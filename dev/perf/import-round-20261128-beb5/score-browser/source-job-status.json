@@ -1,0 +1,305 @@
+{
+  "runId": 46106190962,
+  "jobs": [
+    {
+      "id": 140859368375,
+      "name": "Indexed score complete unit suite",
+      "source": "55cd5bc4fa19348281ca13f082c9cf3b3e64f848",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-28T05:02:38Z",
+      "completedAt": "2026-11-28T05:06:33Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:unit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 140859368582,
+      "name": "Indexed score imports (vndb, AB)",
+      "source": "55cd5bc4fa19348281ca13f082c9cf3b3e64f848",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-28T05:42:06Z",
+      "completedAt": "2026-11-28T06:07:48Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compare exact release packages with independent controls and memory acquisition",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain every observation and failure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 140859368616,
+      "name": "Indexed score imports (jmdict, AB)",
+      "source": "55cd5bc4fa19348281ca13f082c9cf3b3e64f848",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-28T05:05:13Z",
+      "completedAt": "2026-11-28T05:08:56Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compare exact release packages with independent controls and memory acquisition",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain every observation and failure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 140859368626,
+      "name": "Indexed score imports (jitendex, AB)",
+      "source": "55cd5bc4fa19348281ca13f082c9cf3b3e64f848",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-28T05:23:44Z",
+      "completedAt": "2026-11-28T05:29:41Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compare exact release packages with independent controls and memory acquisition",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Retain every observation and failure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 140859368665,
+      "name": "Indexed score lint, types and builds",
+      "source": "55cd5bc4fa19348281ca13f082c9cf3b3e64f848",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-28T05:47:05Z",
+      "completedAt": "2026-11-28T05:50:50Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:js",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:ts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}

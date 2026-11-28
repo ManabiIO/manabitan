@@ -1,0 +1,353 @@
+﻿2026-11-28T05:47:05.9167005Z Current runner version: '2.338.2'
+2026-11-28T05:47:05.9187321Z ##[group]Runner Image Provisioner
+2026-11-28T05:47:05.9188007Z Hosted Compute Agent
+2026-11-28T05:47:05.9188607Z Version: 20261111.635
+2026-11-28T05:47:05.9189161Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T05:47:05.9190058Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T05:47:05.9190638Z Worker ID: {697f9132-30a1-4c15-b07b-e5140a018c38}
+2026-11-28T05:47:05.9191206Z Region: eastus2
+2026-11-28T05:47:05.9191697Z Cloud: Azure
+2026-11-28T05:47:05.9192178Z ##[endgroup]
+2026-11-28T05:47:05.9193283Z ##[group]Operating System
+2026-11-28T05:47:05.9193862Z Ubuntu
+2026-11-28T05:47:05.9194324Z 26.04.1
+2026-11-28T05:47:05.9194829Z LTS
+2026-11-28T05:47:05.9195288Z ##[endgroup]
+2026-11-28T05:47:05.9195739Z ##[group]Runner Image
+2026-11-28T05:47:05.9196285Z Image: ubuntu-26.04
+2026-11-28T05:47:05.9196752Z Version: 20261122.9.1
+2026-11-28T05:47:05.9198197Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T05:47:05.9199398Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T05:47:05.9200519Z ##[endgroup]
+2026-11-28T05:47:05.9201419Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T05:47:05.9203431Z Contents: read
+2026-11-28T05:47:05.9203938Z Metadata: read
+2026-11-28T05:47:05.9204456Z ##[endgroup]
+2026-11-28T05:47:05.9206192Z Secret source: Actions
+2026-11-28T05:47:05.9207025Z Cache mode: write
+2026-11-28T05:47:05.9207901Z Prepare workflow directory
+2026-11-28T05:47:05.9633027Z Prepare all required actions
+2026-11-28T05:47:05.9689308Z Getting action download info
+2026-11-28T05:47:06.1351572Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T05:47:06.6472693Z Complete job name: Indexed score lint, types and builds
+2026-11-28T05:47:06.7334775Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T05:47:06.7336201Z with:
+2026-11-28T05:47:06.7336665Z   ref: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:06.7337221Z   persist-credentials: false
+2026-11-28T05:47:06.7337706Z   repository: ManabiIO/manabitan
+2026-11-28T05:47:06.7341388Z   token: ***
+2026-11-28T05:47:06.7341813Z   ssh-strict: true
+2026-11-28T05:47:06.7342231Z   ssh-user: git
+2026-11-28T05:47:06.7342637Z   clean: true
+2026-11-28T05:47:06.7343055Z   sparse-checkout-cone-mode: true
+2026-11-28T05:47:06.7343559Z   fetch-depth: 1
+2026-11-28T05:47:06.7343962Z   fetch-tags: false
+2026-11-28T05:47:06.7344379Z   show-progress: true
+2026-11-28T05:47:06.7344801Z   lfs: false
+2026-11-28T05:47:06.7345197Z   submodules: false
+2026-11-28T05:47:06.7345619Z   set-safe-directory: true
+2026-11-28T05:47:06.7346090Z   allow-unsafe-pr-checkout: false
+2026-11-28T05:47:06.7346760Z env:
+2026-11-28T05:47:06.7347289Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:06.7347980Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:06.7348570Z ##[endgroup]
+2026-11-28T05:47:06.9369723Z Syncing repository: ManabiIO/manabitan
+2026-11-28T05:47:06.9371634Z ##[group]Getting Git version info
+2026-11-28T05:47:06.9372390Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-28T05:47:06.9373428Z [command]/usr/bin/git version
+2026-11-28T05:47:06.9422337Z git version 2.56.1
+2026-11-28T05:47:06.9443697Z ##[endgroup]
+2026-11-28T05:47:06.9457825Z Temporarily overriding HOME='/home/runner/work/_temp/b1f4dd4b-a92f-41e2-9e16-544ee9cc85a8' before making global git config changes
+2026-11-28T05:47:06.9460630Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T05:47:06.9463198Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T05:47:06.9738395Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-28T05:47:06.9743777Z ##[group]Determining repository object format
+2026-11-28T05:47:06.9759976Z ##[endgroup]
+2026-11-28T05:47:06.9761350Z ##[group]Initializing the repository
+2026-11-28T05:47:06.9762407Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-28T05:47:06.9848788Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T05:47:06.9850926Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T05:47:06.9851990Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T05:47:06.9852698Z hint: call:
+2026-11-28T05:47:06.9853100Z hint:
+2026-11-28T05:47:06.9853772Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T05:47:06.9854615Z hint:
+2026-11-28T05:47:06.9855366Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T05:47:06.9856766Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T05:47:06.9857898Z hint:
+2026-11-28T05:47:06.9858472Z hint: 	git branch -m <name>
+2026-11-28T05:47:06.9859093Z hint:
+2026-11-28T05:47:06.9860138Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T05:47:06.9861720Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-28T05:47:06.9873993Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T05:47:06.9913841Z ##[endgroup]
+2026-11-28T05:47:06.9914518Z ##[group]Disabling automatic garbage collection
+2026-11-28T05:47:06.9917445Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T05:47:06.9948351Z ##[endgroup]
+2026-11-28T05:47:06.9949183Z ##[group]Setting up auth
+2026-11-28T05:47:06.9958556Z Removing SSH command configuration
+2026-11-28T05:47:06.9960694Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T05:47:06.9993703Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T05:47:07.0443987Z Removing HTTP extra header
+2026-11-28T05:47:07.0450284Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T05:47:07.0479004Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T05:47:07.0708813Z Removing includeIf entries pointing to credentials config files
+2026-11-28T05:47:07.0715213Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T05:47:07.0746309Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T05:47:07.0981192Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T05:47:07.1014582Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:07.1043888Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:07.1072759Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:07.1106396Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:07.1130636Z ##[endgroup]
+2026-11-28T05:47:07.1131313Z ##[group]Fetching the repository
+2026-11-28T05:47:07.1136732Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:09.3829161Z From https://github.com/ManabiIO/manabitan
+2026-11-28T05:47:09.3831767Z  * branch            79a9e1abbeff1a56bcc20cb958f03290c0fa0711 -> FETCH_HEAD
+2026-11-28T05:47:09.3839009Z [command]/usr/bin/git rev-parse --verify --quiet 79a9e1abbeff1a56bcc20cb958f03290c0fa0711^{object}
+2026-11-28T05:47:09.3863189Z 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:09.3870821Z ##[endgroup]
+2026-11-28T05:47:09.3872043Z ##[group]Determining the checkout info
+2026-11-28T05:47:09.3873241Z ##[endgroup]
+2026-11-28T05:47:09.3874078Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T05:47:09.3915170Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T05:47:09.3941749Z ##[group]Checking out the ref
+2026-11-28T05:47:09.3944536Z [command]/usr/bin/git checkout --progress --force 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:09.9306300Z Note: switching to '79a9e1abbeff1a56bcc20cb958f03290c0fa0711'.
+2026-11-28T05:47:09.9306856Z 
+2026-11-28T05:47:09.9307155Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T05:47:09.9307795Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T05:47:09.9308221Z state without impacting any branches by switching back to a branch.
+2026-11-28T05:47:09.9308466Z 
+2026-11-28T05:47:09.9308619Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T05:47:09.9308991Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T05:47:09.9309239Z 
+2026-11-28T05:47:09.9309329Z   git switch -c <new-branch-name>
+2026-11-28T05:47:09.9309701Z 
+2026-11-28T05:47:09.9309840Z Or undo this operation with:
+2026-11-28T05:47:09.9310031Z 
+2026-11-28T05:47:09.9310140Z   git switch -
+2026-11-28T05:47:09.9310282Z 
+2026-11-28T05:47:09.9310904Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T05:47:09.9311186Z 
+2026-11-28T05:47:09.9311418Z HEAD is now at 79a9e1a perf: restore indexed compact score validation after integration
+2026-11-28T05:47:09.9337033Z ##[endgroup]
+2026-11-28T05:47:09.9378647Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T05:47:09.9400626Z 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:09.9407982Z ##[group]Removing auth
+2026-11-28T05:47:09.9408383Z Removing SSH command configuration
+2026-11-28T05:47:09.9411205Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T05:47:09.9437228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T05:47:09.9677800Z Removing HTTP extra header
+2026-11-28T05:47:09.9681722Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T05:47:09.9711749Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T05:47:09.9941029Z Removing includeIf entries pointing to credentials config files
+2026-11-28T05:47:09.9944096Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T05:47:09.9965530Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T05:47:09.9966158Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T05:47:09.9966735Z includeif.gitdir:/github/workspace/.git.path
+2026-11-28T05:47:09.9967171Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T05:47:09.9976009Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T05:47:09.9998331Z /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0007559Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0038933Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T05:47:10.0058460Z /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0066684Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0096253Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-28T05:47:10.0120490Z /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0126332Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0158779Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T05:47:10.0177600Z /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0183137Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config
+2026-11-28T05:47:10.0211991Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T05:47:10.0448736Z Removing credentials config '/home/runner/work/_temp/git-credentials-3ffa5c29-caa6-4fdb-99d7-401fc959cbb9.config'
+2026-11-28T05:47:10.0450040Z ##[endgroup]
+2026-11-28T05:47:10.0701773Z Prepare all required actions
+2026-11-28T05:47:10.0702280Z Getting action download info
+2026-11-28T05:47:10.1466381Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-28T05:47:10.3301400Z ##[group]Run ./.github/actions/setup
+2026-11-28T05:47:10.3301643Z with:
+2026-11-28T05:47:10.3301816Z   node-version: 22.22.0
+2026-11-28T05:47:10.3302001Z env:
+2026-11-28T05:47:10.3302210Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:10.3302539Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:10.3302808Z ##[endgroup]
+2026-11-28T05:47:10.3348200Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-28T05:47:10.3423286Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-28T05:47:10.3423624Z with:
+2026-11-28T05:47:10.3423809Z   node-version: 22.22.0
+2026-11-28T05:47:10.3424009Z   cache: npm
+2026-11-28T05:47:10.3424220Z   always-auth: false
+2026-11-28T05:47:10.3424406Z   check-latest: false
+2026-11-28T05:47:10.3426440Z   token: ***
+2026-11-28T05:47:10.3426615Z env:
+2026-11-28T05:47:10.3426858Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:10.3427194Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:10.3427458Z ##[endgroup]
+2026-11-28T05:47:10.4546559Z Attempting to download 22.22.0...
+2026-11-28T05:47:10.4659058Z (node:2279) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T05:47:10.4660161Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T05:47:11.0421522Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-28T05:47:11.3451713Z Extracting ...
+2026-11-28T05:47:11.3558946Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f42dffc7-17be-452b-9257-b3f68ce3803e -f /home/runner/work/_temp/fc961e3d-5529-4da7-bde2-848a53be14ba
+2026-11-28T05:47:12.0272510Z Adding to the cache ...
+2026-11-28T05:47:17.1231799Z ##[group]Environment details
+2026-11-28T05:47:17.3168338Z node: v22.22.0
+2026-11-28T05:47:17.3168645Z npm: 10.9.4
+2026-11-28T05:47:17.3168875Z yarn: 1.22.22
+2026-11-28T05:47:17.3169430Z ##[endgroup]
+2026-11-28T05:47:17.3184403Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-28T05:47:17.3926122Z /home/runner/.npm
+2026-11-28T05:47:17.4645969Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T05:47:17.4719742Z (node:2279) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T05:47:17.8018697Z Received 63143556 of 63143556 (100.0%), 207.6 MBs/sec
+2026-11-28T05:47:17.8019031Z Cache Size: ~60 MB (63143556 B)
+2026-11-28T05:47:17.8114725Z [command]/usr/bin/tar -xf /home/runner/work/_temp/5ef55c3f-23b4-4ff0-8bf4-492718adf1f5/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-28T05:47:18.0382405Z Cache restored successfully
+2026-11-28T05:47:18.0414581Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T05:47:18.0590350Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=7724]
+2026-11-28T05:47:18.0592840Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-28T05:47:18.0598435Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-28T05:47:18.0600588Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-28T05:47:18.0628925Z ##[group]Run npm ci
+2026-11-28T05:47:18.0629391Z [36;1mnpm ci[0m
+2026-11-28T05:47:18.0663663Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T05:47:18.0663972Z env:
+2026-11-28T05:47:18.0664209Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:18.0664558Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:18.0664848Z ##[endgroup]
+2026-11-28T05:47:18.5510494Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-28T05:47:22.5111779Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-28T05:47:23.6513016Z 
+2026-11-28T05:47:23.6513769Z > yomitan@0.0.0 prepare
+2026-11-28T05:47:23.6514247Z > husky
+2026-11-28T05:47:23.6514416Z 
+2026-11-28T05:47:23.7041563Z 
+2026-11-28T05:47:23.7042594Z added 670 packages, and audited 671 packages in 6s
+2026-11-28T05:47:23.7043355Z 
+2026-11-28T05:47:23.7050256Z 232 packages are looking for funding
+2026-11-28T05:47:23.7061664Z   run `npm fund` for details
+2026-11-28T05:47:23.7062159Z 
+2026-11-28T05:47:23.7062472Z found 0 vulnerabilities
+2026-11-28T05:47:23.7783465Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=5718]
+2026-11-28T05:47:23.7786526Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-28T05:47:23.7808433Z ##[group]Run npm run build:libs
+2026-11-28T05:47:23.7808823Z [36;1mnpm run build:libs[0m
+2026-11-28T05:47:23.7809154Z [36;1mnpm run license-report:html[0m
+2026-11-28T05:47:23.7852636Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T05:47:23.7853071Z env:
+2026-11-28T05:47:23.7853411Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:23.7853932Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:23.7854351Z ##[endgroup]
+2026-11-28T05:47:23.8616886Z 
+2026-11-28T05:47:23.8617787Z > yomitan@0.0.0 build:libs
+2026-11-28T05:47:23.8618279Z > node ./dev/bin/build-libs.js
+2026-11-28T05:47:23.8618548Z 
+2026-11-28T05:47:24.3659769Z 
+2026-11-28T05:47:24.3660645Z > yomitan@0.0.0 license-report:html
+2026-11-28T05:47:24.3661992Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-28T05:47:24.3663166Z 
+2026-11-28T05:47:24.6547965Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=876]
+2026-11-28T05:47:24.6580631Z ##[group]Run npm run test:js
+2026-11-28T05:47:24.6580922Z [36;1mnpm run test:js[0m
+2026-11-28T05:47:24.6611363Z shell: /usr/bin/bash -e {0}
+2026-11-28T05:47:24.6611574Z env:
+2026-11-28T05:47:24.6611795Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:47:24.6612137Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:47:24.6612403Z ##[endgroup]
+2026-11-28T05:47:24.7366754Z 
+2026-11-28T05:47:24.7367408Z > yomitan@0.0.0 test:js
+2026-11-28T05:47:24.7367965Z > npx eslint . --ignore-pattern '**/*.json'
+2026-11-28T05:47:24.7368256Z 
+2026-11-28T05:47:26.6396652Z ▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+2026-11-28T05:47:26.6400093Z 
+2026-11-28T05:47:26.6400557Z     ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+2026-11-28T05:47:26.6401751Z       2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+2026-11-28T05:47:26.6402723Z         ╵                                 ~~~~~~
+2026-11-28T05:47:26.6403130Z 
+2026-11-28T05:47:26.6403888Z   This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+2026-11-28T05:47:26.6404680Z 
+2026-11-28T05:47:26.6404972Z     package.json:11:12:
+2026-11-28T05:47:26.6405515Z       11 │     "type": "module",
+2026-11-28T05:47:26.6406069Z          ╵             ~~~~~~~~
+2026-11-28T05:47:26.6406428Z 
+2026-11-28T05:47:26.6407100Z   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+2026-11-28T05:47:26.6407788Z 
+2026-11-28T05:50:01.3895442Z ##[group]Run npm run test:ts
+2026-11-28T05:50:01.3895727Z [36;1mnpm run test:ts[0m
+2026-11-28T05:50:01.3925825Z shell: /usr/bin/bash -e {0}
+2026-11-28T05:50:01.3926032Z env:
+2026-11-28T05:50:01.3926270Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:50:01.3926601Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:50:01.3926863Z ##[endgroup]
+2026-11-28T05:50:01.4687944Z 
+2026-11-28T05:50:01.4688464Z > yomitan@0.0.0 test:ts
+2026-11-28T05:50:01.4689152Z > npm run test:ts:main && npm run test:ts:dev && npm run test:ts:test && npm run test:ts:bench
+2026-11-28T05:50:01.4689708Z 
+2026-11-28T05:50:01.5438905Z 
+2026-11-28T05:50:01.5439712Z > yomitan@0.0.0 test:ts:main
+2026-11-28T05:50:01.5440305Z > npx tsc --noEmit --project jsconfig.json
+2026-11-28T05:50:01.5440581Z 
+2026-11-28T05:50:10.5856840Z 
+2026-11-28T05:50:10.5857702Z > yomitan@0.0.0 test:ts:dev
+2026-11-28T05:50:10.5858132Z > npx tsc --noEmit --project dev/jsconfig.json
+2026-11-28T05:50:10.5858412Z 
+2026-11-28T05:50:16.0692300Z 
+2026-11-28T05:50:16.0694846Z > yomitan@0.0.0 test:ts:test
+2026-11-28T05:50:16.0695582Z > npx tsc --noEmit --project test/jsconfig.typecheck.json
+2026-11-28T05:50:16.0695929Z 
+2026-11-28T05:50:38.1595961Z 
+2026-11-28T05:50:38.1596461Z > yomitan@0.0.0 test:ts:bench
+2026-11-28T05:50:38.1596957Z > npx tsc --noEmit --project benches/jsconfig.json
+2026-11-28T05:50:38.1597249Z 
+2026-11-28T05:50:47.5863599Z ##[group]Run npm run test:build
+2026-11-28T05:50:47.5863889Z [36;1mnpm run test:build[0m
+2026-11-28T05:50:47.5893409Z shell: /usr/bin/bash -e {0}
+2026-11-28T05:50:47.5893624Z env:
+2026-11-28T05:50:47.5893857Z   BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T05:50:47.5894192Z   CANDIDATE_COMMIT: 79a9e1abbeff1a56bcc20cb958f03290c0fa0711
+2026-11-28T05:50:47.5894459Z ##[endgroup]
+2026-11-28T05:50:47.6660316Z 
+2026-11-28T05:50:47.6660956Z > yomitan@0.0.0 test:build
+2026-11-28T05:50:47.6661365Z > node ./dev/bin/build.js --dryRun --all
+2026-11-28T05:50:47.6661551Z 
+2026-11-28T05:50:48.0405518Z Version: 0.0.0.0...
+2026-11-28T05:50:48.0406325Z Building chrome...
+2026-11-28T05:50:48.0409133Z 
+2026-11-28T05:50:48.0409359Z Building chrome-dev...
+2026-11-28T05:50:48.0410960Z 
+2026-11-28T05:50:48.0411359Z Building chrome-playwright...
+2026-11-28T05:50:48.0414148Z 
+2026-11-28T05:50:48.0414463Z Building firefox...
+2026-11-28T05:50:48.0415416Z 
+2026-11-28T05:50:48.0415635Z Building firefox-dev...
+2026-11-28T05:50:48.0417211Z 
+2026-11-28T05:50:48.0417419Z Building firefox-android...
+2026-11-28T05:50:48.0418603Z 
+2026-11-28T05:50:48.0418801Z Building edge...
+2026-11-28T05:50:48.0419296Z 
+2026-11-28T05:50:48.0419973Z Restoring manifest...
+2026-11-28T05:50:48.0626105Z Post job cleanup.
+2026-11-28T05:50:48.0629154Z ##[start-action display=Setup node;id=__5072ec67-0c6f-492c-beba-a538920f2158.__actions_setup-node]
+2026-11-28T05:50:48.0674125Z Post job cleanup.
+2026-11-28T05:50:48.1671678Z (node:2691) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T05:50:48.1672379Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T05:50:48.1674118Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-28T05:50:48.1734685Z ##[end-action id=__5072ec67-0c6f-492c-beba-a538920f2158.__actions_setup-node;outcome=success;conclusion=success;duration_ms=110]
+2026-11-28T05:50:48.1805716Z Post job cleanup.
+2026-11-28T05:50:48.2530664Z [command]/usr/bin/git version
+2026-11-28T05:50:48.2572529Z git version 2.56.1
+2026-11-28T05:50:48.2611317Z Temporarily overriding HOME='/home/runner/work/_temp/4954d57c-4470-4213-9afd-8ade345d960a' before making global git config changes
+2026-11-28T05:50:48.2612827Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T05:50:48.2615491Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T05:50:48.2666327Z Removing SSH command configuration
+2026-11-28T05:50:48.2667218Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T05:50:48.2714547Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T05:50:48.3120298Z Removing HTTP extra header
+2026-11-28T05:50:48.3137368Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T05:50:48.3142516Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T05:50:48.3486105Z Removing includeIf entries pointing to credentials config files
+2026-11-28T05:50:48.3489749Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T05:50:48.3570930Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T05:50:48.3973634Z Cleaning up orphan processes
+2026-11-28T05:50:48.4312696Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
