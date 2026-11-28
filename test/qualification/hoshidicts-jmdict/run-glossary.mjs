@@ -53,7 +53,7 @@ function coverage(pairs, expected) {
 function nativeGlossaryCoverage(results, glossaryOracle) {
     const actual = new Map()
     for (const result of results) {
-        const key = pairKey(result.expression, result.reading)
+        const key = pairKey({expression: result.expression, reading: result.reading})
         if (!actual.has(key)) actual.set(key, [])
         actual.get(key).push(...(result.glossaryRawHashes ?? []))
     }
