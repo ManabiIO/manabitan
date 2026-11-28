@@ -5,7 +5,7 @@
 
 /** @typedef {import('dictionary-importer').ImportExperiments} Experiments */
 /** @typedef {{score?: string, sequence?: string, definitionTags?: string, rules?: string, termTags?: string, glossary?: string}} Fields */
-/** @typedef {{name: string, banks: string[], experiments?: Experiments, expectedFallbacks: number, expectedGlossaryReuses: number, expectedGlobalHits: number, expectedProofs: number, expectedNumericReuseRows: number, expectedSequenceConversionsAvoided: number, expectedOrdinaryComparisonSkips: number}} ProofFixture */
+/** @typedef {{name: string, banks: string[], experiments?: Experiments, expectedFallbacks: number, expectedGlossaryReuses: number, expectedGlobalHits: number, expectedProofs: number, expectedNumericReuseRows: number, expectedSequenceConversionsAvoided: number, expectedOrdinaryComparisonSkips: number, expectedWideSequence?: number}} ProofFixture */
 
 /**
  * @param {string} expression
@@ -36,13 +36,13 @@ const glossaryOnly = [
     {name: 'different term tags', fields: {termTags: '"public"'}},
 ];
 
-/** @type {Array<{name: string, fields: Fields}>} */
+/** @type {Array<{name: string, fields: Fields, expectedWideSequence?: number}>} */
 const unsupportedAfterProof = [
     {name: 'negative-zero score', fields: {score: '-0'}},
     {name: 'overflowing score', fields: {score: '2147483648'}},
     {name: 'fractional score', fields: {score: '0.5'}},
     {name: 'exponent score', fields: {score: '1e0'}},
-    {name: 'overflowing sequence', fields: {sequence: '2147483648'}},
+    {name: 'overflowing sequence', fields: {sequence: '2147483648'}, expectedWideSequence: 2147483648},
     {name: 'exponent sequence', fields: {sequence: '1e0'}},
 ];
 
@@ -70,9 +70,10 @@ export const proofConsumerFixtures = [
         expectedSequenceConversionsAvoided: 1,
         expectedOrdinaryComparisonSkips: 1,
     },
-    ...unsupportedAfterProof.map(({name, fields}) => ({
+    ...unsupportedAfterProof.map(({name, fields, expectedWideSequence}) => ({
         name: `${name} after a completed suffix still takes numeric fallback`,
         banks: [provenPrefix, bank(row('current', fields))],
+        ...(typeof expectedWideSequence === 'number' ? {expectedWideSequence} : {}),
         expectedFallbacks: 1,
         expectedGlossaryReuses: 2,
         expectedGlobalHits: 0,

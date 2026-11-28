@@ -1,0 +1,79 @@
+--- a/test/term-bank-row-suffix-proof-fixtures.js
++++ b/test/term-bank-row-suffix-proof-fixtures.js
+@@ -5,7 +5,7 @@
+ 
+ /** @typedef {import('dictionary-importer').ImportExperiments} Experiments */
+ /** @typedef {{score?: string, sequence?: string, definitionTags?: string, rules?: string, termTags?: string, glossary?: string}} Fields */
+-/** @typedef {{name: string, banks: string[], experiments?: Experiments, expectedFallbacks: number, expectedGlossaryReuses: number, expectedGlobalHits: number, expectedProofs: number, expectedNumericReuseRows: number, expectedSequenceConversionsAvoided: number, expectedOrdinaryComparisonSkips: number}} ProofFixture */
++/** @typedef {{name: string, banks: string[], experiments?: Experiments, expectedFallbacks: number, expectedGlossaryReuses: number, expectedGlobalHits: number, expectedProofs: number, expectedNumericReuseRows: number, expectedSequenceConversionsAvoided: number, expectedOrdinaryComparisonSkips: number, expectedWideSequence?: number}} ProofFixture */
+ 
+ /**
+  * @param {string} expression
+@@ -36,13 +36,13 @@
+     {name: 'different term tags', fields: {termTags: '"public"'}},
+ ];
+ 
+-/** @type {Array<{name: string, fields: Fields}>} */
++/** @type {Array<{name: string, fields: Fields, expectedWideSequence?: number}>} */
+ const unsupportedAfterProof = [
+     {name: 'negative-zero score', fields: {score: '-0'}},
+     {name: 'overflowing score', fields: {score: '2147483648'}},
+     {name: 'fractional score', fields: {score: '0.5'}},
+     {name: 'exponent score', fields: {score: '1e0'}},
+-    {name: 'overflowing sequence', fields: {sequence: '2147483648'}},
++    {name: 'overflowing sequence', fields: {sequence: '2147483648'}, expectedWideSequence: 2147483648},
+     {name: 'exponent sequence', fields: {sequence: '1e0'}},
+ ];
+ 
+@@ -70,9 +70,10 @@
+         expectedSequenceConversionsAvoided: 1,
+         expectedOrdinaryComparisonSkips: 1,
+     },
+-    ...unsupportedAfterProof.map(({name, fields}) => ({
++    ...unsupportedAfterProof.map(({name, fields, expectedWideSequence}) => ({
+         name: `${name} after a completed suffix still takes numeric fallback`,
+         banks: [provenPrefix, bank(row('current', fields))],
++        ...(typeof expectedWideSequence === 'number' ? {expectedWideSequence} : {}),
+         expectedFallbacks: 1,
+         expectedGlossaryReuses: 2,
+         expectedGlobalHits: 0,
+--- a/test/term-bank-row-suffix-proof-consumer.test.js
++++ b/test/term-bank-row-suffix-proof-consumer.test.js
+@@ -136,7 +136,7 @@
+ afterAll(async () => { await disposeParallelTermBankParser(); });
+ 
+ describe('full row-suffix proof is consumed only by its valid fused row', () => {
+-    test.each(proofConsumerFixtures)('$name', async ({banks, experiments, expectedFallbacks, expectedGlossaryReuses, expectedGlobalHits}) => {
++    test.each(proofConsumerFixtures)('$name', async ({banks, experiments, expectedFallbacks, expectedGlossaryReuses, expectedGlobalHits, expectedWideSequence}) => {
+         const expected = expectedRows(banks);
+         const actual = await parse(banks, experiments);
+         expect(actual.attempts).toBe(1);
+@@ -145,7 +145,15 @@
+         expect(actual.globalHits).toBe(expectedGlobalHits);
+         const value = snapshot(actual.chunks);
+         expect(value.rows).toStrictEqual(expected);
+-        expect(value.indexes.length).toBeGreaterThan(0);
++        if (typeof expectedWideSequence === 'number') {
++            // The native lookup encoder explicitly declines Float64 sequences.
++            // The fallback must preserve the wide value without narrowing it.
++            const wideSequence = expectedWideSequence;
++            expect(actual.chunks.some(({sequenceList}) => sequenceList instanceof Float64Array && sequenceList.includes(wideSequence))).toBe(true);
++            expect(value.indexes).toHaveLength(0);
++        } else {
++            expect(value.indexes.length).toBeGreaterThan(0);
++        }
+         // Ordinary conversion remains an independent comparison route for
+         // numeric columns, complete content bytes and prepared lookup indexes.
+         const disabled = await parse(banks, {...experiments, experimentalValidatedGlossaryReuse: false});
+@@ -154,6 +162,11 @@
+         expect(disabled.glossaryReuses).toBe(0);
+         expect(disabled.globalHits).toBe(expectedGlobalHits);
+         expect(snapshot(disabled.chunks)).toStrictEqual(value);
++        if (typeof expectedWideSequence === 'number') {
++            const wideSequence = expectedWideSequence;
++            expect(disabled.chunks.some(({sequenceList}) => sequenceList instanceof Float64Array && sequenceList.includes(wideSequence))).toBe(true);
++            expect(snapshot(disabled.chunks).indexes).toHaveLength(0);
++        }
+     });
+ 
+     test(acceptedNegativeZeroSequenceFixture.name, async () => {

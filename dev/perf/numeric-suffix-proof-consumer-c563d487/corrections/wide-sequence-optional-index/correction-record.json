@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:47:31.844066+00:00",
+  "scope": "Separate prospective correctness/tooling successor for an observed test-oracle error; no performance observation is selected or repeated.",
+  "parentCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "parentTree": "69257c47755062c6759b68332454e4427bf7902d",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "originalRunId": 46135694884,
+  "originalJobId": 140950386103,
+  "originalPublicationManifest": {
+    "bytes": 30364,
+    "sha256": "dd62ae8c26d8116f1df4b0a955324b3b1ff7e586a8fbfb824e13b01db50181f5",
+    "gitBlobSha1": "45f9710535a36f4b7520316a65c71437d3e6aa66"
+  },
+  "originalFailureAudit": {
+    "bytes": 9777,
+    "sha256": "4787b946dbbec181e97326387860fd2a1ae3373da85ec448dcdd9ab65ce06733",
+    "gitBlobSha1": "934b479d52a122660140dbe0e5e6f1fb2a8cbbc2"
+  },
+  "originalUnitTotals": {
+    "filesPassed": 673,
+    "filesFailed": 1,
+    "filesTotal": 674,
+    "testsPassed": 15224,
+    "testsFailed": 1,
+    "testsSkipped": 47,
+    "testsTotal": 15272
+  },
+  "originalMeasuredObservations": 0,
+  "originalCorrectnessPass": false,
+  "reason": "The new universal nonempty-native-index assertion contradicted unchanged f28 behavior: out-of-int32 sequences retain Float64 values, so the optional native-prepared lookup index is absent. The failed assertion preceded the disabled-reuse parity check; a separate full validation must exercise the corrected explicit fallback contract.",
+  "testCorrection": "One fixture adds expectedWideSequence=2147483648 metadata without changing banks or flags. Both enabled and disabled routes must preserve Float64/value semantics and empty native indexes for that case. All other cases still require a native index; full snapshots and row/content parity remain mandatory.",
+  "ownerCorrectionReceipt": {
+    "bytes": 5486,
+    "sha256": "cab5e0ae45e7152fa89655fcb26cbf1054446a93564786cff206a08957f58a20",
+    "gitBlobSha1": "35fc50e9959b858e713298118b1ca124d2df9161"
+  },
+  "testReview": {
+    "bytes": 2782,
+    "sha256": "639dc4ee69ecc28e1714c21af7deb1cb0a44056cf8ac54848b8f3ca5d4577ef5",
+    "gitBlobSha1": "df7430fd682eca80f788b80f5da59d797c6d7ead"
+  },
+  "contractReview": {
+    "bytes": 8485,
+    "sha256": "da5897e642a8c5d549e4c466926fb718035f25a9c492e680f29fdb706c846b63",
+    "gitBlobSha1": "ede40301850102f6c758b0da8dc900e5608d139a"
+  },
+  "coreReview": {
+    "bytes": 7461,
+    "sha256": "3b59d68c0f103c33c78921c3eefaf80b7f560d27d35db8e421ad3cfb8c925373",
+    "gitBlobSha1": "9b912ecb3071ca8f183ff5d6e4a3c633595c5b0c"
+  },
+  "workflowReview": {
+    "bytes": 1058,
+    "sha256": "d8c805972a654636216c598322873a1095982f08f108f990f48eaa2f10765058",
+    "gitBlobSha1": "ec3736bf11cec43295c0392f2b3adc46b3c53b8b"
+  },
+  "oldBindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "finalBinding": {
+    "bytes": 4044,
+    "sha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+    "gitBlobSha1": "077939b2907ae10cc0cf1b3154a4d2686a466a75"
+  },
+  "workflow": {
+    "bytes": 5005,
+    "sha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+    "gitBlobSha1": "73daac9d97a60e3c3d680647d44f27ab50566af1"
+  },
+  "unchanged": {
+    "candidate.patch": {
+      "bytes": 11918,
+      "sha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
+      "gitBlobSha1": "69e9b28b298f76356dbd11545a546e19af0e79c6"
+    },
+    "screen.mjs": {
+      "bytes": 18924,
+      "sha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c",
+      "gitBlobSha1": "975a91b1950c53896a4250633400ec80db29370f"
+    },
+    "run.py": {
+      "bytes": 15588,
+      "sha256": "c35901deca2f042aab22c0756dad08f5458593cd500a4cfe099c9bd6aa3c03f4",
+      "gitBlobSha1": "97221e76e3a00504166ef42cd64a1c185360dd0c"
+    },
+    "prospective-review-criteria.json": {
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
+    },
+    "smoke.mjs": {
+      "bytes": 13909,
+      "sha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42",
+      "gitBlobSha1": "cae5ab1709f55e4c6ef3cdc9b3b573cb3daa1e4b"
+    },
+    "prepare-and-validate.py": {
+      "bytes": 11060,
+      "sha256": "8bd9aec058cfe2e4b358cc3a004531ec47ea6b694609cdf6dbf6e0b948a83505",
+      "gitBlobSha1": "d4ad800bf3a246d8a10ef6a5b48229661b78008c"
+    },
+    "prepare-component.py": {
+      "bytes": 7874,
+      "sha256": "1d3677cbd8d21d71a1b6f23c69942dc34ad15337b78b0dd868d9e1b9664480af",
+      "gitBlobSha1": "8bff08d7933bddb99ff450f6e2a87a2471eb2cfa"
+    },
+    "prepare-diagnostic.py": {
+      "bytes": 6685,
+      "sha256": "cf376b5320b8d1f3a7808f97f7b0ecc59b699e83f0d8e1614b81035ab60eff13",
+      "gitBlobSha1": "1a4b9ca8ba6b1335bc21cc3d294e83604a34f871"
+    },
+    "diagnostic-fields.json": {
+      "bytes": 381,
+      "sha256": "1a2f2012ce72e72c5d5338e7e96bb5cbb439820a4c84934be490ecd72d52c2f5",
+      "gitBlobSha1": "340ace7b455753d8887ec3176553eeda6d4d7c3f"
+    },
+    "native-oracle.mjs": {
+      "bytes": 13009,
+      "sha256": "fca3d561d443aec6623fe5e2864228157e16eb74d5cc477804bfea6f6b4d323d",
+      "gitBlobSha1": "68b360b98e74224924d05c7fa2afadd4bdc16fec"
+    },
+    "emit-build-evidence.py": {
+      "bytes": 2850,
+      "sha256": "e58336a3cce2ff97590ba73c0ebbcc496b4c1829fb38f652eedca1e88b9df77b",
+      "gitBlobSha1": "ba2e4c7e30cacd1b748cb7d7c48a68caa2fce8ae"
+    }
+  },
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "checks": {
+    "original69FileStageUnchanged": true,
+    "exactThreeCoreMapEntriesChanged": true,
+    "frozen48ChildScheduleWarmupsClocksOptionsCriteriaUnchanged": true,
+    "all26CorrectnessCommandsStillRequiredBeforeComponentJobs": true,
+    "noPromotionFromTheFailedOriginalBuild": true,
+    "noPerformanceRerunOrSelection": true
+  },
+  "newNativeExecutionsByThisPreparation": 0,
+  "newMeasuredObservations": 0,
+  "plannedMeasuredObservations": 48,
+  "limitations": [
+    "Local corrected syntax/lint/targeted types are preliminary and do not replace the full exact-f28 hosted correctness gates.",
+    "Original compiled bytes may be preserved from the failed build, but that run did not pass correctness and cannot qualify performance.",
+    "No component, full-browser or memory gain is established."
+  ]
+}

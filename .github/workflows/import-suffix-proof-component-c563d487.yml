@@ -1,8 +1,8 @@
-name: Numeric suffix proof-consumer component c563d487
+name: Numeric suffix proof-consumer corrected component c563d487
 
 on:
   push:
-    branches: [perf/numeric-suffix-proof-consumer-screen-20261128-c563d487]
+    branches: [perf/numeric-suffix-proof-consumer-corrected-20261128-c563d487]
   workflow_dispatch:
 
 permissions:

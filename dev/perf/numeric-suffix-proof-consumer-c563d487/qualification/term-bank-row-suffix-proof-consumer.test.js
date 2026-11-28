@@ -136,7 +136,7 @@ beforeAll(async () => {
 afterAll(async () => { await disposeParallelTermBankParser(); });
 
 describe('full row-suffix proof is consumed only by its valid fused row', () => {
-    test.each(proofConsumerFixtures)('$name', async ({banks, experiments, expectedFallbacks, expectedGlossaryReuses, expectedGlobalHits}) => {
+    test.each(proofConsumerFixtures)('$name', async ({banks, experiments, expectedFallbacks, expectedGlossaryReuses, expectedGlobalHits, expectedWideSequence}) => {
         const expected = expectedRows(banks);
         const actual = await parse(banks, experiments);
         expect(actual.attempts).toBe(1);
@@ -145,7 +145,15 @@ describe('full row-suffix proof is consumed only by its valid fused row', () => 
         expect(actual.globalHits).toBe(expectedGlobalHits);
         const value = snapshot(actual.chunks);
         expect(value.rows).toStrictEqual(expected);
-        expect(value.indexes.length).toBeGreaterThan(0);
+        if (typeof expectedWideSequence === 'number') {
+            // The native lookup encoder explicitly declines Float64 sequences.
+            // The fallback must preserve the wide value without narrowing it.
+            const wideSequence = expectedWideSequence;
+            expect(actual.chunks.some(({sequenceList}) => sequenceList instanceof Float64Array && sequenceList.includes(wideSequence))).toBe(true);
+            expect(value.indexes).toHaveLength(0);
+        } else {
+            expect(value.indexes.length).toBeGreaterThan(0);
+        }
         // Ordinary conversion remains an independent comparison route for
         // numeric columns, complete content bytes and prepared lookup indexes.
         const disabled = await parse(banks, {...experiments, experimentalValidatedGlossaryReuse: false});
@@ -154,6 +162,11 @@ describe('full row-suffix proof is consumed only by its valid fused row', () => 
         expect(disabled.glossaryReuses).toBe(0);
         expect(disabled.globalHits).toBe(expectedGlobalHits);
         expect(snapshot(disabled.chunks)).toStrictEqual(value);
+        if (typeof expectedWideSequence === 'number') {
+            const wideSequence = expectedWideSequence;
+            expect(disabled.chunks.some(({sequenceList}) => sequenceList instanceof Float64Array && sequenceList.includes(wideSequence))).toBe(true);
+            expect(snapshot(disabled.chunks).indexes).toHaveLength(0);
+        }
     });
 
     test(acceptedNegativeZeroSequenceFixture.name, async () => {

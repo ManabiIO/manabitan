@@ -1,0 +1,313 @@
+[
+  {
+    "line": 310,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "fetch-baseline",
+      "command": [
+        "git",
+        "fetch",
+        "--no-tags",
+        "origin",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedEpoch": 1795862009.7916462,
+      "finishedEpoch": 1795862014.92422,
+      "exitCode": 0,
+      "logSha256": "a7fcabf40a25081cdec8f56a3e6f5c418be338c4d465f7418cb32fe0b7be1a7e",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 314,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "create-baseline",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-baseline",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedEpoch": 1795862014.9245863,
+      "finishedEpoch": 1795862015.4945664,
+      "exitCode": 0,
+      "logSha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 318,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "create-candidate",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-candidate",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedEpoch": 1795862015.4948192,
+      "finishedEpoch": 1795862016.052623,
+      "exitCode": 0,
+      "logSha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 322,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "dependencies-baseline",
+      "command": [
+        "cp",
+        "-a",
+        "/home/runner/work/manabitan/manabitan/node_modules",
+        "/home/runner/work/manabitan/suffix-proof-baseline/node_modules"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedEpoch": 1795862016.3661213,
+      "finishedEpoch": 1795862016.8274174,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 324,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "dependencies-candidate",
+      "command": [
+        "cp",
+        "-a",
+        "/home/runner/work/manabitan/manabitan/node_modules",
+        "/home/runner/work/manabitan/suffix-proof-candidate/node_modules"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedEpoch": 1795862016.872865,
+      "finishedEpoch": 1795862017.3546224,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 326,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "reproduce-baseline",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-baseline",
+      "startedEpoch": 1795862017.3549936,
+      "finishedEpoch": 1795862019.6488209,
+      "exitCode": 0,
+      "logSha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 349,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "build-baseline-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-baseline",
+      "startedEpoch": 1795862019.6491141,
+      "finishedEpoch": 1795862020.0280182,
+      "exitCode": 0,
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 355,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "apply-check",
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.patch"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862020.0283935,
+      "finishedEpoch": 1795862020.0307407,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 357,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "apply-patch",
+      "command": [
+        "git",
+        "apply",
+        "/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.patch"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862020.0309803,
+      "finishedEpoch": 1795862020.0331745,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 359,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "build-native-candidate",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--write"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862020.033556,
+      "finishedEpoch": 1795862021.2673016,
+      "exitCode": 0,
+      "logSha256": "cf4f7192147d4091e7cea8773cc245f6c7dd26de731a780baa837efe9248b6d6",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 382,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "build-candidate-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862021.2675943,
+      "finishedEpoch": 1795862021.6460228,
+      "exitCode": 0,
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 388,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "reproduce-candidate",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862021.646363,
+      "finishedEpoch": 1795862022.8646684,
+      "exitCode": 0,
+      "logSha256": "15eb2180bf0d2314162895555b06f101cab58581d3daba4104a61089861ecbd5",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 411,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "scoped-lint",
+      "command": [
+        "npx",
+        "eslint",
+        "test/term-bank-row-suffix-proof-consumer.test.js",
+        "test/term-bank-row-suffix-proof-fixtures.js",
+        "test/term-bank-row-suffix-reuse.test.js",
+        "test/term-bank-row-suffix-token-end-fixtures.js",
+        "test/term-bank-row-suffix-token-ends.test.js"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862022.9602282,
+      "finishedEpoch": 1795862025.8526433,
+      "exitCode": 0,
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 427,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "strict-main-types",
+      "command": [
+        "npm",
+        "run",
+        "test:ts:main"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862025.8529637,
+      "finishedEpoch": 1795862034.2626665,
+      "exitCode": 0,
+      "logSha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 433,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "strict-test-types",
+      "command": [
+        "npm",
+        "run",
+        "test:ts:test"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862034.262984,
+      "finishedEpoch": 1795862054.166193,
+      "exitCode": 0,
+      "logSha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  },
+  {
+    "line": 439,
+    "tag": "SUFFIX_PROOF_BUILD_STEP",
+    "value": {
+      "label": "complete-unit-suite",
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-candidate",
+      "startedEpoch": 1795862054.1665397,
+      "finishedEpoch": 1795862240.7206733,
+      "exitCode": 1,
+      "logSha256": "541129b98857eccccee8fc38f2881fe497495c12caabbb2d4043eb33b8887f55",
+      "scope": "Build/correctness command, not a benchmark observation"
+    }
+  }
+]

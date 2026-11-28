@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:46:15.779570+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent source/protocol review for the separately named corrected cohort. No compiler, candidate module, native test, corpus or timing execution by this reviewer. Original failed cohort remains immutable.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "files": {
+    "prospective-review-criteria.json": {
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "bytes": 5506
+    },
+    "workflow.yml": {
+      "sha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+      "bytes": 5005
+    },
+    "prepare-and-validate.py": {
+      "sha256": "8bd9aec058cfe2e4b358cc3a004531ec47ea6b694609cdf6dbf6e0b948a83505",
+      "bytes": 11060
+    },
+    "prepare-component.py": {
+      "sha256": "1d3677cbd8d21d71a1b6f23c69942dc34ad15337b78b0dd868d9e1b9664480af",
+      "bytes": 7874
+    },
+    "run.py": {
+      "sha256": "c35901deca2f042aab22c0756dad08f5458593cd500a4cfe099c9bd6aa3c03f4",
+      "bytes": 15588
+    },
+    "screen.mjs": {
+      "sha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c",
+      "bytes": 18924
+    },
+    "smoke.mjs": {
+      "sha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42",
+      "bytes": 13909
+    },
+    "native-oracle.mjs": {
+      "sha256": "fca3d561d443aec6623fe5e2864228157e16eb74d5cc477804bfea6f6b4d323d",
+      "bytes": 13009
+    },
+    "prepare-diagnostic.py": {
+      "sha256": "cf376b5320b8d1f3a7808f97f7b0ecc59b699e83f0d8e1614b81035ab60eff13",
+      "bytes": 6685
+    },
+    "diagnostic-fields.json": {
+      "sha256": "1a2f2012ce72e72c5d5338e7e96bb5cbb439820a4c84934be490ecd72d52c2f5",
+      "bytes": 381
+    },
+    "emit-build-evidence.py": {
+      "sha256": "e58336a3cce2ff97590ba73c0ebbcc496b4c1829fb38f652eedca1e88b9df77b",
+      "bytes": 2850
+    },
+    "candidate.patch": {
+      "sha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
+      "bytes": 11918
+    },
+    "qualification/term-bank-row-suffix-proof-consumer.test.js": {
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "bytes": 10092
+    },
+    "qualification/term-bank-row-suffix-proof-fixtures.js": {
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "bytes": 6382
+    },
+    "qualification/term-bank-row-suffix-reuse.test.js": {
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "bytes": 15101
+    },
+    "qualification/term-bank-row-suffix-token-end-fixtures.js": {
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "bytes": 3037
+    },
+    "qualification/term-bank-row-suffix-token-ends.test.js": {
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "bytes": 7560
+    }
+  },
+  "checks": {
+    "frozenCriteria": true,
+    "sourceAndFixtureBindings": true,
+    "baselineAndCandidateReproductionRequired": true,
+    "all58FocusedCasesInFullUnitSuite": true,
+    "strictMainAndTestTypesAndScopedNewJsLintRequired": true,
+    "optionsSuiteAndAllDryBuildsRequired": true,
+    "successArtifactRestoredByExactProductDiffHashesAnd26ReceiptLogs": true,
+    "fullRawNative17WordOracleBothExportsRequired": true,
+    "sixDefaultDisabledProductionDiagnosticSmokeModesRequired": true,
+    "diagnosticNeverTimed": true,
+    "screenOnlyDiagnosticNameArrayChanged": true,
+    "fresh16ChildSchedulePerDictionary": true,
+    "twoExcludedWarmupsOneMeasuredPassPerChild": true,
+    "fixtureReadsCompilationAndDigestOutsideGroupClock": true,
+    "richContentDedupKeyIndexMediaDigestParity": true,
+    "positiveVndbProofAndNumericConsumerGate": true,
+    "everyChildStdoutStderrStatusAndUnacceptedScheduleRetained": true,
+    "matrixFailFastFalseNoSelectedRetryOrResume": true,
+    "pythonRuntimeProvenanceOnlyDiff": true,
+    "boundedExactBuildProductReceiptByteEmitter": true,
+    "allFiveQualificationFilesMatchFrozenOwnerBytes": true,
+    "explicitBashShell": true,
+    "diagnosticSmokeExportsGuardedByExactGetter": true
+  },
+  "resolvedPreFreezeDefect": {
+    "failureReceipt": "history/smoke-null-fixture-placement-failure.json",
+    "failureReceiptSha256": "ad96c90f8e57c49c2df8028d43da32b5b2f32f4e2c210c8bf6273e8447b7c438",
+    "oldSmokeSha256": "1aea93b362c4da856d18d744976b05ea9a686cfe2841f5923fd09e2ae478452a",
+    "newSmokeSha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f",
+    "correction": "Move exactly one null-score malformed fixture append out of parse() to one-time top-level setup before loops, restoring the original local results declaration indentation. The prior draft could grow malformed indefinitely during iteration.",
+    "sourceOrObservationChanged": false
+  },
+  "limits": [
+    "The original c958 correctness cohort failed one newly introduced unsupported-index-presence assertion before0/48 component observations. Its run, tests, binding, logs and artifact remain separate and unchanged.",
+    "This correction addresses that exact baseline-supported test contract. Fresh complete exact-source validation is required; prior static checks do not substitute for it.",
+    "A positive component result permits consideration of separately frozen browser qualification only. It does not establish import or memory gains.",
+    "All three fixed corpus cells and controls must complete and be reviewed separately; no pooling with earlier source cohorts or selective retries.",
+    "Diagnostic durations and memory readings are excluded from performance qualification.",
+    "Final corrected binding/publication identities remain pending separate final review."
+  ],
+  "decision": "No remaining source/protocol blocker for the exact corrected core map. Owner may finalize a separate binding and immutable successor publication; final identity review is still required.",
+  "newMeasurements": false,
+  "supersedesCoreReviewSha256": "c3f3e5ca7ffd701c3d2ef049930a57eb302cee6ade5891b69edebe6900e98870",
+  "resolvedObserverGuard": {
+    "reviewPath": "pipeline-smoke-getter-guard-review.json",
+    "reviewSha256": "919d2943fce07a8350133a31072347040e62a4ff2cfc955349b199c28fef1193",
+    "oldSmokeSha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f",
+    "newSmokeSha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42",
+    "historicalWitnessSha256": "d452afa0e447a5d2a9b8bbe4ff6d1698e0451188c8dbf20b2917f1666f243075",
+    "sourceTimingFixturesCriteriaUnchanged": true
+  },
+  "resolvedWideSequenceTestContract": {
+    "sourceContractReviewSha256": "da5897e642a8c5d549e4c466926fb718035f25a9c492e680f29fdb706c846b63",
+    "correctedTestReviewSha256": "639dc4ee69ecc28e1714c21af7deb1cb0a44056cf8ac54848b8f3ca5d4577ef5",
+    "workflowDeltaReviewSha256": "d8c805972a654636216c598322873a1095982f08f108f990f48eaa2f10765058",
+    "originalFailedRunId": 46135694884,
+    "originalTimedObservations": 0,
+    "onlyChangedCoreEntries": [
+      "workflow.yml",
+      "qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "qualification/term-bank-row-suffix-proof-fixtures.js"
+    ],
+    "candidateCUnchanged": true,
+    "criteriaAndTimedChildUnchanged": true,
+    "originalCoreReviewAndPublicationPreserved": true
+  }
+}

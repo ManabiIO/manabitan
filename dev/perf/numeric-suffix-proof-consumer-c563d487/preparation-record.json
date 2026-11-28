@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 1,
-  "recordedAtUtc": "2026-11-28T10:30:55.035092+00:00",
-  "scope": "Prospective source/tooling finalization and exact staging only; no native build, candidate execution, corpus pass or timing.",
+  "schemaVersion": 2,
+  "recordedAtUtc": "2026-11-28T10:47:31.844066+00:00",
+  "scope": "Separate prospective correctness/tooling successor for an observed test-oracle error; no performance observation is selected or repeated.",
   "baseline": {
     "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
     "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
@@ -11,129 +11,25 @@
   },
   "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
   "candidatePatchSha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
-  "oldBinding": {
-    "bytes": 3817,
-    "sha256": "0377604a2f6856801770e1b8b02e1b07c9caf3165b1ace1c82732cc715954da8",
-    "gitBlobSha1": "c02adbaa0ffc50157ad861a29142ab646a99229a"
-  },
   "finalBinding": {
-    "bytes": 3820,
-    "sha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
-    "gitBlobSha1": "3406bfbd1e350f2591fbda79a44c21258b069da2"
-  },
-  "bindingDiff": {
-    "bytes": 2214,
-    "sha256": "ae18e49709cb91c3a6a65b17ad374de144e52e95db6fc4b4ebd4573e6694a8fd",
-    "gitBlobSha1": "0a73ff93ac6d2dd315e44d7116712c3aafb2f313"
+    "bytes": 4044,
+    "sha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+    "gitBlobSha1": "077939b2907ae10cc0cf1b3154a4d2686a466a75"
   },
   "coreReview": {
-    "bytes": 6465,
-    "sha256": "c3f3e5ca7ffd701c3d2ef049930a57eb302cee6ade5891b69edebe6900e98870",
-    "gitBlobSha1": "007e36655e912e5d3508ce0f4c8a504e474d47ec"
+    "bytes": 7461,
+    "sha256": "3b59d68c0f103c33c78921c3eefaf80b7f560d27d35db8e421ad3cfb8c925373",
+    "gitBlobSha1": "9b912ecb3071ca8f183ff5d6e4a3c633595c5b0c"
   },
-  "workflow": {
-    "bytes": 4992,
-    "sha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
-    "gitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+  "correctionRecord": {
+    "bytes": 6482,
+    "sha256": "c635c99d8ffb86ed0d7ac503d38d19e008856d8225bbd44f26e19aa7eb431b33",
+    "gitBlobSha1": "a7048662d82f1fa87af47dea812ce6d9c692534e"
   },
-  "criteria": {
-    "bytes": 5506,
-    "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
-    "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
-  },
-  "syntaxChecks": [
-    {
-      "file": "run.py",
-      "check": "python ast.parse",
-      "passed": true
-    },
-    {
-      "file": "prepare-and-validate.py",
-      "check": "python ast.parse",
-      "passed": true
-    },
-    {
-      "file": "prepare-component.py",
-      "check": "python ast.parse",
-      "passed": true
-    },
-    {
-      "file": "prepare-diagnostic.py",
-      "check": "python ast.parse",
-      "passed": true
-    },
-    {
-      "file": "emit-build-evidence.py",
-      "check": "python ast.parse",
-      "passed": true
-    },
-    {
-      "file": "screen.mjs",
-      "argv": [
-        "node",
-        "--check",
-        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/screen.mjs"
-      ],
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "file": "smoke.mjs",
-      "argv": [
-        "node",
-        "--check",
-        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/smoke.mjs"
-      ],
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "file": "native-oracle.mjs",
-      "argv": [
-        "node",
-        "--check",
-        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/native-oracle.mjs"
-      ],
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "file": "workflow.yml",
-      "check": "yaml.safe_load and required prepare dependency / fail-fast assertions",
-      "passed": true
-    }
-  ],
-  "checks": {
-    "all17CoreFilesMatchIndependentReview": true,
-    "allFiveQualificationFilesMatchSourceOwner": true,
-    "sourceAndPatchUnchanged": true,
-    "criteriaAndWorkflowUnchanged": true,
-    "finalBindingHasNoPendingFields": true,
-    "allPreFreezeFailuresPreserved": true,
-    "historicalLlhttpCollisionResolvedByExistingScreenGuard": true,
-    "previous56FileStagePreservedByteIdentically": true
-  },
-  "limitations": [
-    "Source-only diagnostic text was generated and independently reversed; no diagnostic/native module has been compiled or executed.",
-    "Prior local fixture lint/types used the disclosed old 9e10 context and do not replace exact f28 hosted correctness gates.",
-    "The candidate WASM and generated manifest are unknown until the source-bound hosted build; no compiled identity is invented.",
-    "The 48-observation component screen remains unacquired and cannot establish full-browser or memory gains.",
-    "The closed dcfc-to-4cd full cohort is unchanged and failed its prospective target latency criteria."
-  ],
-  "nativeBuilds": 0,
-  "candidateExecutions": 0,
+  "originalCorrectnessFailurePreserved": true,
+  "originalMeasuredObservations": 0,
   "newMeasuredObservations": 0,
-  "previousPublication": {
-    "bytes": 24548,
-    "sha256": "2fc5cdd66786d45cadfb133412cd2611bcb4eb13d3415e5cec9f490a59390660",
-    "gitBlobSha1": "8423381dcc9b6207244853a88a6ed38eeb62a4b3"
-  },
-  "observerCorrection": {
-    "bytes": 2216,
-    "sha256": "c232705d99151c042a2c18e2c296231012d789f2430c0d98c14eb859cd9d8813",
-    "gitBlobSha1": "1d3969214cc9e67b2854583df728e320c1b47842"
-  }
+  "nextCorrectnessPassPending": true,
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "workflowSha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8"
 }

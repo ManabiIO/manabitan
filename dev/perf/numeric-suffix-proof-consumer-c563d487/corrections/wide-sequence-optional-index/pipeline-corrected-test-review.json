@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:46:15.772051+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent source and exact-diff review of the source-supported wide-sequence test contract correction. No native/parser/test/corpus/timing execution.",
+  "originalRunId": 46135694884,
+  "originalToolingCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "sourceContractReviewSha256": "da5897e642a8c5d549e4c466926fb718035f25a9c492e680f29fdb706c846b63",
+  "files": {
+    "test/term-bank-row-suffix-proof-fixtures.js": {
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "bytes": 6382
+    },
+    "test/term-bank-row-suffix-proof-consumer.test.js": {
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "bytes": 10092
+    },
+    "qualification-contract-correction.patch": {
+      "sha256": "3afd3d7928de309fbc49ab3fbfb7fa06c4295b543fb083f5e8b52d6137eb6813",
+      "bytes": 4809
+    },
+    "reports/correction-receipt.json": {
+      "sha256": "cab5e0ae45e7152fa89655fcb26cbf1054446a93564786cff206a08957f58a20",
+      "bytes": 5486
+    },
+    "pipeline-correction-review-attempt-1.json": {
+      "sha256": "4f8c40c10decbfa7da93fdbb0322b3f30e6d91ac9b3d036b008e114a9bd591b2",
+      "bytes": 527
+    }
+  },
+  "checks": {
+    "fixtureExactFiveMetadataReplacementReplay": true,
+    "onlyWideSequenceFixtureAnnotated": true,
+    "allRawBanksFlagsExpectedCountersAndCaseNamesUnchanged": true,
+    "enabledAndDisabledExactFloat64WideValueRequired": true,
+    "wideFixtureExplicitlyRequiresZeroOptionalNativeIndexes": true,
+    "allOtherFixturesStillRequirePositiveIndexes": true,
+    "fullRowContentDedupAndIndexSnapshotParityRetained": true,
+    "all58TestCasesRetained": true,
+    "sourcePatchAdmissionClocksCriteriaScheduleUnchanged": true
+  },
+  "reasoning": "Exact-f28 fallback preserves2147483648 in Float64Array; native lookup preparation requires Int32Array and leaves optional prepared indexes absent. The correction narrows the invalid universal presence assertion to the one proven unsupported native encoding case, adds explicit column type/value checks in both reuse modes and retains complete output parity. It does not waive a correctness error or change production behavior.",
+  "staticReceiptScope": "Owner receipt records five-file syntax/scoped lint and targeted strict types. The preparatory prior-JS-context limitation remains explicit; a new full exact-source validation is required. This reviewer did not rerun those checks.",
+  "decision": "No remaining source/test blocker for these exact corrected bytes. Preserve the original failure and require separate corrected binding plus complete validation before any component acquisition.",
+  "newMeasurements": false
+}

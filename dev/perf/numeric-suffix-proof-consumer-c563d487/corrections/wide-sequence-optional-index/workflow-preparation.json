@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:41:35.436653+00:00",
+  "scope": "Prepare a separate validation successor for the demonstrated optional-index test-oracle error; no native, acquisition or publication",
+  "parentCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "parentTree": "69257c47755062c6759b68332454e4427bf7902d",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "oldWorkflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "newWorkflowSha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+  "patchSha256": "fcaf1815fad5ec7b08f2f260727ebc0d036d59dcb668bfe6999d851166c63337",
+  "exactReplacements": [
+    [
+      "name: Numeric suffix proof-consumer component c563d487",
+      "name: Numeric suffix proof-consumer corrected component c563d487"
+    ],
+    [
+      "branches: [perf/numeric-suffix-proof-consumer-screen-20261128-c563d487]",
+      "branches: [perf/numeric-suffix-proof-consumer-corrected-20261128-c563d487]"
+    ]
+  ],
+  "sourceOrTimingChange": false,
+  "originalFailedRun": 46135694884,
+  "originalMeasuredObservations": 0,
+  "fixedSuccessorPlan": 48,
+  "originalFailureAuditSha256": "4787b946dbbec181e97326387860fd2a1ae3373da85ec448dcdd9ab65ce06733",
+  "publicationPending": true
+}

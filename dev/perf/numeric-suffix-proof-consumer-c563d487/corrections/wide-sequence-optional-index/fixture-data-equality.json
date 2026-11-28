@@ -1,0 +1,9 @@
+{
+  "scope": "Pure fixed fixture-data comparison only, no test/native execution or timing",
+  "banksFlagsCountsAndOriginalCaseNamesUnchanged": true,
+  "exactlyOneWideSequenceExpectationAdded": true,
+  "expectedWideSequence": 2147483648,
+  "otherExportsUnchanged": true,
+  "originalFixtureSha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+  "correctedFixtureSha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4"
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:40:27.463332+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Read-only exact-f28 source analysis of the failed new unit assertion. No native/parser/test/corpus/timing execution and no source edits.",
+  "failedRunId": 46135694884,
+  "failedJobId": 140950386103,
+  "toolingCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "originalTestSha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+  "observedFailureScope": "Primary-log owners report that semantic row equality passed, then the unconditional prepared lookup index length >0 assertion failed for the overflowing-sequence fixture. All component jobs were skipped; no timed observations. This review independently analyzes source, not the original failure log.",
+  "primaryFetchedSourceReceiptSha256": "139a77c324aeb6b7b50470104e62634e36dc53db86afdd2e35b1ba3923f7ac51",
+  "all11GitBlobAndSha256BindingsIndependentlyReverified": true,
+  "sourceFiles": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "bytes": 210111,
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "gitBlobSha1": "4f3f7e73c78bca23672f46588cb897633fc7a4ac"
+    },
+    "ext/js/dictionary/term-lookup-index.js": {
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "gitBlobSha1": "e0d30279b67300cb47d519a1b8d809eb4ba784f6"
+    }
+  },
+  "sourceEvidence": {
+    "wideSequencePreserved": {
+      "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "firstLine": 2510,
+      "lastLine": 2521,
+      "sha256": "5dee54670b655b08d04edd0536489762be0ae8c865ba650ec72474ef2619d013",
+      "source": "            if (sequenceList instanceof Float64Array) {\n                let requiresWideSequence = false;\n                for (let i = 0; i < sequenceList.length; ++i) {\n                    if (sequenceList[i] > 0x7fffffff) {\n                        requiresWideSequence = true;\n                        break;\n                    }\n                }\n                if (!requiresWideSequence) {\n                    sequenceList = Int32Array.from(sequenceList);\n                }\n            }\n"
+    },
+    "nativeEncoderRequiresInt32": {
+      "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "firstLine": 1596,
+      "lastLine": 1611,
+      "sha256": "1f4774ca9c98b0e1179a32951496c5d774fe25ce7bed1b5b9fb7f3ad22026c95",
+      "source": "function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {\n    const memory = wasm.memory.buffer;\n    if (\n        !(sequenceList instanceof Int32Array) ||\n        !(plan.expressionIndexes instanceof Uint32Array) ||\n        plan.stringLengths.buffer !== memory ||\n        plan.stringOffsets.buffer !== memory ||\n        plan.stringHashes?.buffer !== memory ||\n        plan.stringsBuffer.buffer !== memory ||\n        plan.expressionIndexes.buffer !== memory ||\n        plan.readingIndexes.buffer !== memory ||\n        rowCount <= 0 || rowCount >= 0xffff ||\n        plan.stringLengths.length <= 0 || plan.stringLengths.length >= 0xffff\n    ) {\n        return null;\n    }\n"
+    },
+    "preparedIndexesOnlyOnNativeSuccess": {
+      "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "firstLine": 2597,
+      "lastLine": 2619,
+      "sha256": "7369a06964492ea989cfb5ba81c74f945b9381d14dbd5481cd37f98023cc4d20",
+      "source": "                const bytes = nativeCompactionScratch === null ?\n    encodeNativeTermLookupIndex(\n        parsed.wasm,\n        nativeStringPlan,\n        readingEqualsExpressionList,\n        sequenceList,\n        count,\n        nativeLookupIndexScratch,\n    ) :\n    null;\n                const elapsedMs = Math.max(0, safePerformance.now() - tLookupIndexStart);\n                if (segments !== null) {\n                    chunk.preparedLookupIndexes = segments;\n                    chunk.preparedLookupIndexEncodeMs = elapsedMs;\n                    nativeSegmentedLookupSegments += segments.size;\n                } else if (bytes !== null) {\n                    chunk.preparedLookupIndexes = new Map([\n                        [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],\n                    ]);\n                    chunk.preparedLookupIndexEncodeMs = elapsedMs;\n                } else if (nativeCompactionScratch !== null) {\n                    ++nativeSegmentedLookupFallbacks;\n                }\n"
+    },
+    "fallbackColumnType": {
+      "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "firstLine": 2348,
+      "lastLine": 2359,
+      "sha256": "e068a1c86b044ad8697a381f33c6ef9c487a88fbdb6df3c8c7e86cefbc6bc01a",
+      "source": "            const readingEqualsExpressionList = fusedStringPlan === null ?\n                new Uint8Array(count) :\n                /** @type {Uint8Array} */ (fusedStringPlan.readingEqualsExpressionList).subarray(start, end);\n            const scoreList = fusedStringPlan === null ?\n                new Float64Array(count) :\n                /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);\n            /** @type {Int32Array|Float64Array} */\n            let sequenceList = fusedStringPlan === null && version >= 3 ?\n                new Float64Array(count) :\n                (fusedStringPlan === null ?\n                    new Int32Array(count) :\n                    /** @type {Int32Array} */ (fusedStringPlan.sequenceList).subarray(start, end));\n"
+    },
+    "separateJsLookupEncoderRetainsWideSequences": {
+      "file": "ext/js/dictionary/term-lookup-index.js",
+      "firstLine": 1465,
+      "lastLine": 1480,
+      "sha256": "66b53b420b1519cf15c1207052cf8cf4ce386cd5c89f096a714ea777508b27a2",
+      "source": "function normalizeSequenceValues(values, rowCount) {\n    if (values instanceof Int32Array) { return values.subarray(0, rowCount); }\n    let wide = false;\n    const normalized = new Array(rowCount);\n    for (let row = 0; row < rowCount; ++row) {\n        const raw = values[row];\n        const value = typeof raw === 'number' ? raw : -1;\n        if (!Number.isSafeInteger(value)) {\n            throw new RangeError('Term lookup sequence must be a safe integer');\n        }\n        const normalizedValue = value < 0 ? -1 : value;\n        if (normalizedValue > 0x7fffffff) { wide = true; }\n        normalized[row] = normalizedValue;\n    }\n    return wide ? Float64Array.from(normalized) : Int32Array.from(normalized);\n}\n"
+    }
+  },
+  "reasoning": [
+    "The overflowing sequence2147483648 exceeds signed-int32 range, so the fused native path legitimately falls back and the general column decoder preserves a Float64Array.",
+    "The native lookup encoder explicitly requires an Int32Array sequence column and returns null for Float64Array. The parser leaves its optional preparedLookupIndexes absent unless native encoding produces bytes/segments.",
+    "Score overflow alone does not constrain native lookup sequence encoding, explaining why the universal presence assertion passed those other numeric fallback cases.",
+    "The independent JS persisted lookup encoder accepts safe wide integers in Float64Array; a missing optional parser-side index is not lost lookup data. Production callers retain their normal fallback preparation path.",
+    "The universal assertion in the new test is inconsistent with the exact baseline parser contract. The current failure provides no evidence that the new suffix consumer corrupted row values."
+  ],
+  "meaningfulCorrection": [
+    "Preserve the failed run, source, original test, binding and manifest unchanged.",
+    "For this wide-sequence fixture, explicitly assert absence of native-prepared indexes and exact Float64/wide sequence preservation; keep positive index expectations for all other fixtures.",
+    "Keep full semantic/content/dedup/index enabled-versus-disabled snapshot parity so the correction enables the currently unreached comparison.",
+    "Any corrected test/tooling cohort requires a separate reviewed binding. Do not alter C, admission, clocks, criteria or old results."
+  ],
+  "decision": "Source evidence supports a narrowly corrected per-fixture optional-index expectation, rather than a product-code change or blanket removal of lookup assertions.",
+  "newMeasurements": false
+}
