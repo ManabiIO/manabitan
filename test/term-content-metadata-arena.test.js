@@ -44,6 +44,18 @@ describe('term content metadata arena ownership', () => {
         expect(arena.hash1.byteLength).toBe(17 * 4);
     });
 
+    /* eslint-disable @stylistic/semi */
+    test.each([32768, 524288])('separates large dense columns within one extra memory page at capacity %i', (capacity) => {
+        const arena = new TermContentMetadataArena(capacity, capacity * 2)
+        const columns = [arena.hash1, arena.hash2, arena.state, arena.length, arena.signaturePresent, arena.signature1, arena.signature2, arena.signature3]
+        expect(new Set(columns.map((column) => column.byteOffset % 4096)).size).toBe(columns.length)
+        const packedBytes = 8 * 1024 * 1024 + capacity * (8 + 26)
+        expect(arena.memory.buffer.byteLength).toBeLessThanOrEqual(Math.ceil(packedBytes / 65536) * 65536 + 65536)
+        expect(arena.slots.length).toBe(capacity * 2)
+        expect(columns.every((column) => column.length === capacity)).toBe(true)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test.each([-1, 0.5, Number.MAX_SAFE_INTEGER, Infinity])('rejects invalid or oversized capacity %s before publishing memory', (capacity) => {
         expect(() => new TermContentMetadataArena(capacity, 16)).toThrow(RangeError);
         expect(() => new TermContentMetadataArena(16, capacity)).toThrow(RangeError);

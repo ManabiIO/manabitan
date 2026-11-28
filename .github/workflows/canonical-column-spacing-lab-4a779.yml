@@ -1,0 +1,62 @@
+name: Canonical column spacing diagnostic 4a779
+
+on:
+  push:
+    branches: [perf/canonical-column-spacing-20261128]
+    paths:
+      - 'ext/js/dictionary/term-content-metadata-arena.js'
+      - 'test/term-content-metadata-arena.test.js'
+      - '.github/scripts/canonical-column-spacing-4a779.mjs'
+      - '.github/scripts/canonical-column-spacing-run-4a779.py'
+      - '.github/workflows/canonical-column-spacing-lab-4a779.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canonical-column-spacing-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    name: Cold JMdict canonical scan with identical controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Validate arena and native rollback behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/canonical-column-spacing-4a779
+          npx eslint ext/js/dictionary/term-content-metadata-arena.js test/term-content-metadata-arena.test.js 2>&1 | tee builds/perf/canonical-column-spacing-4a779/lint.log
+          node node_modules/vitest/vitest.mjs run test/term-content-metadata-arena.test.js test/term-content-canonical-scan.test.js --maxWorkers=2 2>&1 | tee builds/perf/canonical-column-spacing-4a779/unit.log
+      - name: Restore locked JMdict archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run exactly one registered component screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PERF_BASELINE_DIRECTORY="$RUNNER_TEMP/canonical-column-spacing-baseline"
+          git worktree add --detach "$PERF_BASELINE_DIRECTORY" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$PERF_BASELINE_DIRECTORY/node_modules"
+          ln -s "$GITHUB_WORKSPACE/ext/lib" "$PERF_BASELINE_DIRECTORY/ext/lib"
+          python .github/scripts/canonical-column-spacing-run-4a779.py 2>&1 | tee builds/perf/canonical-column-spacing-4a779/launcher.log
+      - name: Preserve every scheduled observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: canonical-column-spacing-4a779
+          path: builds/perf/canonical-column-spacing-4a779
+          if-no-files-found: error
+          retention-days: 14

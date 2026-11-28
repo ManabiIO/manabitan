@@ -45,15 +45,17 @@ export class TermContentMetadataArena {
         /**
          * @param {number} count
          * @param {number} width
+         * @param {boolean} [separate]
          * @returns {number}
          */
-        const reserve = (count, width) => {
-            offset = Math.ceil(offset / width) * width;
+        const reserve = (count, width, separate = true) => {
+            // Keep power-of-two dense columns at different page offsets.
+            offset = Math.ceil((offset + (separate ? 64 : 0)) / width) * width;
             const start = offset;
             offset += count * width;
             return start;
         };
-        const slots = reserve(slotCapacity, 4);
+        const slots = reserve(slotCapacity, 4, false);
         const hash1 = reserve(denseCapacity, 4);
         const hash2 = reserve(denseCapacity, 4);
         const state = reserve(denseCapacity, 1);
