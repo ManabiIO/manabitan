@@ -1,0 +1,39 @@
+name: Prepared score source quality 4a779
+
+on:
+  push:
+    branches: [perf/prepared-scores-quality-20261128-4a779]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prepared-scores-quality-4a779-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Score source quality (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: JavaScript
+            command: npx eslint ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-lookup-index-preparation.js ext/js/dictionary/term-record-opfs-store.js test/term-record-prepared-scores.test.js
+          - name: TypeScript
+            command: npm run test:ts
+          - name: Units and build
+            command: npm run test:unit -- --maxWorkers=2 --no-file-parallelism && npm run test:build
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          ${{ matrix.command }}

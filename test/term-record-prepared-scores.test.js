@@ -12,8 +12,12 @@ import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-
 import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
 
 /** @typedef {import('../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermRecordScores} PreparedScores */
+/** @typedef {ReturnType<typeof createArtifactTermRecordChunkWithResolvedContent> & {dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, termRecordPreinternedPlan: import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan}} Fixture */
 
-/** @param {number} [count] */
+/**
+ * @param {number} [count]
+ * @returns {Fixture}
+ */
 function fixture(count = 128) {
     const builder = createTermRecordPreinternedPlanBuilder(1)
     builder.internStringBytes(new TextEncoder().encode('word'))
@@ -31,7 +35,10 @@ function fixture(count = 128) {
     }, Uint32Array.from({length: count}, (_, i) => i % 2), Float64Array.of(16, 90), Uint32Array.of(7, 9))
 }
 
-/** @param {ReturnType<typeof fixture>} chunk */
+/**
+ * @param {Fixture} chunk
+ * @returns {PreparedScores}
+ */
 function prepare(chunk) {
     const result = prepareTermRecordScores(chunk.scoreList, 0, chunk.rowCount)
     if (result === null) { throw new Error('Missing prepared scores') }
@@ -39,8 +46,9 @@ function prepare(chunk) {
 }
 
 /**
- * @param {ReturnType<typeof fixture>} chunk
+ * @param {Fixture} chunk
  * @param {PreparedScores|null} [prepared]
+ * @returns {Uint8Array}
  */
 function encode(chunk, prepared = null) {
     return new TermRecordOpfsStore()._encodeArtifactRecordFields(chunk, [], [], 16, prepared)
@@ -61,29 +69,27 @@ describe('prepared compact record scores', () => {
         }
     })
 
-    test.each(['range', 'first-use', 'duplicate', 'unused', 'stale', 'short'])(
-        'falls back without changing bytes for a %s score plan', (kind) => {
-            const chunk = fixture()
-            const prepared = prepare(chunk)
-            if (kind === 'range') { prepared.keys[64] = 65535 }
-            if (kind === 'first-use') {
-                const first = prepared.scores[0]
-                prepared.scores[0] = prepared.scores[1]
-                prepared.scores[1] = first
-                for (let i = 0; i < prepared.keys.length; ++i) {
-                    if (prepared.keys[i] < 2) { prepared.keys[i] ^= 1 }
-                }
+    test.each(['range', 'first-use', 'duplicate', 'unused', 'stale', 'short'])('falls back without changing bytes for a %s score plan', (kind) => {
+        const chunk = fixture()
+        const prepared = prepare(chunk)
+        if (kind === 'range') { prepared.keys[64] = 65535 }
+        if (kind === 'first-use') {
+            const first = prepared.scores[0]
+            prepared.scores[0] = prepared.scores[1]
+            prepared.scores[1] = first
+            for (let i = 0; i < prepared.keys.length; ++i) {
+                if (prepared.keys[i] < 2) { prepared.keys[i] ^= 1 }
             }
-            if (kind === 'duplicate') {
-                prepared.scores = Int32Array.from([...prepared.scores, prepared.scores[0]])
-                prepared.keys[6] = 6
-            }
-            if (kind === 'unused') { prepared.scores = Int32Array.from([...prepared.scores, 12345]) }
-            if (kind === 'stale') { chunk.scoreList[64] = -901 }
-            if (kind === 'short') { prepared.keys = prepared.keys.subarray(1) }
-            expect(encode(chunk, prepared)).toEqual(encode(chunk))
-        },
-    )
+        }
+        if (kind === 'duplicate') {
+            prepared.scores = Int32Array.from([...prepared.scores, prepared.scores[0]])
+            prepared.keys[6] = 6
+        }
+        if (kind === 'unused') { prepared.scores = Int32Array.from([...prepared.scores, 12345]) }
+        if (kind === 'stale') { chunk.scoreList[64] = -901 }
+        if (kind === 'short') { prepared.keys = prepared.keys.subarray(1) }
+        expect(encode(chunk, prepared)).toEqual(encode(chunk))
+    })
 
     test('does not call score-plan accessors or trust shared, detached, or spoofed columns', () => {
         const chunk = fixture()
@@ -95,7 +101,7 @@ describe('prepared compact record scores', () => {
         shared.keys = new Uint16Array(new SharedArrayBuffer(shared.keys.byteLength))
         shared.keys.set(prepare(chunk).keys)
         const detached = prepare(chunk)
-        structuredClone(detached.keys, {transfer: [/** @type {ArrayBuffer} */ (detached.keys.buffer)]})
+        structuredClone(detached.keys, {transfer: [(detached.keys.buffer)]})
         const spoofed = prepare(chunk)
         const impostor = Float32Array.from(spoofed.scores)
         Object.setPrototypeOf(impostor, Int32Array.prototype)
@@ -119,13 +125,19 @@ describe('prepared compact record scores', () => {
         const output = []
         vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async (...args) => {
             const fields = /** @type {Uint8Array} */ (args[6])
-            output.push(fields.slice())
+            output.push(Uint8Array.from(fields))
             await Promise.resolve()
             if (output.length === 1) { chunk.scoreList[30000] = -901 }
         })
         await store._encodeAndAppendArtifactChunkForState(
             /** @type {Parameters<typeof store._encodeAndAppendArtifactChunkForState>[0]} */ ({}),
-            chunk, 1, [], [], chunk.termRecordPreinternedPlan, 'raw', indexes,
+            chunk,
+            1,
+            [],
+            [],
+            chunk.termRecordPreinternedPlan,
+            'raw',
+            indexes,
         )
         expect(output).toHaveLength(3)
         for (let i = 0; i < output.length; ++i) {
@@ -141,10 +153,19 @@ describe('prepared compact record scores', () => {
         const worker = new Worker(new URL('fixtures/parser-settlement/worker-node.mjs', import.meta.url), {
             workerData: {url: new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href},
         })
-        /** @param {object} message @returns {Promise<Record<string, unknown>>} */
+        /**
+         * @param {object} message
+         * @returns {Promise<Record<string, unknown>>}
+         */
         const request = async (message) => await new Promise((resolve, reject) => {
-            const onError = (/** @type {Error} */ error) => { worker.off('message', onMessage); reject(error) }
-            const onMessage = (/** @type {Record<string, unknown>} */ result) => { worker.off('error', onError); resolve(result) }
+            const onError = (/** @type {Error} */ error) => {
+                worker.off('message', onMessage)
+                reject(error)
+            }
+            const onMessage = (/** @type {Record<string, unknown>} */ result) => {
+                worker.off('error', onError)
+                resolve(result)
+            }
             worker.once('message', onMessage)
             worker.once('error', onError)
             worker.postMessage(message)
@@ -157,9 +178,17 @@ describe('prepared compact record scores', () => {
             for (const score of [7, -901]) {
                 const rows = Array.from({length: 24}, (_, i) => [`word-${i}`, '', '', '', i % 3 === 0 ? score : 256, ['definition'], i, ''])
                 const sourceBuffers = [rows.slice(0, 12), rows.slice(12)].map((bank) => new TextEncoder().encode(JSON.stringify(bank)).buffer)
-                const result = await request({type: 'parse', id: 1, version: 3, sourceBuffers,
-                    options: {computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true,
-                        emitTermByteLists: false, mediaHintFastScan: true, validateGlossaryTypes: true, prepareLookupIndexes: true}})
+                const result = await request({type: 'parse',
+                    id: 1,
+                    version: 3,
+                    sourceBuffers,
+                    options: {computeContentHashes: true,
+                        emitContentSlab: true,
+                        emitTokenBinaryContent: true,
+                        emitTermByteLists: false,
+                        mediaHintFastScan: true,
+                        validateGlossaryTypes: true,
+                        prepareLookupIndexes: true}})
                 expect(result.type).toBe('result')
                 const parsed = /** @type {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk} */ (result.chunk)
                 const prepared = parsed.preparedLookupIndexes?.get('0:24')?.preparedScores
