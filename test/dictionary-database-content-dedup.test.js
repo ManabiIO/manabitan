@@ -320,7 +320,7 @@ describe('one ready term chunk dedup lookahead', () => {
         expect(rollback).not.toHaveBeenCalled()
         gate.resolve(void 0)
         await failed
-        expect(rollback.mock.calls.flatMap(([stage]) => stage === null ? [] : [[...stage.indexes]])).toStrictEqual([[1], [0]])
+        expect(rollback.mock.calls.flatMap(([stage]) => (stage === null ? [] : [[...stage.indexes]]))).toStrictEqual([[1], [0]])
         expect(getMeta(current.database, 10, 20)).toBeUndefined()
         expect(getMeta(current.database, 30, 40)).toBeUndefined()
         expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
