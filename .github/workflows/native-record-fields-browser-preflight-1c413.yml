@@ -1,0 +1,233 @@
+name: Native record fields browser launch source preflight env repair 20261128
+
+on:
+  push:
+    branches: [test/native-record-fields-browser-preflight-env-20261128-1c413]
+    paths:
+      - '.github/workflows/native-record-fields-browser-preflight-1c413.yml'
+      - 'dev/perf/native-record-fields-browser-preflight-20261128-1c413/**'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: native-record-fields-browser-preflight-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FIELD_STUDY: 915d6f42aea484dffdc7ee72a8d19e417b90cb95
+  FIELD_STUDY_TREE: 944a8720e02bfad40f68b6c7f85f7c6ae237a37f
+  FIELD_PRODUCT: 8982dd89fac525100bdcaca7507bfff7feb2c842
+  FIELD_CONTROL: c34c272357fb8af463d32ab781bcbc640ba1bd3d
+  FIELD_KIT: dev/perf/native-record-fields-browser-20261128-1c413
+  FIELD_PREFLIGHT_KIT: dev/perf/native-record-fields-browser-preflight-20261128-1c413
+  PYTHONDONTWRITEBYTECODE: '1'
+
+# This single job validates source and setup only. It does not install or launch
+# Chromium, invoke the qualification harness, import a dictionary, or acquire timings.
+jobs:
+  source-preflight:
+    name: Exact corrected launch and generated-source guards
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - name: Preserve initial context before checkout or setup
+        id: initialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FIELD_PREFLIGHT_OUTPUT="$RUNNER_TEMP/native-record-fields-browser-preflight"
+          echo "FIELD_PREFLIGHT_OUTPUT=$FIELD_PREFLIGHT_OUTPUT" >> "$GITHUB_ENV"
+          mkdir -p "$FIELD_PREFLIGHT_OUTPUT"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = {key: os.environ.get(key) for key in (
+              "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_SHA", "GITHUB_REF",
+              "FIELD_STUDY", "FIELD_STUDY_TREE", "FIELD_PRODUCT", "FIELD_CONTROL")}
+          result.update({"kind": "source-only-preflight", "productExecuted": False,
+                         "browserExecuted": False, "imports": 0, "timingObservations": 0})
+          Path(os.environ["FIELD_PREFLIGHT_OUTPUT"], "context.json").write_text(
+              json.dumps(result, indent=2, sort_keys=True) + "\n")
+          print(json.dumps(result, sort_keys=True))
+          if os.environ["GITHUB_RUN_ATTEMPT"] != "1":
+              raise SystemExit("Only the original preflight attempt is admitted")
+          PY
+      - name: Check out the exact corrected study at its normal root
+        id: checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.FIELD_STUDY }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind the preflight workflow, complete target and retained sources
+        id: bind
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$FIELD_CONTROL" "$FIELD_PRODUCT" "$GITHUB_SHA"
+          python3 - <<'PY' 2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/bind.log"
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          def require(value, message):
+              if not value:
+                  raise RuntimeError(message)
+          def git(*args):
+              return subprocess.check_output(["git", *args])
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+          audit = os.environ["GITHUB_SHA"]
+          head = os.environ["FIELD_STUDY"]
+          prefix = os.environ["FIELD_PREFLIGHT_KIT"]
+          output = Path(os.environ["FIELD_PREFLIGHT_OUTPUT"])
+          manifest_path = prefix + "/source.json"
+          raw = git("show", audit + ":" + manifest_path)
+          manifest = json.loads(raw)
+          require(manifest["schemaVersion"] == 1, "Unknown preflight manifest")
+          require(manifest["kind"] == "native-fields-browser-source-only-preflight", "Wrong preflight kind")
+          require(manifest["productExecuted"] is False and manifest["timingAcquired"] is False,
+                  "Preflight scope changed")
+          require(git("rev-parse", "HEAD").decode().strip() == head, "Wrong target checkout")
+          require(git("rev-parse", "HEAD^{tree}").decode().strip() == os.environ["FIELD_STUDY_TREE"],
+                  "Wrong target tree")
+          require(manifest["target"]["commit"] == head and
+                  manifest["target"]["tree"] == os.environ["FIELD_STUDY_TREE"], "Target manifest changed")
+          require(git("rev-list", "--parents", "-n", "1", head).decode().split() ==
+                  [head, os.environ["FIELD_PRODUCT"]], "Wrong target parent")
+          require(git("rev-list", "--parents", "-n", "1", audit).decode().split() ==
+                  [audit, manifest["upstream"]["commit"]], "Wrong preflight parent")
+          require(git("rev-parse", manifest["upstream"]["commit"] + "^{tree}").decode().strip() ==
+                  manifest["upstream"]["tree"], "Wrong preflight baseline tree")
+          expected_paths = sorted(set(manifest["files"]) | {manifest_path})
+          actual_paths = sorted(git("diff-tree", "--no-commit-id", "--name-only", "-r",
+                                   manifest["upstream"]["commit"], audit).decode().splitlines())
+          require(actual_paths == expected_paths, "Unexpected complete preflight source delta")
+          sources = {}
+          for path, expected in sorted(manifest["files"].items()):
+              require(path.startswith(prefix + "/") or
+                      path == ".github/workflows/native-record-fields-browser-preflight-1c413.yml",
+                      "Preflight source escaped its boundary")
+              entry = git("ls-tree", "-z", audit, "--", path).split(b"\t", 1)[0].decode().split()
+              require(entry == [expected["mode"], "blob", expected["gitBlob"]], "Wrong preflight Git entry")
+              data = git("show", audit + ":" + path)
+              require(len(data) == expected["bytes"] and digest(data) == expected["sha256"],
+                      "Wrong preflight source bytes")
+              target = output / "preflight-source" / path
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(data)
+              sources[path] = expected
+          target = output / "preflight-source" / manifest_path
+          target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_bytes(raw)
+          for path, expected in sorted(manifest["target"]["sources"].items()):
+              data = Path(path).read_bytes()
+              require(data == git("show", head + ":" + path), "Modified study source")
+              require(len(data) == expected["bytes"] and digest(data) == expected["sha256"],
+                      "Wrong bound study source")
+              require(git("rev-parse", head + ":" + path).decode().strip() == expected["gitBlob"],
+                      "Wrong bound study Git blob")
+              target = output / "study-source" / path
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(data)
+          proof = {"passed": True, "preflightHead": audit, "target": manifest["target"],
+                   "manifestSha256": digest(raw), "sources": sources,
+                   "productExecuted": False, "browserExecuted": False, "timingAcquired": False}
+          (output / "binding.json").write_text(json.dumps(proof, indent=2, sort_keys=True) + "\n")
+          print(json.dumps(proof, sort_keys=True))
+          PY
+      - name: Execute the real launch guard against the corrected study
+        id: launch
+        shell: bash
+        env:
+          FIELD_AUDIT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 "$FIELD_KIT/verify-source.py" --head "$FIELD_STUDY" --phase launch \
+            --output "$FIELD_PREFLIGHT_OUTPUT/source-before-setup.json" \
+            2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/source-before-setup.log"
+      - name: Execute unchanged activation and new fixture-guard pure tests
+        id: protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$FIELD_KIT/test-activation.py" \
+            2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/pure-tests.log"
+      - name: Prepare the exact Node release
+        id: node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the unchanged locked dependencies
+        id: dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/npm-ci.log"
+      - name: Run the unchanged setup library build
+        id: libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:libs 2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/build-libs.log"
+      - name: Run the unchanged setup license report
+        id: license
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run license-report:html 2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/license-report.log"
+      - name: Execute the real generated-source guard
+        id: generated
+        shell: bash
+        env:
+          FIELD_AUDIT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 "$FIELD_KIT/verify-source.py" --head "$FIELD_STUDY" --phase generated \
+            --output "$FIELD_PREFLIGHT_OUTPUT/source-after-setup.json" \
+            2>&1 | tee "$FIELD_PREFLIGHT_OUTPUT/source-after-setup.log"
+      - name: Retain complete original outcomes
+        if: always()
+        shell: bash
+        env:
+          FIELD_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p "$FIELD_PREFLIGHT_OUTPUT"
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ["FIELD_PREFLIGHT_OUTPUT"])
+          raw = json.loads(os.environ["FIELD_STEP_RESULTS"])
+          steps = {key: {field: value.get(field) for field in ("outcome", "conclusion")}
+                   for key, value in raw.items()}
+          required = ("initialize", "checkout", "bind", "launch", "protocol", "node",
+                      "dependencies", "libraries", "license", "generated")
+          failed = [key for key in required if steps.get(key, {}).get("outcome") != "success"]
+          files = {}
+          for path in sorted(root.rglob("*")):
+              if path.is_file():
+                  data = path.read_bytes()
+                  files[path.relative_to(root).as_posix()] = {
+                      "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+          result = {"passed": not failed, "kind": "source-only-preflight",
+                    "runId": os.environ["GITHUB_RUN_ID"], "attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+                    "headSha": os.environ["GITHUB_SHA"], "target": os.environ["FIELD_STUDY"],
+                    "targetTree": os.environ["FIELD_STUDY_TREE"], "required": required,
+                    "steps": steps, "failed": failed, "files": files,
+                    "productExecuted": False, "browserExecuted": False,
+                    "imports": 0, "timingObservations": 0}
+          (root / "outcomes.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+          print(json.dumps(result, sort_keys=True))
+          if failed:
+              raise SystemExit("Original source preflight incomplete: " + ", ".join(failed))
+          PY
+      - name: Preserve the original source-only evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-fields-browser-launch-preflight-${{ github.sha }}
+          path: ${{ runner.temp }}/native-record-fields-browser-preflight
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
