@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-current-jmdict-trace-analysis",
+  "scope": "Successful analysis of an existing complete Chromium trace only. No new import, product rebuild, timing observation, comparison, or optimization claim.",
+  "productSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "packageSha256": "b601d269b4412ccbd54edaf2e37af4d5466f086ff531aced1ec287cb28f416fa",
+  "traceSha256": "39058e1688a428e68d6c97180c9cfcad2d3a68e6fbe5850870d790c2ae0e5458",
+  "acquisition": {
+    "head": "e2786268b7576849fc4e84358623cd9d2277dcc0",
+    "runId": 46127144239,
+    "jobId": 140924149519,
+    "artifactId": 15256811856,
+    "artifactBytes": 17735478,
+    "artifactSha256": "7fe6bcea3930b9c8782903c1d4db874dbe132e473156ca8fab1f2fc241995143",
+    "complete": true,
+    "fullJobLogBlob": "039cbe5fb48981d6d0d9cc223cfb72dd517e454c"
+  },
+  "analysis": {
+    "head": "a4fb865b8d926053d661b3a390aed28352cc8f27",
+    "runId": 46130295082,
+    "jobId": 140933725716,
+    "complete": true,
+    "artifactId": 15257800501,
+    "artifactBytes": 1599208,
+    "artifactSha256": "c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a",
+    "analysisJsonSha256": "b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca",
+    "fullJobLogBlob": "a280549674dfd898f9eafc8051944ac95733c2fb",
+    "controlSha256": {
+      "analyze.py": "a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b",
+      "test_analyze.py": "e999800fe64fc8e03159a8d6646bc90ea3daf1bbadaa2442f6c003a038407ec2",
+      "plan.json": "58ba98bc4b0e3fd0ab6dbc3ce9d9ea93bc9fae3457e948a1a6d4840bf449e460",
+      "workflow.yml": "4bbb647f47327326e51089835848929d97ffdbd69beed03d87a5db56e94c96b0"
+    },
+    "pythonVersion": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]"
+  },
+  "gates": {
+    "python": {
+      "command": "python3 -m unittest discover -s analysis-controls -p test_analyze.py -v",
+      "passed": 13,
+      "failed": 0,
+      "reportedSeconds": 0.003
+    },
+    "actionlint": {
+      "runId": 46130295098,
+      "jobId": 140933725601,
+      "conclusion": "success"
+    },
+    "inputIdentity": "Exact run/job success, artifact metadata/ZIP size/digest, trace/report/control hashes, acquired before/after tracked/runtime manifests, full release package, and original canonical validation identity passed."
+  },
+  "roles": {
+    "other": {
+      "profiles": 3,
+      "samples": 18185,
+      "negativeRawDeltas": 147
+    },
+    "import": {
+      "profiles": 1,
+      "samples": 4223,
+      "negativeRawDeltas": 117
+    },
+    "parser": {
+      "profiles": 3,
+      "samples": 9537,
+      "negativeRawDeltas": 24
+    },
+    "compression": {
+      "profiles": 4,
+      "samples": 11505,
+      "negativeRawDeltas": 163
+    }
+  },
+  "profileInventory": [
+    {
+      "pid": 3327,
+      "profileId": "0x1",
+      "tid": 3327,
+      "threadName": "CrRendererMain",
+      "role": "other",
+      "sampleCount": 6132,
+      "nodeCount": 235,
+      "negativeRawDeltaCount": 128,
+      "startTimeUs": 67707205,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x2",
+      "tid": 3355,
+      "threadName": "DedicatedWorker thread",
+      "role": "other",
+      "sampleCount": 6800,
+      "nodeCount": 2,
+      "negativeRawDeltaCount": 0,
+      "startTimeUs": 67707335,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x3",
+      "tid": 3337,
+      "threadName": "ServiceWorker thread",
+      "role": "other",
+      "sampleCount": 5253,
+      "nodeCount": 44,
+      "negativeRawDeltaCount": 19,
+      "startTimeUs": 67873882,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x4",
+      "tid": 3353,
+      "threadName": "DedicatedWorker thread",
+      "role": "import",
+      "sampleCount": 4223,
+      "nodeCount": 822,
+      "negativeRawDeltaCount": 117,
+      "startTimeUs": 67965135,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x5",
+      "tid": 3406,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3176,
+      "nodeCount": 71,
+      "negativeRawDeltaCount": 8,
+      "startTimeUs": 68180491,
+      "endTimeUs": 69058331
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x6",
+      "tid": 3405,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3344,
+      "nodeCount": 63,
+      "negativeRawDeltaCount": 9,
+      "startTimeUs": 68182982,
+      "endTimeUs": 69058122
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x7",
+      "tid": 3407,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3017,
+      "nodeCount": 64,
+      "negativeRawDeltaCount": 7,
+      "startTimeUs": 68187106,
+      "endTimeUs": 69060111
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x8",
+      "tid": 3358,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2840,
+      "nodeCount": 34,
+      "negativeRawDeltaCount": 36,
+      "startTimeUs": 68434976,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x9",
+      "tid": 3359,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2937,
+      "nodeCount": 37,
+      "negativeRawDeltaCount": 42,
+      "startTimeUs": 68435048,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0xa",
+      "tid": 3357,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2989,
+      "nodeCount": 42,
+      "negativeRawDeltaCount": 46,
+      "startTimeUs": 68435095,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0xb",
+      "tid": 3360,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2739,
+      "nodeCount": 36,
+      "negativeRawDeltaCount": 39,
+      "startTimeUs": 68437964,
+      "endTimeUs": null
+    }
+  ],
+  "diagnosticEndpoints": {
+    "index": 1,
+    "reportPath": "/home/runner/work/manabitan/manabitan/product/builds/perf/jmdict-current-trace-dcfc-da6c4/run-1.html",
+    "reportJsonPath": "/home/runner/work/manabitan/manabitan/product/builds/perf/jmdict-current-trace-dcfc-da6c4/run-1.json",
+    "tracePath": "/home/runner/work/manabitan/manabitan/product/builds/perf/jmdict-current-trace-dcfc-da6c4/run-1.trace.json",
+    "browserVersion": "153.0.8010.12",
+    "packageSha256": "b601d269b4412ccbd54edaf2e37af4d5466f086ff531aced1ec287cb28f416fa",
+    "totalImportMs": 1338.6000000000058,
+    "automationObservedImportMs": 1360.4669780000004,
+    "workerImportMs": 1134.300000000003
+  },
+  "window": {
+    "timedImportClockWindowEstablished": false,
+    "workerTraceStopLogObserved": true,
+    "visibleCompletionFallbackLogObserved": false,
+    "boundaryHarnessSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "sourceAnchors": {
+      "tracingStart": {
+        "line": 4136,
+        "anchor": "await importTraceSession.send('Tracing.start', {"
+      },
+      "workerCompletionMarker": {
+        "line": 4144,
+        "anchor": "const expectedTraceLogFragment = "
+      },
+      "stopFromWorkerCompletion": {
+        "line": 4156,
+        "anchor": "await stopBrowserTraceToFile(traceSession, importTracePath);"
+      },
+      "awaitedTraceStop": {
+        "line": 4204,
+        "anchor": "await importWorkerTraceStopPromise;"
+      },
+      "firstExplicitBenchmarkStateRead": {
+        "line": 4223,
+        "anchor": "const state = await evalSendMessage(page, 'benchmarkDictionaryState');"
+      },
+      "firstExplicitBenchmarkProbeLoop": {
+        "line": 4233,
+        "anchor": "for (const term of probeTerms) {"
+      }
+    },
+    "interpretation": "These are all captured-window samples. No host/browser timing conversion or exact timed-import crop is assumed. The frozen harness awaits trace stop before its explicit benchmark state/probe validation, but work inside import/finalization and asynchronous trace-stop delivery remain part of the captured window."
+  },
+  "topLeafTables": {
+    "import": [
+      "1293\t30.618\t386.209\t(idle)\t:0",
+      "322\t7.625\t96.049\twasm-function[4]\twasm://wasm/34e657a2:1",
+      "154\t3.647\t53.081\t(garbage collector)\t:0",
+      "137\t3.244\t42.962\t_encodeAndAppendArtifactChunkForState\tjs/dictionary/term-record-opfs-store.js:2456",
+      "137\t3.244\t35.842\tpostMessage\t:0",
+      "127\t3.007\t9.322\tclearTimeout\t:0",
+      "126\t2.984\t20.369\tsetTimeout\t:0",
+      "124\t2.936\t37.201\t_encodeArtifactRecordFields\tjs/dictionary/term-record-opfs-store.js:5840",
+      "92\t2.179\t17.166\tround\tjs/dictionary/term-key-hash.js:40",
+      "83\t1.965\t20.756\t_createLookupIndexChunk\tjs/dictionary/term-record-opfs-store.js:6244",
+      "81\t1.918\t21.465\t_cacheRecentPublishedTermContentSources\tjs/dictionary/dictionary-database.js:6795",
+      "73\t1.729\t14.074\tcreateTermContentReferenceSlabs\tjs/dictionary/term-content-block-store.js:1323",
+      "71\t1.681\t14.779\thashLargeTermKeyByteRange\tjs/dictionary/term-key-hash.js:125",
+      "67\t1.587\t18.027\t_registerInFlightTermContentSources\tjs/dictionary/dictionary-database.js:6980",
+      "55\t1.302\t23.038\twrite\t:0",
+      "54\t1.279\t11.660\tparseCompactRecordFields\tjs/dictionary/term-record-opfs-store.js:192",
+      "54\t1.279\t11.520\tBlob\t:0",
+      "50\t1.184\t7.635\t(program)\t:0",
+      "42\t0.995\t23.931\t_tryPublishContiguousArtifactTermContentMetadata\tjs/dictionary/dictionary-database.js:9792",
+      "37\t0.876\t12.867\thasCompletePreparedTermRecordPreinternedPlan\tjs/dictionary/term-record-preinterned-plan.js:568",
+      "36\t0.852\t4.313\tplanContentSpansIntoSlabs\tjs/dictionary/term-content-block-store.js:1454",
+      "34\t0.805\t11.574\tslice\t:0",
+      "33\t0.781\t9.500\t_bulkAddArtifactTermsChunkWithContentDedup\tjs/dictionary/dictionary-database.js:8375",
+      "33\t0.781\t8.253\tvalidateTermContentSpans\tjs/dictionary/term-content-block-store.js:1269",
+      "31\t0.734\t10.384\tread\tjs/dictionary/term-bank-source-pipeline.js:108",
+      "30\t0.710\t2.468\tsetInterval\t:0",
+      "30\t0.710\t2.360\tclearInterval\t:0",
+      "29\t0.687\t5.980\t_scan\tjs/dictionary/term-content-canonical-scan.js:159",
+      "27\t0.639\t9.372\t_publishArtifactTermContentMetadata\tjs/dictionary/dictionary-database.js:9902",
+      "23\t0.545\t5.867\t_importDictionary\tjs/dictionary/dictionary-importer.js:917",
+      "21\t0.497\t14.975\tgetArtifactContentLength\tjs/dictionary/term-record-opfs-store.js:310",
+      "20\t0.474\t3.854\tadoptPendingColumns\tjs/dictionary/dictionary-database.js:9099",
+      "19\t0.450\t7.298\t_publishResolvedArtifactTermContentPlan\tjs/dictionary/dictionary-database.js:9712",
+      "18\t0.426\t5.576\t_findMatchingPersistedTermEntryContentMetaBatch\tjs/dictionary/dictionary-database.js:6576",
+      "18\t0.426\t3.778\timportDictionary\tjs/dictionary/dictionary-importer.js:869"
+    ],
+    "parser": [
+      "4067\t42.644\t1025.876\t(idle)\t:0",
+      "1248\t13.086\t330.178\twasm-function[36]\twasm://wasm/00043732:1",
+      "694\t7.277\t163.593\twasm-function[13]\twasm://wasm/00043732:1",
+      "631\t6.616\t228.123\twasm-function[49]\twasm://wasm/00043732:1",
+      "535\t5.610\t197.903\twasm-function[2]\twasm://wasm/00043732:1",
+      "430\t4.509\t121.233\twasm-function[18]\twasm://wasm/00043732:1",
+      "360\t3.775\t95.870\twasm-function[27]\twasm://wasm/00043732:1",
+      "264\t2.768\t76.933\tparseTermBankWithWasmColumnChunks\tjs/dictionary/term-bank-wasm-parser-worker.js:130",
+      "214\t2.244\t59.654\twasm-function[24]\twasm://wasm/00043732:1",
+      "112\t1.174\t43.044\tcopyWasmBackedColumnChunk\tjs/dictionary/term-bank-wasm-parser.js:4111",
+      "112\t1.174\t22.984\twasm-function[44]\twasm://wasm/00043732:1",
+      "71\t0.744\t16.489\twasm-function[41]\twasm://wasm/00043732:1",
+      "71\t0.744\t14.464\tencodeNativeTermLookupIndex\tjs/dictionary/term-bank-wasm-parser.js:1596",
+      "68\t0.713\t19.454\twasm-function[34]\twasm://wasm/00043732:1",
+      "64\t0.671\t17.201\twasm-function[42]\twasm://wasm/00043732:1",
+      "60\t0.629\t13.382\twasm-function[38]\twasm://wasm/00043732:1",
+      "59\t0.619\t16.448\twasm-function[40]\twasm://wasm/00043732:1",
+      "54\t0.566\t12.909\twasm-function[31]\twasm://wasm/00043732:1",
+      "54\t0.566\t11.522\twasm-function[30]\twasm://wasm/00043732:1",
+      "53\t0.556\t10.329\tparseTermBankWasmBuffersUnchecked\tjs/dictionary/term-bank-wasm-parser.js:868",
+      "43\t0.451\t18.467\tbuildContentUniqueRowIndexes\tjs/dictionary/term-bank-wasm-parser.js:548",
+      "35\t0.367\t8.051\twasm-function[39]\twasm://wasm/00043732:1",
+      "33\t0.346\t14.437\tinflateCompressedTermBankSourcesWasm\tjs/dictionary/term-bank-wasm-parser.js:228",
+      "32\t0.336\t9.781\tbuildTermLookupFilter\tjs/dictionary/term-lookup-route.js:54",
+      "27\t0.283\t5.032\tparse\tjs/dictionary/term-bank-wasm-parser-worker.js:72",
+      "26\t0.273\t7.997\twasm-function[50]\twasm://wasm/00043732:1",
+      "22\t0.231\t15.297\tpostMessage\t:0",
+      "18\t0.189\t6.016\tparseTermBankWithWasmColumnChunks\tjs/dictionary/term-bank-wasm-parser.js:2120",
+      "11\t0.115\t3.427\tjs-to-wasm\t:0",
+      "10\t0.105\t5.085\tparseTermBankWasmBuffers\tjs/dictionary/term-bank-wasm-parser.js:843",
+      "10\t0.105\t2.532\t(program)\t:0",
+      "9\t0.094\t1.558\twasm-function[43]\twasm://wasm/00043732:1",
+      "8\t0.084\t2.422\twasm-function[19]\twasm://wasm/00043732:1",
+      "4\t0.042\t1.471\tallocate\tjs/dictionary/term-lookup-scratch.js:44",
+      "4\t0.042\t0.685\twasm-function[45]\twasm://wasm/00043732:1"
+    ],
+    "compression": [
+      "9598\t83.425\t2171.658\t(idle)\t:0",
+      "367\t3.190\t141.007\twasm-function[101]\tlib/zstd.wasm:1",
+      "334\t2.903\t94.846\twasm-function[149]\tlib/zstd.wasm:1",
+      "266\t2.312\t218.306\tpostMessage\t:0",
+      "218\t1.895\t85.837\twasm-function[106]\tlib/zstd.wasm:1",
+      "178\t1.547\t52.078\tprepareSpanCompression\tlib/zstd-wasm.js:555",
+      "97\t0.843\t28.558\twasm-function[5]\tlib/zstd.wasm:1",
+      "73\t0.635\t14.973\tfinishPreparedSpanCompression\tlib/zstd-wasm.js:627",
+      "53\t0.461\t20.432\twasm-function[104]\tlib/zstd.wasm:1",
+      "37\t0.322\t6.870\tcompressContent\tjs/dictionary/zstd-term-content-compression-worker.js:35",
+      "33\t0.287\t18.384\tprepareWrappedTermContentZstdSpans\tjs/dictionary/zstd-term-content.js:965",
+      "32\t0.278\t7.661\twasm-function[8]\tlib/zstd.wasm:1",
+      "30\t0.261\t6.733\twasm-function[179]\tlib/zstd.wasm:1",
+      "27\t0.235\t7.312\twasm-function[52]\tlib/zstd.wasm:1",
+      "25\t0.217\t9.212\twasm-function[127]\tlib/zstd.wasm:1",
+      "17\t0.148\t17.911\t(program)\t:0",
+      "14\t0.122\t28.667\twasm-function[185]\tlib/zstd.wasm:1",
+      "12\t0.104\t30.367\twasm-function[121]\tlib/zstd.wasm:1",
+      "12\t0.104\t2.238\twasm-function[75]\tlib/zstd.wasm:1",
+      "12\t0.104\t2.020\twasm-function[89]\tlib/zstd.wasm:1",
+      "9\t0.078\t13.247\tjs-to-wasm:id:\tlib/zstd.wasm:1",
+      "9\t0.078\t1.857\twasm-function[133]\tlib/zstd.wasm:1",
+      "9\t0.078\t1.611\twasm-function[95]\tlib/zstd.wasm:1",
+      "6\t0.052\t11.250\twasm-function[94]\tlib/zstd.wasm:1",
+      "6\t0.052\t0.815\twasm-function[92]\tlib/zstd.wasm:1",
+      "5\t0.043\t1.108\twasm-function[9]\tlib/zstd.wasm:1",
+      "5\t0.043\t0.745\t\tjs/dictionary/zstd-term-content-compression-worker.js:30",
+      "4\t0.035\t1.790\twasm-function[122]\tlib/zstd.wasm:1",
+      "4\t0.035\t1.716\tfinishWrappedTermContentZstdSpans\tjs/dictionary/zstd-term-content.js:986",
+      "3\t0.026\t0.654\tensureContextBuffers\tlib/zstd-wasm.js:399",
+      "2\t0.017\t1.236\tgetModule\tlib/zstd-wasm.js:388",
+      "2\t0.017\t0.301\twasm-function[83]\tlib/zstd.wasm:1",
+      "2\t0.017\t0.288\tcheckResult\tlib/zstd-wasm.js:394",
+      "2\t0.017\t0.215\twasm-function[66]\tlib/zstd.wasm:1",
+      "1\t0.009\t0.565\twasm-function[131]\tlib/zstd.wasm:1"
+    ]
+  },
+  "topNativeOwnership": [
+    {
+      "samples": 322,
+      "adjacentWallMs": 96.049,
+      "leaf": "wasm-function[4]",
+      "module": "lib/term-content-canonical-scan-v1.wasm",
+      "exports": [
+        "scan_canonical"
+      ],
+      "nearestExportedAncestor": {
+        "functionIndex": 4,
+        "exportNames": [
+          "scan_canonical"
+        ]
+      },
+      "nearestJsAncestor": {
+        "function": "_scan",
+        "url": "js/dictionary/term-content-canonical-scan.js",
+        "line": 159,
+        "functionDeclarationSourceLine": "async _scan(db, ctx) {"
+      }
+    },
+    {
+      "samples": 3,
+      "adjacentWallMs": 0.668,
+      "leaf": "wasm-function[1008]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_bulkInsertWithDescriptor",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 5643,
+        "functionDeclarationSourceLine": "async _bulkInsertWithDescriptor(descriptor, items, start, count) {"
+      }
+    },
+    {
+      "samples": 2,
+      "adjacentWallMs": 0.512,
+      "leaf": "wasm-function[1237]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_invalidateGlossarySearchIndex",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 3529,
+        "functionDeclarationSourceLine": "_invalidateGlossarySearchIndex(dictionaryName) {"
+      }
+    },
+    {
+      "samples": 2,
+      "adjacentWallMs": 0.366,
+      "leaf": "wasm-function[161]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_bulkInsertWithDescriptor",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 5643,
+        "functionDeclarationSourceLine": "async _bulkInsertWithDescriptor(descriptor, items, start, count) {"
+      }
+    },
+    {
+      "samples": 2,
+      "adjacentWallMs": 0.361,
+      "leaf": "wasm-function[1729]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_invalidateGlossarySearchIndex",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 3529,
+        "functionDeclarationSourceLine": "_invalidateGlossarySearchIndex(dictionaryName) {"
+      }
+    },
+    {
+      "samples": 2,
+      "adjacentWallMs": 0.335,
+      "leaf": "wasm-function[456]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_getCachedStatement",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 2491,
+        "functionDeclarationSourceLine": "_getCachedStatement(sql) {"
+      }
+    },
+    {
+      "samples": 2,
+      "adjacentWallMs": 0.326,
+      "leaf": "wasm-function[456]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "dictionaryExists",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 4994,
+        "functionDeclarationSourceLine": "async dictionaryExists(title) {"
+      }
+    },
+    {
+      "samples": 1,
+      "adjacentWallMs": 0.54,
+      "leaf": "wasm-function[176]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_invalidateGlossarySearchIndex",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 3529,
+        "functionDeclarationSourceLine": "_invalidateGlossarySearchIndex(dictionaryName) {"
+      }
+    },
+    {
+      "samples": 1,
+      "adjacentWallMs": 0.443,
+      "leaf": "wasm-function[165]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_invalidateGlossarySearchIndex",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 3529,
+        "functionDeclarationSourceLine": "_invalidateGlossarySearchIndex(dictionaryName) {"
+      }
+    },
+    {
+      "samples": 1,
+      "adjacentWallMs": 0.442,
+      "leaf": "wasm-function[2674]",
+      "module": null,
+      "exports": null,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "function": "_bulkInsertWithDescriptor",
+        "url": "js/dictionary/dictionary-database.js",
+        "line": 5643,
+        "functionDeclarationSourceLine": "async _bulkInsertWithDescriptor(descriptor, items, start, count) {"
+      }
+    }
+  ],
+  "limits": [
+    "This job only analyzes the completed source-bound trace. It does not run an import, rebuild a product, or acquire a new timing observation.",
+    "Leaf counts are sampled attribution, not elapsed function time. Adjacent sampled wall weights are diagnostic wall allocation, not CPU time, utilization, or a removable-cost estimate.",
+    "Raw chunks retain their original trace-array order and all signed deltas. Reconstruction stably orders each profile's chunks by(event timestamp,original event index), then cumulatively reconstructs sample timestamps and stably sorts samples only for adjacent wall attribution.",
+    "CallFrame source locations label function declarations, not per-sample executed lines. All tables cover the captured window; no exact clock mapping to the benchmark timed-import interval is asserted.",
+    "The interval before the first observed sample and the tail after the last sample are unassigned. Missing terminal endTime is not synthesized. Equal timestamps receive zero adjacent weight.",
+    "Inclusive ancestor rows overlap and must not be added. Concurrent worker weights, spans, and sample ranges do not form an import critical path.",
+    "Tracing perturbs scheduling and timer/message work. Every elapsed value here is excluded from performance promotion and from all comparison cohorts.",
+    "WASM exports identify only exact exported indices. Internal functions remain index-labelled; nearest exported/JS ancestors are dynamic stack context, not an invented internal C symbol.",
+    "Source attribution uses bytes from the exact acquired release package and its before/after runtime manifests. The original successful canonical validation is checked for identity, not reacquired."
+  ],
+  "followup": "Exact symbol recovery is a separate proposed analysis build. No unexported internal C names are inferred in this receipt. Current libdeflate backend, wasm32 uint64 bitbuffer, and fast-unaligned path are already present; negative DecompressionStream/FIFO/short-match studies are not revived."
+}

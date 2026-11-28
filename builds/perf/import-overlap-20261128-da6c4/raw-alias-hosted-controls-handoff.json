@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-native-record-alias-hosted-qualification-controls",
+  "status": "Prospective dependency-setup repair after first executed preflight stopped at source guard; zero imports acquired",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "suggestedResearchBranch": "perf/native-record-alias-qualification-20261128-da6c4",
+  "sourceManifestBlob": "bb966fc57ea4fba91104c2c281d6eb9a8c6756f3",
+  "sourceManifestSha256": "c682df189312ee849bcacbd07c1b16a726487752b6f01b7cc010340c3e51e803",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "planBlob": "0a1b30ecd61e795d4e2a0c688218b383bad6fb6a",
+  "files": [
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/run.py",
+      "blob": "870e1ed48d95202f582c77b99041bf96e3693fd3",
+      "bytes": 41452,
+      "sha256": "3e770f60135f59935d14c191980ed69df66c59d06c6ca891c0a60d49d916f5bb"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
+      "blob": "4d72636645eda9fcee5f2b10d28c9db7e556d221",
+      "bytes": 23733,
+      "sha256": "fdce472d8206f4ecac23baa9927a52761d331efcaac5684fe236544ca30a4eee"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser_proof.py",
+      "blob": "504d64da8768ba5965a522651fc274dabc34e6f6",
+      "bytes": 7457,
+      "sha256": "a44391645e5677692eda1b1e0d88078d1985a48b7d795f08343348751eb9a0d1"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/qualification_stats.py",
+      "blob": "7244378019660adddd1e1e5693a6a43c5f772a9a",
+      "bytes": 6325,
+      "sha256": "9aba4cfad039e815cedfc821b61e9fee923cf5b41f34969b11cb5660dc89dc20"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_qualification_stats.py",
+      "blob": "28b3d69aabe848824f744ae812588fe33db7b4aa",
+      "bytes": 3253,
+      "sha256": "cc5ca5e5a7f4e53fe3ff925118d4619131146509a7f898a3152239d3e4d5643e"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_browser_proof.py",
+      "blob": "e2f7e88930e16f63d841cc1ebda61d1bf79dc63d",
+      "bytes": 7113,
+      "sha256": "b8a22693f65804d6bc181b50ed0a020ba3f1355bf3a7b078f16fadbdc2204514"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/pack_artifacts.py",
+      "blob": "240e95dce7ac993a88497e8d775dfec914cb79d5",
+      "bytes": 4636,
+      "sha256": "a74effd61a687a4ab4176b9ec93f5d135cae135fcf838d9a7854f742a701bf83"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_pack_artifacts.py",
+      "blob": "8fd20d29efa8f057027c927245cfb0c6f1462929",
+      "bytes": 2910,
+      "sha256": "ae76f916b732b5caf4a46721594821817105e77c4bbc8ed628b38e6df78923a2"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/report_results.py",
+      "blob": "ad225e4a64ae9ed56bbac7147dd535419c9a6ec7",
+      "bytes": 4286,
+      "sha256": "0512d71e5970585d3dca34d01d08f312b7dedaf3109dc9a4397cab5356b87fb9"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/product-common.mjs",
+      "blob": "4f370066b72e27c6bd20291d398007862966124c",
+      "bytes": 10197,
+      "sha256": "350ed8ef03a560c9b20943556c18360a1a02e600dd20435ecce08da55f6376be"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.mjs",
+      "blob": "07cee5410f4ed1d10bfcea434ef83be19828f59f",
+      "bytes": 27551,
+      "sha256": "6591a3b882169007f7825a7e242a3264c87fac75c278bbf80e2920b073c6f92b"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.test.mjs",
+      "blob": "29201b35055422b180b15a31515bf3d548581f33",
+      "bytes": 17037,
+      "sha256": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser-layout-export.mjs",
+      "blob": "a8c87feab51f4cf333cdecdb024aa2d742ba0e58",
+      "bytes": 21138,
+      "sha256": "300bfdf6f0dddb9cd545b5c2b6aee779480a352b4f2369e2666193966a6fc022"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test-browser-layout-export.mjs",
+      "blob": "39652928ea834a11ed6f5325d92361a12bf9e2b2",
+      "bytes": 13143,
+      "sha256": "64d61a1d6de5c2a34e00af32c5411faf41455215dd12acb5163aba41b51192b4"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py",
+      "blob": "4806fce39e3da82d53efa94d84f62c30912b6801",
+      "bytes": 16156,
+      "sha256": "00436c3a81419c2af64d4ae0ca026889f2a9caaa7a60fe228008961bc2c1cdea"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_receipt_adapter.py",
+      "blob": "7568c5bfd7612d19c20ec2598f9948bbf6f99c06",
+      "bytes": 16195,
+      "sha256": "2103e4cc147f6d70e4ac5954f2bdaf3f46b43e8cc47124049c011a62a8eb6fd6"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/harness_overlay.py",
+      "blob": "6fc4231407c58d28021aefce47476e9b678feb45",
+      "bytes": 2444,
+      "sha256": "e98b5d457dff320fecb5ed4a8df8bd5419ff18eab1ce676b797c408d02d418f0"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/README.md",
+      "blob": "91a3d86f0fb8d7981c6e575cd01b956b954de712",
+      "bytes": 9780,
+      "sha256": "b3131569c50a18f178924c47fcb85d1e985fb0c26442986c8fc7f7e504991aa6"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/protocol.json",
+      "blob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+      "bytes": 21747,
+      "sha256": "7fd1da46b56c7579c4369a0dcc32cc4c6cd46acb31d19335328b9204fd500389"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/plan.json",
+      "blob": "0a1b30ecd61e795d4e2a0c688218b383bad6fb6a",
+      "bytes": 12317,
+      "sha256": "d852eb8c3c9187ed01996082f8636c5b60f4c5c4e94d6581d1c19ec85109d2ba"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/core.json",
+      "blob": "008adf754595f36087bad627099208ca241d0773",
+      "bytes": 11958,
+      "sha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/comparison.json",
+      "blob": "43c25201ae2953b519e6b215f98e5568f7cf3b6a",
+      "bytes": 41340,
+      "sha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964"
+    },
+    {
+      "path": ".github/workflows/native-record-alias-qualification-da6c4.yml",
+      "blob": "67394899be7329237fa6a3af656344139b0cb781",
+      "bytes": 8551,
+      "sha256": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-A.json.gz",
+      "blob": "e186da3f97c6363931fbe9ddec547a34e1cd76eb",
+      "bytes": 141649,
+      "sha256": "1004ab908b381a828175ccad8f894636778e2afaa9e8ce345c7537c4fd4a689b"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-A.json.gz",
+      "blob": "877bdec05f541a4163270f8739294cf9355dbef1",
+      "bytes": 18378,
+      "sha256": "64efd018a8b2c4d6922ffab379d35791a08832f538e79c7334a09cfaad47c3f2"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-B.json.gz",
+      "blob": "d27b582a7b60909fe99ff835ede01679fdac87d8",
+      "bytes": 142157,
+      "sha256": "c347ca3481cc3e38339fdd2a8ac46def28ddb8e1f505952365153c5364cce5c3"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-B.json.gz",
+      "blob": "0137b334c0d7c0f4fcc51e9612bafac2afe56b06",
+      "bytes": 17647,
+      "sha256": "3934222b1ff44758e5080dd5d1bfd621287577ed6144dd2ab42965a9b288e4b3"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/source-manifest.json",
+      "blob": "bb966fc57ea4fba91104c2c281d6eb9a8c6756f3",
+      "bytes": 7179,
+      "sha256": "c682df189312ee849bcacbd07c1b16a726487752b6f01b7cc010340c3e51e803"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_setup_sources.py",
+      "blob": "fa0bb6ccde072758cb71545279df841e9d75d83e",
+      "bytes": 2808,
+      "sha256": "153ecf913c556a6f51acb6442a18f9851d6cf96f58cd914b987bd81fc1183939"
+    }
+  ],
+  "predecessorResearchCheckpoint": "bf26d0371a10edeaf19a31d9d246b1f5f83b411d",
+  "correctionsBeforeAcquisition": [
+    "A/B stock tooling now compares directly to current dcfc baseline Git blobs; research tooling is not assumed equal. Stock validator, memory, fixture and host modules/commands come from A.",
+    "Every invocation has a fresh exclusive output directory and exact observationId/request/layout equality.",
+    "All original evidence files, including literal pipe-character OPFS names, are packaged into a checksum-verified tar.gz. No raw OPFS directory is passed to upload-artifact.",
+    "Global verification and full browser proof are independent prerequisite jobs; all six ordinary cells need both successful results. Each VNDB cell retains its own required per-host full preflight.",
+    "Actual clean research HEAD/tree/GITHUB_SHA, manifest/workflow/protocol/plan/source hashes and exact current runtime/package identities are guarded before and after acquisition.",
+    "Five synthetic proof-chain/closure negatives and four artifact-transport tests join the previously reviewed receipt/stats gates before browser acquisition.",
+    "After first run failed before dispatch, replace unsupported runner context in job-level env with an initial shell resolution of RUNNER_TEMP/GITHUB_ENV. No import observations existed and no acquisition schedule changed.",
+    "Use stock hardlink-copy dependency directory instead of an unignored top-level symlink. Preserve actual raw status/diffs and generated hashes at every setup checkpoint; fail on any dirty path without restoring or broadening ignore rules."
+  ],
+  "sourceReview": {
+    "root": "Reviewed earlier72aae5 runner and4d726 verifier without a remaining blocker. Latest runner changes only add new source/proof/transport helper gates and repeated clean research status checks.",
+    "criticalPath": "Reviewed frozen bounded exporter/comparator and browser verifier v3; no concrete blocker. Latest runner review requested.",
+    "currentFullNodeExecution": false,
+    "currentFullPythonExecution": false,
+    "v8Parse": {
+      "kind": "V8 parse only; ESM imports stripped; no Node/filesystem/corpus execution",
+      "failures": []
+    },
+    "historicalHelperTests": {
+      "nodeExporter": 8,
+      "pythonComparator": 13,
+      "scope": "Exact frozen peer helper bytes passed before executor outage; logs anchored in helper handoff6e517289."
+    },
+    "historicalStatsTests": {
+      "passed": 7,
+      "scope": "Earlier local source with same logic passed; reconstructed current source has minor wrapping changes and must pass its hosted test gate."
+    },
+    "executedSyntaxGate": "Previous exact source63c959 and browser verifier4d726 passed hosted Python AST / Node --check in job140933764149. Latest setup-only runner870e1ed and new focused temporary-Git test remain unexecuted; required hosted gates enforce them before any import."
+  },
+  "pending": [
+    "Root review/publication of exact29 controls including the narrow stock dependency setup repair and original failure evidence.",
+    "Hosted control syntax, Python/Node deterministic tests and complete exact candidate repository gates.",
+    "Full current-browser all-media A/B exports, native-byte reproduction and complete row/cold-reader proof.",
+    "All six fixed ordinary/media/memory cells and independent raw result arithmetic; no product/browser gain claim yet."
+  ],
+  "naturalProof": {
+    "coreBlob": "008adf754595f36087bad627099208ca241d0773",
+    "completeHandoffBlob": "72fe7c8aa5d93d0e60d7690ff88e3960bafb8623",
+    "rows": 6648310,
+    "groups": 170,
+    "canonicalEntries": 157150,
+    "normalSpans": 170,
+    "aliasGroups": [
+      1,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "aliasRows": 175,
+    "aliasInputBytes": 2983,
+    "completeCurrentNaturalA6B7": true,
+    "browserMediaAndSqliteProofStillRequired": true,
+    "rawPhysicalArchives": "Large local A6/B7 sidecar archives were not uploaded. Exact source/JSON/log/proof receipts are durably anchored."
+  },
+  "b7CompactionKnownResult": {
+    "kind": "Known-result summary from retained tool observation; exact local raw receipt currently inaccessible",
+    "localReceiptBlob": null,
+    "completed": true,
+    "archivePath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-7/preserved-record-files.tar.gz",
+    "archiveBytes": 134717749,
+    "archiveSha256": "b808605ac2ae1d05f2a6e2536795cf4f04fc97b875c72ab9c10b43aee23f6de3",
+    "originalFourSidecarBytes": 401468656,
+    "freedBytes": 266750907,
+    "exactMemberInventory": [
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+        "bytes": 38,
+        "normalizedSha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+        "rawSha256": "2cfe8296935839c23da0004319f11f372e79144060ee901a0421cef1584ff749",
+        "headerInvariant": {
+          "kind": "descriptor",
+          "generationRange": [
+            8,
+            24
+          ]
+        }
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+        "bytes": 399094016,
+        "normalizedSha256": "7cddeb55d18331068d0fab1e59d96adf4c7703fc88dc2f1996434c7b5115cf35",
+        "rawSha256": "08d74a0bcb44a9cb7263775b57cc05f53ff17c2d6ab6d88914421dc96ec23120",
+        "headerInvariant": {
+          "kind": "index",
+          "generationRange": [
+            24,
+            40
+          ],
+          "descriptorBytes": 38,
+          "chunkCount": 169,
+          "rowCount": 6608310
+        }
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+        "bytes": 26,
+        "normalizedSha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+        "rawSha256": "246cec330795ac512fd25a89a1d35713e9c90e1c2dbdaab357976983c41f0410",
+        "headerInvariant": {
+          "kind": "descriptor",
+          "generationRange": [
+            8,
+            24
+          ]
+        }
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+        "bytes": 2374576,
+        "normalizedSha256": "bca794a257112ecad13c61cab2c4162de5478bf2a92e8851a5551d8e57835a6c",
+        "rawSha256": "cdefc7c994543a9fcb9fd00a62377f614cbcf839e4b37189540dcbc41baaa8e9",
+        "headerInvariant": {
+          "kind": "index",
+          "generationRange": [
+            24,
+            40
+          ],
+          "descriptorBytes": 26,
+          "chunkCount": 1,
+          "rowCount": 40000
+        }
+      }
+    ],
+    "verification": "Completed local command checked every archived member against its original SHA/size before removing only those four completed B7 sidecars; content/canonical metadata and failedB6 output remained.",
+    "preservationScope": "This is not a substitute for the unavailable exact receipt file, and no new verification has been run during the outage."
+  },
+  "outage": {
+    "environment": "Unavailable; no new execution probes were made after the unavailable update.",
+    "localRunnerPatch": "Interrupted tool call may or may not have written a local draft. It was never used for acquisition. Uploaded source blobs are the authority.",
+    "fixtureMove": "Root attempted a byte-preserving tmpfs-to-disk move but no successful tool receipt was returned. Path/state/memory effect remain unknown; no recreated claim.",
+    "toolAcquisition": "All new work during the outage used V8/source inspection and unreferenced GitHub blobs only."
+  },
+  "predecessorControlHandoffBlob": "aa8c2a1477e721f3d3f3f690c883a2998feb9010",
+  "publishedFirstSourceCommit": "46060c7b0defec5bb36f58010d95ffe2a05c17c1",
+  "workflowValidationFailure": {
+    "receiptBlob": "d93c50f508faa2ca070d32b783b0819ef1bfe45b",
+    "schemaVersion": 1,
+    "kind": "qualification-workflow-validation-failure",
+    "complete": false,
+    "sourceCommit": "46060c7b0defec5bb36f58010d95ffe2a05c17c1",
+    "sourceTree": "ef5759772ff5d2b2e992ecee0fbaaf281cdacb4a",
+    "workflowRun": 46130108071,
+    "checkSuite": 124792719112,
+    "attempt": 1,
+    "workflowBlob": "f42cfecfe75dd2be40b9ed460a2ccb2c3fe67e00",
+    "sourceManifestBlob": "2dbae390995d59ccdc259f43c7d84da9be618376",
+    "workflowConclusion": "failure",
+    "dispatchedJobs": 0,
+    "importObservations": 0,
+    "timedObservations": 0,
+    "evidence": {
+      "workflow-run.json": {
+        "blob": "ed8b6f6612bf8f3717fa2d924146fb40920e5518",
+        "bytes": 12539,
+        "sha256": "9f1a81a81aec1d81204e499350eb503abe48c50c6d17cfb4b228e5c5ea64e8b7"
+      },
+      "workflow-jobs.json": {
+        "blob": "4f9bdd7bcd783d2155d1f2e7dff68294c20eaffa",
+        "bytes": 27,
+        "sha256": "b3dab5870ff3a8209160335de7c1077b89e461d875d9041ac9d8b8ed7c1666f6"
+      }
+    },
+    "exactAnnotation": null,
+    "annotationLimitation": "The connector does not expose the check-suite/check-run annotation route; its public run-page fetch returns run metadata, and the public web page was unavailable. No annotation text is reconstructed.",
+    "sourceDiagnosis": {
+      "kind": "confirmed workflow context defect, consistent with the zero-job failure",
+      "documentedContextAvailability": "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability",
+      "rule": "jobs.<job_id>.env permits github, needs, strategy, matrix, vars, secrets and inputs; runner is unavailable.",
+      "offendingJobEnvironmentExpressions": 6,
+      "correction": "Resolve RUNNER_TEMP in an initial shell step; write EVIDENCE and UPLOAD to GITHUB_ENV for subsequent steps."
+    },
+    "replacementWorkflowBlob": "67394899be7329237fa6a3af656344139b0cb781",
+    "replacementWorkflowSha256": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc",
+    "replacementSourceManifestBlob": "140615c8905cb3bc38453382e5a29f542237e41e",
+    "productOrMeasuredCodeChanged": false,
+    "protocolOrAcceptanceGateChanged": false,
+    "retry": "A new source-bound workflow commit is required; no unchanged rerun."
+  },
+  "previousCorrectedControlHandoffBlob": "b388de968aff622288c108267b87e08826219e3c",
+  "executedSetupFailure": {
+    "receiptBlob": "2820a301c2f13caf0e7c40c1b628b8c6db907a37",
+    "fullJobLogBlob": "bc7d5ba36e4ba2e831acc2dd62b69e451579b961",
+    "run": 46130307914,
+    "job": 140933764149,
+    "commit": "1b65be131a92d1843bc47ba091bf81b3c9d757ea",
+    "artifactId": 15257343396,
+    "artifactSha256": "1c24d7f6875ad360ccb2169057878dcc0fc54483d6a0b37af9869778aaa7f45e",
+    "originalGitPorcelainWasNotCaptured": true,
+    "importsAcquired": 0
+  }
+}

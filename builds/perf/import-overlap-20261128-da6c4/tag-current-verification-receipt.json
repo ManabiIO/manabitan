@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed source-bound tag verification only; no browser performance observations yet.",
+  "run": {
+    "id": 46125860840,
+    "attempt": 1,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46125860840",
+    "head": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+    "branch": "perf/bounded-tag-prefetch-20261128-da6c4",
+    "workflow": ".github/workflows/import-tag-prefetch-da6c4.yml"
+  },
+  "job": {
+    "id": 140920188484,
+    "name": "Verify bounded tag import and build",
+    "status": "completed",
+    "conclusion": "success",
+    "endLogTimestamp": "2026-11-28T09:14:44.4038562Z"
+  },
+  "originalDecodedJobLog": {
+    "blob": "498ec3485fe43477679d8d1632b1ed23a818869e",
+    "characters": 805913
+  },
+  "checks": {
+    "javascript": "npm run test:js passed",
+    "runtimeTypes": "npm run test:ts:main passed",
+    "testTypes": "npm run test:ts:test passed",
+    "unit": {
+      "filesPassed": 670,
+      "filesTotal": 670,
+      "testsPassed": 15156,
+      "testsSkipped": 47,
+      "testsTotal": 15203,
+      "durationSeconds": 196.79
+    },
+    "build": "npm run test:build passed; exact command node ./dev/bin/build.js --dryRun --all, seven target configuration/dry-run checks, not seven emitted release packages",
+    "buildTargets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "qualificationPython": {
+      "testsPassed": 42
+    }
+  },
+  "retainedCaveats": [
+    "The tag source is separate from repaired-overlap PR977; this success does not validate the overlap compatibility amendment.",
+    "All six complete-browser tag cells were still queued at2026-11-28 09:26:30UTC; no new import-speed, memory, or media result established.",
+    "Logs contain expected warnings/test-fixture errors; job and all required step conclusions are success. No failures were hidden or rerun by this agent."
+  ]
+}

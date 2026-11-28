@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent read-only source review; no execution, acquisition, timing, typecheck, or performance conclusion.",
+  "reviewedRunnerBlob": "63c959d6e4ff95fdeb111a277958726a36bfafe1",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "stockHelpers": {
+    "memory": {
+      "blob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "bytes": 18389
+    },
+    "protocol": {
+      "blob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+      "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "bytes": 4187
+    },
+    "validation": {
+      "blob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "bytes": 21895
+    }
+  },
+  "findings": [
+    "The runner's validate_import_summary keyword arguments match the frozen dcfc signature; canonical original summary/raw validation is required before any observation is accepted.",
+    "memory_schedule receives replication1/2 and returns the expected four ABBA/BAAB items; memory_comparison receives the actual schedule callback.",
+    "run_with_sampling takes the five positional arguments supplied. The runner temporarily installs the exact observation's layout request in os.environ, which the stock sampler inherits, and restores it in finally.",
+    "Each observation creates a new directory with exist_ok=False, refuses existing summary/layout files, binds the entire layout.request and request file to that fresh observation, and retains its source/package/summary/report/layout hashes.",
+    "Source/runtime/package/tooling and controlled harness identities are checked before and after every observation. Runtime tooling is compared with frozen dcfc blobs; A/B original harness equality is separately checked.",
+    "VNDB preflight passes actual exported full files to the independent source-bound native decoder/fresh-reader verifier, then binds its outcome to the natural logical/canonical/normal-span proof. Non-target comparisons do not receive the VNDB physical-layout projection.",
+    "Timing observations, exhaustive-media checks, and four memory observations retain separate purposes; sampled or export observations are not labelled authoritative timing by the observation receipt.",
+    "No concrete new API or source-flow blocker found in this bounded review."
+  ],
+  "limits": [
+    "Did not execute the latest Python/Node helpers, browser acquisition, memory sampler, full repository gates, or statistics module.",
+    "Did not certify the latest workflow environment-context correction or its actionlint result; that is a separate current workflow/source-manifest binding.",
+    "This is a source review of the exact runner blob above, not evidence of a whole-import gain or a successful browser cohort."
+  ]
+}

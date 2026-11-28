@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "qualification-attempt2-complete-setup-outcome",
+  "sourceCommit": "1b65be131a92d1843bc47ba091bf81b3c9d757ea",
+  "run": 46130307914,
+  "attempt": 1,
+  "importsAcquired": 0,
+  "timingCells": "skipped because prerequisites failed",
+  "verification": {
+    "job": 140933763930,
+    "conclusion": "failure",
+    "stage": "baseline release source guard",
+    "failure": "Runtime changed during release build",
+    "controlChecks": {
+      "pythonAst": true,
+      "nodeSyntax": true,
+      "artifactTransportTests": 4,
+      "artifactTransportTestsPassed": 4
+    },
+    "repositoryGatesExecuted": false
+  },
+  "browserPreflight": {
+    "job": 140933764149,
+    "conclusion": "failure",
+    "stage": "same baseline release source guard",
+    "receiptBlob": "2820a301c2f13caf0e7c40c1b628b8c6db907a37"
+  },
+  "actionlint": {
+    "run": 46130307933,
+    "job": 140933764049,
+    "conclusion": "success"
+  },
+  "logs": [
+    {
+      "kind": "verification",
+      "blob": "f80600ed62ec91b2a344ac4f8e0a14844251021d",
+      "bytes": 302603,
+      "sha256": "d41287a363873c1f6e0b2568be670c66f16d2b389c15252297ce404a39a19aa4"
+    },
+    {
+      "kind": "actionlint",
+      "blob": "dc3c16b932c91296f13c5c1ea186d1c63a43f05e",
+      "bytes": 16723,
+      "sha256": "4c1a21987739b06d4f0b50970588defad4d2a796aadcced9c5c4daab6e99bbdb"
+    }
+  ],
+  "preflightFullLogBlob": "bc7d5ba36e4ba2e831acc2dd62b69e451579b961",
+  "artifacts": [
+    {
+      "id": 15258005857,
+      "name": "alias-native-verify-1b65be131a92d1843bc47ba091bf81b3c9d757ea-46130307914-1",
+      "bytes": 365035,
+      "digest": "sha256:9dc706504d122c3a7c524994f54e4ec8f4199b3530ba85f71e25ff48f1a637fa",
+      "expired": false
+    },
+    {
+      "id": 15257343396,
+      "name": "alias-native-preflight-1b65be131a92d1843bc47ba091bf81b3c9d757ea-46130307914-1",
+      "bytes": 364926,
+      "digest": "sha256:1c24d7f6875ad360ccb2169057878dcc0fc54483d6a0b37af9869778aaa7f45e",
+      "expired": false
+    }
+  ],
+  "actualPorcelainUnknownForFailedBuilds": true,
+  "repairHandoffBlob": "19cafac8b8779ce40ad6ab56fea0de15130b95bd",
+  "interpretation": "Both independent prerequisites reached the same setup guard before product validation/import acquisition. No import/product performance conclusion. Syntax and4 exact artifact transport tests actually passed; actionlint passed after the workflow path fix. The stock dependency-tree repair remains prospective."
+}

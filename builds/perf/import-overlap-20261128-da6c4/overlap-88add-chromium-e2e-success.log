@@ -1,0 +1,793 @@
+﻿2026-11-28T09:23:36.1619935Z Current runner version: '2.338.2'
+2026-11-28T09:23:36.1640660Z ##[group]Runner Image Provisioner
+2026-11-28T09:23:36.1641309Z Hosted Compute Agent
+2026-11-28T09:23:36.1641894Z Version: 20261111.635
+2026-11-28T09:23:36.1642426Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T09:23:36.1643056Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T09:23:36.1643633Z Worker ID: {168f03c4-ca20-4cbc-92b5-21c5f03e7731}
+2026-11-28T09:23:36.1644463Z Region: eastus
+2026-11-28T09:23:36.1644989Z Cloud: Azure
+2026-11-28T09:23:36.1645474Z ##[endgroup]
+2026-11-28T09:23:36.1647100Z ##[group]Operating System
+2026-11-28T09:23:36.1647639Z Ubuntu
+2026-11-28T09:23:36.1648079Z 26.04.1
+2026-11-28T09:23:36.1648574Z LTS
+2026-11-28T09:23:36.1649002Z ##[endgroup]
+2026-11-28T09:23:36.1649447Z ##[group]Runner Image
+2026-11-28T09:23:36.1650095Z Image: ubuntu-26.04
+2026-11-28T09:23:36.1650562Z Version: 20261122.9.1
+2026-11-28T09:23:36.1651658Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T09:23:36.1652882Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T09:23:36.1653698Z ##[endgroup]
+2026-11-28T09:23:36.1654938Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T09:23:36.1656845Z Contents: read
+2026-11-28T09:23:36.1657343Z Metadata: read
+2026-11-28T09:23:36.1657899Z ##[endgroup]
+2026-11-28T09:23:36.1659557Z Secret source: Actions
+2026-11-28T09:23:36.1660377Z Cache mode: write
+2026-11-28T09:23:36.1661195Z Prepare workflow directory
+2026-11-28T09:23:36.2071589Z Prepare all required actions
+2026-11-28T09:23:36.2111663Z Getting action download info
+2026-11-28T09:23:36.3618251Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T09:23:36.4586530Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-28T09:23:36.6033500Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-11-28T09:23:36.8513857Z Complete job name: Full Extension E2E (Chromium)
+2026-11-28T09:23:36.9179973Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T09:23:36.9180771Z with:
+2026-11-28T09:23:36.9181128Z   repository: ManabiIO/manabitan
+2026-11-28T09:23:36.9184401Z   token: ***
+2026-11-28T09:23:36.9184754Z   ssh-strict: true
+2026-11-28T09:23:36.9185104Z   ssh-user: git
+2026-11-28T09:23:36.9185458Z   persist-credentials: true
+2026-11-28T09:23:36.9185845Z   clean: true
+2026-11-28T09:23:36.9186201Z   sparse-checkout-cone-mode: true
+2026-11-28T09:23:36.9186627Z   fetch-depth: 1
+2026-11-28T09:23:36.9186970Z   fetch-tags: false
+2026-11-28T09:23:36.9187324Z   show-progress: true
+2026-11-28T09:23:36.9187678Z   lfs: false
+2026-11-28T09:23:36.9188006Z   submodules: false
+2026-11-28T09:23:36.9188359Z   set-safe-directory: true
+2026-11-28T09:23:36.9188758Z   allow-unsafe-pr-checkout: false
+2026-11-28T09:23:36.9189321Z env:
+2026-11-28T09:23:36.9189656Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:36.9190047Z ##[endgroup]
+2026-11-28T09:23:37.1813474Z Syncing repository: ManabiIO/manabitan
+2026-11-28T09:23:37.1816042Z ##[group]Getting Git version info
+2026-11-28T09:23:37.1817018Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-28T09:23:37.1818513Z [command]/usr/bin/git version
+2026-11-28T09:23:37.1819221Z git version 2.56.1
+2026-11-28T09:23:37.1821393Z ##[endgroup]
+2026-11-28T09:23:37.1827727Z Temporarily overriding HOME='/home/runner/work/_temp/04db7eb3-6d79-4b60-8719-c912b376de83' before making global git config changes
+2026-11-28T09:23:37.1829643Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T09:23:37.1831234Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T09:23:37.1833486Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-28T09:23:37.1835383Z ##[group]Determining repository object format
+2026-11-28T09:23:37.1836559Z ##[endgroup]
+2026-11-28T09:23:37.1837532Z ##[group]Initializing the repository
+2026-11-28T09:23:37.1838488Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-28T09:23:37.1938268Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T09:23:37.1940071Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T09:23:37.1943166Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T09:23:37.1944549Z hint: call:
+2026-11-28T09:23:37.1945269Z hint:
+2026-11-28T09:23:37.1946079Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T09:23:37.1947075Z hint:
+2026-11-28T09:23:37.1948110Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T09:23:37.1949632Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T09:23:37.1950933Z hint:
+2026-11-28T09:23:37.1951700Z hint: 	git branch -m <name>
+2026-11-28T09:23:37.1952500Z hint:
+2026-11-28T09:23:37.1953504Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T09:23:37.1956901Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-28T09:23:37.1976255Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T09:23:37.2061860Z ##[endgroup]
+2026-11-28T09:23:37.2063176Z ##[group]Disabling automatic garbage collection
+2026-11-28T09:23:37.2065842Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T09:23:37.2115527Z ##[endgroup]
+2026-11-28T09:23:37.2117175Z ##[group]Setting up auth
+2026-11-28T09:23:37.2121379Z Removing SSH command configuration
+2026-11-28T09:23:37.2126735Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T09:23:37.2164325Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T09:23:37.2605331Z Removing HTTP extra header
+2026-11-28T09:23:37.2613307Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T09:23:37.2645987Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T09:23:37.2884829Z Removing includeIf entries pointing to credentials config files
+2026-11-28T09:23:37.2890347Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T09:23:37.2918037Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T09:23:37.3149701Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T09:23:37.3188813Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:23:37.3215289Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:23:37.3245624Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:23:37.3271469Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:23:37.3295871Z ##[endgroup]
+2026-11-28T09:23:37.3297007Z ##[group]Fetching the repository
+2026-11-28T09:23:37.3303227Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +958e73f551afc1ca5dd7564b1b1553b7d03e9264:refs/remotes/pull/977/merge
+2026-11-28T09:23:39.5985635Z From https://github.com/ManabiIO/manabitan
+2026-11-28T09:23:39.5987108Z  * [new ref]         958e73f551afc1ca5dd7564b1b1553b7d03e9264 -> pull/977/merge
+2026-11-28T09:23:39.5991869Z ##[endgroup]
+2026-11-28T09:23:39.5993172Z ##[group]Determining the checkout info
+2026-11-28T09:23:39.5994580Z ##[endgroup]
+2026-11-28T09:23:39.5995453Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T09:23:39.6046778Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T09:23:39.6072980Z ##[group]Checking out the ref
+2026-11-28T09:23:39.6074855Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/977/merge
+2026-11-28T09:23:40.1401765Z Note: switching to 'refs/remotes/pull/977/merge'.
+2026-11-28T09:23:40.1402241Z 
+2026-11-28T09:23:40.1402527Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T09:23:40.1403297Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T09:23:40.1404301Z state without impacting any branches by switching back to a branch.
+2026-11-28T09:23:40.1404631Z 
+2026-11-28T09:23:40.1414963Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T09:23:40.1415434Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T09:23:40.1415675Z 
+2026-11-28T09:23:40.1415787Z   git switch -c <new-branch-name>
+2026-11-28T09:23:40.1415957Z 
+2026-11-28T09:23:40.1416074Z Or undo this operation with:
+2026-11-28T09:23:40.1416232Z 
+2026-11-28T09:23:40.1416327Z   git switch -
+2026-11-28T09:23:40.1416478Z 
+2026-11-28T09:23:40.1417037Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T09:23:40.1417453Z 
+2026-11-28T09:23:40.1418257Z HEAD is now at 958e73f Merge 88add36ce87811bf0e7ce4f61d833b49911d7b11 into dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:23:40.1444799Z ##[endgroup]
+2026-11-28T09:23:40.1495876Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T09:23:40.1520425Z 958e73f551afc1ca5dd7564b1b1553b7d03e9264
+2026-11-28T09:23:40.1793233Z Prepare all required actions
+2026-11-28T09:23:40.1793702Z Getting action download info
+2026-11-28T09:23:40.2475412Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-28T09:23:40.3742761Z ##[group]Run ./.github/actions/setup
+2026-11-28T09:23:40.3743004Z with:
+2026-11-28T09:23:40.3743178Z   node-version: 22.22.0
+2026-11-28T09:23:40.3743355Z env:
+2026-11-28T09:23:40.3743559Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:40.3743752Z ##[endgroup]
+2026-11-28T09:23:40.3789080Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-28T09:23:40.3860535Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-28T09:23:40.3860853Z with:
+2026-11-28T09:23:40.3861063Z   node-version: 22.22.0
+2026-11-28T09:23:40.3861248Z   cache: npm
+2026-11-28T09:23:40.3861415Z   always-auth: false
+2026-11-28T09:23:40.3861601Z   check-latest: false
+2026-11-28T09:23:40.3863717Z   token: ***
+2026-11-28T09:23:40.3863886Z env:
+2026-11-28T09:23:40.3864195Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:40.3864404Z ##[endgroup]
+2026-11-28T09:23:40.5020339Z Attempting to download 22.22.0...
+2026-11-28T09:23:40.5157408Z (node:2206) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:23:40.5158582Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:23:40.9686671Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-28T09:23:41.2424414Z Extracting ...
+2026-11-28T09:23:41.2532302Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/2115da13-ed9e-4bb5-ae26-2f6e0c71b260 -f /home/runner/work/_temp/3b4747f0-54bc-4c8c-b2ec-e254ea878fe1
+2026-11-28T09:23:41.9011340Z Adding to the cache ...
+2026-11-28T09:23:44.6004359Z ##[group]Environment details
+2026-11-28T09:23:44.7878001Z node: v22.22.0
+2026-11-28T09:23:44.7878440Z npm: 10.9.4
+2026-11-28T09:23:44.7878630Z yarn: 1.22.22
+2026-11-28T09:23:44.7887328Z ##[endgroup]
+2026-11-28T09:23:44.7895001Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-28T09:23:44.8651588Z /home/runner/.npm
+2026-11-28T09:23:44.9291192Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T09:23:44.9367049Z (node:2206) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T09:23:45.3255005Z Received 63143556 of 63143556 (100.0%), 165.9 MBs/sec
+2026-11-28T09:23:45.3255511Z Cache Size: ~60 MB (63143556 B)
+2026-11-28T09:23:45.3274977Z [command]/usr/bin/tar -xf /home/runner/work/_temp/c3699e5e-64f3-4096-a3a4-b90edf494119/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-28T09:23:45.5500364Z Cache restored successfully
+2026-11-28T09:23:45.5532000Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T09:23:45.5756786Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=5196]
+2026-11-28T09:23:45.5759547Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-28T09:23:45.5765268Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-28T09:23:45.5767087Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-28T09:23:45.5825068Z ##[group]Run npm ci
+2026-11-28T09:23:45.5825321Z [36;1mnpm ci[0m
+2026-11-28T09:23:45.5861652Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:23:45.5861938Z env:
+2026-11-28T09:23:45.5862115Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:45.5862329Z ##[endgroup]
+2026-11-28T09:23:46.2045386Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-28T09:23:50.0678728Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-28T09:23:51.2175801Z 
+2026-11-28T09:23:51.2176408Z > yomitan@0.0.0 prepare
+2026-11-28T09:23:51.2176807Z > husky
+2026-11-28T09:23:51.2176960Z 
+2026-11-28T09:23:51.2980451Z 
+2026-11-28T09:23:51.2981524Z added 670 packages, and audited 671 packages in 6s
+2026-11-28T09:23:51.2982204Z 
+2026-11-28T09:23:51.2982652Z 232 packages are looking for funding
+2026-11-28T09:23:51.2983221Z   run `npm fund` for details
+2026-11-28T09:23:51.2993648Z 
+2026-11-28T09:23:51.2994170Z found 0 vulnerabilities
+2026-11-28T09:23:51.3617361Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=5784]
+2026-11-28T09:23:51.3619915Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-28T09:23:51.3639350Z ##[group]Run npm run build:libs
+2026-11-28T09:23:51.3639624Z [36;1mnpm run build:libs[0m
+2026-11-28T09:23:51.3639840Z [36;1mnpm run license-report:html[0m
+2026-11-28T09:23:51.3670052Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:23:51.3670330Z env:
+2026-11-28T09:23:51.3670517Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:51.3670724Z ##[endgroup]
+2026-11-28T09:23:51.4452011Z 
+2026-11-28T09:23:51.4452540Z > yomitan@0.0.0 build:libs
+2026-11-28T09:23:51.4453028Z > node ./dev/bin/build-libs.js
+2026-11-28T09:23:51.4453265Z 
+2026-11-28T09:23:51.9436935Z 
+2026-11-28T09:23:51.9437862Z > yomitan@0.0.0 license-report:html
+2026-11-28T09:23:51.9439651Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-28T09:23:51.9441136Z 
+2026-11-28T09:23:52.2668234Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=904]
+2026-11-28T09:23:52.2701848Z ##[group]Run package_target=chrome-dev
+2026-11-28T09:23:52.2702151Z [36;1mpackage_target=chrome-dev[0m
+2026-11-28T09:23:52.2702412Z [36;1mif [ -n "$MANABITAN_RELEASE_VERSION" ]; then[0m
+2026-11-28T09:23:52.2702674Z [36;1m  package_target=chrome[0m
+2026-11-28T09:23:52.2703011Z [36;1m  npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"[0m
+2026-11-28T09:23:52.2703619Z [36;1m  node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json[0m
+2026-11-28T09:23:52.2704283Z [36;1melse[0m
+2026-11-28T09:23:52.2704580Z [36;1m  npm run build -- --target "$package_target"[0m
+2026-11-28T09:23:52.2704827Z [36;1mfi[0m
+2026-11-28T09:23:52.2705184Z [36;1mecho "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"[0m
+2026-11-28T09:23:52.2705563Z [36;1mecho "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"[0m
+2026-11-28T09:23:52.2736960Z shell: /usr/bin/bash -e {0}
+2026-11-28T09:23:52.2737213Z env:
+2026-11-28T09:23:52.2737387Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:52.2737588Z ##[endgroup]
+2026-11-28T09:23:52.3524796Z 
+2026-11-28T09:23:52.3525484Z > yomitan@0.0.0 build
+2026-11-28T09:23:52.3526035Z > node ./dev/bin/build.js --target chrome-dev
+2026-11-28T09:23:52.3526325Z 
+2026-11-28T09:23:52.7804962Z Version: 0.0.0.0...
+2026-11-28T09:23:52.7834797Z Building chrome-dev...
+2026-11-28T09:23:54.9336584Z 
+2026-11-28T09:23:54.9337908Z Restoring manifest...
+2026-11-28T09:23:54.9559400Z ##[group]Run npx playwright install --with-deps chromium
+2026-11-28T09:23:54.9559740Z [36;1mnpx playwright install --with-deps chromium[0m
+2026-11-28T09:23:54.9589549Z shell: /usr/bin/bash -e {0}
+2026-11-28T09:23:54.9589751Z env:
+2026-11-28T09:23:54.9589917Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:23:54.9590171Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:23:54.9590406Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:23:54.9590602Z ##[endgroup]
+2026-11-28T09:23:55.5316675Z Installing dependencies...
+2026-11-28T09:23:55.5367796Z Switching to root user to install dependencies...
+2026-11-28T09:23:55.6156241Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-28T09:23:55.6378801Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-28T09:23:55.6551300Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-28T09:23:55.6567506Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-28T09:23:55.6606988Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-28T09:23:55.6635663Z Get:7 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [178 kB]
+2026-11-28T09:23:55.6796856Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-28T09:23:55.6871308Z Get:8 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [192 kB]
+2026-11-28T09:23:55.6948043Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [928 kB]
+2026-11-28T09:23:55.6997871Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [205 kB]
+2026-11-28T09:23:55.7003667Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [402 kB]
+2026-11-28T09:23:55.7106492Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [127 kB]
+2026-11-28T09:23:55.7135212Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-28T09:23:55.7165154Z Get:14 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-28T09:23:55.7225366Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [765 kB]
+2026-11-28T09:23:55.7245124Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [165 kB]
+2026-11-28T09:23:55.7265982Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [229 kB]
+2026-11-28T09:23:55.7278262Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [74.4 kB]
+2026-11-28T09:23:55.7703897Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-28T09:23:55.7732947Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-28T09:23:58.9416264Z Fetched 5199 kB in 0s (14.4 MB/s)
+2026-11-28T09:23:59.4978992Z Reading package lists...
+2026-11-28T09:23:59.5214485Z Reading package lists...
+2026-11-28T09:23:59.6650164Z Building dependency tree...
+2026-11-28T09:23:59.6656388Z Reading state information...
+2026-11-28T09:23:59.6950130Z libatk-bridge2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-28T09:23:59.6951119Z libatk-bridge2.0-0t64 set to manually installed.
+2026-11-28T09:23:59.6952130Z libatk1.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-28T09:23:59.6952646Z libatk1.0-0t64 set to manually installed.
+2026-11-28T09:23:59.6953128Z libatspi2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-28T09:23:59.6953586Z libatspi2.0-0t64 set to manually installed.
+2026-11-28T09:23:59.6954190Z libcairo2 is already the newest version (1.18.4-3).
+2026-11-28T09:23:59.6954580Z libcairo2 set to manually installed.
+2026-11-28T09:23:59.6955008Z libcups2t64 is already the newest version (2.4.16-1ubuntu1.3).
+2026-11-28T09:23:59.6955859Z libcups2t64 set to manually installed.
+2026-11-28T09:23:59.6956293Z libdbus-1-3 is already the newest version (1.16.2-2ubuntu4).
+2026-11-28T09:23:59.6956695Z libdbus-1-3 set to manually installed.
+2026-11-28T09:23:59.6957078Z libdrm2 is already the newest version (2.4.131-1).
+2026-11-28T09:23:59.6957453Z libdrm2 set to manually installed.
+2026-11-28T09:23:59.6957881Z libgbm1 is already the newest version (26.0.8-1ubuntu0.3).
+2026-11-28T09:23:59.6958269Z libgbm1 set to manually installed.
+2026-11-28T09:23:59.6958709Z libglib2.0-0t64 is already the newest version (2.88.0-1ubuntu0.1).
+2026-11-28T09:23:59.6959155Z libglib2.0-0t64 set to manually installed.
+2026-11-28T09:23:59.6959604Z libnspr4 is already the newest version (2:4.38.2-1ubuntu1).
+2026-11-28T09:23:59.6960021Z libnspr4 set to manually installed.
+2026-11-28T09:23:59.6960438Z libnss3 is already the newest version (2:3.120-1ubuntu2.2).
+2026-11-28T09:23:59.6960815Z libnss3 set to manually installed.
+2026-11-28T09:23:59.6961395Z libpango-1.0-0 is already the newest version (1.57.0-1).
+2026-11-28T09:23:59.6961806Z libpango-1.0-0 set to manually installed.
+2026-11-28T09:23:59.6962237Z libx11-6 is already the newest version (2:1.8.13-1ubuntu0.1).
+2026-11-28T09:23:59.6962651Z libx11-6 set to manually installed.
+2026-11-28T09:23:59.6963046Z libxcb1 is already the newest version (1.17.0-2ubuntu1).
+2026-11-28T09:23:59.6963437Z libxcb1 set to manually installed.
+2026-11-28T09:23:59.6963919Z libxcomposite1 is already the newest version (1:0.4.6-1build1).
+2026-11-28T09:23:59.6964510Z libxcomposite1 set to manually installed.
+2026-11-28T09:23:59.6964916Z libxdamage1 is already the newest version (1:1.1.7-1).
+2026-11-28T09:23:59.6965301Z libxdamage1 set to manually installed.
+2026-11-28T09:23:59.6965717Z libxext6 is already the newest version (2:1.3.4-1build3).
+2026-11-28T09:23:59.6966098Z libxext6 set to manually installed.
+2026-11-28T09:23:59.6966507Z libxfixes3 is already the newest version (1:6.0.0-2build2).
+2026-11-28T09:23:59.6966914Z libxfixes3 set to manually installed.
+2026-11-28T09:23:59.6967323Z libxkbcommon0 is already the newest version (1.13.1-1).
+2026-11-28T09:23:59.6967721Z libxkbcommon0 set to manually installed.
+2026-11-28T09:23:59.6968158Z libxrandr2 is already the newest version (2:1.5.4-1build1).
+2026-11-28T09:23:59.6968558Z libxrandr2 set to manually installed.
+2026-11-28T09:23:59.6969248Z xvfb is already the newest version (2:21.1.22-1ubuntu1.3).
+2026-11-28T09:23:59.6969778Z fonts-noto-color-emoji is already the newest version (2.051-1build1).
+2026-11-28T09:23:59.6970333Z libfontconfig1 is already the newest version (2.17.1-3ubuntu1).
+2026-11-28T09:23:59.6970766Z libfontconfig1 set to manually installed.
+2026-11-28T09:23:59.6971239Z libfreetype6 is already the newest version (2.14.2+dfsg-1ubuntu0.2).
+2026-11-28T09:23:59.6971680Z libfreetype6 set to manually installed.
+2026-11-28T09:23:59.6972140Z fonts-liberation is already the newest version (1:2.1.5-3build1).
+2026-11-28T09:23:59.6972590Z fonts-liberation set to manually installed.
+2026-11-28T09:23:59.7469903Z Solving dependencies...
+2026-11-28T09:23:59.8286774Z The following additional packages will be installed:
+2026-11-28T09:23:59.8299632Z   libasound2-data xfonts-encodings xfonts-utils
+2026-11-28T09:23:59.8307698Z Recommended packages:
+2026-11-28T09:23:59.8308058Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-11-28T09:23:59.8516725Z The following NEW packages will be installed:
+2026-11-28T09:23:59.8517401Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-11-28T09:23:59.8521436Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-11-28T09:23:59.8521873Z   xfonts-utils
+2026-11-28T09:23:59.8524317Z The following packages will be upgraded:
+2026-11-28T09:23:59.8527959Z   libasound2-data libasound2t64
+2026-11-28T09:23:59.8711777Z 2 upgraded, 9 newly installed, 0 to remove and 36 not upgraded.
+2026-11-28T09:23:59.8712164Z Need to get 22.3 MB of archives.
+2026-11-28T09:23:59.8712511Z After this operation, 80.2 MB of additional disk space will be used.
+2026-11-28T09:23:59.8713214Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-28T09:23:59.8974725Z Get:2 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-ipafont-gothic all 00303-23ubuntu1 [3703 kB]
+2026-11-28T09:23:59.9585960Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 fonts-freefont-ttf all 20211204+svn4273-4build1 [5656 kB]
+2026-11-28T09:24:00.6955310Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-tlwg-loma-otf all 1:0.7.3-1build1 [106 kB]
+2026-11-28T09:24:00.7234813Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-unifont all 1:16.0.04-1build1 [3169 kB]
+2026-11-28T09:24:00.7741683Z Get:6 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-wqy-zenhei all 0.9.45-8build1 [7863 kB]
+2026-11-28T09:24:00.9016794Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libasound2t64 amd64 1.2.15.3-1ubuntu1.2 [418 kB]
+2026-11-28T09:24:00.9335067Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libasound2-data all 1.2.15.3-1ubuntu1.2 [19.7 kB]
+2026-11-28T09:24:00.9381053Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-encodings all 1:1.0.5-0ubuntu3 [576 kB]
+2026-11-28T09:24:00.9420248Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-utils amd64 1:7.7+7build1 [97.3 kB]
+2026-11-28T09:24:00.9450598Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-cyrillic all 1:1.0.5+nmu1build1 [384 kB]
+2026-11-28T09:24:00.9479992Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-scalable all 1:1.0.3-1.3build1 [304 kB]
+2026-11-28T09:24:01.2397017Z Fetched 22.3 MB in 1s (20.4 MB/s)
+2026-11-28T09:24:01.2979667Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-11-28T09:24:01.3241982Z (Reading database ... 
+2026-11-28T09:24:01.3242328Z (Reading database ... 5%
+2026-11-28T09:24:01.3242652Z (Reading database ... 10%
+2026-11-28T09:24:01.3243002Z (Reading database ... 15%
+2026-11-28T09:24:01.3243639Z (Reading database ... 20%
+2026-11-28T09:24:01.3243953Z (Reading database ... 25%
+2026-11-28T09:24:01.3244361Z (Reading database ... 30%
+2026-11-28T09:24:01.3244621Z (Reading database ... 35%
+2026-11-28T09:24:01.3244821Z (Reading database ... 40%
+2026-11-28T09:24:01.3245023Z (Reading database ... 45%
+2026-11-28T09:24:01.3245462Z (Reading database ... 50%
+2026-11-28T09:24:01.3510774Z (Reading database ... 55%
+2026-11-28T09:24:01.3906774Z (Reading database ... 60%
+2026-11-28T09:24:01.4219167Z (Reading database ... 65%
+2026-11-28T09:24:01.4519369Z (Reading database ... 70%
+2026-11-28T09:24:01.4904332Z (Reading database ... 75%
+2026-11-28T09:24:01.6338216Z (Reading database ... 80%
+2026-11-28T09:24:01.8247772Z (Reading database ... 85%
+2026-11-28T09:24:02.0021917Z (Reading database ... 90%
+2026-11-28T09:24:02.1821402Z (Reading database ... 95%
+2026-11-28T09:24:02.1821862Z (Reading database ... 100%
+2026-11-28T09:24:02.1822390Z (Reading database ... 214389 files and directories currently installed.)
+2026-11-28T09:24:02.1865007Z Preparing to unpack .../00-fonts-ipafont-gothic_00303-23ubuntu1_all.deb ...
+2026-11-28T09:24:02.1992699Z Unpacking fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-28T09:24:02.2992164Z Selecting previously unselected package fonts-freefont-ttf.
+2026-11-28T09:24:02.3114625Z Preparing to unpack .../01-fonts-freefont-ttf_20211204+svn4273-4build1_all.deb ...
+2026-11-28T09:24:02.3120472Z Unpacking fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-28T09:24:02.4260822Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-11-28T09:24:02.4382947Z Preparing to unpack .../02-fonts-tlwg-loma-otf_1%3a0.7.3-1build1_all.deb ...
+2026-11-28T09:24:02.4388569Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-28T09:24:02.4576775Z Selecting previously unselected package fonts-unifont.
+2026-11-28T09:24:02.4693176Z Preparing to unpack .../03-fonts-unifont_1%3a16.0.04-1build1_all.deb ...
+2026-11-28T09:24:02.4698904Z Unpacking fonts-unifont (1:16.0.04-1build1) ...
+2026-11-28T09:24:02.6959532Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-11-28T09:24:02.7082538Z Preparing to unpack .../04-fonts-wqy-zenhei_0.9.45-8build1_all.deb ...
+2026-11-28T09:24:02.7204437Z Unpacking fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-28T09:24:02.8834677Z Preparing to unpack .../05-libasound2t64_1.2.15.3-1ubuntu1.2_amd64v3.deb ...
+2026-11-28T09:24:02.8865352Z Unpacking libasound2t64:amd64 (1.2.15.3-1ubuntu1.2) over (1.2.15.3-1ubuntu1.1) ...
+2026-11-28T09:24:02.9436981Z Preparing to unpack .../06-libasound2-data_1.2.15.3-1ubuntu1.2_all.deb ...
+2026-11-28T09:24:02.9453124Z Unpacking libasound2-data (1.2.15.3-1ubuntu1.2) over (1.2.15.3-1ubuntu1.1) ...
+2026-11-28T09:24:02.9822154Z Selecting previously unselected package xfonts-encodings.
+2026-11-28T09:24:02.9940968Z Preparing to unpack .../07-xfonts-encodings_1%3a1.0.5-0ubuntu3_all.deb ...
+2026-11-28T09:24:02.9946650Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-28T09:24:03.0220103Z Selecting previously unselected package xfonts-utils.
+2026-11-28T09:24:03.0336421Z Preparing to unpack .../08-xfonts-utils_1%3a7.7+7build1_amd64v3.deb ...
+2026-11-28T09:24:03.0341867Z Unpacking xfonts-utils (1:7.7+7build1) ...
+2026-11-28T09:24:03.0619796Z Selecting previously unselected package xfonts-cyrillic.
+2026-11-28T09:24:03.0734789Z Preparing to unpack .../09-xfonts-cyrillic_1%3a1.0.5+nmu1build1_all.deb ...
+2026-11-28T09:24:03.0740055Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-28T09:24:03.1066436Z Selecting previously unselected package xfonts-scalable.
+2026-11-28T09:24:03.1181940Z Preparing to unpack .../10-xfonts-scalable_1%3a1.0.3-1.3build1_all.deb ...
+2026-11-28T09:24:03.1187342Z Unpacking xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-28T09:24:03.1671000Z Setting up fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-28T09:24:03.1990966Z Setting up fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-28T09:24:03.2004948Z Setting up libasound2-data (1.2.15.3-1ubuntu1.2) ...
+2026-11-28T09:24:03.2024542Z Setting up libasound2t64:amd64 (1.2.15.3-1ubuntu1.2) ...
+2026-11-28T09:24:03.2037785Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-28T09:24:03.2050615Z Setting up xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-28T09:24:03.2064453Z Setting up fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-28T09:24:03.2118179Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-11-28T09:24:03.2129914Z Setting up fonts-unifont (1:16.0.04-1build1) ...
+2026-11-28T09:24:03.2143213Z Setting up xfonts-utils (1:7.7+7build1) ...
+2026-11-28T09:24:03.2187461Z Setting up xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-28T09:24:03.2605048Z Setting up xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-28T09:24:03.2961712Z Processing triggers for libc-bin (2.43-2ubuntu2.7) ...
+2026-11-28T09:24:03.4975629Z Processing triggers for man-db (2.13.1-1build1) ...
+2026-11-28T09:24:03.4995693Z Not building database; man-db/auto-update is not 'true'.
+2026-11-28T09:24:03.5004490Z Processing triggers for fontconfig (2.17.1-3ubuntu1) ...
+2026-11-28T09:24:04.1259523Z 
+2026-11-28T09:24:04.1260158Z Running kernel seems to be up-to-date.
+2026-11-28T09:24:04.1260487Z 
+2026-11-28T09:24:04.1260638Z Restarting services...
+2026-11-28T09:24:04.1345319Z 
+2026-11-28T09:24:04.1345887Z Service restarts being deferred:
+2026-11-28T09:24:04.1349058Z  systemctl restart hosted-compute-agent.service
+2026-11-28T09:24:04.1349342Z 
+2026-11-28T09:24:04.1350110Z No containers need to be restarted.
+2026-11-28T09:24:04.1350349Z 
+2026-11-28T09:24:04.1364814Z No user sessions are running outdated binaries.
+2026-11-28T09:24:04.1365090Z 
+2026-11-28T09:24:04.1365431Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-28T09:24:04.8838217Z Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+2026-11-28T09:24:05.1842464Z |                                                                                |   0% of 186.8 MiB
+2026-11-28T09:24:05.3001291Z |■■■■■■■■                                                                        |  10% of 186.8 MiB
+2026-11-28T09:24:05.3667332Z |■■■■■■■■■■■■■■■■                                                                |  20% of 186.8 MiB
+2026-11-28T09:24:05.4160574Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 186.8 MiB
+2026-11-28T09:24:05.4723201Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 186.8 MiB
+2026-11-28T09:24:05.5290674Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 186.8 MiB
+2026-11-28T09:24:05.5850883Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 186.8 MiB
+2026-11-28T09:24:05.6434249Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 186.8 MiB
+2026-11-28T09:24:05.7021562Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 186.8 MiB
+2026-11-28T09:24:05.7563185Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 186.8 MiB
+2026-11-28T09:24:05.8080748Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 186.8 MiB
+2026-11-28T09:24:07.6770914Z Chrome for Testing 153.0.8010.12 (playwright chromium v1243) downloaded to /home/runner/.cache/ms-playwright/chromium-1243
+2026-11-28T09:24:07.6773281Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-11-28T09:24:07.9632908Z |                                                                                |   0% of 2.3 MiB
+2026-11-28T09:24:07.9644137Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-11-28T09:24:07.9672570Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-11-28T09:24:07.9688289Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-11-28T09:24:07.9703529Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-11-28T09:24:07.9719140Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-11-28T09:24:07.9734523Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-11-28T09:24:07.9748990Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-11-28T09:24:07.9769535Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-11-28T09:24:07.9779627Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-11-28T09:24:07.9791515Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-11-28T09:24:08.0327840Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-11-28T09:24:08.0330365Z Downloading Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip
+2026-11-28T09:24:08.3415487Z |                                                                                |   0% of 114.3 MiB
+2026-11-28T09:24:08.4444276Z |■■■■■■■■                                                                        |  10% of 114.3 MiB
+2026-11-28T09:24:08.5007662Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.3 MiB
+2026-11-28T09:24:08.5468998Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.3 MiB
+2026-11-28T09:24:08.5875427Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.3 MiB
+2026-11-28T09:24:08.6126078Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.3 MiB
+2026-11-28T09:24:08.6420247Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.3 MiB
+2026-11-28T09:24:08.6699352Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.3 MiB
+2026-11-28T09:24:08.7066726Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.3 MiB
+2026-11-28T09:24:08.7438296Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.3 MiB
+2026-11-28T09:24:08.7742487Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.3 MiB
+2026-11-28T09:24:10.0948027Z Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1243
+2026-11-28T09:24:10.1230443Z ##[group]Run actions/cache@caa296126883cff596d87d8935842f9db880ef25
+2026-11-28T09:24:10.1230747Z with:
+2026-11-28T09:24:10.1230930Z   path: builds/e2e-dictionary-cache
+2026-11-28T09:24:10.1231168Z   key: chromium-e2e-dictionaries-Linux-v1
+2026-11-28T09:24:10.1231406Z   enableCrossOsArchive: false
+2026-11-28T09:24:10.1231637Z   fail-on-cache-miss: false
+2026-11-28T09:24:10.1231836Z   lookup-only: false
+2026-11-28T09:24:10.1232021Z   save-always: false
+2026-11-28T09:24:10.1232189Z env:
+2026-11-28T09:24:10.1232355Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:24:10.1232583Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:24:10.1232823Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:24:10.1233017Z ##[endgroup]
+2026-11-28T09:24:10.2747189Z Cache hit for: chromium-e2e-dictionaries-Linux-v1
+2026-11-28T09:24:10.7158589Z Received 65697048 of 65697048 (100.0%), 164.4 MBs/sec
+2026-11-28T09:24:10.7159054Z Cache Size: ~63 MB (65697048 B)
+2026-11-28T09:24:10.7180942Z [command]/usr/bin/tar -xf /home/runner/work/_temp/489eb7c4-cffd-4437-9ae9-73d3b40f1d0d/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-28T09:24:10.7939492Z Cache restored successfully
+2026-11-28T09:24:10.8117231Z Cache restored from key: chromium-e2e-dictionaries-Linux-v1
+2026-11-28T09:24:10.8292835Z ##[group]Run xvfb-run -a npm run test:e2e:chromium-extension
+2026-11-28T09:24:10.8293419Z [36;1mxvfb-run -a npm run test:e2e:chromium-extension[0m
+2026-11-28T09:24:10.8332349Z shell: /usr/bin/bash -e {0}
+2026-11-28T09:24:10.8332583Z env:
+2026-11-28T09:24:10.8332761Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:24:10.8333009Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:24:10.8333274Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:24:10.8333495Z   MANABITAN_CHROMIUM_HEADLESS: 1
+2026-11-28T09:24:10.8333718Z   MANABITAN_E2E_STRICT_RUNTIME: 1
+2026-11-28T09:24:10.8333925Z ##[endgroup]
+2026-11-28T09:24:11.1732574Z 
+2026-11-28T09:24:11.1733071Z > yomitan@0.0.0 test:e2e:chromium-extension
+2026-11-28T09:24:11.1733760Z > node ./test/chromium/extension-two-dictionary-import.e2e.js
+2026-11-28T09:24:11.1734299Z 
+2026-11-28T09:24:13.8723397Z [chromium-e2e] phase: Open settings page (1320.3 ms)
+2026-11-28T09:24:14.8922853Z [chromium-e2e] phase: Anonymous request rules match literal URLs (12.6 ms)
+2026-11-28T09:24:15.6340811Z [chromium-e2e] phase: Anki screenshots retain their source tab (687.9 ms)
+2026-11-28T09:24:16.4230310Z [chromium-e2e] phase: Cancelled navigation preserves import controller (685.5 ms)
+2026-11-28T09:24:16.7240197Z [chromium-e2e] phase: Runtime diagnostics (210.6 ms)
+2026-11-28T09:24:16.8617650Z [chromium-e2e] phase: Backend OPFS probe (64.7 ms)
+2026-11-28T09:24:17.1175568Z [chromium-e2e] phase: Reset dictionary settings (203.6 ms)
+2026-11-28T09:24:17.2550229Z [chromium-e2e] phase: Configure functional import mode (57.1 ms)
+2026-11-28T09:24:17.3175294Z [chromium-e2e] phase: Warmup real dictionary cache (150.7 ms)
+2026-11-28T09:24:17.4523433Z [chromium-e2e] phase: Import JMdict via file input (71.7 ms)
+2026-11-28T09:24:18.3607492Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 4 of 5: Importing data... (731.8 ms)
+2026-11-28T09:24:18.5213794Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 5 of 5: Finalizing import... (160.6 ms)
+2026-11-28T09:24:18.6534442Z [chromium-e2e] phase: JMdict: total import (1227.1 ms)
+2026-11-28T09:24:19.1975698Z [chromium-e2e] phase: Reload settings page after JMdict import (479.5 ms)
+2026-11-28T09:24:19.5659705Z [chromium-e2e] phase: Enable JMdict before concurrent import verification (184.3 ms)
+2026-11-28T09:24:20.5183463Z [chromium-e2e] phase: Wait for JMdict backend term index after import (845.1 ms)
+2026-11-28T09:24:20.6657916Z [chromium-e2e] phase: Verify JMdict backend content integrity after import (85.3 ms)
+2026-11-28T09:24:20.7912880Z [chromium-e2e] phase: Discover JMdict warmup term for concurrent search tab (61.0 ms)
+2026-11-28T09:24:21.3359625Z [chromium-e2e] phase: Open dedicated concurrent lookup tab (491.1 ms)
+2026-11-28T09:24:22.2358810Z [chromium-e2e] phase: Warm up dedicated concurrent lookup tab after enabling JMdict (837.1 ms)
+2026-11-28T09:24:22.6453750Z [chromium-e2e] phase: Discover JMdict probe term for concurrent verification (354.6 ms)
+2026-11-28T09:24:23.5008451Z [chromium-e2e] phase: Wait for JMdict lookup backend readiness before concurrent import (339.6 ms)
+2026-11-28T09:24:23.8895911Z [chromium-e2e] phase: Verify baseline JMdict lookup backend from search tab before concurrent Jitendex import (338.4 ms)
+2026-11-28T09:24:24.0118125Z [chromium-e2e] phase: Import Jitendex via file input (76.3 ms)
+2026-11-28T09:24:25.3193548Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 4 of 5: Importing data... (1142.7 ms)
+2026-11-28T09:24:25.7639642Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 5 of 5: Finalizing import... (444.4 ms)
+2026-11-28T09:24:25.8815344Z [chromium-e2e] phase: Jitendex: total import (1927.6 ms)
+2026-11-28T09:24:25.9167145Z [chromium-e2e] phase: Verify JMdict lookup backend during Jitendex import (1125.6 ms)
+2026-11-28T09:24:26.1004881Z [chromium-e2e] phase: Verify Jitendex backend content integrity after import (110.0 ms)
+2026-11-28T09:24:39.2466757Z [chromium-e2e] phase: Concurrent DB-open pressure during JMdict import (2075.0 ms)
+2026-11-28T09:24:39.9870584Z [chromium-e2e] phase: Post-import backend diagnostics (677.3 ms)
+2026-11-28T09:24:40.1395046Z [chromium-e2e] phase: Enable imported dictionaries in profile options (97.0 ms)
+2026-11-28T09:24:41.5585215Z [chromium-e2e] phase: Discover overlap lookup term (225.8 ms)
+2026-11-28T09:24:42.2949303Z [chromium-e2e] phase: Wait for backend dictionary readiness (666.4 ms)
+2026-11-28T09:24:55.3638528Z [chromium-e2e] phase: Restore concurrent lookup tab after orderly update-trigger restart (2083.2 ms)
+2026-11-28T09:24:55.4188424Z [chromium-e2e] phase: Verify persistence after orderly restart following JMdict update trigger (13021.5 ms)
+2026-11-28T09:24:55.5586815Z [chromium-e2e] phase: Trigger slow JMdict update (78.4 ms)
+2026-11-28T09:24:56.6323398Z [chromium-e2e] phase: Verify JMdict lookup backend during JMdict update download (294.3 ms)
+2026-11-28T09:25:00.6841183Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 3 of 6: Downloading dictionary... (4995.6 ms)
+2026-11-28T09:25:01.6343440Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 5 of 6: Importing data... (950.3 ms)
+2026-11-28T09:25:01.9476442Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 6 of 6: Finalizing import... (313.2 ms)
+2026-11-28T09:25:02.5943945Z [chromium-e2e] phase: JMdict update: total import (7103.9 ms)
+2026-11-28T09:25:04.1004734Z [chromium-e2e] phase: Verify JMdict lookup backend during active JMdict update import step (7413.4 ms)
+2026-11-28T09:25:04.7442697Z [chromium-e2e] phase: Wait for backend dictionary readiness after update (591.8 ms)
+2026-11-28T09:25:04.8840458Z [chromium-e2e] phase: Refresh enabled dictionaries after update (90.0 ms)
+2026-11-28T09:25:05.2655606Z [chromium-e2e] phase: Verify JMdict backend content integrity after update (165.0 ms)
+2026-11-28T09:25:07.6702851Z [chromium-e2e] phase: Reload settings page for modal verification (494.7 ms)
+2026-11-28T09:25:09.7189091Z [chromium-e2e] phase: Verify installed dictionaries list (0.7 ms)
+2026-11-28T09:25:09.8015720Z [chromium-e2e] phase: Configure restart profile matrix (16.3 ms)
+2026-11-28T09:25:13.7632812Z [chromium-e2e] phase: Verify restart persistence after update (3978.5 ms)
+2026-11-28T09:25:14.2349321Z [chromium-e2e] phase: Open search page (396.2 ms)
+2026-11-28T09:25:14.7169211Z [chromium-e2e] phase: Verify search results include both dictionaries (435.4 ms)
+2026-11-28T09:25:18.6946759Z [chromium-e2e] phase: Anki saves retain their destination across changes and restart (3906.8 ms)
+2026-11-28T09:25:19.8987052Z [chromium-e2e] phase: Restore scanner results after search reload (1041.1 ms)
+2026-11-28T09:25:20.3752227Z [chromium-e2e] phase: Profile lookup: 暗 (370.2 ms)
+2026-11-28T09:25:20.7540760Z [chromium-e2e] phase: Profile lookup: 名 (335.0 ms)
+2026-11-28T09:25:21.1412633Z [chromium-e2e] phase: Profile lookup: 日 (337.3 ms)
+2026-11-28T09:25:21.5187845Z [chromium-e2e] phase: Profile lookup: 学 (330.7 ms)
+2026-11-28T09:25:21.8911541Z [chromium-e2e] phase: Profile lookup: 食 (321.3 ms)
+2026-11-28T09:25:22.2624269Z [chromium-e2e] phase: Profile lookup: 見 (325.7 ms)
+2026-11-28T09:25:22.6371662Z [chromium-e2e] phase: Profile lookup: 言 (327.0 ms)
+2026-11-28T09:25:23.0047064Z [chromium-e2e] phase: Profile lookup: 行 (318.0 ms)
+2026-11-28T09:25:23.3713068Z [chromium-e2e] phase: Profile lookup: 水 (317.2 ms)
+2026-11-28T09:25:23.7346174Z [chromium-e2e] phase: Profile lookup: 猫 (313.2 ms)
+2026-11-28T09:25:23.7880623Z [chromium-e2e] phase: Lookup aggregate coverage (0.0 ms)
+2026-11-28T09:25:25.0888177Z [chromium-e2e] phase: Delete JMdict before batch import (1245.5 ms)
+2026-11-28T09:25:25.8984809Z [chromium-e2e] phase: Trigger multi-file dictionary import stress (228.6 ms)
+2026-11-28T09:25:26.8283944Z [chromium-e2e] phase: Import progress: Importing dictionary (1 of 2) - Step 4 of 5: Importing data... (766.1 ms)
+2026-11-28T09:25:26.9480425Z [chromium-e2e] phase: Import progress: Importing dictionary (1 of 2) - Step 5 of 5: Finalizing import... (119.6 ms)
+2026-11-28T09:25:27.7896512Z [chromium-e2e] phase: Import progress: Importing dictionary (2 of 2) - Step 4 of 5: Importing data... (841.6 ms)
+2026-11-28T09:25:28.0244604Z [chromium-e2e] phase: Import progress: Importing dictionary (2 of 2) - Step 5 of 5: Finalizing import... (234.7 ms)
+2026-11-28T09:25:28.1227343Z [chromium-e2e] phase: JMdict + JMnedict batch import: total import (2434.8 ms)
+2026-11-28T09:25:28.8225999Z [chromium-e2e] phase: Verify installed dictionaries after multi-file import (194.0 ms)
+2026-11-28T09:25:29.1368179Z [chromium-e2e] phase: Verify JMdict backend content integrity after multi-file import (137.0 ms)
+2026-11-28T09:25:29.3934364Z [chromium-e2e] phase: Verify JMnedict backend content integrity after multi-file import (199.4 ms)
+2026-11-28T09:25:30.6054993Z [chromium-e2e] phase: Verify existing dictionary lookup continuity after multi-file import (1161.3 ms)
+2026-11-28T09:25:30.7689181Z [chromium-e2e] phase: Enable JMnedict for extended lookup stress (104.9 ms)
+2026-11-28T09:25:35.5050327Z [chromium-e2e] phase: Verify restart persistence after multi-file import (4616.0 ms)
+2026-11-28T09:25:35.7156673Z [chromium-e2e] phase: Refresh enabled dictionaries before hover stress (161.9 ms)
+2026-11-28T09:25:35.9867311Z [chromium-e2e] phase: Enable text scanning for hover stress (96.0 ms)
+2026-11-28T09:25:36.4370055Z [chromium-e2e] phase: Wait for backend readiness before hover stress (284.2 ms)
+2026-11-28T09:25:48.1622747Z [chromium-e2e] phase: Verify hover lookup responsiveness at varying speeds (11675.3 ms)
+2026-11-28T09:25:56.1353764Z [chromium-e2e] phase: Verify repeated hover scanning remains responsive (7934.5 ms)
+2026-11-28T09:25:56.9608156Z [chromium-e2e] phase: Verify search remains responsive after hover stress (789.7 ms)
+2026-11-28T09:25:58.3995408Z [chromium-e2e] Reader bridge scenario 0: activation
+2026-11-28T09:25:58.5601443Z [chromium-e2e] Reader bridge scenario 0: rendered content
+2026-11-28T09:25:58.5751020Z [chromium-e2e] Reader bridge scenario 1: activation
+2026-11-28T09:25:58.7051440Z [chromium-e2e] Reader bridge scenario 1: rendered content
+2026-11-28T09:25:59.1075045Z [chromium-e2e] Reader bridge scenario 1: mining completion
+2026-11-28T09:25:59.1225377Z [chromium-e2e] Reader bridge scenario 2: activation
+2026-11-28T09:26:01.3088029Z [chromium-e2e] Reader bridge scenario 2: rendered content
+2026-11-28T09:26:02.2110216Z [chromium-e2e] phase: Verify installed Reader trusted-click lookup bridge (round 1/3) (5190.8 ms)
+2026-11-28T09:26:03.4983938Z [chromium-e2e] Reader bridge scenario 0: activation
+2026-11-28T09:26:03.6429726Z [chromium-e2e] Reader bridge scenario 0: rendered content
+2026-11-28T09:26:03.6583040Z [chromium-e2e] Reader bridge scenario 1: activation
+2026-11-28T09:26:03.7878387Z [chromium-e2e] Reader bridge scenario 1: rendered content
+2026-11-28T09:26:04.1814135Z [chromium-e2e] Reader bridge scenario 1: mining completion
+2026-11-28T09:26:04.1903500Z [chromium-e2e] Reader bridge scenario 2: activation
+2026-11-28T09:26:06.3809443Z [chromium-e2e] Reader bridge scenario 2: rendered content
+2026-11-28T09:26:07.2624856Z [chromium-e2e] phase: Verify installed Reader trusted-click lookup bridge (round 2/3) (4783.3 ms)
+2026-11-28T09:26:08.5472567Z [chromium-e2e] Reader bridge scenario 0: activation
+2026-11-28T09:26:08.7259282Z [chromium-e2e] Reader bridge scenario 0: rendered content
+2026-11-28T09:26:08.7403340Z [chromium-e2e] Reader bridge scenario 1: activation
+2026-11-28T09:26:08.8894521Z [chromium-e2e] Reader bridge scenario 1: rendered content
+2026-11-28T09:26:09.2965224Z [chromium-e2e] Reader bridge scenario 1: mining completion
+2026-11-28T09:26:09.3004639Z [chromium-e2e] Reader bridge scenario 2: activation
+2026-11-28T09:26:11.4885936Z [chromium-e2e] Reader bridge scenario 2: rendered content
+2026-11-28T09:26:12.3549985Z [chromium-e2e] phase: Verify installed Reader trusted-click lookup bridge (round 3/3) (4836.7 ms)
+2026-11-28T09:26:13.0977214Z [chromium-e2e] phase: Reload settings page for deletion profiling (471.4 ms)
+2026-11-28T09:26:14.2902880Z [chromium-e2e] phase: Delete dictionary: Jitendex (1073.1 ms)
+2026-11-28T09:26:14.5366455Z [chromium-e2e] phase: Post-delete backend verification (lookup + metadata) (191.6 ms)
+2026-11-28T09:26:14.5898430Z [chromium-e2e] PASS: Two-dictionary import profiling and verification completed.
+2026-11-28T09:26:14.7109482Z [chromium-e2e] Wrote report: /home/runner/work/manabitan/manabitan/builds/chromium-e2e-import-report.html
+2026-11-28T09:26:14.7110561Z [chromium-e2e] Wrote report json: /home/runner/work/manabitan/manabitan/builds/chromium-e2e-import-report.json
+2026-11-28T09:26:14.7111610Z [chromium-e2e] Wrote combined report: /home/runner/work/manabitan/manabitan/builds/extension-e2e-report.html
+2026-11-28T09:26:24.9595003Z ##[group]Run node - <<'NODE'
+2026-11-28T09:26:24.9595343Z [36;1mnode - <<'NODE'[0m
+2026-11-28T09:26:24.9595569Z [36;1mconst fs = require('node:fs');[0m
+2026-11-28T09:26:24.9595874Z [36;1mconst path = 'builds/chromium-e2e-import-report.json';[0m
+2026-11-28T09:26:24.9596184Z [36;1mif (!fs.existsSync(path)) {[0m
+2026-11-28T09:26:24.9596495Z [36;1m  console.error('Chromium extension E2E report JSON not found.');[0m
+2026-11-28T09:26:24.9596827Z [36;1m  process.exit(1);[0m
+2026-11-28T09:26:24.9597039Z [36;1m}[0m
+2026-11-28T09:26:24.9597287Z [36;1mconst report = JSON.parse(fs.readFileSync(path, 'utf8'));[0m
+2026-11-28T09:26:24.9597825Z [36;1mconst runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;[0m
+2026-11-28T09:26:24.9598369Z [36;1m// SyncAccessHandle is a dedicated-worker API, not a window API.[0m
+2026-11-28T09:26:24.9598776Z [36;1m// Validate the actual dictionary worker's storage diagnostics.[0m
+2026-11-28T09:26:24.9599140Z [36;1mconst worker = runtime?.openStorageDiagnostics?.runtimeContext;[0m
+2026-11-28T09:26:24.9599461Z [36;1mconst opfsReady = runtime !== null && ([0m
+2026-11-28T09:26:24.9599743Z [36;1m  runtime.hasStorageGetDirectory === true &&[0m
+2026-11-28T09:26:24.9600055Z [36;1m  worker?.isDedicatedWorkerGlobalScope === true &&[0m
+2026-11-28T09:26:24.9600349Z [36;1m  worker?.hasStorageGetDirectory === true &&[0m
+2026-11-28T09:26:24.9600810Z [36;1m  worker?.hasCreateSyncAccessHandle === true &&[0m
+2026-11-28T09:26:24.9601101Z [36;1m  runtime.hasOpfsSahpoolVfs === true &&[0m
+2026-11-28T09:26:24.9601402Z [36;1m  runtime.opfsSahpoolInstallResult === 'installed' &&[0m
+2026-11-28T09:26:24.9601794Z [36;1m  runtime.openStorageMode === 'opfs-sahpool'[0m
+2026-11-28T09:26:24.9602033Z [36;1m);[0m
+2026-11-28T09:26:24.9602214Z [36;1mif (report.status !== 'success') {[0m
+2026-11-28T09:26:24.9602597Z [36;1m  console.error(`Chromium extension E2E status is not success: ${String(report.status)}`);[0m
+2026-11-28T09:26:24.9602975Z [36;1m  process.exit(1);[0m
+2026-11-28T09:26:24.9603183Z [36;1m}[0m
+2026-11-28T09:26:24.9603382Z [36;1mif (report.skippedVerification === true) {[0m
+2026-11-28T09:26:24.9603822Z [36;1m  console.error(`Chromium extension E2E skipped verification: ${String(report.skipReason || 'no reason')}`);[0m
+2026-11-28T09:26:24.9604434Z [36;1m  process.exit(1);[0m
+2026-11-28T09:26:24.9604629Z [36;1m}[0m
+2026-11-28T09:26:24.9604798Z [36;1mif (!opfsReady) {[0m
+2026-11-28T09:26:24.9605210Z [36;1m  console.error(`Chromium extension OPFS readiness check failed. runtimeDiagnostics=${JSON.stringify(runtime)}`);[0m
+2026-11-28T09:26:24.9605647Z [36;1m  process.exit(1);[0m
+2026-11-28T09:26:24.9605846Z [36;1m}[0m
+2026-11-28T09:26:24.9606002Z [36;1mNODE[0m
+2026-11-28T09:26:24.9635746Z shell: /usr/bin/bash -e {0}
+2026-11-28T09:26:24.9635964Z env:
+2026-11-28T09:26:24.9636140Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:26:24.9636397Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:26:24.9636642Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:26:24.9636843Z ##[endgroup]
+2026-11-28T09:26:25.0023735Z ##[group]Run node - <<'NODE'
+2026-11-28T09:26:25.0024215Z [36;1mnode - <<'NODE'[0m
+2026-11-28T09:26:25.0024433Z [36;1mconst fs = require('node:fs');[0m
+2026-11-28T09:26:25.0024739Z [36;1mconst path = 'builds/chromium-e2e-import-report.json';[0m
+2026-11-28T09:26:25.0025028Z [36;1mif (!fs.existsSync(path)) {[0m
+2026-11-28T09:26:25.0025477Z [36;1m  fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Chromium Extension E2E\nReport JSON not found.\n');[0m
+2026-11-28T09:26:25.0025882Z [36;1m  process.exit(0);[0m
+2026-11-28T09:26:25.0026083Z [36;1m}[0m
+2026-11-28T09:26:25.0026334Z [36;1mconst report = JSON.parse(fs.readFileSync(path, 'utf8'));[0m
+2026-11-28T09:26:25.0026694Z [36;1mconst phases = Array.isArray(report.phases) ? report.phases : [];[0m
+2026-11-28T09:26:25.0027238Z [36;1mconst runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;[0m
+2026-11-28T09:26:25.0028014Z [36;1mconst startupDiagnostics = runtime && typeof runtime.startupDiagnosticsSnapshot === 'object' && runtime.startupDiagnosticsSnapshot !== null ?[0m
+2026-11-28T09:26:25.0028541Z [36;1m  runtime.startupDiagnosticsSnapshot :[0m
+2026-11-28T09:26:25.0028790Z [36;1m  null;[0m
+2026-11-28T09:26:25.0029407Z [36;1mconst startupIncompleteCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryStartupCleanupSummary === 'object' && startupDiagnostics.dictionaryStartupCleanupSummary !== null ?[0m
+2026-11-28T09:26:25.0030142Z [36;1m  startupDiagnostics.dictionaryStartupCleanupSummary :[0m
+2026-11-28T09:26:25.0030426Z [36;1m  null;[0m
+2026-11-28T09:26:25.0031059Z [36;1mconst startupIntegrityCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryTermRecordIntegritySummary === 'object' && startupDiagnostics.dictionaryTermRecordIntegritySummary !== null ?[0m
+2026-11-28T09:26:25.0031855Z [36;1m  startupDiagnostics.dictionaryTermRecordIntegritySummary :[0m
+2026-11-28T09:26:25.0032154Z [36;1m  null;[0m
+2026-11-28T09:26:25.0032365Z [36;1mconst formatCleanupCounts = (summary) => {[0m
+2026-11-28T09:26:25.0032653Z [36;1m  if (!(summary && typeof summary === 'object')) {[0m
+2026-11-28T09:26:25.0032910Z [36;1m    return 'unknown';[0m
+2026-11-28T09:26:25.0033113Z [36;1m  }[0m
+2026-11-28T09:26:25.0033520Z [36;1m  const removedCount = typeof summary.removedCount === 'number' ? summary.removedCount : 'n/a';[0m
+2026-11-28T09:26:25.0034426Z [36;1m  const failedCount = typeof summary.failedCount === 'number' ? summary.failedCount : 'n/a';[0m
+2026-11-28T09:26:25.0034876Z [36;1m  return `removed=${String(removedCount)}, failed=${String(failedCount)}`;[0m
+2026-11-28T09:26:25.0035186Z [36;1m};[0m
+2026-11-28T09:26:25.0035433Z [36;1mconst worker = runtime?.openStorageDiagnostics?.runtimeContext;[0m
+2026-11-28T09:26:25.0035743Z [36;1mconst opfsReady = runtime ? ([0m
+2026-11-28T09:26:25.0036001Z [36;1m  runtime.hasStorageGetDirectory === true &&[0m
+2026-11-28T09:26:25.0036308Z [36;1m  worker?.isDedicatedWorkerGlobalScope === true &&[0m
+2026-11-28T09:26:25.0036601Z [36;1m  worker?.hasStorageGetDirectory === true &&[0m
+2026-11-28T09:26:25.0036875Z [36;1m  worker?.hasCreateSyncAccessHandle === true &&[0m
+2026-11-28T09:26:25.0037161Z [36;1m  runtime.hasOpfsSahpoolVfs === true &&[0m
+2026-11-28T09:26:25.0037459Z [36;1m  runtime.opfsSahpoolInstallResult === 'installed' &&[0m
+2026-11-28T09:26:25.0037762Z [36;1m  runtime.openStorageMode === 'opfs-sahpool'[0m
+2026-11-28T09:26:25.0038006Z [36;1m) : null;[0m
+2026-11-28T09:26:25.0038336Z [36;1mconst top = [...phases].sort((a, b) => Number(b.durationMs || 0) - Number(a.durationMs || 0)).slice(0, 5);[0m
+2026-11-28T09:26:25.0038725Z [36;1mconst lines = [[0m
+2026-11-28T09:26:25.0038925Z [36;1m  '## Chromium Extension E2E',[0m
+2026-11-28T09:26:25.0039189Z [36;1m  `- Status: \`${String(report.status || 'unknown')}\``,[0m
+2026-11-28T09:26:25.0039557Z [36;1m  `- Skipped verification: \`${String(report.skippedVerification === true)}\``,[0m
+2026-11-28T09:26:25.0040137Z [36;1m  `- Skip reason: ${report.skipReason ? `\`${String(report.skipReason)}\`` : 'none'}`,[0m
+2026-11-28T09:26:25.0040544Z [36;1m  `- Launch mode: \`${String(report.launchMode || 'unknown')}\``,[0m
+2026-11-28T09:26:25.0040941Z [36;1m  `- Failure: ${report.failureReason ? `\`${String(report.failureReason)}\`` : 'none'}`,[0m
+2026-11-28T09:26:25.0041376Z [36;1m  `- OPFS ready: ${opfsReady === null ? 'unknown' : `\`${String(opfsReady)}\``}`,[0m
+2026-11-28T09:26:25.0041798Z [36;1m  `- Runtime diagnostics: \`${JSON.stringify(report.runtimeDiagnostics ?? null)}\``,[0m
+2026-11-28T09:26:25.0042283Z [36;1m  `- Startup cleanup (incomplete imports): ${formatCleanupCounts(startupIncompleteCleanup)}`,[0m
+2026-11-28T09:26:25.0042780Z [36;1m  `- Startup cleanup (term-record integrity): ${formatCleanupCounts(startupIntegrityCleanup)}`,[0m
+2026-11-28T09:26:25.0043169Z [36;1m  `- Phase count: ${String(phases.length)}`,[0m
+2026-11-28T09:26:25.0043422Z [36;1m  '- Slowest phases:',[0m
+2026-11-28T09:26:25.0043771Z [36;1m  ...top.map((phase) => `  - ${String(phase.name)} (${Number(phase.durationMs || 0).toFixed(1)} ms)`),[0m
+2026-11-28T09:26:25.0044400Z [36;1m  '',[0m
+2026-11-28T09:26:25.0044564Z [36;1m];[0m
+2026-11-28T09:26:25.0044845Z [36;1mfs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);[0m
+2026-11-28T09:26:25.0045185Z [36;1mNODE[0m
+2026-11-28T09:26:25.0072896Z shell: /usr/bin/bash -e {0}
+2026-11-28T09:26:25.0073109Z env:
+2026-11-28T09:26:25.0073289Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:26:25.0073527Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:26:25.0073783Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:26:25.0073985Z ##[endgroup]
+2026-11-28T09:26:25.0486450Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-28T09:26:25.0486791Z with:
+2026-11-28T09:26:25.0486980Z   name: chromium-extension-e2e-report
+2026-11-28T09:26:25.0487244Z   path: builds/chromium-e2e-import-report.json
+2026-11-28T09:26:25.0487494Z   retention-days: 7
+2026-11-28T09:26:25.0487682Z   if-no-files-found: error
+2026-11-28T09:26:25.0487882Z   compression-level: 6
+2026-11-28T09:26:25.0488071Z   overwrite: false
+2026-11-28T09:26:25.0488255Z   include-hidden-files: false
+2026-11-28T09:26:25.0488461Z env:
+2026-11-28T09:26:25.0488633Z   MANABITAN_RELEASE_VERSION: 
+2026-11-28T09:26:25.0489024Z   MANABITAN_CHROMIUM_BUILD_TARGET: chrome-dev
+2026-11-28T09:26:25.0489265Z   MANABITAN_E2E_SKIP_BUILD: 1
+2026-11-28T09:26:25.0489464Z ##[endgroup]
+2026-11-28T09:26:25.1840558Z (node:4310) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:26:25.1841648Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:26:25.1862533Z With the provided path, there will be 1 file uploaded
+2026-11-28T09:26:25.1894763Z Artifact name is valid!
+2026-11-28T09:26:25.1895391Z Root directory input is valid!
+2026-11-28T09:26:25.4059207Z Beginning upload of artifact content to blob storage
+2026-11-28T09:26:25.4384761Z (node:4310) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T09:26:25.5225597Z Uploaded bytes 159705
+2026-11-28T09:26:25.5397439Z Finished uploading artifact content to blob storage!
+2026-11-28T09:26:25.5398175Z SHA256 digest of uploaded artifact zip is 0c3f0b5350f694a91cf3a4c564b78ab6194e67f702c634c39337921864e9ca3e
+2026-11-28T09:26:25.5399876Z Finalizing artifact upload
+2026-11-28T09:26:25.8836978Z Artifact chromium-extension-e2e-report.zip successfully finalized. Artifact ID 15258010094
+2026-11-28T09:26:25.8838123Z Artifact chromium-extension-e2e-report has been successfully uploaded! Final size is 159705 bytes. Artifact ID is 15258010094
+2026-11-28T09:26:25.8842900Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/46129517312/artifacts/15258010094
+2026-11-28T09:26:25.9029505Z Post job cleanup.
+2026-11-28T09:26:26.0101188Z Cache hit occurred on the primary key chromium-e2e-dictionaries-Linux-v1, not saving cache.
+2026-11-28T09:26:26.0236018Z Post job cleanup.
+2026-11-28T09:26:26.0239239Z ##[start-action display=Setup node;id=__8bf261af-96c6-4c9d-b5e5-b56e27cb6980.__actions_setup-node]
+2026-11-28T09:26:26.0275197Z Post job cleanup.
+2026-11-28T09:26:26.1325111Z (node:4332) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:26:26.1326692Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:26:26.1328791Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-28T09:26:26.1394362Z ##[end-action id=__8bf261af-96c6-4c9d-b5e5-b56e27cb6980.__actions_setup-node;outcome=success;conclusion=success;duration_ms=115]
+2026-11-28T09:26:26.1452067Z Post job cleanup.
+2026-11-28T09:26:26.2183612Z [command]/usr/bin/git version
+2026-11-28T09:26:26.2222831Z git version 2.56.1
+2026-11-28T09:26:26.2257150Z Temporarily overriding HOME='/home/runner/work/_temp/9882c0a6-96cb-4880-95ef-150232e53b28' before making global git config changes
+2026-11-28T09:26:26.2258940Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T09:26:26.2260934Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T09:26:26.2292878Z Removing SSH command configuration
+2026-11-28T09:26:26.2298791Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T09:26:26.2346952Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T09:26:26.2655803Z Removing HTTP extra header
+2026-11-28T09:26:26.2658404Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T09:26:26.2730196Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T09:26:26.3099638Z Removing includeIf entries pointing to credentials config files
+2026-11-28T09:26:26.3101396Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T09:26:26.3145441Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T09:26:26.3152313Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T09:26:26.3153059Z includeif.gitdir:/github/workspace/.git.path
+2026-11-28T09:26:26.3153919Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T09:26:26.3175772Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T09:26:26.3208822Z /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3219752Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3267577Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T09:26:26.3299789Z /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3316984Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3341397Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-28T09:26:26.3363144Z /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3372705Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3403110Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T09:26:26.3432376Z /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3437438Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config
+2026-11-28T09:26:26.3467402Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T09:26:26.3711681Z Removing credentials config '/home/runner/work/_temp/git-credentials-2d891f0a-65d8-47b7-915c-61dfa21dcf0f.config'
+2026-11-28T09:26:26.3873502Z Cleaning up orphan processes
+2026-11-28T09:26:26.4195924Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

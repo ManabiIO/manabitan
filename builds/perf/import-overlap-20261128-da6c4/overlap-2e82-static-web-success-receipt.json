@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact amended-source static-web correctness/type gate; no comparative import performance claim.",
+  "source": {
+    "head": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
+    "tree": "2497bc64bbef07ad9d352b043fffa52e9a314024",
+    "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "observedMergeCheckout": "323fbf0 (short SHA from log)",
+    "runtimeChangeSince88add": false,
+    "testAmendmentBlob": "c5744034f1235b8fa8996ee6f86472358b32b4b7"
+  },
+  "run": {
+    "id": 46130835581,
+    "jobId": 140935381652,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46130835581",
+    "jobConclusion": "success",
+    "lastObservedAtUtc": "2026-11-28 09:34:01"
+  },
+  "log": {
+    "blob": "adf02fcd489116952613f8a29cb69a9c738782c9",
+    "characters": 57521
+  },
+  "checks": {
+    "mainTypes": "pass",
+    "testTypes": "pass",
+    "webTypes": "pass",
+    "focused": {
+      "files": 4,
+      "tests": 78,
+      "allPass": true
+    },
+    "staticBrowserAcceptance": "pass",
+    "staticAcceptancePassLines": [
+      "PASS no-extension host and persistent OPFS initialize without cross-origin isolation",
+      "PASS full official JMdict imports via a real file input using the shared importer",
+      "PASS real core translation 猫",
+      "PASS real core translation 学校",
+      "PASS real core translation 食べました",
+      "PASS real ManabiTan scanner renders the requested headword",
+      "PASS popup dismissal permits rescanning the same word and never enables a stopped scanner",
+      "PASS second independent tab cannot open the same SQLite pool",
+      "PASS frequency dictionary uses the same importer and appears in results",
+      "PASS failed custom ZIP does not erase the committed dictionary",
+      "PASS search RPC returns bounded previews for kana, romaji and inflected words",
+      "PASS English definition search is indexed, bounded and lower priority than Japanese lookup",
+      "PASS recommendations reuse the existing ManabiTan Japanese catalog",
+      "PASS pre-aborted import is rejected without changing storage",
+      "PASS in-flight custom import cancellation rolls back and allows retry",
+      "PASS abrupt tab death during import recovers both SQL and sidecar storage",
+      "PASS real structured-content media remains image-only and links are constrained",
+      "PASS default archive size mismatch fails before import",
+      "PASS full Jitendex static archive is checksum-verified and imported locally",
+      "PASS disable and re-enable persists explicit choice without reimport",
+      "PASS default choice, dictionary and lookup survive full browser restart",
+      "PASS already-open worker performs dictionary lookup while offline",
+      "PASS deletion removes dictionary and retains its no-reinstall choice across restart",
+      "PASS no uncaught browser exceptions"
+    ]
+  },
+  "repairsEstablished": [
+    "Corrected public callback parameter indices compile against current source.",
+    "Numeric-function-to-void assignment fixture compiles; no runtime callback compatibility source changes were needed."
+  ],
+  "limits": [
+    "This gate does not replace the still-pending complete new-head CI/owned-overlap qualification.",
+    "Full static Jitendex import is a separate functional workload, not ordinary baseline-A phase data or performance/memory qualification.",
+    "The failed88add type log remains e0080200c7d825b471a37d07938e22058340ce6e; it has not been relabeled passed."
+  ]
+}

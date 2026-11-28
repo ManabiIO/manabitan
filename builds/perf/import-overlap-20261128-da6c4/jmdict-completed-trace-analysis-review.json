@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent read-only source review; no local Python execution or new import.",
+  "reviewed": {
+    "script": "8bf0e568530eb3bead6cffc45f1623255b71f6c8",
+    "tests": "139d475713702374c17045f5a617f1be4d1a41a2",
+    "plan": "540213fc1d45ffd4087211fcbdd3f915806b57d7",
+    "workflow": "69976e0754d37a2212ce967d4698932303e7ccbe"
+  },
+  "acquisition": {
+    "runId": 46127144239,
+    "jobId": 140924149519,
+    "artifactId": 15256811856,
+    "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  },
+  "resolvedFindings": [
+    {
+      "finding": "ProfileChunks originally accumulated in trace-array order, which is not necessarily per-profile timestamp order.",
+      "resolution": "Raw event index/timestamp/emitter/data retained; stable per-profile(ts,eventIndex) chunk merge before signed-delta cumulative reconstruction, with dedicated out-of-order deterministic test."
+    },
+    {
+      "finding": "Source line annotation could be mistaken for the sampled executing line.",
+      "resolution": "Renamed functionDeclarationSourceLine and documented CallFrame declaration-position semantics."
+    }
+  ],
+  "checked": [
+    "Exact successful run/job/artifact identity, ZIP size/digest, trace/report/summary/control hashes and acquired before/after/runtime/package identities.",
+    "Source frames read from exact package and verified against runtime manifest; actual WASM export indices used without inventing internal C symbols.",
+    "Signed deltas preserved; samples stable sorted after cumulative reconstruction; leading gap and final tail unassigned; same-frame recursion deduplicated for inclusive rows.",
+    "Timestamp/user timing events and original phases retained, but no unproved host/browser clock mapping, timed-window crop, CPU-time or removable-cost claim.",
+    "Invoking GitHub SHA controls fetched without product checkout/build/import; tests gate analysis; failure receipts and logs retained."
+  ],
+  "conclusion": "No remaining concrete source blocker found in this exact set. Hosted deterministic tests/actionlint remain required; source review alone does not establish execution success."
+}

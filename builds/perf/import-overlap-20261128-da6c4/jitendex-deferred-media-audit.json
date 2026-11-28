@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only current-source and history audit. No new corpus execution, timing acquisition, product patch, or performance claim.",
+  "product": {
+    "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "sourceContinuity": {
+    "olderSource": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "comparison": "https://github.com/ManabiIO/manabitan/compare/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2...dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "changedFiles": [
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "dev/perf/import-lookup-screen.js",
+      "ext/js/dictionary/wasm/term-bank-parser.c",
+      "test/term-bank-format3-row.test.js"
+    ],
+    "interpretation": "Importer, database, source-pipeline and content-store JS are unchanged. #972 changes native parser work, so older elapsed counters are not current-source measurements."
+  },
+  "oldDiagnostic": {
+    "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "runId": 46105395307,
+    "jobId": 140856896694,
+    "evidenceCommit": "9651eb4d1479ccdc16a92c7a099f649f271faebe",
+    "evidencePath": "builds/perf/import-overlap-20261128-da6c4/current-baseline-profiles.json",
+    "ordinaryObservations": 1,
+    "mediaCheck": "all",
+    "trace": false,
+    "fixture": {
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    "totalImportMs": 1475.8999999999942,
+    "step4MediaWriteMs": 140,
+    "step4MediaResolveMs": 31,
+    "mediaZipBatchRangeReadCount": 7,
+    "mediaZipBatchEntryCount": 236,
+    "mediaZipBatchReadMs": 143,
+    "mediaZipBatchInflateMs": 23,
+    "termContentCompressMs": 493.40000000000873,
+    "termRecordCloseWritableMs": 110.80000000000291,
+    "caveats": [
+      "Seven is raw ZIP range-read count, not established media write-batch count.",
+      "Raw-read elapsed time can overlap or include time blocked behind owner-thread media writes; do not sum these clocks.",
+      "Compression/finalization counters overlap other phases and are not removable-cost ceilings.",
+      "The single retained old-source observation is only a hypothesis source; no comparative or current-base speed estimate."
+    ]
+  },
+  "path": [
+    {
+      "file": "ext/js/dictionary/dictionary-importer.js",
+      "function": "_importDeferredMediaRequirements",
+      "lines": "3588-3720",
+      "facts": "Greedy existing4MiB decoded-source budget and at most1024 entries; ordered resolved writes; only next raw read overlaps previous write. Cancel/join pending read in finally."
+    },
+    {
+      "file": "ext/js/dictionary/dictionary-importer.js",
+      "function": "deferred writeMedia callback",
+      "lines": "2610-2629",
+      "facts": "Calls bulkAdd('media') and counts complete awaited write cost; media count/progress ordered."
+    },
+    {
+      "file": "ext/js/dictionary/dictionary-database.js",
+      "function": "bulkAdd",
+      "lines": "5008-5068",
+      "facts": "Existing open bulk transaction reused. Media count>=64 and aggregate payload<=4MiB selects64-row statement; otherwise8-row statement."
+    },
+    {
+      "file": "ext/js/dictionary/dictionary-database.js",
+      "function": "_bulkInsertWithDescriptor",
+      "lines": "5643-5664",
+      "facts": "Synchronous per-statement SQL/bind construction, cached statement lookup, reset(true),bind,step. No per-image transaction/message/timer/await."
+    },
+    {
+      "file": "ext/js/dictionary/dictionary-database.js",
+      "function": "_getCachedStatement",
+      "lines": "2491-2513",
+      "facts": "Existing SQL-keyed LRU prepared-statement cache. No unconditional per-image prepare."
+    }
+  ],
+  "novelty": [
+    {
+      "owner": "https://github.com/ManabiIO/manabitan/pull/776",
+      "state": "merged",
+      "head": "4efdd175a1d368ea0029351ddb49a4099a87889f",
+      "mechanism": "Existing1024-entry bounded raw ZIP media batching and64-row/4MiB SQLite batches."
+    },
+    {
+      "owner": "https://github.com/ManabiIO/manabitan/pull/266",
+      "state": "closed unmerged",
+      "head": "07f4ac60fbc0b6a6a99a44d838d3d678e9c92566",
+      "mechanism": "Reuse SQL full-batch text and preallocate external-media bind arrays; component-only evidence."
+    },
+    {
+      "owner": "perf/import-direct-bulk-bind-20260924",
+      "head": "6da43e7056357595af388cd91760d12b6a8579a5",
+      "mechanism": "Existing database bulk bind construction work; do not independently recreate."
+    },
+    {
+      "owner": "study/columnar-media-20261128-63aba8",
+      "head": "de2c0c040834c507657f0c46b0666cc8c70143f5",
+      "mechanism": "Parser/image-reference columnar materialization; no ordinary deferred SQLite-payload route change."
+    },
+    {
+      "owner": "study/early-native-media-20261128-63aba8",
+      "head": "b731306e3ffd4205401feb47916fd021303c1401",
+      "mechanism": "Early native projected image-reference/diagnostic columns; no late payload-write route change."
+    },
+    {
+      "owner": "perf/media-catalog-lab-20261128-4a779",
+      "head": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+      "mechanism": "Dense ZIP catalog metadata/allocation; no ordinary SQLite payload route change."
+    },
+    {
+      "owner": "research/import-columnar-media-component-20261128-83b3",
+      "head": "29ae2936452c1dc38ebf01cd82d250dff921e3c7",
+      "mechanism": "Columnar component acquisition held for source-option parity; no gain inferred."
+    },
+    {
+      "owner": "codex/small-media-batch-20261021",
+      "head": "6ca5bd4ee23468e07d66a0070398976dc81db1fb",
+      "mechanism": "Cached-small-archive raw media batching already reflected in current route."
+    }
+  ],
+  "boundedDiagnostic": {
+    "priority": "Obtain current exact-source cost/geometry before implementing anything.",
+    "preferredReuse": "Read ordinary unchanged A Jitendex reports from already-running exact-current qualification when available; retain source/package/fixture identities and raw phases. This confirms whether the old late-media cost remains.",
+    "attributionIfNeeded": "One explicitly diagnostic currentdcfc full Jitendex import, no comparison claim. Bound per media write batch: row count, payload byte total, chosen SQL batch size, actual statement row counts, number of cache misses/prepares, existing transaction state; split elapsed SQL/bind construction, cached statement lookup, reset, bind, step. Preserve full stock correctness/media/restart checks and all failures. Declare any instrumentation overlay; no source changes silently attributed to ordinary performance.",
+    "firstNarrowQuestion": "Does a9–63-row bounded tail select8-row SQL statements, and is repeated statement execution materially costly? Existing64-row maximum and4MiB byte guard can be retained, but geometry/cost must be proved before any candidate.",
+    "heldAlternative": "Only if BLOB persistence dominates and same-format overhead has no worthwhile route, test existing external-media payload storage. This is a physical-layout experiment requiring new prospective proofs and separate browser/memory/lookup qualification."
+  },
+  "externalRouteFeasibility": {
+    "existingMethods": [
+      "DictionaryDatabase.appendMediaContentBytes",
+      "DictionaryDatabase.bulkAddExternalMediaRows",
+      "DictionaryDatabase._deserializeMediaRow"
+    ],
+    "existingSchema": "Same media columns; empty content BLOB plus actual contentOffset/contentLength, method0, decoded length; no new binary media format required.",
+    "ordering": "Append exact immutable decoded bytes through current term-content import session, then insert reference metadata in same SQLite bulk transaction; ordered importer callback remains awaited. Existing finish drains stores before publishing; rollback must restore appended content length and SQL metadata together.",
+    "ownership": "Do not mutate generic caller media objects or rely on typed-array shape as immutable. Existing resolved ArrayBuffers are importer-owned; any introduced await must snapshot/privately own its byte views and metadata. Preserve concurrent/cancel/close/purge lifecycle behavior.",
+    "fallback": "Keep generic database bulkAdd and unsupported/non-session paths unchanged. Eligibility must use existing storage/session/format capabilities, never dictionary name or corpus count.",
+    "physicalDifferences": "Term-content bytes and opaque SQLite bytes/layout change; complete media payload and metadata equality, reopen/delete/update/rollback behavior, cold media reads, and full unrelated-storage equality require explicit proof.",
+    "coveredExistingTests": [
+      "test/dictionary-database-media.test.js",
+      "test/dictionary-database-media-cursor.test.js",
+      "test/dictionary-database-media-readiness.test.js",
+      "test/dictionary-importer-media-batch.test.js",
+      "test/dictionary-importer-media-prefetch.test.js",
+      "test/dictionary-importer-artifact-media-manifest.test.js",
+      "test/dictionary-database-import-cleanup.test.js",
+      "test/dictionary-media-generation.test.js"
+    ],
+    "caveat": "Existing coverage demonstrates relevant supported routes, not that a new ordinary-source caller would already be fully qualified. No implementation authorized or acquired here."
+  },
+  "decisions": {
+    "noDuplicateSQLConstruction": true,
+    "noUnmeasuredLayoutImplementation": true,
+    "noCurrentSpeedupClaim": true,
+    "noJMdictGainAssumed": "Pinned JMdict has no media payload target; any media-only route would principally target Jitendex."
+  }
+}

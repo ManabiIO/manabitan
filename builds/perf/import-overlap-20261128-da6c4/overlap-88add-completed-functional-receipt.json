@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed88add CI evidence only; separate subsequent2e82test-only amendment has pending own gates.",
+  "head": "88add36ce87811bf0e7ce4f61d833b49911d7b11",
+  "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "runId": 46129517312,
+  "results": [
+    {
+      "jobId": 140931418589,
+      "name": "Test Build",
+      "conclusion": "success",
+      "logBlob": "34bdfe021acdf45b977630087182e4143f7b2e77",
+      "checks": [
+        "Pinned Clang/LLD21 build:dictionary-wasm --check reproduced both assets",
+        "Current parserWASM SHA2565d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "Actual npm build emitted seven extension packages",
+        "Extension manifest validation"
+      ]
+    },
+    {
+      "jobId": 140931418757,
+      "name": "Full Extension E2E (Chromium)",
+      "conclusion": "success",
+      "logBlob": "769462621d59a80515dab8434992a8a3c6c3528a",
+      "checks": [
+        "Built chrome-dev package",
+        "Required report.status=success and skippedVerification=false",
+        "Real JMdict/Jitendex imports, concurrent lookup, updates, restart/deletion exercised"
+      ],
+      "artifact": {
+        "id": 15258010094,
+        "bytes": 159705,
+        "payloadRetrieved": false
+      },
+      "caveat": "Functional acceptance run, not prospective import-time/memory qualification."
+    },
+    {
+      "jobId": 140931418850,
+      "name": "Unit Tests",
+      "conclusion": "success",
+      "logBlob": "579b2a163cebca90c921f451c54c5340d7f065ef",
+      "logCharacters": 791972,
+      "filesPassed": 674,
+      "testsPassed": 15186,
+      "testsSkipped": 47,
+      "testsTotal": 15233,
+      "durationSeconds": 187.61
+    }
+  ],
+  "otherCurrentHeadFailure": {
+    "runId": 46129517279,
+    "jobId": 140931398123,
+    "scope": "Four TS2322 errors in the new assignability test; fixed in test-only2e82amendment, not retroactively marked passed",
+    "failureLogBlob": "e0080200c7d825b471a37d07938e22058340ce6e",
+    "repairReceiptBlob": "a673c55d0cf6b9ef4ea5a7ca18ccc3c0dbbd9486"
+  },
+  "statusCaveat": "Other queued88add CI jobs were cancelled on later head; success of completed jobs is retained individually, never reported as a complete green88addCI run.",
+  "newSource": {
+    "head": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
+    "qualificationHead": "53a00db6a070a02f40b4111d69dc439b868e1fe4",
+    "qualificationRun": 46130837802,
+    "qualificationVerifyJob": 140935388109,
+    "lastObserved": "queued at2026-11-28 09:32:10UTC",
+    "staticWebRun": 46130835581,
+    "staticWebLastObserved": "in_progress at2026-11-28 09:32:10UTC"
+  }
+}

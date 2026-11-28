@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "scope": "Test-only repair of newly observed current-head hosted type errors. No runtime source or gate weakening.",
+  "source": {
+    "pullRequest": 977,
+    "head": "88add36ce87811bf0e7ce4f61d833b49911d7b11",
+    "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "observedMergeCheckout": "958e73f (full merge SHA not independently retrieved)"
+  },
+  "failure": {
+    "runId": 46129517279,
+    "jobId": 140931398123,
+    "stage": "test/jsconfig.typecheck.json after main types passed",
+    "exitCode": 2,
+    "logBlob": "e0080200c7d825b471a37d07938e22058340ce6e",
+    "logCharacters": 18459,
+    "diagnostics": [
+      "2026-11-28T09:21:46.6722617Z ##[error]test/term-bank-pipeline-completion.test.js(24,40): error TS2322: Type 'number' is not assignable to type 'void'.",
+      "2026-11-28T09:21:46.6731184Z ##[error]test/term-bank-pipeline-completion.test.js(32,9): error TS2322: Type '() => { completed: boolean; }' is not assignable to type 'number'.",
+      "2026-11-28T09:21:46.6733376Z ##[error]test/term-bank-pipeline-completion.test.js(33,9): error TS2322: Type '() => Promise<{ completion: number; }>' is not assignable to type 'number'.",
+      "2026-11-28T09:21:46.6735214Z ##[error]test/term-bank-pipeline-completion.test.js(34,9): error TS2322: Type '() => Promise<number>' is not assignable to type 'number'."
+    ],
+    "downstreamSkipped": [
+      "web/tsconfig.json",
+      "focused runtime tests",
+      "real browser acceptance"
+    ]
+  },
+  "change": {
+    "path": "test/term-bank-pipeline-completion.test.js",
+    "oldBlob": "806241f0e59ee0875c9bdbe79d58eb7da08a6081",
+    "newBlob": "c5744034f1235b8fa8996ee6f86472358b32b4b7",
+    "characters": 23610,
+    "details": [
+      "Correct callback parameter index from2to3 for deferred,lazy,compressed public APIs; eager remains2.",
+      "Give the numeric callback its inferred return first, then assign the function value to() =>void. This tests ordinary callback assignability without directly declaring a value-returning checkJs function body as void.",
+      "All remaining parser lifecycle/runtime checks are byte-identical; no assertions removed or relaxed."
+    ]
+  },
+  "validation": {
+    "scope": "Pure V8 runtime execution and source signature/index cross-check, not a TypeScript compiler check",
+    "executed": 1,
+    "passed": [
+      "public parallel callbacks retain their legacy result assignability"
+    ],
+    "signatures": [
+      {
+        "name": "parseTermBankWithWasmColumnChunksParallel",
+        "index": 2,
+        "parameter": "onChunk",
+        "signature": "export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, version, onChunk, options = {}, shouldCancel = () => false) {"
+      },
+      {
+        "name": "parseTermBankWithWasmColumnChunksParallelDeferred",
+        "index": 3,
+        "parameter": "onChunk",
+        "signature": "export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentBytePromises, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {"
+      },
+      {
+        "name": "parseTermBankWithWasmColumnChunksParallelLazy",
+        "index": 3,
+        "parameter": "onChunk",
+        "signature": "export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteLoaders, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {"
+      },
+      {
+        "name": "parseTermBankWithWasmColumnChunksParallelCompressedLazy",
+        "index": 3,
+        "parameter": "onChunk",
+        "signature": "export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(sourceLoaders, estimatedByteLengths, version, onChunk, options = {}, shouldCancel = () => false) {"
+      }
+    ],
+    "restOfFileByteIdentical": true,
+    "typescript": "Not executed locally; executor unavailable. Required hosted full main/test/web types remain the compiler gate.",
+    "runtime": "No production bytes changed. No native/browser performance observation reacquired."
+  },
+  "permissions": "Only an unreferenced blob was created; root owns commits, refs, qualification updates."
+}

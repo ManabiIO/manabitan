@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only novelty and retained-outcome audit; no new execution or independent recomputation of other study's raw observations.",
+  "currentSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "decoderHistory": {
+    "oldPr": "https://github.com/ManabiIO/manabitan/pull/41",
+    "oldHead": "51c06f03da22a416d331a9c72bf76f8435666f50",
+    "warning": "The old PR body describes a historical opt-in backend and cannot establish current default behavior.",
+    "laterPr": "https://github.com/ManabiIO/manabitan/pull/642",
+    "laterMerged": true,
+    "laterHead": "22739a5292a011c74242eb052f9b11f29e396ece",
+    "laterMechanism": "Removes experimentalLibdeflate because both branches already called the same bounded libdeflate implementation. No runtime speed claim.",
+    "historicalWasm64Branch": "perf/libdeflate64-import-20260915",
+    "historicalWasm64Head": "7e506a055dd1eae0be0d294c38f89d4e187d568a",
+    "historicalWasm64Mechanism": "__wasm32__ machine_word_t=u64 instead of upstream size_t; current implementation independently confirmed by critical_path, so not a new admission proposal."
+  },
+  "shortWord": {
+    "branch": "perf/inflate-short-word-screen-20261128-5a86",
+    "evidenceHead": "ac0894ec21efcc89c34408534a43a40f4f46d761",
+    "evidencePath": "builds/perf/inflate-short-word-hosted-20261128-5a86/summary.json.txt",
+    "source": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "49bf79f35084e7c42d1088d5d30c522172d8ec3b",
+      "candidateTree": "af9a3630ab5acc04ec82023fc40d30b249983182",
+      "originalProductCommit": "1c93b0a18f5dd53a13dfdd3d054687c85e097247",
+      "originalProductTree": "7bf2f889a94d955bf8845b9f8d9e2d4afb464617",
+      "parserModules": {
+        "A": {
+          "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "bytes": 67659
+        },
+        "B": {
+          "sha256": "e522cb7f60cef3c8d305853afc57e8eb6c5d2121bf39ae773bff407901cc04b6",
+          "bytes": 67667
+        }
+      },
+      "packageEntriesDeclaredForConditionalBrowserGate": [
+        "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+        "js/dictionary/wasm/vendor/libdeflate/README.md",
+        "lib/term-bank-parser.wasm"
+      ]
+    },
+    "run": {
+      "id": 46112380632,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46112380632",
+      "validationJobId": 140878598879,
+      "componentJobId": 140903680352,
+      "skippedBrowserJobId": 140915280648
+    },
+    "scope": [
+      "This is a Node decoder component result, not a browser full-import or whole-process browser-memory result. Browser expansion was skipped exactly as registered.",
+      "All 53 complete decoded banks are checked by full digest/CRC/span and input-consumption receipts; the decoded corpus bytes themselves are not in the artifact. This is not a parser row-output replay.",
+      "The fixture declares 528299 term rows; the decoder component does not independently parse/count term rows.",
+      "The native sourceInflateMs clock includes immediate CRC; the callElapsedMs clock also includes the production helper allocation/copy boundary. Concurrent whole-import phase ceilings are not inferred.",
+      "The extra branch reduced modeled source-level speculative stores, but the experiment did not isolate the machine-code reason for regression. No instruction-count or causal slowdown claim follows."
+    ],
+    "sourceDiff": {
+      "file": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+      "currentBytes": 25048,
+      "candidateBytes": 25284,
+      "exactOnlyInsertion": "\t\t\t/* The first word already covers a short match.  The next\n\t\t\t * symbol and bitbuffer were prepared above; retain the normal\n\t\t\t * loop condition without issuing the remaining wild stores. */\n\t\t\tif (length <= WORDBYTES)\n\t\t\t\tcontinue;\n",
+      "explanation": "After the first unaligned word store in the offset>=WORDBYTES branch, skip the remaining speculative stores when length<=WORDBYTES. No backend, bitbuffer-width, or CRC-policy change."
+    },
+    "disposition": "STOP / NO PR",
+    "reason": "Complete fixed decoder component regressed against both identical-code baseline arms; five of seven predeclared continuation checks failed.",
+    "counts": {
+      "archiveMembers": 88,
+      "children": 36,
+      "freshPids": 36,
+      "completeSweeps": 180,
+      "groupCalls": 2160,
+      "verifiedBankOutputs": 9540,
+      "banksPerSweep": 53,
+      "groupsPerSweep": 12,
+      "decodedBytesPerSweep": 171617523,
+      "compressedBytesPerSweep": 15632849
+    },
+    "continuationChecks": {
+      "candidateMedianWallAgainstBoth": false,
+      "candidateEqualWorkWallAgainstBoth": false,
+      "candidateMedianCpuAgainstBoth": false,
+      "candidateFasterBlocksAgainstBoth": false,
+      "sameCodeMedianWallDrift": true,
+      "sameCodeMedianCpuDrift": true,
+      "coldWallAgainstBoth": false
+    },
+    "reportedStatistics": {
+      "callElapsedMs": {
+        "pairedMedianBAPercent": 6.490460742604509,
+        "pairedMedianCAPercent": -0.11026098873491708,
+        "pairedMedianBCPercent": 6.444664832238733,
+        "candidateFasterBlocks": 0,
+        "candidateFasterThanControlBlocks": 0,
+        "controlFasterBlocks": 8,
+        "equalWorkBAPercent": 6.169026508189002,
+        "equalWorkBCPercent": 6.407202757789543,
+        "equalWorkCAPercent": -0.22383470613610568,
+        "coldPairedMedianBAPercent": 6.582940450401886,
+        "coldPairedMedianBCPercent": 6.82217703444945,
+        "coldPairedMedianCAPercent": 1.1207105674962414
+      },
+      "sourceInflateMs": {
+        "pairedMedianBAPercent": 6.639199729063783,
+        "pairedMedianCAPercent": -0.08907838787818312,
+        "pairedMedianBCPercent": 6.647239662973803,
+        "candidateFasterBlocks": 0,
+        "candidateFasterThanControlBlocks": 0,
+        "controlFasterBlocks": 8,
+        "equalWorkBAPercent": 6.361149550866285,
+        "equalWorkBCPercent": 6.586715023028278,
+        "equalWorkCAPercent": -0.2116262539034519,
+        "coldPairedMedianBAPercent": 6.779717248001393,
+        "coldPairedMedianBCPercent": 7.147811751855038,
+        "coldPairedMedianCAPercent": 0.8945056389984218
+      },
+      "cpuTotalMs": {
+        "pairedMedianBAPercent": 6.462613079165392,
+        "pairedMedianCAPercent": -0.12570650273954764,
+        "pairedMedianBCPercent": 6.423139149094803,
+        "candidateFasterBlocks": 0,
+        "candidateFasterThanControlBlocks": 0,
+        "controlFasterBlocks": 7,
+        "equalWorkBAPercent": 6.1589631358072605,
+        "equalWorkBCPercent": 6.3979182914331245,
+        "equalWorkCAPercent": -0.22458630719760508,
+        "coldPairedMedianBAPercent": 5.381682993120096,
+        "coldPairedMedianBCPercent": 5.900689763089817,
+        "coldPairedMedianCAPercent": 0.4903382358924069
+      }
+    },
+    "sourceValidation": {
+      "status": "PASS",
+      "scopedLint": "test/term-bank-inflater.test.js",
+      "typeProjects": 4,
+      "unitTestsPassed": 15143,
+      "unitTestsSkipped": 47,
+      "unitTestFiles": 669,
+      "pinnedNativeArtifactsReproduced": 2,
+      "clangAndLldVersion": "21.1.8",
+      "nativeSanitizerCases": 231528,
+      "sanitizers": [
+        "address",
+        "undefined",
+        "leak"
+      ],
+      "nativeSanitizerCompiler": "GCC 15.2.0-16ubuntu1",
+      "nativeWordBytes": 8,
+      "buildScope": "npm run test:build -> node dev/bin/build.js --dryRun --all, seven targets; no validation-stage product ZIP build claimed",
+      "syntheticOracleChecks": 15,
+      "receiptObserverTests": 32
+    },
+    "keyOriginals": {
+      "componentArtifactZip": {
+        "artifactId": 15255017646,
+        "bytes": 375497,
+        "sha256": "baf07612795ba49af3294f4f92698ec7c1ad49c358ac738e20da6ee681cd89f7"
+      },
+      "componentJobLog": {
+        "bytes": 294528,
+        "sha256": "b8b8f3692cbcbce0115e52fa755dc9204a0467791349607050cddb98370db865"
+      },
+      "componentReport": {
+        "bytes": 1481911,
+        "sha256": "e99329f0eb72e0820f906415f4723639fc1f57513d0be463df734ce5058c2d1a"
+      },
+      "oracle": {
+        "bytes": 24318,
+        "sha256": "13ff5b6484b39637b61195578f1a505f1abdbb78ec5511d9978169f30a6062c3"
+      },
+      "invocation": {
+        "bytes": 11932,
+        "sha256": "428f3a789ca9ad708efb5e6b8c11e996f9d24a278df19efc434e2325bbfd554c"
+      },
+      "validationArtifactZip": {
+        "artifactId": 15253507283,
+        "bytes": 160484,
+        "sha256": "69eab665c19c68701eae005f6fb67958f46bdf1f4183b80615652aa5e0a3816c"
+      }
+    }
+  },
+  "decision": "Do not revive default libdeflate/wasm64 admission or the rejected short-word-store predicate. This specific rejection does not establish that every distinct decoder change is impossible, and it provides no positive speed claim."
+}
