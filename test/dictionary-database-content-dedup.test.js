@@ -111,7 +111,7 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, s
  * @param {number[]} [sourceValues]
  * @param {number} [hash1]
  * @param {number} [hash2]
- * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
+ * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveSourceConsumed: () => void, rejectSourceConsumed: (error: Error) => void, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
  */
 function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20) {
     const database = new DictionaryDatabase();
@@ -119,15 +119,35 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     Reflect.set(database, '_deferTermsVirtualTableSync', true);
     Reflect.set(database, '_termContentZstdInitialized', true);
 
+    /* eslint-disable @stylistic/semi */
+    /** @type {() => void} */
+    let resolveSourceConsumed = () => {}
+    /** @type {(error: Error) => void} */
+    let rejectSourceConsumed = () => {}
+    /** @type {Promise<void>} */
+    const sourceConsumed = new Promise((resolve, reject) => {
+        resolveSourceConsumed = () => resolve()
+        rejectSourceConsumed = reject
+    })
+    void sourceConsumed.catch(() => {})
+    /* eslint-enable @stylistic/semi */
     /** @type {() => void} */
     let resolveContent = () => {};
     /** @type {(error: Error) => void} */
     let rejectContent = () => {};
     const contentCompletion = new Promise((resolve, reject) => {
         resolveContent = () => {
+            /* eslint-disable @stylistic/semi */
+            resolveSourceConsumed()
+            /* eslint-enable @stylistic/semi */
             resolve({packMs: 1, compressMs: 2, envelopeMs: 3, referenceMs: 4, opfsAppendMs: 5});
         };
-        rejectContent = reject;
+        /* eslint-disable @stylistic/semi */
+        rejectContent = (error) => {
+            rejectSourceConsumed(error)
+            reject(error)
+        }
+        /* eslint-enable @stylistic/semi */
     });
     /** @type {() => void} */
     let resolveRecords = () => {};
@@ -156,7 +176,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     Reflect.set(database, '_termContentBlockImportSession', {
         tryBeginAppendSpans: vi.fn(() => ({
             initialSelection: true,
-            sourceConsumed: Promise.resolve(),
+            sourceConsumed,
             storage: Promise.resolve({
                 contentOffsets: new Float64Array([100]),
                 contentLengths: new Uint32Array([sourceValues.length]),
@@ -216,6 +236,8 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         plan,
         appendRecords,
         releaseBorrowedContent,
+        resolveSourceConsumed,
+        rejectSourceConsumed,
         resolveContent,
         rejectContent,
         resolveRecords,
@@ -2414,7 +2436,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
-    test('retains parser content until reserved content is durable', async () => {
+    test('releases parser content after gathering while reserved writes remain pending', async () => {
         const harness = createArtifactOverlapHarness();
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
         Reflect.set(harness.chunk, 'contentRowStart', 0);
@@ -2433,8 +2455,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             lengths: harness.plan.resolvedLengths,
         });
 
-        harness.resolveContent();
+        /* eslint-disable @stylistic/semi */
+        harness.resolveSourceConsumed()
+        /* eslint-enable @stylistic/semi */
         await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
+        harness.resolveContent();
         harness.resolveRecords();
         await importing;
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
@@ -2518,6 +2543,187 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('waits for exact persisted bytes after the parser overwrites its released content', async () => {
+        const original = Array.from({length: 1024}, (_, index) => index & 0xff)
+        const collision = [...original]
+        collision[17] ^= 0xff
+        const durable = Uint8Array.from(original)
+        const harness = createArtifactOverlapHarness(original)
+        const read = vi.fn(async () => durable)
+        const readDetailed = vi.fn(async () => ({status: 'ok', bytes: durable}))
+        const readDetailedBatch = vi.fn(async () => [
+            {status: 'ok', bytes: durable},
+            {status: 'ok', bytes: durable},
+        ])
+        Reflect.set(harness.database, '_termContentBlockStore', {read, readDetailed, readDetailedBatch})
+        const importing = harness.run()
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+
+        harness.resolveSourceConsumed()
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce())
+        const batches = Reflect.get(harness.database, '_inFlightTermContentSourceBatches')
+        expect(batches.size).toBe(1)
+        for (const batch of batches) {
+            expect(batch.contentBytes).toEqual([])
+            expect(batch.contentSpans).toBeNull()
+            expect(batch.pendingCompletion).toBeInstanceOf(Promise)
+        }
+        harness.chunk.contentBytesBuffer?.fill(0xee)
+
+        const find = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database)
+        const findBatch = Reflect.get(harness.database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(harness.database)
+        const primary = getMeta(harness.database, 10, 20)
+        if (typeof primary === 'undefined') { throw new Error('Expected published term content metadata') }
+        const duplicate = find(10, 20, Uint8Array.from(original))
+        const different = find(10, 20, Uint8Array.from(collision))
+        const compared = findBatch([
+            {hash1: 10, hash2: 20, contentBytes: Uint8Array.from(original), primary},
+            {hash1: 10, hash2: 20, contentBytes: Uint8Array.from(collision), primary},
+        ])
+        const publicRead = harness.database.readTermEntryContentBytesForDiagnostics(100, original.length, 'raw-block-v2:jmdict')
+        await Promise.resolve()
+        expect(read).not.toHaveBeenCalled()
+        expect(readDetailed).not.toHaveBeenCalled()
+        expect(readDetailedBatch).not.toHaveBeenCalled()
+
+        harness.resolveContent()
+        await expect(duplicate).resolves.toMatchObject({offset: 100, length: original.length})
+        await expect(different).resolves.toBeUndefined()
+        await expect(compared).resolves.toMatchObject([
+            {existingMeta: {offset: 100, length: original.length}, exactFallback: true},
+            {existingMeta: undefined, exactFallback: true},
+        ])
+        await expect(publicRead).resolves.toEqual(durable)
+        expect(read).toHaveBeenCalledOnce()
+        expect(readDetailed).toHaveBeenCalledTimes(2)
+        expect(readDetailedBatch).toHaveBeenCalledOnce()
+        harness.resolveRecords()
+        await importing
+        expect(batches.size).toBe(0)
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+    })
+
+    test('rejects pending readers with the persistence failure after releasing the parser', async () => {
+        const original = new Array(1024).fill(1)
+        const harness = createArtifactOverlapHarness(original)
+        const read = vi.fn()
+        const readDetailed = vi.fn()
+        Reflect.set(harness.database, '_termContentBlockStore', {read, readDetailed})
+        const failure = new Error('injected failure after source release')
+        const importing = harness.run()
+        const failedImport = expect(importing).rejects.toBe(failure)
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.resolveSourceConsumed()
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce())
+        harness.chunk.contentBytesBuffer?.fill(0xee)
+        const find = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database)
+        const comparison = expect(find(10, 20, Uint8Array.from(original))).rejects.toBe(failure)
+        const publicRead = expect(harness.database.readTermEntryContentBytesForDiagnostics(
+            100, original.length, 'raw-block-v2:jmdict',
+        )).rejects.toBe(failure)
+
+        harness.rejectContent(failure)
+        harness.resolveRecords()
+        await Promise.all([failedImport, comparison, publicRead])
+        expect(read).not.toHaveBeenCalled()
+        expect(readDetailed).not.toHaveBeenCalled()
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined()
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0)
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]))
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+    })
+
+    test('keeps parser content readable when source consumption fails before the terminal drain', async () => {
+        const harness = createArtifactOverlapHarness()
+        const failure = new Error('injected source consumption failure')
+        const importing = harness.run()
+        const rejected = expect(importing).rejects.toBe(failure)
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.rejectSourceConsumed(failure)
+        await Promise.resolve()
+        await Promise.resolve()
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled()
+        const findSource = Reflect.get(harness.database, '_findInFlightTermContentSource').bind(harness.database)
+        expect(findSource(100, 3, 'raw-block-v2:jmdict')).toMatchObject({
+            buffer: harness.chunk.contentBytesBuffer,
+            offset: 0,
+            length: 3,
+        })
+
+        harness.rejectContent(failure)
+        harness.resolveRecords()
+        await rejected
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0)
+    })
+
+    test('drains content persistence after record failure even when the parser has already resumed', async () => {
+        const harness = createArtifactOverlapHarness()
+        const failure = new Error('injected record append failure after source release')
+        let settled = false
+        const importing = harness.run().finally(() => { settled = true })
+        const rejected = expect(importing).rejects.toBe(failure)
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.resolveSourceConsumed()
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce())
+        harness.chunk.contentBytesBuffer?.fill(0xee)
+        harness.rejectRecords(failure)
+        await Promise.resolve()
+        await Promise.resolve()
+        expect(settled).toBe(false)
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(1)
+
+        harness.resolveContent()
+        await rejected
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0)
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined()
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]))
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+    })
+
+    test('drains every released reservation before rejecting a batched read', async () => {
+        const database = new DictionaryDatabase()
+        const register = Reflect.get(database, '_registerInFlightTermContentSources').bind(database)
+        const readDetailedBatch = vi.fn()
+        Reflect.set(database, '_termContentBlockStore', {readDetailedBatch})
+        /** @type {(reason: Error) => void} */
+        let rejectFirst = () => {}
+        const firstCompletion = new Promise((_resolve, reject) => { rejectFirst = reject })
+        /** @type {() => void} */
+        let resolveSecond = () => {}
+        /** @type {Promise<void>} */
+        const secondCompletion = new Promise((resolve) => { resolveSecond = () => resolve() })
+        const first = register([100], [1], 'raw', [Uint8Array.of(1)], null)
+        const second = register([200], [1], 'raw', [Uint8Array.of(2)], null)
+        first.releaseSource(firstCompletion)
+        second.releaseSource(secondCompletion)
+        expect(() => register([100], [1], 'raw', [Uint8Array.of(3)], null)).toThrow(
+            'Duplicate in-flight term content storage reference',
+        )
+        const readBatch = Reflect.get(database, '_readTermEntryContentBytesDetailedBatch').bind(database)
+        let settled = false
+        const reading = readBatch([
+            {contentOffset: 100, contentLength: 1, contentDictName: 'raw'},
+            {contentOffset: 200, contentLength: 1, contentDictName: 'raw'},
+        ]).finally(() => { settled = true })
+        const failure = new Error('injected first reservation failure')
+        const rejected = expect(reading).rejects.toBe(failure)
+        rejectFirst(failure)
+        await Promise.resolve()
+        await Promise.resolve()
+        expect(settled).toBe(false)
+        expect(readDetailedBatch).not.toHaveBeenCalled()
+
+        resolveSecond()
+        await rejected
+        expect(readDetailedBatch).not.toHaveBeenCalled()
+        first.unregister()
+        second.unregister()
+        expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('finds ordered and unordered in-flight content without per-entry maps', () => {
         const database = new DictionaryDatabase();
         const register = Reflect.get(database, '_registerInFlightTermContentSources').bind(database);
@@ -2552,8 +2758,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             'Duplicate in-flight term content storage reference',
         );
 
-        unregisterUnordered();
-        unregisterOrdered();
+        /* eslint-disable @stylistic/semi */
+        unregisterUnordered.unregister()
+        unregisterOrdered.unregister()
+        /* eslint-enable @stylistic/semi */
         expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
