@@ -3709,9 +3709,14 @@ EMPTY_BYTES;
             // Format4 needs two uint16 row keys plus at most one uint32 offset
             // and uint16 length per selected row. Sparse tables never require
             // reading a whole table or the span between distant reference IDs.
-            const rowBytes = referenceFormat ? 10 : (compact ?
-COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
-                (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ? FLOAT64_SCORE_RECORD_FIELDS_BYTES : LOOKUP_INDEX_RECORD_FIELDS_BYTES));
+            let rowBytes = LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+            if (referenceFormat) {
+                rowBytes = 10;
+            } else if (compact) {
+                rowBytes = COMPACT_RECORD_FIELDS_BYTES_PER_ROW;
+            } else if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE) {
+                rowBytes = FLOAT64_SCORE_RECORD_FIELDS_BYTES;
+            }
             const descriptorCharge = 64 + info.contentDictName.length * 2;
             const blockRange = typeof maxBlockReferences !== 'undefined' &&
             typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';
@@ -3724,12 +3729,16 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
             let scoreCount = 0;
             if (referenceLayout !== null) {
                 scoreCount = referenceLayout.scoreCount;
-                const rowKeys = await read(file,
+                const rowKeys = await read(
+                    file,
                     fieldsStart + referenceLayout.referenceKeysStart + position.row * 2,
-                    fieldsStart + referenceLayout.referenceKeysStart + (position.row + rows) * 2);
-                keys = await read(file,
+                    fieldsStart + referenceLayout.referenceKeysStart + (position.row + rows) * 2,
+                );
+                keys = await read(
+                    file,
                     fieldsStart + referenceLayout.scoreKeysStart + position.row * 2,
-                    fieldsStart + referenceLayout.scoreKeysStart + (position.row + rows) * 2);
+                    fieldsStart + referenceLayout.scoreKeysStart + (position.row + rows) * 2,
+                );
                 const rowKeyView = new DataView(rowKeys.buffer, rowKeys.byteOffset, rowKeys.byteLength);
                 const scoreKeyView = new DataView(keys.buffer, keys.byteOffset, keys.byteLength);
                 const order = new Uint32Array(rows);
@@ -3758,12 +3767,16 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                         lastKey = key;
                         ++end;
                     }
-                    const offsetBytes = await read(file,
+                    const offsetBytes = await read(
+                        file,
                         fieldsStart + referenceLayout.offsetsStart + firstKey * 4,
-                        fieldsStart + referenceLayout.offsetsStart + (lastKey + 1) * 4);
-                    const lengthBytes = await read(file,
+                        fieldsStart + referenceLayout.offsetsStart + (lastKey + 1) * 4,
+                    );
+                    const lengthBytes = await read(
+                        file,
                         fieldsStart + referenceLayout.lengthsStart + firstKey * 2,
-                        fieldsStart + referenceLayout.lengthsStart + (lastKey + 1) * 2);
+                        fieldsStart + referenceLayout.lengthsStart + (lastKey + 1) * 2,
+                    );
                     const offsetView = new DataView(offsetBytes.buffer, offsetBytes.byteOffset, offsetBytes.byteLength);
                     const lengthView = new DataView(lengthBytes.buffer, lengthBytes.byteOffset, lengthBytes.byteLength);
                     for (let index = start; index < end; ++index) {
