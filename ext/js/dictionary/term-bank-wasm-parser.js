@@ -27,7 +27,7 @@ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-
 import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
-import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
+import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-limits.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;

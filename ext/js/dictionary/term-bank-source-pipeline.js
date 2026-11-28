@@ -17,6 +17,9 @@
 
 import {deferPromise} from '../core/utilities.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
+import {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './term-bank-source-limits.js';
+
+export {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES};
 
 const SOURCE_TERM_BANK_BATCH_MAX_FILES = 80;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
@@ -30,10 +33,6 @@ const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
 const RAW_ZIP_BATCH_MAX_RANGE_BYTES = 16 * 1024 * 1024;
 const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
-
-export const RAW_ZIP_BATCH_MAX_FILES = 1024;
-
-export const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
