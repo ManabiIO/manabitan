@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "kind": "Retained untimed scanner work model and exact static WASM bytecode inspection",
+  "noPerformanceObservation": true,
+  "sourceMask": "2cdcc90241fa19221b7fc4e5d793eb70896c3258",
+  "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "archive": {
+    "path": "mask-census-evidence.tar.gz",
+    "bytes": 388605,
+    "sha256": "db882f6787ca177f59d57935a537d09a161330827603d838ef7464cc156a91f8"
+  },
+  "verifierSha256": "f6365e590eaa078f110bfa27c02c7642c6da7ec0bc91cf9e144c4f924f180f99",
+  "members": {
+    "baseline.c": {
+      "bytes": 158441,
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    "baseline.wasm": {
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "bytecode-hold.json": {
+      "bytes": 11896,
+      "sha256": "cac9b8825c6d80a890e6efc45af340b24e015f6b00aa942dd157be94df7462f1"
+    },
+    "census-receipt.json": {
+      "bytes": 377,
+      "sha256": "b3cca6acac6c643113489b795e2328fc004e36ce3aa12835f80182dc3f29ae0e"
+    },
+    "census.log": {
+      "bytes": 4699,
+      "sha256": "f5045b6b45dd193a45944b4738d87449d083905694561b1ae1b96e4cbf3cf3e3"
+    },
+    "conditional-call-path-review.json": {
+      "bytes": 5416,
+      "sha256": "caa186c0609876a1877b89451e69f2964d48d8f6aa1ba7fc7a0c1397d7be58e2"
+    },
+    "disassemble.mjs": {
+      "bytes": 1953,
+      "sha256": "c036516268321d66d94029296964a6481975478709a9f961eb1c5d91166410be"
+    },
+    "existing-group-census.json": {
+      "bytes": 36355,
+      "sha256": "5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904"
+    },
+    "mask-bytecode.json": {
+      "bytes": 1838101,
+      "sha256": "35bfb230275fb720282beddd21ce953b2346a426fe0dba98a656f9a3d6282078"
+    },
+    "mask.c": {
+      "bytes": 161814,
+      "sha256": "3c5c6d89a44356e2f0c3af8636f82a4a77a1f7212891161707e4465acaa2ca5e"
+    },
+    "mask.wasm": {
+      "bytes": 67892,
+      "sha256": "6b327b4b5c85a973b1e2344276bb5476b6d036b197d87ab03b2a930ed50059eb"
+    },
+    "mask.wat": {
+      "bytes": 989825,
+      "sha256": "e684614355dd83657570fdd9469699fc5d0f7d70aa99e032d4652667af4aff5b"
+    },
+    "model-review.json": {
+      "bytes": 3302,
+      "sha256": "cf075413460d411b279f926560ebcfc2b47eb6d9a5c9af32a073c3eb7fa7b4db"
+    },
+    "plan.json": {
+      "bytes": 1290,
+      "sha256": "85a0456dbbf5477225d003cb3b550ae1f87050da96af3412684f02c451be3ba5"
+    },
+    "preflight-1-runner.mjs": {
+      "bytes": 22482,
+      "sha256": "4bc2f132460d3e3948fea129bb3efe95c7eeb563013b0112fd1077e7bc328b02"
+    },
+    "preflight-history.json": {
+      "bytes": 643,
+      "sha256": "af323ef3c7a079687d0dea27d8835ecb6c36dfc2ec5816f47a2c9c3d4180831c"
+    },
+    "result/report.json": {
+      "bytes": 83293,
+      "sha256": "0e72c3481928dd8213b62814cfd4ef3e0cb5a6754030bc6ce6f18ffa50cf7a39"
+    },
+    "runtime.json": {
+      "bytes": 394,
+      "sha256": "3fb3cd28caf6c3f4a7b0ae561cf3e5a228769e452fc0f441120066c87ce1d3e6"
+    },
+    "scan-window-census.mjs": {
+      "bytes": 22869,
+      "sha256": "f4592074cb5e16a17e8ef206002beb4b5868d1d10ecec8944ecf21a6b358f02a"
+    },
+    "self-test-receipt.json": {
+      "bytes": 390,
+      "sha256": "2545ad057643b5b67e2ad9bf3bae0b1df7117087d3b1e9fd2ce5f4e5fa32a923"
+    },
+    "storage-independent-review.json": {
+      "bytes": 4474,
+      "sha256": "d1dab6c0641f011529b684660517b2986012d1df3c2a33a413f0c94ecc68ac98"
+    },
+    "storage-review.py": {
+      "bytes": 12710,
+      "sha256": "14beac36da0d55c6f680a734da9b4ab15702feebbe130cb48cb94b17ed97f119"
+    },
+    "storage-review.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "storage-review.stdout.log": {
+      "bytes": 219,
+      "sha256": "b4bef0ec1720e446d1f0d398faff42800c193de26da691cef7f2860040fc0fe9"
+    },
+    "verify-mask-census.py": {
+      "bytes": 11789,
+      "sha256": "f6365e590eaa078f110bfa27c02c7642c6da7ec0bc91cf9e144c4f924f180f99"
+    }
+  },
+  "preservedLimitations": [
+    "Source-operation model, not native instrumentation, machine instructions, memory traffic or speed",
+    "Exactly one full locked JMdict census; no WASM instantiated or imported dictionary",
+    "Node24 only executes byte-level model and formats existing bytecode; no Node24 performance comparison",
+    "Zero text-normalization hints and independent no-media/no-fallback path audit are required to make primary-glossary calls exhaustive",
+    "WASM cache fields are locals; zero-mask store-elision proposal held",
+    "Model cannot override noisy or negative complete-browser comparisons"
+  ]
+}

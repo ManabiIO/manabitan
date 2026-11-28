@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "kind": "Evidence-only current JMdict trace/census and source-backed HOLD follow-up; no new performance observation",
+  "kind": "Evidence-only current JMdict trace/census, source-backed HOLD and scanner work-count follow-ups; no new performance observation",
   "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
   "suffixCandidateCommit": "38031a752b26c9b630e5f2f1d45e780786656c74",
   "originalArtifact": {
@@ -154,6 +154,22 @@
     "startup/independent-review.json": {
       "bytes": 4674,
       "sha256": "adb01b40b33c1ce36d4bf240014dcf0f8bdbc0575116f83216721cfd2ade6556"
+    },
+    "mask-census/independent-pack-review.json": {
+      "bytes": 5024,
+      "sha256": "21e0c5da18928f83b4bbb79b4c024a778be8ccb0d60dffc405a85586538bee35"
+    },
+    "mask-census/mask-census-evidence.tar.gz": {
+      "bytes": 388605,
+      "sha256": "db882f6787ca177f59d57935a537d09a161330827603d838ef7464cc156a91f8"
+    },
+    "mask-census/mask-census-manifest.json.txt": {
+      "bytes": 4651,
+      "sha256": "7d95451e5469a5a49a68527690a1c153ea6211266730d06b8cb293b2a172c523"
+    },
+    "mask-census/verify-mask-census.py": {
+      "bytes": 11789,
+      "sha256": "f6365e590eaa078f110bfa27c02c7642c6da7ec0bc91cf9e144c4f924f180f99"
     }
   }
 }

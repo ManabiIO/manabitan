@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_READ_ONLY_PACK_REVIEW",
+  "noCensusRerun": true,
+  "noWasmCompilationOrInstantiation": true,
+  "noTimingAcquisition": true,
+  "archive": {
+    "path": "mask-census-evidence.tar.gz",
+    "bytes": 388605,
+    "sha256": "db882f6787ca177f59d57935a537d09a161330827603d838ef7464cc156a91f8"
+  },
+  "manifestSha256": "7d95451e5469a5a49a68527690a1c153ea6211266730d06b8cb293b2a172c523",
+  "verifierSha256": "f6365e590eaa078f110bfa27c02c7642c6da7ec0bc91cf9e144c4f924f180f99",
+  "memberCount": 25,
+  "payloadBytes": 3508283,
+  "originalMembersByteCompared": [
+    "baseline.c",
+    "baseline.wasm",
+    "bytecode-hold.json",
+    "census-receipt.json",
+    "census.log",
+    "conditional-call-path-review.json",
+    "disassemble.mjs",
+    "existing-group-census.json",
+    "mask-bytecode.json",
+    "mask.c",
+    "mask.wasm",
+    "mask.wat",
+    "model-review.json",
+    "plan.json",
+    "preflight-1-runner.mjs",
+    "preflight-history.json",
+    "result/report.json",
+    "runtime.json",
+    "scan-window-census.mjs",
+    "self-test-receipt.json",
+    "storage-independent-review.json",
+    "storage-review.py",
+    "storage-review.stderr.log",
+    "storage-review.stdout.log",
+    "verify-mask-census.py"
+  ],
+  "nativeGitBindings": [
+    "baseline.c",
+    "baseline.wasm",
+    "mask.c",
+    "mask.wasm"
+  ],
+  "commands": [
+    {
+      "mode": "portable",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/home/agent/manabitan-mask-census-pack-5a86/verify-mask-census.py",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "01a883c25d87b975d8f85c534057ee04414e9eb0c4c2acd92df91a3d39e23623",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "optimized-rejection",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "/home/agent/manabitan-mask-census-pack-5a86/verify-mask-census.py"
+      ],
+      "exitCode": 1,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "cef1dbb707815cfaafa18e3b03ef4177e9188f3d9f884f969fa169713ac2381d"
+    }
+  ],
+  "additionalNegativeChecks": [
+    "wrong-bytecode-offset",
+    "linear-store-claim",
+    "wrong-frozen-module"
+  ],
+  "rawOpcodeChecks": [
+    {
+      "offset": 19664,
+      "bytesHex": "2118",
+      "meaning": "window end local.set24"
+    },
+    {
+      "offset": 19747,
+      "bytesHex": "fd64",
+      "meaning": "i8x16.bitmask"
+    },
+    {
+      "offset": 19749,
+      "bytesHex": "2217",
+      "meaning": "special mask local.tee23"
+    },
+    {
+      "offset": 19764,
+      "bytesHex": "2119",
+      "meaning": "window start local.set25"
+    },
+    {
+      "offset": 19771,
+      "bytesHex": "2117",
+      "meaning": "zero special mask local.set23"
+    },
+    {
+      "offset": 19775,
+      "bytesHex": "2119",
+      "meaning": "zero branch window start local.set25"
+    }
+  ],
+  "analysis": {
+    "primaryGlossaryCalls": 473658,
+    "genericStringCalls": 7506626,
+    "baseline8ByteClassifications": 11595488,
+    "candidateFresh16ByteClassifications": 6023609,
+    "hypotheticalPerStringReset16ByteClassifications": 8629674,
+    "crossStringPersistenceClassificationDifference": 2606065,
+    "candidateClassifiedByteSum": 96377744,
+    "baselineClassifiedByteSum": 92763904,
+    "candidateMinusBaselineClassifiedByteSum": 3613840,
+    "candidateMinusResetSourceLoopIterations": 1225585,
+    "fullyCoveredByPriorWindowCalls": 2262893,
+    "normalizationRows": 0
+  },
+  "scope": [
+    "All 25 archived payloads match separately retained originals; four native source/module bytes match exact baseline and candidate Git objects.",
+    "Portable verification recomputes all twelve group totals, fixed bank identities, path guards and source-operation arithmetic; five built-in report mutations and three additional bytecode mutations reject.",
+    "Exact bytecode offsets independently contain the declared local operations and SIMD bitmask, with no linear-memory stores in the retained classifier/range/zero-mask region. This is WebAssembly bytecode, not browser machine-code evidence.",
+    "The completed source model validates 473658 primary glossary calls conditional on the separate no-media/no-fallback audit and zero raw text-normalization hints. The per-string-reset arm is analytical only.",
+    "Classified-byte sums overlap and are not physical memory traffic. Source comparisons, loop iterations and assignments are not costs, native counters or speed estimates.",
+    "No census replay, parser import, extra correctness qualification, timing retry or product proposal was performed. The frozen browser cohort retains authority over performance."
+  ],
+  "preflightCorrection": "The original full-coverage counter defect and corrected f4592074 model remain archived; the no-slack boundary regression was fixed before the only corpus pass."
+}
