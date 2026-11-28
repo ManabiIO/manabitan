@@ -2,8 +2,8 @@
   "schema": 1,
   "repository": "ManabiIO/manabitan",
   "task": "Optimize JMdict, Jitendex and VNDB imports, prioritize JMdict, open PRs only for gains worth review, do not use Work mode",
-  "recordedAtUtc": "2026-11-28 07:05:40 UTC",
-  "status": "In progress. Four approaches closed without PR; native score transport qualification pending. Local execution unavailable since 2026-11-28 06:58:35 UTC; remote GitHub monitoring remains available.",
+  "recordedAtUtc": "2026-11-28 07:28:16 UTC",
+  "status": "In progress. Completed screens, including original native score transport, establish no repeatable complete-import gain. Corrected-source 12-pair browser qualification and hosted source gates remain queued. Local execution recovered with files intact.",
   "baseline": {
     "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
     "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
@@ -199,7 +199,8 @@
     "coverageLimitMs": 250,
     "measuredMemoryBoundFailures": 0,
     "qualificationBoundary": "Incomplete coverage does not support a full memory conclusion. Zero measured bound failures is not a blanket memory-nonregression claim.",
-    "originalDecisionMatrixSha256": "13f9673be9d1b3035c46efedd7cd93c1fa2f2269f4ff2e0eea0a823d7da1318c"
+    "originalDecisionMatrixSha256": "13f9673be9d1b3035c46efedd7cd93c1fa2f2269f4ff2e0eea0a823d7da1318c",
+    "scope": "Six completed non-native cohorts; original-native totals are recorded separately below"
   },
   "cacheStageCalibration": {
     "dictionary": "jmdict",
@@ -244,7 +245,7 @@
     "originalAuditContractSha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
     "codeValidation": {
       "originalV1": "673 unit files /15198 tests passed,47 skipped. Lint45 errors and one test type error were identified and corrected in final source; original bench TS did not run.",
-      "finalFocused": "73 tests in4 files and full type closure of all6 changed test files passed. Main/dev full TS passed locally; remaining full checks queued remotely.",
+      "finalFocused": "73 focused tests in four files and the full type closure of all six changed test files passed. Main/dev full TS, benchmark full TS and scoped lint pass locally. Full local unit attempt has only compiler setup gaps after targeted sparse-checkout reruns; full test TS is blocked by linked dependency diagnostics identical to frozen baseline. Hosted clean-dependency gates remain pending.",
       "corpusParity": {
         "replayCommit": "49b426371ace2542710ab2b7a3e0e0915b6c4e35",
         "groups": 204,
@@ -262,42 +263,87 @@
         "runtimeBridgeSha256": "1cc775d5d0841104a40e647b2b8d18779b1fe4d4939b89bea8af1b89cad595bb",
         "boundary": "All groups/rows exact record and lookup-byte parity through production parser route options, synthetic private content offsets and captured append IO. Not browser persistence, all-media import, elapsed-time or peak-memory proof. Final runtime differs only by independently checked comments/layout and unshadowed undefined-to-void0 spelling; later changes are tests only.",
         "tailInvocation": "Initial last-part selection count10 was rejected by the unchanged combiner. Historical receipt and rejection retained; accepted aggregate uses rerun requested count32 clipped to10 remaining groups. No rule, runner, manifest or source change."
-      }
-    },
-    "originalPrintedResultsProvisional": {
-      "source": "Completed GitHub job logs; independent new-artifact audit blocked by unavailable execution environment.",
-      "jmdict": {
-        "medianPercent": -1.7266,
-        "equalWorkPercent": -0.5376,
-        "fasterPairs": 3,
-        "pairs": 6,
-        "identicalControlMedianPercent": -3.2283,
-        "conclusion": "No worthwhile gain established from printed summary"
       },
-      "vndb": {
-        "medianPercent": -0.088,
-        "equalWorkPercent": 0.2489,
-        "fasterPairs": 3,
-        "pairs": 6,
-        "identicalControlMedianPercent": 2.5946,
-        "conclusion": "Essentially flat; combined memory/semantic gate failed, exact reason not yet established"
-      },
-      "artifacts": [
-        {
-          "dictionary": "jmdict",
-          "id": 15253170104,
-          "bytes": 36081099,
-          "sha256": "e5fa6d613523850affc71a902751beeb05b7934537201be3815b3256acef6ca7",
-          "independentAudit": "pending"
+      "afterRecovery": {
+        "recorded_at_utc": "2026-11-28T07:26:40.558656+00:00",
+        "local_commit": "2c744b53f51abc5c53d855d60597b9e619725d45",
+        "tree": "cb45e5071784ec13fabe8d64494399c65480878c",
+        "git_status": "",
+        "remote_product_commit": "13e7a7e6c1568de0af563d0577385e9ba16892c1",
+        "scoped_lint": {
+          "exit_code": 0,
+          "files": 13
         },
-        {
-          "dictionary": "vndb",
-          "id": 15253075614,
-          "bytes": 35153034,
-          "sha256": "92dcd111f4a250742fbfbb857bfd10fc72ab29f10e3372494f1801680a480020",
-          "independentAudit": "pending"
-        }
-      ]
+        "benchmark_types": {
+          "exit_code": 0
+        },
+        "full_unit_attempt": {
+          "exit_code": 1,
+          "result": "665 files passed; 9 failed from local setup gaps",
+          "limitations": [
+            "Seven failing files needed tracked .github/ and web/ paths excluded by the sparse checkout. Those paths were materialized without changing source and all seven files passed on targeted rerun.",
+            "Two C regression suites cannot run locally because no supported WebAssembly compiler is installed. Full hosted final-source gate remains pending."
+          ]
+        },
+        "sparse_setup_targeted_rerun": {
+          "exit_code": 0,
+          "files": 7
+        },
+        "full_test_types": {
+          "exit_code": 2,
+          "baseline_identical": true,
+          "diagnostics": 918,
+          "limitation": "All diagnostics arise in linked selenium-webdriver dependencies; final and frozen baseline logs are byte-identical. This is not a passing full test type gate."
+        },
+        "logs": [
+          {
+            "path": "native-score-evidence/final-source-full-unit-after-recovery.log",
+            "bytes": 28701,
+            "sha256": "0a556e2720c150b6f8ea8f1fd1951df6a66792ec5fa93fa125833ff8252048ab",
+            "summary_lines": [
+              "⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯",
+              " Test Files  9 failed | 665 passed (674)",
+              "      Tests  10 failed | 15160 passed | 68 skipped (15238)",
+              "   Duration  477.80s (transform 8.24s, setup 4.37s, import 87.49s, tests 289.68s, environment 297ms)"
+            ]
+          },
+          {
+            "path": "native-score-evidence/final-source-sparse-setup-regressions.log",
+            "bytes": 235,
+            "sha256": "a576eefbe339f3165252fb82f8a3634123f011bed536aca46da9b8d87d573a26",
+            "summary_lines": [
+              " Test Files  7 passed (7)",
+              "      Tests  69 passed (69)",
+              "   Duration  1.96s (transform 54ms, setup 64ms, import 85ms, tests 657ms, environment 1ms)"
+            ]
+          },
+          {
+            "path": "native-score-evidence/final-source-scoped-lint-after-recovery.log",
+            "bytes": 694,
+            "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+            "summary_lines": []
+          },
+          {
+            "path": "native-score-evidence/final-source-full-bench-types-after-recovery.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "summary_lines": []
+          },
+          {
+            "path": "native-score-evidence/final-source-full-test-types-after-recovery.log",
+            "bytes": 169155,
+            "sha256": "2cf50a09da2e95a459f47995eebd4fbacf753747b9f08a48118e0c8657986722",
+            "summary_lines": []
+          },
+          {
+            "path": "native-score-evidence/baseline-full-test-types-after-recovery.log",
+            "bytes": 169155,
+            "sha256": "2cf50a09da2e95a459f47995eebd4fbacf753747b9f08a48118e0c8657986722",
+            "summary_lines": []
+          }
+        ],
+        "source_mutations": "none; only local sparse checkout coverage expanded"
+      }
     },
     "componentDiagnostic": {
       "evidenceSha256": "f9e506ac9eedac6f5a98714d75619e1cff50437568081c0f1110e346655cf27f",
@@ -308,6 +354,1846 @@
       "groupsWithLowerMedian": 12,
       "pairsPerGroup": 24,
       "interpretation": "Only about4.19ms of warmed component work in this diagnostic; no whole-import prediction."
+    },
+    "originalIndependentAudit": {
+      "schemaVersion": 1,
+      "createdAt": "2026-11-28T07:16:19.006745+00:00",
+      "cohort": "original-native-v1",
+      "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "allIndependentAuditsComplete": true,
+      "performanceQualified": false,
+      "publicationEligible": false,
+      "interpretation": "No repeatable whole-import gain established by these six-pair screens. Every timing and control pair is retained. Original v1 also predates the compact-source origin correction; corrected source has a separate frozen cohort and is not pooled with v1. Memory coverage failures are not measured regressions. Native counters prove cumulative owned transport avoidance and route admission only.",
+      "totals": {
+        "browserImportAndSemanticObservations": 78,
+        "ordinaryObservationsIncludingWarmups": 60,
+        "candidatePairs": 18,
+        "identicalCodeControlPairs": 6,
+        "warmupObservations": 12,
+        "allMediaObservations": 6,
+        "memoryObservations": 12,
+        "rawMemoryScans": 1197,
+        "semanticFailures": 0,
+        "nativeAdmissionOrParserInvariantDeviations": 0,
+        "memoryPassedCells": 2,
+        "memoryCoverageIncompleteCells": 1,
+        "memoryObservationsWithCoverageFailure": 1,
+        "measuredMemoryBoundRegressions": 0,
+        "sourceBoundDiagnosticTraceObservationsExcludedFromStatistics": 2
+      },
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "provenance": {
+            "artifactId": 15253170104,
+            "artifactSha256": "e5fa6d613523850affc71a902751beeb05b7934537201be3815b3256acef6ca7",
+            "artifactBytes": 36081099,
+            "runId": 46109112015,
+            "jobId": 140868435739,
+            "productCommit": "cc369aec9d0233b8491bcef4d82d185eb5c5086d",
+            "productTree": "36bb2d4855b04ea6ee1d2209db1ee94238221c7c",
+            "studyCommit": "1540e0e3451956cd9757780879a02ef41ec9505a",
+            "auditorSha256": "664eadfa4445560a2b2756a4e25ef8c4f8e1e0fe7cabb833d3aff0845dd5a134",
+            "contractSha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
+            "independentAuditSha256": "76ff682d2c2aa84a625412e72d63b181d3a2d1c8a982c77d50fe1310a694c9c2"
+          },
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -5.455800353022444,
+              6.108181445541705
+            ],
+            "equalWorkChangePercent": -0.5376018108690817,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -1.7266172739571761,
+            "ratios": [
+              0.9408534492620853,
+              1.0443942814145897,
+              0.9502366932225013,
+              1.0777693474962444,
+              1.0152309612983552,
+              0.9500305436774659
+            ],
+            "worstPairChangePercent": 7.776934749624442
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -8.68802619270539,
+              2.2313637496913064
+            ],
+            "equalWorkChangePercent": -3.402920236514684,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -3.2283312215070414,
+            "ratios": [
+              1.022313637496913,
+              0.9131197380729461
+            ],
+            "worstPairChangePercent": 2.2313637496913064
+          },
+          "nativeTransportAdmission": {
+            "passed": true,
+            "expectedCandidateCounters": {
+              "NativeScorePlanGroups": 12,
+              "NativeScorePlanRows": 528299,
+              "NativeScorePlanBytesAvoided": 1043222
+            },
+            "referenceBaselineObservation": "warmup-1-A",
+            "deviations": [],
+            "interpretation": "Cumulative owned transport bytes and route admission only; not peak memory or timing evidence"
+          },
+          "verifiedSemanticObservations": 26,
+          "memoryAudit": {
+            "schemaVersion": 1,
+            "observations": 4,
+            "rawScanCount": 352,
+            "everyObservationQualified": true,
+            "passesProspectiveMemoryScreen": true,
+            "metrics": {
+              "maxSampledPssKiB": {
+                "medianPairedChangePercent": -1.3298127912568902,
+                "maximumPairedChangePercent": -0.5054422767769573
+              },
+              "maxSampledPrivateKiB": {
+                "medianPairedChangePercent": -1.5835273485527268,
+                "maximumPairedChangePercent": -0.1817995595841615
+              }
+            }
+          },
+          "failedMemoryObservations": [],
+          "memoryClassification": "passed",
+          "auditDirectory": "/workspace/scratch/2ed731c9ad68/native-score-evidence/hosted-v1-jmdict",
+          "retainedRawArchive": {
+            "retainedPath": "/workspace/scratch/2ed731c9ad68/native-score-evidence/retained-v1-jmdict-raw.zip",
+            "retainedBytes": 2653534,
+            "retainedSha256": "5da14cd51d5f3ca04c01ca97dc46fdcdfe4a1ba66bacbc0954326a02e8e3931d",
+            "allNonPackageEntriesRetainedAndRehashed": true
+          },
+          "diagnosticTraceMembers": [
+            "diagnostic-trace-A/run-1.html",
+            "diagnostic-trace-A/run-1.json",
+            "diagnostic-trace-A/run-1.trace.json",
+            "diagnostic-trace-A/summary.json",
+            "diagnostic-trace-B/run-1.html",
+            "diagnostic-trace-B/run-1.json",
+            "diagnostic-trace-B/run-1.trace.json",
+            "diagnostic-trace-B/summary.json"
+          ]
+        },
+        {
+          "dictionary": "jitendex",
+          "provenance": {
+            "artifactId": 15253835421,
+            "artifactSha256": "75749a493c537cc26e2be820cc91db5967bf7be5de8b65328d855bdc91297dbb",
+            "artifactBytes": 35123946,
+            "runId": 46109112015,
+            "jobId": 140868435752,
+            "productCommit": "cc369aec9d0233b8491bcef4d82d185eb5c5086d",
+            "productTree": "36bb2d4855b04ea6ee1d2209db1ee94238221c7c",
+            "studyCommit": "1540e0e3451956cd9757780879a02ef41ec9505a",
+            "auditorSha256": "664eadfa4445560a2b2756a4e25ef8c4f8e1e0fe7cabb833d3aff0845dd5a134",
+            "contractSha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
+            "independentAuditSha256": "9d086061b59f890117cd5f7f9b904a10f6a59fefa372da125a6e142d817ec373"
+          },
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -2.614156677701285,
+              1.8019538275250824
+            ],
+            "equalWorkChangePercent": -0.42897269853293674,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.3803534352432747,
+            "ratios": [
+              0.9993069993069993,
+              0.9913774825075997,
+              0.9930859319881351,
+              0.9563393839383745,
+              1.0106833010683258,
+              1.025355775482176
+            ],
+            "worstPairChangePercent": 2.5355775482176046
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.3490116866240687,
+              0.508960573477113
+            ],
+            "equalWorkChangePercent": -0.41708614986253334,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.42002555657347784,
+            "ratios": [
+              1.0050896057347711,
+              0.9865098831337593
+            ],
+            "worstPairChangePercent": 0.508960573477113
+          },
+          "nativeTransportAdmission": {
+            "passed": true,
+            "expectedCandidateCounters": {
+              "NativeScorePlanGroups": 22,
+              "NativeScorePlanRows": 436555,
+              "NativeScorePlanBytesAvoided": 868106
+            },
+            "referenceBaselineObservation": "warmup-1-A",
+            "deviations": [],
+            "interpretation": "Cumulative owned transport bytes and route admission only; not peak memory or timing evidence"
+          },
+          "verifiedSemanticObservations": 26,
+          "memoryAudit": {
+            "schemaVersion": 1,
+            "observations": 4,
+            "rawScanCount": 399,
+            "everyObservationQualified": true,
+            "passesProspectiveMemoryScreen": true,
+            "metrics": {
+              "maxSampledPssKiB": {
+                "medianPairedChangePercent": 1.4578253506407512,
+                "maximumPairedChangePercent": 1.9462992841100313
+              },
+              "maxSampledPrivateKiB": {
+                "medianPairedChangePercent": 1.6082751756099634,
+                "maximumPairedChangePercent": 2.182273285253955
+              }
+            }
+          },
+          "failedMemoryObservations": [],
+          "memoryClassification": "passed",
+          "auditDirectory": "/workspace/scratch/2ed731c9ad68/native-score-evidence/hosted-v1-jitendex",
+          "retainedRawArchive": {
+            "retainedPath": "/workspace/scratch/2ed731c9ad68/native-score-evidence/retained-v1-jitendex-raw.zip",
+            "retainedBytes": 1687695,
+            "retainedSha256": "cc694de5dfeb71dd3debbb2647b01a1227f389f87609e388482bca8596d85999",
+            "allNonPackageEntriesRetainedAndRehashed": true
+          },
+          "diagnosticTraceMembers": []
+        },
+        {
+          "dictionary": "vndb",
+          "provenance": {
+            "artifactId": 15253075614,
+            "artifactSha256": "92dcd111f4a250742fbfbb857bfd10fc72ab29f10e3372494f1801680a480020",
+            "artifactBytes": 35153034,
+            "runId": 46109112015,
+            "jobId": 140868435786,
+            "productCommit": "cc369aec9d0233b8491bcef4d82d185eb5c5086d",
+            "productTree": "36bb2d4855b04ea6ee1d2209db1ee94238221c7c",
+            "studyCommit": "1540e0e3451956cd9757780879a02ef41ec9505a",
+            "auditorSha256": "664eadfa4445560a2b2756a4e25ef8c4f8e1e0fe7cabb833d3aff0845dd5a134",
+            "contractSha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
+            "independentAuditSha256": "f453f8ff472a95c8986af1a3e4fbee9ff050d6efa8794eddc9ef61e5d2685a4a"
+          },
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -0.6891293114846042,
+              1.5686288874539933
+            ],
+            "equalWorkChangePercent": 0.24888741808588577,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.08800796248331633,
+            "ratios": [
+              1.0007531223196118,
+              0.997486718430722,
+              0.997280386062504,
+              1.0110156515821682,
+              1.0203569261669116,
+              0.9889370277078039
+            ],
+            "worstPairChangePercent": 2.035692616691165
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              1.3788548074141982,
+              3.8102511880497847
+            ],
+            "equalWorkChangePercent": 2.577891234750318,
+            "fasterPairs": 0,
+            "medianPairedChangePercent": 2.5945529977319914,
+            "ratios": [
+              1.013788548074142,
+              1.0381025118804978
+            ],
+            "worstPairChangePercent": 3.8102511880497847
+          },
+          "nativeTransportAdmission": {
+            "passed": true,
+            "expectedCandidateCounters": {
+              "NativeScorePlanGroups": 170,
+              "NativeScorePlanRows": 6648310,
+              "NativeScorePlanBytesAvoided": 13294580
+            },
+            "referenceBaselineObservation": "warmup-1-A",
+            "deviations": [],
+            "interpretation": "Cumulative owned transport bytes and route admission only; not peak memory or timing evidence"
+          },
+          "verifiedSemanticObservations": 26,
+          "memoryAudit": {
+            "schemaVersion": 1,
+            "observations": 4,
+            "rawScanCount": 446,
+            "everyObservationQualified": false,
+            "passesProspectiveMemoryScreen": false,
+            "metrics": {
+              "maxSampledPssKiB": {
+                "medianPairedChangePercent": null,
+                "maximumPairedChangePercent": null
+              },
+              "maxSampledPrivateKiB": {
+                "medianPairedChangePercent": null,
+                "maximumPairedChangePercent": null
+              }
+            }
+          },
+          "failedMemoryObservations": [
+            {
+              "name": "B1",
+              "qualificationFailures": [
+                "covered-import-scan-gap-over-250ms"
+              ],
+              "maximumCoveredSampleGapMs": 284.865473,
+              "preImportBracketGapMs": 67.659545,
+              "postImportBracketGapMs": 99.985754,
+              "qualified": false
+            }
+          ],
+          "memoryClassification": "incomplete-coverage",
+          "auditDirectory": "/workspace/scratch/2ed731c9ad68/native-score-evidence/hosted-v1-vndb",
+          "retainedRawArchive": {
+            "retainedPath": "/workspace/scratch/2ed731c9ad68/native-score-evidence/retained-v1-vndb-raw.zip",
+            "retainedBytes": 1721672,
+            "retainedSha256": "4f525ee575baaf2a3c83902f201f3baafc31759d07e32a84a54224c92c0cd6b7",
+            "allNonPackageEntriesRetainedAndRehashed": true
+          },
+          "diagnosticTraceMembers": []
+        }
+      ]
+    },
+    "originalDiagnosticAttribution": {
+      "diagnosticOnly": true,
+      "bindingSha256": "65731c1385620cc4117298dc28c8fccf715d5c2dc64b2aa1a2a238af7383b5ad",
+      "samplerSha256": "5074952e36836c5a4a6c7a2c84a5f82227c09b068e89d195c67324f3a565b488",
+      "arms": {
+        "A": {
+          "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "localImmutableSourceEquivalent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "recordSourceSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "sampleOutputSha256": "3fe723908a0266f545924a7fca76760239c44b79c3ffc752d932cea781752541",
+          "quality": {
+            "profiles": 11,
+            "samples": 39255,
+            "negativeDeltas": 360,
+            "missingNodeSamples": 0,
+            "unpairedSamplesOrDeltas": 0,
+            "maximumDeltaMicroseconds": 143052
+          },
+          "sink": {
+            "pid": 12863,
+            "thread": 12889,
+            "samples": 4276,
+            "idleSelfSamples": 1394,
+            "targets": {
+              "_cacheRecentPublishedTermContentSources": {
+                "selfSamples": 80,
+                "inclusiveSamples": 80,
+                "selfSourceLines": {
+                  "6795": 1,
+                  "6829": 1,
+                  "6851": 11,
+                  "6852": 4,
+                  "6853": 7,
+                  "6854": 2,
+                  "6855": 3,
+                  "6856": 4,
+                  "6857": 4,
+                  "6858": 5,
+                  "6859": 1,
+                  "6863": 1,
+                  "6871": 1,
+                  "6879": 4,
+                  "6915": 2,
+                  "6919": 1,
+                  "6928": 4,
+                  "6929": 3,
+                  "6937": 5,
+                  "6938": 4,
+                  "6940": 3,
+                  "6942": 1,
+                  "6943": 2,
+                  "6944": 2,
+                  "6947": 4
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_cacheRecentPublishedTermContentSources",
+                    80
+                  ]
+                ]
+              },
+              "_createLookupIndexChunk": {
+                "selfSamples": 81,
+                "inclusiveSamples": 282,
+                "selfSourceLines": {
+                  "6252": 1,
+                  "6264": 2,
+                  "6275": 1,
+                  "6277": 66,
+                  "6278": 11
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "hashLargeTermKeyByteRange",
+                    85
+                  ],
+                  [
+                    "_createLookupIndexChunk",
+                    81
+                  ],
+                  [
+                    "parseCompactRecordFields",
+                    53
+                  ],
+                  [
+                    "round",
+                    44
+                  ],
+                  [
+                    "hashTermKeyByteRange",
+                    7
+                  ],
+                  [
+                    "rotateLeft",
+                    5
+                  ],
+                  [
+                    "validateRecordFields",
+                    5
+                  ],
+                  [
+                    "hashTermKeyBytes",
+                    2
+                  ]
+                ]
+              },
+              "_encodeAndAppendArtifactChunkForState": {
+                "selfSamples": 75,
+                "inclusiveSamples": 218,
+                "selfSourceLines": {
+                  "2478": 1,
+                  "2483": 7,
+                  "2484": 2,
+                  "2487": 3,
+                  "2493": 13,
+                  "2495": 7,
+                  "2496": 5,
+                  "2498": 2,
+                  "2499": 3,
+                  "2500": 7,
+                  "2510": 14,
+                  "2515": 6,
+                  "2547": 1,
+                  "2556": 1,
+                  "2564": 2,
+                  "2580": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_encodeArtifactRecordFields",
+                    90
+                  ],
+                  [
+                    "_encodeAndAppendArtifactChunkForState",
+                    75
+                  ],
+                  [
+                    "_encodeArtifactChunkRecords",
+                    19
+                  ],
+                  [
+                    "getArtifactContentLength",
+                    15
+                  ],
+                  [
+                    "hasCompletePreparedTermRecordPreinternedPlan",
+                    5
+                  ],
+                  [
+                    "validateContentLength",
+                    5
+                  ],
+                  [
+                    "validateContentOffset",
+                    4
+                  ],
+                  [
+                    "getSynchronousResolvedContentReferences",
+                    2
+                  ],
+                  [
+                    "hasTermRecordPreinternedPlanShape",
+                    1
+                  ],
+                  [
+                    "_appendEncodedChunk",
+                    1
+                  ],
+                  [
+                    "now",
+                    1
+                  ]
+                ]
+              },
+              "_encodeArtifactRecordFields": {
+                "selfSamples": 90,
+                "inclusiveSamples": 105,
+                "selfSourceLines": {
+                  "5862": 1,
+                  "5873": 8,
+                  "5876": 1,
+                  "5877": 1,
+                  "5887": 1,
+                  "5889": 16,
+                  "5890": 17,
+                  "5900": 4,
+                  "5904": 12,
+                  "5907": 2,
+                  "5916": 2,
+                  "5929": 1,
+                  "5947": 8,
+                  "5948": 1,
+                  "5949": 1,
+                  "5950": 7,
+                  "5951": 5,
+                  "5959": 2
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_encodeArtifactRecordFields",
+                    90
+                  ],
+                  [
+                    "getArtifactContentLength",
+                    15
+                  ]
+                ]
+              },
+              "_publishArtifactTermContentMetadata": {
+                "selfSamples": 36,
+                "inclusiveSamples": 171,
+                "selfSourceLines": {
+                  "9986": 7,
+                  "9996": 3,
+                  "10065": 26
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_cacheRecentPublishedTermContentSources",
+                    80
+                  ],
+                  [
+                    "_tryPublishContiguousArtifactTermContentMetadata",
+                    55
+                  ],
+                  [
+                    "_publishArtifactTermContentMetadata",
+                    36
+                  ]
+                ]
+              },
+              "_publishResolvedArtifactTermContentPlan": {
+                "selfSamples": 282,
+                "inclusiveSamples": 282,
+                "selfSourceLines": {
+                  "9746": 2,
+                  "9756": 2,
+                  "9757": 3,
+                  "9758": 2,
+                  "9760": 1,
+                  "9764": 272
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_publishResolvedArtifactTermContentPlan",
+                    282
+                  ]
+                ]
+              },
+              "_registerInFlightTermContentSources": {
+                "selfSamples": 63,
+                "inclusiveSamples": 63,
+                "selfSourceLines": {
+                  "6980": 1,
+                  "6996": 4,
+                  "6998": 2,
+                  "6999": 3,
+                  "7000": 5,
+                  "7001": 3,
+                  "7002": 1,
+                  "7006": 2,
+                  "7007": 1,
+                  "7010": 1,
+                  "7011": 4,
+                  "7013": 3,
+                  "7014": 3,
+                  "7020": 2,
+                  "7021": 6,
+                  "7043": 2,
+                  "7055": 1,
+                  "7056": 3,
+                  "7057": 3,
+                  "7064": 12,
+                  "7074": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_registerInFlightTermContentSources",
+                    63
+                  ]
+                ]
+              },
+              "_scan": {
+                "selfSamples": 25,
+                "inclusiveSamples": 422,
+                "selfSourceLines": {
+                  "289": 7,
+                  "290": 1,
+                  "293": 3,
+                  "297": 3,
+                  "340": 1,
+                  "341": 6,
+                  "352": 2,
+                  "400": 1,
+                  "402": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "wasm-function[4]",
+                    283
+                  ],
+                  [
+                    "adoptPendingColumns",
+                    27
+                  ],
+                  [
+                    "_scan",
+                    25
+                  ],
+                  [
+                    "_findMatchingPersistedTermEntryContentMetaBatch",
+                    13
+                  ],
+                  [
+                    "getRawTermContentBlockCompressionDictName",
+                    12
+                  ],
+                  [
+                    "_readTermEntryContentMetaHashPairIndex",
+                    11
+                  ],
+                  [
+                    "_termContentBytesEqualSpan",
+                    11
+                  ],
+                  [
+                    "",
+                    7
+                  ],
+                  [
+                    "_readTermContentSignature",
+                    6
+                  ],
+                  [
+                    "_findRecentTermContentSource",
+                    6
+                  ],
+                  [
+                    "fetch",
+                    5
+                  ],
+                  [
+                    "resolveExactCandidates",
+                    5
+                  ]
+                ]
+              },
+              "hashLookupIndexBytes": {
+                "selfSamples": 0,
+                "inclusiveSamples": 143,
+                "selfSourceLines": {},
+                "topDescendantSelfSamples": [
+                  [
+                    "hashLargeTermKeyByteRange",
+                    85
+                  ],
+                  [
+                    "round",
+                    44
+                  ],
+                  [
+                    "hashTermKeyByteRange",
+                    7
+                  ],
+                  [
+                    "rotateLeft",
+                    5
+                  ],
+                  [
+                    "hashTermKeyBytes",
+                    2
+                  ]
+                ]
+              },
+              "parseCompactRecordFields": {
+                "selfSamples": 53,
+                "inclusiveSamples": 53,
+                "selfSourceLines": {
+                  "207": 52,
+                  "212": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "parseCompactRecordFields",
+                    53
+                  ]
+                ]
+              },
+              "resolveExactCandidates": {
+                "selfSamples": 14,
+                "inclusiveSamples": 72,
+                "selfSourceLines": {
+                  "9139": 5,
+                  "9144": 4,
+                  "9145": 1,
+                  "9163": 1,
+                  "9164": 3
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "resolveExactCandidates",
+                    14
+                  ],
+                  [
+                    "_findMatchingPersistedTermEntryContentMetaBatch",
+                    13
+                  ],
+                  [
+                    "getRawTermContentBlockCompressionDictName",
+                    12
+                  ],
+                  [
+                    "_termContentBytesEqualSpan",
+                    11
+                  ],
+                  [
+                    "_readTermContentSignature",
+                    6
+                  ],
+                  [
+                    "_findRecentTermContentSource",
+                    6
+                  ],
+                  [
+                    "_getMatchingPersistedTermEntryContentMetaCandidates",
+                    5
+                  ],
+                  [
+                    "_canExactlyComparePersistedTermContent",
+                    3
+                  ],
+                  [
+                    "setResolvedTermContentPlanDictName",
+                    1
+                  ],
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "validateContentLength": {
+                "selfSamples": 5,
+                "inclusiveSamples": 5,
+                "selfSourceLines": {
+                  "554": 4,
+                  "555": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "validateContentLength",
+                    5
+                  ]
+                ]
+              },
+              "validateContentOffset": {
+                "selfSamples": 4,
+                "inclusiveSamples": 4,
+                "selfSourceLines": {
+                  "543": 1,
+                  "544": 3
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "validateContentOffset",
+                    4
+                  ]
+                ]
+              }
+            }
+          },
+          "parserTargets": {
+            "prepareNativeTermScorePlan": {
+              "selfSamples": 0,
+              "inclusiveSamples": 0,
+              "topDescendantSelfSamples": []
+            },
+            "copyOwnedTermScorePlan": {
+              "selfSamples": 0,
+              "inclusiveSamples": 0,
+              "topDescendantSelfSamples": []
+            },
+            "copyWasmBackedColumnChunkInternal": {
+              "selfSamples": 0,
+              "inclusiveSamples": 0,
+              "topDescendantSelfSamples": []
+            },
+            "copyWasmBackedColumnChunk": {
+              "selfSamples": 119,
+              "perWorkerSelfSamples": [
+                65,
+                26,
+                28
+              ],
+              "inclusiveSamples": null,
+              "scope": "Each parser profile contains this name in its reported top-self list; the frozen target set does not report its inclusive count."
+            }
+          },
+          "recordSourceLineAttribution": {
+            "_createLookupIndexChunk": [
+              {
+                "reportedLine": 6252,
+                "selfSamples": 1,
+                "sourceLine": "        if (!(recordFields instanceof Uint8Array)) {"
+              },
+              {
+                "reportedLine": 6264,
+                "selfSamples": 2,
+                "sourceLine": "            payload.byteLength +"
+              },
+              {
+                "reportedLine": 6275,
+                "selfSamples": 1,
+                "sourceLine": "        view.setUint32(32, hashLookupIndexBytes(recordFields), true);"
+              },
+              {
+                "reportedLine": 6277,
+                "selfSamples": 66,
+                "sourceLine": "        output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);"
+              },
+              {
+                "reportedLine": 6278,
+                "selfSamples": 11,
+                "sourceLine": "        output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);"
+              }
+            ],
+            "_encodeArtifactRecordFields": [
+              {
+                "reportedLine": 5862,
+                "selfSamples": 1,
+                "sourceLine": "        const scoreKeys = new Uint16Array(count);"
+              },
+              {
+                "reportedLine": 5873,
+                "selfSamples": 8,
+                "sourceLine": "        for (let i = 0; i < count; ++i) {"
+              },
+              {
+                "reportedLine": 5876,
+                "selfSamples": 1,
+                "sourceLine": "            const contentLength = getArtifactContentLength(chunk, contentLengths, i);"
+              },
+              {
+                "reportedLine": 5877,
+                "selfSamples": 1,
+                "sourceLine": "            if (contentLength >= U16_NULL) {"
+              },
+              {
+                "reportedLine": 5887,
+                "selfSamples": 1,
+                "sourceLine": "            const score = chunk.scoreList[i] ?? 0;"
+              },
+              {
+                "reportedLine": 5889,
+                "selfSamples": 16,
+                "sourceLine": "            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;"
+              },
+              {
+                "reportedLine": 5890,
+                "selfSamples": 17,
+                "sourceLine": "            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);"
+              },
+              {
+                "reportedLine": 5900,
+                "selfSamples": 4,
+                "sourceLine": "                    scoreIndexes.set(score, scoreIndex);"
+              },
+              {
+                "reportedLine": 5904,
+                "selfSamples": 12,
+                "sourceLine": "            scoreKeys[i] = scoreIndex;"
+              },
+              {
+                "reportedLine": 5907,
+                "selfSamples": 2,
+                "sourceLine": "        (scores.length * 4) +"
+              },
+              {
+                "reportedLine": 5916,
+                "selfSamples": 2,
+                "sourceLine": "            const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);"
+              },
+              {
+                "reportedLine": 5929,
+                "selfSamples": 1,
+                "sourceLine": "        const output = new Uint8Array(compactByteLength);"
+              },
+              {
+                "reportedLine": 5947,
+                "selfSamples": 8,
+                "sourceLine": "            for (let i = 0; i < count; ++i) {"
+              },
+              {
+                "reportedLine": 5948,
+                "selfSamples": 1,
+                "sourceLine": "                const unique = uniqueIndexList[i]"
+              },
+              {
+                "reportedLine": 5949,
+                "selfSamples": 1,
+                "sourceLine": "                const offset = resolvedOffsets[unique]"
+              },
+              {
+                "reportedLine": 5950,
+                "selfSamples": 7,
+                "sourceLine": "                outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase"
+              },
+              {
+                "reportedLine": 5951,
+                "selfSamples": 5,
+                "sourceLine": "                outputLengths[i] = resolvedLengths[unique]"
+              },
+              {
+                "reportedLine": 5959,
+                "selfSamples": 2,
+                "sourceLine": "        new Uint16Array(output.buffer, cursor, count).set(scoreKeys);"
+              }
+            ],
+            "_publishResolvedArtifactTermContentPlan": []
+          }
+        },
+        "B": {
+          "source": "cc369aec9d0233b8491bcef4d82d185eb5c5086d",
+          "localImmutableSourceEquivalent": "1aa81610ce6f23f361fb3b42030d0aca2aaa80d8",
+          "recordSourceSha256": "d0fe43c282a1b7a83915fce85c986c2945494e2062e1fc93be7da660947a87d3",
+          "sampleOutputSha256": "15afe4c0abb807369d384cb85b34c0fb4698e4a1834da1d46f4cfb069f08a0cd",
+          "quality": {
+            "profiles": 11,
+            "samples": 42762,
+            "negativeDeltas": 386,
+            "missingNodeSamples": 0,
+            "unpairedSamplesOrDeltas": 0,
+            "maximumDeltaMicroseconds": 145082
+          },
+          "sink": {
+            "pid": 13245,
+            "thread": 13268,
+            "samples": 4222,
+            "idleSelfSamples": 1399,
+            "targets": {
+              "_cacheRecentPublishedTermContentSources": {
+                "selfSamples": 62,
+                "inclusiveSamples": 62,
+                "selfSourceLines": {
+                  "6831": 1,
+                  "6853": 11,
+                  "6855": 7,
+                  "6856": 3,
+                  "6857": 2,
+                  "6858": 1,
+                  "6859": 3,
+                  "6860": 5,
+                  "6865": 1,
+                  "6873": 1,
+                  "6917": 2,
+                  "6930": 3,
+                  "6931": 5,
+                  "6939": 1,
+                  "6940": 4,
+                  "6942": 1,
+                  "6943": 2,
+                  "6944": 3,
+                  "6945": 2,
+                  "6946": 2,
+                  "6949": 2
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_cacheRecentPublishedTermContentSources",
+                    62
+                  ]
+                ]
+              },
+              "_createLookupIndexChunk": {
+                "selfSamples": 76,
+                "inclusiveSamples": 260,
+                "selfSourceLines": {
+                  "6353": 1,
+                  "6357": 2,
+                  "6370": 59,
+                  "6371": 14
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_createLookupIndexChunk",
+                    76
+                  ],
+                  [
+                    "hashLargeTermKeyByteRange",
+                    71
+                  ],
+                  [
+                    "round",
+                    64
+                  ],
+                  [
+                    "parseCompactRecordFields",
+                    36
+                  ],
+                  [
+                    "validateRecordFields",
+                    6
+                  ],
+                  [
+                    "hashTermKeyByteRange",
+                    4
+                  ],
+                  [
+                    "rotateLeft",
+                    3
+                  ]
+                ]
+              },
+              "_encodeAndAppendArtifactChunkForState": {
+                "selfSamples": 61,
+                "inclusiveSamples": 253,
+                "selfSourceLines": {
+                  "2516": 2,
+                  "2521": 3,
+                  "2525": 1,
+                  "2526": 4,
+                  "2527": 3,
+                  "2530": 6,
+                  "2531": 2,
+                  "2536": 10,
+                  "2537": 2,
+                  "2538": 4,
+                  "2539": 5,
+                  "2541": 2,
+                  "2543": 3,
+                  "2553": 6,
+                  "2558": 2,
+                  "2559": 1,
+                  "2582": 1,
+                  "2590": 2,
+                  "2607": 1,
+                  "2623": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_encodeArtifactRecordFields",
+                    99
+                  ],
+                  [
+                    "_encodeAndAppendArtifactChunkForState",
+                    61
+                  ],
+                  [
+                    "isCanonicalTermScorePlan",
+                    22
+                  ],
+                  [
+                    "hasCompletePreparedTermRecordPreinternedPlan",
+                    18
+                  ],
+                  [
+                    "validateContentOffset",
+                    15
+                  ],
+                  [
+                    "getContentOffsetDelta",
+                    12
+                  ],
+                  [
+                    "_encodeArtifactChunkRecords",
+                    11
+                  ],
+                  [
+                    "validateContentLength",
+                    7
+                  ],
+                  [
+                    "hasCompletePreparedTermLookupIndexes",
+                    3
+                  ],
+                  [
+                    "getSynchronousTermScorePlan",
+                    2
+                  ],
+                  [
+                    "_appendEncodedChunk",
+                    1
+                  ],
+                  [
+                    "getSynchronousResolvedContentReferences",
+                    1
+                  ]
+                ]
+              },
+              "_encodeArtifactRecordFields": {
+                "selfSamples": 99,
+                "inclusiveSamples": 141,
+                "selfSourceLines": {
+                  "5909": 1,
+                  "5916": 6,
+                  "5924": 1,
+                  "5933": 3,
+                  "5935": 7,
+                  "5936": 8,
+                  "5939": 6,
+                  "5940": 5,
+                  "5941": 3,
+                  "5945": 2,
+                  "5946": 2,
+                  "5948": 2,
+                  "5952": 13,
+                  "5983": 1,
+                  "5984": 1,
+                  "5985": 2,
+                  "6022": 2,
+                  "6040": 3,
+                  "6041": 4,
+                  "6042": 3,
+                  "6043": 18,
+                  "6044": 2,
+                  "6051": 1,
+                  "6052": 3
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_encodeArtifactRecordFields",
+                    99
+                  ],
+                  [
+                    "isCanonicalTermScorePlan",
+                    22
+                  ],
+                  [
+                    "getContentOffsetDelta",
+                    12
+                  ],
+                  [
+                    "validateContentLength",
+                    4
+                  ],
+                  [
+                    "validateContentOffset",
+                    2
+                  ],
+                  [
+                    "getSynchronousTermScorePlan",
+                    2
+                  ]
+                ]
+              },
+              "_publishArtifactTermContentMetadata": {
+                "selfSamples": 19,
+                "inclusiveSamples": 111,
+                "selfSourceLines": {
+                  "10067": 19
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_cacheRecentPublishedTermContentSources",
+                    62
+                  ],
+                  [
+                    "_tryPublishContiguousArtifactTermContentMetadata",
+                    30
+                  ],
+                  [
+                    "_publishArtifactTermContentMetadata",
+                    19
+                  ]
+                ]
+              },
+              "_publishResolvedArtifactTermContentPlan": {
+                "selfSamples": 278,
+                "inclusiveSamples": 278,
+                "selfSourceLines": {
+                  "9748": 2,
+                  "9758": 2,
+                  "9760": 1,
+                  "9762": 1,
+                  "9766": 272
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_publishResolvedArtifactTermContentPlan",
+                    278
+                  ]
+                ]
+              },
+              "_registerInFlightTermContentSources": {
+                "selfSamples": 43,
+                "inclusiveSamples": 43,
+                "selfSourceLines": {
+                  "6998": 5,
+                  "7001": 2,
+                  "7003": 2,
+                  "7008": 3,
+                  "7009": 1,
+                  "7011": 2,
+                  "7012": 1,
+                  "7015": 2,
+                  "7016": 2,
+                  "7021": 2,
+                  "7022": 3,
+                  "7023": 6,
+                  "7045": 1,
+                  "7058": 2,
+                  "7059": 3,
+                  "7066": 6
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_registerInFlightTermContentSources",
+                    43
+                  ]
+                ]
+              },
+              "_scan": {
+                "selfSamples": 27,
+                "inclusiveSamples": 410,
+                "selfSourceLines": {
+                  "289": 9,
+                  "291": 3,
+                  "293": 4,
+                  "297": 2,
+                  "304": 1,
+                  "341": 4,
+                  "343": 1,
+                  "352": 1,
+                  "375": 1,
+                  "401": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "wasm-function[4]",
+                    284
+                  ],
+                  [
+                    "_scan",
+                    27
+                  ],
+                  [
+                    "_termContentBytesEqualSpan",
+                    23
+                  ],
+                  [
+                    "adoptPendingColumns",
+                    18
+                  ],
+                  [
+                    "_readTermEntryContentMetaHashPairIndex",
+                    14
+                  ],
+                  [
+                    "_findMatchingPersistedTermEntryContentMetaBatch",
+                    10
+                  ],
+                  [
+                    "getRawTermContentBlockCompressionDictName",
+                    8
+                  ],
+                  [
+                    "_findRecentTermContentSource",
+                    6
+                  ],
+                  [
+                    "_readTermContentSignature",
+                    6
+                  ],
+                  [
+                    "",
+                    5
+                  ],
+                  [
+                    "_getMatchingPersistedTermEntryContentMetaCandidates",
+                    4
+                  ],
+                  [
+                    "fetch",
+                    2
+                  ]
+                ]
+              },
+              "getContentOffsetDelta": {
+                "selfSamples": 12,
+                "inclusiveSamples": 12,
+                "selfSourceLines": {
+                  "624": 4,
+                  "625": 8
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "getContentOffsetDelta",
+                    12
+                  ]
+                ]
+              },
+              "getSynchronousTermScorePlan": {
+                "selfSamples": 2,
+                "inclusiveSamples": 2,
+                "selfSourceLines": {
+                  "47": 1,
+                  "53": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "getSynchronousTermScorePlan",
+                    2
+                  ]
+                ]
+              },
+              "hashLookupIndexBytes": {
+                "selfSamples": 0,
+                "inclusiveSamples": 142,
+                "selfSourceLines": {},
+                "topDescendantSelfSamples": [
+                  [
+                    "hashLargeTermKeyByteRange",
+                    71
+                  ],
+                  [
+                    "round",
+                    64
+                  ],
+                  [
+                    "hashTermKeyByteRange",
+                    4
+                  ],
+                  [
+                    "rotateLeft",
+                    3
+                  ]
+                ]
+              },
+              "isCanonicalTermScorePlan": {
+                "selfSamples": 22,
+                "inclusiveSamples": 22,
+                "selfSourceLines": {
+                  "74": 1,
+                  "83": 10,
+                  "84": 3,
+                  "85": 3,
+                  "88": 5
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "isCanonicalTermScorePlan",
+                    22
+                  ]
+                ]
+              },
+              "parseCompactRecordFields": {
+                "selfSamples": 36,
+                "inclusiveSamples": 36,
+                "selfSourceLines": {
+                  "209": 33,
+                  "210": 1,
+                  "211": 1,
+                  "214": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "parseCompactRecordFields",
+                    36
+                  ]
+                ]
+              },
+              "resolveExactCandidates": {
+                "selfSamples": 8,
+                "inclusiveSamples": 70,
+                "selfSourceLines": {
+                  "9141": 1,
+                  "9146": 3,
+                  "9166": 1,
+                  "9167": 2,
+                  "9171": 1
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "_termContentBytesEqualSpan",
+                    23
+                  ],
+                  [
+                    "_findMatchingPersistedTermEntryContentMetaBatch",
+                    10
+                  ],
+                  [
+                    "resolveExactCandidates",
+                    8
+                  ],
+                  [
+                    "getRawTermContentBlockCompressionDictName",
+                    8
+                  ],
+                  [
+                    "_findRecentTermContentSource",
+                    6
+                  ],
+                  [
+                    "_readTermContentSignature",
+                    6
+                  ],
+                  [
+                    "_getMatchingPersistedTermEntryContentMetaCandidates",
+                    4
+                  ],
+                  [
+                    "setResolvedTermContentPlanDictName",
+                    2
+                  ],
+                  [
+                    "",
+                    2
+                  ],
+                  [
+                    "_canExactlyComparePersistedTermContent",
+                    1
+                  ]
+                ]
+              },
+              "validateContentLength": {
+                "selfSamples": 7,
+                "inclusiveSamples": 7,
+                "selfSourceLines": {
+                  "597": 7
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "validateContentLength",
+                    7
+                  ]
+                ]
+              },
+              "validateContentOffset": {
+                "selfSamples": 15,
+                "inclusiveSamples": 15,
+                "selfSourceLines": {
+                  "587": 15
+                },
+                "topDescendantSelfSamples": [
+                  [
+                    "validateContentOffset",
+                    15
+                  ]
+                ]
+              }
+            }
+          },
+          "parserTargets": {
+            "prepareNativeTermScorePlan": {
+              "selfSamples": 1,
+              "inclusiveSamples": 16,
+              "topDescendantSelfSamples": [
+                [
+                  "wasm-function[34]",
+                  15
+                ],
+                [
+                  "prepareNativeTermScorePlan",
+                  1
+                ]
+              ]
+            },
+            "copyOwnedTermScorePlan": {
+              "selfSamples": 8,
+              "inclusiveSamples": 8,
+              "topDescendantSelfSamples": [
+                [
+                  "copyOwnedTermScorePlan",
+                  8
+                ]
+              ]
+            },
+            "copyWasmBackedColumnChunkInternal": {
+              "selfSamples": 112,
+              "inclusiveSamples": 203,
+              "topDescendantSelfSamples": [
+                [
+                  "copyWasmBackedColumnChunkInternal",
+                  112
+                ],
+                [
+                  "buildTermLookupFilter",
+                  81
+                ],
+                [
+                  "copyOwnedTermScorePlan",
+                  8
+                ],
+                [
+                  "",
+                  1
+                ],
+                [
+                  "hashMask",
+                  1
+                ]
+              ]
+            }
+          },
+          "recordSourceLineAttribution": {
+            "_createLookupIndexChunk": [
+              {
+                "reportedLine": 6353,
+                "selfSamples": 1,
+                "sourceLine": "        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);"
+              },
+              {
+                "reportedLine": 6357,
+                "selfSamples": 2,
+                "sourceLine": "            payload.byteLength +"
+              },
+              {
+                "reportedLine": 6370,
+                "selfSamples": 59,
+                "sourceLine": "        output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);"
+              },
+              {
+                "reportedLine": 6371,
+                "selfSamples": 14,
+                "sourceLine": "        output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);"
+              }
+            ],
+            "_encodeArtifactRecordFields": [
+              {
+                "reportedLine": 5909,
+                "selfSamples": 1,
+                "sourceLine": "        const scorePlan = hasCompactScoreSource ? getSynchronousTermScorePlan(chunk, count) : null"
+              },
+              {
+                "reportedLine": 5916,
+                "selfSamples": 6,
+                "sourceLine": "        const canonicalScorePlan = directReferences !== null && scorePlan !== null && isCanonicalTermScorePlan(scorePlan) ? scorePlan : null"
+              },
+              {
+                "reportedLine": 5924,
+                "selfSamples": 1,
+                "sourceLine": "        const scores = [];"
+              },
+              {
+                "reportedLine": 5933,
+                "selfSamples": 3,
+                "sourceLine": "        for (let i = 0; i < count; ++i) {"
+              },
+              {
+                "reportedLine": 5935,
+                "selfSamples": 7,
+                "sourceLine": "            const unique = directScoreReferences === null ? -1 : directScoreReferences.uniqueIndexList[i]"
+              },
+              {
+                "reportedLine": 5936,
+                "selfSamples": 8,
+                "sourceLine": "            if (directScoreReferences !== null && unique >= directScoreReferences.offsets.length) {"
+              },
+              {
+                "reportedLine": 5939,
+                "selfSamples": 6,
+                "sourceLine": "            const contentOffset = directScoreReferences !== null ? directScoreReferences.offsets[unique] :"
+              },
+              {
+                "reportedLine": 5940,
+                "selfSamples": 5,
+                "sourceLine": "                (directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0)"
+              },
+              {
+                "reportedLine": 5941,
+                "selfSamples": 3,
+                "sourceLine": "            const contentLength = directScoreReferences !== null ? directScoreReferences.lengths[unique] : getArtifactContentLength(chunk, contentLengths, i)"
+              },
+              {
+                "reportedLine": 5945,
+                "selfSamples": 2,
+                "sourceLine": "            if (scorePlan !== null && (directScoreReferences === null || unique !== lastValidatedScoreReference)) {"
+              },
+              {
+                "reportedLine": 5946,
+                "selfSamples": 2,
+                "sourceLine": "                validateContentOffset(contentOffset)"
+              },
+              {
+                "reportedLine": 5948,
+                "selfSamples": 2,
+                "sourceLine": "                getContentOffsetDelta(contentOffset, contentOffsetBase)"
+              },
+              {
+                "reportedLine": 5952,
+                "selfSamples": 13,
+                "sourceLine": "            if (contentLength >= U16_NULL) {"
+              },
+              {
+                "reportedLine": 5983,
+                "selfSamples": 1,
+                "sourceLine": "        const scoreValues = canonicalScorePlan?.values ?? scores"
+              },
+              {
+                "reportedLine": 5984,
+                "selfSamples": 1,
+                "sourceLine": "        const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +"
+              },
+              {
+                "reportedLine": 5985,
+                "selfSamples": 2,
+                "sourceLine": "        (scoreValues.length * 4) +"
+              },
+              {
+                "reportedLine": 6022,
+                "selfSamples": 2,
+                "sourceLine": "        const output = new Uint8Array(compactByteLength);"
+              },
+              {
+                "reportedLine": 6040,
+                "selfSamples": 3,
+                "sourceLine": "            for (let i = 0; i < count; ++i) {"
+              },
+              {
+                "reportedLine": 6041,
+                "selfSamples": 4,
+                "sourceLine": "                const unique = uniqueIndexList[i]"
+              },
+              {
+                "reportedLine": 6042,
+                "selfSamples": 3,
+                "sourceLine": "                const offset = resolvedOffsets[unique]"
+              },
+              {
+                "reportedLine": 6043,
+                "selfSamples": 18,
+                "sourceLine": "                outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase"
+              },
+              {
+                "reportedLine": 6044,
+                "selfSamples": 2,
+                "sourceLine": "                outputLengths[i] = resolvedLengths[unique]"
+              },
+              {
+                "reportedLine": 6051,
+                "selfSamples": 1,
+                "sourceLine": "        cursor += count * 2;"
+              },
+              {
+                "reportedLine": 6052,
+                "selfSamples": 3,
+                "sourceLine": "        new Uint16Array(output.buffer, cursor, count).set(scoreKeys);"
+              }
+            ],
+            "_publishResolvedArtifactTermContentPlan": []
+          }
+        }
+      },
+      "targetComparison": {
+        "_encodeArtifactRecordFields": {
+          "A": {
+            "selfSamples": 90,
+            "inclusiveSamples": 105
+          },
+          "B": {
+            "selfSamples": 99,
+            "inclusiveSamples": 141
+          }
+        },
+        "isCanonicalTermScorePlan": {
+          "A": {
+            "selfSamples": 0,
+            "inclusiveSamples": 0
+          },
+          "B": {
+            "selfSamples": 22,
+            "inclusiveSamples": 22
+          }
+        },
+        "getSynchronousTermScorePlan": {
+          "A": {
+            "selfSamples": 0,
+            "inclusiveSamples": 0
+          },
+          "B": {
+            "selfSamples": 2,
+            "inclusiveSamples": 2
+          }
+        },
+        "getContentOffsetDelta": {
+          "A": {
+            "selfSamples": 0,
+            "inclusiveSamples": 0
+          },
+          "B": {
+            "selfSamples": 12,
+            "inclusiveSamples": 12
+          }
+        },
+        "validateContentOffset": {
+          "A": {
+            "selfSamples": 4,
+            "inclusiveSamples": 4
+          },
+          "B": {
+            "selfSamples": 15,
+            "inclusiveSamples": 15
+          }
+        },
+        "validateContentLength": {
+          "A": {
+            "selfSamples": 5,
+            "inclusiveSamples": 5
+          },
+          "B": {
+            "selfSamples": 7,
+            "inclusiveSamples": 7
+          }
+        },
+        "_encodeAndAppendArtifactChunkForState": {
+          "A": {
+            "selfSamples": 75,
+            "inclusiveSamples": 218
+          },
+          "B": {
+            "selfSamples": 61,
+            "inclusiveSamples": 253
+          }
+        },
+        "_createLookupIndexChunk": {
+          "A": {
+            "selfSamples": 81,
+            "inclusiveSamples": 282
+          },
+          "B": {
+            "selfSamples": 76,
+            "inclusiveSamples": 260
+          }
+        },
+        "hashLookupIndexBytes": {
+          "A": {
+            "selfSamples": 0,
+            "inclusiveSamples": 143
+          },
+          "B": {
+            "selfSamples": 0,
+            "inclusiveSamples": 142
+          }
+        },
+        "parseCompactRecordFields": {
+          "A": {
+            "selfSamples": 53,
+            "inclusiveSamples": 53
+          },
+          "B": {
+            "selfSamples": 36,
+            "inclusiveSamples": 36
+          }
+        },
+        "_publishResolvedArtifactTermContentPlan": {
+          "A": {
+            "selfSamples": 282,
+            "inclusiveSamples": 282
+          },
+          "B": {
+            "selfSamples": 278,
+            "inclusiveSamples": 278
+          }
+        },
+        "_publishArtifactTermContentMetadata": {
+          "A": {
+            "selfSamples": 36,
+            "inclusiveSamples": 171
+          },
+          "B": {
+            "selfSamples": 19,
+            "inclusiveSamples": 111
+          }
+        },
+        "_cacheRecentPublishedTermContentSources": {
+          "A": {
+            "selfSamples": 80,
+            "inclusiveSamples": 80
+          },
+          "B": {
+            "selfSamples": 62,
+            "inclusiveSamples": 62
+          }
+        },
+        "_registerInFlightTermContentSources": {
+          "A": {
+            "selfSamples": 63,
+            "inclusiveSamples": 63
+          },
+          "B": {
+            "selfSamples": 43,
+            "inclusiveSamples": 43
+          }
+        },
+        "_scan": {
+          "A": {
+            "selfSamples": 25,
+            "inclusiveSamples": 422
+          },
+          "B": {
+            "selfSamples": 27,
+            "inclusiveSamples": 410
+          }
+        },
+        "resolveExactCandidates": {
+          "A": {
+            "selfSamples": 14,
+            "inclusiveSamples": 72
+          },
+          "B": {
+            "selfSamples": 8,
+            "inclusiveSamples": 70
+          }
+        }
+      },
+      "limits": [
+        "Two separate instrumented observations after fixed qualification, excluded from all performance statistics.",
+        "All CPU samples will be retained and counted without time weighting; source-line attribution is not branch coverage.",
+        "Final corrected runtime13e7 is a different source and is not represented by Bcc369.",
+        "Do not compare anonymous Wasm function indices across binaries; the added export renumbers existing functions.",
+        "Function/source-line positions are sampled attribution, not proof of branch execution or an elapsed-time estimate.",
+        "The common publication and lookup functions are not changed by the score transport mechanism; their A/B count differences are descriptive sample variation."
+      ],
+      "observedScoreInternerLineSamplesA": 50,
+      "observedContentReferenceAndLengthRegionSamplesB": 51,
+      "interpretation": [
+        "The native plan transport is active for all 12 JMdict groups / 528299 rows in B; the bound diagnostic metadata records 1043222 cumulative owned bytes avoided.",
+        "The baseline field encoder has 50 self samples attributed to its score-read/lookup/intern/key-assignment lines. B has 22 canonical-plan helper samples and 51 field-encoder self samples attributed to its content-reference/length/validation region, with additional offset-validation descendants.",
+        "This pair does not show a smaller sampled field-encoder subtree (A 105 inclusive / B 141). This is descriptive attribution only, not a measured slowdown or a causal explanation of the ordinary cohort.",
+        "Resolved content publication and lookup copying/hashing remain visible, larger non-score work in both sink profiles.",
+        "The new native preparation/copy work is visible in parser workers; it cannot be converted to elapsed milliseconds or added to sink samples as an import-time prediction.",
+        "The audited original six-pair ordinary cohort remains inconclusive; these traces neither replace those measurements nor qualify the corrected source."
+      ]
     }
   },
   "lockedFixtures": [
@@ -331,18 +2217,39 @@
     }
   ],
   "pending": [
-    "Wait for original native Jitendex browser cohort.",
-    "Wait for corrected-source full units, scoped lint, four full TS projects, seven dry builds and actionlint.",
-    "Wait for all three corrected-native 12-pair browser cohorts.",
-    "Resume frozen independent native artifact audits only when execution is available; do not treat printed summaries as independent audits.",
+    "Wait for corrected-source hosted full unit suite, scoped lint, four full TypeScript projects, seven dry builds and actionlint.",
+    "Wait for all three corrected-native 12-pair browser cohorts, then audit with the unchanged frozen corrected-source auditor and contract.",
+    "Preserve data-only benchmark observations and audit reports; source and study code are already recoverable from Git revisions.",
     "Open a PR only if the exact final source establishes a gain worth review with applicable correctness and memory evidence."
   ],
-  "recoveryLimits": "This checkpoint reconstructs compact facts from completed independent reports and preserved conversation/tool state. It is not a replacement for raw artifacts or full local audit files. GitHub source/study objects are published and verified; raw workflow artifacts have14-day retention. Rounded displayed statistics retain the underlying original report/run references.",
+  "recoveryLimits": "This compact checkpoint summarizes completed independent reports and preserved raw evidence; it does not replace raw artifacts. Source and study Git objects are published and verified. GitHub artifact retention is fourteen days. The local executor recovered with files intact; all original-native artifacts were independently audited with the original frozen checker. A data-only durable backup is in preparation.",
   "rejectedOrOwnedLeads": [
     "Current JMdict resolved-plan publication already admits all12 groups and bulk-copies99.9669% of newly published rows; scalar source-line profiler attribution was misleading. Do not widen admission.",
     "Jitendex final-close duration varies greatly by host/storage; a fifth cohort was about7ms after four near110ms. Existing flush durability must remain.",
     "Canonical slot tags (#975), current in-flight registration (#830), and owned content overlap (#977) are existing owners' separate work. Read-only overlap review found no qualified full-browser JMdict gain at06:07UTC; do not duplicate those scopes.",
     "Do not repeat blocked local Chromium/socket attempts or switch to Work mode.",
     "Do not change worker count, batching, cache capacities, compression settings, dictionary thresholds, or fixtures to manufacture a result."
-  ]
+  ],
+  "completedTotalsIncludingOriginalNative": {
+    "cohorts": 7,
+    "dictionaryCells": 21,
+    "semanticObservations": 594,
+    "candidatePairs": 144,
+    "identicalControlPairs": 48,
+    "rawMemoryScans": 7423,
+    "memoryPassedCells": 13,
+    "memoryCoverageIncompleteCells": 8,
+    "memoryObservationsWithCoverageFailure": 13,
+    "measuredMemoryBoundFailures": 0,
+    "semanticFailures": 0,
+    "diagnosticTraceObservationsExcluded": 2,
+    "interpretation": "Counts summarize evidence coverage only. No timing cohorts or hosts were pooled. Incomplete memory coverage is not a nonregression result."
+  },
+  "executionRecovery": {
+    "unavailableSinceUtc": "2026-11-28 06:58:35 UTC",
+    "recoveredAtUtc": "2026-11-28 07:12:24 UTC",
+    "sourceAndEvidenceIntact": true,
+    "fallbackWorkflowPublished": false,
+    "localSourceClean": true
+  }
 }
