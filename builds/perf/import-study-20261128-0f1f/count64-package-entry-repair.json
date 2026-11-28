@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28 07:17:46 UTC",
+  "original": {
+    "runId": 46110938657,
+    "workflowHead": "fca50d67be8f1b85ccbc9c6dd7b7c96ee75480fd",
+    "workflowPath": ".github/workflows/zstd-count64-qualification-20261128-0f1f.yml",
+    "expectedPackageEntry": "lib/zstd-simd.wasm"
+  },
+  "failure": {
+    "stage": "Package-entry equality guard before plan construction and observation loops",
+    "message": "Unexpected packaged changes: ['lib/zstd.wasm']",
+    "observedCellsAtReview": [
+      "jmdict-AB",
+      "jmdict-BA",
+      "jitendex-AB",
+      "jitendex-BA",
+      "vndb-AB",
+      "vndb-BA"
+    ],
+    "timedObservations": 0,
+    "warmupObservations": 0,
+    "mediaObservations": 0,
+    "memoryObservations": 0,
+    "limitation": "All six exact failure logs plus frozen control flow establish zero import observations; ZIP absence inventory is a separate pending inspection"
+  },
+  "sourceProof": {
+    "buildScript": "dev/build-libs.js",
+    "buildScriptSha256": "edd3d2794a75150665ccdebb9701cb247abc786ac369132a5f951f15bfe3ae32",
+    "copyFrom": "dev/data/zstd-simd.wasm",
+    "copyTo": "ext/lib/zstd.wasm",
+    "packagedEntry": "lib/zstd.wasm",
+    "observer": "dev/perf/import-qualification-20261125-a7f7.py",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+  },
+  "corrected": {
+    "workflowHead": "1f4bcb05800e832d2297172c0da7936963758716",
+    "workflowTree": "a1d6261e352f3457310cce47a1b9bc55052ac528",
+    "workflowBlob": "63941c73e273241bd93328bb818069d6fc307a14",
+    "workflowSha256": "45c1843ed5a458bcb620856b4d7712d23aa72a517f2e1f0cb94aa149531e74e1",
+    "branch": "perf/zstd-count64-package-entry-qualification-20261128-0f1f",
+    "expectedPackageEntry": "lib/zstd.wasm",
+    "attemptPolicy": "Run attempt1 only",
+    "runId": 46120503401
+  },
+  "unchanged": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "b150866ac6ce80e4b164f1b90ef2f03658791705",
+    "candidateTree": "30ae249f227279b2b5b6766767f7532cda401114",
+    "pairs": 12,
+    "workers": 3,
+    "vndbSahAllocationUnits": [
+      37,
+      37
+    ],
+    "observerBytes": true,
+    "fixtures": true,
+    "acquisitionSchedule": true
+  },
+  "changes": [
+    "Correct the sole packaged-entry assertion",
+    "Distinct workflow, branch and evidence labels",
+    "Explicit first-attempt-only guard"
+  ],
+  "independentReview": "jmdict_path_audit independently reconstructed2859 bytes and matching workflow SHA256/Git blob, inspected the unmodified build alias and observer ordering",
+  "retention": "Original workflow, run, zero-sample failures and original pending-analysis verifier remain preserved; no failed measured or memory cohort replaced"
+}

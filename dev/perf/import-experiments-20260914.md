@@ -733,3 +733,173 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-28: JMdict-first import investigation (0f1f)
+
+This round freezes baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`
+(tree `d99ea4d04658f7ec1c76acdc5f3684594212a471`). Its first priority is
+JMdict completion time, with Jitendex and VNDB checked independently. No worker
+count, batch size, cache budget, codec level, dictionary threshold or storage
+format changes are included. No performance PR has been opened.
+
+The current machine-readable checkpoint is
+[`checkpoint.json`](../../builds/perf/import-study-20261128-0f1f/checkpoint.json).
+It records exact source and workflow identities, fixture and artifact hashes,
+completed observations, rejected candidates and pending checks. Negative
+percentages below mean a shorter candidate elapsed time.
+
+### Completed full-import experiments: reject both
+
+Each cell contains 12 alternating candidate pairs, two excluded warmup pairs,
+four interleaved identical-code pairs, two separate exhaustive-media
+observations and four separate memory observations. Each dictionary has a second
+independent host starting in reverse order. The primary clock runs from file
+selection through the post-UI import-complete event. Nested phase counters overlap
+and are not added. Identical-code controls are reported separately, never
+subtracted from candidate results.
+
+**Cache scan fusion**, product `ac1497941c6c8d5725c71b1274bef134dba4d36d`,
+completed its JMdict study in
+[run 46102404862](https://github.com/ManabiIO/manabitan/actions/runs/46102404862).
+Paired medians were -0.024% and -0.446%; equal-work changes were +0.162% and
+-0.032%. Both descriptive intervals cross zero. The cache phase fell by about
+18.55 ms and 15.10 ms, but complete import did not improve consistently.
+The reverse-order host also retained one failed memory observation: its
+343.1 ms maximum sample gap exceeded the 250 ms coverage limit. Source gates
+passed. This candidate is closed without a PR or replacement cohort.
+
+**Native glossary hint locals**, product
+`486330b71ef0734e52174b76f45b65c580623798`, completed all six cells in
+[run 46105416073](https://github.com/ManabiIO/manabitan/actions/runs/46105416073).
+
+| Dictionary | AB paired median | BA paired median | AB equal work | BA equal work |
+| --- | ---: | ---: | ---: | ---: |
+| JMdict | +0.611% | -3.166% | +0.946% | -2.701% |
+| Jitendex | +0.368% | +0.678% | +0.407% | +1.502% |
+| VNDB | +0.356% | +0.369% | +0.333% | +0.346% |
+
+All six descriptive intervals include zero. JMdict's favorable second host did
+not replicate on the first. Jitendex AB additionally failed memory coverage in
+A1, B1 and B2, leaving neither memory pair qualified. Other cells' four memory
+observations qualified. All semantic import checks passed, and stored sizes
+remained 43,520,477 / 67,466,332 / 609,176,779 bytes for JMdict / Jitendex / VNDB.
+The pinned native rebuild, full unit suite, targeted ESLint, all type projects and
+all-target dry-run build passed. An untimed component oracle also checked all 937 locked
+banks and 7,613,164 rows with no fallback and exact prepared-map outputs; that
+oracle does not claim actual worker projection or every persisted database byte.
+This candidate is closed for all three dictionaries.
+
+The two studies retain all 336 prescribed observations, including warmups,
+controls and failed coverage. Neither failed nor neutral cohort will be repeated
+for the unchanged candidate.
+
+### Codec match counting: consistent component gain, import result pending
+
+The guarded 64-bit Zstd match counter compares eight bytes using XOR and trailing
+zero count while preserving the existing tails and reversed-limit guard. Its
+frozen product is `b150866ac6ce80e4b164f1b90ef2f03658791705`
+(tree `30ae249f227279b2b5b6766767f7532cda401114`).
+
+[The component study](https://github.com/ManabiIO/manabitan/actions/runs/46106027902)
+uses actual prepared corpus output, fixed production grouping, one cold
+preflight, one excluded three-arm warmup sweep, 12 paired timing sweeps with
+alternating A0/B0 order and four interleaved A0/A1 controls. Warm native-call paired medians are -2.502% for JMdict, -4.041% for
+Jitendex and -6.158% for VNDB, with all 12 pairs faster in each cell. Those are
+Node 22 native-codec measurements, not full-import improvements. The single
+JMdict cold observation was +0.859% slower and remains visible.
+
+The frozen oracle asserts exact baseline frame bytes and passing roundtrips
+and 2,048 synthetic cases. Independent inspection verified its bindings,
+receipts and counters. Bulk real-corpus/frame payloads are excluded from the
+hosted artifacts, so that inspection did not independently repeat every frame
+comparison. Native heap size remains 16,908,288 bytes. Exact compiler
+reproduction, all seven target dry-run builds and the full unit gate have been
+independently inspected. The full lint/types/JSON gate also reports success; its
+small artifact still awaits inspection at this checkpoint.
+
+The original
+[run 46110938657](https://github.com/ManabiIO/manabitan/actions/runs/46110938657)
+caught an experiment setup error before importing: the workflow expected
+`lib/zstd-simd.wasm`, while the unchanged build script maps
+`dev/data/zstd-simd.wasm` to the actual package entry `lib/zstd.wasm`.
+The equality guard executes before plan construction and every warmup, import,
+media or memory observation. All six cells stopped at that guard; their zero-sample failures remain retained.
+
+The independently reviewed prospective repair is workflow commit
+`1f4bcb05800e832d2297172c0da7936963758716`, in
+[run 46120503401](https://github.com/ManabiIO/manabitan/actions/runs/46120503401).
+It corrects only that entry assertion, uses distinct evidence labels and requires
+attempt one. Frozen product revisions, observer bytes and all six acquisition
+schedules remain unchanged. The original pending local verifier's mistaken
+alias is also preserved; a separately named corrected verifier is required.
+No measured cohort is being replaced. The repair proof is
+[`count64-package-entry-repair.json`](../../builds/perf/import-study-20261128-0f1f/count64-package-entry-repair.json).
+A PR still requires a useful complete-import result and the remaining gates.
+
+The separately frozen 128-bit comparison is a component experiment in
+[run 46109865919](https://github.com/ManabiIO/manabitan/actions/runs/46109865919).
+Inspected warm paired medians are -2.567% for JMdict and -7.071% for VNDB,
+both with 12/12 faster pairs and exact frames. Jitendex has completed, but its
+numerical artifact is not yet inspected. Different hosts were used for the
+64-bit and 128-bit studies: these numbers do not rank the two implementations.
+No 128-bit product or browser qualification has been published.
+
+### Cold-path hypotheses still under qualification
+
+Profile review identified work that finishes before the relevant hot loop enters
+optimized code. Diagnostic Node traces and ordinary browser profiles motivate
+the following independent experiments; they do not provide a speed estimate.
+
+| Experiment | Frozen source | Existing acquisition |
+| --- | --- | --- |
+| Canonical row and reservation outlining | `d5b8ae03474c326db559837713955a2b3fe74c9b` | [46112238568](https://github.com/ManabiIO/manabitan/actions/runs/46112238568): both fresh-browser component jobs completed; artifacts await inspection |
+| Native record-run validator | `491b6024fef8ee763e5436b0c5275b287a3be52b` | [46114585245](https://github.com/ManabiIO/manabitan/actions/runs/46114585245): component queued, including initialization and copies |
+| JS record-run helper | Product `cb5136c51bed519a958874fad636310a9f83f447` | [46115499144](https://github.com/ManabiIO/manabitan/actions/runs/46115499144): six complete-import cells and three source gates queued |
+| JS record-field helper | Product `6da3dc87d4d0695ef7c1fafd9a934460a0186659` | [46119739523](https://github.com/ManabiIO/manabitan/actions/runs/46119739523): six complete-import cells and three source gates queued |
+
+The JS record-field product moves the existing final column scatter loop into
+one synchronous five-argument helper, adding 480 source bytes without changing
+planning, output-array allocation, guards, formats or fallback behavior. It passed 58 named
+and 128 deterministic differential cases plus exact output for all 12 captured
+JMdict groups. Its candidate trace logged helper OSR entry inside the first
+50,000-row group and no eager deoptimization. This is one qualitative Node
+execution: it establishes neither Chromium behavior nor how much work remained
+after optimization.
+
+Both JS helpers are independently reviewed, separate products. The record-run
+helper passed 67 focused repository tests and targeted types locally. Field
+helper local unit/type attempts were terminated by SIGKILL before test
+assertions or type diagnostics; those attempts are not passes. Hosted full
+gates are required for both. The standard build gate is `npm run test:build`
+(`--dryRun --all`); the browser cohorts separately build actual Chrome packages.
+
+Captured field inputs have exact producer, source and input identities, but the
+enclosing historical Node harness source hash could not be located. Component
+replay does not establish original pre-loop buffer capacities, actual browser
+persistence, end-to-end scheduling or peak memory.
+
+### Evidence and continuation
+
+The single handoff remains this document. Machine observations belong under
+`builds/perf/import-study-20261128-0f1f/`. Before the executor outage, eight
+completed cohort archives and their catalogs were verified against 2,152
+original retained files. A separate deterministic 437-member experiment archive
+was also verified. Their hashes and publication status are in the checkpoint.
+Those compact local archives have not yet been pushed; original hosted artifacts
+remain available through the linked runs. Preserve the failed compiler attempts,
+memory coverage failures, partial extraction and killed local checks.
+
+The local executor became unavailable around 06:58 UTC. Continue to inspect
+existing hosted artifacts without reacquiring measurements. The field product
+was recovered from the frozen remote baseline using the exact reviewed patch:
+its remote Git blob `ced1b3bed68143e48bd8f43a9f71af7e43763cc4` and tree exactly
+match the local pre-outage identities. Its qualification workflow keeps the
+existing 11 observer hashes and all schedules unchanged. The workflow received
+an independent exact-text review; local actionlint execution was unavailable.
+
+For each pending study, inspect the exact run attempt, head, artifact digest,
+source bindings, complete raw observation set, controls and retained failures
+before interpreting its summary. Use the frozen workflow and analyzer paths at
+the linked source commit; do not dispatch a new acquisition to replace an
+unfavorable or incomplete result. Queue and UI listing omissions are not failed
+runs: direct run IDs and commit check-runs identify the existing acquisition.

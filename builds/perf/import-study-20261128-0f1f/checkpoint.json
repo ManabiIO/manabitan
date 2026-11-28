@@ -1,0 +1,527 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "20261128-0f1f",
+  "recordedAtUtc": "2026-11-28T07:24:39Z",
+  "repository": "ManabiIO/manabitan",
+  "scope": "JMdict first, then Jitendex and VNDB complete import optimization",
+  "decision": "No PR opened: completed full-import experiments did not show a repeatable gain. Remaining product candidates require their frozen browser cohorts and source gates.",
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "fixtures": [
+    {
+      "id": "jmdict",
+      "rows": 528299,
+      "banks": 53,
+      "zipBytes": 15645766,
+      "zipSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sourceBytes": 171617523,
+      "storedBytes": 43520477
+    },
+    {
+      "id": "jitendex",
+      "rows": 436555,
+      "banks": 219,
+      "zipBytes": 38831822,
+      "zipSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sourceBytes": 538927310,
+      "storedBytes": 67466332,
+      "mediaCount": 236
+    },
+    {
+      "id": "vndb",
+      "rows": 6648310,
+      "banks": 665,
+      "zipBytes": 291705969,
+      "zipSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sourceBytes": 4267992967,
+      "storedBytes": 609176779,
+      "mediaCount": 146570
+    }
+  ],
+  "protocol": {
+    "primaryMetric": "Dictionary file selection through post-UI import-complete event",
+    "perCell": {
+      "timedPairs": 12,
+      "excludedWarmupPairs": 2,
+      "interleavedIdenticalCodePairs": 4,
+      "separateExhaustiveMediaObservations": 2,
+      "separateMemoryObservations": 4,
+      "totalObservations": 42
+    },
+    "replication": "Independent reverse-order host for each dictionary",
+    "elapsedChange": "100 * (candidate / baseline - 1); negative is faster",
+    "controls": "Report separately; do not subtract their estimate",
+    "fixedWorkers": 3,
+    "restrictions": [
+      "No worker, batch, cache-budget, codec-level, threshold or format tuning",
+      "No rerunning unchanged failed or neutral cohorts",
+      "Do not add overlapping phase counters",
+      "Component, diagnostic and complete-import observations remain distinct"
+    ]
+  },
+  "closedExperiments": [
+    {
+      "name": "Cache scan fusion",
+      "product": "ac1497941c6c8d5725c71b1274bef134dba4d36d",
+      "workflowHead": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+      "runId": 46102404862,
+      "decision": "Reject; no PR",
+      "sourceGates": "Passed and artifacts inspected",
+      "cells": [
+        {
+          "dictionary": "jmdict",
+          "order": "AB",
+          "medianPercent": -0.024,
+          "equalWorkPercent": 0.162,
+          "descriptive95IntervalPercent": [
+            -1.142,
+            1.277
+          ],
+          "fasterPairs": 6,
+          "worstPercent": 3.515,
+          "memory": "Four observations qualify"
+        },
+        {
+          "dictionary": "jmdict",
+          "order": "BA",
+          "medianPercent": -0.446,
+          "equalWorkPercent": -0.032,
+          "descriptive95IntervalPercent": [
+            -1.143,
+            0.804
+          ],
+          "fasterPairs": 7,
+          "worstPercent": 3.714,
+          "memory": "A1 maximum sampling gap 343.1ms exceeds 250ms; retained failure"
+        }
+      ],
+      "interpretation": "Cache phase reduced by about 18.55ms and 15.10ms but complete import remained neutral."
+    },
+    {
+      "name": "Native glossary hint locals",
+      "product": "486330b71ef0734e52174b76f45b65c580623798",
+      "workflowHead": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+      "runId": 46105416073,
+      "decision": "Reject for all three dictionaries; no PR",
+      "sourceGates": "Pinned native rebuild, full unit suite, targeted ESLint, all type projects and all-target dry-run builds passed; artifacts inspected",
+      "cells": [
+        {
+          "dictionary": "jmdict",
+          "order": "AB",
+          "medianPercent": 0.611,
+          "equalWorkPercent": 0.946,
+          "descriptive95IntervalPercent": [
+            -1.041,
+            2.608
+          ],
+          "fasterPairs": 3,
+          "memory": "Four observations qualify"
+        },
+        {
+          "dictionary": "jmdict",
+          "order": "BA",
+          "medianPercent": -3.166,
+          "equalWorkPercent": -2.701,
+          "descriptive95IntervalPercent": [
+            -4.842,
+            1.399
+          ],
+          "fasterPairs": 7,
+          "tiedPairs": 1,
+          "memory": "Four observations qualify"
+        },
+        {
+          "dictionary": "jitendex",
+          "order": "AB",
+          "medianPercent": 0.368,
+          "equalWorkPercent": 0.407,
+          "descriptive95IntervalPercent": [
+            -3.952,
+            2.284
+          ],
+          "fasterPairs": 6,
+          "memory": "A1/B1/B2 exceed 250ms maximum sampling gap; neither memory pair qualifies"
+        },
+        {
+          "dictionary": "jitendex",
+          "order": "BA",
+          "medianPercent": 0.678,
+          "equalWorkPercent": 1.502,
+          "descriptive95IntervalPercent": [
+            -0.67,
+            2.594
+          ],
+          "fasterPairs": 4,
+          "memory": "Four observations qualify"
+        },
+        {
+          "dictionary": "vndb",
+          "order": "AB",
+          "medianPercent": 0.356,
+          "equalWorkPercent": 0.333,
+          "descriptive95IntervalPercent": [
+            -0.58,
+            1.396
+          ],
+          "fasterPairs": 4,
+          "memory": "Four observations qualify"
+        },
+        {
+          "dictionary": "vndb",
+          "order": "BA",
+          "medianPercent": 0.369,
+          "equalWorkPercent": 0.346,
+          "descriptive95IntervalPercent": [
+            -1.507,
+            2.487
+          ],
+          "fasterPairs": 6,
+          "memory": "Four observations qualify"
+        }
+      ],
+      "correctness": {
+        "banks": 937,
+        "rows": 7613164,
+        "fallbacks": 0,
+        "result": "Exact parser-boundary and prepared-map corpus outputs",
+        "reportSha256": "e145d68be3511097842cb2f7eff670ac12bb2b3d0c05f3d8834b81872b1dbb76",
+        "limitation": "Component proof does not establish actual production worker projection or every persisted database byte"
+      }
+    }
+  ],
+  "codecComponents": {
+    "boundary": "Native Zstd calls on actual prepared output with fixed production grouping; Node22/V8 12.4; component estimates only",
+    "schedule": "One cold preflight, one excluded three-arm warmup sweep, 12 paired timing sweeps with alternating A0/B0 order, and four interleaved A0/A1 control sweeps. Each sweep alternates arm calls block by block and sums native intervals. 2048 synthetic cases.",
+    "count64": {
+      "product": "b150866ac6ce80e4b164f1b90ef2f03658791705",
+      "tree": "30ae249f227279b2b5b6766767f7532cda401114",
+      "componentRunId": 46106027902,
+      "componentHead": "42c6283108e7cfea1bbc1dc78910afd45b688250",
+      "sourceRunId": 46109925343,
+      "importRunId": 46120503401,
+      "wasmSha256": "41e2d04f83607716d02f25f614fe67b0711fc3eff70de23ce846256aec3033f4",
+      "results": [
+        {
+          "dictionary": "jmdict",
+          "warmMedianPercent": -2.502,
+          "warmEqualWorkPercent": -2.586,
+          "descriptive95IntervalPercent": [
+            -2.847,
+            -2.428
+          ],
+          "fasterPairs": 12,
+          "worstPercent": -2.031,
+          "coldSinglePercent": 0.859,
+          "exactFrameChecks": 7907,
+          "roundtripChecks": 2357
+        },
+        {
+          "dictionary": "jitendex",
+          "warmMedianPercent": -4.041,
+          "warmEqualWorkPercent": -4.026,
+          "descriptive95IntervalPercent": [
+            -4.384,
+            -3.823
+          ],
+          "fasterPairs": 12,
+          "worstPercent": -3.155,
+          "coldSinglePercent": -1.111,
+          "exactFrameChecks": 18341,
+          "roundtripChecks": 3203
+        },
+        {
+          "dictionary": "vndb",
+          "warmMedianPercent": -6.158,
+          "warmEqualWorkPercent": -6.114,
+          "descriptive95IntervalPercent": [
+            -6.453,
+            -5.876
+          ],
+          "fasterPairs": 12,
+          "worstPercent": -5.101,
+          "exactFrameChecks": 10351,
+          "roundtripChecks": 2558
+        }
+      ],
+      "sourceGates": {
+        "unit": "Passed and artifact independently inspected: 670 files, 15171 passed, 47 skipped; separate options 32 passed",
+        "build": "Passed and artifact independently inspected: pinned generator reproduces exact WASM; all seven target dry-run builds (npm run test:build, --dryRun --all)",
+        "lintTypesJson": "Remote job succeeded; artifact contents awaiting inspection"
+      },
+      "importQualification": "Corrected prospective six-cell study queued. Original study failed the mistaken packaged-entry assertion before any observations; original outcomes preserved.",
+      "originalImportRunId": 46110938657,
+      "importQualificationHead": "1f4bcb05800e832d2297172c0da7936963758716",
+      "originalImportFailure": {
+        "cause": "Workflow expected lib/zstd-simd.wasm but unchanged build-libs maps dev/data/zstd-simd.wasm to packaged lib/zstd.wasm",
+        "stage": "Package identity guard before plan construction or any import observation",
+        "observedZeroSampleCells": [
+          "jmdict-AB",
+          "jmdict-BA",
+          "jitendex-AB",
+          "jitendex-BA",
+          "vndb-AB",
+          "vndb-BA"
+        ],
+        "noMeasuredCohortRepeated": true,
+        "repairReceipt": "count64-package-entry-repair.json"
+      }
+    },
+    "count128": {
+      "componentRunId": 46109865919,
+      "componentHead": "2b31bff4057e0a96318743ee08e591c9796d269b",
+      "wasmSha256": "304813b387ed3bd6b762826105279bec1196be79baeda3bc836ea8479efa7a5d",
+      "inspectedResults": [
+        {
+          "dictionary": "jmdict",
+          "warmMedianPercent": -2.56684,
+          "warmEqualWorkPercent": -2.561042,
+          "descriptive95IntervalPercent": [
+            -3.086767,
+            -2.008747
+          ],
+          "fasterPairs": 12,
+          "worstPercent": -1.768371,
+          "exactFrameChecks": 7907,
+          "roundtripChecks": 2357
+        },
+        {
+          "dictionary": "vndb",
+          "warmMedianPercent": -7.071,
+          "warmEqualWorkPercent": -6.943,
+          "descriptive95IntervalPercent": [
+            -7.304,
+            -6.774
+          ],
+          "fasterPairs": 12,
+          "worstPercent": -5.737,
+          "exactFrameChecks": 10351,
+          "roundtripChecks": 2558
+        }
+      ],
+      "jitendex": "Run completed successfully; numeric artifact uninspected at checkpoint",
+      "status": "No product or full-import study published; do not compare count64 and count128 across different hosts"
+    },
+    "invariants": "The source-bound oracle asserts exact baseline frame equality and successful roundtrips for all tested real cases; independently inspected bindings, receipts and counters support these reports. Bulk real-corpus/frame payloads are excluded from hosted artifacts, so inspection did not independently repeat every frame comparison. Native heaps stay 16908288 bytes. Single cold observations are retained, not replicated cold estimates."
+  },
+  "otherFrozenExperiments": [
+    {
+      "name": "Canonical row and reservation helpers",
+      "head": "d5b8ae03474c326db559837713955a2b3fe74c9b",
+      "runId": 46112238568,
+      "status": "Both completed; reports awaiting artifact inspection",
+      "boundary": "Fresh Chromium component calls on 12 exact native arenas; no complete-import result"
+    },
+    {
+      "name": "Native record-run validator",
+      "head": "491b6024fef8ee763e5436b0c5275b287a3be52b",
+      "runId": 46114585245,
+      "status": "Queued",
+      "boundary": "Fresh Chromium component; includes native initialization and private-column copying; no product"
+    },
+    {
+      "name": "JS record-run helper",
+      "product": "cb5136c51bed519a958874fad636310a9f83f447",
+      "tree": "3b5018aa46602a202e99f13c7e171f3d2b4e1d34",
+      "qualificationHead": "1fa9eac4cb8b30089626c6d5d219c3d20738d292",
+      "runId": 46115499144,
+      "status": "Full six-cell qualification and three source gates queued"
+    },
+    {
+      "name": "JS record-field helper",
+      "product": "6da3dc87d4d0695ef7c1fafd9a934460a0186659",
+      "tree": "0eb585edf865d8d68c8d9e2b42a01643c29bf4f5",
+      "qualificationHead": "a6b37c523a8d8f4a5bcea50bdb351ba1f5c4a6b3",
+      "status": "All six full-import cohorts and three source gates queued; exact run/head/workflow independently verified",
+      "boundary": "Exact one-file +480-byte helper extraction. 58 named and 128 deterministic differential cases plus all 12 JMdict groups passed; qualitative Node OSR entry is not speed evidence.",
+      "runId": 46119739523
+    }
+  ],
+  "artifacts": {
+    "cacheScan": [
+      {
+        "id": 15247890699,
+        "name": "cache-scan-jmdict-BA-20261128-0f1f",
+        "bytes": 35551983,
+        "sha256": "66a12ba47ea20e041b3c6f5c7e8f71c76454ae850be567ad40fb0f926bf4dba9",
+        "runId": 46102404862,
+        "head": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102404862/artifacts/15247890699"
+      },
+      {
+        "id": 15247500035,
+        "name": "cache-scan-checks-lint-types-20261128-0f1f",
+        "bytes": 940,
+        "sha256": "4600dd2b904996b9dd29e68acf8b1d20b6c2cee8375a17f0b802e16cf9f5be70",
+        "runId": 46102404862,
+        "head": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102404862/artifacts/15247500035"
+      },
+      {
+        "id": 15246704575,
+        "name": "cache-scan-checks-unit-20261128-0f1f",
+        "bytes": 49689,
+        "sha256": "eebdab91c2b8727921825a9470d1bbee32bc4844b1820dc26f8a452beb8f5257",
+        "runId": 46102404862,
+        "head": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102404862/artifacts/15246704575"
+      },
+      {
+        "id": 15246354551,
+        "name": "cache-scan-jmdict-AB-20261128-0f1f",
+        "bytes": 35556749,
+        "sha256": "cd4b7989c509bc467e2512cb49d56f66cfe65a3f320312bd19b12b2634670f24",
+        "runId": 46102404862,
+        "head": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102404862/artifacts/15246354551"
+      },
+      {
+        "id": 15245994180,
+        "name": "cache-scan-checks-build-20261128-0f1f",
+        "bytes": 583,
+        "sha256": "a33b1a216c1d119d58f8c83d4b8cfde7edb34e39a1affba88467d05151c7f70a",
+        "runId": 46102404862,
+        "head": "13cd84615a23804e06dec66cb0a8bcf2f8d617ba",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102404862/artifacts/15245994180"
+      }
+    ],
+    "nativeHints": [
+      {
+        "id": 15251966065,
+        "name": "native-hint-locals-vndb-BA-20261128-0f1f",
+        "bytes": 35742758,
+        "sha256": "7e8887774b3bdc7508233a5ed1476f3d0c0c81c980c28e4bc65ca180a041708e",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15251966065"
+      },
+      {
+        "id": 15251277424,
+        "name": "native-hint-locals-jmdict-BA-20261128-0f1f",
+        "bytes": 35663712,
+        "sha256": "7c25d02cf9218bc30b3522e37f430aab139119ca71574f8514762e7b0f5a7e18",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15251277424"
+      },
+      {
+        "id": 15250117592,
+        "name": "native-hint-locals-vndb-AB-20261128-0f1f",
+        "bytes": 35929967,
+        "sha256": "be0ab1f132a63241177da52c78c177c2213511df754bad91cee674707a946924",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15250117592"
+      },
+      {
+        "id": 15250028451,
+        "name": "native-hint-locals-checks-unit-20261128-0f1f",
+        "bytes": 46180,
+        "sha256": "aedb06fade24d24382825015a9d5824197b5846ae9f71878f237460ab3aee1bd",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15250028451"
+      },
+      {
+        "id": 15249303217,
+        "name": "native-hint-locals-jmdict-AB-20261128-0f1f",
+        "bytes": 35656711,
+        "sha256": "0798658a1d37d9fd2731400686c10ac2cb37e6dc40fa65a3caeadb230303d120",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15249303217"
+      },
+      {
+        "id": 15248925933,
+        "name": "native-hint-locals-checks-lint-types-20261128-0f1f",
+        "bytes": 939,
+        "sha256": "889897ddf583045fd9660649f8ca5b23482145bdb1dba200273220e49c006e67",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15248925933"
+      },
+      {
+        "id": 15248869447,
+        "name": "native-hint-locals-jitendex-AB-20261128-0f1f",
+        "bytes": 35630869,
+        "sha256": "ef5b7b26cd7d9dc693424878815a5ac28b98785a97da9560da0241648c735f22",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15248869447"
+      },
+      {
+        "id": 15248794878,
+        "name": "native-hint-locals-jitendex-BA-20261128-0f1f",
+        "bytes": 35591573,
+        "sha256": "8f64b3e1e614501fc770aeeab151a0c7cd69349c2d49e1e31f9f8b44bba662df",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15248794878"
+      },
+      {
+        "id": 15248209265,
+        "name": "native-hint-locals-checks-build-20261128-0f1f",
+        "bytes": 1340,
+        "sha256": "05e664bcb2e86caa8afe3246c7f57f5ee54a229145c3580a6ba53206e790a4e2",
+        "runId": 46105416073,
+        "head": "ef8b46a5d65ce6abb949b1e1dc51e618af4e9445",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46105416073/artifacts/15248209265"
+      }
+    ],
+    "count64Corpus": [
+      {
+        "id": 15249724250,
+        "name": "zstd-count64-corpus-20261128-0f1f-vndb",
+        "bytes": 451977,
+        "sha256": "10d4baadb4de23c769c908f836fe02a809a8c8e54210db51affa10b5373c82f3",
+        "runId": 46106027902,
+        "head": "42c6283108e7cfea1bbc1dc78910afd45b688250",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46106027902/artifacts/15249724250"
+      },
+      {
+        "id": 15249297844,
+        "name": "zstd-count64-corpus-20261128-0f1f-jmdict",
+        "bytes": 285578,
+        "sha256": "354526fd707875b8d621d80495488385e6908aa947a3e74f01788337825132f9",
+        "runId": 46106027902,
+        "head": "42c6283108e7cfea1bbc1dc78910afd45b688250",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46106027902/artifacts/15249297844"
+      },
+      {
+        "id": 15248891830,
+        "name": "zstd-count64-corpus-20261128-0f1f-jitendex",
+        "bytes": 936148,
+        "sha256": "2b47e1c05a124909a91f7c5225635c069575be73aed608a55dc0e6b50ad1094e",
+        "runId": 46106027902,
+        "head": "42c6283108e7cfea1bbc1dc78910afd45b688250",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46106027902/artifacts/15248891830"
+      }
+    ]
+  },
+  "evidencePersistence": {
+    "completedCohortCatalogSha256": "57f8662d86ba02146bff307f3d971de5b231d274cb8f5f0196a937054fca5fbe",
+    "completedCohorts": 8,
+    "retainedObservations": 336,
+    "originalRetainedFiles": 2152,
+    "primaryRawArchiveBytes": 13932324,
+    "experimentArchive": {
+      "members": 437,
+      "contentBytes": 16180650,
+      "compressedBytes": 2593527,
+      "sha256": "6728bf840ed0e4bf93909d304656a483f4cfdc604723811c12749a0e212595ef",
+      "manifestSha256": "fa5e303281ab944e67a2223a40d809bf5d3c32e98643a177ed372015cc50008d"
+    },
+    "status": "Verified compact archives and catalogs saved locally before executor outage; those archives have not yet been published to GitHub. Hosted artifacts remain separately available.",
+    "failureRetention": "Includes superseded compiler failures, failed memory coverage, SIGKILL source attempts and partial extraction. No failed acquisition relabeled."
+  },
+  "limitations": [
+    "Local executor became unavailable around06:58UTC; hosted acquisition continues.",
+    "Local Chromium was unavailable due EPERM process-singleton socket; no browser workaround or Work mode used.",
+    "Captured field inputs came from a baseline Node harness whose enclosing source hash could not be located; producer boundary and source/input hashes are recorded. They do not prove full browser persistence.",
+    "Diagnostic OSR traces are qualitative, one process per arm, with no elapsed performance estimate.",
+    "No successful cohort or measurement is repeated after observing its result."
+  ]
+}

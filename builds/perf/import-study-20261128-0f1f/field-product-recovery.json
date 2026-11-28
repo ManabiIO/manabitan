@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28 07:06:38 UTC",
+  "purpose": "Publish the exact already-reviewed local candidate after executor unavailability",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "localFrozenCommit": "045b1918db21b7339ed3a55ab65ecf881c84f4e0",
+  "remoteProductCommit": "6da3dc87d4d0695ef7c1fafd9a934460a0186659",
+  "productBranch": "perf/js-record-field-helper-20261128-0f1f",
+  "productTree": "0eb585edf865d8d68c8d9e2b42a01643c29bf4f5",
+  "productFile": "ext/js/dictionary/term-record-opfs-store.js",
+  "productMode": "100644",
+  "productBlob": "ced1b3bed68143e48bd8f43a9f71af7e43763cc4",
+  "expectedProductSha256": "74a4a90e4d192d35cd22da3c439e026be507b7923bdbcc4917a858011b7bcb38",
+  "acquisition": "Read frozen baseline UTF-8 source with GitHub connector; apply the two exact reviewed replacements in memory",
+  "validation": {
+    "uniqueAnchor": true,
+    "uniqueLoopBody": true,
+    "sourceDeltaBytes": 480,
+    "gitBlobExactlyMatchesLocalFrozenIdentity": true,
+    "gitTreeExactlyMatchesLocalFrozenIdentity": true,
+    "remoteCommitHasOneChangedFile": true,
+    "remoteDiff": {
+      "additions": 20,
+      "deletions": 7
+    }
+  },
+  "sourceChecks": {
+    "localUnitAndTypes": "Four processes terminated by SIGKILL before diagnostics; no pass claimed",
+    "hosted": "Required"
+  },
+  "performance": "No comparison result; no PR"
+}
