@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-untimed-residual-grammar-census-compact-checkpoint",
+  "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineModuleSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+  "scope": "One baseline-only instrumented generic-grammar census; final raw-attribute extension is a second untimed pass. No timing or product change.",
+  "validation": {
+    "groups": 12,
+    "banks": 53,
+    "rows": 528299,
+    "allOutputOraclesEqual": true,
+    "allBeforeAfterSourceHashesEqual": true,
+    "instrumentationOverflow": 0,
+    "rawAttributeExtensionPreservesAllPriorCounters": true
+  },
+  "totals": {
+    "genericRows": 208562,
+    "genericSourceBytes": 61304698,
+    "genericLoopIterations": 10196746,
+    "stringTokens": 5708347,
+    "objectKeys": 3179823,
+    "fastCommonKeys": 1799065,
+    "stringTokenBytes": 52021565,
+    "maximumDepth": 10,
+    "contentChildEntries": 407307,
+    "tagValueShortcuts": 0,
+    "closeTokens": 1891674,
+    "scalarTokens": 0,
+    "whitespaceTokens": 0,
+    "keyTokenBytes": 24637479,
+    "otherKeyTokenBytes": 11414462,
+    "genericContainerEntries": 1275805
+  },
+  "families": {
+    "list-containing-general-glossary": {
+      "rows": 66968,
+      "bytes": 39037795,
+      "iterations": 6397383
+    },
+    "forms-table": {
+      "rows": 19062,
+      "bytes": 13598439,
+      "iterations": 2884744
+    },
+    "flat-strings": {
+      "rows": 104490,
+      "bytes": 4875146,
+      "iterations": 349476
+    },
+    "links-without-table-or-list": {
+      "rows": 18042,
+      "bytes": 3793318,
+      "iterations": 565143
+    }
+  },
+  "keys": [
+    {
+      "key": "content",
+      "count": 1056923,
+      "tokenBytes": 9512307
+    },
+    {
+      "key": "tag",
+      "count": 742142,
+      "tokenBytes": 3710710
+    },
+    {
+      "key": "style",
+      "count": 362914,
+      "tokenBytes": 2540398
+    },
+    {
+      "key": "lang",
+      "count": 216599,
+      "tokenBytes": 1299594
+    },
+    {
+      "key": "data",
+      "count": 210709,
+      "tokenBytes": 1264254
+    },
+    {
+      "key": "textAlign",
+      "count": 151636,
+      "tokenBytes": 1667996
+    },
+    {
+      "key": "listStyleType",
+      "count": 140676,
+      "tokenBytes": 2110140
+    },
+    {
+      "key": "type",
+      "count": 104072,
+      "tokenBytes": 624432
+    },
+    {
+      "key": "href",
+      "count": 72579,
+      "tokenBytes": 435474
+    },
+    {
+      "key": "fontSize",
+      "count": 69013,
+      "tokenBytes": 690130
+    },
+    {
+      "key": "verticalAlign",
+      "count": 50971,
+      "tokenBytes": 764565
+    },
+    {
+      "key": "fontStyle",
+      "count": 1589,
+      "tokenBytes": 17479
+    }
+  ],
+  "exactAttributeObjects": {
+    "data": [
+      {
+        "literal": "{\"content\":\"glossary\"}",
+        "count": 66897
+      },
+      {
+        "literal": "{\"content\":\"refGlosses\"}",
+        "count": 50971
+      },
+      {
+        "literal": "{\"content\":\"references\"}",
+        "count": 46746
+      },
+      {
+        "literal": "{\"content\":\"infoGlossary\"}",
+        "count": 5070
+      },
+      {
+        "literal": "{\"content\":\"formsTable\"}",
+        "count": 19062
+      },
+      {
+        "literal": "{\"content\":\"notes\"}",
+        "count": 11116
+      },
+      {
+        "literal": "{\"content\":\"sourceLanguages\"}",
+        "count": 9476
+      },
+      {
+        "literal": "{\"content\":\"antonyms\"}",
+        "count": 1371
+      }
+    ],
+    "style": [
+      {
+        "literal": "{\"listStyleType\":\"circle\"}",
+        "count": 66897
+      },
+      {
+        "literal": "{\"fontSize\":\"65%\",\"verticalAlign\":\"middle\"}",
+        "count": 50971
+      },
+      {
+        "literal": "{\"listStyleType\":\"'➡️ '\"}",
+        "count": 46746
+      },
+      {
+        "literal": "{\"listStyleType\":\"'ℹ️ '\"}",
+        "count": 5070
+      },
+      {
+        "literal": "{\"textAlign\":\"center\"}",
+        "count": 108280
+      },
+      {
+        "literal": "{\"textAlign\":\"left\"}",
+        "count": 43356
+      },
+      {
+        "literal": "{\"listStyleType\":\"'📝 '\"}",
+        "count": 11116
+      },
+      {
+        "literal": "{\"fontSize\":\"130%\"}",
+        "count": 18042
+      },
+      {
+        "literal": "{\"fontStyle\":\"italic\"}",
+        "count": 1589
+      },
+      {
+        "literal": "{\"listStyleType\":\"'🌐 '\"}",
+        "count": 9476
+      },
+      {
+        "literal": "{\"listStyleType\":\"'🔄 '\"}",
+        "count": 1371
+      }
+    ]
+  },
+  "attributeTotals": {
+    "data": {
+      "occurrences": 210709,
+      "values": 8,
+      "valueBytes": 4922420,
+      "fieldBytes": 6397383,
+      "structurallyCountedValueLoopIterations": 842836
+    },
+    "style": {
+      "occurrences": 362914,
+      "values": 11,
+      "valueBytes": 9653776,
+      "fieldBytes": 12557088,
+      "structurallyCountedValueLoopIterations": 1553598
+    }
+  },
+  "shortAdjacentEqual": {
+    "withoutValidationWitnessRows": 6422,
+    "withoutValidationWitnessBytes": 1345835,
+    "stillGenericRows": 5422,
+    "stillGenericBytes": 1143019,
+    "stillGenericIterations": 168794,
+    "stillGenericKeys": 55857,
+    "stillEncodedRows": 309,
+    "stillEncodedBytes": 62427,
+    "longAdjacentAtLeast512BytesAllAlreadyReused": true
+  },
+  "limitations": [
+    "Generic counters count executed baseline work after existing validation reuse and whole-list dispatch, not CPU or a savings guarantee.",
+    "Data/style raw literals were individually extracted from the actual source and JSON-validated after the native call; all values are compact string-only objects,18one-field kinds and1two-field kind.",
+    "2,396,434 value-subtree loop iterations are a source-control-flow calculation over actual object occurrences; matching/checking work would remain in a new recognizer.",
+    "Source and metadata must be snapshotted immediately at fused-call return, because later lookup scratch reuses the retired metadata allocation. The first too-late census assertion failure is retained locally.",
+    "Complete raw archive was created and hashed locally but had not been uploaded before the execution environment disconnected. This compact receipt records tool-observed output; it does not claim durable availability of every raw member."
+  ],
+  "localEvidence": {
+    "path": "/tmp/manabitan-da6c4-residual-grammar/evidence-v1.tar.gz",
+    "bytes": 943790,
+    "sha256": "91209a99fee4977d0a12c452612c53eefb880f400def1c15c1c43e547517935f",
+    "members": 33,
+    "uploadComplete": false
+  },
+  "priorAndDecision": {
+    "failedChildListCohortReceipt": "fd14fb6c2ce8d0943df49169c6333f8d3831f660",
+    "failedChildListIndependentAudit": "96adbbe0b5627ed2e5185d44dfc5d567ede0d104",
+    "staticTwoShapePrior": "c8acce2669112ef1493da3f80f4b7001a1f331dd",
+    "static19LiteralExtension": "Rejected before product implementation after novelty overlap was found",
+    "nextAuthorizedExperiment": "Separate f28 uncached compact string-only arbitrary-field metadata grammar derived explicitly from #831; real3corpus acceptance/fallback-byte census and adversarial/full-output parity required before any fresh CPU protocol or timing."
+  }
+}

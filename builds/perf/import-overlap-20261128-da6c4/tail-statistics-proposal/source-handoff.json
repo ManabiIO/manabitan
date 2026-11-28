@@ -1,0 +1,47 @@
+{
+  "schema": "manabitan-tail-statistics-handoff-v1",
+  "files": [
+    {
+      "path": "tail_stats.py",
+      "blob": "24acf1090893710bc85cdfa89edc2edd7ca39b1c",
+      "bytes": 10064
+    },
+    {
+      "path": "test_tail_stats.py",
+      "blob": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9",
+      "bytes": 15487
+    }
+  ],
+  "sourceBinding": {
+    "commit": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "blob": "7bfac83eedfbae61590b849c0934060c30ff4cef",
+    "sha256": "01b41fcc5f4589f77637acfa21de374d705d32cefaa8673807501cdfeb05e15b"
+  },
+  "api": [
+    "schedule(dictionary, initial_order)",
+    "analyze(observations, dictionary, initial_order)"
+  ],
+  "qualification": "One complete prescribed ordinary host cohort only; no exclusions or cross-host pooling; memory/source/semantic gates remain separate.",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 897,
+    "sampling": "random.Random(897).choices(range(n), k=n)",
+    "sharedIndicesFor": "paired millisecond and ratio medians",
+    "sortedIndices": [
+      249,
+      9749
+    ]
+  },
+  "tests": {
+    "methods": 18,
+    "command": "python3 -m unittest -v test_tail_stats",
+    "status": "UNEXECUTED: executor unavailable before any source edit or test run; hosted gate must pass before timing."
+  },
+  "sourceStatus": "Unreferenced blobs only; parent owns refs/workflows. No product source changes.",
+  "supersedesUnexecutedBlobs": [
+    "08049849d58a38941e36cf9f03d408be201a2c30",
+    "7d1f44021bc389ca5e05e9fe73de6488b79cb0b1"
+  ],
+  "finalDifference": "Reject positive finite inputs whose computed ratio underflows to zero; no valid-cohort statistic or schedule changes."
+}

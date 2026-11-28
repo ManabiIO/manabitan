@@ -1,0 +1,15 @@
+{
+  "schema": "manabitan-compact-metadata-final-admission-review-v1",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateBlob": "4cb302e4fef1539c07fbdbeb4aba1cf59f8136d0",
+  "deltaBlob": "79f2df97dad4bf87d1c6842e69d9276efd57b328",
+  "previousReviewedCandidate": "3a587c37dd10a71295512e4ca9a0e17e4efdf05d",
+  "previousReviewBlob": "cb3b35bbcdd8abb909829519b66ca9df8560b2eb",
+  "proof": {
+    "newLength": 165345,
+    "oneLineOnly": true,
+    "addedLine": "                    (src[i + 1u] == 'd' || src[i + 1u] == 's') &&\n"
+  },
+  "conclusion": "Only the raw first-character d/s prefilter is added before is_metadata_key. Generic key validation still precedes it; it narrows equivalent literal-only admission and does not change the reviewed helper/hint/depth/parent-state behavior. No concrete source-level blocker.",
+  "status": "Source-only; unbuilt, untested, no corpus timing. All previous required differential/census gates remain."
+}

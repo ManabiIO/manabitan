@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-untimed-alias-browser-preflight-log-review",
+  "run": 46137335791,
+  "job": 140955464780,
+  "qualificationCommit": "6594b22915ee717b4009e414a299007badfb25f6",
+  "fullLogBlob": "db28133393938f5983cad9ec44671a9567a19614",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+  "complete": true,
+  "sourceManifestSha256": "d0800c3da8c90736d821f2a434d484d4ecf67d8b9d7167aacfdaf873e9d8d842",
+  "bindingSha256": "4b08b24c1b6e443826ee10b9ded36e3341b3ff8eaf0a5a695e68d1a905e560fa",
+  "sourceIdentities": {
+    "A": {
+      "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+      "sourceManifestSha256": "916181ba4f5bf5eb7493646f0bf4e8c1b5173d0a9a57331227295aec3869bcab",
+      "packageSha256": "866991a0f337c7c6985d70ec7e49805d4be3687c085072eae8545d680be922b8"
+    },
+    "B": {
+      "commit": "cce6353276f92b80fc6c377bf543354ea59edce3",
+      "tree": "b65955a62da72c55e24a681011684601fa089f07",
+      "sourceManifestSha256": "b6027afc251574862dcff42126cfe67b75f8708749798d75a167e39ac85fa5dc",
+      "packageSha256": "4ac403aa80d52bc576a000f379c49777dff86bd8e484043e06ef60c4133059fd"
+    }
+  },
+  "artifacts": [
+    {
+      "id": 15260940298,
+      "name": "alias-native-verify-6594b22915ee717b4009e414a299007badfb25f6-46137335791-1",
+      "bytes": 34713461,
+      "digest": "sha256:51a0e3a008a86b22e92680a64c26e6ed9ba1a579e1aa4564a19d1c9613794646"
+    },
+    {
+      "id": 15260486824,
+      "name": "alias-native-preflight-gate-6594b22915ee717b4009e414a299007badfb25f6-46137335791-1",
+      "bytes": 288325,
+      "digest": "sha256:911c1d58b39d9fe0e57a0ec36fc0690f2182adb93e54971bb4aae31d65fded22"
+    },
+    {
+      "id": 15259779699,
+      "name": "alias-native-preflight-6594b22915ee717b4009e414a299007badfb25f6-46137335791-1",
+      "bytes": 314290476,
+      "digest": "sha256:de7f8fceb5b717e689c3c13d70c85876d8402a6be22a5a8b5b9e3d174468cfc8"
+    }
+  ],
+  "rowsA": 6648310,
+  "rowsB": 6648310,
+  "logicalDigestA": "ec3b399cf741c74c7d0ca2d2e5d963961d6aeafbe9cad5aefec123166b7a63f0",
+  "logicalDigestB": "ec3b399cf741c74c7d0ca2d2e5d963961d6aeafbe9cad5aefec123166b7a63f0",
+  "nativePreparedGroupsA": 162,
+  "nativePreparedGroupsB": 170,
+  "aliasProofsA": 0,
+  "aliasProofsB": 8,
+  "coldRecordProbesA": 20,
+  "coldRecordProbesB": 194,
+  "coldLookupProbesA": 82,
+  "coldLookupProbesB": 82,
+  "canonicalEntries": 157150,
+  "normalContentSpansVerified": 170,
+  "aliasRows": 175,
+  "aliasGroups": [
+    1,
+    87,
+    91,
+    92,
+    105,
+    123,
+    126,
+    139
+  ],
+  "result": "Both actual full-browser all-media/restart/export proofs succeeded, with identical complete logical digest and all naturally verified same-arm normalized term bytes. This is prerequisite correctness evidence, not an ordinary timing observation or a measured speedup.",
+  "limitations": [
+    "Root read and parsed retained GitHub logs and all13 ALIAS_RECEIPT envelopes; full original archive-byte audit is still pending because the executor is unavailable.",
+    "Source-only audit controls are being prepared for a read-only hosted archive audit. No acquisition retry or gate change is authorized by this receipt."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-root-source-only-compact-metadata-review",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateSourceBlob": "4cb302e4fef1539c07fbdbeb4aba1cf59f8136d0",
+  "deltaManifestBlob": "79f2df97dad4bf87d1c6842e69d9276efd57b328",
+  "operations": [
+    {
+      "operation": "insertBeforeUnique",
+      "marker": "static int parse_composite_span_impl(",
+      "insertedCharacters": 2724
+    },
+    {
+      "operation": "insertBeforeUnique",
+      "marker": "                // The key was already validated; consume an adjacent colon\n",
+      "insertedCharacters": 1554
+    }
+  ],
+  "exactDeclaredInsertionReproduction": true,
+  "conclusions": [
+    "The exact frozen baseline plus the two declared insertions reproduces the entire candidate C source byte-for-byte in memory. Existing common-key, whole-glossary and string validators remain unchanged.",
+    "Explicit literal d/s first-byte admission was added after root review. Existing generic parent-key parsing remains; this does not combine the separate metadata-classifier optimization.",
+    "Each quoted key/value is bounded by the existing parse_string_span before lookahead; compact closing brace alone commits cursor/hints. Unsupported spacing/scalars/nesting/trailing commas and malformed strings return without publishing local state.",
+    "The depth<MAX_JSON_NESTING admission preserves the eliminated object's required frame; strict top-level unknown-key assignment runs before the skip, preserving parent required-field bookkeeping.",
+    "Both key and value media markers use the existing escaped-aware marker checker. type/text normalization checks use the same existing helper and conservatively OR local hints. Duplicate field semantics remain the baseline hint semantics.",
+    "No byte-size threshold, cache, hash, literal-shape table, child-list parser or parsing flag is introduced."
+  ],
+  "requiredPreflight": [
+    "Pinned LLVM21.1.8 must first reproduce the exact frozen stock WASM SHA2565d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695.",
+    "Differential malformed/adversarial cases must cover escapes, media keys/values, type/text, duplicate keys, strict glossary required fields, depth boundaries, long successful string prefixes followed by unsupported scalar/nesting, and hint/cursor behavior on failure.",
+    "Run untimed full JMdict/Jitendex/VNDB output parity and actual failed-probe scanned-prefix-byte census before a separate prospective timing freeze."
+  ],
+  "limitations": "Executor unavailable. Source-only review; no compile/test/full corpus parity or performance claim. Grammar is derived from prior #831; separate cost composition must earn current evidence."
+}

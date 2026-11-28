@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-source-only-statistics-review",
+  "sourceBlobs": {
+    "module": "24acf1090893710bc85cdfa89edc2edd7ca39b1c",
+    "tests": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9",
+    "originalRunner": "7bfac83eedfbae61590b849c0934060c30ff4cef"
+  },
+  "review": "Root read the complete module and all18 test methods. No executor execution was possible or claimed.",
+  "findings": [
+    "Public analyze validates an exact complete ordered list against frozen per-dictionary schedule, including warmups; all five fields, types, positive finite durations, complete pair sets and finite derived quantities are checked.",
+    "Four excluded warmups,24JMdict or12non-target adjacent pairs, alternating AB/BA order and eight/four controls every third pair match the approved prospective schedule.",
+    "Ratio and millisecond bootstrap use the same Random(897).choices index sample for each complete pair set;10,000 resamples and249/9749 sorted endpoints match the original ratio-only method.",
+    "JMdict gates independently require at least10ms and1% median savings,18of24 faster pairs, negative equal-work and both upper confidence endpoints, and strict control effects below half the smaller percentage benefit.",
+    "Non-target gates retain inclusive1%median/equal-work,3%upper interval and1%absolute control effects. Memory and source qualification remain separate.",
+    "No tail-admission-based filtering, pooling hosts, optional exclusions, retries or inferred memory pass is present.",
+    "Tests cover the exact prior comparison fields, coupled resample indices, both orders, invalid schema/nonfinite input, no mutation, warmup schedule and inclusive/exclusive gate boundaries.",
+    "Reviewed sole final source delta: reject finite positive durations whose division underflows to zero, plus its adversarial test. Valid observation math and all thresholds are unchanged."
+  ],
+  "decision": "No source-level statistics blocker found. Hosted execution of all control tests is required before any timing.",
+  "supersedes": "975559c2e7171b2d1573ddcaeb343a179eae5e18"
+}

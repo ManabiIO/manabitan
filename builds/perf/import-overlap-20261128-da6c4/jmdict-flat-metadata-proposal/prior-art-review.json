@@ -1,0 +1,60 @@
+{
+  "schema": "manabitan-flat-metadata-novelty-review-v1",
+  "status": "source-only; no new implementation or timing by reviewer",
+  "currentBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "scope": "Standalone uncached compact flat string-valued metadata-object grammar under literal data/style keys, with arbitrary field count, using existing bounded string validation and unchanged generic key admission.",
+  "historicalSubstrate": {
+    "pullRequest": "https://github.com/ManabiIO/manabitan/pull/831",
+    "commit": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+    "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "blob": "38b39e3eba320c6a216b9c8df5831b58818e10e2",
+    "bytes": 158503,
+    "excerptBlob": "289105c0650a52506ea7d019c311884fb5b2632d",
+    "helper": "parse_flat_metadata_object",
+    "helperScope": "Arbitrary primitive field count, quoted strings or scalars, JSON whitespace; complete closing brace required; local media/normalization/text-normalization hints.",
+    "wrapper": "reuse_or_parse_metadata_object adds16–512-byte admission,8sets×4witnesses, raw-prefix selector, exact byte comparison and cached hints.",
+    "noveltyConclusion": "Generic direct flat-object grammar is prior art in #831's cache-miss path. Removing all cache machinery while restricting to compact strings is a distinct cost composition; it must retain historical attribution and earn preparation-inclusive evidence."
+  },
+  "otherExactScreens": [
+    {
+      "head": "c8acce2669112ef1493da3f80f4b7001a1f331dd",
+      "branch": "perf/jmdict-neutral-metadata-objects-20261119",
+      "mechanism": "Two exact static semantic data/style object literals; distinct from arbitrary key/value grammar.",
+      "reviewBlob": "aab9e30e5650c62635a94578ca0e50ffca0784b6"
+    },
+    {
+      "head": "524b41a112a1ba0b1ac31723da274c97d5525653",
+      "branch": "perf/r2-flat-glossary-20261123-fcff",
+      "mechanism": "Leading quoted-string run in a top-level glossary array, not metadata object grammar."
+    },
+    {
+      "pullRequest": 895,
+      "mechanism": "Metadata key classification; do not combine that change with this isolated grammar screen."
+    },
+    {
+      "pullRequest": 948,
+      "head": "dce83c54af038e7b4ac59c8d690026c532341f40",
+      "mechanism": "Top-level structured-content type literal fusion, not generic metadata field grammar."
+    },
+    {
+      "pullRequest": 972,
+      "mechanism": "Whole compact structured glossary helper; occupied, outside this residual metadata path."
+    }
+  ],
+  "requiredSemantics": [
+    "Use complete logical-end-bounded string validation for arbitrary and escaped keys and values.",
+    "Preserve media hints for img/image in both keys and values, including escaped equivalent spellings.",
+    "Preserve normalization and text-normalization hints for every type/text pair, including escaped strings and duplicate keys.",
+    "Compact-only unsupported whitespace, scalars, nesting or invalid syntax must fall through with all parser state and hints unchanged.",
+    "Require depth<MAX_JSON_NESTING for the eliminated single object frame.",
+    "Literal data/style parent admission must preserve strict top-level glossary key/required-field state.",
+    "Consume only the child closing brace; publish OBJECT_AFTER_VALUE and leave the parent's delimiter handling unchanged.",
+    "Do not count prior generic key-validation/selector overhead as removed.",
+    "Measure failed probes and rescanned bytes across real JMdict/Jitendex/VNDB before timing; any-field admission removes third-field rejection but does not bound long failing probes."
+  ],
+  "limits": [
+    "This is a bounded branch/PR novelty search, not a claim that every unadvertised branch has been exhausted.",
+    "Historical cache and static-literal timing results do not establish the current uncached grammar outcome.",
+    "573623 metadata values and2.396M parser state iterations are source/census opportunity counts, not removable cost or a speedup estimate."
+  ]
+}
