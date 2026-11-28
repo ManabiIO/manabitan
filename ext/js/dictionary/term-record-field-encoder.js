@@ -29,13 +29,13 @@ const descriptor = Object.getOwnPropertyDescriptor;
 const prototypeOf = Object.getPrototypeOf;
 const hasOwn = Object.hasOwn;
 const isView = ArrayBuffer.isView;
-const typedArrayPrototype = prototypeOf(Uint8Array.prototype);
+const typedArrayPrototype = /** @type {object} */ (prototypeOf(Uint8Array.prototype));
 const typedBuffer = /** @type {(this: ArrayBufferView) => ArrayBuffer} */ (descriptor(typedArrayPrototype, 'buffer')?.get);
 const typedByteOffset = /** @type {(this: ArrayBufferView) => number} */ (descriptor(typedArrayPrototype, 'byteOffset')?.get);
 const typedLength = /** @type {(this: ArrayBufferView) => number} */ (descriptor(typedArrayPrototype, 'length')?.get);
 const arrayBufferLength = /** @type {(this: ArrayBuffer) => number} */ (descriptor(ArrayBuffer.prototype, 'byteLength')?.get);
 const columnConstructors = [Int32Array, Uint32Array, Float64Array];
-const typedArrayConstructor = prototypeOf(Int32Array);
+const typedArrayConstructor = /** @type {object} */ (prototypeOf(Int32Array));
 
 /** @returns {boolean} */
 function hasCanonicalViewAccessors() {
@@ -66,7 +66,7 @@ function hasCanonicalViewAccessors() {
  */
 function ownData(object, name) {
     const value = descriptor(object, name);
-    return value !== undefined && hasOwn(value, 'value') ? value.value : undefined;
+    return typeof value !== 'undefined' && hasOwn(value, 'value') ? value.value : void 0;
 }
 
 /**
@@ -76,11 +76,11 @@ function ownData(object, name) {
 function hasUnusedPlainFixedSpan(chunk) {
     const length = descriptor(chunk, 'fixedContentLength');
     if (
-        length === undefined ? 'fixedContentLength' in chunk :
+        typeof length === 'undefined' ? 'fixedContentLength' in chunk :
             !hasOwn(length, 'value') || typeof length.value === 'number'
     ) { return false; }
     const offset = descriptor(chunk, 'fixedContentOffsetBase');
-    return offset === undefined ? !('fixedContentOffsetBase' in chunk) : hasOwn(offset, 'value');
+    return typeof offset === 'undefined' ? !('fixedContentOffsetBase' in chunk) : hasOwn(offset, 'value');
 }
 
 /**
