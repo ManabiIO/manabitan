@@ -65,6 +65,7 @@ import {
     TermBankWasmResourceError,
 } from './term-bank-wasm-parser.js';
 import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
+import {compileCanonicalScanModule} from './term-content-canonical-scan.js';
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
@@ -5150,6 +5151,11 @@ export class DictionaryImporter {
             this._usePrecomputedContentForMediaRows
         );
         const useDirectArtifactChunkImport = streamToChunkHandler && (useRawBytesDirectContent || useMediaDirectArtifactChunkImport);
+        if (useDirectArtifactChunkImport && enableTermEntryContentDedup) {
+            // Overlap immutable helper compilation with parsing. The ordinary
+            // scanner retains asset retry/fallback and native memory ownership.
+            void compileCanonicalScanModule().catch(() => {});
+        }
         const includeContentMetadata = useDirectArtifactChunkImport ? true : (useRawBytesDirectContent ? false : (this._wasmPassThroughTermContent || !this._wasmSkipUnusedTermContentEncoding));
         const minimalDecode = (
             this._wasmCanonicalRowsFastPath &&
