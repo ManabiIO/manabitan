@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "scope": "Exact source validation only; no browser performance or memory claim",
+  "verifierSha256": "d6f41304c2c636ff5f953aa9122fe955e123667a2a8e1422f59d2ca27183a9e8",
+  "archiveSha256": "db5c3b60697e2bd041a480523eb5712e2af8fd2fda3ec405a3e1675e211e8c71",
+  "allOriginalPayloadsMatch": 15,
+  "originalArtifactBytes": 52685,
+  "originalArtifactSha256": "5b46168d1d6bc85c0b9f931a94cea85eb0c12a4f1f7d83e2f55ecb36f1dbe436",
+  "freshGitHubArtifactAndSourceGateMetadataMatch": true,
+  "optimizedPythonRejected": true,
+  "noNewAcquisition": true,
+  "verifierOutputSha256": "3377482ddcbe46b0fe7d865322536ada2fd35d8d75dec7254dbd9af9600de913",
+  "workflowGitBinding": {
+    "status": "PASS exact bytes",
+    "commit": "baca22e773e835f6729d4fc5198f2445afac4535",
+    "gitBlob": "d6294fe33f8ee45feb071843df8721c6694e66dd",
+    "sha256": "30e5450fada26ce5a2525d3f6746fd8ca93c5bef7eac4d07341c90e214125c17"
+  },
+  "handoffReview": {
+    "status": "PASS one exact line-based insertion, no edits/deletions to existing text",
+    "oldGitBlob": "d9c9948339ac13b7835d0994fe4fa5538fbc8782",
+    "insertedLines": 8,
+    "preparationNote": "A prefix-only check and a character-alignment check were unsuitable for this subsection insertion and rejected. Exact line-based diff verifies one insertion only; no proposed content changed."
+  },
+  "falsePerformanceClaimRejectedAfterRebindingArchiveHashes": true,
+  "plannedPathsMissAcquisitionFilters": true,
+  "plannedPaths": [
+    "builds/perf/js-hash-rounds-5a86/source-validation-checkpoint/evidence.tar.xz",
+    "builds/perf/js-hash-rounds-5a86/source-validation-checkpoint/manifest.json",
+    "builds/perf/js-hash-rounds-5a86/source-validation-checkpoint/verify-validation.py",
+    "builds/perf/js-hash-rounds-5a86/source-validation-checkpoint/independent-review.json",
+    "dev/perf/import-experiments-20260914.md"
+  ]
+}

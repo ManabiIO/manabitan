@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "validationOnly": true,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "baca22e773e835f6729d4fc5198f2445afac4535",
+  "members": {
+    "artifact-metadata.json": {
+      "bytes": 756,
+      "sha256": "79f8ae66385ec1b0fbbc82380821419cae743d97d081000732443ff19964b026"
+    },
+    "checkpoint.json": {
+      "bytes": 1483,
+      "sha256": "7640b5607710f10496daf89a0c2f70974253a9b0c33f3c1e65297abcc7a81c60"
+    },
+    "jobs-source-gate-complete.json": {
+      "bytes": 3576,
+      "sha256": "68605e9f9bc7d21ecd7379b6e408e6137b815722a750c9ea5e1db2755a355e80"
+    },
+    "logs/build.log": {
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    "logs/format.log": {
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "logs/lint.log": {
+      "bytes": 764,
+      "sha256": "7299800c2295e66c451f9ab2a9407eee7e7968f1066572ee3cccb7030b15ff4c"
+    },
+    "logs/native-rebuild.log": {
+      "bytes": 500,
+      "sha256": "a6b6cf1c3278e4d6074cc813af34bd985ec7e9fb1675c9e8ecd80ec8948cc079"
+    },
+    "logs/observers.log": {
+      "bytes": 8382,
+      "sha256": "4ec608b1159daaf857014c3bf71797c899479eeacb9192e1181cef70c4e33cd2"
+    },
+    "logs/source.log": {
+      "bytes": 3354,
+      "sha256": "4b4b48adcd894afa7a1d1040be5ec8bbe86689e9709e18f8b289ec640b84ac8b"
+    },
+    "logs/toolchain.log": {
+      "bytes": 2143,
+      "sha256": "27ca0fb168cc3903323e59d58b49d3eadb8a9046eb1717adfcc6ceab1a8ec904"
+    },
+    "logs/types.log": {
+      "bytes": 444,
+      "sha256": "493d95206d825009022843ae583d9cebbfd9d664d812523227e48c71d733d454"
+    },
+    "logs/unit.log": {
+      "bytes": 594080,
+      "sha256": "e68fcd57bf57463d80c808bcaf3076d4b44a7b839194903fc7319703f5b41cc5"
+    },
+    "original-artifact.zip": {
+      "bytes": 52685,
+      "sha256": "5b46168d1d6bc85c0b9f931a94cea85eb0c12a4f1f7d83e2f55ecb36f1dbe436"
+    },
+    "original-job.log": {
+      "bytes": 1065649,
+      "sha256": "9836b45d530b6473a56eedd1e8e3018c29d86a2a7116a59ec08c28fc3922f8d2"
+    },
+    "workflow.yml": {
+      "bytes": 5017,
+      "sha256": "30e5450fada26ce5a2525d3f6746fd8ca93c5bef7eac4d07341c90e214125c17"
+    }
+  },
+  "archive": {
+    "file": "evidence.tar.xz",
+    "bytes": 164352,
+    "sha256": "db5c3b60697e2bd041a480523eb5712e2af8fd2fda3ec405a3e1675e211e8c71",
+    "memberCount": 15,
+    "uncompressedBytes": 1739179
+  },
+  "verifier": {
+    "file": "verify-validation.py",
+    "bytes": 7419,
+    "sha256": "d6f41304c2c636ff5f953aa9122fe955e123667a2a8e1422f59d2ca27183a9e8"
+  }
+}
