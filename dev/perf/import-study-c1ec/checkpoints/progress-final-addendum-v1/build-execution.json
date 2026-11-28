@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/build_progress_checkpoint.py",
+    "--spec",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/progress-specification.json",
+    "--output",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/progress-checkpoint-01"
+  ],
+  "startedAt": "2026-11-28T08:45:10.242469+00:00",
+  "finishedAt": "2026-11-28T08:45:11.259015+00:00",
+  "elapsedSeconds": 1.0165517409986933,
+  "exitCode": 0,
+  "sourceExperimentsExecuted": false,
+  "published": false
+}

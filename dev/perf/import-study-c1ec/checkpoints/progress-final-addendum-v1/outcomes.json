@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "archiveState": "verified-progress-checkpoint-terminal-Chrome-evidence-absent",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "priorCheckpoint": "0ab2ff5050dba9b528eefdeffcb4f0eb8c6357b0",
+  "writer": {
+    "runId": 46118417081,
+    "status": "verified-partial-failure-no-statistics",
+    "timingObservations": 0,
+    "sourceAndIntegrityGatesPassed": true,
+    "failure": "Production-planner preflight rejected serialized metadata missing getData presence and ZIP offsets.",
+    "diagnosis": "Metadata-only smoke; no reads, decompression, parser, worker, browser or timing. Original failure unchanged."
+  },
+  "nativeExport": {
+    "status": "complete-held-mechanism-stopped",
+    "planSha256": "d62d1d287215f76008e6e2dd98cb8e55f5b25c63dc35e7518a913a7433076a8e",
+    "counts": {
+      "freshCorrectnessChildren": 3,
+      "freshTimedChildren": 36,
+      "completePassesIncludingExcludedWarmups": 183,
+      "completeGroupTransactions": 2196,
+      "completeOriginalFusedCalls": 2196,
+      "groupsPerPass": 12,
+      "banksPerPass": 53,
+      "rowsPerPass": 528299,
+      "rowVisitsIncludingExcludedWarmups": 96678717,
+      "replacedObservations": 0,
+      "extraObservations": 0
+    },
+    "primaryScope": "One fresh-child observation is the arithmetic mean of three measured pass totals for the complete captured original fused export, including the common Reflect/call/clock boundary and any engine work inside it. This is not isolated copy_valid_utf8 cost, complete parser CPU, actual browser timing or an import measurement; passes/groups are not independent samples.",
+    "controlQualified": false,
+    "comparisons": {
+      "B/A": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 817.3033333333333,
+            "numeratorMs": 729.8696666666666,
+            "ratio": 0.8930217667043243
+          },
+          {
+            "block": 2,
+            "denominatorMs": 663.9643333333333,
+            "numeratorMs": 713.0436666666668,
+            "ratio": 1.0739186291633136
+          },
+          {
+            "block": 3,
+            "denominatorMs": 466.047,
+            "numeratorMs": 551.535,
+            "ratio": 1.1834321431100296
+          },
+          {
+            "block": 4,
+            "denominatorMs": 605.8716666666667,
+            "numeratorMs": 601.621,
+            "ratio": 0.9929842128283493
+          },
+          {
+            "block": 5,
+            "denominatorMs": 589.651,
+            "numeratorMs": 450.64300000000003,
+            "ratio": 0.7642537704506566
+          },
+          {
+            "block": 6,
+            "denominatorMs": 506.76000000000005,
+            "numeratorMs": 685.4526666666666,
+            "ratio": 1.3526179388007469
+          },
+          {
+            "block": 7,
+            "denominatorMs": 530.6216666666667,
+            "numeratorMs": 685.6673333333334,
+            "ratio": 1.2921962603612744
+          },
+          {
+            "block": 8,
+            "denominatorMs": 415.1383333333333,
+            "numeratorMs": 488.9753333333333,
+            "ratio": 1.1778611948627566
+          },
+          {
+            "block": 9,
+            "denominatorMs": 450.32766666666674,
+            "numeratorMs": 568.591,
+            "ratio": 1.2626161839194125
+          },
+          {
+            "block": 10,
+            "denominatorMs": 510.229,
+            "numeratorMs": 401.4346666666667,
+            "ratio": 0.7867735206479184
+          },
+          {
+            "block": 11,
+            "denominatorMs": 439.94666666666666,
+            "numeratorMs": 490.549,
+            "ratio": 1.1150192447569403
+          },
+          {
+            "block": 12,
+            "denominatorMs": 505.3993333333333,
+            "numeratorMs": 465.52366666666666,
+            "ratio": 0.921100674186353
+          }
+        ],
+        "medianPairedChangePercent": 9.446893696012681,
+        "equalWorkChangePercent": 5.1012572947397805,
+        "fasterPairs": 5,
+        "worstPairChangePercent": 35.26179388007469,
+        "descriptiveBootstrap95Percent": [
+          -9.293877955466135,
+          22.302416351472097
+        ]
+      },
+      "B/C": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 798.3046666666665,
+            "numeratorMs": 729.8696666666666,
+            "ratio": 0.9142745835549837
+          },
+          {
+            "block": 2,
+            "denominatorMs": 726.2673333333333,
+            "numeratorMs": 713.0436666666668,
+            "ratio": 0.981792287688372
+          },
+          {
+            "block": 3,
+            "denominatorMs": 660.398,
+            "numeratorMs": 551.535,
+            "ratio": 0.835155466854836
+          },
+          {
+            "block": 4,
+            "denominatorMs": 523.4963333333334,
+            "numeratorMs": 601.621,
+            "ratio": 1.1492363206619083
+          },
+          {
+            "block": 5,
+            "denominatorMs": 496.326,
+            "numeratorMs": 450.64300000000003,
+            "ratio": 0.9079576729810649
+          },
+          {
+            "block": 6,
+            "denominatorMs": 494.3776666666667,
+            "numeratorMs": 685.4526666666666,
+            "ratio": 1.38649601890053
+          },
+          {
+            "block": 7,
+            "denominatorMs": 589.4163333333335,
+            "numeratorMs": 685.6673333333334,
+            "ratio": 1.1632988340443002
+          },
+          {
+            "block": 8,
+            "denominatorMs": 503.153,
+            "numeratorMs": 488.9753333333333,
+            "ratio": 0.9718223548966881
+          },
+          {
+            "block": 9,
+            "denominatorMs": 502.2003333333334,
+            "numeratorMs": 568.591,
+            "ratio": 1.1321995671050264
+          },
+          {
+            "block": 10,
+            "denominatorMs": 418.0133333333333,
+            "numeratorMs": 401.4346666666667,
+            "ratio": 0.9603393831137764
+          },
+          {
+            "block": 11,
+            "denominatorMs": 441.811,
+            "numeratorMs": 490.549,
+            "ratio": 1.1103141388512283
+          },
+          {
+            "block": 12,
+            "denominatorMs": 629.2713333333332,
+            "numeratorMs": 465.52366666666666,
+            "ratio": 0.7397820971769465
+          }
+        ],
+        "medianPairedChangePercent": -2.3192678707469883,
+        "equalWorkChangePercent": 0.7352264025751287,
+        "fasterPairs": 7,
+        "worstPairChangePercent": 38.649601890053,
+        "descriptiveBootstrap95Percent": [
+          -8.888387173197575,
+          14.071794388346737
+        ]
+      },
+      "C/A": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 817.3033333333333,
+            "numeratorMs": 798.3046666666665,
+            "ratio": 0.9767544485727453
+          },
+          {
+            "block": 2,
+            "denominatorMs": 663.9643333333333,
+            "numeratorMs": 726.2673333333333,
+            "ratio": 1.0938348596034024
+          },
+          {
+            "block": 3,
+            "denominatorMs": 466.047,
+            "numeratorMs": 660.398,
+            "ratio": 1.417020171785249
+          },
+          {
+            "block": 4,
+            "denominatorMs": 605.8716666666667,
+            "numeratorMs": 523.4963333333334,
+            "ratio": 0.8640383139443722
+          },
+          {
+            "block": 5,
+            "denominatorMs": 589.651,
+            "numeratorMs": 496.326,
+            "ratio": 0.8417284122302855
+          },
+          {
+            "block": 6,
+            "denominatorMs": 506.76000000000005,
+            "numeratorMs": 494.3776666666667,
+            "ratio": 0.9755656852685032
+          },
+          {
+            "block": 7,
+            "denominatorMs": 530.6216666666667,
+            "numeratorMs": 589.4163333333335,
+            "ratio": 1.1108033658633114
+          },
+          {
+            "block": 8,
+            "denominatorMs": 415.1383333333333,
+            "numeratorMs": 503.153,
+            "ratio": 1.2120128631821523
+          },
+          {
+            "block": 9,
+            "denominatorMs": 450.32766666666674,
+            "numeratorMs": 502.2003333333334,
+            "ratio": 1.1151887181407907
+          },
+          {
+            "block": 10,
+            "denominatorMs": 510.229,
+            "numeratorMs": 418.0133333333333,
+            "ratio": 0.8192661203760142
+          },
+          {
+            "block": 11,
+            "denominatorMs": 439.94666666666666,
+            "numeratorMs": 441.811,
+            "ratio": 1.004237634864832
+          },
+          {
+            "block": 12,
+            "denominatorMs": 505.3993333333333,
+            "numeratorMs": 629.2713333333332,
+            "ratio": 1.245097276213265
+          }
+        ],
+        "medianPairedChangePercent": 4.903624723411726,
+        "equalWorkChangePercent": 4.334164966996146,
+        "fasterPairs": 5,
+        "worstPairChangePercent": 41.70201717852491,
+        "descriptiveBootstrap95Percent": [
+          -8.019800039356229,
+          16.360079066147158
+        ]
+      }
+    },
+    "candidateDecision": {
+      "checks": [
+        {
+          "baseline": "A",
+          "primaryCpu": false
+        },
+        {
+          "baseline": "C",
+          "primaryCpu": false
+        }
+      ],
+      "supportsNativeExportCostHypothesis": false,
+      "decision": "Held; this fixed native-export diagnostic supplies no qualified mechanism signal",
+      "priorBroadComponentDecisionsUnchanged": true,
+      "mechanismLineStoppedForFailedControl": true,
+      "automaticBrowserPromotion": false,
+      "productPrQualified": false
+    },
+    "independentAudit": {
+      "path": "profile-evidence/utf8-fused-export-study-c1ec/completed-cohort-independent-audit.json",
+      "sha256": "294d762ec618b0534e7bafb01ea9b81bcebe675b83fbaf8cc66895fa0902943b"
+    }
+  },
+  "simd": {
+    "status": "retired-exact-prior-source",
+    "pr": 19,
+    "head": "61588714864a58b22793dc8f17de4878ae29b315",
+    "scope": "Explicit16-byte v128 quote/backslash/control scanner already exists. Historical C also changed memmove; no isolated-SIMD regression claim.",
+    "receipt": {
+      "path": "profile-evidence/simd-pr19-prior-art.json",
+      "sha256": "d77cfad10c701cd482f4066d1c23e99f8fdc210800e2b25330ddee911d8d18e6"
+    }
+  },
+  "groupBurst": {
+    "localCommit": "e88cf52a4f4a2ad99e7a2f7fcb038cab06dd6af1",
+    "hostedCommit": "9e14b5304ab1153e9720d112c830d325021eb07f",
+    "tree": "e9a70a78ee4e6b499dbafb5fcc8318f74afcd867",
+    "focusedTestsPassed": 52,
+    "changedTestLint": "passed-0-errors-0-warnings",
+    "staticReviews": "runtime-and-real-stream-policy-canary-clear",
+    "performanceQualified": false
+  },
+  "chrome": {
+    "state": "pending-result-not-included",
+    "runId": 46126332612,
+    "jobId": 140921633790,
+    "wrapperCommit": "18661492d92ba99d85a26363d562c996c0fff287",
+    "wrapperTree": "361e102fe7385bba6f2ea6260740cf4e087705c0",
+    "planSha256": "fd39b31be1ad929bf1e8865db76f47268784d076b1153c852f08ded5389c11e3",
+    "readerSha256": "8ac89a096728c06cb8d193c71e2a971f0679debfa3baddb399fd4e6486fc8353",
+    "statusAtImmutableBinding": "queued; no observations inspected",
+    "bindingRecordedAt": "2026-11-28T08:33:17.743008+00:00",
+    "observationsIncluded": 0,
+    "terminalResultIncluded": false,
+    "productPrQualified": false,
+    "scope": "A preservation checkpoint of completed earlier evidence and frozen prospective inputs; no Chrome result is inferred."
+  },
+  "externalDevelopAdvance": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "mergePr": 972,
+    "receipt": {
+      "path": "profile-evidence/develop-advance-dcfc02a0-c1ec.json",
+      "sha256": "b6a890bc6a5c74ff496d41ac0f6e4148faff0a7c216eeeccafad9b4d4aa22f56"
+    },
+    "qualificationBoundary": "No frozen study changed. Any worthwhile signal needs current-develop rebase/reverification before a PR. No credit taken for972."
+  },
+  "productPrQualified": false,
+  "publishedAddendum": false
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-11-28T08:45:40.903715+00:00",
+  "finishedAt": "2026-11-28T08:45:41.248891+00:00",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/progress-checkpoint-01/restore_addendum.py",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/progress-checkpoint-01/payload.tar.gz",
+    "--expected-payload-sha256",
+    "8cf643dc9f27387335d35a0893765f6be98cfef1099fc42a973afa14a523d1b9",
+    "--prior-payload",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/payload.tar.gz",
+    "--output",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/verification-restore-01"
+  ],
+  "exitCode": 0,
+  "payloadSha256": "8cf643dc9f27387335d35a0893765f6be98cfef1099fc42a973afa14a523d1b9",
+  "priorPayloadSha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+  "sourceExperimentsExecuted": false,
+  "published": false,
+  "status": "all-progress-and-prior-referenced-members-restored-and-verified",
+  "archiveMembers": 207,
+  "logicalEvidenceFiles": 350,
+  "controlFiles": 14,
+  "priorReferencedFiles": 151,
+  "allRestoredDiskDigestsMatched": true,
+  "symlinksCreated": 0,
+  "temporaryRestorationRemovedAfterVerification": true
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "verified-progress-checkpoint-chrome-pending",
+  "payloadBytes": 1039433,
+  "payloadSha256": "8cf643dc9f27387335d35a0893765f6be98cfef1099fc42a973afa14a523d1b9",
+  "manifestSha256": "9322db6f4c169549081836b1526145617e297d676581aca750f03688c7af1fcd",
+  "counts": {
+    "selectedFiles": 350,
+    "selectedBytesBeforeDeduplication": 8060112,
+    "priorReferencedFiles": 151,
+    "newUniqueObjects": 192,
+    "newUniqueBytes": 7549151
+  },
+  "publicationPatternScreen": {
+    "status": "zero-listed-pattern-matches",
+    "testedPatterns": {
+      "github-token": "\\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})\\b",
+      "private-key": "-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
+      "aws-access-key": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+      "unmasked-bearer": "(?i)authorization[\"\\s]*[:=][\"\\s]*(?:bearer|basic) +[A-Za-z0-9_+/.-]{24,}",
+      "signed-url": "(?i)[?&](?:X-Amz-Signature|access_token|sig)=[A-Za-z0-9%_+/.-]{24,}"
+    },
+    "matchCount": 0,
+    "findings": [],
+    "scope": "Only the five listed token/key/signed-URL patterns in all selected bytes, controls and the generated manifest. The prior payload is not embedded. This is not an exhaustive secret audit."
+  },
+  "priorPayloadEmbedded": false,
+  "chrome": {
+    "state": "pending-result-not-included",
+    "runId": 46126332612,
+    "jobId": 140921633790,
+    "wrapperCommit": "18661492d92ba99d85a26363d562c996c0fff287",
+    "wrapperTree": "361e102fe7385bba6f2ea6260740cf4e087705c0",
+    "planSha256": "fd39b31be1ad929bf1e8865db76f47268784d076b1153c852f08ded5389c11e3",
+    "readerSha256": "8ac89a096728c06cb8d193c71e2a971f0679debfa3baddb399fd4e6486fc8353",
+    "statusAtImmutableBinding": "queued; no observations inspected",
+    "bindingRecordedAt": "2026-11-28T08:33:17.743008+00:00",
+    "observationsIncluded": 0,
+    "terminalResultIncluded": false,
+    "productPrQualified": false,
+    "scope": "A preservation checkpoint of completed earlier evidence and frozen prospective inputs; no Chrome result is inferred."
+  },
+  "terminalFinalizerRelaxed": false,
+  "sourceExperimentsExecuted": false,
+  "published": false,
+  "productPrQualified": false
+}
