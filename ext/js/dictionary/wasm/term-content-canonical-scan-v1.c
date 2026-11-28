@@ -34,6 +34,7 @@
 #define EPOCHS (EXACT + EXACT_BATCH_SIZE * 8u)
 #define INDEXES (EPOCHS + MAX_ROWS * 4u)
 #define LAYOUT_END (INDEXES + MAX_ROWS * 4u)
+#define SIGNATURE1_MBR6 0x3652424du
 #define U32(p) ((uint32_t *)(uintptr_t)(p))
 #define U8(p) ((uint8_t *)(uintptr_t)(p))
 
@@ -53,13 +54,13 @@ __attribute__((export_name("canonical_prefix_bytes")))
 uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 
 // Header at 1024: journal progress, next cursor, pending count, exact count,
-// resolved count, dense count, reserved. The journal count is volatile so a
+// resolved count, dense count, non-MBR6 insertion flag (compact entry only).
+// The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.
 // Config at 1088: pointers x10, capacity, dense, rowCount, first, last, cursor,
 // contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter. The
 // old projection slots are reserved. trapAfter is for internal fault tests.
-__attribute__((export_name("scan_canonical")))
-int32_t scan_canonical(void) {
+static int32_t scan_canonical_impl(uint32_t implicit_signature1) {
     volatile uint32_t *h = (volatile uint32_t *)(uintptr_t)1024u;
     const uint32_t *c = U32(1088u);
     const uint64_t bytes = (uint64_t)__builtin_wasm_memory_size(0) * 65536u;
@@ -72,6 +73,7 @@ int32_t scan_canonical(void) {
     }
     uint32_t widths[8] = {4, 4, 1, 4, 1, 4, 4, 4};
     for (uint32_t k = 0; k < 8; ++k) {
+        if (implicit_signature1 && k == 5u) { continue; }
         if (c[k + 2] < PREFIX || c[k + 2] % widths[k] ||
             (uint64_t)c[k + 2] + (uint64_t)c[10] * widths[k] > bytes) {
             return -1;
@@ -137,10 +139,16 @@ int32_t scan_canonical(void) {
             hash1[index] = m[2];
             hash2[index] = m[3];
             length[index] = m[1];
-            s1[index] = sigs[i * 3];
+            const uint32_t first_signature = sigs[i * 3];
             s2[index] = sigs[i * 3 + 1];
             s3[index] = sigs[i * 3 + 2];
-            present[index] = 1;
+            if (implicit_signature1) {
+                present[index] = first_signature == SIGNATURE1_MBR6 ? 2u : 1u;
+                if (first_signature != SIGNATURE1_MBR6) { h[6] = 1u; }
+            } else {
+                s1[index] = first_signature;
+                present[index] = 1u;
+            }
             state[index] = 2;
             slots[slot] = index + 1;
             staged = index;
@@ -157,3 +165,12 @@ int32_t scan_canonical(void) {
     }
     return 0;
 }
+
+// Keep the original entry's table-pointer and marker contract for old callers.
+__attribute__((export_name("scan_canonical")))
+int32_t scan_canonical(void) { return scan_canonical_impl(0u); }
+
+// The owner materializes rare first words from the SIGS snapshot before any
+// output adoption or await. Output unique/staged columns provide the mapping.
+__attribute__((export_name("scan_canonical_implicit_signature1")))
+int32_t scan_canonical_implicit_signature1(void) { return scan_canonical_impl(1u); }
