@@ -920,6 +920,10 @@ class DenseIdRecordStore {
  * @property {Uint8Array} generationId
  */
 
+/** @typedef {Awaited<ReturnType<typeof import('./term-record-fields.js').createImportRecordFieldEncoder>>} ImportRecordFieldEncoder */
+/** @typedef {{encoder: ImportRecordFieldEncoder, calls: number, javascriptCalls: number}} ImportRecordFieldSession */
+/** @typedef {{calls: number, javascriptCalls: number, native: ReturnType<NonNullable<ImportRecordFieldEncoder>['getDiagnostics']>|null}} ImportRecordFieldMetrics */
+
 /**
  * @typedef {object} TermRecordEndImportSessionMetrics
  * @property {number} flushPendingWritesMs
@@ -943,6 +947,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {ImportRecordFieldMetrics|null} recordFields
  */
 
 /**
@@ -1023,6 +1028,10 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /* eslint-disable @stylistic/semi */
+        /** @type {ImportRecordFieldSession|null} */
+        this._importRecordFieldSession = null
+        /* eslint-enable @stylistic/semi */
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1307,6 +1316,8 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _prepare() {
+        /* eslint-disable-next-line @stylistic/semi */
+        this._retireImportRecordFieldEncoder()
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1359,6 +1370,8 @@ export class TermRecordOpfsStore {
                 return;
             }
             this._importSessionActive = true;
+            /* eslint-disable-next-line @stylistic/semi */
+            this._beginImportRecordFieldEncoder()
             this._exactLookupRoute = null;
             this._exactLookupRouteAbandoned = false;
             this._deferIndexBuild = true;
@@ -1393,6 +1406,50 @@ export class TermRecordOpfsStore {
             }
         }, true);
     }
+
+    /* eslint-disable @stylistic/semi */
+    /** @returns {void} */
+    _beginImportRecordFieldEncoder() {
+        this._retireImportRecordFieldEncoder()
+        /** @type {ImportRecordFieldSession} */
+        const session = {encoder: null, calls: 0, javascriptCalls: 0}
+        this._importRecordFieldSession = session
+        void import('./term-record-fields.js')
+            .then(async ({createImportRecordFieldEncoder}) => {
+                const encoder = await createImportRecordFieldEncoder()
+                if (this._importRecordFieldSession !== session) {
+                    encoder?.dispose()
+                    return
+                }
+                session.encoder = encoder
+            })
+            .catch(() => {})
+    }
+
+    /**
+     * @param {ImportRecordFieldSession|null} [session]
+     * @returns {void}
+     */
+    _retireImportRecordFieldEncoder(session = this._importRecordFieldSession) {
+        if (session === null || this._importRecordFieldSession !== session) { return }
+        this._importRecordFieldSession = null
+        session.encoder?.dispose()
+    }
+
+    /**
+     * @param {ImportRecordFieldSession|null} [session]
+     * @returns {ImportRecordFieldMetrics|null}
+     */
+    _getImportRecordFieldMetrics(session = this._importRecordFieldSession) {
+        return session === null ?
+            null :
+            {
+                calls: session.calls,
+                javascriptCalls: session.javascriptCalls,
+                native: session.encoder?.getDiagnostics() ?? null,
+            }
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @returns {Promise<import('dictionary-import-journal').TermRecordCheckpoint>}
@@ -1530,6 +1587,8 @@ export class TermRecordOpfsStore {
      */
     async _abandonImportWritesForRollback() {
         this._importSessionActive = false;
+        /* eslint-disable-next-line @stylistic/semi */
+        this._retireImportRecordFieldEncoder()
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
         this._indexDirty = false;
@@ -1608,9 +1667,13 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async endImportSession() {
+        /* eslint-disable-next-line @stylistic/semi */
+        const recordFieldSession = this._importRecordFieldSession
         try {
             await this._endImportSession();
         } finally {
+            /* eslint-disable-next-line @stylistic/semi */
+            this._retireImportRecordFieldEncoder(recordFieldSession)
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
         }
@@ -1620,6 +1683,8 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _endImportSession() {
+        /* eslint-disable-next-line @stylistic/semi */
+        const recordFieldSession = this._importRecordFieldSession
         if (!this._importSessionActive && !this._hasPendingShardWrites()) {
             return;
         }
@@ -1653,6 +1718,7 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            recordFields: this._getImportRecordFieldMetrics(recordFieldSession),
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -6294,6 +6360,13 @@ view.chunks :
      * @returns {Uint8Array}
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+        /* eslint-disable @stylistic/semi */
+        const session = this._importRecordFieldSession
+        if (session !== null) { ++session.calls }
+        const nativeFields = session?.encoder?.tryEncode(chunk, contentOffsetBase, getSynchronousRecordFieldReferences) ?? null
+        if (nativeFields !== null) { return nativeFields }
+        if (session !== null) { ++session.javascriptCalls }
+        /* eslint-enable @stylistic/semi */
         const count = chunk.rowCount;
         const useFixedContentSpan = hasFixedContentSpan(chunk, count);
         const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
