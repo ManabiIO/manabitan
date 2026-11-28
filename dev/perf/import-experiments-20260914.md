@@ -1488,3 +1488,184 @@ No new complete-import gain is established in this checkpoint. The VNDB
 component result advances one implementation, the JMdict FIFO result rejects
 one mechanism, and the repaired overlap draft remains held for current-source
 qualification.
+
+
+### Current-parser baseline and new source-bound investigations
+
+Develop advanced at 07:56:22 UTC to
+`dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`, tree
+`d911260f1a57f518d59b3a12127fcc3b2293c918`, by merging
+[#972](https://github.com/ManabiIO/manabitan/pull/972). Its structured-glossary
+fastpath and scalar-token-end reuse change the native parser/WASM. The five
+develop changes are disjoint from the candidate patches, but the performance
+baseline is materially newer. Existing `9e10d3b3` evidence stays historical;
+new acquisition uses current native assets rather than silently composing old
+performance numbers.
+
+#### Current overlap review and qualification
+
+Draft #977 now has clean head
+`ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed`, tree
+`11db07622fe196dd1a6fd587aec247553e8de193`. Its fifteen optimization/test/config
+path-to-blob changes are unchanged. The current independent qualification head
+is `10e8ee6b3daf7020521e3cfec2b2479e907c2fa8`, tree
+`1cc06cffff56eccbeddbdcea1c2b2db074b9a1a5`, on
+`perf/owned-overlap-current-20261128-da6c4`.
+The product and qualification have identical `ext/` subtree
+`11b766a159cc47121ac6be913b139d568bbb6632`, `test/` subtree
+`1d85377e47fb844195fb7e4b0d3239dc7ba9c7d5`, and ESLint blob
+`ecacd4bd0572e1df051d2f0167d11d09d3026cf8`.
+
+[Run 46125980377](https://github.com/ManabiIO/manabitan/actions/runs/46125980377)
+is the new current-parser qualification. Its
+[prospective decision plan](https://github.com/ManabiIO/manabitan/blob/10e8ee6b3daf7020521e3cfec2b2479e907c2fa8/builds/perf/import-overlap-20261128-da6c4/current-parser-qualification-plan.json)
+requires a replicated JMdict improvement of at least 10 ms and 1% paired median,
+9/12 faster pairs, negative upper time/percentage bootstrap bounds, lower
+equal-work totals, and small identical-control drift. Each Jitendex/VNDB cell
+must meet the fixed nonregression, complete semantic, and unchanged memory gates.
+There is still no current whole-import result.
+
+Prior repaired head `c819bb92` passed static-web Chromium run
+`46121741356`. Its ordinary CI later reported two successes, thirteen
+cancellations, and four conditional skips; those cancellations are not passes.
+The older `9e10` qualification `46121740432` was queued with no browser
+acquisition when superseded. At 08:33:16 UTC its source verify/build job had
+started; no browser matrix was observed. It was not cancelled by this work.
+Any eventual output from that old source remains separate.
+
+#### Bounded tag text prefetch: implemented, no PR without a measured gain
+
+A distinct small opportunity overlaps the first ordinary small tag-bank read
+with term processing. The candidate retains one immutable text result and keeps
+JSON parsing, entry validation, progress, and persistence in the existing tag
+phase. Both declared ZIP sizes must be known and at most 64 KiB. A separate
+writer bounds actual decoder output before copying it, so a forged small ZIP
+header cannot authorize unbounded retained text. The existing direct-read scope
+owns cancellation and joins decoder cleanup before archive disposal/rollback.
+CRC checks and actual decoded-size checks remain active. Artifact/preloaded,
+oversized/unknown-size, and term-free imports retain their prior paths.
+
+The initial qualification source `81da87b1` was superseded before timing by
+current-base head `b2a909472aa6a415a9bc0b91f7d37208390af016`, tree
+`3d74b708853a342c55e89fb825e545a35e8ef57d`, on
+`perf/bounded-tag-prefetch-20261128-da6c4`.
+[Run 46125860840](https://github.com/ManabiIO/manabitan/actions/runs/46125860840)
+uses current baseline `dcfc02a0`. No PR has been opened for this mechanism.
+
+Its [fixed plan](https://github.com/ManabiIO/manabitan/blob/b2a909472aa6a415a9bc0b91f7d37208390af016/builds/perf/import-tag-prefetch-20261128-da6c4/registered-plan.json)
+requires at least 5 ms and 0.5% paired-median JMdict savings on each independent
+host, 9/12 faster pairs, negative upper bootstrap bounds, lower equal-work work,
+small identical-control drift, and all cross-corpus semantic/memory/nonregression
+gates. The previous 13 ms late tag read is only a diagnostic opportunity ceiling.
+The new bounded writer is part of the candidate, so any effect is not attributed
+solely to scheduling. The related cached-native late tag reader remains a
+separate mechanism.
+
+The [independent source review](../../builds/perf/import-overlap-20261128-da6c4/tag-prefetch-independent-source-review.json)
+found no concrete lifetime/integrity blocker. Historical-base local checks
+passed main/test TypeScript, 137 focused import cases, 42 Python qualification
+tests, scoped ESLint, and all seven build targets. A full local unit invocation
+completed with 659 passing files but also fifteen five-second timeouts, two
+missing-WASM-compiler suites, and five unexpected worker exits. The four suites
+containing those timeouts then passed all 209 cases with maxWorkers=2, without
+increasing timeouts. That diagnosis does not turn the incomplete full run into
+a complete pass. The exact failures, subsequent results, and command receipts
+are retained in the
+[validation archive](../../builds/perf/import-overlap-20261128-da6c4/tag-prefetch-local-validation.zip).
+Current-base full hosted gates remain required.
+
+#### VNDB alias product: clean current source and full-data correctness work
+
+The clean source-only branch `perf/native-record-alias-20261128-da6c4`
+advanced from `601ccc83` on the old base to
+`2c02336b135ee01661ca2a788395afec75e66712`, tree
+`17995fab3d9e2fd226f0cc37d306f5dfc7e39505`, on current develop.
+It contains seven runtime files, five test/support files, and header registration.
+There is no alias PR or product performance result yet.
+
+The [final thirteen-file manifest](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-source-manifest.json),
+[complete patch](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-source.patch),
+[local validation logs](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-local-validation.json),
+and [superseding independent review](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-final-review.json)
+bind the exact source. Earlier review/checkpoint artifacts remain historical.
+Main/test type checks passed before the final style-only changes; the 344
+focused/related cases reran afterward. Scoped lint and all-target build passed.
+After moving to current develop and rebuilding the 69,068-byte native parser
+asset, 392 parser/import/ownership/cleanup cases passed. A temporary Git index
+proved the executed current working tree equals the clean remote candidate tree,
+while retaining its honest local HEAD/dirty-state record.
+
+The [original product protocol](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-browser-protocol-9e.json)
+is superseded by the
+[current-source amended protocol](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-product-browser-protocol-current.json).
+All numerical gates remain fixed: both VNDB hosts need at least 100 ms and 1%
+paired-median savings, 9/12 faster pairs, negative upper bootstrap bounds, lower
+equal-work totals, and small identical controls. The four JMdict/Jitendex cells
+must pass their declared nonregression/control limits and all semantic/memory
+gates. The source and verification witnesses must be frozen before timing.
+
+Alias storage intentionally changes physical record/content/index layout and
+later canonical physical offsets. The protocol therefore requires a complete
+natural-source relocation/alias proof and a separate untimed browser export.
+Only the five exact term-storage files and physical reference digest may differ
+between arms, and each difference must match a frozen layout witness. Ordinary
+observations retain the stock per-observation validation plus an identical,
+explicitly bound, read-only post-endpoint hash hook. This is a test-harness
+overlay, not a product overlay and not an unchanged-harness claim. Raw hashes
+and random generation IDs are retained; only the schema-declared 16-byte
+record/index generation fields may be normalized, after validating matching
+header linkage. Unrelated media, storage inventory, allocations, and logical
+results stay strict.
+
+The first source-setup attempt stopped with zero groups because a bare dense
+descriptor lacked the real importer's getData capability. A later observer
+attempt stopped before its first record append because it assumed an array
+where the existing DB permits uniform dictionary-name representation. Both
+are retained harness failures, not product discrepancies or timing observations.
+The repaired current-baseline A pipeline then completed all 170 groups and
+6,648,310 rows with real native workers, clean termination, no fallback, and
+canonical counts matching the historical byte oracle. Its content seed is the
+same 7,533,449-byte f50a48e2… file. Separate fresh-reader verification initially
+stopped because its process omitted codec initialization; that verifier is
+being repaired against the already preserved A output without rerunning the
+pipeline. This checkpoint does not claim a completed A/B persisted comparison.
+
+#### Additional JMdict evidence and explicit diagnostic corrections
+
+The [prepared-only census and existing range-cache audit](../../builds/perf/import-overlap-20261128-da6c4/jmdict-capsule-census-and-range-audit.zip)
+preserve two rejected/redundant directions. The private-copy census found
+15,189,559 cumulative fallback-column bytes, of which only 4,754,691 are beyond
+already studied key/expression reuse. Preserving raw sequence semantics reduces
+the distinct omission to 2,641,495 bytes: 20,939 real rows have negative
+sequences other than -1 that persisted indexes normalize to null. A broader
+private-only representation could change that contract, but its small ceiling
+does not justify a five-module protocol. No capsule implementation was made.
+The existing range-cache branch already implements the proposed representation;
+its two audited JMdict cells did not show a replicated latency gain.
+
+The [single actual-DB CPU diagnostic](../../builds/perf/import-overlap-20261128-da6c4/jmdict-db-cpu-profile-9e.zip)
+is exactly `9e10d3b3`, not current `dcfc02a0`. It preserves the raw profile,
+source/clock/row/block/probe receipts, original analyzer failure, corrected
+timestamp analysis, and parity against the earlier diagnostic. Native canonical,
+registration, cache, record validation/encoding, and write-side hashing dominate
+the observed DB work; those mechanisms have active prior studies. Reader
+integrity checks and cold-query posting validation are not import opportunities.
+
+The [explicit route-filter correction](../../builds/perf/import-overlap-20261128-da6c4/jmdict-profile-route-threshold-correction.json)
+supersedes an erroneous exclusion in the initial analysis: the route threshold
+is 128 MiB, not 1 GiB, and 171,617,523-byte JMdict does build route filters.
+Its eighteen filter leaf samples must not be discarded. The separate byte
+census disabled route-filter preparation, so its counted fallback columns remain
+valid but it is not a complete ordinary-options allocation census. The raw
+profile was not rerun or silently replaced.
+
+A new single full-browser diagnostic is prepared under
+`dev/perf/jmdict-current-trace-da6c4/`, pinned to current `dcfc02a0`.
+It reuses the existing browser-wide trace path and requires source-identified
+profiles for three parser workers, four compression workers, and one import
+worker, plus complete original source/corpus/runtime/semantic receipts.
+[Local control checks](../../builds/perf/import-overlap-20261128-da6c4/current-jmdict-trace-control-checks.zip)
+cover twelve receipt cases, YAML parsing, and all ten shell blocks; local
+actionlint is unavailable, so the repository's hosted actionlint check remains
+required. All traced elapsed values are diagnostic only and cannot be pooled
+with ordinary timing. No current browser trace result is claimed yet.

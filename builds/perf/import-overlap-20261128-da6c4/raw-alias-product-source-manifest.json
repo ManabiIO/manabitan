@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "scope": "Production raw-alias implementation. Source/targeted gates only; no natural replay or browser/performance claim yet.",
+  "files": [
+    {
+      "path": "eslint.config.js",
+      "bytes": 39466,
+      "characters": 39466,
+      "sha256": "e983437bb69b1b6c78627cb7cefbd80495e0690fdfb276a339fdccd5ee4d4b18",
+      "gitBlobSha": "5f6fe979070f463431b8b142679958cebd516d87",
+      "blob": "5f6fe979070f463431b8b142679958cebd516d87"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 619957,
+      "characters": 619907,
+      "sha256": "e0ef2d090de064870978344fcddd4a537087d23caf9bd353b389789d1715fb93",
+      "gitBlobSha": "05782250d9f4f52d4c7b6acdfd6d4847aa5cd8cb",
+      "blob": "05782250d9f4f52d4c7b6acdfd6d4847aa5cd8cb"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "bytes": 346604,
+      "characters": 346602,
+      "sha256": "ec9f86d571c6d9984fb95dfb479b32999b73d0eca5433c79980e6a2c75c7f12f",
+      "gitBlobSha": "dff4632a4fd8fd8a73ac1d475f63e92dcbfbd9e2",
+      "blob": "dff4632a4fd8fd8a73ac1d475f63e92dcbfbd9e2"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210342,
+      "characters": 210342,
+      "sha256": "678a18d10ce31f41ea43ac9eea16b7d14a2cb867ba48a77cded69b324216e1d1",
+      "gitBlobSha": "d34bde6efd39f236b8edec98fe55a34601751d41",
+      "blob": "d34bde6efd39f236b8edec98fe55a34601751d41"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "bytes": 70699,
+      "characters": 70699,
+      "sha256": "da0321e2afdfa5843e0d5ac43ffeb718792f701e6c6a1bdd04f9f5a35b22e7c2",
+      "gitBlobSha": "4f7d158a9f07c8cc73d0a02a415ac163852e9bdd",
+      "blob": "4f7d158a9f07c8cc73d0a02a415ac163852e9bdd"
+    },
+    {
+      "path": "ext/js/dictionary/term-import-metrics.js",
+      "bytes": 3120,
+      "characters": 3120,
+      "sha256": "aa80342fc8d6d83cc63f7f4c6d78b3ee3ade66bab12ce061127a130a36815465",
+      "gitBlobSha": "672f4677784474280d73eabd30106b466d83364b",
+      "blob": "672f4677784474280d73eabd30106b466d83364b"
+    },
+    {
+      "path": "test/term-bank-wasm-parser.test.js",
+      "bytes": 201514,
+      "characters": 201457,
+      "sha256": "3ff7326bf3c80500e95f0406910b25d6a377ffe7f6d3710b6ac0d315f76af52f",
+      "gitBlobSha": "a5fd77814ee365a0a852544957b38fc3103b4534",
+      "blob": "a5fd77814ee365a0a852544957b38fc3103b4534"
+    },
+    {
+      "path": "ext/js/dictionary/native-term-record-alias.js",
+      "bytes": 8735,
+      "characters": 8735,
+      "sha256": "fdc45425a7e3b4b68429117238fc31879a4daf95267b20263b36d673fec29c06",
+      "gitBlobSha": "30d3565fd8b33fe0bdb169952977f761b4cdadea",
+      "blob": "30d3565fd8b33fe0bdb169952977f761b4cdadea"
+    },
+    {
+      "path": "ext/js/dictionary/native-term-record-ownership.js",
+      "bytes": 11668,
+      "characters": 11668,
+      "sha256": "c8aebb7cb4ee23e8def3d4f55f3614716661e612965a0fff688fb07811e94242",
+      "gitBlobSha": "3582a38478ccae4f79be97408b393caaae343810",
+      "blob": "3582a38478ccae4f79be97408b393caaae343810"
+    },
+    {
+      "path": "test/dictionary-native-record-alias-lifecycle.test.js",
+      "bytes": 17082,
+      "characters": 17082,
+      "sha256": "a23a72eddd933b3a5cf20b239978fcfe7d5faf225d2825f0b4b43cf24cdd68b9",
+      "gitBlobSha": "ffb1c073b40cde346c5f5061f6039d1b49395a58",
+      "blob": "ffb1c073b40cde346c5f5061f6039d1b49395a58"
+    },
+    {
+      "path": "test/native-term-record-alias.test.js",
+      "bytes": 14124,
+      "characters": 14124,
+      "sha256": "db751540a01efda5919ee02778fb75025604e36ae4b20de99d935ec526b266e9",
+      "gitBlobSha": "a442264a3a698d3f277b838271da815e1f030f55",
+      "blob": "a442264a3a698d3f277b838271da815e1f030f55"
+    },
+    {
+      "path": "test/native-term-record-ownership.test.js",
+      "bytes": 5347,
+      "characters": 5347,
+      "sha256": "a026142d758504db6efa0133efad18c47552184efcb575b29224b606789b2f53",
+      "gitBlobSha": "cdb9e0c30459075ed766ea82d79f19daa9a0fd6b",
+      "blob": "cdb9e0c30459075ed766ea82d79f19daa9a0fd6b"
+    },
+    {
+      "path": "test/util/native-term-record-fixture.js",
+      "bytes": 5086,
+      "characters": 5086,
+      "sha256": "6d54d3bb3ab84aee8bc565690c072a2bb6e5ff4d37c2d7a5be0ebeefe607aeb1",
+      "gitBlobSha": "6fb70776de3085cce3928c30415afb7b35b7fb11",
+      "blob": "6fb70776de3085cce3928c30415afb7b35b7fb11"
+    }
+  ],
+  "patch": {
+    "blob": "4a700cb2e574d206f20ea16ce2bff402d7712213",
+    "bytes": 95168,
+    "sha256": "dd752a1cb11230ec53e3f7d8fdfafe4e2529bd7c9814adf23615e06ecde62ecc"
+  },
+  "validation": {
+    "blob": "3b44037533751cd59ce8d21db5c3fc0306367bd6",
+    "bytes": 55330,
+    "sha256": "9639c41ddacb0c845e5cfffcbf2c5f2c74f03dc57562bbfee67c7ec7feef3592",
+    "note": "Contains all26 exact local logs, including original failures and zero-byte137 log; statuses and limitations explicit."
+  }
+}

@@ -1,0 +1,1800 @@
+diff --git a/eslint.config.js b/eslint.config.js
+index 0df5512..5f6fe97 100644
+--- a/eslint.config.js
++++ b/eslint.config.js
+@@ -86,6 +86,8 @@ const manabitanHeaderFiles = [
+     'ext/js/dictionary/term-record-import-index-worker-client.js',
+     'ext/js/dictionary/term-lookup-index.js',
+     'ext/js/dictionary/term-lookup-index-preparation.js',
++    'ext/js/dictionary/native-term-record-ownership.js',
++    'ext/js/dictionary/native-term-record-alias.js',
+     'ext/js/dictionary/term-bank-source-crc.js',
+     'ext/js/dictionary/term-bank-wasm-parser.js',
+     'ext/js/dictionary/term-bank-wasm-parser-worker.js',
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 6414e12..0578225 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -77,6 +77,8 @@ import {
+ import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
+ import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+ import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
++import {admitNativeTermRecordLease, assertNativeTermRecordLease} from './native-term-record-ownership.js';
++import {tryCreateNativeTermRecordAliases} from './native-term-record-alias.js';
+ 
+ const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+ const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
+@@ -557,6 +559,12 @@ export class DictionaryDatabase {
+         this._bulkImportState = BULK_IMPORT_STATE_IDLE;
+         /** @type {Promise<string>|null} */
+         this._bulkImportSetupPromise = null;
++        /** @type {Set<Promise<void>>} */
++        this._nativeTermRecordAppends = new Set();
++        /** @type {Error[]} */
++        this._nativeTermRecordAppendErrors = [];
++        /** @type {Error|null} */
++        this._nativeTermRecordAppendCancellation = null;
+         /** @type {boolean} */
+         this._bulkImportTransactionOpen = false;
+         /** @type {DictionaryImportJournal} */
+@@ -898,9 +906,12 @@ export class DictionaryDatabase {
+             return;
+         }
+         this._beginExclusiveDatabaseCleanup();
++        this._cancelNativeTermRecordAppends();
+         /** @type {Error[]} */
+         const errors = [];
+         try {
++            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
++            errors.push(...this._nativeTermRecordAppendErrors);
+             const db = this._requireDb();
+             if (this._bulkImportJournalRecord !== null) {
+                 await this._rollbackBulkImport(db, errors, true, true);
+@@ -974,6 +985,8 @@ export class DictionaryDatabase {
+             throw new Error('A dictionary bulk import is already active');
+         }
+         this._transitionBulkImportState(BULK_IMPORT_STATE_IDLE, BULK_IMPORT_STATE_ACTIVE);
++        this._nativeTermRecordAppendErrors.length = 0;
++        this._nativeTermRecordAppendCancellation = null;
+     }
+ 
+     /**
+@@ -1029,6 +1042,7 @@ export class DictionaryDatabase {
+ 
+     /** Returns the lifecycle to idle after setup or finalization cleanup. */
+     _endBulkImportLifecycle() {
++        this._nativeTermRecordAppendErrors.length = 0;
+         this._generationMediaWrite = null;
+         if (this._bulkImportState === BULK_IMPORT_STATE_IDLE) { return; }
+         if (this._bulkImportState === BULK_IMPORT_STATE_ACTIVE) {
+@@ -1451,10 +1465,13 @@ export class DictionaryDatabase {
+         this._assertBulkImportSessionOwner(expectedSessionId);
+         const db = this._beginBulkImportFinalization();
+         if (db === null) { return; }
++        this._cancelNativeTermRecordAppends();
+         /** @type {Error[]} */
+         const errors = [];
+         let rollbackSucceeded = true;
+         try {
++            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
++            errors.push(...this._nativeTermRecordAppendErrors);
+             rollbackSucceeded = await this._rollbackBulkImport(db, errors, true, true);
+             this._restoreRuntimeAfterBulkImportFailure(db, errors);
+             if (!rollbackSucceeded || errors.length > 0) {
+@@ -1535,6 +1552,12 @@ export class DictionaryDatabase {
+             let termRecordSessionEnded = false;
+             let sqlitePublished = false;
+             try {
++                if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
++                if (this._nativeTermRecordAppendCancellation !== null) { throw this._nativeTermRecordAppendCancellation; }
++                if (this._nativeTermRecordAppendErrors.length === 1) { throw this._nativeTermRecordAppendErrors[0]; }
++                if (this._nativeTermRecordAppendErrors.length > 1) {
++                    throw new AggregateError(this._nativeTermRecordAppendErrors, 'Native term-record persistence failed');
++                }
+                 const generationMedia = publication?.summary.generationMedia;
+                 if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
+                     await this._awaitGenerationMediaPublication(generationMedia);
+@@ -1937,9 +1960,12 @@ export class DictionaryDatabase {
+             throw error;
+         }
+ 
++        this._cancelNativeTermRecordAppends();
+         /** @type {Error[]} */
+         const errors = [];
+         try {
++            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
++            errors.push(...this._nativeTermRecordAppendErrors);
+             // An early media writer may still be waiting for the index the
+             // abandoned import will never supply. Cancel before joining it.
+             const mediaWrite = this._generationMediaWrite;
+@@ -5071,9 +5097,10 @@ void 0 :
+ 
+     /**
+      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
++     * @param {object|null} [nativeRecordLease]
+      * @returns {Promise<void>}
+      */
+-    async bulkAddArtifactTermsChunk(chunk) {
++    async bulkAddArtifactTermsChunk(chunk, nativeRecordLease = null) {
+         this._invalidateGlossarySearchIndex(chunk.dictionary);
+         this._lastBulkAddTermsMetrics = null;
+         this._termEntryContentCache.clear();
+@@ -5092,7 +5119,7 @@ void 0 :
+                 (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
+             );
+             if (hasHashArrays || hasContentSlab) {
+-                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
++                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk, nativeRecordLease);
+                 return;
+             }
+             const rows = this._materializeArtifactChunkTermEntries(chunk);
+@@ -8370,9 +8397,10 @@ this._readTermContentSignature(
+ 
+     /**
+      * @param {ArtifactTermRecordChunk} chunk
++     * @param {object|null} [nativeRecordLease]
+      * @returns {Promise<void>}
+      */
+-    async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
++    async _bulkAddArtifactTermsChunkWithContentDedup(chunk, nativeRecordLease = null) {
+         const useLocalTransaction = !this._bulkImportTransactionOpen;
+         const count = chunk.rowCount;
+         if (count <= 0) {
+@@ -8392,6 +8420,9 @@ this._readTermContentSignature(
+         let stagedContentMetadata = null;
+         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
+         let dedupPlanRollbackState = null;
++        const nativeAliasOwner = this._beginNativeTermRecordAppend(chunk, nativeRecordLease);
++        /** @type {Error|null} */
++        let nativeAppendError = null;
+ 
+         if (useLocalTransaction) {
+             await this._beginImmediateTransaction(this._requireDb());
+@@ -8451,6 +8482,7 @@ this._readTermContentSignature(
+                     previousResolvedUniformDictName: contentDedupPlan.resolvedUniformDictName,
+                 };
+             }
++            nativeAliasOwner?.validateOwner();
+             const tContentStoreStart = safePerformance.now();
+             let preparedLookupIndexes = null;
+             let recordAppended = false;
+@@ -8521,6 +8553,7 @@ this._readTermContentSignature(
+                     const persistenceResult = earlyContentPersistence === null ?
+                         await pendingContentPersistence :
+                         await earlyContentPersistence.storage;
++                    nativeAliasOwner?.validateOwner();
+                     const {
+                         pendingOffsets,
+                         pendingLengths,
+@@ -8661,21 +8694,80 @@ this._readTermContentSignature(
+                     contentLengths,
+                     resolvedContentDictNames,
+                     importMetrics,
++                    nativeAliasOwner,
+                 );
+             }
+             if (useLocalTransaction) {
+                 this._requireDb().exec('COMMIT');
+             }
++            nativeAliasOwner?.validateOwner();
+             stagedContentMetadata = null;
+             dedupPlanRollbackState = null;
+             this._lastBulkAddTermsMetrics = importMetrics;
+         } catch (e) {
++            nativeAppendError = toError(e);
+             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
+             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
+             if (useLocalTransaction) {
+                 try { this._requireDb().exec('ROLLBACK'); } catch (_) { /* NOP */ }
+             }
+             throw e;
++        } finally {
++            nativeAliasOwner?.finish(nativeAppendError);
++        }
++    }
++
++    /**
++     * Registers the private append before its first await. Finalization closes
++     * admission through the existing lifecycle state, then joins this owner
++     * before closing or truncating either store. Completion includes rollback.
++     * @param {ArtifactTermRecordChunk} sourceChunk
++     * @param {object|null} lease
++     * @returns {(import('./native-term-record-alias.js').NativeRecordAliasOwner & {finish: (error: Error|null) => void})|null}
++     * @throws {Error} If the native input lease or database admission is no longer active.
++     */
++    _beginNativeTermRecordAppend(sourceChunk, lease) {
++        if (lease === null) { return null; }
++        assertNativeTermRecordLease(lease, sourceChunk);
++        const sessionId = this._bulkImportJournalRecord?.sessionId;
++        if (
++            !this._bulkImportTransactionOpen || this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE ||
++            typeof sessionId !== 'string' || this._nativeTermRecordAppendCancellation !== null ||
++            this._nativeTermRecordAppendErrors.length > 0
++        ) { throw new Error('Native term-record storage admission is closed'); }
++        admitNativeTermRecordLease(lease, sourceChunk);
++        const blockSession = this._termContentBlockImportSession;
++        /** @type {() => void} */
++        let resolveCompletion = () => {};
++        /** @type {Promise<void>} */
++        const completion = new Promise((resolve) => { resolveCompletion = resolve; });
++        this._nativeTermRecordAppends.add(completion);
++        const validateOwner = () => {
++            if (this._nativeTermRecordAppendCancellation !== null) { throw this._nativeTermRecordAppendCancellation; }
++            this._assertBulkImportSessionOwner(sessionId);
++            if (
++                !this._nativeTermRecordAppends.has(completion) || !this._bulkImportTransactionOpen ||
++                this._termContentBlockImportSession !== blockSession
++            ) { throw new Error('Native term-record storage ownership changed'); }
++        };
++        return {
++            sourceChunk,
++            lease,
++            validateOwner,
++            finish: (error) => {
++                if (!this._nativeTermRecordAppends.delete(completion)) { return; }
++                if (error !== null && error !== this._nativeTermRecordAppendCancellation) {
++                    this._nativeTermRecordAppendErrors.push(error);
++                }
++                resolveCompletion();
++            },
++        };
++    }
++
++    /** Cancels admitted private appends without abandoning their live writes. */
++    _cancelNativeTermRecordAppends() {
++        if (this._nativeTermRecordAppends.size > 0 && this._nativeTermRecordAppendCancellation === null) {
++            this._nativeTermRecordAppendCancellation = new Error('Native term-record append was cancelled by database cleanup');
+         }
+     }
+ 
+@@ -10126,15 +10218,42 @@ null :
+      * @param {Uint32Array} contentLengths
+      * @param {string|(string|null)[]} resolvedContentDictNames
+      * @param {Record<string, number>} importMetrics
++     * @param {import('./native-term-record-alias.js').NativeRecordAliasOwner|null} [nativeAliasOwner]
+      * @returns {Promise<void>}
+      */
+-    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics) {
++    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics, nativeAliasOwner = null) {
++        if (nativeAliasOwner !== null) {
++            const aliasStart = safePerformance.now();
++            const pendingAliases = tryCreateNativeTermRecordAliases(
++                nativeAliasOwner,
++                chunk,
++                resolvedContentDictNames,
++                this._termContentZstdInitialized ? this._termContentBlockImportSession : null,
++                resolveTermContentZstdDictName(chunk.dictionary),
++                (offset, length, name) => this._readTermEntryContentBytes(offset, length, name),
++            );
++            if (pendingAliases !== null) {
++                const aliases = await pendingAliases;
++                importMetrics.contentAliasMs += safePerformance.now() - aliasStart;
++                if (aliases !== null) {
++                    chunk = aliases.chunk;
++                    resolvedContentDictNames = aliases.contentDictName;
++                    importMetrics.contentAliasCount += aliases.aliasCount;
++                    importMetrics.contentAliasInputBytes += aliases.inputBytes;
++                    this._addTermContentBlockProfile(importMetrics, aliases.blockStorage);
++                }
++            }
++        }
+         const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
+             chunk,
+             contentOffsets,
+             contentLengths,
+             resolvedContentDictNames,
+         );
++        if (nativeAliasOwner !== null) {
++            assertNativeTermRecordLease(nativeAliasOwner.lease, nativeAliasOwner.sourceChunk);
++            nativeAliasOwner.validateOwner();
++        }
+         importMetrics.termRecordBuildMs += metrics.buildRecordsMs;
+         importMetrics.termRecordEncodeMs += metrics.encodeMs;
+         importMetrics.termRecordWriteMs += metrics.appendWriteMs;
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index e5863de..dff4632 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -68,6 +68,7 @@ import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content
+ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
+ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
+ import {DictionaryImportSession} from './dictionary-import-session.js';
++import {NativeTermRecordImportOwner} from './native-term-record-ownership.js';
+ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
+ import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
+ import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
+@@ -1520,6 +1521,12 @@ export class DictionaryImporter {
+             archiveReader,
+             disposeParser: disposeParallelTermBankParser,
+         });
++        const nativeRecordOwner = new NativeTermRecordImportOwner(() => {
++            if (importSession.failed || importSession.state !== 'active') {
++                throw new Error('Native term-record import is no longer active');
++            }
++            this._throwIfCancelled();
++        });
+         const rawZipPayloadReader = RawZipPayloadReader.supportsArchive(archiveContent) ?
+             new RawZipPayloadReader(archiveContent) :
+             null;
+@@ -2103,8 +2110,11 @@ export class DictionaryImporter {
+                     step4TimingBreakdown.termSerializationMs += importMetrics.serializationMs;
+                 }
+                 const tTermsWriteStart = Date.now();
++                const nativeRecordLease = directArtifactChunk === null ? null : nativeRecordOwner.claim(directArtifactChunk);
+                 await (directArtifactChunk !== null ?
+-                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
++                    (nativeRecordLease === null ?
++                        dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
++                        dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk, nativeRecordLease)) :
+                     bulkAdd('terms', termList, {trackProgress}));
+                 const tTermsWriteEnd = Date.now();
+                 importMetrics.bulkAddTermsMs += Math.max(0, tTermsWriteEnd - tTermsWriteStart);
+@@ -2346,6 +2356,7 @@ export class DictionaryImporter {
+                             preloadedTermFileBytes,
+                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
+                             allowNativeImageProjection,
++                            nativeRecordOwner,
+                         );
+                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
+                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
+@@ -2905,6 +2916,7 @@ export class DictionaryImporter {
+                 ok: false,
+             });
+         } finally {
++            nativeRecordOwner.close();
+             acceptMediaPrefetch = false;
+             sourceMediaPreparation?.cancel();
+             if (stagedSourceMedia.preparation !== null) {
+@@ -5074,9 +5086,10 @@ export class DictionaryImporter {
+      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
+      * @param {number|null} [wasmRowChunkSizeOverride]
+      * @param {boolean} [allowNativeImageProjection]
++     * @param {NativeTermRecordImportOwner|null} [nativeRecordOwner]
+      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
+      */
+-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false) {
++    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false, nativeRecordOwner = null) {
+         this._lastFastTermBankReadProfile = null;
+         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
+         let deferredSourceBatch = null;
+@@ -5235,17 +5248,23 @@ export class DictionaryImporter {
+                     }
+                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
+                     const tChunkSinkStart = Date.now();
+-                    await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
+-                        {
+-                            ...columnPayload,
+-                            dictionary: dictionaryTitle,
+-                            dictionaryTotalRows: chunkProgress.totalRows,
+-                            contentDictNameList: null,
+-                            uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+-                        },
+-                        requirementsForChunk,
+-                        chunkProgress,
+-                    );
++                    const sinkChunk = {
++                        ...columnPayload,
++                        dictionary: dictionaryTitle,
++                        dictionaryTotalRows: chunkProgress.totalRows,
++                        contentDictNameList: null,
++                        uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
++                    };
++                    const nativeRecordLease = nativeRecordOwner?.bind(columnChunk, sinkChunk) ?? null;
++                    try {
++                        await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
++                            sinkChunk,
++                            requirementsForChunk,
++                            chunkProgress,
++                        );
++                    } finally {
++                        nativeRecordOwner?.release(nativeRecordLease);
++                    }
+                     importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+                     return;
+                 }
+diff --git a/ext/js/dictionary/term-bank-wasm-parser.js b/ext/js/dictionary/term-bank-wasm-parser.js
+index 4f3f7e7..d34bde6 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -29,6 +29,7 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
+ import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
+ import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
+ import {registerOwnedTermContent} from './term-content-ownership.js';
++import {registerReceivedNativeTermRecordChunk} from './native-term-record-ownership.js';
+ 
+ const META_U32_FIELDS = 17;
+ const U8_BACKSLASH = 0x5c;
+@@ -3742,6 +3743,9 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
+                     data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
+                     registerOwnedTermContent(chunk?.contentBytesBuffer)
+                 );
++                if (ownsContentBytes && chunk !== null) {
++                    registerReceivedNativeTermRecordChunk(chunk);
++                }
+                 resolve({
+                     chunk,
+                     profile,
+diff --git a/ext/js/dictionary/term-content-block-store.js b/ext/js/dictionary/term-content-block-store.js
+index f085d63..4f7d158 100644
+--- a/ext/js/dictionary/term-content-block-store.js
++++ b/ext/js/dictionary/term-content-block-store.js
+@@ -77,6 +77,16 @@ export class TermContentBlockImportSession {
+         this._closed = false;
+     }
+ 
++    /**
++     * Additional references may share the selected storage family without
++     * making a new compression-selection decision for a small payload.
++     * @param {string} dictionary
++     * @returns {boolean}
++     */
++    isBlockStorageSelected(dictionary) {
++        return !this._closed && this._blockEnabledDictionaries.has(dictionary);
++    }
++
+     /**
+      * @param {string} dictionary
+      * @param {Uint8Array[]} contentBytesList
+diff --git a/ext/js/dictionary/term-import-metrics.js b/ext/js/dictionary/term-import-metrics.js
+index 9be8c76..672f467 100644
+--- a/ext/js/dictionary/term-import-metrics.js
++++ b/ext/js/dictionary/term-import-metrics.js
+@@ -37,6 +37,9 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
+     'contentOpfsAppendMs',
+     'contentInitialReservationCount',
+     'contentInitialReservationSavingsMissCount',
++    'contentAliasCount',
++    'contentAliasInputBytes',
++    'contentAliasMs',
+     'contentMetadataMs',
+     'contentMetadataStageMs',
+     'contentMetadataPublishMs',
+diff --git a/test/term-bank-wasm-parser.test.js b/test/term-bank-wasm-parser.test.js
+index f3909aa..a5fd778 100644
+--- a/test/term-bank-wasm-parser.test.js
++++ b/test/term-bank-wasm-parser.test.js
+@@ -47,6 +47,8 @@ import {
+     TermBankWasmResourceError,
+ } from '../ext/js/dictionary/term-bank-wasm-parser.js';
+ import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
++import {hasNativeTermRecordLease, NativeTermRecordImportOwner} from '../ext/js/dictionary/native-term-record-ownership.js';
++import {createNativeRecordFixture} from './util/native-term-record-fixture.js';
+ 
+ const __dirname = path.dirname(fileURLToPath(import.meta.url));
+ const termBankParserWasmPath = path.resolve(__dirname, '../ext/lib/term-bank-parser.wasm');
+@@ -1699,6 +1701,90 @@ describe('term-bank WASM parser', () => {
+         }
+     });
+ 
++    maybeTest.each([
++        {ownership: 'owned', privateSink: true},
++        {ownership: 'borrowed', privateSink: true},
++        {ownership: 'conflicting', privateSink: true},
++        {ownership: 'owned', privateSink: false},
++    ])('binds receiver record ownership only through the private importer sink: $ownership/$privateSink', async ({ownership, privateSink}) => {
++        /** @implements {WorkerMock} */
++        class RecordWorker {
++            constructor() {
++                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
++                this.listeners = new Map();
++            }
++
++            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
++                addWorkerListener(this.listeners, type, listener);
++            }
++
++            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
++                this.listeners.get(type)?.delete(listener);
++            }
++
++            postMessage(/** @type {WorkerMessage} */ message) {
++                queueMicrotask(() => {
++                    if (message.type === 'initialize') {
++                        emitWorkerMessage(this.listeners, {type: 'ready'});
++                        return;
++                    }
++                    const {source} = createNativeRecordFixture();
++                    emitWorkerMessage(this.listeners, {
++                        type: 'result',
++                        id: message.id,
++                        rowCount: source.rowCount,
++                        resultSentEpochMs: Date.now(),
++                        ownsContentBytes: ownership !== 'borrowed',
++                        borrowsWorkerMemory: ownership === 'conflicting',
++                        chunk: {...source, mediaRows: [], contentBytesBuffer: new Uint8Array(new SharedArrayBuffer(8))},
++                        profile: {chunkDispatchMs: 0},
++                    });
++                });
++            }
++
++            terminate() {}
++        }
++
++        vi.stubGlobal('Worker', RecordWorker);
++        const owner = new NativeTermRecordImportOwner(() => {});
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
++        const count = getParallelTermBankParserWorkerCount();
++        /** @type {Array<{lease: object, chunk: object}>} */
++        const leases = [];
++        let chunks = 0;
++        try {
++            await importer._readTermBankFileFast(
++                /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'})),
++                3,
++                'Receiver fixture',
++                false,
++                false,
++                true,
++                'raw-bytes',
++                (chunk) => {
++                    ++chunks;
++                    const lease = owner.claim(chunk);
++                    const eligible = ownership === 'owned' && privateSink;
++                    expect(lease !== null).toBe(eligible);
++                    if (lease !== null) {
++                        expect(hasNativeTermRecordLease(lease, chunk)).toBe(true);
++                        leases.push({lease, chunk});
++                    }
++                },
++                {loaders: Array.from({length: count}, () => async () => textEncoder.encode('[]')), estimatedByteLengths: new Array(count).fill(24 * 1024 * 1024)},
++                null,
++                false,
++privateSink ? owner : null,
++            );
++            expect(chunks).toBe(count);
++            for (const {lease, chunk} of leases) { expect(hasNativeTermRecordLease(lease, chunk)).toBe(false); }
++        } finally {
++            owner.close();
++            await disposeParallelTermBankParser();
++            vi.stubGlobal('Worker', void 0);
++        }
++    });
++
+     maybeTest.each([
+         {sourceCount: 31, outcome: 'complete'},
+         {sourceCount: 32, outcome: 'complete'},
+diff --git a/ext/js/dictionary/native-term-record-alias.js b/ext/js/dictionary/native-term-record-alias.js
+new file mode 100644
+index 0000000..30d3565
+--- /dev/null
++++ b/ext/js/dictionary/native-term-record-alias.js
+@@ -0,0 +1,172 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {assertNativeTermRecordLease, hasNativeTermRecordLease} from './native-term-record-ownership.js';
++import {
++    createRawTermContentCompactBlockDictName,
++    isRawTermContentTokenBinary,
++    RAW_TERM_CONTENT_TOKEN_DICT_NAME,
++} from './raw-term-content.js';
++import {createArtifactTermRecordChunkWithResolvedContent} from './term-record-opfs-store.js';
++
++const MAX_ALIAS_ENTRIES = 64;
++const MAX_ALIAS_INPUT_BYTES = 64 * 1024;
++
++/** @typedef {import('./dictionary-database.js').ArtifactTermRecordChunk} RecordChunk */
++/** @typedef {NonNullable<Awaited<ReturnType<import('./term-content-block-store.js').TermContentBlockImportSession['append']>>>} BlockStorage */
++/**
++ * @typedef {{sourceChunk: RecordChunk, lease: object, validateOwner: () => void}} NativeRecordAliasOwner
++ */
++
++/**
++ * Keeps a privately owned native lookup segment whole when only a bounded raw
++ * prefix would otherwise split its records. Canonical deduplication tables
++ * stay unchanged: the extra physical references belong only to this append.
++ *
++ * This entry is synchronous for every ineligible chunk. The database calls it
++ * only after ordinary content persistence and metadata publication settle.
++ * @param {NativeRecordAliasOwner} owner
++ * @param {RecordChunk} recordChunk
++ * @param {string|(string|null)[]} contentDictNames
++ * @param {import('./term-content-block-store.js').TermContentBlockImportSession|null} blockSession
++ * @param {string|null} compressionDictName
++ * @param {(offset: number, length: number, dictName: string) => Promise<Uint8Array|null>} readContent
++ * @returns {Promise<{chunk: RecordChunk, contentDictName: string, blockStorage: BlockStorage, aliasCount: number, inputBytes: number}|null>|null}
++ */
++export function tryCreateNativeTermRecordAliases(owner, recordChunk, contentDictNames, blockSession, compressionDictName, readContent) {
++    const {sourceChunk, lease, validateOwner} = owner;
++    if (
++        !Array.isArray(contentDictNames) || blockSession === null ||
++        !blockSession.isBlockStorageSelected(sourceChunk.dictionary) ||
++        !hasNativeTermRecordLease(lease, sourceChunk)
++    ) { return null; }
++    assertNativeTermRecordLease(lease, sourceChunk);
++    validateOwner();
++    const plan = sourceChunk.contentDedupPlan;
++    const references = recordChunk.resolvedContentReferences;
++    const uniqueCount = plan?.uniqueCount;
++    if (
++        plan === null || typeof plan === 'undefined' ||
++        references === null || typeof references === 'undefined' ||
++        typeof uniqueCount !== 'number' || !Number.isSafeInteger(uniqueCount) || uniqueCount <= 0 ||
++        uniqueCount > sourceChunk.rowCount ||
++        references.uniqueIndexList !== sourceChunk.contentUniqueIndexList ||
++        references.offsets !== plan.resolvedOffsets || references.lengths !== plan.resolvedLengths ||
++        !(plan.resolvedOffsets.buffer instanceof ArrayBuffer) ||
++        !(plan.resolvedLengths.buffer instanceof ArrayBuffer) ||
++        plan.resolvedOffsets.length !== uniqueCount || plan.resolvedLengths.length !== uniqueCount ||
++        plan.resolvedFlags.length !== uniqueCount ||
++        !Array.isArray(plan.resolvedDictNames) || plan.resolvedDictNames.length !== uniqueCount ||
++        recordChunk.preparedLookupIndexes !== sourceChunk.preparedLookupIndexes
++    ) { return null; }
++
++    // These arrays are filled by this ordered database append, after the
++    // receiver lease was acquired. Retain their identities separately from
++    // the immutable native parser columns.
++    const {resolvedOffsets: offsets, resolvedLengths: lengths, resolvedFlags: flags, resolvedDictNames: names} = plan;
++    const targetName = createRawTermContentCompactBlockDictName(compressionDictName);
++    /** @type {Array<{offset: number, length: number, uniqueIndexes: number[]}>} */
++    const rawReferences = [];
++    /** @type {Map<number, Map<number, number>>} */
++    const byOffset = new Map();
++    let inputBytes = 0;
++    let hasCompressed = false;
++    for (let uniqueIndex = 0; uniqueIndex < uniqueCount; ++uniqueIndex) {
++        const offset = offsets[uniqueIndex];
++        const length = lengths[uniqueIndex];
++        if (flags[uniqueIndex] === 0 || !Number.isSafeInteger(offset) || offset < 0 || length === 0) { return null; }
++        const name = names[uniqueIndex];
++        if (name === targetName) {
++            hasCompressed = true;
++            continue;
++        }
++        if (name !== RAW_TERM_CONTENT_TOKEN_DICT_NAME) { return null; }
++        let byLength = byOffset.get(offset);
++        const previous = byLength?.get(length);
++        if (typeof previous === 'number') {
++            rawReferences[previous].uniqueIndexes.push(uniqueIndex);
++            continue;
++        }
++        inputBytes += length;
++        if (rawReferences.length >= MAX_ALIAS_ENTRIES || inputBytes > MAX_ALIAS_INPUT_BYTES) { return null; }
++        if (typeof byLength === 'undefined') {
++            byLength = new Map();
++            byOffset.set(offset, byLength);
++        }
++        byLength.set(length, rawReferences.length);
++        rawReferences.push({offset, length, uniqueIndexes: [uniqueIndex]});
++    }
++    if (!hasCompressed || rawReferences.length === 0) { return null; }
++
++    const assertOwnership = () => {
++        assertNativeTermRecordLease(lease, sourceChunk);
++        validateOwner();
++        if (
++            sourceChunk.contentDedupPlan !== plan ||
++            plan.resolvedOffsets !== offsets || plan.resolvedLengths !== lengths ||
++            plan.resolvedFlags !== flags || plan.resolvedDictNames !== names ||
++            recordChunk.resolvedContentReferences !== references ||
++            references.uniqueIndexList !== sourceChunk.contentUniqueIndexList ||
++            references.offsets !== offsets || references.lengths !== lengths
++        ) { throw new Error('Native term-record resolved content ownership changed'); }
++    };
++
++    return (async () => {
++        /** @type {Uint8Array[]} */
++        const rawBytes = [];
++        for (const {offset, length} of rawReferences) {
++            assertOwnership();
++            const bytes = await readContent(offset, length, RAW_TERM_CONTENT_TOKEN_DICT_NAME);
++            assertOwnership();
++            if (bytes === null || bytes.byteLength !== length || !isRawTermContentTokenBinary(bytes)) { return null; }
++            // Reads can return import-overlay subviews. This bounded copy
++            // owns just the canonical inputs across compression and append.
++            rawBytes.push(new Uint8Array(bytes));
++        }
++        assertOwnership();
++        const blockStorage = await blockSession.append(sourceChunk.dictionary, rawBytes, compressionDictName);
++        assertOwnership();
++        if (blockStorage === null) { return null; }
++        if (
++            blockStorage.contentDictName !== targetName ||
++            blockStorage.contentOffsets.length !== rawReferences.length ||
++            blockStorage.contentLengths.length !== rawReferences.length
++        ) { throw new Error('Native term-record alias storage returned invalid references'); }
++        const aliasOffsets = new Float64Array(offsets);
++        for (let index = 0; index < rawReferences.length; ++index) {
++            const rawReference = rawReferences[index];
++            const offset = blockStorage.contentOffsets[index];
++            if (!Number.isSafeInteger(offset) || offset < 0 || blockStorage.contentLengths[index] !== rawReference.length) {
++                throw new Error('Native term-record alias storage changed the logical content length');
++            }
++            for (const uniqueIndex of rawReference.uniqueIndexes) { aliasOffsets[uniqueIndex] = offset; }
++        }
++        return {
++            chunk: createArtifactTermRecordChunkWithResolvedContent(
++                recordChunk,
++                references.uniqueIndexList,
++                aliasOffsets,
++                lengths,
++                sourceChunk.preparedLookupIndexes,
++            ),
++            contentDictName: targetName,
++            blockStorage,
++            aliasCount: rawReferences.length,
++            inputBytes,
++        };
++    })();
++}
+diff --git a/ext/js/dictionary/native-term-record-ownership.js b/ext/js/dictionary/native-term-record-ownership.js
+new file mode 100644
+index 0000000..3582a38
+--- /dev/null
++++ b/ext/js/dictionary/native-term-record-ownership.js
+@@ -0,0 +1,277 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++/**
++ * @typedef {Omit<Parameters<import('./term-record-opfs-store.js').TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']>[0], 'dictionary'|'preparedLookupIndexes'> & {
++ *   dictionary?: string,
++ *   dictionaryTotalRows?: number,
++ *   contentRowStart?: number,
++ *   contentUniqueIndexList?: Uint32Array|null,
++ *   contentDedupPlan?: {sourceRowCount?: number, uniqueCount?: number}|null,
++ *   releaseBorrowedContent?: () => void,
++ *   preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>,
++ * }} NativeRecordColumns
++ */
++/** @typedef {NonNullable<ReturnType<typeof captureRecordColumns>>} RecordColumns */
++/** @typedef {{owner: NativeTermRecordImportOwner, target: object, columns: RecordColumns, dictionary: string|undefined, dictionaryTotalRows: number|undefined, claimed: boolean, admitted: boolean, active: boolean}} RecordLeaseState */
++
++/** @type {WeakMap<object, RecordColumns>} */
++const receivedNativeRecords = new WeakMap();
++/** @type {WeakMap<object, RecordLeaseState>} */
++const recordLeases = new WeakMap();
++
++/**
++ * Fixed private buffers are transferred out of the parser worker. Shared and
++ * resizable views cannot establish this record-column ownership contract.
++ * @param {ArrayBufferView} view
++ * @returns {boolean}
++ */
++function hasPrivateBacking(view) {
++    return view.buffer instanceof ArrayBuffer && view.buffer.byteLength > 0 &&
++    Reflect.get(view.buffer, 'resizable') !== true;
++}
++
++/**
++ * This is a descriptor of a trusted receiver result, not a proof obtainable
++ * from arbitrary caller shapes. The receiver and private importer establish
++ * exclusive ownership; the descriptor detects replaced columns and wrappers.
++ * Ordinary database and record-store admission still validate the complete
++ * prepared index and key geometry. Ownership checks need no extra key scan.
++ * @param {unknown} value
++ * @returns {object|null}
++ */
++function captureRecordColumns(value) {
++    if (typeof value !== 'object' || value === null) { return null; }
++    const chunk = /** @type {NativeRecordColumns} */ (value);
++    const {rowCount, termRecordPreinternedPlan: plan, preparedLookupIndexes: indexes} = chunk;
++    if (
++        !Number.isSafeInteger(rowCount) || rowCount <= 0 || rowCount >= 0xffff ||
++        (chunk.contentRowStart ?? 0) !== 0 ||
++        typeof chunk.releaseBorrowedContent !== 'undefined' ||
++        !Array.isArray(chunk.expressionBytesList) || chunk.expressionBytesList.length > 0 ||
++        !Array.isArray(chunk.readingBytesList) || chunk.readingBytesList.length > 0 ||
++        !(chunk.readingEqualsExpressionList instanceof Uint8Array) || chunk.readingEqualsExpressionList.length !== rowCount ||
++        !(chunk.scoreList instanceof Int32Array || chunk.scoreList instanceof Float64Array) || chunk.scoreList.length !== rowCount ||
++        !(chunk.sequenceList instanceof Int32Array || chunk.sequenceList instanceof Float64Array) || chunk.sequenceList.length !== rowCount ||
++        !(chunk.contentUniqueIndexList instanceof Uint32Array) || chunk.contentUniqueIndexList.length !== rowCount ||
++        chunk.contentDedupPlan?.sourceRowCount !== rowCount ||
++        typeof plan !== 'object' || plan === null ||
++        !(plan.stringsBuffer instanceof Uint8Array) ||
++        !(plan.stringLengths instanceof Uint16Array) || plan.stringLengths.length === 0 || plan.stringLengths.length >= 0xffff ||
++        !(plan.expressionIndexes instanceof Uint32Array) || plan.expressionIndexes.length !== rowCount ||
++        !(plan.readingIndexes instanceof Uint32Array) || plan.readingIndexes.length !== rowCount ||
++        !(indexes instanceof Map) || indexes.size !== 1
++    ) { return null; }
++    const prepared = indexes.get(`0:${rowCount}`);
++    if (
++        typeof prepared !== 'object' || prepared === null || prepared.preinternedPlan !== plan ||
++        !(prepared.bytes instanceof Uint8Array) || prepared.bytes.byteLength === 0
++    ) { return null; }
++    const views = [
++        plan.stringsBuffer,
++        plan.stringLengths,
++        plan.expressionIndexes,
++        plan.readingIndexes,
++        chunk.readingEqualsExpressionList,
++        chunk.scoreList,
++        chunk.sequenceList,
++        chunk.contentUniqueIndexList,
++        prepared.bytes,
++    ];
++    for (const optional of [plan.stringOffsets, plan.stringHashes, prepared.routeFilter]) {
++        if (optional === null || typeof optional === 'undefined') { continue; }
++        if (!(optional instanceof Uint32Array)) { return null; }
++        views.push(optional);
++    }
++    if (!views.every(hasPrivateBacking)) { return null; }
++    return {
++        rowCount,
++        expressionBytesList: chunk.expressionBytesList,
++        readingBytesList: chunk.readingBytesList,
++        readingEqualsExpressionList: chunk.readingEqualsExpressionList,
++        scoreList: chunk.scoreList,
++        sequenceList: chunk.sequenceList,
++        contentUniqueIndexList: chunk.contentUniqueIndexList,
++        contentDedupPlan: chunk.contentDedupPlan,
++        sourceRowCount: chunk.contentDedupPlan.sourceRowCount,
++        uniqueCount: chunk.contentDedupPlan.uniqueCount,
++        plan,
++        stringsBuffer: plan.stringsBuffer,
++        stringLengths: plan.stringLengths,
++        stringOffsets: plan.stringOffsets,
++        stringHashes: plan.stringHashes,
++        expressionIndexes: plan.expressionIndexes,
++        readingIndexes: plan.readingIndexes,
++        indexes,
++        prepared,
++        preparedBytes: prepared.bytes,
++        routeFilter: prepared.routeFilter,
++    };
++}
++
++/**
++ * @param {unknown} value
++ * @param {RecordColumns} expected
++ * @returns {boolean}
++ */
++function matchesRecordColumns(value, expected) {
++    const current = captureRecordColumns(value);
++    if (current === null) { return false; }
++    return Object.keys(expected).every((key) => Reflect.get(current, key) === Reflect.get(expected, key));
++}
++
++/**
++ * Called only by the known parser-worker result receiver, after transfer.
++ * A public parser callback can receive these bytes but receives no import
++ * lease; generic database and resolved-reference factory calls stay mutable.
++ * @param {object} chunk
++ * @returns {boolean}
++ */
++export function registerReceivedNativeTermRecordChunk(chunk) {
++    const columns = captureRecordColumns(chunk);
++    if (columns === null) { return false; }
++    receivedNativeRecords.set(chunk, columns);
++    return true;
++}
++
++/** Owns leases only for the importer's private ordered sink callback. */
++export class NativeTermRecordImportOwner {
++    /** @param {() => void} validateOwner */
++    constructor(validateOwner) {
++        /** @type {() => void} */
++        this._validateOwner = validateOwner;
++        /** @type {WeakMap<object, object>} */
++        this._leases = new WeakMap();
++        /** @type {boolean} */
++        this._closed = false;
++    }
++
++    /**
++     * Rebinds the genuine receiver result across the importer's object spread.
++     * This method is never called for arbitrary application onChunk callbacks.
++     * @param {object} source
++     * @param {object} target
++     * @returns {object|null}
++     */
++    bind(source, target) {
++        const columns = receivedNativeRecords.get(source);
++        receivedNativeRecords.delete(source);
++        if (
++            this._closed || typeof columns === 'undefined' ||
++            !matchesRecordColumns(source, columns) || !matchesRecordColumns(target, columns)
++        ) { return null; }
++        this.validate();
++        const chunk = /** @type {NativeRecordColumns} */ (target);
++        const lease = {};
++        recordLeases.set(lease, {
++            owner: this,
++            target,
++            columns,
++            dictionary: chunk.dictionary,
++            dictionaryTotalRows: chunk.dictionaryTotalRows,
++            claimed: false,
++            admitted: false,
++            active: true,
++        });
++        this._leases.set(target, lease);
++        return lease;
++    }
++
++    /**
++     * A lease travels out of band into one database append, never on the chunk.
++     * @param {object} target
++     * @returns {object|null}
++     */
++    claim(target) {
++        const lease = this._leases.get(target);
++        this._leases.delete(target);
++        if (typeof lease === 'undefined') { return null; }
++        const state = recordLeases.get(lease);
++        if (typeof state === 'undefined' || !state.active || this._closed) { return null; }
++        this.validate();
++        state.claimed = true;
++        return lease;
++    }
++
++    /**
++     * Dropping the lease never permits recycling bytes retained by a record
++     * cache. Transferred native record buffers remain immutable after import.
++     * @param {object|null} lease
++     */
++    release(lease) {
++        if (lease === null) { return; }
++        const state = recordLeases.get(lease);
++        if (typeof state === 'undefined' || state.owner !== this) { return; }
++        state.active = false;
++        this._leases.delete(state.target);
++        recordLeases.delete(lease);
++    }
++
++    /** @throws {Error} If the import no longer owns its record inputs. */
++    validate() {
++        if (this._closed) { throw new Error('Native term-record import ownership is closed'); }
++        this._validateOwner();
++    }
++
++    /** @returns {boolean} */
++    get active() { return !this._closed; }
++
++    /** Invalidates admission synchronously without changing ordinary await order. */
++    close() {
++        this._closed = true;
++        this._leases = new WeakMap();
++    }
++}
++
++/**
++ * @param {unknown} lease
++ * @param {unknown} value
++ * @returns {boolean}
++ */
++export function hasNativeTermRecordLease(lease, value) {
++    if (typeof lease !== 'object' || lease === null) { return false; }
++    const state = recordLeases.get(lease);
++    if (typeof state === 'undefined' || !state.active || !state.claimed || !state.owner.active || state.target !== value) { return false; }
++    const chunk = /** @type {NativeRecordColumns} */ (value);
++    return chunk.dictionary === state.dictionary && chunk.dictionaryTotalRows === state.dictionaryTotalRows &&
++    matchesRecordColumns(value, state.columns);
++}
++
++/**
++ * @param {object} lease
++ * @param {unknown} chunk
++ * @throws {Error} If the private input lifetime or import owner changed.
++ */
++export function assertNativeTermRecordLease(lease, chunk) {
++    if (!hasNativeTermRecordLease(lease, chunk)) { throw new Error('Native term-record input ownership changed'); }
++    const state = /** @type {RecordLeaseState} */ (recordLeases.get(lease));
++    state.owner.validate();
++}
++
++/**
++ * Consumes database admission once, while retaining the input lifetime for
++ * every content and record await owned by that append.
++ * @param {object} lease
++ * @param {unknown} chunk
++ * @throws {Error} If this lease has already admitted an append.
++ */
++export function admitNativeTermRecordLease(lease, chunk) {
++    assertNativeTermRecordLease(lease, chunk);
++    const state = /** @type {RecordLeaseState} */ (recordLeases.get(lease));
++    if (state.admitted) { throw new Error('Native term-record input was already admitted'); }
++    state.admitted = true;
++}
+diff --git a/test/dictionary-native-record-alias-lifecycle.test.js b/test/dictionary-native-record-alias-lifecycle.test.js
+new file mode 100644
+index 0000000..ffb1c07
+--- /dev/null
++++ b/test/dictionary-native-record-alias-lifecycle.test.js
+@@ -0,0 +1,296 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {describe, expect, test, vi} from 'vitest';
++import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
++import {TermContentBlockImportSession, TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
++import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
++import {createNativeRecordFixture, createNativeRecordGate, receiveNativeRecordFixture} from './util/native-term-record-fixture.js';
++
++/** @typedef {import('../ext/js/dictionary/term-record-opfs-store.js').TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']} RecordAppend */
++/** @typedef {Awaited<ReturnType<DictionaryDatabase['_resolveArtifactTermContentDedup']>>} ResolvedContent */
++/**
++ * @typedef {{
++ * database: DictionaryDatabase, events: string[], received: ReturnType<typeof receiveNativeRecordFixture>, dedupResult: ResolvedContent,
++ * resolve: import('vitest').MockInstance<DictionaryDatabase['_resolveArtifactTermContentDedup']>,
++ * read: import('vitest').MockInstance<DictionaryDatabase['_readTermEntryContentBytes']>,
++ * alias: import('vitest').MockInstance<TermContentBlockImportSession['append']>,
++ * record: import('vitest').Mock<RecordAppend>, recordCalls: Array<Parameters<RecordAppend>>, append: () => Promise<void>,
++ * readStarted: ReturnType<typeof createNativeRecordGate>, aliasStarted: ReturnType<typeof createNativeRecordGate>,
++ * recordStarted: ReturnType<typeof createNativeRecordGate>, dedupStarted: ReturnType<typeof createNativeRecordGate>,
++ * endContent: import('vitest').Mock<() => Promise<void>>, endRecords: import('vitest').Mock<() => Promise<void>>,
++ * rollbackContent: import('vitest').Mock<() => Promise<void>>, rollbackRecords: import('vitest').Mock<() => Promise<void>>,
++ * exec: import('vitest').Mock<(value: unknown) => void>, root: {getFileHandle: import('vitest').Mock<() => Promise<object>>},
++ * }} DatabaseFixture
++ */
++
++/**
++ * @param {{read?: Promise<void>, alias?: Promise<void>, record?: Promise<void>, dedup?: Promise<void>}} [gates]
++ * @returns {DatabaseFixture}
++ */
++function createFixture(gates = {}) {
++    const {source, rawBytes} = createNativeRecordFixture();
++    const received = receiveNativeRecordFixture(source);
++    const database = new DictionaryDatabase();
++    /** @type {string[]} */
++    const events = [];
++    const readStarted = createNativeRecordGate();
++    const aliasStarted = createNativeRecordGate();
++    const recordStarted = createNativeRecordGate();
++    const dedupStarted = createNativeRecordGate();
++    const plan = /** @type {NonNullable<typeof source.contentDedupPlan>} */ (source.contentDedupPlan);
++    /** @type {ResolvedContent} */
++    const dedupResult = {
++        contentOffsets: new Float64Array(0),
++        contentLengths: new Uint32Array(0),
++        pendingContentBytes: [],
++        pendingContentHash1s: [],
++        pendingContentHash2s: [],
++        pendingContentDictNames: null,
++        pendingRowToUniqueIndex: null,
++        pendingContentCount: 0,
++        pendingContentSpans: null,
++        uniformContentDictName: 'raw-v6',
++        pendingHitCount: 0,
++        persistedHitCount: source.rowCount,
++        exactFallbackCount: 0,
++        contentDedupPlan: plan,
++        pendingPlanUniqueIndexes: [],
++        pendingPlanUniqueStart: null,
++        resolvedContentDictNames: /** @type {string[]} */ (plan.resolvedDictNames),
++    };
++    const resolve = vi.spyOn(database, '_resolveArtifactTermContentDedup').mockImplementation(async () => {
++        dedupStarted.resolve();
++        if (typeof gates.dedup !== 'undefined') { await gates.dedup; }
++        return dedupResult;
++    });
++    const read = vi.spyOn(database, '_readTermEntryContentBytes').mockImplementation(async () => {
++        events.push('read-start');
++        readStarted.resolve();
++        if (typeof gates.read !== 'undefined') { await gates.read; }
++        events.push('read-end');
++        return rawBytes;
++    });
++    const session = new TermContentBlockImportSession(new TermContentBlockStore(new TermContentOpfsStore()));
++    Reflect.get(session, '_blockEnabledDictionaries').add(source.dictionary);
++    const alias = vi.spyOn(session, 'append').mockImplementation(async (_dictionary, bytes) => {
++        events.push('alias-start');
++        aliasStarted.resolve();
++        if (typeof gates.alias !== 'undefined') { await gates.alias; }
++        events.push('alias-end');
++        return {
++            contentOffsets: new Float64Array([10000]),
++            contentLengths: Uint32Array.from(bytes, (entry) => entry.length),
++            contentDictName: 'raw-block-v2',
++            compressedBytes: 5,
++            uncompressedBytes: rawBytes.length,
++            packMs: 0,
++            compressMs: 0,
++            envelopeMs: 0,
++            referenceMs: 0,
++            opfsAppendMs: 0,
++        };
++    });
++    /** @type {Array<Parameters<RecordAppend>>} */
++    const recordCalls = [];
++    /** @type {RecordAppend} */
++    const appendRecords = async (...args) => {
++        recordCalls.push(args);
++        events.push('record-start');
++        recordStarted.resolve();
++        if (typeof gates.record !== 'undefined') { await gates.record; }
++        events.push('record-end');
++        return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0, validationMs: 0, recordFieldEncodeMs: 0, lookupIndexEncodeMs: 0};
++    };
++    const record = vi.fn(appendRecords);
++    const endContent = vi.fn(async () => { events.push('content-close'); });
++    const endRecords = vi.fn(async () => { events.push('record-close'); });
++    const rollbackContent = vi.fn(async () => { events.push('content-rollback'); });
++    const rollbackRecords = vi.fn(async () => { events.push('record-rollback'); });
++    const exec = vi.fn((/** @type {unknown} */ value) => {
++        if (value === 'COMMIT') { events.push('commit'); }
++        if (value === 'ROLLBACK') { events.push('sql-rollback'); }
++    });
++    Reflect.set(database, '_db', {exec, close: () => { events.push('database-close'); }});
++    Reflect.set(database, '_bulkImportState', 'active');
++    Reflect.set(database, '_bulkImportTransactionOpen', true);
++    Reflect.set(database, '_bulkImportJournalRecord', {
++        version: 1, sessionId: 'native-record-alias', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
++    });
++    Reflect.set(database, '_enableTermEntryContentDedup', true);
++    Reflect.set(database, '_termContentZstdInitialized', true);
++    Reflect.set(database, '_termContentBlockImportSession', session);
++    Reflect.set(database, '_termContentStore', {
++        endImportSession: endContent, rollbackImportSession: rollbackContent, getLastEndImportSessionMetrics: () => null,
++    });
++    Reflect.set(database, '_termRecordStore', {
++        appendBatchFromArtifactChunkResolvedContent: record,
++        endImportSession: endRecords,
++        rollbackImportSession: rollbackRecords,
++        getLastEndImportSessionMetrics: () => null,
++    });
++    Reflect.set(database, '_importJournal', {clear: async () => { events.push('journal-clear'); }});
++    vi.spyOn(database, '_invalidateGlossarySearchIndex').mockImplementation(() => {});
++    vi.spyOn(database, '_invalidateTermLookupCaches').mockImplementation(() => {});
++    vi.spyOn(database, '_applyRuntimePragmas').mockImplementation(() => {});
++    vi.spyOn(database, '_clearBulkImportRuntimeCaches').mockImplementation(() => {});
++    vi.spyOn(database, '_createIndexesSql').mockReturnValue([]);
++    vi.spyOn(database, '_syncTermsVirtualTableFromRecordStore').mockResolvedValue(void 0);
++    vi.spyOn(database, '_rollbackGenerationMedia').mockResolvedValue(void 0);
++    const root = {
++        getFileHandle: vi.fn(async () => { events.push('purge-marker'); return {}; }),
++    };
++    vi.spyOn(database, '_getDictionaryPurgeRoot').mockResolvedValue(/** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ (root)));
++    vi.spyOn(database, '_finishPersistentDictionaryPurge').mockImplementation(async () => {
++        events.push('purge');
++        return true;
++    });
++    vi.spyOn(database, '_prepareOnce').mockResolvedValue(void 0);
++    const append = () => database.bulkAddArtifactTermsChunk(received.chunk, received.lease);
++    return {database, events, received, dedupResult, resolve, read, alias, record, recordCalls, append, readStarted, aliasStarted, recordStarted, dedupStarted, endContent, endRecords, rollbackContent, rollbackRecords, exec, root};
++}
++
++describe('native record alias database lifetime', () => {
++    test('uses the private reference overlay while preserving canonical dedup references', async () => {
++        const fixture = createFixture();
++        const plan = /** @type {NonNullable<typeof fixture.received.chunk.contentDedupPlan>} */ (fixture.received.chunk.contentDedupPlan);
++        const originalOffsets = new Float64Array(plan.resolvedOffsets);
++        await fixture.append();
++        const recordChunk = fixture.recordCalls[0][0];
++        const names = fixture.recordCalls[0][3];
++        expect(names).toBe('raw-block-v2');
++        expect(recordChunk.preparedLookupIndexes).toBe(fixture.received.chunk.preparedLookupIndexes);
++        expect(recordChunk.resolvedContentReferences?.offsets).toStrictEqual(new Float64Array([10000, 108]));
++        expect(plan.resolvedOffsets).toStrictEqual(originalOffsets);
++        expect(plan.resolvedDictNames).toStrictEqual(['raw-v6', 'raw-block-v2']);
++        expect(fixture.database.getLastBulkAddTermsMetrics()).toMatchObject({contentAliasCount: 1, contentAliasInputBytes: 8, dedupUniqueCount: 0});
++        expect(Reflect.get(fixture.database, '_nativeTermRecordAppends').size).toBe(0);
++    });
++
++    test('keeps a generic mutable factory caller on the existing mixed route', async () => {
++        const fixture = createFixture();
++        await fixture.database.bulkAddArtifactTermsChunk(fixture.received.chunk);
++        expect(fixture.read).not.toHaveBeenCalled();
++        expect(fixture.alias).not.toHaveBeenCalled();
++        expect(fixture.recordCalls[0][3]).toEqual(['raw-v6', 'raw-block-v2']);
++        expect(Reflect.get(fixture.database, '_nativeTermRecordAppends').size).toBe(0);
++    });
++
++    test('abort cancels a delayed raw read and joins the owner before rollback', async () => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({read: gate.promise});
++        const append = fixture.append();
++        const appendRejected = expect(append).rejects.toThrow('cancelled by database cleanup');
++        await fixture.readStarted.promise;
++        const abort = fixture.database.abortBulkImport();
++        await vi.waitFor(() => { expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('finalizing'); });
++        expect(fixture.rollbackContent).not.toHaveBeenCalled();
++        gate.resolve();
++        await appendRejected;
++        await abort;
++        expect(fixture.alias).not.toHaveBeenCalled();
++        expect(fixture.record).not.toHaveBeenCalled();
++        expect(fixture.events.indexOf('content-rollback')).toBeGreaterThan(fixture.events.indexOf('read-end'));
++    });
++
++    test.each(['close', 'purge'])('%s joins an already-started alias write before touching storage', async (action) => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({alias: gate.promise});
++        const appendRejected = expect(fixture.append()).rejects.toThrow('cancelled by database cleanup');
++        await fixture.aliasStarted.promise;
++        const cleanup = action === 'close' ? fixture.database.close() : fixture.database.purge();
++        await vi.waitFor(() => { expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('finalizing'); });
++        expect(fixture.rollbackContent).not.toHaveBeenCalled();
++        expect(fixture.events).not.toContain('database-close');
++        expect(fixture.events).not.toContain('purge');
++        gate.resolve();
++        await appendRejected;
++        await cleanup;
++        expect(fixture.record).not.toHaveBeenCalled();
++        const mutation = fixture.events.indexOf(action === 'close' ? 'content-rollback' : 'purge');
++        expect(mutation).toBeGreaterThan(fixture.events.indexOf('alias-end'));
++    });
++
++    test('finish holds the lease through record append and rejects competing finalizers and new private admission', async () => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({record: gate.promise});
++        const append = fixture.append();
++        await fixture.recordStarted.promise;
++        const finish = fixture.database.finishBulkImport();
++        await vi.waitFor(() => { expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('finalizing'); });
++        expect(fixture.endRecords).not.toHaveBeenCalled();
++        const next = receiveNativeRecordFixture(createNativeRecordFixture().source);
++        await expect(fixture.database.bulkAddArtifactTermsChunk(next.chunk, next.lease)).rejects.toThrow('admission is closed');
++        await expect(fixture.database.abortBulkImport()).rejects.toThrow('finalization is already active');
++        await expect(fixture.database.close()).rejects.toThrow('finalization is already active');
++        gate.resolve();
++        await append;
++        await finish;
++        expect(fixture.events.indexOf('record-close')).toBeGreaterThan(fixture.events.indexOf('record-end'));
++        expect(fixture.events.indexOf('commit')).toBeGreaterThan(fixture.events.indexOf('record-close'));
++    });
++
++    test.each([false, true])('finish rolls back a failed append whether it starts before or after settlement (%s)', async (finishAfterSettlement) => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({alias: gate.promise});
++        const appendRejected = expect(fixture.append()).rejects.toThrow('write failed');
++        await fixture.aliasStarted.promise;
++        let finish;
++        if (!finishAfterSettlement) {
++            finish = expect(fixture.database.finishBulkImport()).rejects.toThrow('write failed');
++        }
++        gate.reject(new Error('write failed'));
++        await appendRejected;
++        if (finishAfterSettlement) {
++            finish = expect(fixture.database.finishBulkImport()).rejects.toThrow('write failed');
++        }
++        await finish;
++        expect(fixture.exec).not.toHaveBeenCalledWith('COMMIT');
++        expect(fixture.rollbackContent).toHaveBeenCalledOnce();
++        expect(fixture.rollbackRecords).toHaveBeenCalledOnce();
++        expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('idle');
++    });
++
++    test('adopts staged dedup rollback state before observing cancellation after resolution', async () => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({dedup: gate.promise});
++        const staged = {indexes: new Int32Array([1]), active: true};
++        fixture.dedupResult.pendingContentCount = 1;
++        fixture.dedupResult.pendingPlanUniqueStart = 0;
++        Reflect.set(fixture.dedupResult, 'stagedContentMetadata', staged);
++        const stagedRollback = vi.spyOn(fixture.database, '_rollbackStagedArtifactTermContentMetadata').mockImplementation(() => { fixture.events.push('staged-rollback'); });
++        const planRollback = vi.spyOn(fixture.database, '_rollbackArtifactTermContentDedupPlan').mockImplementation(() => { fixture.events.push('plan-rollback'); });
++        const appendRejected = expect(fixture.append()).rejects.toThrow('cancelled by database cleanup');
++        await fixture.dedupStarted.promise;
++        const abort = fixture.database.abortBulkImport();
++        await vi.waitFor(() => { expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('finalizing'); });
++        gate.resolve();
++        await appendRejected;
++        await abort;
++        expect(stagedRollback).toHaveBeenCalledWith(staged);
++        expect(planRollback).toHaveBeenCalledWith(expect.objectContaining({count: 1, start: 0}));
++        expect(fixture.events.indexOf('content-rollback')).toBeGreaterThan(fixture.events.indexOf('plan-rollback'));
++    });
++
++    test('a failed purge marker leaves an admitted private append resumable', async () => {
++        const gate = createNativeRecordGate();
++        const fixture = createFixture({read: gate.promise});
++        fixture.root.getFileHandle.mockRejectedValueOnce(new Error('marker failed'));
++        const append = fixture.append();
++        await fixture.readStarted.promise;
++        await expect(fixture.database.purge()).rejects.toThrow('marker failed');
++        expect(Reflect.get(fixture.database, '_bulkImportState')).toBe('active');
++        expect(fixture.rollbackContent).not.toHaveBeenCalled();
++        gate.resolve();
++        await append;
++        await fixture.database.finishBulkImport();
++        expect(fixture.exec).toHaveBeenCalledWith('COMMIT');
++        expect(fixture.rollbackContent).not.toHaveBeenCalled();
++    });
++});
+diff --git a/test/native-term-record-alias.test.js b/test/native-term-record-alias.test.js
+new file mode 100644
+index 0000000..a442264
+--- /dev/null
++++ b/test/native-term-record-alias.test.js
+@@ -0,0 +1,263 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {describe, expect, test, vi} from 'vitest';
++import {tryCreateNativeTermRecordAliases} from '../ext/js/dictionary/native-term-record-alias.js';
++import {TermContentBlockImportSession, TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
++import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
++import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
++import {createNativeRecordFixture, createNativeRecordGate, receiveNativeRecordFixture} from './util/native-term-record-fixture.js';
++
++/** @typedef {import('../ext/js/dictionary/dictionary-database.js').ArtifactTermRecordChunk} RecordChunk */
++/**
++ * @typedef {{
++ * owner: import('../ext/js/dictionary/native-term-record-ownership.js').NativeTermRecordImportOwner,
++ * chunk: RecordChunk, recordChunk: RecordChunk, plan: NonNullable<RecordChunk['contentDedupPlan']>, names: string[],
++ * blockSession: TermContentBlockImportSession,
++ * append: import('vitest').MockInstance<TermContentBlockImportSession['append']>,
++ * read: import('vitest').Mock<() => Promise<Uint8Array|null>>,
++ * validateOwner: import('vitest').Mock<() => void>,
++ * aliasOwner: import('../ext/js/dictionary/native-term-record-alias.js').NativeRecordAliasOwner,
++ * rawBytes: Uint8Array,
++ * }} AliasFixture
++ */
++
++/**
++ * @param {{rawEntries?: number, rawLength?: number}} [options]
++ * @returns {AliasFixture}
++ */
++function createFixture(options = {}) {
++    const {source, rawBytes} = createNativeRecordFixture(options);
++    const {owner, lease, chunk, recordChunk} = receiveNativeRecordFixture(source);
++    const blockStore = new TermContentBlockStore(new TermContentOpfsStore());
++    const blockSession = new TermContentBlockImportSession(blockStore);
++    Reflect.get(blockSession, '_blockEnabledDictionaries').add(chunk.dictionary);
++    const append = vi.spyOn(blockSession, 'append').mockImplementation(async (_dictionary, bytes) => ({
++        contentOffsets: Float64Array.from(bytes, (_, index) => 10000 + index * 20),
++        contentLengths: Uint32Array.from(bytes, (entry) => entry.byteLength),
++        contentDictName: 'raw-block-v2',
++        compressedBytes: 5,
++        uncompressedBytes: bytes.reduce((sum, entry) => sum + entry.byteLength, 0),
++        packMs: 0,
++        compressMs: 0,
++        envelopeMs: 0,
++        referenceMs: 0,
++        opfsAppendMs: 0,
++    }));
++    const read = vi.fn(async () => /** @type {Uint8Array|null} */ (rawBytes));
++    const validateOwner = vi.fn(() => {});
++    const aliasOwner = {sourceChunk: chunk, lease, validateOwner};
++    const plan = /** @type {NonNullable<typeof chunk.contentDedupPlan>} */ (chunk.contentDedupPlan);
++    const names = /** @type {string[]} */ (plan.resolvedDictNames);
++    return {owner, chunk, recordChunk, plan, names, blockSession, append, read, validateOwner, aliasOwner, rawBytes};
++}
++
++/**
++ * @param {ReturnType<typeof createFixture>} fixture
++ * @returns {ReturnType<typeof tryCreateNativeTermRecordAliases>}
++ */
++function startAliases(fixture) {
++    return tryCreateNativeTermRecordAliases(fixture.aliasOwner, fixture.recordChunk, fixture.names, fixture.blockSession, null, fixture.read);
++}
++
++describe('bounded native term-record aliases', () => {
++    test('copies only record offsets and preserves canonical metadata and complete prepared bytes', async () => {
++        const fixture = createFixture();
++        const canonicalOffsets = new Float64Array(fixture.plan.resolvedOffsets);
++        const canonicalNames = [...fixture.names];
++        const result = await startAliases(fixture);
++        expect(result).not.toBeNull();
++        expect(result?.contentDictName).toBe('raw-block-v2');
++        expect(result?.chunk.resolvedContentReferences?.offsets).toStrictEqual(new Float64Array([10000, 108]));
++        expect(result?.chunk.resolvedContentReferences?.lengths).toBe(fixture.plan.resolvedLengths);
++        expect(result?.chunk.preparedLookupIndexes).toBe(fixture.chunk.preparedLookupIndexes);
++        expect(result?.chunk.termRecordPreinternedPlan).toBe(fixture.chunk.termRecordPreinternedPlan);
++        expect(fixture.plan.resolvedOffsets).toStrictEqual(canonicalOffsets);
++        expect(fixture.names).toStrictEqual(canonicalNames);
++        expect(fixture.read).toHaveBeenCalledWith(100, 8, 'raw-v6');
++        expect(fixture.append.mock.calls[0][1][0]).toStrictEqual(fixture.rawBytes);
++        expect(fixture.append.mock.calls[0][1][0].buffer).not.toBe(fixture.rawBytes.buffer);
++    });
++
++    test('reads and aliases an identical canonical raw reference only once per group', async () => {
++        const fixture = createFixture({rawEntries: 2});
++        fixture.plan.resolvedOffsets[1] = fixture.plan.resolvedOffsets[0];
++        const result = await startAliases(fixture);
++        expect(fixture.read).toHaveBeenCalledTimes(1);
++        expect(fixture.append.mock.calls[0][1]).toHaveLength(1);
++        expect(result?.aliasCount).toBe(1);
++        expect(result?.inputBytes).toBe(8);
++        expect(result?.chunk.resolvedContentReferences?.offsets).toStrictEqual(new Float64Array([10000, 10000, 116]));
++    });
++
++    test.each(['unwitnessed', 'uniform', 'unselected', 'other-format', 'other-family', 'unresolved', 'replaced-resolution'])('keeps %s calls on the synchronous fallback', (kind) => {
++        const fixture = createFixture();
++        if (kind === 'unwitnessed') { fixture.aliasOwner.lease = {}; }
++        if (kind === 'uniform') { fixture.names.fill('raw-v6'); }
++        if (kind === 'unselected') { Reflect.get(fixture.blockSession, '_blockEnabledDictionaries').clear(); }
++        if (kind === 'other-format') { fixture.names[0] = 'raw-v2'; }
++        if (kind === 'other-family') { fixture.names[1] = 'raw-block-v2:jmdict'; }
++        if (kind === 'unresolved') { fixture.plan.resolvedFlags[0] = 0; }
++        if (kind === 'replaced-resolution') { fixture.plan.resolvedOffsets = new Float64Array(fixture.plan.resolvedOffsets); }
++        expect(startAliases(fixture)).toBeNull();
++        expect(fixture.read).not.toHaveBeenCalled();
++        expect(fixture.append).not.toHaveBeenCalled();
++    });
++
++    test.each([{rawEntries: 65}, {rawLength: 65537}])('rejects inputs beyond the fixed group bounds before reading', (options) => {
++        const fixture = createFixture(options);
++        expect(startAliases(fixture)).toBeNull();
++        expect(fixture.read).not.toHaveBeenCalled();
++    });
++
++    test('accepts exactly the entry and byte bounds', async () => {
++        const fixture = createFixture({rawEntries: 64, rawLength: 1024});
++        const result = await startAliases(fixture);
++        expect(result?.aliasCount).toBe(64);
++        expect(result?.inputBytes).toBe(65536);
++        expect(fixture.read).toHaveBeenCalledTimes(64);
++    });
++
++    test.each(['unavailable', 'short', 'other-format'])('falls back before writing when a canonical read is %s', async (kind) => {
++        const fixture = createFixture();
++        if (kind === 'unavailable') { fixture.read.mockResolvedValueOnce(null); }
++        if (kind === 'short') { fixture.read.mockResolvedValueOnce(fixture.rawBytes.subarray(0, 4)); }
++        if (kind === 'other-format') { fixture.read.mockResolvedValueOnce(new Uint8Array(8)); }
++        await expect(startAliases(fixture)).resolves.toBeNull();
++        expect(fixture.append).not.toHaveBeenCalled();
++    });
++
++    test('does not start a write after cancellation during a canonical read', async () => {
++        const fixture = createFixture();
++        const gate = createNativeRecordGate();
++        fixture.read.mockImplementationOnce(async () => {
++            await gate.promise;
++            return fixture.rawBytes;
++        });
++        const pending = startAliases(fixture);
++        fixture.owner.close();
++        gate.resolve();
++        await expect(pending).rejects.toThrow('ownership changed');
++        expect(fixture.append).not.toHaveBeenCalled();
++    });
++
++    test('holds resolution and record input ownership through alias append completion', async () => {
++        const fixture = createFixture();
++        const started = createNativeRecordGate();
++        const gate = createNativeRecordGate();
++        const original = fixture.append.getMockImplementation();
++        fixture.append.mockImplementationOnce(async (...args) => {
++            started.resolve();
++            await gate.promise;
++            return await /** @type {NonNullable<typeof original>} */ (original)(...args);
++        });
++        const pending = startAliases(fixture);
++        await started.promise;
++        fixture.plan.resolvedLengths = new Uint32Array(fixture.plan.resolvedLengths);
++        gate.resolve();
++        await expect(pending).rejects.toThrow('resolved content ownership changed');
++        expect(fixture.plan.resolvedOffsets[0]).toBe(100);
++    });
++
++    test('propagates a write failure without publishing alias references', async () => {
++        const fixture = createFixture();
++        fixture.append.mockRejectedValueOnce(new Error('alias write failed'));
++        await expect(startAliases(fixture)).rejects.toThrow('alias write failed');
++        expect(fixture.plan.resolvedOffsets[0]).toBe(100);
++        expect(fixture.recordChunk.resolvedContentReferences?.offsets[0]).toBe(100);
++    });
++
++    test('preserves ordinary references beyond the 32-bit segment boundary', async () => {
++        const fixture = createFixture();
++        fixture.plan.resolvedOffsets[1] = 0x100000000 + 10;
++        const result = await startAliases(fixture);
++        expect(result?.chunk.resolvedContentReferences?.offsets[1]).toBe(0x100000000 + 10);
++        expect(result?.chunk.preparedLookupIndexes).toBe(fixture.chunk.preparedLookupIndexes);
++    });
++
++    test('the actual record sink retains its 4 GiB split and rebuilt-index fallback after aliasing', async () => {
++        const fixture = createFixture();
++        fixture.plan.resolvedOffsets[1] = 0x100000000 + 10010;
++        const result = await startAliases(fixture);
++        if (result === null) { throw new Error('Expected an alias overlay'); }
++        const encoded = [];
++        for (const useReferences of [true, false]) {
++            const store = new TermRecordOpfsStore();
++            vi.spyOn(store, '_getOrCreateShardState').mockResolvedValue(
++                /** @type {Awaited<ReturnType<TermRecordOpfsStore['_getOrCreateShardState']>>} */ ({}),
++            );
++            const append = vi.spyOn(store, '_appendEncodedChunk').mockResolvedValue();
++            await store.appendBatchFromArtifactChunkResolvedContent(
++                useReferences ? result.chunk : {...result.chunk, resolvedContentReferences: void 0},
++                useReferences ? [] : [10000, 0x100000000 + 10010],
++                useReferences ? [] : [8, 8],
++                result.contentDictName,
++            );
++            expect(append.mock.calls.map((args) => [args[2], args[4]])).toStrictEqual([[1, 10000], [1, 0x100000000 + 10010]]);
++            expect(append.mock.calls.every((args) => args[5] instanceof Uint8Array && args[5].byteLength > 0 && args[6] instanceof Uint8Array && args[6].byteLength > 0)).toBe(true);
++            encoded.push(append.mock.calls);
++        }
++        expect(encoded[0]).toStrictEqual(encoded[1]);
++    });
++
++    test('reads an active import overlay without flushing queued writes', async () => {
++        const fixture = createFixture();
++        const contentStore = new TermContentOpfsStore();
++        Reflect.set(contentStore, '_importSessionActive', true);
++        Reflect.set(contentStore, '_length', 108);
++        Reflect.set(contentStore, '_importReadOverlayChunks', [fixture.rawBytes]);
++        Reflect.set(contentStore, '_importReadOverlayOffsets', [100]);
++        Reflect.set(contentStore, '_importReadOverlayBytes', fixture.rawBytes.byteLength);
++        const loaded = vi.spyOn(contentStore, 'ensureLoadedForRead');
++        const blockStore = new TermContentBlockStore(contentStore);
++        const result = await tryCreateNativeTermRecordAliases(
++            fixture.aliasOwner,
++            fixture.recordChunk,
++            fixture.names,
++            fixture.blockSession,
++            null,
++            (offset, length, name) => blockStore.read(offset, length, name),
++        );
++        expect(result?.aliasCount).toBe(1);
++        expect(loaded).not.toHaveBeenCalled();
++    });
++
++    test('includes a cold canonical-read wait before starting the alias append', async () => {
++        const fixture = createFixture();
++        const gate = createNativeRecordGate();
++        const started = createNativeRecordGate();
++        const contentStore = new TermContentOpfsStore();
++        const file = new File([new Uint8Array(100), fixture.rawBytes], 'content');
++        const fileHandle = {getFile: async () => file};
++        const state = {index: 0, fileName: 'content', fileHandle, fileLength: 108, startOffset: 0, readFile: /** @type {File|null} */ (null)};
++        Reflect.set(contentStore, '_length', 108);
++        Reflect.set(contentStore, '_fileHandle', fileHandle);
++        Reflect.set(contentStore, '_segmentStates', [state]);
++        const load = vi.spyOn(contentStore, 'ensureLoadedForRead').mockImplementation(async () => {
++            started.resolve();
++            await gate.promise;
++            state.readFile = file;
++            Reflect.set(contentStore, '_loadedForRead', true);
++        });
++        const blockStore = new TermContentBlockStore(contentStore);
++        const pending = tryCreateNativeTermRecordAliases(
++            fixture.aliasOwner,
++            fixture.recordChunk,
++            fixture.names,
++            fixture.blockSession,
++            null,
++            (offset, length, name) => blockStore.read(offset, length, name),
++        );
++        await started.promise;
++        expect(load).toHaveBeenCalledOnce();
++        expect(fixture.append).not.toHaveBeenCalled();
++        gate.resolve();
++        expect((await pending)?.aliasCount).toBe(1);
++    });
++});
+diff --git a/test/native-term-record-ownership.test.js b/test/native-term-record-ownership.test.js
+new file mode 100644
+index 0000000..cdb9e0c
+--- /dev/null
++++ b/test/native-term-record-ownership.test.js
+@@ -0,0 +1,100 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {describe, expect, test} from 'vitest';
++import {admitNativeTermRecordLease, assertNativeTermRecordLease, hasNativeTermRecordLease, NativeTermRecordImportOwner, registerReceivedNativeTermRecordChunk} from '../ext/js/dictionary/native-term-record-ownership.js';
++import {createNativeRecordFixture, receiveNativeRecordFixture} from './util/native-term-record-fixture.js';
++
++describe('private native record ownership', () => {
++    test('requires both genuine receiver origin and a private callback owner', () => {
++        const {source} = createNativeRecordFixture();
++        const owner = new NativeTermRecordImportOwner(() => {});
++        expect(owner.bind(source, {...source})).toBeNull();
++        expect(registerReceivedNativeTermRecordChunk(source)).toBe(true);
++        expect(owner.claim(source)).toBeNull();
++        expect(hasNativeTermRecordLease({}, source)).toBe(false);
++    });
++
++    test('binds once across the importer spread and admits one database append', () => {
++        const {source} = createNativeRecordFixture();
++        const {owner, lease, chunk} = receiveNativeRecordFixture(source);
++        expect(hasNativeTermRecordLease(lease, chunk)).toBe(true);
++        expect(hasNativeTermRecordLease(lease, source)).toBe(false);
++        expect(owner.claim(chunk)).toBeNull();
++        expect(owner.bind(source, {...source})).toBeNull();
++        admitNativeTermRecordLease(lease, chunk);
++        expect(() => admitNativeTermRecordLease(lease, chunk)).toThrow('already admitted');
++        owner.release(lease);
++        expect(hasNativeTermRecordLease(lease, chunk)).toBe(false);
++    });
++
++    test('close immediately revokes a claimed lease', () => {
++        const {owner, lease, chunk} = receiveNativeRecordFixture(createNativeRecordFixture().source);
++        owner.close();
++        expect(hasNativeTermRecordLease(lease, chunk)).toBe(false);
++        expect(() => assertNativeTermRecordLease(lease, chunk)).toThrow('ownership changed');
++        owner.release(lease);
++    });
++
++    test('can retire an unclaimed lease when the private callback fails', () => {
++        const {source} = createNativeRecordFixture();
++        registerReceivedNativeTermRecordChunk(source);
++        const owner = new NativeTermRecordImportOwner(() => {});
++        const target = {...source};
++        const lease = owner.bind(source, target);
++        owner.release(lease);
++        expect(owner.claim(target)).toBeNull();
++    });
++
++    test.each(['scoreList', 'sequenceList', 'readingEqualsExpressionList', 'contentUniqueIndexList'])('rejects replacement of %s', (field) => {
++        const {lease, chunk} = receiveNativeRecordFixture(createNativeRecordFixture().source);
++        Reflect.set(chunk, field, structuredClone(Reflect.get(chunk, field)));
++        expect(() => assertNativeTermRecordLease(lease, chunk)).toThrow('ownership changed');
++    });
++
++    test.each(['dictionary', 'dictionaryTotalRows', 'rowCount'])('rejects changed %s metadata', (field) => {
++        const {lease, chunk} = receiveNativeRecordFixture(createNativeRecordFixture().source);
++        Reflect.set(chunk, field, 'changed');
++        expect(() => assertNativeTermRecordLease(lease, chunk)).toThrow('ownership changed');
++    });
++
++    test('rejects replacing the complete native map or its prepared payload', () => {
++        for (const replaceMap of [true, false]) {
++            const {lease, chunk} = receiveNativeRecordFixture(createNativeRecordFixture().source);
++            const indexes = /** @type {NonNullable<typeof chunk.preparedLookupIndexes>} */ (chunk.preparedLookupIndexes);
++            if (replaceMap) {
++                chunk.preparedLookupIndexes = new Map(indexes);
++            } else {
++                const prepared = /** @type {NonNullable<ReturnType<typeof indexes.get>>} */ (indexes.get(`0:${chunk.rowCount}`));
++                prepared.bytes = new Uint8Array(prepared.bytes);
++            }
++            expect(() => assertNativeTermRecordLease(lease, chunk)).toThrow('ownership changed');
++        }
++    });
++
++    test('rejects shared, borrowed, and explicit per-row record columns', () => {
++        for (const shape of ['shared', 'borrowed', 'explicit']) {
++            const {source} = createNativeRecordFixture();
++            if (shape === 'shared') { source.scoreList = new Int32Array(new SharedArrayBuffer(source.rowCount * 4)); }
++            if (shape === 'borrowed') { source.releaseBorrowedContent = () => {}; }
++            if (shape === 'explicit') { source.expressionBytesList = [new Uint8Array([1])]; }
++            expect(registerReceivedNativeTermRecordChunk(source)).toBe(false);
++        }
++    });
++
++    test('checks the private import owner after admission', () => {
++        let active = true;
++        const {lease, chunk} = receiveNativeRecordFixture(createNativeRecordFixture().source, () => {
++            if (!active) { throw new Error('cancelled import'); }
++        });
++        admitNativeTermRecordLease(lease, chunk);
++        active = false;
++        expect(() => assertNativeTermRecordLease(lease, chunk)).toThrow('cancelled import');
++    });
++});
+diff --git a/test/util/native-term-record-fixture.js b/test/util/native-term-record-fixture.js
+new file mode 100644
+index 0000000..6fb7077
+--- /dev/null
++++ b/test/util/native-term-record-fixture.js
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (C) 2026  Yomitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {NativeTermRecordImportOwner, registerReceivedNativeTermRecordChunk} from '../../ext/js/dictionary/native-term-record-ownership.js';
++import {createTermRecordPreinternedPlanBuilder} from '../../ext/js/dictionary/term-record-preinterned-plan.js';
++import {prepareTermLookupIndexesFromPreinternedPlan} from '../../ext/js/dictionary/term-lookup-index-preparation.js';
++import {createArtifactTermRecordChunkWithResolvedContent} from '../../ext/js/dictionary/term-record-opfs-store.js';
++
++/** @typedef {import('../../ext/js/dictionary/dictionary-database.js').ArtifactTermRecordChunk} RecordChunk */
++
++/**
++ * Builds actual prepared lookup bytes with private native-shaped columns.
++ * The registration below stands in for the known worker receiver in unit tests.
++ * @param {{rawEntries?: number, rawLength?: number}} [options]
++ * @returns {{source: RecordChunk, rawBytes: Uint8Array}}
++ */
++export function createNativeRecordFixture({rawEntries = 1, rawLength = 8} = {}) {
++    const count = rawEntries + 1;
++    const builder = createTermRecordPreinternedPlanBuilder(count);
++    const encoder = new TextEncoder();
++    for (let index = 0; index < count; ++index) { builder.internStringBytes(encoder.encode(`term${index}`)); }
++    const keyIndexes = Uint32Array.from({length: count}, (_, index) => index);
++    const plan = builder.buildPlan(keyIndexes, new Uint32Array(keyIndexes));
++    const rawBytes = new Uint8Array(rawLength);
++    rawBytes.set([0x4d, 0x42, 0x52, 0x36]);
++    const source = {
++        dictionary: 'Alias fixture',
++        rowCount: count,
++        contentRowStart: 0,
++        dictionaryTotalRows: count,
++        expressionBytesList: [],
++        readingBytesList: [],
++        readingEqualsExpressionList: new Uint8Array(count).fill(1),
++        scoreList: new Int32Array(count),
++        sequenceList: new Int32Array(count).fill(-1),
++        termRecordPreinternedPlan: plan,
++        contentUniqueIndexList: new Uint32Array(keyIndexes),
++        contentBytesList: [],
++        contentHash1List: new Uint32Array(count),
++        contentHash2List: new Uint32Array(count),
++        contentDictNameList: null,
++        useResolvedContentReferences: true,
++        contentDedupPlan: {
++            sourceRowCount: count,
++            uniqueCount: count,
++            uniqueRowIndexes: new Uint32Array(keyIndexes),
++            resolvedFlags: new Uint8Array(count).fill(1),
++            resolvedOffsets: Float64Array.from({length: count}, (_, index) => 100 + index * rawLength),
++            resolvedLengths: new Uint32Array(count).fill(rawLength),
++            resolvedDictNames: Array.from({length: count}, (_, index) => (index < rawEntries ? 'raw-v6' : 'raw-block-v2')),
++            pendingEpochs: null,
++            pendingIndexes: null,
++            nextEpoch: 1,
++        },
++    };
++    const prepared = prepareTermLookupIndexesFromPreinternedPlan(source);
++    if (prepared === null || prepared.indexes.size !== 1) { throw new Error('Fixture did not produce a complete lookup index'); }
++    return {source: {...source, preparedLookupIndexes: prepared.indexes}, rawBytes};
++}
++
++/**
++ * @param {RecordChunk} source
++ * @param {() => void} [validateOwner]
++ * @returns {{owner: NativeTermRecordImportOwner, lease: object, chunk: RecordChunk, recordChunk: RecordChunk}}
++ */
++export function receiveNativeRecordFixture(source, validateOwner = () => {}) {
++    if (!registerReceivedNativeTermRecordChunk(source)) { throw new Error('Fixture is not eligible for native ownership'); }
++    const owner = new NativeTermRecordImportOwner(validateOwner);
++    const chunk = {...source};
++    const bound = owner.bind(source, chunk);
++    const lease = owner.claim(chunk);
++    if (bound === null || lease !== bound) { throw new Error('Fixture lease could not be claimed'); }
++    const plan = /** @type {NonNullable<typeof chunk.contentDedupPlan>} */ (chunk.contentDedupPlan);
++    const recordChunk = createArtifactTermRecordChunkWithResolvedContent(
++        chunk,
++        /** @type {Uint32Array} */ (chunk.contentUniqueIndexList),
++        plan.resolvedOffsets,
++        plan.resolvedLengths,
++        chunk.preparedLookupIndexes,
++    );
++    return {owner, lease, chunk, recordChunk};
++}
++
++/** @returns {{promise: Promise<void>, resolve: () => void, reject: (reason: unknown) => void}} */
++export function createNativeRecordGate() {
++    return /** @type {ReturnType<typeof createNativeRecordGate>} */ (Promise.withResolvers());
++}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "supersedesClaimsInBlobs": [
+    "ec6a8d81703db57317b029b576f8737d3ba6cc2c",
+    "4da19adcbdd55ca6184ed70b6a271038e833724f"
+  ],
+  "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "issue": "The analysis confused the 1 GiB native projected-media threshold with the separate 128 MiB exact-lookup-route threshold.",
+  "exactSource": [
+    {
+      "path": "ext/js/dictionary/term-lookup-route.js",
+      "definition": "MIN_EXACT_LOOKUP_SOURCE_BYTES = 128 * 1024 * 1024"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "method": "importDictionary",
+      "rule": "_prepareExactLookupRoute = (rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "method": "_readTermBankFileFast",
+      "rule": "prepareLookupRoute: useDirectArtifactChunkImport && this._prepareExactLookupRoute"
+    }
+  ],
+  "jmdict": {
+    "sourceBytes": 171617523,
+    "exactLookupThresholdBytes": 134217728,
+    "ordinaryPrepareLookupRoute": true
+  },
+  "cpuProfileCorrection": "The 18 buildTermLookupFilter leaf samples (15.063 ms adjacent sample wall weights) under copyWasmBackedColumnChunk are actual parser-route work, not a harness-only exclusion. The helper's prepareLookupRoute:true matches ordinary JMdict. The independent second content copy, serial parser execution, Node file shim, verification/reopen and diagnostic wrappers remain harness limitations. No new timing or acquisition occurred.",
+  "byteCensusCorrection": "The census's prepareLookupRoute:false is a diagnostic omission, so its description as exact ordinary options is withdrawn for that field. Its raw script/report remain unchanged. buildTermLookupFilter allocates an independent Uint32Array and only reads string hashes; adding that separate retained output cannot change fallback plan/sequence/flag backing aliases or their exclusive byte totals. Thus the 15,189,559 B baseline total,4,754,691 B beyond prior reuse,2,641,495 B if raw sequences retained, and20,939 negative-sequence reconstruction mismatches remain valid for the observed fields. The census is not a complete accounting of all ordinary result bytes.",
+  "decision": "No speed claim, new prototype or rerun. Keep original evidence and this explicit correction together."
+}

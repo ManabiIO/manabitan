@@ -1,0 +1,61 @@
+{
+  "schema": "manabitan.native-record-alias.independent-source-review.v1",
+  "reviewedUtc": "2026-11-28 08:18:07 UTC",
+  "reviewer": "import_history",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "productWorktree": "/home/agent/manabitan-da6c4dbd0097/raw-alias-product",
+  "frozenPatch": {
+    "blob": "6e22256f8135f9dfe2461986c81be47e7a56ac97",
+    "bytes": 94500,
+    "sha256": "4c6ed83dffff081cfd609c8a766d066ccde1e12be4ba6662b7f6e97ab3d9fe19"
+  },
+  "independentlyVerified": "All13 source hashes in alias-source-checkpoint-2.json match files at review; git diff --check passes. Checkpoint status text predates the author's subsequent successful main/test type gates and is not relabeled.",
+  "sourceSha256": {
+    "eslint.config.js": "e983437bb69b1b6c78627cb7cefbd80495e0690fdfb276a339fdccd5ee4d4b18",
+    "ext/js/dictionary/dictionary-database.js": "4050c431e3f89799a1c976460d98895fba89cbbe0d23085841b8b0bff2fe87cc",
+    "ext/js/dictionary/dictionary-importer.js": "ec9f86d571c6d9984fb95dfb479b32999b73d0eca5433c79980e6a2c75c7f12f",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "678a18d10ce31f41ea43ac9eea16b7d14a2cb867ba48a77cded69b324216e1d1",
+    "ext/js/dictionary/term-content-block-store.js": "da0321e2afdfa5843e0d5ac43ffeb718792f701e6c6a1bdd04f9f5a35b22e7c2",
+    "ext/js/dictionary/term-import-metrics.js": "aa80342fc8d6d83cc63f7f4c6d78b3ee3ade66bab12ce061127a130a36815465",
+    "test/term-bank-wasm-parser.test.js": "28fa911fec2f0692b95c2ff5311818853f9187d2bf7e581506199903323c4900",
+    "ext/js/dictionary/native-term-record-alias.js": "fdc45425a7e3b4b68429117238fc31879a4daf95267b20263b36d673fec29c06",
+    "ext/js/dictionary/native-term-record-ownership.js": "20c87ae7c12b29ae5c4c10c54010bd4758e6a1d81755bbbeefe3b507e3a85209",
+    "test/dictionary-native-record-alias-lifecycle.test.js": "cfadde1540046b8ecebf86f8db7a8cb156751abcfc2cde1762189c9df9d181f4",
+    "test/native-term-record-alias.test.js": "de911c87f0e22d1173b435f3c5f5d792d768934b5d4180efaa3d0c8cac0fb77e",
+    "test/native-term-record-ownership.test.js": "55ad98bf129f0085b932b9f7b0de2598e631eabd0dd8bacf4d697efcdd1b84cf",
+    "test/util/native-term-record-fixture.js": "12cb0a583150cdadd548884215a21f4de17bae18032403926e8a6c1b227f99a4"
+  },
+  "disposition": "No remaining concrete blocker found in the reviewed runtime/lifecycle boundary. Approval is limited to preparing the actual-product correctness replay and frozen full-browser qualification; no product performance result or merge recommendation.",
+  "protectedBoundaries": [
+    "Known native receiver records eligible transferred fixed private buffers only; borrowed/conflicting flags and caller-shaped explicit per-row columns decline. WeakMap source registration alone does not authorize aliasing: private importer owner must bind source to its spread-created sink chunk, claim one out-of-band lease and admit it once at DB entry.",
+    "The real importer retains and releases the lease around its entire private callback. Public/custom callbacks with the default null owner and generic factory-created resolved references retain old mutable fallback behavior. Identity/geometry checks are constant-size, not an assertion that arbitrary generic typed arrays are immutable.",
+    "Canonical DB-resolved tables receive a separate identity-bound ownership check. Eligibility is bounded to64 distinct canonical raw-v6 entries/64KiB, one already-selected compact family, complete native lookup map and normal post-persistence path. Early reservation path is excluded.",
+    "Every canonical raw read, alias append and final record append retains both native and DB ownership across awaits. Alias bytes are copied within the bounded group, and only a private record-offset overlay is changed; canonical dedup metadata/cache are not promoted or rewritten.",
+    "The unchanged actual record sink remains responsible for4GiB run geometry and fallback. A targeted actual-sink differential test now covers that boundary; complete maps are not trusted for generic factory callers.",
+    "Active content overlay reads can avoid flushing queued writes under the existing store path; cold read waiting is neither skipped nor relabeled. No parser buffer is recycled at lease release, because existing record caches may legitimately retain it.",
+    "DB registration occurs synchronously before the first resolver await and remains active through rollback. Finalizers close admission first. Finish joins admitted work without cancellation; abort/close cancel then join before storage mutation. Empty-owner paths do not add an await.",
+    "Purge first claims finalizing, creates its durable marker, then cancels/joins before storage mutation. A failed marker restores ACTIVE without poisoning an admitted append. Already-admitted operations may validate while DB is FINALIZING because finalization owns their join.",
+    "Late private failures survive operation settlement and force finish rollback. Operation rollback never self-joins. The resolution rollback descriptor is adopted before a post-resolution cancellation check."
+  ],
+  "concreteIssuesResolvedDuringReview": [
+    "Original extra alias write could overlap abort/close/purge cleanup because baseline had no registered append drain; the narrow native-owner registration/join fixes that race.",
+    "Post-resolution cancellation originally preceded adoption of staged metadata/dedup rollback state; adoption now happens first.",
+    "Original purge ordering cancelled appends before durable-marker success; failure could restore ACTIVE with a poisoned owner. Ordering and focused failure case are corrected."
+  ],
+  "testSourceReviewed": [
+    "Private receiver-origin/claim/rebind/close, fixed-private versus borrowed/shared/caller-shaped fallback",
+    "Real worker receiver plus _readTermBankFileFast private versus public callback ownership matrix",
+    "Bounded alias dedup/read failure/cancellation/immutable resolved identity, canonical preservation, cold-read wait and import-overlay hit",
+    "Actual record sink >4GiB split/output differential",
+    "Abort delayed read, close/purge delayed write, finish delayed record append, competing finalizers/new admission, failure before/after settlement, staged rollback cancellation, purge-marker failure/resume"
+  ],
+  "validationScope": {
+    "independentlyRun": "Read-only review, source hash comparison and diff check; no independent execution of the reported344 tests.",
+    "authorReported": "Full main/test types and344 focused/related tests pass; final scoped lint/build were underway at handoff.",
+    "unresolved": "Full exact-source CI, complete natural-offset corpus correctness and browser layout proof, prospective full-browser latency/nonregression/memory gates. The frozen component52% result does not qualify this larger production implementation."
+  },
+  "prospectiveFullBrowserPlan": {
+    "blob": "789930b794b5bfc00e61938049e2498ca59cdeb6",
+    "requiresSeparateCompleteImmutableBindingBeforeAcquisition": true
+  }
+}

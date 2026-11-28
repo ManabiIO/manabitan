@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "scope": "One fixed-source full JMdict browser import for all-worker CPU/trace diagnosis. Release production defaults, no candidate arm, no comparative timing or memory claim. Every traced elapsed value is excluded from performance promotion.",
+  "productSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "researchBranch": "perf/bounded-content-overlap-20261128-da6c4",
+  "workflowPath": ".github/workflows/jmdict-current-trace-da6c4.yml",
+  "workflowSha256": "e469471135ce931c9825a749c3de9f5f55a35a68845b15c3bab544a5ba92adb2",
+  "receiptScriptPath": "dev/perf/jmdict-current-trace-da6c4/receipt.py",
+  "receiptScriptSha256": "9b63bbb64e640b5fcef5bfe6cc8e2125dead16669debdbecbf9e4d4ee2549771",
+  "nodeVersion": "v22.22.0",
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "sourceSha256": {
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "dev/data/dictionary-wasm/manifest.json": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+    "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+    "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  "expectedProfileRoles": {
+    "parser": 3,
+    "compression": 4,
+    "import": 1
+  },
+  "acquisition": {
+    "imports": 1,
+    "runCount": 1,
+    "command": "node dev/perf/import-benchmark.js jmdict --runs 1 --trace --build-target chrome --media-check all --no-build --output builds/perf/jmdict-current-trace-dcfc-da6c4",
+    "productFlags": null,
+    "workerCountOverride": null,
+    "batchCacheCompressionThresholdChanges": null,
+    "extraPhaseProfiling": false,
+    "processSampling": false,
+    "traceCategories": "devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-v8.cpu_profiler,disabled-by-default-v8.cpu_profiler.hires,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack",
+    "traceBoundary": "Existing e2e browser-wide Tracing.start immediately before import trigger through owning import-worker completion console boundary; original harness then checks published dictionaries/lookups/storage/media.",
+    "retries": "None. Preserve setup, trace, validation or coverage failure. A future materially changed diagnostic is a distinct source/environment cohort."
+  },
+  "requiredReceipts": [
+    "Exact invoking research HEAD=GITHUB_SHA, workflow/plan/script hashes",
+    "Exact product dcfc commit and tree, tracked source/runtime/package snapshots before and after",
+    "Pinned complete JMdict ZIP size and SHA256; source lockfile fixture equality",
+    "Source-bound parser C/WASM/manifest plus installed ext/lib artifact equality",
+    "Successful original browser import/readback/media/store receipts, traceEnabled=true, authoritativeTiming=false, productionImportDefaults=true, no import flags",
+    "Exactly3 parser-worker profiles,4 compression-worker profiles,1 DB/import-worker profile with nonempty samples; all sampled node references present",
+    "Raw trace and complete source/report/control files retained even after failure",
+    "All three diagnostic control files byte-equal to git show GITHUB_SHA:path; controls unchanged after trace; actual productTree equals plan.productTree",
+    "Unchanged canonicalize_validation verifies all72 cold/warm lookups, full media, restart and storage; raw headless Chromium, skippedVerification=false, zero errors and no fallback"
+  ],
+  "analysisRules": [
+    "Group raw Profile/ProfileChunk records by(pid,id), not emitter thread alone.",
+    "Preserve negative raw deltas; reconstruct/sort timestamps for weighted interpretation instead of clamping/dropping.",
+    "Leaf sample counts and adjacent sampled wall weights do not establish exact CPU utilization or independent function duration.",
+    "Do not sum overlapping worker durations as critical-path time.",
+    "No timing from this trace may be pooled with current or historical qualification cohorts.",
+    "Missing terminal endTime on persistent-worker profiles is allowed when tracing ends before worker termination; require observed profile/sample coverage instead.",
+    "Classify parser, compression, importer, setup/readback stacks before forming an optimization hypothesis.",
+    "Stop repeated-glossary/cache/metadata/record/hash duplicates unless a distinct measured residual emerges."
+  ],
+  "background": {
+    "oldNodeProfileSource": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "oldNodeProfileEvidenceBlob": "ec6a8d81703db57317b029b576f8737d3ba6cc2c",
+    "routeThresholdCorrectionBlob": "5cf94c41ae4046d0f5fbea33fb28432f9afe3465",
+    "previousCompleteBrowserTraceExample": "798cb09f1d45294eeeb10e22d2cd3e5eac2f8079",
+    "reason": "Merged#972 changes parser encoding/scalar scan work; old profiles are background only."
+  },
+  "localExecution": "Local Chromium install previously returned403SiteUnavailable; no retry or bypass. Workflow is prepared for root publication; no PR/product change."
+}

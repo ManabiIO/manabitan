@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "sourceFiles": [
+    {
+      "path": "eslint.config.js",
+      "bytes": 39466,
+      "characters": 39466,
+      "sha256": "e983437bb69b1b6c78627cb7cefbd80495e0690fdfb276a339fdccd5ee4d4b18",
+      "gitBlobSha": "5f6fe979070f463431b8b142679958cebd516d87"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 619957,
+      "characters": 619907,
+      "sha256": "e0ef2d090de064870978344fcddd4a537087d23caf9bd353b389789d1715fb93",
+      "gitBlobSha": "05782250d9f4f52d4c7b6acdfd6d4847aa5cd8cb"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "bytes": 346604,
+      "characters": 346602,
+      "sha256": "ec9f86d571c6d9984fb95dfb479b32999b73d0eca5433c79980e6a2c75c7f12f",
+      "gitBlobSha": "dff4632a4fd8fd8a73ac1d475f63e92dcbfbd9e2"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210342,
+      "characters": 210342,
+      "sha256": "678a18d10ce31f41ea43ac9eea16b7d14a2cb867ba48a77cded69b324216e1d1",
+      "gitBlobSha": "d34bde6efd39f236b8edec98fe55a34601751d41"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "bytes": 70699,
+      "characters": 70699,
+      "sha256": "da0321e2afdfa5843e0d5ac43ffeb718792f701e6c6a1bdd04f9f5a35b22e7c2",
+      "gitBlobSha": "4f7d158a9f07c8cc73d0a02a415ac163852e9bdd"
+    },
+    {
+      "path": "ext/js/dictionary/term-import-metrics.js",
+      "bytes": 3120,
+      "characters": 3120,
+      "sha256": "aa80342fc8d6d83cc63f7f4c6d78b3ee3ade66bab12ce061127a130a36815465",
+      "gitBlobSha": "672f4677784474280d73eabd30106b466d83364b"
+    },
+    {
+      "path": "test/term-bank-wasm-parser.test.js",
+      "bytes": 201514,
+      "characters": 201457,
+      "sha256": "3ff7326bf3c80500e95f0406910b25d6a377ffe7f6d3710b6ac0d315f76af52f",
+      "gitBlobSha": "a5fd77814ee365a0a852544957b38fc3103b4534"
+    },
+    {
+      "path": "ext/js/dictionary/native-term-record-alias.js",
+      "bytes": 8735,
+      "characters": 8735,
+      "sha256": "fdc45425a7e3b4b68429117238fc31879a4daf95267b20263b36d673fec29c06",
+      "gitBlobSha": "30d3565fd8b33fe0bdb169952977f761b4cdadea"
+    },
+    {
+      "path": "ext/js/dictionary/native-term-record-ownership.js",
+      "bytes": 11668,
+      "characters": 11668,
+      "sha256": "c8aebb7cb4ee23e8def3d4f55f3614716661e612965a0fff688fb07811e94242",
+      "gitBlobSha": "3582a38478ccae4f79be97408b393caaae343810"
+    },
+    {
+      "path": "test/dictionary-native-record-alias-lifecycle.test.js",
+      "bytes": 17082,
+      "characters": 17082,
+      "sha256": "a23a72eddd933b3a5cf20b239978fcfe7d5faf225d2825f0b4b43cf24cdd68b9",
+      "gitBlobSha": "ffb1c073b40cde346c5f5061f6039d1b49395a58"
+    },
+    {
+      "path": "test/native-term-record-alias.test.js",
+      "bytes": 14124,
+      "characters": 14124,
+      "sha256": "db751540a01efda5919ee02778fb75025604e36ae4b20de99d935ec526b266e9",
+      "gitBlobSha": "a442264a3a698d3f277b838271da815e1f030f55"
+    },
+    {
+      "path": "test/native-term-record-ownership.test.js",
+      "bytes": 5347,
+      "characters": 5347,
+      "sha256": "a026142d758504db6efa0133efad18c47552184efcb575b29224b606789b2f53",
+      "gitBlobSha": "cdb9e0c30459075ed766ea82d79f19daa9a0fd6b"
+    },
+    {
+      "path": "test/util/native-term-record-fixture.js",
+      "bytes": 5086,
+      "characters": 5086,
+      "sha256": "6d54d3bb3ab84aee8bc565690c072a2bb6e5ff4d37c2d7a5be0ebeefe607aeb1",
+      "gitBlobSha": "6fb70776de3085cce3928c30415afb7b35b7fb11"
+    }
+  ],
+  "patch": {
+    "bytes": 95168,
+    "sha256": "dd752a1cb11230ec53e3f7d8fdfafe4e2529bd7c9814adf23615e06ecde62ecc"
+  },
+  "logs": [
+    {
+      "path": "alias-adapter-local.log",
+      "bytes": 3705,
+      "sha256": "9ee99ea99150b8cbfd65bd907e98ccc2b429aeb681135e0de98bb38146409230",
+      "text": "\u2714 getFile and slice metadata are lazy and preserve native File/Blob identities (21.861047ms)\n\u2714 lazy slices retain Blob range normalization and nested offsets (6.993858ms)\n\u2714 empty slices issue no payload reads (2.459629ms)\n\u2714 writable commit is staged and invalidates old File snapshots only after close (9.398946ms)\n\u2714 keepExistingData writes and seeks preserve prefix bytes and file holes (3.697966ms)\n\u2714 truncate clamps the writable cursor and preserves sequential write order (6.860961ms)\n\u2714 abort preserves the original file and releases writer ownership (4.367529ms)\n\u2714 unawaited write and seek calls remain ordered (3.377469ms)\n\u2714 exclusive ownership covers distinct handles and removal (4.582445ms)\n\u2714 synchronous handles preserve typed-view offsets, explicit positions and fsync (4.188272ms)\n\u2714 revived file handles share path locks and have independently retained receipts (7.051053ms)\n\u2714 exclusive synchronous ownership is enforced across real Node workers (171.859486ms)\n\u2714 directories, names and missing entries follow bounded handle rules (2.124894ms)\n\u2714 descriptors reject escaping paths and symbolic-link ancestors (1.84772ms)\n\u2714 lazy text and stream reads reproduce the full file bytes (3.378396ms)\n\u2714 failed writes preserve original contents and release all resources on close (2.593864ms)\n\u2714 dispose aborts uncommitted writers while preserving explicitly retained files (3.480894ms)\n\u2714 quiescence refuses parent leases and orphan lock or staging files without mutating them (3.617587ms)\nNODE_OPFS_ADAPTER_TEST_RESULT {\"complete\":true,\"scope\":\"Deterministic real Node file/worker adapter correctness only; no corpus or performance result.\",\"adapterUrl\":\"file:///home/agent/manabitan-da6c4dbd0097/alias-product-replay/archived/raw-alias-node-opfs.mjs\",\"tests\":[{\"name\":\"getFile and slice metadata are lazy and preserve native File/Blob identities\",\"passed\":true},{\"name\":\"lazy slices retain Blob range normalization and nested offsets\",\"passed\":true},{\"name\":\"empty slices issue no payload reads\",\"passed\":true},{\"name\":\"writable commit is staged and invalidates old File snapshots only after close\",\"passed\":true},{\"name\":\"keepExistingData writes and seeks preserve prefix bytes and file holes\",\"passed\":true},{\"name\":\"truncate clamps the writable cursor and preserves sequential write order\",\"passed\":true},{\"name\":\"abort preserves the original file and releases writer ownership\",\"passed\":true},{\"name\":\"unawaited write and seek calls remain ordered\",\"passed\":true},{\"name\":\"exclusive ownership covers distinct handles and removal\",\"passed\":true},{\"name\":\"synchronous handles preserve typed-view offsets, explicit positions and fsync\",\"passed\":true},{\"name\":\"revived file handles share path locks and have independently retained receipts\",\"passed\":true},{\"name\":\"exclusive synchronous ownership is enforced across real Node workers\",\"passed\":true},{\"name\":\"directories, names and missing entries follow bounded handle rules\",\"passed\":true},{\"name\":\"descriptors reject escaping paths and symbolic-link ancestors\",\"passed\":true},{\"name\":\"lazy text and stream reads reproduce the full file bytes\",\"passed\":true},{\"name\":\"failed writes preserve original contents and release all resources on close\",\"passed\":true},{\"name\":\"dispose aborts uncommitted writers while preserving explicitly retained files\",\"passed\":true},{\"name\":\"quiescence refuses parent leases and orphan lock or staging files without mutating them\",\"passed\":true}],\"receiptMeaning\":\"read-call/write-call counters are observed Node API invocations, not measured kernel syscall counts.\"}\n\u2139 tests 18\n\u2139 suites 0\n\u2139 pass 18\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 279.251517\n"
+    },
+    {
+      "path": "alias-build-final.log",
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "text": "Version: 0.0.0.0...\nBuilding chrome...\n\nBuilding chrome-dev...\n\nBuilding chrome-playwright...\n\nBuilding firefox...\n\nBuilding firefox-dev...\n\nBuilding firefox-android...\n\nBuilding edge...\n\nRestoring manifest...\n"
+    },
+    {
+      "path": "alias-build-libs.log",
+      "bytes": 210,
+      "sha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d",
+      "text": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 build:libs\n> node ./dev/bin/build-libs.js\n\n"
+    },
+    {
+      "path": "alias-eslint-final-fixed.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "text": "\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n"
+    },
+    {
+      "path": "alias-eslint-final.log",
+      "bytes": 10744,
+      "sha256": "5618dc2d708e0588589d87283ae4c3aa552b94a41f2375f48357aa2baf0fbe43",
+      "text": "\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/ext/js/dictionary/dictionary-database.js\n  8754:26  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  8754:33  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/ext/js/dictionary/native-term-record-ownership.js\n   45:1   error  Expected indentation of 4 spaces                                             @stylistic/indent-binary-ops\n   65:54  error  Use `.length > 0` when checking length is not zero                           unicorn/explicit-length-check\n   66:51  error  Use `.length > 0` when checking length is not zero                           unicorn/explicit-length-check\n   85:28  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   85:48  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   85:72  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   86:43  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   86:60  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   87:38  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n  175:26  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  175:34  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  176:43  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  177:29  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  177:46  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  240:1   error  Expected indentation of 4 spaces                                             @stylistic/indent-binary-ops\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/dictionary-native-record-alias-lifecycle.test.js\n   50:46  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   51:34  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   51:60  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   52:40  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   52:71  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   53:36  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   53:70  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   54:45  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   54:68  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   55:39  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   78:56  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   79:46  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   79:66  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   80:24  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   80:39  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   80:54  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   80:70  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  116:62  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  117:49  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/native-term-record-alias.test.js\n   47:20  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   47:35  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   47:50  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   47:66  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   62:44  error  Unexpected newline after '('                                                 @stylistic/function-paren-newline\n   64:5   error  Unexpected newline before ')'                                                @stylistic/function-paren-newline\n  218:13  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  218:33  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  218:54  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  218:69  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  218:96  error  There should be no line break here                                           @stylistic/function-call-argument-newline\n  244:13  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  244:33  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  244:54  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  244:69  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  244:96  error  There should be no line break here                                           @stylistic/function-call-argument-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/native-term-record-ownership.test.js\n  57:61  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/term-bank-wasm-parser.test.js\n  1733:41  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1733:57  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1733:84  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1734:69  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1754:17  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1754:19  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1754:20  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1754:39  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1754:40  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1754:46  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1754:47  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1754:53  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1754:54  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1754:59  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1766:17  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1766:22  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1766:23  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1766:29  error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/util/native-term-record-fixture.js\n  64:60  error  Arrow function used ambiguously with a conditional expression  @stylistic/no-confusing-arrow\n\n\u2716 72 problems (72 errors, 0 warnings)\n  72 errors and 0 warnings potentially fixable with the `--fix` option.\n\n"
+    },
+    {
+      "path": "alias-eslint-first.log",
+      "bytes": 12705,
+      "sha256": "618ef125815c4aeb7e25da75e183e15fb2809b00e7b0bcc50e91924dfe279c62",
+      "text": "\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/ext/js/dictionary/dictionary-database.js\n  8720:5   error  Missing JSDoc @throws declaration                                                       jsdoc/require-throws\n  8741:43  error  Unsafe argument of type `Promise<any>` assigned to a parameter of type `Promise<void>`  @typescript-eslint/no-unsafe-argument\n  8746:52  error  Unsafe argument of type `Promise<any>` assigned to a parameter of type `Promise<void>`  @typescript-eslint/no-unsafe-argument\n  8751:26  error  Object properties must go on a new line if they aren't all on the same line             @stylistic/object-property-newline\n  8751:33  error  Object properties must go on a new line if they aren't all on the same line             @stylistic/object-property-newline\n  8753:59  error  Unsafe argument of type `Promise<any>` assigned to a parameter of type `Promise<void>`  @typescript-eslint/no-unsafe-argument\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/ext/js/dictionary/native-term-record-ownership.js\n   45:1   error  Expected indentation of 4 spaces                                             @stylistic/indent-binary-ops\n   65:54  error  Use `.length > 0` when checking length is not zero                           unicorn/explicit-length-check\n   66:51  error  Use `.length > 0` when checking length is not zero                           unicorn/explicit-length-check\n   85:28  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   85:48  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   85:72  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   86:43  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   86:60  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n   87:38  error  There should be a linebreak after this element                               @stylistic/array-element-newline\n  175:26  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  175:34  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  176:43  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  177:29  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  177:46  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  240:1   error  Expected indentation of 4 spaces                                             @stylistic/indent-binary-ops\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/dictionary-native-record-alias-lifecycle.test.js\n   20:1    error  Missing JSDoc @returns type                                                  jsdoc/require-returns-type\n   34:46   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   35:34   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   35:60   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   36:40   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   36:71   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   37:36   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   37:70   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   38:45   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   38:68   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   39:39   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   62:56   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   63:46   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   63:66   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   64:24   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   64:39   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   64:54   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   64:70   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  101:62   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  102:49   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  116:115  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line\n  126:54   error  Prefer the spread operator over `Array#slice()`                              unicorn/prefer-spread\n  128:15   error  Array destructuring may not contain consecutive ignored values               unicorn/no-unreadable-array-destructuring\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/native-term-record-alias.test.js\n   19:1    error  Missing JSDoc @returns type                                                  jsdoc/require-returns-type\n   33:20   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   33:35   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   33:50   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   33:66   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n   48:44   error  Unexpected newline after '('                                                 @stylistic/function-paren-newline\n   50:5    error  Unexpected newline before ')'                                                @stylistic/function-paren-newline\n   56:63   error  Prefer the spread operator over `Array#slice()`                              unicorn/prefer-spread\n   91:107  error  Prefer the spread operator over `Array#slice()`                              unicorn/prefer-spread\n  123:79   error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line\n  143:69   error  Prefer the spread operator over `Array#slice()`                              unicorn/prefer-spread\n  201:13   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  201:33   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  201:54   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  201:69   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  201:96   error  There should be no line break here                                           @stylistic/function-call-argument-newline\n  227:13   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  227:33   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  227:54   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  227:69   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  227:96   error  There should be no line break here                                           @stylistic/function-call-argument-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/native-term-record-ownership.test.js\n  57:61  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread\n  75:49  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/term-bank-wasm-parser.test.js\n  1727:110  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line\n  1730:41   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1730:57   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1730:84   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1731:69   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline\n  1751:17   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1751:19   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1751:20   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1751:39   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1751:40   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1751:46   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1751:47   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1751:53   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1751:54   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1751:59   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1763:17   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1763:22   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n  1763:23   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline\n  1763:29   error  There should be a line break after this argument                             @stylistic/function-call-argument-newline\n\n/home/agent/manabitan-da6c4dbd0097/raw-alias-product/test/util/native-term-record-fixture.js\n  64:60  error  Arrow function used ambiguously with a conditional expression  @stylistic/no-confusing-arrow\n\n\u2716 87 problems (87 errors, 0 warnings)\n  77 errors and 0 warnings potentially fixable with the `--fix` option.\n\n"
+    },
+    {
+      "path": "alias-eslint-fixed.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "text": "\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n"
+    },
+    {
+      "path": "alias-eslint-owned-copy.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "text": "\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n"
+    },
+    {
+      "path": "alias-focused-final.log",
+      "bytes": 243,
+      "sha256": "0be46325c18235baab80ee22b3d1a995b5ad010f139d0b523aab9db337b1abbd",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  8 passed (8)\n      Tests  344 passed (344)\n   Start at  03:12:51\n   Duration  6.80s (transform 3.74s, setup 148ms, import 6.84s, tests 4.23s, environment 1ms)\n\n"
+    },
+    {
+      "path": "alias-focused-poststyle.log",
+      "bytes": 243,
+      "sha256": "d1a6a1985333a5bd7720b5c69f5b56107b376d07fd1f12c91ad2dbc358333a62",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  8 passed (8)\n      Tests  344 passed (344)\n   Start at  03:16:11\n   Duration  5.13s (transform 2.44s, setup 129ms, import 4.50s, tests 3.28s, environment 1ms)\n\n"
+    },
+    {
+      "path": "alias-lifecycle-first.log",
+      "bytes": 242,
+      "sha256": "7364a52713ec350e97a82ae09aae8679342f4ae375bbf95885438b360a75f068",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  5 passed (5)\n      Tests  115 passed (115)\n   Start at  02:51:40\n   Duration  2.71s (transform 708ms, setup 48ms, import 1.43s, tests 448ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "alias-ownership-test-first.log",
+      "bytes": 239,
+      "sha256": "41d07972c5e9ec10f3055e7c0a8fd9d332795c2dfbf9e38717af95f443f7c555",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  1 passed (1)\n      Tests  14 passed (14)\n   Start at  02:47:38\n   Duration  621ms (transform 397ms, setup 26ms, import 435ms, tests 12ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "alias-receiver-first.log",
+      "bytes": 242,
+      "sha256": "be39f3a85a21fef3c3cc3946aaaf89a37d4e04792899d3dd5eafcfa6b2c91eac",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  2 passed (2)\n      Tests  213 passed (213)\n   Start at  02:54:38\n   Duration  4.35s (transform 1.27s, setup 34ms, import 1.64s, tests 2.21s, environment 0ms)\n\n"
+    },
+    {
+      "path": "alias-test-types-capped-node.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    {
+      "path": "alias-test-types-capped.log",
+      "bytes": 60,
+      "sha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548",
+      "text": "/bin/bash: line 1: /usr/bin/time: No such file or directory\n"
+    },
+    {
+      "path": "alias-test-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    {
+      "path": "alias-test-types-first.log",
+      "bytes": 2526,
+      "sha256": "c4956787ed03fa2e19c5acca4044333eaf0fd519c3910641d2c5d7eeb3c07605",
+      "text": "test/chromium/import-flags-ab-benchmark.js(24,38): error TS2307: Cannot find module '../../dev/perf/dictionary-fixtures.js' or its corresponding type declarations.\ntest/chromium/import-flags-ab-benchmark.js(25,180): error TS2307: Cannot find module '../../dev/perf/benchmark-support.js' or its corresponding type declarations.\ntest/dictionary-native-record-alias-lifecycle.test.js(125,15): error TS2488: Type 'never' must have a '[Symbol.iterator]()' method that returns an iterator.\ntest/dictionary-native-record-alias-lifecycle.test.js(127,28): error TS2339: Property 'preparedLookupIndexes' does not exist on type 'never'.\ntest/dictionary-native-record-alias-lifecycle.test.js(128,28): error TS2339: Property 'resolvedContentReferences' does not exist on type 'never'.\ntest/import-media-validation.test.js(9,36): error TS2307: Cannot find module '../dev/perf/import-media-validation.js' or its corresponding type declarations.\ntest/import-media-validation.test.js(55,82): error TS7006: Parameter 'paths' implicitly has an 'any' type.\ntest/import-media-validation.test.js(62,72): error TS7006: Parameter 'paths' implicitly has an 'any' type.\ntest/import-media-validation.test.js(103,75): error TS7006: Parameter 'paths' implicitly has an 'any' type.\ntest/perf-benchmark-support.test.js(25,149): error TS2307: Cannot find module '../dev/perf/benchmark-support.js' or its corresponding type declarations.\ntest/perf-benchmark-support.test.js(26,120): error TS2307: Cannot find module '../dev/perf/dictionary-fixtures.js' or its corresponding type declarations.\ntest/perf-benchmark-support.test.js(388,95): error TS2307: Cannot find module '../dev/perf/dictionary-fixtures.js' or its corresponding type declarations.\ntest/perf-experiment-receipts.test.js(6,35): error TS2307: Cannot find module '../dev/perf/benchmark-support.js' or its corresponding type declarations.\ntest/perf-experiment-receipts.test.js(7,38): error TS2307: Cannot find module '../dev/perf/dictionary-fixtures.js' or its corresponding type declarations.\ntest/perf-import-experiment-evidence.test.js(24,35): error TS2307: Cannot find module '../dev/perf/benchmark-support.js' or its corresponding type declarations.\ntest/perf-import-experiment-evidence.test.js(25,38): error TS2307: Cannot find module '../dev/perf/dictionary-fixtures.js' or its corresponding type declarations.\ntest/util/native-term-record-fixture.js(76,80): error TS2304: Cannot find name 'source'.\ntest/util/native-term-record-fixture.js(76,108): error TS2304: Cannot find name 'source'.\n"
+    },
+    {
+      "path": "alias-test-types-fourth.log",
+      "bytes": 1864,
+      "sha256": "408ced0df243e7355808a35df749d88daf84510b60200a52ec9401d34e1719d0",
+      "text": "test/dictionary-native-record-alias-lifecycle.test.js(68,11): error TS2322: Type 'Mock<(_chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, _offsets: number[] | ... 1 more ... | Float64Array<...>, _lengths: ...' is not assignable to type 'Mock<(chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, conte...'.\n  Type 'Mock<(_chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, _offsets: number[] | ... 1 more ... | Float64Array<...>, _lengths: ...' is not assignable to type '{ (chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, contentL...'.\n    Types of parameters 'args' and 'chunk' are incompatible.\n      Type '[chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, contentLen...' is not assignable to type 'never'.\n"
+    },
+    {
+      "path": "alias-test-types-second.log",
+      "bytes": 651,
+      "sha256": "6adba579ea1cfb1fe25b28800ab5b0700147441f58fad4cb5436256ed7d4ae00",
+      "text": "test/dictionary-native-record-alias-lifecycle.test.js(125,15): error TS2488: Type 'never' must have a '[Symbol.iterator]()' method that returns an iterator.\ntest/dictionary-native-record-alias-lifecycle.test.js(127,28): error TS2339: Property 'preparedLookupIndexes' does not exist on type 'never'.\ntest/dictionary-native-record-alias-lifecycle.test.js(128,28): error TS2339: Property 'resolvedContentReferences' does not exist on type 'never'.\ntest/native-term-record-alias.test.js(184,54): error TS2533: Object is possibly 'null' or 'undefined'.\ntest/native-term-record-alias.test.js(184,80): error TS2533: Object is possibly 'null' or 'undefined'.\n"
+    },
+    {
+      "path": "alias-test-types-third.log",
+      "bytes": 1864,
+      "sha256": "277b96f53a201912533bc595b53138e0106356b52d4de101870ec9d7446048e6",
+      "text": "test/dictionary-native-record-alias-lifecycle.test.js(68,11): error TS2322: Type 'Mock<(_chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, _offsets: Float64Array<...>, _lengths: Uint32Array<...>, _names: st...' is not assignable to type 'Mock<(chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, conte...'.\n  Type 'Mock<(_chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, _offsets: Float64Array<...>, _lengths: Uint32Array<...>, _names: st...' is not assignable to type '{ (chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, contentL...'.\n    Types of parameters 'args' and 'chunk' are incompatible.\n      Type '[chunk: { dictionary: string; rowCount: number; dictionaryTotalRows?: number | undefined; expressionBytesList: Uint8Array<ArrayBufferLike>[]; readingBytesList: Uint8Array<...>[]; ... 7 more ...; preparedLookupIndexes?: Map<...> | undefined; }, contentOffsets: number[] | ... 1 more ... | Float64Array<...>, contentLen...' is not assignable to type 'never'.\n"
+    },
+    {
+      "path": "alias-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    {
+      "path": "alias-types-first.log",
+      "bytes": 2630,
+      "sha256": "5039642ae61bb8c8de294df60e4c041f0d649110a3f0ef24f56640612fc96460",
+      "text": "ext/js/comm/yomitan-api.js(18,25): error TS2307: Cannot find module '../../lib/linkedom.js' or its corresponding type declarations.\next/js/comm/yomitan-api.js(233,25): error TS2578: Unused '@ts-expect-error' directive.\next/js/comm/yomitan-api.js(235,25): error TS2578: Unused '@ts-expect-error' directive.\next/js/dictionary/dictionary-importer.js(28,8): error TS2307: Cannot find module '../../lib/zip.js' or its corresponding type declarations.\next/js/dictionary/dictionary-importer.js(50,44): error TS2307: Cannot find module '../../lib/zstd-wasm.js' or its corresponding type declarations.\next/js/dictionary/dictionary-media-renderer.js(18,31): error TS2307: Cannot find module '../../lib/resvg-wasm.js' or its corresponding type declarations.\next/js/dictionary/mdx/mdx-converter.js(22,8): error TS2307: Cannot find module '../../../lib/zip.js' or its corresponding type declarations.\next/js/dictionary/mdx/mdx-converter.js(23,25): error TS2307: Cannot find module '../../../lib/parse5.js' or its corresponding type declarations.\next/js/dictionary/sqlite-wasm.js(18,31): error TS2307: Cannot find module '../../lib/sqlite/index.mjs' or its corresponding type declarations.\next/js/dictionary/zstd-term-content.js(31,8): error TS2307: Cannot find module '../../lib/zstd-wasm.js' or its corresponding type declarations.\next/js/dom/simple-dom-parser.js(19,25): error TS2307: Cannot find module '../../lib/parse5.js' or its corresponding type declarations.\next/js/dom/simple-dom-parser.js(30,9): error TS2578: Unused '@ts-expect-error' directive.\next/js/language/ja/japanese-text-preprocessors.js(18,31): error TS2307: Cannot find module '../../../lib/kanji-processor.js' or its corresponding type declarations.\next/js/language/ko/korean-text-processors.js(18,22): error TS2307: Cannot find module '../../../lib/hangul-js.js' or its corresponding type declarations.\next/js/pages/settings/dictionary-controller.js(19,30): error TS2307: Cannot find module '../../../lib/validate-schemas.js' or its corresponding type declarations.\next/js/templates/anki-template-renderer.js(19,26): error TS2307: Cannot find module '../../lib/handlebars.js' or its corresponding type declarations.\next/js/templates/anki-template-renderer.js(20,26): error TS2307: Cannot find module '../../lib/linkedom.js' or its corresponding type declarations.\next/js/templates/template-renderer-media-provider.js(19,26): error TS2307: Cannot find module '../../lib/handlebars.js' or its corresponding type declarations.\next/js/templates/template-renderer.js(19,26): error TS2307: Cannot find module '../../lib/handlebars.js' or its corresponding type declarations.\n"
+    },
+    {
+      "path": "alias-types-second.log",
+      "bytes": 411,
+      "sha256": "5531fea5db5d66f0654afa3666cb970a0f67cd2c9f0e0538372b69e306d88291",
+      "text": "ext/js/dictionary/native-term-record-ownership.js(86,77): error TS2339: Property 'routeFilter' does not exist on type '{ bytes: Uint8Array<ArrayBufferLike>; preinternedPlan: PreinternedTermRecordPlan; }'.\next/js/dictionary/native-term-record-ownership.js(113,31): error TS2339: Property 'routeFilter' does not exist on type '{ bytes: Uint8Array<ArrayBufferLike>; preinternedPlan: PreinternedTermRecordPlan; }'.\n"
+    },
+    {
+      "path": "alias-unit-first.log",
+      "bytes": 1086,
+      "sha256": "f51b98cfadb15b723a1e7b81527e3eba20c25fb30c1d09079a52f582885b7463",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n \u276f test/native-term-record-alias.test.js (21 tests | 1 failed) 28ms\n     \u00d7 includes a cold canonical-read wait before starting the alias append 4ms\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af\n\n FAIL  test/native-term-record-alias.test.js > bounded native term-record aliases > includes a cold canonical-read wait before starting the alias append\nAssertionError: expected \"ensureLoadedForRead\" to be called once, but got 0 times\n \u276f test/native-term-record-alias.test.js:199:22\n    197|         );\n    198|         await Promise.resolve();\n    199|         expect(load).toHaveBeenCalledOnce();\n       |                      ^\n    200|         expect(fixture.append).not.toHaveBeenCalled();\n    201|         gate.resolve();\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/1]\u23af\n\n\n Test Files  1 failed | 1 passed (2)\n      Tests  1 failed | 34 passed (35)\n   Start at  02:48:44\n   Duration  863ms (transform 371ms, setup 32ms, import 495ms, tests 42ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "alias-unit-second.log",
+      "bytes": 239,
+      "sha256": "e22edfd613462c23e088d0a685973413ebd4dafff639b653571ecd476088b83b",
+      "text": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/raw-alias-product\n\n\n Test Files  2 passed (2)\n      Tests  35 passed (35)\n   Start at  02:49:49\n   Duration  830ms (transform 362ms, setup 28ms, import 481ms, tests 40ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "alias-vndb-restore.log",
+      "bytes": 2157,
+      "sha256": "134c0d8e4ffd2cb0364af6265a32609f482ac901f2b2a7c16c133509a6b82f52",
+      "text": "{\"paths\":{\"vndb\":\"/home/agent/manabitan-da6c4dbd0097/fixtures/vndb_characters_by_bee.zip\"},\"fixtures\":{\"jmdict\":{\"label\":\"JMdict\",\"cacheFile\":\"JMdict.zip\",\"release\":\"2026-11-22\",\"url\":\"https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip\",\"sha256\":\"3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f\",\"sizeBytes\":15645766,\"expectedTitle\":\"JMdict [2026-11-22]\",\"revision\":\"JMdict.2026-11-22\",\"termRows\":528299,\"mediaFiles\":0,\"mediaBytes\":0},\"jmnedict\":{\"label\":\"JMnedict\",\"cacheFile\":\"JMnedict.zip\",\"release\":\"2026-09-06\",\"url\":\"https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip\",\"sha256\":\"d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12\",\"sizeBytes\":11432315,\"expectedTitle\":\"JMnedict [2026-09-06]\",\"revision\":\"JMnedict.2026-09-06\",\"termRows\":667942},\"jitendex\":{\"label\":\"Jitendex\",\"cacheFile\":\"jitendex-yomitan.zip\",\"release\":\"2026.10.03.0\",\"url\":\"https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip\",\"sha256\":\"e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356\",\"sizeBytes\":38831822,\"expectedTitle\":\"Jitendex.org [2026-10-03]\",\"revision\":\"2026.10.03.0\",\"termRows\":436555,\"mediaFiles\":236,\"mediaBytes\":4992155,\"unreferencedMediaPaths\":[\"jitendex/HanaMinA/05167.svg\",\"jitendex/HanaMinA/05641.svg\",\"jitendex/HanaMinA/0576b.svg\",\"jitendex/HanaMinA/05bda.svg\",\"jitendex/HanaMinA/06207.svg\",\"jitendex/HanaMinA/07055.svg\",\"jitendex/HanaMinA/07575.svg\",\"jitendex/HanaMinA/076a5.svg\",\"jitendex/HanaMinA/0793d.svg\",\"jitendex/HanaMinA/080ed.svg\",\"jitendex/HanaMinA/09093.svg\",\"jitendex/HanaMinA/09c81.svg\",\"jitendex/HanaMinA/20bb7.svg\"]},\"vndb\":{\"label\":\"VNDB\",\"cacheFile\":\"vndb_characters_by_bee.zip\",\"release\":\"1.0.0\",\"url\":\"https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip\",\"sha256\":\"da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792\",\"sizeBytes\":291705969,\"expectedTitle\":\"VNDB Characters by Bee\",\"revision\":\"395525135651\",\"termRows\":6648310,\"mediaFiles\":146570,\"mediaBytes\":188131284,\"mediaRows\":146570,\"optional\":true}}}\n"
+    }
+  ],
+  "observedResults": {
+    "mainTypes": {
+      "exitCode": 0,
+      "log": "alias-types-final.log",
+      "note": "Before formatting-only runtime changes"
+    },
+    "testTypesUncapped": {
+      "exitCode": 137,
+      "log": "alias-test-types-final.log",
+      "note": "Process killed without diagnostics; stderr tool receipt retained in session; empty redirected log remains exact"
+    },
+    "resourceReporterUnavailable": {
+      "exitCode": 127,
+      "log": "alias-test-types-capped.log"
+    },
+    "testTypesHeapCapped": {
+      "exitCode": 0,
+      "heapMiB": 1536,
+      "log": "alias-test-types-capped-node.log",
+      "note": "Before formatting and same-type structuredClone test-copy edit"
+    },
+    "focusedPostStyle": {
+      "exitCode": 0,
+      "files": 8,
+      "tests": 344,
+      "maxWorkers": 2,
+      "log": "alias-focused-poststyle.log"
+    },
+    "scopedLint": {
+      "exitCode": 0,
+      "files": 13,
+      "log": "alias-eslint-final-fixed.log",
+      "note": "All13 sources after autofix; ownership test-copy follow-up checked separately"
+    },
+    "ownershipCopyLint": {
+      "exitCode": 0,
+      "log": "alias-eslint-owned-copy.log"
+    },
+    "dryRunBuild": {
+      "exitCode": 0,
+      "log": "alias-build-final.log"
+    },
+    "lazyNodeAdapter": {
+      "exitCode": 0,
+      "cases": 18,
+      "log": "alias-adapter-local.log"
+    }
+  },
+  "remaining": [
+    "full exact-source unit/static CI",
+    "natural-offset full term-storage A/B proof",
+    "product performance qualification",
+    "whole-browser ordinary import, restart and lookup qualification"
+  ]
+}

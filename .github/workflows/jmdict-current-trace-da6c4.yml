@@ -1,0 +1,129 @@
+name: Current JMdict worker trace (dcfc-da6c4)
+
+on:
+  push:
+    branches: [perf/bounded-content-overlap-20261128-da6c4]
+    paths:
+      - .github/workflows/jmdict-current-trace-da6c4.yml
+      - dev/perf/jmdict-current-trace-da6c4/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    name: Frozen JMdict parser and compression trace
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: product
+        shell: bash
+    env:
+      PROFILE_OUTPUT: builds/perf/jmdict-current-trace-dcfc-da6c4
+      MANABITAN_CHROMIUM_BROWSER: chromium
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+    steps:
+      - name: Check out the exact invoking diagnostic controls
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: research
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/jmdict-current-trace-da6c4.yml
+            dev/perf/jmdict-current-trace-da6c4
+
+      - name: Check out the exact current product source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+          path: product
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+          cache-dependency-path: product/package-lock.json
+
+      - name: Install the locked source dependencies
+        run: npm ci
+
+      - name: Build source-bound libraries and license page
+        run: |
+          set -euo pipefail
+          npm run build:libs
+          npm run license-report:html
+
+      - name: Install the locked Chromium runtime
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore the checksum-pinned dictionary cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: product/builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('product/test/perf/dictionaries.lock.json') }}
+
+      - name: Verify the original complete JMdict corpus
+        run: node dev/perf/prepare-dictionaries.js jmdict
+
+      - name: Build the exact release package before the identity snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROFILE_OUTPUT"
+          node dev/bin/build.js --target chrome 2>&1 | tee "$PROFILE_OUTPUT/build.log"
+
+      - name: Verify source, runtime, plan and complete input identity
+        run: python3 ../research/dev/perf/jmdict-current-trace-da6c4/receipt.py before
+
+      - name: Capture one ordinary-default full import with all-worker tracing
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js jmdict \
+            --runs 1 --trace --build-target chrome --media-check all --no-build \
+            --output "$PROFILE_OUTPUT" 2>&1 | tee "$PROFILE_OUTPUT/run.log"
+
+      - name: Guard source and runtime identity after the diagnostic
+        if: always()
+        run: python3 ../research/dev/perf/jmdict-current-trace-da6c4/receipt.py after
+
+      - name: Verify full import receipts and all required worker profiles
+        if: always()
+        run: python3 ../research/dev/perf/jmdict-current-trace-da6c4/receipt.py coverage
+
+      - name: Print setup and trace outcomes even after failure
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          out = pathlib.Path(os.environ['PROFILE_OUTPUT'])
+          for name in ['before-receipt.json', 'after-receipt.json', 'coverage-receipt.json']:
+              path = out / name
+              if path.exists():
+                  data = json.loads(path.read_text())
+                  compact = {key: value for key, value in data.items() if key not in ['tracked', 'runtime', 'validation', 'profiles']}
+                  print('CURRENT_JMDICT_TRACE_OUTCOME ' + json.dumps(compact, separators=(',', ':')))
+              else:
+                  print('CURRENT_JMDICT_TRACE_OUTCOME ' + json.dumps({'complete': False, 'missingReceipt': name, 'scope': 'Diagnostic only; preserve setup/acquisition failure without rerun'}))
+          PY
+
+      - name: Preserve every trace, source receipt, report and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-current-trace-dcfc-da6c4-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            product/builds/perf/jmdict-current-trace-dcfc-da6c4
+            product/builds/manabitan-chrome.zip
+            research/.github/workflows/jmdict-current-trace-da6c4.yml
+            research/dev/perf/jmdict-current-trace-da6c4
+          if-no-files-found: warn
+          retention-days: 30
