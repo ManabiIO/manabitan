@@ -1,0 +1,38 @@
+{
+  "runId": 46128439514,
+  "runAttempt": 1,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "dictionary": "vndb",
+  "artifactId": 15257973100,
+  "jobId": 140930868544,
+  "originalOuterSha256": "b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+  "originalOuterBytes": 35848763,
+  "originalOuterPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb.zip",
+  "completeOriginalCensusSha256": "26611cf4d9498bb4892a1d8008509707de0aadd65f985a5030a290b257fcbc24",
+  "independentAuditSha256": "5e87785ae4692313cfcf8ae21cbc702a449ace91924007c737cc9104eab17bf2",
+  "retentionHelperSha256": "2fd6e13344a30988abf6437ef3c5f86fc224de45c4bf0075fe9924334a51a89d",
+  "mode": "all-original-member-bytes-except-listed-reproducible-package-zips",
+  "byteAuditComplete": true,
+  "memoryPassed": false,
+  "retainedPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-original-members-without-packages.zip",
+  "retainedArchiveSha256": "1da25a0d03d314d3583c6a5e96c10d04af8cd731be4e8a471f9a00c167738baf",
+  "retainedArchiveBytes": 2421230,
+  "retainedMemberCount": 315,
+  "omittedOriginalMembers": [
+    {
+      "name": "package-A.zip",
+      "bytes": 16806965,
+      "sha256": "1f7fd108fcb43ea20c620d3ede8248fefda973bf00462cb58c621aedf6256715",
+      "compressedBytes": 16730701,
+      "zipCrc32": 3420352555
+    },
+    {
+      "name": "package-B.zip",
+      "bytes": 16813344,
+      "sha256": "8fb4a36084814c8518ba0a429da543543920f7e3a515c6a16816b27f68d95330",
+      "compressedBytes": 16737167,
+      "zipCrc32": 642729397
+    }
+  ],
+  "limitations": "This is a reconstructed ZIP, not the original outer archive. Every original member byte except exact package-A.zip and package-B.zip is retained, including the original CI audit; ZIP container metadata is normalized. The complete original census and outer SHA256/size are retained separately. The full frozen byte audit completed before omission, independently of the memory gate. A complete package/byte re-audit requires the original package ZIPs; the full original artifact and packages remain locally available. Local audit and derived analysis outputs are separate, not substituted for original members."
+}

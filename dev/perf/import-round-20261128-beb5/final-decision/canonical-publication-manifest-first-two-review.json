@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "scope": "Local-byte to proposed publication manifest identities and path completeness for the two listed completed corpora. Remote Git blob content readback remains owned by root.",
+  "manifestPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/blob-manifest-first-two.json",
+  "manifestSha256": "be5f670f656f4835cc76f3561b7560050c2f6278924e2a6124838e99e7b18011",
+  "filesVerified": 28,
+  "allSha256AndGitBlobIdsMatch": true,
+  "uniquePathsUnderExpectedPrefix": true,
+  "pendingVndbExplicit": true
+}

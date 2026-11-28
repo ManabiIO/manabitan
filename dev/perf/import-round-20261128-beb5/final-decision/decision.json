@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "recommendation": "No product performance PR for either current candidate; retain both as held research.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "independentArithmetic": {
+    "path": "/tmp/manabitan-beb5/final-candidate-decision/recomputed-inputs.json",
+    "bytes": 117656,
+    "sha256": "54ee8687ef06252e67f8b29bd65f625bcbc8e87b2f6ee27838e7179be3e7cd0a",
+    "repositoryRelativePath": "recomputed-inputs.json"
+  },
+  "arithmeticSource": {
+    "path": "/tmp/manabitan-beb5/final-candidate-decision/recompute.py",
+    "bytes": 9233,
+    "sha256": "befe00d118a6f3ce42eff98c29791cd47af27a6c5aac222ff75a96bef16955b7",
+    "repositoryRelativePath": "recompute.py"
+  },
+  "candidateDecisions": {
+    "crc": {
+      "runtime": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+      "tree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+      "study": "477fb271ef25fac533fb1faf737a5dab898190e3",
+      "run": 46127721419,
+      "startOrder": "AB",
+      "status": "HOLD",
+      "productPrRecommended": false,
+      "corpora": {
+        "jmdict": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/crc-jmdict/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/crc/jmdict/local-independent-audit.json",
+            "sha256": "d0f879aa41483004700266c2e2776d79f6c8b5262c022fe5b342e67b9d63e912",
+            "bytes": 208851
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": 1.6280512941452052,
+              "equalWorkChangePercent": -0.49559323849881487,
+              "fasterPairs": 4,
+              "medianPairedDifferenceMs": 14.899999999965075,
+              "meanPairedDifferenceMs": -4.624999999980598,
+              "sumPairedDifferenceMs": -55.49999999976717,
+              "minimumPairedDifferenceMs": -199.09999999997672,
+              "maximumPairedDifferenceMs": 30.599999999976717,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -0.5248010078547694,
+                2.8497667296151885
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": 0.4825840564576467,
+              "equalWorkChangePercent": 0.7410863777313148,
+              "fasterPairs": 1,
+              "medianPairedDifferenceMs": 4.349999999976717,
+              "meanPairedDifferenceMs": 6.749999999970896,
+              "sumPairedDifferenceMs": 26.999999999883585,
+              "minimumPairedDifferenceMs": -8.100000000093132,
+              "maximumPairedDifferenceMs": 26.400000000023283,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -0.8709677419454942,
+                2.9142289435948765
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "parserSourceInflateMs",
+              "count": 12,
+              "medianPairedChangePercent": 10.13497164716739,
+              "equalWorkChangePercent": 6.207264957291225,
+              "fasterPairs": 4,
+              "medianPairedDifferenceMs": 37.40000000008149,
+              "meanPairedDifferenceMs": 24.208333333430346,
+              "sumPairedDifferenceMs": 290.50000000116415,
+              "minimumPairedDifferenceMs": -43.79999999993015,
+              "maximumPairedDifferenceMs": 86.4000000001397,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -3.92643089714374,
+                15.615216147288535
+              ]
+            },
+            "control": {
+              "metric": "parserSourceInflateMs",
+              "count": 4,
+              "medianPairedChangePercent": 4.637823993722123,
+              "equalWorkChangePercent": 6.119869620194374,
+              "fasterPairs": 1,
+              "medianPairedDifferenceMs": 17.20000000006985,
+              "meanPairedDifferenceMs": 23.00000000008731,
+              "sumPairedDifferenceMs": 92.00000000034925,
+              "minimumPairedDifferenceMs": -26.0999999998603,
+              "maximumPairedDifferenceMs": 83.70000000006985,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -6.6530716288210385,
+                22.633856138469266
+              ]
+            }
+          },
+          "phaseScope": "parserSourceInflateMs includes inflation and immediate whole-bank CRC. parserSourceCrcMs measures deferred CRC inside parsing, not inflation. Keep these diagnostic counters separate; do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": false,
+          "memoryRawScans": 293,
+          "semanticallyValidatedObservations": 42
+        },
+        "jitendex": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/crc/jitendex/local-independent-audit.json",
+            "sha256": "3030015638eef210815be2f722378ead46495cb708733090c6b1e27c1063781f",
+            "bytes": 209120
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": 2.368156441994662,
+              "equalWorkChangePercent": 2.0889790594885493,
+              "fasterPairs": 3,
+              "medianPairedDifferenceMs": 27.500000000029104,
+              "meanPairedDifferenceMs": 24.025000000001455,
+              "sumPairedDifferenceMs": 288.30000000001746,
+              "minimumPairedDifferenceMs": -15.200000000011642,
+              "maximumPairedDifferenceMs": 95.5,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -0.09041574564864208,
+                3.34896384286294
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": -0.6829910276626494,
+              "equalWorkChangePercent": -0.21754430865723595,
+              "fasterPairs": 3,
+              "medianPairedDifferenceMs": -8.25,
+              "meanPairedDifferenceMs": -2.5500000000029104,
+              "sumPairedDifferenceMs": -10.200000000011642,
+              "minimumPairedDifferenceMs": -15.099999999976717,
+              "maximumPairedDifferenceMs": 21.399999999965075,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -1.298813005330901,
+                1.8907934263973525
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "parserSourceInflateMs",
+              "count": 12,
+              "medianPairedChangePercent": 10.234225410308806,
+              "equalWorkChangePercent": 9.871790689329485,
+              "fasterPairs": 0,
+              "medianPairedDifferenceMs": 51.54999999997381,
+              "meanPairedDifferenceMs": 50.4333333333343,
+              "sumPairedDifferenceMs": 605.2000000000116,
+              "minimumPairedDifferenceMs": 17.80000000022119,
+              "maximumPairedDifferenceMs": 96.90000000002328,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                5.8159434124218645,
+                12.771732782144408
+              ]
+            },
+            "control": {
+              "metric": "parserSourceInflateMs",
+              "count": 4,
+              "medianPairedChangePercent": -3.081896260561856,
+              "equalWorkChangePercent": -2.7692742429091366,
+              "fasterPairs": 4,
+              "medianPairedDifferenceMs": -16.449999999953434,
+              "meanPairedDifferenceMs": -14.69999999992433,
+              "sumPairedDifferenceMs": -58.79999999969732,
+              "minimumPairedDifferenceMs": -19.999999999825377,
+              "maximumPairedDifferenceMs": -5.899999999965075,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -3.8602586372943004,
+                -1.0950259836608356
+              ]
+            }
+          },
+          "phaseScope": "parserSourceInflateMs includes inflation and immediate whole-bank CRC. parserSourceCrcMs measures deferred CRC inside parsing, not inflation. Keep these diagnostic counters separate; do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": true,
+          "memoryRawScans": 348,
+          "semanticallyValidatedObservations": 42
+        },
+        "vndb": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/crc/vndb/local-independent-audit.json",
+            "sha256": "8d51778ddf196030792233aecc951157a44c58c99899833204aeb848086e7ff2",
+            "bytes": 213611
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": -0.23416165082821294,
+              "equalWorkChangePercent": -1.027831852821659,
+              "fasterPairs": 6,
+              "medianPairedDifferenceMs": -11.599999999962165,
+              "meanPairedDifferenceMs": -51.56666666668025,
+              "sumPairedDifferenceMs": -618.800000000163,
+              "minimumPairedDifferenceMs": -600.5,
+              "maximumPairedDifferenceMs": 204.40000000002328,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -2.296744370370385,
+                1.8054372880106362
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": -3.2977603418261836,
+              "equalWorkChangePercent": -2.9917012849933866,
+              "fasterPairs": 3,
+              "medianPairedDifferenceMs": -171.39999999996508,
+              "meanPairedDifferenceMs": -154.47499999999127,
+              "sumPairedDifferenceMs": -617.8999999999651,
+              "minimumPairedDifferenceMs": -423.19999999995343,
+              "maximumPairedDifferenceMs": 148.0999999999185,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -7.873488372092153,
+                2.998825578097386
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "parserSourceInflateMs",
+              "count": 12,
+              "medianPairedChangePercent": 0.9542428008032733,
+              "equalWorkChangePercent": -0.6483581897327784,
+              "fasterPairs": 5,
+              "medianPairedDifferenceMs": 9.800000000366708,
+              "meanPairedDifferenceMs": -6.7166666665361845,
+              "sumPairedDifferenceMs": -80.59999999843421,
+              "minimumPairedDifferenceMs": -81.49999999918509,
+              "maximumPairedDifferenceMs": 51.29999999987194,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -3.1769987083099527,
+                2.3466838860224826
+              ]
+            },
+            "control": {
+              "metric": "parserSourceInflateMs",
+              "count": 4,
+              "medianPairedChangePercent": -1.232656018116618,
+              "equalWorkChangePercent": -0.4584374317468831,
+              "fasterPairs": 3,
+              "medianPairedDifferenceMs": -12.59999999916181,
+              "meanPairedDifferenceMs": -4.724999999656575,
+              "sumPairedDifferenceMs": -18.8999999986263,
+              "minimumPairedDifferenceMs": -37.39999999990687,
+              "maximumPairedDifferenceMs": 43.69999999960419,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -3.473576669445211,
+                4.342641359394506
+              ]
+            }
+          },
+          "phaseScope": "parserSourceInflateMs includes inflation and immediate whole-bank CRC. parserSourceCrcMs measures deferred CRC inside parsing, not inflation. Keep these diagnostic counters separate; do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": true,
+          "memoryRawScans": 563,
+          "semanticallyValidatedObservations": 42
+        }
+      },
+      "reason": "The first-pass Node owning-work benefit did not translate to current Chromium imports. JMdict/Jitendex complete-import medians are adverse and VNDB is inconclusive; Jitendex source-inflate work is slower in every pair. The smaller source change does not establish a user-visible gain."
+    },
+    "canonical": {
+      "runtime": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+      "tree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+      "study": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+      "run": 46128439514,
+      "startOrder": "BA",
+      "status": "HOLD",
+      "productPrRecommended": false,
+      "corpora": {
+        "jmdict": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/canonical/jmdict/local-independent-audit.json",
+            "sha256": "8de47c14a031430311b185bd5e661f8ae227599b2ae0d7da293d4e61da283c52",
+            "bytes": 215602
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": 0.9215917136300877,
+              "equalWorkChangePercent": -1.4861505545166076,
+              "fasterPairs": 5,
+              "medianPairedDifferenceMs": 9.649999999979627,
+              "meanPairedDifferenceMs": -16.09166666666715,
+              "sumPairedDifferenceMs": -193.10000000000582,
+              "minimumPairedDifferenceMs": -240.59999999997672,
+              "maximumPairedDifferenceMs": 46.39999999999418,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -1.5793870843801017,
+                1.9866562739055293
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": -0.7265397956313979,
+              "equalWorkChangePercent": -0.9487221532485934,
+              "fasterPairs": 3,
+              "medianPairedDifferenceMs": -7.75,
+              "meanPairedDifferenceMs": -10.125000000007276,
+              "sumPairedDifferenceMs": -40.500000000029104,
+              "minimumPairedDifferenceMs": -30.20000000001164,
+              "maximumPairedDifferenceMs": 5.199999999982538,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -2.797591477536976,
+                0.4924242424225955
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "termRecordWriteMs",
+              "count": 12,
+              "medianPairedChangePercent": -25.587756477446423,
+              "equalWorkChangePercent": -28.220627125055554,
+              "fasterPairs": 12,
+              "medianPairedDifferenceMs": -17.500000000058208,
+              "meanPairedDifferenceMs": -18.67500000000291,
+              "sumPairedDifferenceMs": -224.10000000003492,
+              "minimumPairedDifferenceMs": -28.900000000023283,
+              "maximumPairedDifferenceMs": -7.500000000058208,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -36.20467409012732,
+                -22.052770132798827
+              ]
+            },
+            "control": {
+              "metric": "termRecordWriteMs",
+              "count": 4,
+              "medianPairedChangePercent": -18.643728764363555,
+              "equalWorkChangePercent": -20.098846787481385,
+              "fasterPairs": 4,
+              "medianPairedDifferenceMs": -13.69999999999709,
+              "meanPairedDifferenceMs": -15.249999999992724,
+              "sumPairedDifferenceMs": -60.999999999970896,
+              "minimumPairedDifferenceMs": -24.5999999998603,
+              "maximumPairedDifferenceMs": -9.000000000116415,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -29.42583732045623,
+                -12.29508196737019
+              ]
+            }
+          },
+          "phaseScope": "termRecordWriteMs contains checksum work inside append/write work; it is not an isolated checksum timer. Other phase counters can overlap. Do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": true,
+          "memoryRawScans": 449,
+          "semanticallyValidatedObservations": 42
+        },
+        "jitendex": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/canonical/jitendex/local-independent-audit.json",
+            "sha256": "c8e5eba7ee43046903b3ba24b34281809ed8bfffd527ecd4b223cd62f94cffed",
+            "bytes": 215380
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": 0.1672939405279461,
+              "equalWorkChangePercent": 0.23761219876914375,
+              "fasterPairs": 6,
+              "medianPairedDifferenceMs": 2.6999999999825377,
+              "meanPairedDifferenceMs": 3.9333333333415794,
+              "sumPairedDifferenceMs": 47.20000000009895,
+              "minimumPairedDifferenceMs": -49.40000000002328,
+              "maximumPairedDifferenceMs": 67.80000000001746,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -1.0609719938245221,
+                1.4722714721465913
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": 2.8433725034729074,
+              "equalWorkChangePercent": 6.425381690906096,
+              "fasterPairs": 1,
+              "medianPairedDifferenceMs": 47.15000000002328,
+              "meanPairedDifferenceMs": 106.47500000000582,
+              "sumPairedDifferenceMs": 425.9000000000233,
+              "minimumPairedDifferenceMs": -29.900000000023283,
+              "maximumPairedDifferenceMs": 361.5,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -1.778808971385737,
+                22.465974768504047
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "termRecordWriteMs",
+              "count": 12,
+              "medianPairedChangePercent": -33.49526523936075,
+              "equalWorkChangePercent": -32.69134567285666,
+              "fasterPairs": 12,
+              "medianPairedDifferenceMs": -29.89999999999418,
+              "meanPairedDifferenceMs": -32.67500000002959,
+              "sumPairedDifferenceMs": -392.10000000035507,
+              "minimumPairedDifferenceMs": -71.60000000006403,
+              "maximumPairedDifferenceMs": -5.399999999965075,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -40.69768943542347,
+                -25.973692382271796
+              ]
+            },
+            "control": {
+              "metric": "termRecordWriteMs",
+              "count": 4,
+              "medianPairedChangePercent": 37.03543371521478,
+              "equalWorkChangePercent": 17.309501411114113,
+              "fasterPairs": 1,
+              "medianPairedDifferenceMs": 24.049999999901047,
+              "meanPairedDifferenceMs": 13.80000000000291,
+              "sumPairedDifferenceMs": 55.20000000001164,
+              "minimumPairedDifferenceMs": -27.199999999895226,
+              "maximumPairedDifferenceMs": 34.300000000104774,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -27.41935483860889,
+                40.614334470868066
+              ]
+            }
+          },
+          "phaseScope": "termRecordWriteMs contains checksum work inside append/write work; it is not an isolated checksum timer. Other phase counters can overlap. Do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": true,
+          "memoryRawScans": 446,
+          "semanticallyValidatedObservations": 42
+        },
+        "vndb": {
+          "inputAudit": {
+            "path": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/local-independent-audit.json",
+            "repositoryRelativePath": "../current-browser/canonical/vndb/local-independent-audit.json",
+            "sha256": "5e87785ae4692313cfcf8ae21cbc702a449ace91924007c737cc9104eab17bf2",
+            "bytes": 218953
+          },
+          "wholeImport": {
+            "candidate": {
+              "metric": "totalImportMs",
+              "count": 12,
+              "medianPairedChangePercent": -0.0008937756218019288,
+              "equalWorkChangePercent": -0.4840276620082462,
+              "fasterPairs": 6,
+              "medianPairedDifferenceMs": -5.820766091346741e-11,
+              "meanPairedDifferenceMs": -28.066666666655994,
+              "sumPairedDifferenceMs": -336.79999999987194,
+              "minimumPairedDifferenceMs": -421.5,
+              "maximumPairedDifferenceMs": 429.70000000018626,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -3.034505056476766,
+                2.2712586669653145
+              ]
+            },
+            "control": {
+              "metric": "totalImportMs",
+              "count": 4,
+              "medianPairedChangePercent": -0.6789932187065695,
+              "equalWorkChangePercent": -0.902486389014423,
+              "fasterPairs": 2,
+              "medianPairedDifferenceMs": -39.050000000046566,
+              "meanPairedDifferenceMs": -52.05000000001746,
+              "sumPairedDifferenceMs": -208.20000000006985,
+              "minimumPairedDifferenceMs": -141.0,
+              "maximumPairedDifferenceMs": 10.900000000023283,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -2.4063486645618193,
+                0.19058942840697313
+              ]
+            }
+          },
+          "owningPhaseDiagnostic": {
+            "candidate": {
+              "metric": "termRecordWriteMs",
+              "count": 12,
+              "medianPairedChangePercent": -10.408463829777649,
+              "equalWorkChangePercent": -12.686487638553457,
+              "fasterPairs": 12,
+              "medianPairedDifferenceMs": -78.8500000005588,
+              "meanPairedDifferenceMs": -99.20833333348128,
+              "sumPairedDifferenceMs": -1190.5000000017753,
+              "minimumPairedDifferenceMs": -204.2000000004191,
+              "maximumPairedDifferenceMs": -46.5999999998603,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -16.475867164245606,
+                -8.395225910012227
+              ]
+            },
+            "control": {
+              "metric": "termRecordWriteMs",
+              "count": 4,
+              "medianPairedChangePercent": 1.699358342649493,
+              "equalWorkChangePercent": 2.2310054224230047,
+              "fasterPairs": 2,
+              "medianPairedDifferenceMs": 11.350000000966247,
+              "meanPairedDifferenceMs": 17.075000000506407,
+              "sumPairedDifferenceMs": 68.30000000202563,
+              "minimumPairedDifferenceMs": -37.60000000009313,
+              "maximumPairedDifferenceMs": 83.20000000018626,
+              "descriptiveBootstrap95PercentFromFrozenAuditor": [
+                -4.541611305723414,
+                11.594202898584571
+              ]
+            }
+          },
+          "phaseScope": "termRecordWriteMs contains checksum work inside append/write work; it is not an isolated checksum timer. Other phase counters can overlap. Do not add them or substitute them for browser totalImportMs.",
+          "memoryPassed": false,
+          "memoryRawScans": 466,
+          "semanticallyValidatedObservations": 42
+        }
+      },
+      "reason": "The write-phase counter improves in every treatment pair of each corpus, but current complete-import results are inconclusive and the earlier JMdict result did not repeat. That evidence is insufficient to justify the additional native ABI, admission and lifecycle surface in a product performance PR."
+    }
+  },
+  "currentAuditCount": 6,
+  "currentValidatedObservationCount": 252,
+  "priorEvidence": {
+    "canonicalJmdict": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "measuredRuntime": "570ccc3968046269cb00d2053e49d3c32367031a",
+      "run": 46112170828,
+      "inputAudit": {
+        "path": "/tmp/manabitan-beb5/canonical-local-audit/jmdict/independent-audit.json",
+        "bytes": 213712,
+        "sha256": "b571deb78f48a438b7f9f89638820bb424cce3c3f158062605a836931b8a6c94",
+        "repositoryRelativePath": "../hosted-audit/canonical-jmdict/independent-audit.json"
+      },
+      "candidate": {
+        "count": 12,
+        "medianPairedChangePercent": -1.0972902467091705,
+        "equalWorkChangePercent": -1.4582958565700244,
+        "worstPairChangePercent": 1.4761215629623514,
+        "descriptiveBootstrap95Percent": [
+          -2.4158950955845415,
+          -0.5346013847361997
+        ],
+        "fasterPairs": 10
+      },
+      "control": {
+        "count": 4,
+        "medianPairedChangePercent": 1.6386876954990193,
+        "equalWorkChangePercent": 1.4408804576121703,
+        "worstPairChangePercent": 2.7850304612980548,
+        "descriptiveBootstrap95Percent": [
+          -0.28868360277134464,
+          2.7850304612980548
+        ],
+        "fasterPairs": 1
+      },
+      "interpretation": "Motivated one current-base confirmation. The current result does not repeat this older signal; different baseline, host and initial order prevent attributing the difference to a single cause. No pooling."
+    },
+    "crcNodeComponent": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "run": 46120623371,
+      "receipt": {
+        "path": "/tmp/manabitan-beb5/crc-original-raw-audit/independent-raw-audit.json",
+        "bytes": 69400,
+        "sha256": "b93551e37b14dbc7962e11aed76118a545f448ab4b4a227cdeb81b13171e97b8"
+      },
+      "reference": "../crc-component/README.md",
+      "scope": "Production-module allocation, copy, inflate and immediate CRC owning work in fresh default Node processes; not concurrent browser or complete-import time."
+    }
+  },
+  "memoryQualificationFailures": [
+    {
+      "candidate": "crc",
+      "dictionary": "jmdict",
+      "arm": "B1",
+      "input": {
+        "path": "/tmp/manabitan-beb5/current-browser-artifacts/crc-jmdict/memory/B1/memory.json",
+        "bytes": 2272413,
+        "sha256": "be7564d60723debbd24dfa5bd05cbc29173124b776a6060e3a708e6f172e6f5e"
+      },
+      "archiveMember": "memory/B1/memory.json",
+      "failures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maximumCoveredSampleGapMs": 349.048089,
+      "thresholdMs": 250,
+      "samplesWithUnreadableAddressSpaces": 1,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "candidate": "canonical",
+      "dictionary": "vndb",
+      "arm": "A1",
+      "input": {
+        "path": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/memory/A1/memory.json",
+        "bytes": 3806246,
+        "sha256": "2b6477a861582a0b48867e52c758990be75f8881596b7ca99b05d28494379a87"
+      },
+      "archiveMember": "memory/A1/memory.json",
+      "failures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maximumCoveredSampleGapMs": 373.125723,
+      "thresholdMs": 250,
+      "samplesWithUnreadableAddressSpaces": 1,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "candidate": "canonical",
+      "dictionary": "vndb",
+      "arm": "B1",
+      "input": {
+        "path": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/memory/B1/memory.json",
+        "bytes": 3792696,
+        "sha256": "6b9d756f003aa43ce04b5b24f1e1d059cfd6cf1987f2ea930d752dbaa5f93da7"
+      },
+      "archiveMember": "memory/B1/memory.json",
+      "failures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maximumCoveredSampleGapMs": 328.369735,
+      "thresholdMs": 250,
+      "samplesWithUnreadableAddressSpaces": 1,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    }
+  ],
+  "memoryInterpretation": "Coverage failures are not measured memory regressions. The other four current candidate/corpus screens qualify; second pairs qualify in both affected screens, but aggregate metrics remain unavailable. No imputation or replacement.",
+  "maintenance": {
+    "crc": {
+      "numstat": [
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "insertions": 2,
+          "deletions": 2
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "insertions": null,
+          "deletions": null
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "insertions": 1,
+          "deletions": 0
+        }
+      ],
+      "productTrackedPaths": 3,
+      "testTrackedPaths": 0,
+      "productInsertions": 3,
+      "testInsertions": 0,
+      "uncompressedWasmBytes": {
+        "baseline": 69068,
+        "candidate": 68047,
+        "scope": "Uncompressed module; not a download-size metric."
+      }
+    },
+    "canonical": {
+      "numstat": [
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "insertions": 2,
+          "deletions": 2
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+          "insertions": null,
+          "deletions": null
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "insertions": 5,
+          "deletions": 1
+        },
+        {
+          "path": "ext/js/dictionary/term-content-canonical-layout.js",
+          "insertions": 14,
+          "deletions": 0
+        },
+        {
+          "path": "ext/js/dictionary/term-content-canonical-scan.js",
+          "insertions": 173,
+          "deletions": 3
+        },
+        {
+          "path": "ext/js/dictionary/term-record-opfs-store.js",
+          "insertions": 22,
+          "deletions": 4
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "insertions": 174,
+          "deletions": 0
+        },
+        {
+          "path": "test/term-lookup-native-checksum.test.js",
+          "insertions": 407,
+          "deletions": 0
+        }
+      ],
+      "productTrackedPaths": 7,
+      "testTrackedPaths": 1,
+      "productInsertions": 390,
+      "testInsertions": 407,
+      "uncompressedWasmBytes": {
+        "baseline": 1624,
+        "candidate": 6206,
+        "scope": "Uncompressed module; not a download-size metric."
+      }
+    }
+  },
+  "sourceQualification": {
+    "crc": {
+      "reference": "../crc-current-source/local-gates-summary.json",
+      "unitFilesPassed": 669,
+      "unitTestsPassed": 15139,
+      "unitTestsSkipped": 47,
+      "crcVectors": 837,
+      "productionSourceCases": 157,
+      "jmdictBanks": 53,
+      "jmdictGroups": 12,
+      "sourceReceipt": {
+        "path": "/tmp/manabitan-beb5/crc-current-gates/source-gates.json",
+        "bytes": 3510,
+        "sha256": "a19ad1203fcb7fa1651c727349f59e62d2963682f3759a985147bd7ddbc76994"
+      }
+    },
+    "canonical": {
+      "reference": "../canonical-current-source/local-gates-summary.json",
+      "unitFilesPassed": 670,
+      "unitTestsPassed": 15151,
+      "unitTestsSkipped": 47,
+      "originalChecksumRegressionCases": 12,
+      "sourceReceipt": {
+        "path": "/tmp/manabitan-beb5/canonical-current-gates/validation-summary.json",
+        "bytes": 2038,
+        "sha256": "ab62bc84e987f216fe46103168da40de4b25849125415f7c10941ab97874bb34"
+      }
+    },
+    "common": [
+      "Full JavaScript lint",
+      "All four type projects",
+      "Pinned Clang/LLD21.1.8 native reproduction",
+      "All-target build dry run",
+      "JSON formatting"
+    ],
+    "interpretation": "Source and unit qualification supports the tested semantics; it does not prove a performance benefit."
+  },
+  "limits": [
+    "No timing or importer execution was performed for this decision review.",
+    "No pooling across candidates, corpora, older/current baselines or hosts.",
+    "All treatment and identical-code control pairs are retained; planned warmups stay outside the measured pair summaries.",
+    "No control subtraction, outlier trimming, replacement cohort or threshold relaxation.",
+    "Nested and concurrent phase counters are not additive and do not identify isolated checksum time or time removed from the critical path.",
+    "Descriptive intervals are inherited from frozen auditors, not newly bootstrapped or promoted to cross-host guarantees.",
+    "Raw-module size is not compressed download size.",
+    "The retained current browser archives omit only two audited package ZIPs; repeating a full package-byte audit requires those originals."
+  ],
+  "furtherExperimentProposed": false,
+  "newVariantProposed": false
+}

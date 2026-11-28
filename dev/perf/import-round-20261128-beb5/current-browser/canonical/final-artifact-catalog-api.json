@@ -1,0 +1,99 @@
+{
+  "artifacts": [
+    {
+      "id": 15257973100,
+      "name": "canonical-current-confirmation-beb5-vndb-BA",
+      "size_in_bytes": 35848763,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257973100",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257973100/zip",
+      "expired": false,
+      "created_at": "2026-11-28T09:46:26Z",
+      "expires_at": "2026-12-12T09:46:23Z",
+      "updated_at": "2026-11-28T09:46:26Z",
+      "digest": "sha256:b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+      "workflow_run": {
+        "id": 46128439514,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+        "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+      }
+    },
+    {
+      "id": 15257355156,
+      "name": "canonical-current-source-beb5",
+      "size_in_bytes": 8455,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257355156",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257355156/zip",
+      "expired": false,
+      "created_at": "2026-11-28T09:07:00Z",
+      "expires_at": "2026-12-12T09:07:00Z",
+      "updated_at": "2026-11-28T09:07:00Z",
+      "digest": "sha256:0634e4a2ef956e9995705faa18772da1ef55e8233a8b44f13b27453ed4a56c65",
+      "workflow_run": {
+        "id": 46128439514,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+        "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+      }
+    },
+    {
+      "id": 15257332665,
+      "name": "canonical-current-confirmation-beb5-jmdict-BA",
+      "size_in_bytes": 35775884,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257332665",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257332665/zip",
+      "expired": false,
+      "created_at": "2026-11-28T09:21:46Z",
+      "expires_at": "2026-12-12T09:21:44Z",
+      "updated_at": "2026-11-28T09:21:46Z",
+      "digest": "sha256:2027b05eb7a72dffc366e5cf36b1b38eef3e9a7c42d90fa568151a79ee79db67",
+      "workflow_run": {
+        "id": 46128439514,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+        "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+      }
+    },
+    {
+      "id": 15256763937,
+      "name": "canonical-current-confirmation-beb5-jitendex-BA",
+      "size_in_bytes": 35807833,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256763937",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256763937/zip",
+      "expired": false,
+      "created_at": "2026-11-28T09:24:01Z",
+      "expires_at": "2026-12-12T09:23:59Z",
+      "updated_at": "2026-11-28T09:24:01Z",
+      "digest": "sha256:10a4b22a23e76ab94d6b1a3e9ba1b9aa6ea050168cc42bb08f346bed8bfbc83f",
+      "workflow_run": {
+        "id": 46128439514,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+        "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+      }
+    },
+    {
+      "id": 15256583372,
+      "name": "canonical-current-units-beb5",
+      "size_in_bytes": 50411,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256583372",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256583372/zip",
+      "expired": false,
+      "created_at": "2026-11-28T09:12:05Z",
+      "expires_at": "2026-12-12T09:12:04Z",
+      "updated_at": "2026-11-28T09:12:05Z",
+      "digest": "sha256:856203bb21ec55ce37c3489ddd9d4a740fbc32febb7d020bb670e969ab12e0e2",
+      "workflow_run": {
+        "id": 46128439514,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+        "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+      }
+    }
+  ]
+}

@@ -1,0 +1,431 @@
+{
+  "complete": true,
+  "repository": "ManabiIO/manabitan",
+  "runId": 46128439514,
+  "runAttempt": 1,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "completeCorpora": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "validatedObservations": 126,
+  "originalAndLocalAuditsDeepEqual": true,
+  "memoryGates": {
+    "jmdict": true,
+    "jitendex": true,
+    "vndb": false
+  },
+  "publication": "Unreferenced blobs only; no commits, trees, refs or PRs created.",
+  "sourceGateArtifactsDuplicated": false,
+  "repositoryPathPrefix": "dev/perf/import-round-20261128-beb5/current-browser/canonical/",
+  "localOnlyFullOriginals": [
+    {
+      "dictionary": "jmdict",
+      "artifactId": 15257332665,
+      "name": "canonical-current-confirmation-beb5-jmdict-BA",
+      "bytes": 35775884,
+      "sha256": "2027b05eb7a72dffc366e5cf36b1b38eef3e9a7c42d90fa568151a79ee79db67",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict.zip",
+      "uploadedVerbatim": false
+    },
+    {
+      "dictionary": "jitendex",
+      "artifactId": 15256763937,
+      "name": "canonical-current-confirmation-beb5-jitendex-BA",
+      "bytes": 35807833,
+      "sha256": "10a4b22a23e76ab94d6b1a3e9ba1b9aa6ea050168cc42bb08f346bed8bfbc83f",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex.zip",
+      "uploadedVerbatim": false
+    },
+    {
+      "dictionary": "vndb",
+      "artifactId": 15257973100,
+      "name": "canonical-current-confirmation-beb5-vndb-BA",
+      "bytes": 35848763,
+      "sha256": "b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb.zip",
+      "uploadedVerbatim": false
+    }
+  ],
+  "fileBindingCount": 44,
+  "uniqueGitBlobCount": 42,
+  "files": [
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-original-job.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/original-job.log",
+      "bytes": 312204,
+      "sha256": "0e859a024d7b9f7f9e4e7adf93331c30fb758e0409ccac01e18c41805bfc9678",
+      "expectedGitBlobSha": "182e71effabaeb5f14777d2cc761536f01553b7c",
+      "gitBlobSha": "182e71effabaeb5f14777d2cc761536f01553b7c"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-original-job.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/original-job.log",
+      "bytes": 312136,
+      "sha256": "0e8e66eb95eaa01ad482035030720b406eff33179ca6d2a5e83d29e35a1144b5",
+      "expectedGitBlobSha": "aad248dd03e47cbea5c8c3f07ec76d5fc619a7fe",
+      "gitBlobSha": "aad248dd03e47cbea5c8c3f07ec76d5fc619a7fe"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/acquisition-registration.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/acquisition-registration.json",
+      "bytes": 1565,
+      "sha256": "1d7c1d4cde5f33cf12dc9dcc484cf48b9e69e9be9c7842db12d837cb20f868ca",
+      "expectedGitBlobSha": "81da6aa86760e83bab01410afd12039c71700e1b",
+      "gitBlobSha": "81da6aa86760e83bab01410afd12039c71700e1b"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/locked-cohort.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/locked-cohort.json",
+      "bytes": 769,
+      "sha256": "2fb0889894b7ddd75d0a195a30b00a8679af46a11570ef77704b907f17935426",
+      "expectedGitBlobSha": "b76c39825191bdc16f06563509c8d2bec4f86690",
+      "gitBlobSha": "b76c39825191bdc16f06563509c8d2bec4f86690"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/dictionary-job-lock.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/dictionary-job-lock.json",
+      "bytes": 689,
+      "sha256": "173179d0a60c0d9f1cf78d7e3575a12b63979a5d57d4aba66cd18b8f0338c3a5",
+      "expectedGitBlobSha": "bdb08fb82bc734c48525867401f86f2f8ba845e4",
+      "gitBlobSha": "bdb08fb82bc734c48525867401f86f2f8ba845e4"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/initial-run-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/initial-run-api.json",
+      "bytes": 13809,
+      "sha256": "28852f6e6ea096058f46286a93fb99c55d64cce02c2edf99e3418b0940920455",
+      "expectedGitBlobSha": "d3a6f3519232b056408647cd93228a1d4e0b09df",
+      "gitBlobSha": "d3a6f3519232b056408647cd93228a1d4e0b09df"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/verify-extract-and-summarize.py",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/verify-extract-and-summarize.py",
+      "bytes": 9765,
+      "sha256": "cf201c2ad61387dbcec5c161c9d86e15c6ff9f1efe1b6575923432e29b6c41fb",
+      "expectedGitBlobSha": "53ea03606797acc5fe5c8a1db51b21d014074139",
+      "gitBlobSha": "53ea03606797acc5fe5c8a1db51b21d014074139"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/retain-original-members.py",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/retain-original-members.py",
+      "bytes": 4913,
+      "sha256": "2fd6e13344a30988abf6437ef3c5f86fc224de45c4bf0075fe9924334a51a89d",
+      "expectedGitBlobSha": "20609224e5ca1f814b9ca4e15be44fa0b846a95c",
+      "gitBlobSha": "20609224e5ca1f814b9ca4e15be44fa0b846a95c"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-original-members-without-packages.zip",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/original-members-without-packages.zip",
+      "bytes": 2346240,
+      "sha256": "f93d2ae85765b23b5c5ff487f555e61fb1f06646370b00641b8d32f030bb308a",
+      "expectedGitBlobSha": "766d1a5a88881c62bdd0a2c8d8363452ad926dda",
+      "derivesFromOriginalArchive": {
+        "artifactId": 15257332665,
+        "name": "canonical-current-confirmation-beb5-jmdict-BA",
+        "bytes": 35775884,
+        "sha256": "2027b05eb7a72dffc366e5cf36b1b38eef3e9a7c42d90fa568151a79ee79db67",
+        "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict.zip"
+      },
+      "gitBlobSha": "766d1a5a88881c62bdd0a2c8d8363452ad926dda"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-artifact-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/artifact-api.json",
+      "bytes": 790,
+      "sha256": "e333d8337859fe40ee604dcaca402cff99f0ae6e35e4ef193ed42ded85b83ba3",
+      "expectedGitBlobSha": "5ba804d5ee29235f4901f4b72572f340e54132e5",
+      "gitBlobSha": "5ba804d5ee29235f4901f4b72572f340e54132e5"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-job-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/job-api.json",
+      "bytes": 3983,
+      "sha256": "860064451ca3915855190cf79825b050c262886b4e6b56e16cb2d3b96eb4856a",
+      "expectedGitBlobSha": "b905a8968c30c9eaae78f63d19089678b1b2eab4",
+      "gitBlobSha": "b905a8968c30c9eaae78f63d19089678b1b2eab4"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-member-census.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/member-census.json",
+      "bytes": 70588,
+      "sha256": "ef89a23d5e8236013ca4223f27980b546ef8b4cc23c0f35d963b0ad253a36233",
+      "expectedGitBlobSha": "5231f3fdf747d1ff48ff6df30669387f5e76068f",
+      "gitBlobSha": "5231f3fdf747d1ff48ff6df30669387f5e76068f"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-retention.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/retention.json",
+      "bytes": 2219,
+      "sha256": "d2a95cf40f507ff2c4f3ecdd851e284fbc54c3c01d6e651ece32dbeb77aa5ef6",
+      "expectedGitBlobSha": "5910f9512d17f9c84dbb94bd6e1fb76627f82e1b",
+      "gitBlobSha": "5910f9512d17f9c84dbb94bd6e1fb76627f82e1b"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jmdict-absolute-report.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/absolute-report.json",
+      "bytes": 9160,
+      "sha256": "2bfbcf6b4e163448de9a9e9dcc7c3d93d3ce8078a78bb3cdd82c37208bc41c0b",
+      "expectedGitBlobSha": "6a14cd1efbd55c46c8b622f97e350a0a01cad534",
+      "gitBlobSha": "6a14cd1efbd55c46c8b622f97e350a0a01cad534"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict/local-independent-audit.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/local-independent-audit.json",
+      "bytes": 215602,
+      "sha256": "8de47c14a031430311b185bd5e661f8ae227599b2ae0d7da293d4e61da283c52",
+      "expectedGitBlobSha": "380550a1d2e30010af00893bfa094fc03aee7c20",
+      "gitBlobSha": "380550a1d2e30010af00893bfa094fc03aee7c20"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict/local-audit-execution.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/local-audit-execution.json",
+      "bytes": 548,
+      "sha256": "58c7bbd1d4660c033e2ab32c0d12b0d24190c0f25016f7f1f78f15720859283a",
+      "expectedGitBlobSha": "fb0508758dfb119b6878ce6233297ca3ec2cd67e",
+      "gitBlobSha": "fb0508758dfb119b6878ce6233297ca3ec2cd67e"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict/local-audit-stdout.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/local-audit-stdout.log",
+      "bytes": 1377,
+      "sha256": "d654463ba8b9dbba631c021474fc091979cc7071e5c139bd290464eac2d2df3e",
+      "expectedGitBlobSha": "2612005cc461cca2ded2f43e7d4579d97124a55a",
+      "gitBlobSha": "2612005cc461cca2ded2f43e7d4579d97124a55a"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jmdict/local-audit-stderr.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jmdict/local-audit-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedGitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-original-members-without-packages.zip",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/original-members-without-packages.zip",
+      "bytes": 2378143,
+      "sha256": "ff6149fbfd19d29bbae38f89d56d9619055121c4a17efd9b1c10bf4417e1511a",
+      "expectedGitBlobSha": "5d0dba7f21ecb6721f293fd5975b708962d9d98f",
+      "derivesFromOriginalArchive": {
+        "artifactId": 15256763937,
+        "name": "canonical-current-confirmation-beb5-jitendex-BA",
+        "bytes": 35807833,
+        "sha256": "10a4b22a23e76ab94d6b1a3e9ba1b9aa6ea050168cc42bb08f346bed8bfbc83f",
+        "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex.zip"
+      },
+      "gitBlobSha": "5d0dba7f21ecb6721f293fd5975b708962d9d98f"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-artifact-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/artifact-api.json",
+      "bytes": 792,
+      "sha256": "94a93847c2db62fe1bfa8766460a3c75036da8ad49872a20cf44ee44d3d08672",
+      "expectedGitBlobSha": "82d9c5660a36c7ff30a8d228631e12f0090b0a86",
+      "gitBlobSha": "82d9c5660a36c7ff30a8d228631e12f0090b0a86"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-job-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/job-api.json",
+      "bytes": 3985,
+      "sha256": "9bc314e01856d5cd99792cf8000949ce2d739943e65247991a343563fe6fa677",
+      "expectedGitBlobSha": "7e21e085b11c32b05e6ba77ad59bbddf3bfa1fd8",
+      "gitBlobSha": "7e21e085b11c32b05e6ba77ad59bbddf3bfa1fd8"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-member-census.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/member-census.json",
+      "bytes": 70615,
+      "sha256": "98a7d7031d3478b202b18610f952d3fa104f1c1ec4b50e8074a650cc492da3cf",
+      "expectedGitBlobSha": "15eadd2e7dd214412421e88092a2195ee0808efc",
+      "gitBlobSha": "15eadd2e7dd214412421e88092a2195ee0808efc"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-retention.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/retention.json",
+      "bytes": 2224,
+      "sha256": "8d2987f8b8af5b5c2aae4baad5961d2988e7759347dda9cc833cece208e1bfe4",
+      "expectedGitBlobSha": "e8c6e63c8c5b55b33e6731804155ae27b33e886b",
+      "gitBlobSha": "e8c6e63c8c5b55b33e6731804155ae27b33e886b"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/jitendex-absolute-report.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/absolute-report.json",
+      "bytes": 9189,
+      "sha256": "1241cdb27485081c3e71c5c0a4086a47dc1c25302919abb46d4e92a98557e4ad",
+      "expectedGitBlobSha": "5dacd6e0c4ea26c68e1a16927b07c23b78670208",
+      "gitBlobSha": "5dacd6e0c4ea26c68e1a16927b07c23b78670208"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-independent-audit.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/local-independent-audit.json",
+      "bytes": 215380,
+      "sha256": "c8e5eba7ee43046903b3ba24b34281809ed8bfffd527ecd4b223cd62f94cffed",
+      "expectedGitBlobSha": "d7277dadf83141a6427fb919e05cb46b25b4214e",
+      "gitBlobSha": "d7277dadf83141a6427fb919e05cb46b25b4214e"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-audit-execution.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/local-audit-execution.json",
+      "bytes": 552,
+      "sha256": "f6c1df2106c64dedbdc27c8b499b647358958b297267a71e46eebc3723e1b190",
+      "expectedGitBlobSha": "cbc4b5dda3494bc3955ab8d1f6fb5271f56198fa",
+      "gitBlobSha": "cbc4b5dda3494bc3955ab8d1f6fb5271f56198fa"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-audit-stdout.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/local-audit-stdout.log",
+      "bytes": 1372,
+      "sha256": "49ea1ca6abee1d88c55bd2644b9a658f82ee9ccc7ed5936a5623f67971211943",
+      "expectedGitBlobSha": "280f809de3d3d01b9bf164d1c4dbea633d1ff2be",
+      "gitBlobSha": "280f809de3d3d01b9bf164d1c4dbea633d1ff2be"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-audit-stderr.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/jitendex/local-audit-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedGitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-original-job.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/original-job.log",
+      "bytes": 313542,
+      "sha256": "451a0bbb7ac8c35f651399db9fccb4526872849ee43f4b016d2c75e11a23cb6d",
+      "expectedGitBlobSha": "e904c74113483a5c5e16b260eddbc921d6db1bbd",
+      "gitBlobSha": "e904c74113483a5c5e16b260eddbc921d6db1bbd"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/final-run-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/final-run-api.json",
+      "bytes": 13817,
+      "sha256": "ffd28e813e1456bea5d74641a7afbae69936d90474ca3eeead7535ab346546ea",
+      "expectedGitBlobSha": "30f0d7898bdd3142a052f29af08204fcd88f93af",
+      "gitBlobSha": "30f0d7898bdd3142a052f29af08204fcd88f93af"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/final-jobs-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/final-jobs-api.json",
+      "bytes": 23171,
+      "sha256": "8a8aba2e90b0ac02607f8f74673cbd5b7496ea10ba27b8e06f39fa8af960eee5",
+      "expectedGitBlobSha": "d1977ba42a846bc8bcacb66474dd3e235c922f39",
+      "gitBlobSha": "d1977ba42a846bc8bcacb66474dd3e235c922f39"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/final-artifact-catalog-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/final-artifact-catalog-api.json",
+      "bytes": 4319,
+      "sha256": "fb30a9ff118876fa2727ea8c0075589a8ed31ddfe420c90600f6cbeb7bdd95b5",
+      "expectedGitBlobSha": "f5de0aaa28139c99d8a544ac0ea688cf2b3c1663",
+      "gitBlobSha": "f5de0aaa28139c99d8a544ac0ea688cf2b3c1663"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/cohort-summary.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/cohort-summary.json",
+      "bytes": 34853,
+      "sha256": "a95c32f24c49edd261211d953c6a8d0845d54d1e80b35b84953a34cb72a3e3c8",
+      "expectedGitBlobSha": "072207598c483ac1c382c45ba82b3c42ce3ba810",
+      "gitBlobSha": "072207598c483ac1c382c45ba82b3c42ce3ba810"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-original-members-without-packages.zip",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/original-members-without-packages.zip",
+      "bytes": 2421230,
+      "sha256": "1da25a0d03d314d3583c6a5e96c10d04af8cd731be4e8a471f9a00c167738baf",
+      "expectedGitBlobSha": "37b29ded705fb8d4d834b86e89b1f7645325c00f",
+      "derivesFromOriginalArchive": {
+        "artifactId": 15257973100,
+        "name": "canonical-current-confirmation-beb5-vndb-BA",
+        "bytes": 35848763,
+        "sha256": "b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+        "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb.zip"
+      },
+      "gitBlobSha": "37b29ded705fb8d4d834b86e89b1f7645325c00f"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-artifact-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/artifact-api.json",
+      "bytes": 788,
+      "sha256": "542cae171f1ba53fe772b7d80acf4a612dbe2eb945c5bae4e05278f2c2c98ead",
+      "expectedGitBlobSha": "fbd376d12f31711bbf90e96583d38c26851c72b9",
+      "gitBlobSha": "fbd376d12f31711bbf90e96583d38c26851c72b9"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-job-api.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/job-api.json",
+      "bytes": 3981,
+      "sha256": "0d601a6c95214c1037f8b97ad48d788c328b0055debb5182d5ca719533469449",
+      "expectedGitBlobSha": "e769df258b18cf0d416cece4482097f79e5b6bfe",
+      "gitBlobSha": "e769df258b18cf0d416cece4482097f79e5b6bfe"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-member-census.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/member-census.json",
+      "bytes": 70816,
+      "sha256": "26611cf4d9498bb4892a1d8008509707de0aadd65f985a5030a290b257fcbc24",
+      "expectedGitBlobSha": "361f238cf4c6353cac05e9bfbaa01ca39d1b5b0b",
+      "gitBlobSha": "361f238cf4c6353cac05e9bfbaa01ca39d1b5b0b"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-retention.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/retention.json",
+      "bytes": 2214,
+      "sha256": "fe19ee65377f73c7a877973a8be4c879d3909ea93f854a4c06066139391f0386",
+      "expectedGitBlobSha": "35bc31354d407dcc3cf27a772bc2d3bcc69e948d",
+      "gitBlobSha": "35bc31354d407dcc3cf27a772bc2d3bcc69e948d"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-absolute-report.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/absolute-report.json",
+      "bytes": 9044,
+      "sha256": "cd3085963be32c8a7efeaea6fb130b3bc00d1d077576b7677037dd3da2a421eb",
+      "expectedGitBlobSha": "a87d5de27905aa31ed174fd728565d1735727119",
+      "gitBlobSha": "a87d5de27905aa31ed174fd728565d1735727119"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/vndb-memory-failure-details.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/memory-failure-details.json",
+      "bytes": 2817,
+      "sha256": "3c5d86afc1ecfc8dcc63b7de883e13d3d7f930a4acc898202df4a0c85d725492",
+      "expectedGitBlobSha": "1fcbb3b2422aaf92203877d11210356e07010b5a",
+      "gitBlobSha": "1fcbb3b2422aaf92203877d11210356e07010b5a"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/local-independent-audit.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/local-independent-audit.json",
+      "bytes": 218953,
+      "sha256": "5e87785ae4692313cfcf8ae21cbc702a449ace91924007c737cc9104eab17bf2",
+      "expectedGitBlobSha": "c65662a023d75a0f2d632d8a53b34fce169ec684",
+      "gitBlobSha": "c65662a023d75a0f2d632d8a53b34fce169ec684"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/local-audit-execution.json",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/local-audit-execution.json",
+      "bytes": 544,
+      "sha256": "7f5dbece5f634a880f86c07de8a1ffcf5a56db98e538dd2a9f7d0a57945285c5",
+      "expectedGitBlobSha": "3dee709755236bf4e24df3e61b304c8652ee4ec8",
+      "gitBlobSha": "3dee709755236bf4e24df3e61b304c8652ee4ec8"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/local-audit-stdout.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/local-audit-stdout.log",
+      "bytes": 1321,
+      "sha256": "520a75424e7904bb438448cdaa00a706663925e1790176bb1732ecf2fb6c2f4a",
+      "expectedGitBlobSha": "67943113d9b06e97f0f344ae7e77747498badce3",
+      "gitBlobSha": "67943113d9b06e97f0f344ae7e77747498badce3"
+    },
+    {
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-vndb/local-audit-stderr.log",
+      "path": "dev/perf/import-round-20261128-beb5/current-browser/canonical/vndb/local-audit-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedGitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    }
+  ]
+}

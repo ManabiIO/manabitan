@@ -1,0 +1,19 @@
+{
+  "id": 15257973100,
+  "name": "canonical-current-confirmation-beb5-vndb-BA",
+  "size_in_bytes": 35848763,
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257973100",
+  "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257973100/zip",
+  "expired": false,
+  "created_at": "2026-11-28T09:46:26Z",
+  "expires_at": "2026-12-12T09:46:23Z",
+  "updated_at": "2026-11-28T09:46:26Z",
+  "digest": "sha256:b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+  "workflow_run": {
+    "id": 46128439514,
+    "repository_id": 1165902460,
+    "head_repository_id": 1165902460,
+    "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+    "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "complete": true,
+  "files": [
+    {
+      "name": "README.md",
+      "bytes": 11577,
+      "sha256": "0c8435ac29aabc80512817094841f49ef987e8bb3e05cd78c5fc038394d58704"
+    },
+    {
+      "name": "canonical-publication-manifest-first-two-review.json",
+      "bytes": 546,
+      "sha256": "55436093f29047f554a465d55792ea33ac14705c802ae0b01791e024253670ac"
+    },
+    {
+      "name": "canonical-publication-review-first-two.json",
+      "bytes": 1356,
+      "sha256": "7737a96d81f8194cf57826cfe3c550dfa6af9c6a54efb4bc56cdacfc93df0267"
+    },
+    {
+      "name": "decision.json",
+      "bytes": 33427,
+      "sha256": "95a8e638b41f8fe86c782c6ab5e93dc88e32028c2db10a8da9c9b6e7c3af743e"
+    },
+    {
+      "name": "recompute.py",
+      "bytes": 9233,
+      "sha256": "befe00d118a6f3ce42eff98c29791cd47af27a6c5aac222ff75a96bef16955b7"
+    },
+    {
+      "name": "recomputed-inputs.json",
+      "bytes": 117656,
+      "sha256": "54ee8687ef06252e67f8b29bd65f625bcbc8e87b2f6ee27838e7179be3e7cd0a"
+    }
+  ]
+}

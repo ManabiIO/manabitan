@@ -1,0 +1,28 @@
+{
+  "completeForListedCorpora": true,
+  "scope": "Independent byte/readback review of retention, not a new import audit or measurement.",
+  "corpora": {
+    "jmdict": {
+      "retentionSha256": "d2a95cf40f507ff2c4f3ecdd851e284fbc54c3c01d6e651ece32dbeb77aa5ef6",
+      "censusSha256": "ef89a23d5e8236013ca4223f27980b546ef8b4cc23c0f35d963b0ad253a36233",
+      "originalSha256": "2027b05eb7a72dffc366e5cf36b1b38eef3e9a7c42d90fa568151a79ee79db67",
+      "retainedSha256": "f93d2ae85765b23b5c5ff487f555e61fb1f06646370b00641b8d32f030bb308a",
+      "originalMembers": 316,
+      "retainedMembers": 314,
+      "omittedExactPackagesOnly": true,
+      "allRetainedMemberBytesEqualOriginal": true,
+      "completeOriginalCensusMatchesRetainedBytes": true
+    },
+    "jitendex": {
+      "retentionSha256": "8d2987f8b8af5b5c2aae4baad5961d2988e7759347dda9cc833cece208e1bfe4",
+      "censusSha256": "98a7d7031d3478b202b18610f952d3fa104f1c1ec4b50e8074a650cc492da3cf",
+      "originalSha256": "10a4b22a23e76ab94d6b1a3e9ba1b9aa6ea050168cc42bb08f346bed8bfbc83f",
+      "retainedSha256": "ff6149fbfd19d29bbae38f89d56d9619055121c4a17efd9b1c10bf4417e1511a",
+      "originalMembers": 316,
+      "retainedMembers": 314,
+      "omittedExactPackagesOnly": true,
+      "allRetainedMemberBytesEqualOriginal": true,
+      "completeOriginalCensusMatchesRetainedBytes": true
+    }
+  }
+}

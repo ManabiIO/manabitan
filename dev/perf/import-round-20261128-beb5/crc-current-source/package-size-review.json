@@ -1,0 +1,23 @@
+{
+  "scope": "Current CRC Jitendex original release package member sizes; no timing.",
+  "originalArchive": "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex.zip",
+  "arms": {
+    "A": {
+      "packageBytes": 16806965,
+      "wasmPath": "lib/term-bank-parser.wasm",
+      "uncompressedWasmBytes": 69068,
+      "compressedWasmBytes": 24956
+    },
+    "B": {
+      "packageBytes": 16807039,
+      "wasmPath": "lib/term-bank-parser.wasm",
+      "uncompressedWasmBytes": 68047,
+      "compressedWasmBytes": 25011
+    }
+  },
+  "candidateMinusBaseline": {
+    "packageBytes": 74,
+    "uncompressedWasmBytes": -1021,
+    "compressedWasmBytes": 55
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "scope": "Local-byte publication manifest and retained VNDB member readback only. Remote Git content readback remains owned by root. JM/Jit member equality was independently checked earlier.",
+  "manifestPath": "/tmp/manabitan-beb5/current-browser-artifacts/canonical-receipts/blob-manifest-final.json",
+  "manifestSha256": "c0921bcbd0dada9b55189feb690e3b06041d6dce655c8610eb5273c859a07576",
+  "filesVerified": 44,
+  "allSha256AndGitBlobIdsMatch": true,
+  "uniquePathsUnderExpectedPrefix": true,
+  "vndb": {
+    "retentionSha256": "fe19ee65377f73c7a877973a8be4c879d3909ea93f854a4c06066139391f0386",
+    "censusSha256": "26611cf4d9498bb4892a1d8008509707de0aadd65f985a5030a290b257fcbc24",
+    "originalSha256": "b9362bf463bdbfc0ae7818d2f21a5094d03ebc24642e7584a46a3ea51f980a96",
+    "retainedSha256": "1da25a0d03d314d3583c6a5e96c10d04af8cd731be4e8a471f9a00c167738baf",
+    "originalMembers": 317,
+    "retainedMembers": 315,
+    "onlyExactPackagesOmitted": true,
+    "failureAndOriginalAuditRetained": true,
+    "allRetainedMemberBytesEqualOriginal": true
+  }
+}

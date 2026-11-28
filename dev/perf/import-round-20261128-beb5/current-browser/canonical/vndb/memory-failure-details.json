@@ -1,0 +1,83 @@
+{
+  "runId": 46128439514,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "dictionary": "vndb",
+  "completeByteAudit": true,
+  "memoryPassed": false,
+  "originalMember": "memory/memory-comparison.json",
+  "originalMemberSha256": "21ab3fdae40ee95e42817012c04b924cd53d47b473f34fa59143e1450966ed8d",
+  "fixedMaximumCoveredGapMs": 250,
+  "observations": [
+    {
+      "name": "B1",
+      "arm": "B",
+      "benchmarkExitCode": 0,
+      "qualifiedForWholeTreePss": false,
+      "maximumCoveredSampleGapMs": 328.369735,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "fullyContainedImportSampleCount": 42,
+      "stableFullyReadImportSampleCount": 41,
+      "preImportBracketGapMs": 41.143586,
+      "postImportBracketGapMs": 102.349357,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "name": "A1",
+      "arm": "A",
+      "benchmarkExitCode": 0,
+      "qualifiedForWholeTreePss": false,
+      "maximumCoveredSampleGapMs": 373.125723,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "fullyContainedImportSampleCount": 42,
+      "stableFullyReadImportSampleCount": 41,
+      "preImportBracketGapMs": 47.643778,
+      "postImportBracketGapMs": 100.062466,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "name": "A2",
+      "arm": "A",
+      "benchmarkExitCode": 0,
+      "qualifiedForWholeTreePss": true,
+      "maximumCoveredSampleGapMs": 227.55388,
+      "qualificationFailures": [],
+      "fullyContainedImportSampleCount": 44,
+      "stableFullyReadImportSampleCount": 44,
+      "preImportBracketGapMs": 97.264065,
+      "postImportBracketGapMs": 45.1025,
+      "maxSampledPssKiB": 1237397,
+      "maxSampledPrivateKiB": 1005272
+    },
+    {
+      "name": "B2",
+      "arm": "B",
+      "benchmarkExitCode": 0,
+      "qualifiedForWholeTreePss": true,
+      "maximumCoveredSampleGapMs": 226.146104,
+      "qualificationFailures": [],
+      "fullyContainedImportSampleCount": 41,
+      "stableFullyReadImportSampleCount": 41,
+      "preImportBracketGapMs": 102.681224,
+      "postImportBracketGapMs": 99.65964,
+      "maxSampledPssKiB": 1223951,
+      "maxSampledPrivateKiB": 993448
+    }
+  ],
+  "aggregateMetrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    }
+  },
+  "interpretation": "The first B and A acquisitions fail the unchanged coverage rule. Aggregate memory remains unqualified; this is not evidence of measured memory growth. The qualified second pair does not replace the failed pair. No replacement observations or threshold change."
+}

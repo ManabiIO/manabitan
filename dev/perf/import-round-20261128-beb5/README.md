@@ -4,15 +4,18 @@
 
 This investigation targets JMdict first, with Jitendex and VNDB as required
 cross-corpus checks. The original experiments use baseline
-`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. Two separate prospective browser
+`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. Two separate completed browser
 studies use current baseline `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`.
 
-**No performance PR has been opened from this investigation.** All original
-experiments have been audited. The single-pragma CRC component gain and the
-small canonical-checksum JMdict complete-import signal justify separate
-current-base qualification. The recent-first glossary revision is held.
-Current-base browser outcomes remain pending and must not be inferred from
-the historical measurements. This record makes no cumulative speedup claim.
+**No performance PR has been opened from this investigation.** The original
+experiments and both current-baseline browser studies are complete and audited.
+The single-pragma CRC variant is rejected: its Node component gain did not
+translate to Chromium imports, and JMdict/Jitendex results were adverse. The
+canonical checksum integration is held: its original small JMdict signal did
+not repeat, despite a faster record-write phase. Neither current candidate
+meets the bar for a performance PR. The recent-first glossary revision also
+remains held. See the [independent final decision](final-decision/README.md).
+This record makes no cumulative speedup claim.
 
 All fixtures are the complete pinned archives in
 `test/perf/dictionaries.lock.json`: JMdict 528,299 rows, Jitendex 436,555 rows
@@ -34,25 +37,28 @@ archives. No timing observation was rerun during either audit.
 Negative percentages mean less measured time. Component results and complete
 browser imports have different scopes and must not be combined.
 
-| Experiment | JMdict | Jitendex | VNDB | Decision |
-| --- | ---: | ---: | ---: | --- |
-| Native record-field encoding, complete imports | −0.442% | +1.635% | −1.142% | Hold: all descriptive intervals include zero; incomplete JMdict/VNDB memory acquisition. |
-| Indexed score validation, complete imports | −1.112% | −0.440% | +0.358% | Hold: small/noisy effects, disagreeing estimators and controls; one corpus lacks qualified memory coverage. |
-| Original prefix-first witness, warm component | −3.903% | +1.394% | +2.638% | Hold: JMdict signal accompanied by other-corpus and synthetic regressions. |
-| Recent-first glossary witness, warm component | −2.751% | +2.405% | +1.209% | Hold: other-corpus and long-unique regressions persist. |
-| Canonical-module checksums, original complete imports | −1.097% | −0.398% | +1.134% | Advance unchanged to one separate current-base confirmation; no PR yet. |
-| Disable CRC inner-loop unrolling, first owning pass | −4.149% | Not run | Not run | Advance the same single pragma to current-base complete browser imports. |
-| Separate-module native checksum, startup + component | −12.128% | +4.236% | −40.249% | Mechanism evidence only; motivated a different canonical-module integration. |
-| Chromium DecompressionStream, 64 KiB input slices | +42.366% | Not run | Not run | Reject: all six JMdict pairs slower. |
-| Chromium DecompressionStream, 1 KiB input slices | +145.057% | Not run | Not run | Reject: all six JMdict pairs slower. |
+| Experiment                                            |    JMdict | Jitendex |     VNDB | Decision                                                                                                    |
+| ----------------------------------------------------- | --------: | -------: | -------: | ----------------------------------------------------------------------------------------------------------- |
+| CRC unroll disabled, current complete imports         |   +1.628% |  +2.368% |  −0.234% | Reject: browser results do not reproduce the component gain; JMdict/Jitendex are adverse.                   |
+| Canonical checksums, current complete imports         |   +0.922% |  +0.167% |  −0.001% | Hold: no repeatable complete-import benefit; original JMdict signal did not confirm.                        |
+| Native record-field encoding, complete imports        |   −0.442% |  +1.635% |  −1.142% | Hold: all descriptive intervals include zero; incomplete JMdict/VNDB memory acquisition.                    |
+| Indexed score validation, complete imports            |   −1.112% |  −0.440% |  +0.358% | Hold: small/noisy effects, disagreeing estimators and controls; one corpus lacks qualified memory coverage. |
+| Original prefix-first witness, warm component         |   −3.903% |  +1.394% |  +2.638% | Hold: JMdict signal accompanied by other-corpus and synthetic regressions.                                  |
+| Recent-first glossary witness, warm component         |   −2.751% |  +2.405% |  +1.209% | Hold: other-corpus and long-unique regressions persist.                                                     |
+| Canonical-module checksums, original complete imports |   −1.097% |  −0.398% |  +1.134% | Hold after the separate current-base confirmation failed to repeat the JMdict signal.                       |
+| Disable CRC inner-loop unrolling, first owning pass   |   −4.149% |  Not run |  Not run | Rejected after the same single pragma failed current-base complete-browser qualification.                   |
+| Separate-module native checksum, startup + component  |  −12.128% |  +4.236% | −40.249% | Mechanism evidence only; motivated a different canonical-module integration.                                |
+| Chromium DecompressionStream, 64 KiB input slices     |  +42.366% |  Not run |  Not run | Reject: all six JMdict pairs slower.                                                                        |
+| Chromium DecompressionStream, 1 KiB input slices      | +145.057% |  Not run |  Not run | Reject: all six JMdict pairs slower.                                                                        |
 
-The native record-field, score-validation and canonical-checksum rows report
-complete-import paired medians. Both glossary-witness rows are warm sequential
+The current CRC and canonical rows, and the native record-field, score-validation
+and original canonical-checksum rows, report complete-import paired medians. Both glossary-witness rows are warm sequential
 component replays; their pair-index sums are descriptive complete-work totals,
 not independent browser imports. The separate-module checksum component row
 includes that helper's module startup and hashing work, not parser/storage/UI
-or concurrent-worker import latency. The CRC row reports summed first-pass
-owning work, not concurrent browser elapsed time. The DecompressionStream rows cover
+or concurrent-worker import latency. The CRC first-owning-pass row reports summed component
+work, not concurrent browser elapsed time; the separate current CRC row
+reports complete browser imports. The DecompressionStream rows cover
 inflation, source CRC, framing and copies into native memory; parsing and storage
 remain outside those timers.
 
@@ -147,8 +153,12 @@ hook or additional slice-size variant is pursued.
 All 36 original arms, source identities, conformance observations and failures
 are retained. Chromium passes 171 format/source checks. Node feasibility
 failures remain failures; its ordinary output equality does not establish
-eligible error behavior. The 459.3 ms source-inflation profile already includes
-source CRC; sampled CRC time must not be added to it.
+eligible error behavior. The ordinary 459.3 ms source-inflation counter
+already includes immediate source CRC and begins after JavaScript allocation
+and compressed-input copying. The 166.852 sampled CRC milliseconds come from
+a separate traced observation, whose source-inflation counter is 402.1 ms.
+Neither addition nor subtraction between those different observations is a
+valid decomposition; summed worker samples are not elapsed import latency.
 
 ## Completed original studies and current-base qualification
 
@@ -165,14 +175,15 @@ passes: 42 observations per corpus, 126 total. Ordinary timing uses 12 balanced
 pairs, four interleaved identical-code pairs and four retained warmups; media
 and memory observations are separate.
 
-| Corpus | Complete-import paired median | Equal-work change | Faster pairs | Descriptive 95% interval | A/A median | Median paired difference |
-| --- | ---: | ---: | ---: | --- | ---: | ---: |
-| JMdict | −1.097% | −1.458% | 10/12 | [−2.416%, −0.535%] | +1.639% | −7.60 ms |
-| Jitendex | −0.398% | −0.684% | 7/12 | [−2.584%, +0.810%] | −0.961% | −6.60 ms |
-| VNDB | +1.134% | +0.186% | 5/12 | [−2.610%, +4.320%] | +1.511% | +59.25 ms |
+| Corpus   | Complete-import paired median | Equal-work change | Faster pairs | Descriptive 95% interval | A/A median | Median paired difference |
+| -------- | ----------------------------: | ----------------: | -----------: | ------------------------ | ---------: | -----------------------: |
+| JMdict   |                       −1.097% |           −1.458% |        10/12 | [−2.416%, −0.535%]       |    +1.639% |                 −7.60 ms |
+| Jitendex |                       −0.398% |           −0.684% |         7/12 | [−2.584%, +0.810%]       |    −0.961% |                 −6.60 ms |
+| VNDB     |                       +1.134% |           +0.186% |         5/12 | [−2.610%, +4.320%]       |    +1.511% |                +59.25 ms |
 
-JMdict's small full-import signal warrants one independent, opposite-order
-confirmation on the current baseline. Jitendex and VNDB are inconclusive.
+JMdict's original small full-import signal warranted one independent,
+opposite-order confirmation on the current baseline. It did not repeat in
+that completed confirmation below. Original Jitendex and VNDB were inconclusive.
 The record-write diagnostic, which includes hashing and other write work,
 has paired medians of −32.009%, −24.993% and −4.392%, respectively. These
 overlapping work counters are not added to elapsed import time. Jitendex's
@@ -226,7 +237,58 @@ is bound to study `07307bed49e6fd80ec28c37e0313a6bff402b66f`, tree
 `f18eaa4af84d68086a7fcfe0e7215a742cf55a79`. It keeps the algorithm,
 3,072-byte admission threshold, guards and protocol unchanged, starts BA,
 and evaluates each corpus on a separate host. It neither replaces the original
-VNDB failure nor pools cohorts. Hosted and browser outcomes remain pending.
+VNDB failure nor pools cohorts. Both hosted source/unit prerequisites and
+Actionlint pass. The complete current hosted unit suite has the same 670
+files, 15,151 tests passed and 47 skipped. The [source artifact audit](canonical-current-source/hosted-source-audit.json)
+independently binds both runtimes and all eight qualification source files to
+their published Git objects; it verifies the pinned native checks and seven
+build targets. The build check is a dry run, not emitted release archives.
+
+#### Completed current-baseline confirmation: hold
+
+[JMdict raw audit](current-browser/canonical/jmdict/local-independent-audit.json) ·
+[Jitendex raw audit](current-browser/canonical/jitendex/local-independent-audit.json) ·
+[VNDB raw audit](current-browser/canonical/vndb/local-independent-audit.json)
+
+All 126 original package/source/output/storage/media receipts pass. Local
+frozen audits reproduce the complete original hosted reports without
+substituting local output for original artifact members.
+
+| Corpus   | Whole-import paired median | Equal-work change | Faster pairs | Descriptive 95% interval | A/A median | Median paired difference |
+| -------- | -------------------------: | ----------------: | -----------: | ------------------------ | ---------: | -----------------------: |
+| JMdict   |                    +0.922% |           −1.486% |         5/12 | [−1.579%, +1.987%]       |    −0.727% |                 +9.65 ms |
+| Jitendex |                    +0.167% |           +0.238% |         6/12 | [−1.061%, +1.472%]       |    +2.843% |                 +2.70 ms |
+| VNDB     |                    −0.001% |           −0.484% |         6/12 | [−3.035%, +2.271%]       |    −0.679% |                 ≈0.00 ms |
+
+JMdict's original −1.097% median with 10/12 faster pairs did not repeat:
+the current cohort is +0.922%, with 5/12 faster. Its favorable −1.486%
+equal-work figure remains reported, including pair 12, A=1,307.8 ms and
+B=1,067.2 ms (−240.6 ms). That single pair exceeds the magnitude of the
+complete −193.1 ms sum of paired differences and explains the estimator
+disagreement; no trimmed or replacement result is used.
+
+The record-write diagnostic improves in all twelve JMdict and all twelve
+Jitendex pairs: −25.588% and −33.495% medians, respectively.
+That diagnostic includes checksum and other append/write work. JMdict's
+identical-code write diagnostic has a −18.644% median; it is neither subtracted
+from the candidate nor presented as isolated checksum savings. Jitendex's
+whole-import identical-code pair 1 moves +361.5 ms; all controls remain.
+VNDB's write diagnostic likewise improves in all twelve pairs, with a
+−10.408% median and −78.85 ms median paired difference; its
+complete-import median remains effectively zero.
+
+The integration adds 390 product-line insertions, 407 regression-test lines
+and 4,582 uncompressed canonical-WASM bytes, with additional ABI, admission and arena
+lifecycle responsibilities. A faster diagnostic alone does not justify that
+maintenance cost without a repeatable practical complete-import benefit.
+No new threshold, combined variant, replacement cohort or PR is proposed.
+
+Current memory screens pass for JMdict and Jitendex. VNDB B1 and A1 exceed
+the unchanged 250 ms maximum-coverage-gap limit at 328.369735 ms and
+373.125723 ms, respectively; A2 and B2 qualify. All 466 raw scans and all
+semantic receipts remain. Aggregate memory metrics are null; no value is
+imputed and no acquisition is replaced. The original-baseline VNDB memory
+failure remains a separate observation.
 
 ### Recent-first glossary witness: hold
 
@@ -262,7 +324,7 @@ diagnostics, not production admission counts.
 
 The original component changes only `#pragma clang loop unroll(disable)`
 on the existing eight-lane CRC loop. The 64-byte group, table, threshold, fold,
-tail and import policy remain unchanged. The production parser module shrinks
+tail and import policy remain unchanged. The uncompressed production parser module shrinks
 1,021 bytes. Reduced register-stack traffic motivated the experiment; the
 pragma also changes state-array memory operations, so codegen counts alone
 do not establish a throughput cause.
@@ -301,7 +363,7 @@ to expose the pinned versioned default linker resolved them and enabled 21
 additional tests. The first failed full run, both failed compiler probes and the successful
 corrected probe remain in the [complete gate bundle](crc-current-source/local-gates-evidence.zip).
 
-Prospective study `477fb271ef25fac533fb1faf737a5dab898190e3` uses the same
+Registered study `477fb271ef25fac533fb1faf737a5dab898190e3` uses the same
 42-observation protocol per corpus, exact package/source binding, three
 workers, interleaved controls and independent media/memory observations.
 It requires native correctness and full source/unit predecessors. Only the
@@ -309,7 +371,71 @@ parser C and WASM package members may differ. Immediate whole-bank CRC is
 inside inflation; deferred `parserSourceCrcMs` belongs inside parsing.
 Neither counter is added to elapsed import time. Both hosted source/unit
 prerequisites pass, including the complete current source oracle and the same
-669-file/15,139-test unit suite. Browser results remain pending.
+669-file/15,139-test unit suite. Actionlint also passes.
+
+#### Completed current-baseline browser study: reject
+
+[Complete CRC decision and receipts](current-browser/crc/README.md) ·
+[JMdict audit](current-browser/crc/jmdict/local-independent-audit.json) ·
+[Jitendex audit](current-browser/crc/jitendex/local-independent-audit.json) ·
+[VNDB audit](current-browser/crc/vndb/local-independent-audit.json)
+
+All 126 original package/source/output/storage/media receipts pass, and all
+three frozen local audits match the original hosted reports.
+
+| Corpus   | Whole-import paired median | Equal-work change | Faster pairs | Descriptive 95% interval | A/A median | Median paired difference |
+| -------- | -------------------------: | ----------------: | -----------: | ------------------------ | ---------: | -----------------------: |
+| JMdict   |                    +1.628% |           −0.496% |         4/12 | [−0.525%, +2.850%]       |    +0.483% |                +14.90 ms |
+| Jitendex |                    +2.368% |           +2.089% |         3/12 | [−0.090%, +3.349%]       |    −0.683% |                +27.50 ms |
+| VNDB     |                    −0.234% |           −1.028% |         6/12 | [−2.297%, +1.805%]       |    −3.298% |                −11.60 ms |
+
+JMdict's equal-work estimate is favorable while its median and 8/12 pairs
+are adverse. Pair 10, A=1,117.7 ms/B=918.6 ms, remains included; it explains
+much of that discrepancy. Jitendex's inflation-plus-immediate-CRC diagnostic
+is slower in all twelve pairs, with a +10.234% paired median. The earlier
+fresh-Node owning-phase improvement therefore cannot support a Chromium
+throughput claim. VNDB's small favorable median is mixed and sits within
+larger identical-code variation; its −600.5 ms pair 7 is also retained.
+
+Jitendex and VNDB pass all four separate memory observations each. JMdict B1
+fails the original 250 ms maximum-coverage-gap rule at 349.048089 ms after a
+process-tree change and an unreadable discovered process. All four JMdict
+memory benchmark processes exit successfully and their semantic receipts
+pass, but memory pair 1 remains unqualified. Pair 2 qualifies (sampled PSS
++0.833%, private +0.871%); aggregate memory metrics remain null. This is a
+coverage failure, not a measured memory regression or saving.
+
+The one-pragma variant is rejected. Its uncompressed WASM shrinks 1,021 bytes
+(69,068 to 68,047), while the compressed WASM member grows 55 bytes and the
+release ZIP grows 74 bytes. This does not supply a download-size saving or
+outweigh the missing complete-import improvement and adverse Jitendex phase.
+No alternate unrolling factor, lane count or further cohort is pursued.
+
+### Bounded inflater follow-up: no new candidate
+
+[Source and profile review](inflater-followup/README.md) ·
+[Retained processed profile inputs](inflater-followup/retained-profile-inputs.json)
+
+The native decoder remains substantial work in the traced JMdict observation,
+but the reviewed opportunities do not identify a new removable cost. The
+implementation already reuses its per-instance decompressor and fixed
+Huffman tables, inflates into parser-owned output, and preserves all twelve
+JMdict groups as independent bank spans without a decoded-bank joining copy.
+It already selects the wide native decode/copy path reviewed in PR #664.
+
+The retained top-frame samples bound the named table-builder function at
+approximately 8.2 sampled milliseconds; that excludes header bit decoding
+in the main decoder and is not an elapsed-import saving estimate. Dynamic
+table caching would add preserved state or copying to the current union
+layout without a measured repetition census. The separate SIMD history-copy
+proposal in PR #812 also failed to replicate a complete-import gain. No
+new implementation or timing cohort was justified by this bounded review.
+
+The retained ZIP contains original processed summaries, mapping helpers,
+named and production modules, and the current capture manifest. It is not
+the complete original raw browser trace and cannot replay trace acquisition.
+The named module's non-custom sections are independently byte-identical to
+the exact profile-baseline production module.
 
 ### Completed audit and preservation
 
@@ -321,14 +447,25 @@ retention failures. The CRC component's separate raw audit supplies its
 correctness and arithmetic verification.
 
 The root's independent local audits produce complete canonical reports equal
-to the hosted reports. Before publishing the evidence commit, the root
-rehashes 101 files, checks 104 registered tree entries, compares all four
-verbatim component archives and verifies every byte of all 313 retained
-original members per canonical corpus. Only the exact two package ZIP
+to the hosted reports. Before publishing the earlier original-cohort evidence
+commit `d32c3f68aa86c5b7fa97864cc9fbc4dda10af0a2`, the root rehashes 101 files,
+checks 104 registered tree entries, compares all four verbatim component
+archives and verifies every byte of all 313 retained original members per
+original canonical corpus. Only the exact two package ZIP
 members are omitted from the durable reduced canonical archives, after the
 full original-package audits pass; complete original member maps and outer
 digests remain. The reduced archives cannot alone repeat the full package
 audit. No original timing observation or failed memory scan is replaced.
+
+The same original-first process covers all six completed current browser
+artifacts: full original ZIP size/digest and member census, full frozen
+source/package/output audit, then compact retention of every member except
+the exact package-A/package-B ZIPs. Original hosted reports and local audit
+reports remain distinct. The root independently compares fetched Git objects
+to the local files and checks every retained member against its complete
+original artifact before advancing the evidence branch. Full current source
+and unit artifact ZIPs and all decoded job logs are retained separately.
+The final review does not infer speedup from successful source or CI gates.
 
 ## Baseline advanced during the investigation
 
