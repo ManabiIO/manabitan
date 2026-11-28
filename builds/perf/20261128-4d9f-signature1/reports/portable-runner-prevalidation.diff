@@ -1,0 +1,216 @@
+--- original/sink-parity.mjs
++++ portable/run.mjs
+@@ -6,33 +6,29 @@
+ import {createHash} from 'node:crypto';
+ import {openAsBlob} from 'node:fs';
+ import {mkdir, readFile, readdir, stat, statfs, writeFile} from 'node:fs/promises';
++import os from 'node:os';
+ import path from 'node:path';
+-import {fileURLToPath, pathToFileURL} from 'node:url';
++import {pathToFileURL} from 'node:url';
+ import {Worker as NodeWorker} from 'node:worker_threads';
+ import {analyzeFields, decodeFields, sha256, summarize} from './field-analysis.mjs';
+ import {catalogSourceFiles, openSourceCatalog, sourceManifest} from './archive-catalog.mjs';
+ import {createBoundedNodeOpfs} from './node-opfs-bounded.mjs';
+ import {digestStoredFiles} from './file-oracle.mjs';
+ import {
+-    sources, frozenRoot, priorEvidenceRoot, nodeSha256, fileHashes, fileIdentity, resources, sourceReceipt,
+-    validateSourceFamily, assertHistoricalOracleIdentity,
++    helperRoot, parseRunArguments, fileHashes, fileIdentity, resources, sourceReceipt,
++    loadVerificationManifest, readPinnedOracle, evidenceReceipt, assertHistoricalOracleIdentity,
+ } from './common.mjs';
+ import {allocationReceipt, metadataDigest, parserOutputDigest} from './metadata-oracle.mjs';
+ 
+-const evidenceRoot = path.dirname(fileURLToPath(import.meta.url));
+-const corpus = process.argv[2];
+-assert(['jitendex', 'vndb'].includes(corpus));
+-const arm = process.argv[3];
+-assert(['A', 'B'].includes(arm));
+-const {root: sourceRoot, commit: sourceCommit} = sources[arm];
+-assert.equal(process.version, 'v22.22.0');
+-const output = path.resolve(process.argv[4]);
++const configuration = parseRunArguments();
++if (configuration === null) { process.exit(0); }
++const {corpus, arm, sourceRoot, sourceCommit, output, cacheRoot, evidenceRoot, expectedNodeSha256} = configuration;
+ await mkdir(output); // Never replace a previous failed or successful acquisition.
+ const sourceModule = file => import(pathToFileURL(path.join(sourceRoot, file)).href);
+ const save = (name, data) => writeFile(path.join(output, name), `${JSON.stringify(data, null, 2)}\n`);
+-const helpers = ['sink-parity.mjs', 'field-analysis.mjs', 'common.mjs', 'metadata-oracle.mjs',
++const helpers = ['run.mjs', 'field-analysis.mjs', 'common.mjs', 'metadata-oracle.mjs',
+     'archive-catalog.mjs', 'node-opfs-bounded.mjs', 'node-opfs-bounded.test.mjs', 'file-oracle.mjs',
+-    'vndb-media-oracle.py', 'vndb-media-file-oracle.json', 'protocol.json', 'compare-results.mjs', 'launch.py'];
++    'vndb-media-oracle.py', 'compare-results.mjs', 'launch.py'];
+ const extraSources = [
+     'ext/js/dictionary/term-record-import-index-worker.js',
+     'ext/js/dictionary/term-record-import-index-worker-client.js',
+@@ -55,6 +51,10 @@
+ const pools = new Set();
+ let source;
+ let sourceFamily;
++let verification;
++let evidenceIdentity;
++let runtimeIdentity;
++let expectedOutputOracle;
+ let helperIdentity;
+ let fixture;
+ let lockSha256;
+@@ -124,7 +124,7 @@
+     peakRss = Math.max(peakRss, memory.rss);
+     assert(memory.rss < budget.maximumRssBytes, 'Census RSS budget exceeded');
+     assert(Date.now() - startedAt < budget.maximumWallMs, 'Census wall deadline exceeded');
+-    for (const [location, minimum] of [['/tmp', budget.minimumTempBytes], [output, budget.minimumReportBytes]]) {
++    for (const [location, minimum] of [[os.tmpdir(), budget.minimumTempBytes], [output, budget.minimumReportBytes]]) {
+         const info = await statfs(location);
+         assert(info.bavail * info.bsize >= minimum, `Census free-space floor: ${location}`);
+     }
+@@ -215,31 +215,36 @@
+ }
+ 
+ try {
+-    initialResources = await resources();
+-    assert.equal((await fileIdentity(process.execPath)).sha256, nodeSha256, 'Pinned Node runtime');
++    initialResources = await resources(output);
++    verification = await loadVerificationManifest(evidenceRoot);
++    assert.equal(process.version, verification.manifest.recordedNodeVersion, 'Use the recorded Node version');
++    runtimeIdentity = await fileIdentity(process.execPath);
++    if (expectedNodeSha256 !== null) { assert.equal(runtimeIdentity.sha256, expectedNodeSha256, 'Requested Node executable identity'); }
++    evidenceIdentity = await evidenceReceipt(evidenceRoot, verification.manifest);
++    const expectedOutput = await readPinnedOracle(evidenceRoot, verification.manifest, `${corpus}-output`);
++    expectedOutputOracle = JSON.parse(expectedOutput.bytes);
+     await resourceBoundary();
+-    source = await sourceReceipt(sourceRoot, sourceCommit);
++    source = await sourceReceipt(sourceRoot, sourceCommit, arm, verification.manifest);
+     source.identity = {...source.identity, ...await fileHashes(sourceRoot, extraSources)};
+-    sourceFamily = await validateSourceFamily(arm, source);
+-    helperIdentity = await fileHashes(evidenceRoot, helpers);
++    sourceFamily = {arm, historicalRuntimeCommit: verification.manifest.historicalSource.commit,
++        runtimeProfileCommit: verification.manifest.sourceProfiles[arm].runtimeCommit, verificationManifest: verification.identity};
++    helperIdentity = await fileHashes(helperRoot, helpers);
+     const lockBytes = await readFile(path.join(sourceRoot, 'test/perf/dictionaries.lock.json'));
+     lockSha256 = sha256(lockBytes);
+     fixture = JSON.parse(lockBytes).dictionaries[corpus];
+-    const archivePath = path.join(frozenRoot, 'builds/e2e-dictionary-cache', fixture.cacheFile);
++    const archivePath = path.join(cacheRoot, fixture.cacheFile);
+     assert.deepEqual(await fileIdentity(archivePath), {bytes: fixture.sizeBytes, sha256: fixture.sha256});
+     if (corpus === 'jmdict') {
+-        const oraclePath = path.resolve(evidenceRoot, '../current-db-profile/lookup-capture-2/result.json');
+-        const bytes = await readFile(oraclePath);
++        const {filename: oraclePath, bytes} = await readPinnedOracle(evidenceRoot, verification.manifest, 'jmdict-reference');
+         expectedJmdict = JSON.parse(bytes);
+         assert.equal(expectedJmdict.success, true);
+-        assert.equal(expectedJmdict.source.commit, sourceCommit);
++        assert.equal(expectedJmdict.source.commit, verification.manifest.historicalSource.commit);
+         assert.equal(expectedJmdict.fixtureSha256, fixture.sha256);
+-        for (const [file, hash] of Object.entries(expectedJmdict.source.identity)) { assert.equal(source.identity[file], hash); }
++        assertHistoricalOracleIdentity(expectedJmdict.source.identity, source.canonicalIdentity, verification.manifest, arm);
+         await save('jmdict-oracle-receipt.json', {path: oraclePath, sha256: sha256(bytes), capture: expectedJmdict.lookupCapture});
+     }
+     if (corpus === 'vndb') {
+-        const oraclePath = path.join(sourceRoot, 'dev/perf/import-qualification-evidence-20261125-a7f7/vndb-independent/corpus.json.txt');
+-        const bytes = await readFile(oraclePath);
++        const {filename: oraclePath, bytes} = await readPinnedOracle(evidenceRoot, verification.manifest, 'vndb-corpus');
+         const oracleSha256 = sha256(bytes);
+         assert.equal(oracleSha256, '62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a');
+         expectedVndbMedia = JSON.parse(bytes);
+@@ -250,8 +255,7 @@
+         assert.equal(expectedVndbMedia.uniqueImagePaths, fixture.mediaFiles);
+         vndbMediaOracleReceipt = {path: oraclePath, sha256: oracleSha256, sourceCommit: expectedVndbMedia.head,
+             scope: expectedVndbMedia.scope, note: 'Independent legacy JSON/native projection oracle: per-group representatives are not distinct archive media files.'};
+-        const fileOraclePath = path.join(evidenceRoot, 'vndb-media-file-oracle.json');
+-        const fileOracleBytes = await readFile(fileOraclePath);
++        const {filename: fileOraclePath, bytes: fileOracleBytes} = await readPinnedOracle(evidenceRoot, verification.manifest, 'vndb-media-files');
+         expectedVndbMediaFiles = JSON.parse(fileOracleBytes);
+         assert.equal(expectedVndbMediaFiles.success, true);
+         assert.equal(expectedVndbMediaFiles.fixtureSha256, fixture.sha256);
+@@ -259,7 +263,8 @@
+         assert.equal(expectedVndbMediaFiles.lockSha256, lockSha256);
+         assert.equal(expectedVndbMediaFiles.uniqueImagePaths, fixture.mediaFiles);
+         assert.equal(expectedVndbMediaFiles.mediaBytes, fixture.mediaBytes);
+-        assert.equal(expectedVndbMediaFiles.helperSha256, helperIdentity['vndb-media-oracle.py']);
++        const originalMediaHelper = await readPinnedOracle(evidenceRoot, verification.manifest, 'vndb-media-original-helper');
++        assert.equal(expectedVndbMediaFiles.helperSha256, originalMediaHelper.identity.sha256);
+         vndbMediaOracleReceipt.independentFileOracle = {path: fileOraclePath, sha256: sha256(fileOracleBytes)};
+         await save('media-oracle-receipt.json', vndbMediaOracleReceipt);
+     }
+@@ -269,7 +274,8 @@
+         return new Response(await readFile(url), {headers: {'Content-Type': 'application/wasm'}});
+     };
+     env = await createBoundedNodeOpfs();
+-    assert(env.rootPath.startsWith('/tmp/manabitan-opfs-'));
++    assert.equal(path.dirname(env.temporaryRoot), os.tmpdir());
++    assert(path.basename(env.temporaryRoot).startsWith('manabitan-opfs-bounded-'));
+     stage = 'module and archive catalog setup';
+     await save('setup.json', {stage, corpus, arm, source, sourceFamily, helperIdentity, fixture, lockSha256,
+         node: process.version, execArgv: process.execArgv, budget, initialResources,
+@@ -298,12 +304,12 @@
+     assert.equal(index.revision, fixture.revision);
+     const manifestSha256 = sha256(JSON.stringify(sourceManifest(banks)));
+     if (corpus === 'vndb') {
+-        const referenceBytes = await readFile(path.join(priorEvidenceRoot, 'vndb-directory-preflight-1/result.json'));
++        const {bytes: referenceBytes} = await readPinnedOracle(evidenceRoot, verification.manifest, 'vndb-directory');
+         const reference = JSON.parse(referenceBytes);
+         assert(reference.success && reference.independentCentralDirectoryExactMatch);
+         assert.equal(opened.catalog, 'dense-zip');
+         assert.equal(reference.manifestSha256, manifestSha256);
+-        assertHistoricalOracleIdentity(reference.source.identity, source.identity, sourceFamily);
++        assertHistoricalOracleIdentity(reference.source.identity, source.canonicalIdentity, verification.manifest, arm);
+         await save('catalog-oracle-receipt.json', {sha256: sha256(referenceBytes), manifestSha256});
+     }
+     totalBytes = banks.reduce((total, bank) => total + bank.uncompressedSize, 0);
+@@ -560,27 +566,25 @@
+     await save('signature-allocation.json', {arm, corpus, final: signatureAllocation,
+         groups: groupResults.map(group => ({group: group.group, ...group.signatureAllocation})),
+         nullPhysicalSignature1EveryGroup: groupResults.every(group => group.signatureAllocation.physicalSignature1IsNull)});
+-    let completeFileOracle = null;
+-    if (expectedJmdict) {
+-        const expectedFileBytes = await readFile(path.resolve(evidenceRoot, '../current-db-profile/lookup-capture-2/final-output-oracle.json'));
+-        assert.equal(sha256(expectedFileBytes), expectedJmdict.finalOracle.sha256);
+-        const actual = await digestStoredFiles(env.rootPath);
+-        assert.deepEqual(actual, JSON.parse(expectedFileBytes).persisted);
+-        completeFileOracle = {allFileBytesMatch: true, expectedOracleSha256: sha256(expectedFileBytes),
+-            observed: actual, normalization: 'Only the random 16-byte generation identifiers, after validating paired linkage'};
+-        await save('complete-file-oracle.json', completeFileOracle);
+-    }
+-    const finalSource = await sourceReceipt(sourceRoot, sourceCommit);
++    assert.deepEqual(finalOracle, expectedOutputOracle, 'Complete recorded file and logical metadata oracle');
++    const expectedOracleIdentity = verification.manifest.oracles[`${corpus}-output`];
++    assert.equal((await fileIdentity(path.join(output, 'final-output-oracle.json'))).sha256, expectedOracleIdentity.sha256);
++    const completeFileOracle = {allFileBytesMatch: true, allLogicalMetadataMatches: true,
++        expectedOracleSha256: expectedOracleIdentity.sha256,
++        normalization: 'Only independently linked random16-byte file generation identifiers and representation-specific logical S1 markers'};
++    await save('complete-file-oracle.json', completeFileOracle);
++    const finalSource = await sourceReceipt(sourceRoot, sourceCommit, arm, verification.manifest);
+     finalSource.identity = {...finalSource.identity, ...await fileHashes(sourceRoot, extraSources)};
+     assert.deepEqual(finalSource, source);
+-    assert.deepEqual(await fileHashes(evidenceRoot, helpers), helperIdentity);
++    assert.deepEqual(await fileHashes(helperRoot, helpers), helperIdentity);
++    assert.deepEqual(await evidenceReceipt(evidenceRoot, verification.manifest), evidenceIdentity);
+     const summary = summarize(chunks);
+     const actualIndexBytes = files.filter(file => file.path.endsWith('.mbtr.mbti')).reduce((total, file) => total + file.bytes, 0);
+     const actualContentBytes = files.filter(file => file.path.startsWith('manabitan-term-content.bin')).reduce((total, file) => total + file.bytes, 0);
+     const actualAllFilesBytes = files.reduce((total, file) => total + file.bytes, 0);
+     assert(summary.currentFieldsBytes <= actualIndexBytes);
+     await save('result.json', {success: true, timingEligible: false, corpus, arm, source, sourceFamily, helperIdentity,
+-        fixture, lockSha256, node: process.version, execArgv: process.execArgv,
++        fixture, lockSha256, node: process.version, runtimeIdentity, evidenceIdentity, execArgv: process.execArgv,
+         boundary: 'Actual current parent/candidate parser, public DB sink, real codecs and record-store fields with exact source grouping and ordered sink, bounded filesystem-backed Node OPFS adapter. Every persisted file and logical metadata column hashed. No import-speed or browser-memory claim.',
+         mediaBoundary: 'Default skipImageMetadata/direct-artifact route passes columnPayload unchanged. Media requirements/files, UI, SQLite transaction, browser scheduling, restart and lookup are outside this census.',
+         indexStorageBoundary: 'Real import-index worker runs when eligible; Node adapter handles lack createSyncAccessHandle and production code falls back to its asynchronous writer.',
+@@ -595,14 +599,14 @@
+         files, completeFileOracle, finalOracle: await fileIdentity(path.join(output, 'final-output-oracle.json')),
+         signatureAllocation, nullPhysicalSignature1EveryGroup: groupResults.every(group => group.signatureAllocation.physicalSignature1IsNull),
+         sourceChecks, groupResults, chunks, budget, peakRssDiagnosticBytes: peakRss,
+-        initialResources, finalResources: await resources()});
++        initialResources, finalResources: await resources(output)});
+     console.log(JSON.stringify({corpus, success: true, summary, actualIndexBytes, actualAllFilesBytes}));
+ } catch (error) {
+     await save('failure.json', {success: false, corpus, arm, stage, currentGroup, error: String(error?.stack ?? error),
+-        source, helperIdentity, fixture, lockSha256, policy, rows, mediaRows, totalBytes,
++        source, helperIdentity, evidenceIdentity, runtimeIdentity, configuration, fixture, lockSha256, policy, rows, mediaRows, totalBytes,
+         groupResults, sourceChecks, chunks, budget, plannedBlocks, compressionRequests,
+         compressionReplies, sourceConsumedReplies, indexUnsupportedReplies,
+-        initialResources, finalResources: await resources()});
++        initialResources, finalResources: await resources(output)});
+     throw error;
+ } finally {
+     for (const worker of workers) { worker.terminate(); }

@@ -1,0 +1,106 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# (node:11) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: both implicit columns decode to exact independent baseline bytes including the zero tail
+ok 1 - both implicit columns decode to exact independent baseline bytes including the zero tail
+  ---
+  duration_ms: 2.556884
+  type: 'test'
+  ...
+# Subtest: a physical nonuniform dictionary-name column is hashed exactly while historical prefix scalars remain recorded
+ok 2 - a physical nonuniform dictionary-name column is hashed exactly while historical prefix scalars remain recorded
+  ---
+  duration_ms: 0.39078
+  type: 'test'
+  ...
+# Subtest: native S1 backing is counted once and the external dictionary-name backing is included
+ok 3 - native S1 backing is counted once and the external dictionary-name backing is included
+  ---
+  duration_ms: 0.238634
+  type: 'test'
+  ...
+# Subtest: an external materialized first-signature column is also counted exactly once
+ok 4 - an external materialized first-signature column is also counted exactly once
+  ---
+  duration_ms: 0.179868
+  type: 'test'
+  ...
+# Subtest: an unrecognized logical metadata property cannot disappear from the oracle
+ok 5 - an unrecognized logical metadata property cannot disappear from the oracle
+  ---
+  duration_ms: 2.106646
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixValue=-1 is rejected even after materialization
+ok 6 - invalid representation property _termEntryContentMetaDictNameIdPrefixValue=-1 is rejected even after materialization
+  ---
+  duration_ms: 0.222238
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixValue=0.5 is rejected even after materialization
+ok 7 - invalid representation property _termEntryContentMetaDictNameIdPrefixValue=0.5 is rejected even after materialization
+  ---
+  duration_ms: 0.403942
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixValue=4294967296 is rejected even after materialization
+ok 8 - invalid representation property _termEntryContentMetaDictNameIdPrefixValue=4294967296 is rejected even after materialization
+  ---
+  duration_ms: 0.142226
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=-1 is rejected even after materialization
+ok 9 - invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=-1 is rejected even after materialization
+  ---
+  duration_ms: 0.253517
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=0.5 is rejected even after materialization
+ok 10 - invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=0.5 is rejected even after materialization
+  ---
+  duration_ms: 0.379542
+  type: 'test'
+  ...
+# Subtest: invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=5 is rejected even after materialization
+ok 11 - invalid representation property _termEntryContentMetaDictNameIdPrefixEnd=5 is rejected even after materialization
+  ---
+  duration_ms: 0.215151
+  type: 'test'
+  ...
+# (node:12) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: existing: ordered writes, committed visibility, snapshots, abort
+ok 12 - existing: ordered writes, committed visibility, snapshots, abort
+  ---
+  duration_ms: 15.760375
+  type: 'test'
+  ...
+# Subtest: bounded: ordered writes, committed visibility, snapshots, abort
+ok 13 - bounded: ordered writes, committed visibility, snapshots, abort
+  ---
+  duration_ms: 20.660232
+  type: 'test'
+  ...
+# Subtest: bounded: validates confined paths and closes abandoned writers
+ok 14 - bounded: validates confined paths and closes abandoned writers
+  ---
+  duration_ms: 7.570893
+  type: 'test'
+  ...
+# Subtest: bounded: lazy slices and a large staged write retain exact data
+ok 15 - bounded: lazy slices and a large staged write retain exact data
+  ---
+  duration_ms: 11.237894
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 159.015543

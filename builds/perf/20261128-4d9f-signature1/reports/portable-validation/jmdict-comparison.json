@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "jmdict",
+  "parent": {
+    "directory": "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-A-1",
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  },
+  "candidate": {
+    "directory": "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-B-1",
+    "commit": "232de57c6fd78ef1115d6db97d2ac5bb2c224417"
+  },
+  "rows": 528299,
+  "groups": 12,
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "node": "v22.22.0",
+  "exactParserOutputsAndLookupPayloads": true,
+  "exactRecordFieldsAndEnvelopes": true,
+  "exactNormalizedFinalFileBytes": true,
+  "exactIndependentLogicalMetadata": true,
+  "finalOutputOracle": {
+    "bytes": 4712,
+    "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+  },
+  "persistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 19566680,
+      "sha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "bytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "bytes": 23748952,
+      "sha256": "397dae5e5f86853b47a90384739e42754e7ed84869a2d2142d05220f3600114f",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "generationLinkageVerified": true,
+  "logicalMetadataColumns": [
+    "_termEntryContentMetaByHash",
+    "_termEntryContentMetaCollisionsByHashPair",
+    "_termEntryContentMetaDenseCount",
+    "_termEntryContentMetaDictNameIdByValue",
+    "_termEntryContentMetaDictNameIdTable",
+    "_termEntryContentMetaDictNames",
+    "_termEntryContentMetaFreeIndexes",
+    "_termEntryContentMetaHash1Table",
+    "_termEntryContentMetaHash2Table",
+    "_termEntryContentMetaHashPairCount",
+    "_termEntryContentMetaHashPairMask",
+    "_termEntryContentMetaHashPairPendingCount",
+    "_termEntryContentMetaHashPairTable",
+    "_termEntryContentMetaIdTable",
+    "_termEntryContentMetaLengthTable",
+    "_termEntryContentMetaOffsetTable",
+    "_termEntryContentMetaRecentSourceBatchIdTable",
+    "_termEntryContentMetaRecentSourceOffsetTable",
+    "_termEntryContentMetaSignature1Table",
+    "_termEntryContentMetaSignature2Table",
+    "_termEntryContentMetaSignature3Table",
+    "_termEntryContentMetaSignaturePresentTable",
+    "_termEntryContentMetaStateTable"
+  ],
+  "compression": {
+    "codecWorkers": 4,
+    "plannedBlocks": 103,
+    "compressionRequests": 103,
+    "compressionReplies": 103,
+    "sourceConsumedReplies": 103
+  },
+  "indexWorker": {
+    "count": 0,
+    "unsupportedOpenReplies": 0
+  },
+  "parentAllocation": {
+    "arenaWasAllocated": true,
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 26214400,
+    "physicalSignature1IsNull": false,
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 26214400
+  },
+  "candidateAllocation": {
+    "arenaWasAllocated": true,
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 24117248,
+    "physicalSignature1IsNull": true,
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 24117248
+  },
+  "finalOwnedBytesAvoided": 2097152,
+  "candidateNullPhysicalSignature1EveryGroup": true,
+  "perGroupAllocation": [
+    {
+      "group": 0,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 34951,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 34951,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 1,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 67690,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 67690,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 2,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 99946,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 99946,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 3,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 128704,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 128704,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 4,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 162863,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 162863,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 5,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 196406,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 196406,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 6,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 220436,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 220436,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 7,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 251766,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 251766,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 8,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 277208,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 277208,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 9,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 302014,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 302014,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 10,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 327665,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 327665,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    },
+    {
+      "group": 11,
+      "parent": {
+        "arenaWasAllocated": true,
+        "denseCount": 362032,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400
+      },
+      "candidate": {
+        "arenaWasAllocated": true,
+        "denseCount": 362032,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248
+      },
+      "ownedBytesAvoided": 2097152
+    }
+  ],
+  "limitations": [
+    "Sequential production-group term-sink replay, not concurrent browser import timing.",
+    "Final owned-array/native-memory accounting is not browser peak or settled memory.",
+    "Media projection/reference coverage is checked; separate media persistence, UI, SQLite, restart and lookup remain outside this boundary."
+  ]
+}

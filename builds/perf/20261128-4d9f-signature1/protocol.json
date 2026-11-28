@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 4,
+  "purpose": "Portable complete JMdict, Jitendex and VNDB current-parent/candidate term-sink parity and combined implicit metadata allocation verification",
+  "timingEligible": false,
+  "parentCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateCommit": "55e87bc64c9b043a91f1d075f0324d3176c18c9a",
+  "candidateTree": "dffcaebec8348865266875264ffc7c6ee7e4da3b",
+  "sourceSelection": "CLI source root and exact source ID; committed verification-manifest runtime tree/file hashes pin dcfc and 55e87bc independently of helper/evidence-only commits. Generated ZIP source comments are normalized to one complete pinned bundle SHA only.",
+  "runtime": "Node v22.22.0 required; actual executable SHA256 recorded and equal A/B required. Optional --node-sha256 enforces recorded Linux x64 binary.",
+  "runtimeHeapMiB": 512,
+  "observations": "One complete fresh-process A and one complete fresh-process B per corpus, sequential under the shared CPU slot; failed attempts remain separate",
+  "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS",
+  "oracles": [
+    "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
+    "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
+    "Every encoded record row independently decoded and checked against its input score/reference; every record field and final envelope hash retained",
+    "All persisted file bytes hashed twice: raw receipt plus comparison form normalizing only independently linked random 16-byte record/index generation identifiers",
+    "Every logical metadata column, slot, ordered collision entry, dictionary interner, high-water and free-ID state hashed",
+    "Candidate S1/presence independently decoded from marker 2 and literal 0x3652424d; virtual dictionary-name column independently reconstructed from its prefix with a zero capacity tail; no product getter or materializer is invoked",
+    "Per-group and final native arena, external S1 and dictionary-name backing measured separately; both prefix scalar properties explicitly validated and recorded; physical null status observed without assuming identical behavior across corpora",
+    "Independent VNDB full-corpus group/media path oracle and ZIP media filename oracle retained: 170 groups, 146725 references, 146570 distinct paths, 155 repeated group representatives",
+    "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
+    "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest"
+  ],
+  "resourcePolicy": {
+    "minimumTemporaryBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallSeconds": 1200,
+    "firstExecYieldMilliseconds": 30000
+  },
+  "excludedClaims": [
+    "Whole-browser import speed or parser concurrency timing",
+    "Browser peak/settled memory qualification",
+    "Media file persistence, settings UI, SQLite transaction, restart or lookup validation",
+    "New format byte savings from the copied field-size diagnostic"
+  ],
+  "preflightRevision": {
+    "reason": "Original JV acquisition first stopped on regenerated ZIP source-path comments, before parsing any group",
+    "priorProtocol": "original-evidence.tar.gz:original-jv/preflight-1-source/protocol.json",
+    "provenance": "reports/generated-zip-comment-provenance.json",
+    "diff": "reports/generated-zip-comment-only.diff",
+    "runtimeSourceChanged": false,
+    "revisionMadeBeforeFirstSuccessfulOriginalAcquisition": true
+  },
+  "portableDerivative": {
+    "source": "The validated portable S1 helper/evidence from de8d30b plus Node-contract filename follow-up 071a8a9; combined metadata decoding/allocation and strict property inventory added separately",
+    "runtimeCodeChangedByHelper": false,
+    "candidateRuntimeCommit": "55e87bc64c9b043a91f1d075f0324d3176c18c9a",
+    "helperValidation": "Executed helper contracts and complete fresh A/B observations are recorded separately under reports; this frozen protocol does not assert their outcome."
+  }
+}

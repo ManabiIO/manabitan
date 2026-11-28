@@ -1,0 +1,15 @@
+{
+  "scope": "Helper packaging only; excludes explicit Node contracts from Vitest discovery",
+  "priorHelperCommit": "de8d30b5bffa804dc742e28c5cc24b7416468ec2",
+  "oldPath": "test/perf/signature1-corpus-verification/node-opfs-bounded.test.mjs",
+  "newPath": "test/perf/signature1-corpus-verification/node-opfs-bounded.contract.mjs",
+  "fileContentsByteIdentical": true,
+  "contractSha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2",
+  "updatedCallSites": [
+    "run.mjs helper identity list",
+    "README.md explicit node --test command"
+  ],
+  "runtimeSourceChanged": false,
+  "originalValidationReceiptsRetained": true,
+  "additionalFullCorpusReplay": "Not needed for a file suffix and hash-list path change; original complete A/B proof retained."
+}

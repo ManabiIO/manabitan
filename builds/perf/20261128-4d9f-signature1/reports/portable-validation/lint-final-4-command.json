@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+    "node_modules/eslint/bin/eslint.js",
+    "test/perf/signature1-corpus-verification",
+    "--format",
+    "json",
+    "--output-file",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/lint-final-4.json"
+  ],
+  "returncode": 0,
+  "secondsDiagnostic": 4.364716529846191
+}

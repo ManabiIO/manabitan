@@ -1,0 +1,112 @@
+{
+  "success": true,
+  "timingEligible": false,
+  "baseline": {
+    "root": "/home/agent/manabitan-current-4d9ffe79ec6f",
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identity": {
+      "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-content-opfs-store.js": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+      "ext/js/dictionary/term-record-opfs-store.js": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "test/fixtures/opfs-continuation/node-opfs-adapter.mjs": "5ae07ae3f36e712a13f7b17aa18a264373b98d263102a2f50bbe86bf748f429a",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+      "dev/data/dictionary-wasm/manifest.json": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+      "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+      "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "ext/lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    }
+  },
+  "candidate": {
+    "root": "/home/agent/manabitan-signature1-4d9ffe79ec6f",
+    "commit": "df25b497c46d79e72d1cd3b52589e31ade24b35a",
+    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identity": {
+      "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/dictionary-database.js": "0af519acab7243edc46abea9dafd0bbe9a1bf9a312a86bcb680057a1aa8f8969",
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-content-opfs-store.js": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+      "ext/js/dictionary/term-record-opfs-store.js": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "test/fixtures/opfs-continuation/node-opfs-adapter.mjs": "5ae07ae3f36e712a13f7b17aa18a264373b98d263102a2f50bbe86bf748f429a",
+      "ext/js/dictionary/term-content-canonical-scan.js": "746dc752e0fa555f7924d1340998674bb10fff624554f212da859bff865b5fda",
+      "ext/js/dictionary/term-content-metadata-arena.js": "e9f94bcc1ad421e997b22874b61b49f118efdcac72ecd881db8a606f3ebb16f9",
+      "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "c2439ff67d54e21625385a8aa7c79aca6d3b4bb2714aee4a5169140facab991e",
+      "dev/data/dictionary-wasm/manifest.json": "c8fe77203ea654ff748b12ed0cb52c95443ce85f2eb17d67c90d07a6ecaccabb",
+      "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+      "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "ext/lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "d629347973c6d7eb98a1125302dd4713e22a5d0a7059b25dd2c2ee37d3e3baf0",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    }
+  },
+  "rows": 528299,
+  "groups": 12,
+  "frames": 103,
+  "finalOracle": {
+    "bytes": 4712,
+    "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+  },
+  "allocationA": {
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 26214400,
+    "physicalSignature1": {
+      "type": "Uint32Array",
+      "length": 524288,
+      "bytes": 2097152,
+      "sha256": "6fed4e642e597cae275a2d1cf84a38569ba214b0ae712a1c37be4e918af5ce5a"
+    },
+    "signaturePresent": {
+      "type": "Uint8Array",
+      "length": 524288,
+      "bytes": 524288,
+      "sha256": "f7be999e90823375a0a906cbf1ca2ac420f60723d5c8bd824f33e38420d44c83"
+    },
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 26214400
+  },
+  "allocationB": {
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 24117248,
+    "physicalSignature1": null,
+    "signaturePresent": {
+      "type": "Uint8Array",
+      "length": 524288,
+      "bytes": 524288,
+      "sha256": "832f33fe6dea23135aa1eceb921bc2e8b129fd613e4d586385db3227d49811c6"
+    },
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 24117248
+  },
+  "retainedBackingBytesAvoided": 2097152,
+  "limitation": "No browser whole-import latency or process peak claim"
+}

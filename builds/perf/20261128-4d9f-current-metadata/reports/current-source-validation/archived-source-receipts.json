@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "archive": "../../validation-and-source-81e203e.tar.gz",
+  "archiveIndex": "../../current-source-validation-index.json",
+  "purpose": "Expanded immutable source manifests and package inventories remain in the verified archive to keep the review diff compact. The workspace originals are also retained.",
+  "members": [
+    {
+      "path": "package-audit.json",
+      "bytes": 191785,
+      "sha256": "f0cc0b28e646502ab0bb2efe37b2ef1113ca8140265697358d33787f30ab602b"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 16523,
+      "sha256": "98daa63b04d010ebf93b096ce977d0fb0a80e6e5fcdf13b27f16f0b36c32885c"
+    },
+    {
+      "path": "validated-source-manifest.json",
+      "bytes": 16910,
+      "sha256": "09f52ddff9d5c3fdc5be6272bc3b9154a8e34609e88524d4659201109384da1d"
+    }
+  ]
+}

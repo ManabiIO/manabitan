@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "sourceTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+  "runtimeIntegration": "fc431c38e5c614069e75652d60b3b5c50682986b",
+  "runtimeTree": "9f19f03afba5eb6f2eedd32db813a206a8abee3d",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "runtimeChangeAfterFocusedTests": false,
+  "testOnlyChange": "Two multi-line accessor fixture objects split properties onto separate lines; six scoped lint findings corrected.",
+  "completedLocalGates": [
+    "normal build:libs",
+    "11 focused suites / 318 tests",
+    "main TypeScript",
+    "dev TypeScript",
+    "bench TypeScript",
+    "all-target dry build",
+    "parent and candidate Chrome release builds",
+    "exact five-entry package audit",
+    "4 CRC tests after pinned-linker PATH correction"
+  ],
+  "incompleteLocalGates": [
+    "full-unit process SIGKILL after 423 passing-file markers; no final Vitest JSON",
+    "test TypeScript: original npm 137, then 1 GiB explicit heap SIGABRT, then 2 GiB SIGKILL",
+    "corrected-file ESLint retry SIGKILL; original scoped command had only six formatting findings in the two now-corrected fixtures"
+  ],
+  "hostedGates": "Root launched exact-runtime hosted full unit/types/dry-build/native checks; ordinary PR CI will cover corrected-file lint. No hosted outcome assumed here.",
+  "fullUnitPartial": {
+    "passingFileMarkers": 423,
+    "finalJsonExists": false,
+    "setupSkippedCrcTests": 4,
+    "crcResolution": "Pinned Clang invokes wasm-ld-21; extracted usr/bin was absent from original validation PATH. The alias exists there. Adding that same pinned directory made all 4 CRC tests pass without changing product source."
+  },
+  "packageAudit": "package-audit.json",
+  "results": [
+    {
+      "label": "base-chrome-release-1",
+      "sourceId": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/base-chrome-release-1/result.json",
+      "logSha256": "568b5dcfdfff7430e34f1c61e770488747668d771c3088c0b817a289dfae8f2c",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "dev/bin/build.js",
+        "--target",
+        "chrome"
+      ]
+    },
+    {
+      "label": "candidate-bench-types-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-bench-types-1/result.json",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "--max-old-space-size=1024",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "benches/jsconfig.json"
+      ]
+    },
+    {
+      "label": "candidate-build-libs-1",
+      "sourceId": "fc431c38e5c614069e75652d60b3b5c50682986b",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-build-libs-1/result.json",
+      "logSha256": "202a87a00ef76091d8a32984349b989f52b738f07047864bf3713d162d3dcc74",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "dev/bin/build-libs.js"
+      ]
+    },
+    {
+      "label": "candidate-chrome-release-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-chrome-release-1/result.json",
+      "logSha256": "568b5dcfdfff7430e34f1c61e770488747668d771c3088c0b817a289dfae8f2c",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "dev/bin/build.js",
+        "--target",
+        "chrome"
+      ]
+    },
+    {
+      "label": "candidate-crc-setup-control-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-crc-setup-control-1/result.json",
+      "logSha256": "c2950b6c970443ab15276f20e8807a493ebedf9c055fac7b4ee504c0ade86939",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/term-bank-crc.test.js",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/candidate-crc-setup-control-1/vitest.json"
+      ],
+      "vitest": {
+        "numTotalTestSuites": 2,
+        "numPassedTestSuites": 2,
+        "numFailedTestSuites": 0,
+        "numTotalTests": 4,
+        "numPassedTests": 4,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      }
+    },
+    {
+      "label": "candidate-dry-build-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-dry-build-1/result.json",
+      "logSha256": "c865bdb676eb2d3ed548b9ae8729197bc84cc2f76b82c4b9731a311c8c5e1741",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "dev/bin/build.js",
+        "--dryRun",
+        "--all"
+      ]
+    },
+    {
+      "label": "candidate-focused-1",
+      "sourceId": "fc431c38e5c614069e75652d60b3b5c50682986b",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-focused-1/result.json",
+      "logSha256": "d37878f3174de7728a06b833dea593df7b55dccf25d969447a5c65ab09f8d495",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/dictionary-content-implicit-columns.test.js",
+        "test/dictionary-content-lazy-ids.test.js",
+        "test/dictionary-content-dict-name-prefix.test.js",
+        "test/term-content-signature1.test.js",
+        "test/dictionary-content-publication-range.test.js",
+        "test/dictionary-database-content-dedup.test.js",
+        "test/term-content-canonical-scan.test.js",
+        "test/term-content-metadata-arena.test.js",
+        "test/term-content-metadata-growth.test.js",
+        "test/dictionary-database-in-flight-content-source.test.js",
+        "test/raw-term-content-block.test.js",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/candidate-focused-1/vitest.json"
+      ],
+      "vitest": {
+        "numTotalTestSuites": 28,
+        "numPassedTestSuites": 28,
+        "numFailedTestSuites": 0,
+        "numTotalTests": 318,
+        "numPassedTests": 318,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      }
+    },
+    {
+      "label": "candidate-full-unit-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": -9,
+      "signal": "SIGKILL",
+      "timedOut": false,
+      "resultPath": "validation/candidate-full-unit-1/result.json",
+      "logSha256": "31a3c9fbed2971f5f785deb171fdbfacfcfac506447b4cbb5f2a7fcb1f2b379b",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/candidate-full-unit-1/vitest.json"
+      ]
+    },
+    {
+      "label": "candidate-scoped-lint-1",
+      "sourceId": "fc431c38e5c614069e75652d60b3b5c50682986b",
+      "returnCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-scoped-lint-1/result.json",
+      "logSha256": "7fcea25c0dc71442574842fcba89ce51027722f6166c53c96da701e5275e9777",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "node_modules/eslint/bin/eslint.js",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-content-canonical-scan.js",
+        "ext/js/dictionary/term-content-metadata-arena.js",
+        "test/dictionary-content-dict-name-prefix.test.js",
+        "test/dictionary-content-implicit-columns.test.js",
+        "test/dictionary-content-publication-range.test.js",
+        "test/dictionary-database-content-dedup.test.js",
+        "test/term-content-canonical-scan.test.js",
+        "test/term-content-metadata-arena.test.js",
+        "test/term-content-metadata-growth.test.js",
+        "test/term-content-signature1.test.js"
+      ]
+    },
+    {
+      "label": "candidate-test-lint-2",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": -9,
+      "signal": "SIGKILL",
+      "timedOut": false,
+      "resultPath": "validation/candidate-test-lint-2/result.json",
+      "logSha256": "f6ba0ef46e1959c9149e0e39b24290bcabb4d934ef3301b523bf63dc58054e8d",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "node_modules/eslint/bin/eslint.js",
+        "test/term-content-signature1.test.js"
+      ]
+    },
+    {
+      "label": "candidate-test-types-2",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": -6,
+      "signal": "SIGABRT",
+      "timedOut": false,
+      "resultPath": "validation/candidate-test-types-2/result.json",
+      "logSha256": "fc3afb1388a4e2f1048ec381463ff5df83ee19f6acfb075bdd54ea312b863dfc",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "--max-old-space-size=1024",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ]
+    },
+    {
+      "label": "candidate-test-types-3",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": -9,
+      "signal": "SIGKILL",
+      "timedOut": false,
+      "resultPath": "validation/candidate-test-types-3/result.json",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": [
+        "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+        "--max-old-space-size=2048",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ]
+    },
+    {
+      "label": "candidate-types-1",
+      "sourceId": "fc431c38e5c614069e75652d60b3b5c50682986b",
+      "returnCode": 137,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/candidate-types-1/result.json",
+      "logSha256": "b128961e85a98332782b1af4dec7e22996eb4874d76217df174181524355e7c5",
+      "command": [
+        "npm",
+        "run",
+        "test:ts"
+      ]
+    },
+    {
+      "label": "crc-compiler-dry-command",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/crc-compiler-dry-command/result.json",
+      "logSha256": "e3ab7f4a69503592c9c3bc0be818051e2276d0b2299f2616930cb8624d1fe92f",
+      "command": [
+        "/workspace/scratch/4d9ffe79ec6f/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+        "-###",
+        "--target=wasm32-freestanding",
+        "-matomics",
+        "-mbulk-memory",
+        "-nostdlib",
+        "-Wl,--no-entry",
+        "-Wl,--shared-memory",
+        "-Wl,--max-memory=4294967296",
+        "-Wl,--export=probe",
+        "-Wl,--strip-all",
+        "-o",
+        "/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/crc-compiler-probe.wasm",
+        "/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/crc-compiler-probe.c"
+      ]
+    },
+    {
+      "label": "crc-compiler-probe-1",
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "returnCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "resultPath": "validation/crc-compiler-probe-1/result.json",
+      "logSha256": "b7910ae3dab8e91844eaa2247bf5ef1993ca4cf962288e34ea6dfaadf276ba89",
+      "command": [
+        "/workspace/scratch/4d9ffe79ec6f/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+        "--target=wasm32-freestanding",
+        "-matomics",
+        "-mbulk-memory",
+        "-nostdlib",
+        "-Wl,--no-entry",
+        "-Wl,--shared-memory",
+        "-Wl,--max-memory=4294967296",
+        "-Wl,--export=probe",
+        "-Wl,--strip-all",
+        "-o",
+        "/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/crc-compiler-probe.wasm",
+        "/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/validation/crc-compiler-probe.c"
+      ]
+    }
+  ]
+}

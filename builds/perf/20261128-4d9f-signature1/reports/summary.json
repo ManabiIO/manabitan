@@ -1,0 +1,89 @@
+{
+  "success": true,
+  "timingEligible": false,
+  "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "232de57c6fd78ef1115d6db97d2ac5bb2c224417",
+  "corpora": [
+    {
+      "corpus": "jitendex",
+      "parentRun": "jitendex-A-2",
+      "candidateRun": "jitendex-B-1",
+      "rows": 436555,
+      "groups": 22,
+      "banks": 219,
+      "sourceBytes": 538927310,
+      "recordChunks": 22,
+      "finalDenseCount": 363243,
+      "capacity": 524288,
+      "parentOwnedArenaBytes": 26214400,
+      "candidateOwnedArenaBytes": 24117248,
+      "avoidedOwnedArenaBytes": 2097152,
+      "candidatePhysicalS1AlwaysNull": true,
+      "finalOracleSHA256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff",
+      "totalPersistedBytes": 61977692,
+      "metadataColumns": 23,
+      "codec": {
+        "codecWorkers": 4,
+        "plannedBlocks": 385,
+        "compressionRequests": 385,
+        "compressionReplies": 385,
+        "sourceConsumedReplies": 385
+      },
+      "indexWorker": {
+        "count": 0,
+        "unsupportedOpenReplies": 0
+      },
+      "sampledRssDiagnosticBytes": {
+        "A": 443576320,
+        "B": 442146816
+      },
+      "processMaxRssDiagnosticKiB": {
+        "A": 447404,
+        "B": 452252
+      }
+    },
+    {
+      "corpus": "vndb",
+      "parentRun": "vndb-A-1",
+      "candidateRun": "vndb-B-1",
+      "rows": 6648310,
+      "groups": 170,
+      "banks": 665,
+      "sourceBytes": 4267992967,
+      "recordChunks": 192,
+      "finalDenseCount": 157150,
+      "capacity": 262144,
+      "parentOwnedArenaBytes": 17301504,
+      "candidateOwnedArenaBytes": 16252928,
+      "avoidedOwnedArenaBytes": 1048576,
+      "candidatePhysicalS1AlwaysNull": true,
+      "finalOracleSHA256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62",
+      "totalPersistedBytes": 409433345,
+      "metadataColumns": 23,
+      "codec": {
+        "codecWorkers": 4,
+        "plannedBlocks": 0,
+        "compressionRequests": 0,
+        "compressionReplies": 0,
+        "sourceConsumedReplies": 0
+      },
+      "indexWorker": {
+        "count": 1,
+        "unsupportedOpenReplies": 2
+      },
+      "sampledRssDiagnosticBytes": {
+        "A": 466735104,
+        "B": 473055232
+      },
+      "processMaxRssDiagnosticKiB": {
+        "A": 458100,
+        "B": 471280
+      }
+    }
+  ],
+  "preflightFailures": [
+    "jitendex-A-1"
+  ],
+  "acquisitionFailures": [],
+  "scope": "Complete term-sink correctness and physical metadata allocation accounting; not browser speed or process memory qualification"
+}

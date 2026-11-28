@@ -1,0 +1,28 @@
+{
+  "cause": "esbuild source-path line comments contain the restored shared node_modules location",
+  "runtimeCodeUnchanged": true,
+  "exactPrefixOld": "// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/",
+  "exactPrefixNormalized": "// node_modules/",
+  "replacedCommentLines": 24,
+  "bytesAdded": 936,
+  "identities": {
+    "frozen": {
+      "path": "/workspace/scratch/4d9ffe79ec6f/manabitan/ext/lib/zip.js",
+      "bytes": 191228,
+      "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+    },
+    "A": {
+      "path": "/home/agent/manabitan-current-4d9ffe79ec6f/ext/lib/zip.js",
+      "bytes": 192164,
+      "sha256": "48cdbc73ba8dccbba63e8d868d9a2a430625e98e0898c883b593f39d2356790e"
+    },
+    "B": {
+      "path": "/home/agent/manabitan-signature1-4d9ffe79ec6f/ext/lib/zip.js",
+      "bytes": 192164,
+      "sha256": "48cdbc73ba8dccbba63e8d868d9a2a430625e98e0898c883b593f39d2356790e"
+    }
+  },
+  "normalizedSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+  "failedAttempt": "jitendex-A-1: source preflight, exit1, signal null, zero groups",
+  "runtimeFilesMutated": false
+}
