@@ -362,7 +362,8 @@
         "userVersion": 0,
         "actualEmptyGlossaryInvalidationKeepsExportUnchanged": true,
         "seededControlDeletesOnlyIntendedDictionaryRows": true,
-        "rootEpochAndHighWaterRemainZero": true
+        "rootEpochAndHighWaterRemainZero": true,
+        "scope": "Separate real public-sink controls on each source arm. Whole-SQLite export digests are not recorded by the actual metadata corpus acquisitions."
       },
       "results": [
         {
@@ -406,7 +407,8 @@
         "independentAuditAcquisitionNode": "22.22.0",
         "readOnlyComparatorAuditNode": "24.22.3",
         "hostedContractObservations": 112
-      }
+      },
+      "metadataCorpusSqliteEvidence": "Initial, per-group and final epoch-zero root state plus clean teardown; no whole-SQLite export digest."
     }
   },
   "sourceCompatibilityReview": {
