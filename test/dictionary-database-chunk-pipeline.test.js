@@ -529,7 +529,9 @@ describe('ordered artifact term chunk persistence', () => {
                 endImportSession: recordEnd,
                 getLastEndImportSessionMetrics: vi.fn(() => null),
             });
-            Object.assign(Reflect.get(h.database, '_termContentBlockImportSession'), {close: vi.fn()});
+            const blockSession = Reflect.get(h.database, '_termContentBlockImportSession');
+            if (blockSession === null) { throw new Error('Expected an active term content block import session'); }
+            Object.assign(blockSession, {close: vi.fn()});
             Reflect.set(h.database, '_importJournal', {clear: vi.fn().mockResolvedValue(void 0)});
             vi.spyOn(h.database, '_syncTermsVirtualTableFromRecordStore').mockResolvedValue();
             vi.spyOn(h.database, '_applyRuntimePragmas').mockImplementation(() => {});
