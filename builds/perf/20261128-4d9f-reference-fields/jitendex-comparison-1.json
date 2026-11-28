@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "jitendex",
+  "candidateCommit": "7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d",
+  "runtimeCommit": "2dd9058a74ec4b4b9195a168fbc167d37fe59f88",
+  "disabled": {
+    "directory": "/workspace/scratch/4d9ffe79ec6f/experiments/record-reference-table/prototype/corpus/reports/jitendex-A-1",
+    "fieldsBytes": 3497796,
+    "indexBytes": 23590852,
+    "contentBytes": 38386795,
+    "allTermFileBytes": 61977692
+  },
+  "enabled": {
+    "directory": "/workspace/scratch/4d9ffe79ec6f/experiments/record-reference-table/prototype/corpus/reports/jitendex-B-1",
+    "fieldsBytes": 3497796,
+    "indexBytes": 23590852,
+    "contentBytes": 38386795,
+    "allTermFileBytes": 61977692
+  },
+  "actualSavedBytes": 0,
+  "fieldReductionPercent": 0,
+  "indexReductionPercent": 0,
+  "termFileReductionPercent": 0,
+  "rows": 436555,
+  "groups": 22,
+  "chunks": 22,
+  "format4Chunks": 0,
+  "format4Rows": 0,
+  "fallbackCounts": {
+    "no-strict-size-saving": 22
+  },
+  "exactParserOutputsAndLookupPayloads": true,
+  "everyActualFieldRowMatchesSource": true,
+  "everyActualFinalChunkReread": true,
+  "everyExpandedFileAndMetadataMatchesOriginalOracle": true,
+  "finalOutputOracle": {
+    "bytes": 4724,
+    "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+  },
+  "actualPersistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 38386795,
+      "sha256": "664c13a8f93f089d04023460fd01f56117744b41d72c3fd8608bb9ebfa217fc9",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+      "bytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "bytes": 23590852,
+      "sha256": "696c9f5506f32ceba7ecfe6834b69cd3ffdac83c0d6eec74afe4923a0b354a2b",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "defaultOffPreservesEveryOriginalFileByte": true,
+  "limitations": [
+    "Sequential production-group term sink, not whole-browser import timing.",
+    "Separate media persistence/UI/SQLite/restart/lookup are outside this corpus boundary.",
+    "Actual persisted size does not establish browser memory or elapsed-time improvement."
+  ]
+}

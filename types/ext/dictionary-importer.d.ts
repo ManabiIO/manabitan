@@ -62,6 +62,8 @@ export type ImportExperiments = {
     /** Qualified automatic middle-CPU policy: true. Explicit false retains two workers for diagnostics. */
     experimentalParserWorkers3?: boolean;
     experimentalGenericSpanCompression?: boolean;
+    /** Default off: persist repeated term-content references using per-chunk u16 keys. */
+    experimentalReferenceTableFields?: boolean;
     experimentalSkipFusedParse?: boolean;
     /** Qualified production default: true. Explicit false retains the allocation oracle. */
     experimentalLookupScratchReuse?: boolean;

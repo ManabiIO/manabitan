@@ -24,7 +24,7 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-test.each([12, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
+test.each([13, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec(`PRAGMA user_version = ${version}`);
@@ -39,19 +39,20 @@ test.each([12, -1])('startup refuses schema %s before old SQL or OPFS initializa
         connection.exec('CREATE TABLE old_build_initialized(value TEXT)');
     });
     const pragmas = vi.spyOn(database, '_applyRuntimePragmas').mockImplementation(() => {});
-    vi.spyOn(database, '_recoverInterruptedImportSession').mockResolvedValue();
+    const recover = vi.spyOn(database, '_recoverInterruptedImportSession').mockResolvedValue();
     vi.spyOn(database, '_restoreTermRecordDictionaryHealth').mockImplementation(() => {});
     await expect(database._openConnection()).rejects.toThrow(/schema.*(?:newer|invalid)/iu);
     expect(contentPrepare).not.toHaveBeenCalled();
     expect(recordPrepare).not.toHaveBeenCalled();
     expect(initialize).not.toHaveBeenCalled();
     expect(pragmas).not.toHaveBeenCalled();
+    expect(recover).not.toHaveBeenCalled();
     expect(connection.selectValue('PRAGMA user_version')).toBe(version);
     expect(connection.selectValues('SELECT value FROM newer_storage')).toEqual(['preserved']);
     expect(connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'table'")).toEqual(['newer_storage']);
 });
 
-test('keeps ordinary dictionaries at schema 10 and accepts a published packed-media schema', async () => {
+test.each([11, 12])('keeps ordinary dictionaries at schema 10 and accepts published reader floor %i', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec('PRAGMA user_version = 10');
@@ -63,15 +64,15 @@ test('keeps ordinary dictionaries at schema 10 and accepts a published packed-me
     expect(connection.selectValue('PRAGMA user_version')).toBe(10);
 
     connection.exec('BEGIN');
-    connection.exec('PRAGMA user_version = 11');
+    connection.exec(`PRAGMA user_version = ${version}`);
     connection.exec('ROLLBACK');
     expect(connection.selectValue('PRAGMA user_version')).toBe(10);
 
     connection.exec('BEGIN');
-    connection.exec('PRAGMA user_version = 11');
+    connection.exec(`PRAGMA user_version = ${version}`);
     connection.exec('COMMIT');
-    expect(database._getSupportedInstalledSchemaVersion()).toBe(11);
+    expect(database._getSupportedInstalledSchemaVersion()).toBe(version);
     await database._runSchemaMigrations();
-    expect(connection.selectValue('PRAGMA user_version')).toBe(11);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(version);
     expect(connection.selectValues('SELECT value FROM preserved')).toEqual(['text']);
 });

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "vndb",
+  "candidateCommit": "7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d",
+  "runtimeCommit": "2dd9058a74ec4b4b9195a168fbc167d37fe59f88",
+  "disabled": {
+    "directory": "/home/agent/manabitan-reference-format-reports-4d9f/vndb-A-1",
+    "fieldsBytes": 53191776,
+    "indexBytes": 401899832,
+    "contentBytes": 7533449,
+    "allTermFileBytes": 409433345
+  },
+  "enabled": {
+    "directory": "/home/agent/manabitan-reference-format-reports-4d9f/vndb-B-1",
+    "fieldsBytes": 28780532,
+    "indexBytes": 377488588,
+    "contentBytes": 7533449,
+    "allTermFileBytes": 385022101
+  },
+  "actualSavedBytes": 24411244,
+  "fieldReductionPercent": 45.89289141238675,
+  "indexReductionPercent": 6.073962230469407,
+  "termFileReductionPercent": 5.9622022236610945,
+  "rows": 6648310,
+  "groups": 170,
+  "chunks": 192,
+  "format4Chunks": 162,
+  "format4Rows": 6328310,
+  "fallbackCounts": {
+    "no-strict-size-saving": 10,
+    "unused-offset-before-split-base": 20
+  },
+  "exactParserOutputsAndLookupPayloads": true,
+  "everyActualFieldRowMatchesSource": true,
+  "everyActualFinalChunkReread": true,
+  "everyExpandedFileAndMetadataMatchesOriginalOracle": true,
+  "finalOutputOracle": {
+    "bytes": 5342,
+    "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+  },
+  "actualPersistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 7533449,
+      "sha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "bytes": 38,
+      "sha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "bytes": 375257528,
+      "sha256": "dfa4d1cf4c7ba346492ddd6d714f92a21f999cae9eedc835b7349f31bdf5f279",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "bytes": 26,
+      "sha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+      "bytes": 2231060,
+      "sha256": "d6296b49d5e9d46b56e051a19c9cd40ffb0693df66016f563eb4241fe6babc41",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "defaultOffPreservesEveryOriginalFileByte": true,
+  "limitations": [
+    "Sequential production-group term sink, not whole-browser import timing.",
+    "Separate media persistence/UI/SQLite/restart/lookup are outside this corpus boundary.",
+    "Actual persisted size does not establish browser memory or elapsed-time improvement."
+  ]
+}

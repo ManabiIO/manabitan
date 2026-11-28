@@ -1,0 +1,13 @@
+{
+  "originalSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+  "instrumentedSha256": "88dc6f2e702f429d75efc0d8f8da5e30765fd7e81e7ebb9c9d8c7f2def588bfe",
+  "originalBytes": 325917,
+  "instrumentedBytes": 342797,
+  "runtimeSourceCommit": "8c3ca42aa848b82a392ec96ea6b6f5ab21b80199",
+  "observerFiles": {
+    "storage-activation.mjs": "69a75bf1d7c7dfd15eb3b556fd42f23286ec9cf0750062e636509e950cd0fde4",
+    "activation_overlay.py": "94c3f9bc90da8b07476d070adf90bc006efcc4cd3c0ad94b0f6f4d6381e7639a",
+    "storage-activation.contract.mjs": "941defa6858b87f7c567226604e35a4427484093dde149c2e33f113d9426a1da",
+    "test_activation_overlay.py": "241f3afc3e7c1ea14840ab44c16e6b2fef90cc076a44ce361c4cfb5f6b40b6cd"
+  }
+}

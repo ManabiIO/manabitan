@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "parentCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "currentRuntimeCommit": "8c3ca42aa848b82a392ec96ea6b6f5ab21b80199",
+  "currentRuntimeExtTree": "3c1286119d8d2fb93eeaeac755cfbac8a1be5553",
+  "frozenCorpusCommit": "7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d",
+  "frozenCorpusRuntimeExtTree": "ca59077b60a378d1fb671843e987272e531f6911",
+  "qualification": {
+    "frozenDcfcFocusedTests": 496,
+    "frozenDcfcMainAndTestTypes": "passed",
+    "frozenDcfcDryBuild": "passed",
+    "actualOldReaderBytePreservation": "passed; actual previous Database method, not old-browser restart",
+    "frozenDcfcCompleteCorpus": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "currentRuntimeSourceReview": "no blocker found; independent source-only review",
+    "browserToolingNodeContractGroups": 5,
+    "browserToolingPythonContractGroups": 4,
+    "browserToolingScopedLint": "passed after formatting-only fixes; first failure retained",
+    "overlaidFullE2eSyntax": "passed",
+    "currentRuntimeFullUnits": "pending",
+    "currentRuntimeCorpus": "pending",
+    "browserOffOnStorageRestartMediaLookup": "pending",
+    "browserDefaultOffPerformance": "pending; no latency claim"
+  },
+  "browserExpectations": {
+    "jmdict": {
+      "off": {
+        "floor": 10,
+        "formatCounts": {
+          "2": 12
+        },
+        "format4Rows": 0,
+        "totalRows": 528299,
+        "chunks": 12
+      },
+      "on": {
+        "floor": 12,
+        "formatCounts": {
+          "2": 7,
+          "4": 5
+        },
+        "format4Rows": 210000,
+        "totalRows": 528299,
+        "chunks": 12
+      }
+    },
+    "jitendex": {
+      "off": {
+        "floor": 10,
+        "formatCounts": {
+          "2": 22
+        },
+        "format4Rows": 0,
+        "totalRows": 436555,
+        "chunks": 22
+      },
+      "on": {
+        "floor": 10,
+        "formatCounts": {
+          "2": 22
+        },
+        "format4Rows": 0,
+        "totalRows": 436555,
+        "chunks": 22
+      }
+    },
+    "vndb": {
+      "off": {
+        "floor": 11,
+        "formatCounts": {
+          "2": 192
+        },
+        "format4Rows": 0,
+        "totalRows": 6648310,
+        "chunks": 192
+      },
+      "on": {
+        "floor": 12,
+        "formatCounts": {
+          "2": 30,
+          "4": 162
+        },
+        "format4Rows": 6328310,
+        "totalRows": 6648310,
+        "chunks": 192
+      }
+    }
+  },
+  "expectationBasis": "Format counts are frozen dcfc term-sink observations at unchanged4-core/8GiB helper policy. Browser floors include normal packed VNDB media publication, absent from that term-sink boundary. Current/browser results must independently match; no adjustment of grouping or source policy is authorized."
+}

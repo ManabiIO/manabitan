@@ -1,0 +1,41 @@
+{
+  "success": true,
+  "readerDatabaseSha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+  "candidateCommit": "2dd9058a74ec4b4b9195a168fbc167d37fe59f88",
+  "beforeDatabaseSha256": "0bc633d097dae595320a1a7300e0deadfbb09d7fe301033b90dac681bd40e6d2",
+  "afterDatabaseSha256": "0bc633d097dae595320a1a7300e0deadfbb09d7fe301033b90dac681bd40e6d2",
+  "databaseBytes": 16384,
+  "userVersion": 12,
+  "recoveryCalls": 0,
+  "contentPrepareCalls": 0,
+  "recordPrepareCalls": 0,
+  "schemaCalls": 0,
+  "runtimePragmaCalls": 0,
+  "healthRestoreCalls": 0,
+  "beforeFiles": [
+    {
+      "name": "manabitan-term-records/dict-Published%20format4.mbtr",
+      "bytes": 26,
+      "sha256": "0f02cf399c4657a0959fb57d2859fb6323aedbb7ad288c180a5ddf65a1f726ee"
+    },
+    {
+      "name": "manabitan-term-records/dict-Published%20format4.mbtr.mbti",
+      "bytes": 3640,
+      "sha256": "9a16598c05ee5a5fc9870d0311ea61b59cfb6b012586e3e66a129a28ed1c077a"
+    }
+  ],
+  "afterFiles": [
+    {
+      "name": "manabitan-term-records/dict-Published%20format4.mbtr",
+      "bytes": 26,
+      "sha256": "0f02cf399c4657a0959fb57d2859fb6323aedbb7ad288c180a5ddf65a1f726ee"
+    },
+    {
+      "name": "manabitan-term-records/dict-Published%20format4.mbtr.mbti",
+      "bytes": 3640,
+      "sha256": "9a16598c05ee5a5fc9870d0311ea61b59cfb6b012586e3e66a129a28ed1c077a"
+    }
+  ],
+  "actualFormat4Chunks": 1,
+  "boundary": "Actual previous DictionaryDatabase._openConnection with real SQLite and real format4 record/index files from the candidate writer. OPFS prepare/recovery are observation spies and never reached; every SQLite and OPFS byte remains identical. No older-browser restart claim."
+}

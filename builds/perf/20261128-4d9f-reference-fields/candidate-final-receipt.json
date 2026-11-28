@@ -1,0 +1,21 @@
+{
+  "commit": "7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d",
+  "runtimeCommit": "2dd9058a74ec4b4b9195a168fbc167d37fe59f88",
+  "runtimeTree": "ca59077b60a378d1fb671843e987272e531f6911",
+  "patchSha256": "83b206fd7369b48524eeb19c14953b6e6af53ff53c4910cd22ef17a1a4e24c40",
+  "focusedSuites": 8,
+  "focusedTests": 496,
+  "focusedExit": 0,
+  "oldReader": {
+    "status": "passed",
+    "receipt": "old-reader-result-v2.json",
+    "runtimeSameAsFinalCandidate": true
+  },
+  "static": {
+    "mainTypes": 0,
+    "testTypes": 0,
+    "scopedLint": 0,
+    "allTargetDryBuild": 0
+  },
+  "publication": "Local only; no PR or push."
+}

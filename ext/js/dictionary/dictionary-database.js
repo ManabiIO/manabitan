@@ -81,6 +81,8 @@ import {initializeTermContentPlanResolution} from './term-content-plan-resolutio
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
+const REFERENCE_TABLE_DICTIONARY_SCHEMA_VERSION = 12;
+const MAX_SUPPORTED_DICTIONARY_SCHEMA_VERSION = REFERENCE_TABLE_DICTIONARY_SCHEMA_VERSION;
 const DICTIONARY_PURGE_MARKER = 'manabitan-dictionary-purge-pending';
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
@@ -1522,6 +1524,7 @@ export class DictionaryDatabase {
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
             let termRecordLookupIndexWorkerFileCount = 0;
+            let referenceTableFieldChunkCount = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1593,6 +1596,7 @@ export class DictionaryDatabase {
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
                             termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
+                            referenceTableFieldChunkCount = metrics.referenceTableFieldChunkCount ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1638,9 +1642,13 @@ export class DictionaryDatabase {
                             1,
                         );
                     }
-                    if (isGenerationMediaDescriptor(publication?.summary.generationMedia)) {
-                        // The storage gate and the summary become durable together.
-                        db.exec(`PRAGMA user_version = ${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}`);
+                    const requiredSchemaVersion = referenceTableFieldChunkCount > 0 ?
+                        REFERENCE_TABLE_DICTIONARY_SCHEMA_VERSION :
+                        (isGenerationMediaDescriptor(publication?.summary.generationMedia) ? PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION : 0);
+                    if (requiredSchemaVersion > 0 && this._getSupportedInstalledSchemaVersion() < requiredSchemaVersion) {
+                        // Actual new-format bytes and the publication become durable
+                        // together. A later import must never lower this reader floor.
+                        db.exec(`PRAGMA user_version = ${requiredSchemaVersion}`);
                     }
                     db.exec({
                         sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
@@ -1863,6 +1871,7 @@ export class DictionaryDatabase {
      */
     setImportOptimizationFlags(options = {}) {
         this._termContentBlockStore.setCompressionExperiments(options);
+        this._termRecordStore.setImportExperiments(options);
         this._adaptiveTermBulkAddBatchSize = true;
         this._retryBeginImmediateTransaction = false;
         this._skipIntraBatchContentDedup = false;
@@ -10594,13 +10603,13 @@ null :
         if (!Number.isSafeInteger(installedSchemaVersion) || installedSchemaVersion < 0) {
             throw new Error('Dictionary storage schema version is invalid');
         }
-        if (installedSchemaVersion > PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION) {
+        if (installedSchemaVersion > MAX_SUPPORTED_DICTIONARY_SCHEMA_VERSION) {
             reportDiagnostics('dictionary-schema-migration-skipped', {
                 reason: 'newer-installed-version',
                 installedSchemaVersion,
-                currentSchemaVersion: PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION,
+                currentSchemaVersion: MAX_SUPPORTED_DICTIONARY_SCHEMA_VERSION,
             });
-            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
+            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${MAX_SUPPORTED_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
         }
         return installedSchemaVersion;
     }

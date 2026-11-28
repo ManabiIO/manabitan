@@ -29,6 +29,7 @@
 export function snapshotTermBankExperiments(options = {}) {
     return Object.freeze({
         experimentalGenericSpanCompression: typeof options.experimentalGenericSpanCompression === 'undefined' || options.experimentalGenericSpanCompression === true,
+        experimentalReferenceTableFields: options.experimentalReferenceTableFields === true,
         experimentalParserWorkers3: typeof options.experimentalParserWorkers3 === 'undefined' || options.experimentalParserWorkers3 === true,
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
         experimentalLookupScratchReuse: typeof options.experimentalLookupScratchReuse === 'undefined' || options.experimentalLookupScratchReuse === true,

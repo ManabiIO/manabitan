@@ -9,6 +9,7 @@ import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImportSession} from '../ext/js/dictionary/dictionary-import-session.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static} */
@@ -105,6 +106,86 @@ function activateImport(database, connection) {
 
 const summary = /** @type {import('dictionary-importer').Summary} */ ({
     title: 'Dictionary 42', version: 3, importSuccess: true,
+});
+
+/**
+ * @param {number} chunks
+ * @returns {Promise<NonNullable<ReturnType<TermRecordOpfsStore['getLastEndImportSessionMetrics']>>>}
+ */
+async function referenceTableMetrics(chunks) {
+    const store = new TermRecordOpfsStore();
+    await store.beginImportSession();
+    await store.endImportSession();
+    const metrics = store.getLastEndImportSessionMetrics();
+    if (metrics === null) { throw new Error('Missing finalized record-store metrics'); }
+    return {...metrics, referenceTableFieldChunkCount: chunks};
+}
+
+describe('record-field reader floor publication', () => {
+    test.each([
+        [10, 0, false, 10],
+        [10, 1, false, 12],
+        [10, 0, true, 11],
+        [10, 1, true, 12],
+        [11, 1, false, 12],
+        [12, 0, false, 12],
+        [12, 0, true, 12],
+    ])('publishes floor %i with %i actual format4 chunks and packed media=%s as %i', async (installed, chunks, packedMedia, expected) => {
+        const {database, connection} = createDatabase();
+        connection.exec(`PRAGMA user_version = ${installed}`);
+        insertSummary(connection, 42, {importSuccess: false});
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const metrics = await referenceTableMetrics(chunks);
+        recordStore.getLastEndImportSessionMetrics = () => metrics;
+        vi.mocked(recordStore.endImportSession).mockImplementation(async () => {
+            expect(connection.selectValue('PRAGMA user_version')).toBe(installed);
+        });
+        const nextSummary = {...summary};
+        if (packedMedia) {
+            nextSummary.generationMedia = {version: 2, prefix: 'img/cc', suffix: '.webp', firstId: 1, slotCount: 1, count: 1, dataBytes: 7};
+            vi.spyOn(database, '_awaitGenerationMediaPublication').mockResolvedValue();
+        }
+        const owner = await database.startBulkImport();
+        const result = await database.finishBulkImport(null, {summary: nextSummary, primaryKey: 42}, owner);
+        expect(result).toMatchObject({published: true, housekeepingErrors: []});
+        expect(connection.selectValue('PRAGMA user_version')).toBe(expected);
+        expect(JSON.parse(String(connection.selectValue('SELECT summaryJson FROM dictionaries')))).toMatchObject({importSuccess: true, storageGenerationId: owner});
+    });
+
+    test('rolls the reader floor back with a failed SQLite publication', async () => {
+        const {database, connection} = createDatabase();
+        connection.exec('PRAGMA user_version = 10');
+        insertSummary(connection, 42, {importSuccess: false});
+        connection.exec(`CREATE TRIGGER fail_publication BEFORE INSERT ON dictionaryImportPublications
+            BEGIN SELECT RAISE(ABORT, 'Injected publication failure'); END;`);
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const metrics = await referenceTableMetrics(1);
+        recordStore.getLastEndImportSessionMetrics = () => metrics;
+        const owner = await database.startBulkImport();
+        await expect(database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner)).rejects.toThrow('Injected publication failure');
+        expect(connection.selectValue('PRAGMA user_version')).toBe(10);
+        expect(JSON.parse(String(connection.selectValue('SELECT summaryJson FROM dictionaries')))).toEqual({importSuccess: false});
+        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaryImportPublications')).toBe(0);
+        expect(recordStore.rollbackImportSession).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).toHaveBeenCalledOnce();
+    });
+
+    test('keeps the reader floor and publication after post-COMMIT cleanup fails', async () => {
+        const {database, connection} = createDatabase();
+        connection.exec('PRAGMA user_version = 10');
+        insertSummary(connection, 42, {importSuccess: false});
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const metrics = await referenceTableMetrics(1);
+        recordStore.getLastEndImportSessionMetrics = () => metrics;
+        const failure = new Error('Injected journal cleanup failure');
+        vi.mocked(Reflect.get(database, '_importJournal').clear).mockRejectedValueOnce(failure);
+        const owner = await database.startBulkImport();
+        const result = await database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner);
+        expect(result).toMatchObject({published: true, housekeepingErrors: [failure]});
+        expect(connection.selectValue('PRAGMA user_version')).toBe(12);
+        expect(connection.selectValue('SELECT sessionId FROM dictionaryImportPublications')).toBe(owner);
+        expect(recordStore.rollbackImportSession).not.toHaveBeenCalled();
+    });
 });
 
 /** @returns {Promise<ArrayBuffer>} */

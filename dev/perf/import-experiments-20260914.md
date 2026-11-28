@@ -733,3 +733,55 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-28: opt-in content-reference tables for persisted term fields
+
+**Hold for browser and current-parent qualification.** The new `experimentalReferenceTableFields` experiment is default off and accepts only literal `true`. It stores each eligible chunk's existing private content-reference table once, followed by the original 16-bit row reference IDs and the unchanged score keys. It preserves the entire table, including unused entries, without a row remapping map. The writer admits it only when every reference is representable relative to that exact chunk's content base and the actual encoded fields are strictly smaller than the existing compact fields. Otherwise it emits the existing format unchanged. No worker, batching, cache, compression, or media policy changes accompany the experiment.
+
+### Actual persisted-byte observation
+
+The frozen observation uses parent `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`, candidate `7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d`, and candidate runtime `ext` tree `ca59077b60a378d1fb671843e987272e531f6911`. Both arms use that same candidate; A explicitly disables the flag and B enables it. Node is `v22.22.0`, executable SHA-256 `1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31`. The source policy receives the ordinary four-core/eight-GiB hints, uses three parser workers and four codec workers, and retains every production group, split, row, source-byte check and ownership boundary.
+
+| Corpus | Rows | Groups / chunks | Format4 chunks / rows | Written field bytes, off → on | Actual index bytes saved |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| JMdict | 528,299 | 12 / 12 | 5 / 210,000 | 4,239,960 → 4,198,956 | 41,004 |
+| Jitendex | 436,555 | 22 / 22 | 0 / 0 | 3,497,796 → 3,497,796 | 0 |
+| VNDB | 6,648,310 | 170 / 192 | 162 / 6,328,310 | 53,191,776 → 28,780,532 | 24,411,244 |
+
+VNDB's actual lookup-container bytes fall from 401,899,832 to 377,488,588, a 6.074% reduction. Its complete term-content/record/index files fall from 409,433,345 to 385,022,101 bytes, a 5.962% reduction; content bytes remain 7,533,449. Ten small chunks decline the strict-size test, and twenty split chunks decline because unused references precede the split's actual base. The smaller JMdict saving is 0.173% of lookup bytes; Jitendex correctly falls back for every chunk. These are final written/drained file sizes, not reservation estimates. They establish no browser latency or memory improvement.
+
+Every emitted field row was independently decoded and compared to its source. Every complete private table and original row reference ID was compared exactly. Every final index chunk was reread and bound to payload, field and complete-envelope hashes. Independent format4-to-format2 expansion preserved score order and keys and reproduced every original file byte, apart from independently linked random generation IDs, and every logical metadata column. Default-off actual files matched the original byte oracle without format normalization. Original JMdict section checks, complete parser-output hashes and independent VNDB source/media path accounting remained intact. Separate media persistence, SQLite publication, browser restart and lookup were outside this corpus boundary.
+
+The [evidence index](../../builds/perf/20261128-4d9f-reference-fields/evidence.json) records the exact source identities and qualification status. The [chronology index](../../builds/perf/20261128-4d9f-reference-fields/chronology-index.json) hashes every member of the compressed source/receipt archive. It retains all failed attempts: the initial synthetic oracle path mistake, the first real-file observer's omitted 16-byte lookup-container prefix, the nominal enabled run whose setup cleared the ephemeral flag during prepare, and the earlier test-only typed-array snapshot/lint failures. The invalid enabled run is not used as format4 evidence. Corrected setup prepares the stores before applying the flag and checks active import/flag state on every encoding call. The final accepted observations are JMdict A3/B2, Jitendex A1/B1 and VNDB A1/B1. The nested VNDB raw archive was independently reopened and checked byte for byte.
+
+### Reader compatibility and publication
+
+Format4 readers validate dimensions, score and reference keys, padding, safe offsets, checksums, descriptor linkage and authoritative recovery paths. Existing legacy, compact and Float64-score formats remain readable. The experiment flag resets with import cleanup. Actual format4 usage, counted after successful store drain, raises the installed reader floor to 12 inside the existing SQLite publication transaction. An all-fallback or disabled import does not raise the floor merely because an option was requested. Later packed-media publication cannot lower 12 to 11.
+
+The frozen focused cohort passed 496 tests, main/test type checks, scoped lint and the all-target dry build. A separate actual previous-reader check used the old `DictionaryDatabase._openConnection`, real SQLite bytes and actual candidate-written format4 files. It refused floor 12 before recovery, OPFS prepare or schema initialization, leaving both the complete SQLite export and record/index files byte-identical. That check is not an older-browser restart observation.
+
+The runtime was subsequently integrated onto `f28c2801fcfd9416f220b46b9cbafeee901c1cb2` at `8c3ca42aa848b82a392ec96ea6b6f5ab21b80199`, `ext` tree `3c1286119d8d2fb93eeaeac755cfbac8a1be5553`. The upstream indexed score-key loop is retained, and the lazy content-ID changes are untouched. An [independent source review](../../builds/perf/20261128-4d9f-reference-fields/independent-review-current-8c3ca42.md) found no blocker. The dcfc observations retain their original identity; current-parent unit, corpus and browser qualification remain separate gates.
+
+### Prospective browser activation observer
+
+The existing pinned quick benchmark already performs orderly restart, counts/title/revision checks, twelve content probes before and after restart, seventy-two complete lookup-result digest checks, media verification and final OPFS inventory. Its existing `--flags` option can activate the experiment without changing the runtime package:
+
+```sh
+node dev/perf/import-benchmark.js vndb --runs 1 --build-target chrome \
+  --media-check all --flags '{"experimentalReferenceTableFields":true}' \
+  --output builds/perf/reference-fields-enabled
+```
+
+Use `false` for the disabled arm and a fresh profile for each acquisition. The planned browser cohort is a storage/correctness study; elapsed values in its raw reports are not qualified latency evidence.
+
+The tooling-only [activation overlay](../../test/perf/record-reference-table-verification/activation_overlay.py) exports `overlay(original_source)` and `validate_activation(receipt, expected)`. It inserts a standalone read-only observer after the existing restart/lookup/media/storage checks and writes the supplemental top-level `report.referenceFormatActivation`. It leaves the standard validation schema and extension package unchanged. The caller must verify its exposed original-E2E, bundled-SQLite and SQLite-wrapper hashes, and retain both original and overlaid harness bytes/hashes.
+
+The observer visits every actual index chunk boundary, verifies descriptor generation linkage, validates field header dimensions, and records format/row counts and written byte lengths. It identifies `/dict.sqlite3` through the pinned SAH association path, flags and digest before reading the stable SQLite main-header schema floor. It rejects unsupported main-header WAL format, live WAL data, hot rollback journals, malformed associations, truncated/clipped reads, unexpected files and header changes. It does not decode all field values or replace the existing semantic checks. The nine Node/Python contract groups, generated full-E2E syntax and scoped tooling lint passed; the initial formatting-only lint failure is retained.
+
+```sh
+node --test test/perf/record-reference-table-verification/storage-activation.contract.mjs
+python3 -m unittest discover \
+  -s test/perf/record-reference-table-verification -p test_activation_overlay.py
+```
+
+For ordinary browser imports, the expected disabled floors are 10 for JMdict/Jitendex and 11 for VNDB's packed media; enabled floors are 12 for JMdict/VNDB and 10 for Jitendex's complete fallback. These differ from the media-excluded corpus boundary. Format counts and exact term-file sizes must be reverified on the current source and actual browser grouping before claiming browser storage qualification. No current-parent corpus, browser result, default-off timing or default-on promotion is asserted by this checkpoint.
