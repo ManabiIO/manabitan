@@ -55,7 +55,90 @@ static int decode_case(const uint8_t *input, size_t in_length, const uint8_t *ex
     return status;
 }
 
+struct fixed_history_case {
+    uint8_t compressed[1024];
+    uint8_t expected[1024];
+    size_t compressed_length, expected_length;
+    unsigned pending, pending_bits;
+};
+
+static void history_bits(struct fixed_history_case *stream, unsigned value, unsigned width) {
+    for (unsigned i = 0; i < width; ++i) {
+        stream->pending |= ((value >> i) & 1u) << stream->pending_bits++;
+        if (stream->pending_bits == 8) {
+            assert(stream->compressed_length < sizeof(stream->compressed));
+            stream->compressed[stream->compressed_length++] = (uint8_t)stream->pending;
+            stream->pending = stream->pending_bits = 0;
+        }
+    }
+}
+
+static void history_code(struct fixed_history_case *stream, unsigned value, unsigned width) {
+    for (unsigned i = width; i > 0; --i) history_bits(stream, (value >> (i - 1)) & 1u, 1);
+}
+
+static void history_symbol(struct fixed_history_case *stream, unsigned value) {
+    if (value <= 143) history_code(stream, 0x30 + value, 8);
+    else if (value <= 255) history_code(stream, 0x190 + value - 144, 9);
+    else if (value <= 279) history_code(stream, value - 256, 7);
+    else history_code(stream, 0xc0 + value - 280, 8);
+}
+
+static void history_literal(struct fixed_history_case *stream, uint8_t value) {
+    history_symbol(stream, value);
+    assert(stream->expected_length < sizeof(stream->expected));
+    stream->expected[stream->expected_length++] = value;
+}
+
+static void history_match(struct fixed_history_case *stream, unsigned length, unsigned distance) {
+    static const unsigned offsets[] = {1, 2, 3, 4, 5, 7, 9};
+    static const unsigned extras[] = {0, 0, 0, 0, 1, 1, 2};
+    assert((length >= 3 && length <= 9) || length == 23);
+    assert(distance >= 1 && distance <= 9 && distance <= stream->expected_length);
+    history_symbol(stream, length == 23 ? 270 : 257 + length - 3);
+    if (length == 23) history_bits(stream, 0, 2);
+    unsigned code = 0;
+    while (code + 1 < sizeof(offsets) / sizeof(offsets[0]) && offsets[code + 1] <= distance) ++code;
+    history_code(stream, code, 5);
+    history_bits(stream, distance - offsets[code], extras[code]);
+    for (unsigned i = 0; i < length; ++i) {
+        assert(stream->expected_length < sizeof(stream->expected));
+        stream->expected[stream->expected_length] = stream->expected[stream->expected_length - distance];
+        ++stream->expected_length;
+    }
+}
+
+static void short_history_cases(void) {
+    static const uint8_t prefix[] = "[\"abcdefghijklmnopqrstuvwxyz0123456789";
+    for (unsigned length = 3; length <= 9; ++length) {
+        for (unsigned distance = 7; distance <= 9; ++distance) {
+            for (unsigned following = 1; following <= 7; ++following) {
+                struct fixed_history_case stream = {0};
+                history_bits(&stream, 3, 3);
+                for (size_t i = 0; i < sizeof(prefix) - 1; ++i) history_literal(&stream, prefix[i]);
+                history_match(&stream, length, distance);
+                history_match(&stream, 23, following);
+                // Literal input and output slack force both matches into the fast loop.
+                for (unsigned i = 0; i < 400; ++i) history_literal(&stream, (uint8_t)('A' + i % 26));
+                history_literal(&stream, '"');
+                history_literal(&stream, ']');
+                history_symbol(&stream, 256);
+                if (stream.pending_bits) stream.compressed[stream.compressed_length++] = (uint8_t)stream.pending;
+                for (size_t alignment = 0; alignment <= 7; ++alignment) {
+                    decode_case(stream.compressed, stream.compressed_length, stream.expected, stream.expected_length, alignment, 0);
+                }
+                decode_case(stream.compressed, stream.compressed_length - 1, stream.expected, stream.expected_length, 0, -99);
+                stream.compressed[stream.compressed_length] = 0;
+                decode_case(stream.compressed, stream.compressed_length + 1, stream.expected, stream.expected_length, 0, -6);
+                decode_case(stream.compressed, stream.compressed_length, stream.expected, stream.expected_length - 1, 0, -99);
+                decode_case(stream.compressed, stream.compressed_length, stream.expected, stream.expected_length, 0, 0);
+            }
+        }
+    }
+}
+
 int main(void) {
+    short_history_cases();
     const size_t widths[] = {0, 1, 2, 7, 8, 15, 16, 31, 32, 255, 256, 257, 258,
                             259, 4095, 4096, 32767, 32768, 65535, 65536, 131073};
     const int strategies[] = {Z_DEFAULT_STRATEGY, Z_FIXED, Z_HUFFMAN_ONLY};

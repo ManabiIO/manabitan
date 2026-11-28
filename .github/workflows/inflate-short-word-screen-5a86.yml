@@ -1,0 +1,164 @@
+name: Short DEFLATE word-copy screen 5a86
+
+on:
+  push:
+    branches: ['perf/inflate-short-word-screen-20261128-5a86']
+    paths:
+      - '.github/workflows/inflate-short-word-screen-5a86.yml'
+      - 'dev/perf/inflate-short-word-screen-5a86.py'
+      - 'test/perf/inflate-short-word-20261128-5a86/**'
+      - 'ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h'
+      - 'ext/js/dictionary/wasm/vendor/libdeflate/README.md'
+      - 'dev/data/dictionary-wasm/manifest.json'
+      - 'dev/data/dictionary-wasm/term-bank-parser.wasm'
+      - 'test/term-bank-inflater.test.js'
+      - 'test/native/term-bank-inflater-sanitizer.c'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: inflate-short-word-screen-5a86-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  PERF_CANDIDATE: ${{ github.sha }}
+
+jobs:
+  validate:
+    name: Validate exact short-word candidate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    env:
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create validation evidence directory
+        run: mkdir -p builds/perf/inflate-short-word-validation
+      - uses: ./.github/actions/setup
+      - name: Verify exact product, original local failures and frozen qualifier
+        run: |
+          python dev/perf/inflate-short-word-screen-5a86.py check --candidate "$PERF_CANDIDATE" 2>&1 | tee builds/perf/inflate-short-word-validation/source.log
+          python test/perf/inflate-short-word-20261128-5a86/verify-local-evidence.py 2>&1 | tee builds/perf/inflate-short-word-validation/local-evidence.log
+          python test/perf/inflate-short-word-20261128-5a86/driver.py --candidate "$PERF_CANDIDATE" --evidence builds/perf/inflate-short-word-validation/observer-preflight --preflight-only 2>&1 | tee builds/perf/inflate-short-word-validation/observer-preflight.log
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee builds/perf/inflate-short-word-validation/receipt-tests.log
+      - name: Install pinned dictionary WASM toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21 build-essential zlib1g-dev
+      - name: Reproduce both checked-in native artifacts
+        run: npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/inflate-short-word-validation/native-rebuild.log
+      - name: Check exact changed test lint and all test types
+        run: |
+          npx eslint test/term-bank-inflater.test.js 2>&1 | tee builds/perf/inflate-short-word-validation/lint.log
+          npm run test:ts 2>&1 | tee builds/perf/inflate-short-word-validation/types.log
+      - name: Run complete unit suite
+        run: npm run test:unit 2>&1 | tee builds/perf/inflate-short-word-validation/unit.log
+      - name: Check native bounds with address, undefined and leak sanitizers
+        run: |
+          cc --version | tee builds/perf/inflate-short-word-validation/native-sanitizer-compiler.log
+          cc -std=c11 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -ffunction-sections -fdata-sections -I. test/native/term-bank-inflater-sanitizer.c -Wl,--gc-sections -lz -o builds/perf/inflate-short-word-validation/term-bank-inflater-sanitizer 2>&1 | tee builds/perf/inflate-short-word-validation/native-sanitizer-build.log
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=exitcode=23 UBSAN_OPTIONS=halt_on_error=1 builds/perf/inflate-short-word-validation/term-bank-inflater-sanitizer 2>&1 | tee builds/perf/inflate-short-word-validation/native-address-undefined-leak.log
+      - name: Validate generated JSON and all build targets
+        run: |
+          npm run test:json:format 2>&1 | tee builds/perf/inflate-short-word-validation/json-format.log
+          npm run test:build 2>&1 | tee builds/perf/inflate-short-word-validation/build.log
+      - name: Retain validation receipts, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: inflate-short-word-validation-5a86
+          path: builds/perf/inflate-short-word-validation
+          if-no-files-found: error
+          retention-days: 30
+
+  component:
+    name: Separate hosted 36-child decoder component
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      eligible: ${{ steps.component.outputs.eligible }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Restore fixed dictionary archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the separate frozen component acquisition
+        id: component
+        run: |
+          python test/perf/inflate-short-word-20261128-5a86/driver.py \
+            --candidate "$PERF_CANDIDATE" --evidence builds/perf/inflate-short-word-component
+      - name: Retain every component receipt and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: inflate-short-word-component-5a86
+          path: builds/perf/inflate-short-word-component
+          if-no-files-found: error
+          retention-days: 30
+
+  screen:
+    name: ${{ matrix.dictionary }} complete import (${{ matrix.order }})
+    needs: [validate, component]
+    if: ${{ needs.validate.result == 'success' && needs.component.result == 'success' && needs.component.outputs.eligible == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install lockfile Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore fixed dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run all prescribed timing, controls, media and memory observations
+        run: |
+          python dev/perf/inflate-short-word-screen-5a86.py run \
+            --candidate "$PERF_CANDIDATE" --dictionary "$PERF_DICTIONARY" --order "$PERF_ORDER" \
+            --evidence "builds/perf/inflate-short-word-browser/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Print complete or partial evidence for independent review
+        if: always()
+        run: |
+          python dev/perf/inflate-short-word-screen-5a86.py summary \
+            --evidence "builds/perf/inflate-short-word-browser/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: inflate-short-word-${{ matrix.dictionary }}-${{ matrix.order }}-5a86
+          path: |
+            builds/perf/inflate-short-word-browser/${{ matrix.dictionary }}-${{ matrix.order }}
+            builds/perf/inflate-short-word-browser/${{ matrix.dictionary }}-${{ matrix.order }}-driver
+          if-no-files-found: error
+          retention-days: 30

@@ -63,6 +63,128 @@ function decode(compressed, expected, options = {}) {
 
 const sizes = [0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 255, 256, 257, 258, 259, 4095, 4096, 32767, 32768, 65535, 65536, 131073]
 
+/**
+ * Fixed codes make the two history matches explicit; 400 subsequent literal
+ * bytes keep both matches inside the decoder's input/output fast-loop guards.
+ * @param {number} length
+ * @param {number} distance
+ * @param {number} followingDistance
+ * @returns {{compressed: Uint8Array, expected: Uint8Array}}
+ */
+function shortHistoryFixture(length, distance, followingDistance) {
+    /** @type {number[]} */
+    const bytes = []
+    /** @type {number[]} */
+    const expected = []
+    let pending = 0
+    let pendingBits = 0
+    const bits = (/** @type {number} */ value, /** @type {number} */ width) => {
+        for (let i = 0; i < width; ++i) {
+            pending |= ((value >>> i) & 1) << pendingBits++
+            if (pendingBits === 8) {
+                bytes.push(pending)
+                pending = 0
+                pendingBits = 0
+            }
+        }
+    }
+    const code = (/** @type {number} */ value, /** @type {number} */ width) => {
+        for (let i = width - 1; i >= 0; --i) { bits((value >>> i) & 1, 1) }
+    }
+    const symbol = (/** @type {number} */ value) => {
+        if (value <= 143) {
+            code(0x30 + value, 8)
+        } else if (value <= 255) {
+            code(0x190 + value - 144, 9)
+        } else if (value <= 279) {
+            code(value - 256, 7)
+        } else {
+            code(0xc0 + value - 280, 8)
+        }
+    }
+    const literal = (/** @type {number} */ value) => {
+        symbol(value)
+        expected.push(value)
+    }
+    const match = (/** @type {number} */ matchLength, /** @type {number} */ matchDistance) => {
+        const bases = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31]
+        const extras = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2]
+        const offsets = [1, 2, 3, 4, 5, 7, 9, 13]
+        const offsetExtras = [0, 0, 0, 0, 1, 1, 2, 2]
+        let index = bases.length - 1
+        while (matchLength < bases[index]) { --index }
+        symbol(257 + index)
+        bits(matchLength - bases[index], extras[index])
+        index = offsets.length - 1
+        while (matchDistance < offsets[index]) { --index }
+        code(index, 5)
+        bits(matchDistance - offsets[index], offsetExtras[index])
+        for (let i = 0; i < matchLength; ++i) { expected.push(expected[expected.length - matchDistance]) }
+    }
+    bits(3, 3) // Final block with fixed Huffman codes.
+    for (const value of encoder.encode('["abcdefghijklmnopqrstuvwxyz0123456789')) { literal(value) }
+    match(length, distance)
+    match(23, followingDistance)
+    for (let i = 0; i < 400; ++i) { literal(65 + i % 26) }
+    literal(34)
+    literal(93)
+    symbol(256)
+    if (pendingBits > 0) { bytes.push(pending) }
+    const compressed = Uint8Array.from(bytes)
+    const output = Uint8Array.from(expected)
+    expect(Buffer.compare(inflateRawSync(compressed), output)).toBe(0)
+    return {compressed, expected: output}
+}
+
+describe('explicit short history matches before later overlapping copies', () => {
+    test.each([3, 4, 5, 6, 7, 8, 9])('preserves later output after a %i-byte match', (length) => {
+        for (const distance of [7, 8, 9]) {
+            for (const followingDistance of [1, 2, 3, 4, 5, 6, 7]) {
+                const {compressed, expected} = shortHistoryFixture(length, distance, followingDistance)
+                for (const alignment of [0, 1, 7]) {
+                    const result = decode(compressed, expected, {alignment})
+                    expect(result.status).toBe(expected.length)
+                    expect(Buffer.compare(result.bytes, expected)).toBe(0)
+                }
+                expect(Buffer.compare(decode(compressed, expected, {physicalEnd: true}).bytes, expected)).toBe(0)
+
+                // Place the output at the physical memory end as well. Every
+                // byte after the short match is part of the expected output.
+                wasm.wasm_reset_heap()
+                const meta = wasm.wasm_alloc(20)
+                const spans = wasm.wasm_alloc(8)
+                const input = wasm.wasm_alloc(compressed.length + 65536)
+                const heap = new Uint8Array(wasm.memory.buffer)
+                const output = heap.length - expected.length
+                expect(input + compressed.length).toBeLessThan(output - 16)
+                heap.set(compressed, input)
+                heap.fill(0xa5, output - 16)
+                new Uint32Array(wasm.memory.buffer, meta, 5).set([0, compressed.length, expected.length, 8, crc32(expected)])
+                expect(wasm.inflate_and_join_term_banks(input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, output, expected.length, spans)).toBe(expected.length)
+                expect([...heap.subarray(output - 16, output)]).toEqual(new Array(16).fill(0xa5))
+                expect(Buffer.compare(heap.subarray(output), expected)).toBe(0)
+            }
+        }
+    })
+
+    test('retains CRC, exact-size and complete-input checks after the short fast-loop match', () => {
+        for (const length of [3, 8, 9]) {
+            const {compressed, expected} = shortHistoryFixture(length, 8, 3)
+            for (const physicalEnd of [false, true]) {
+                expect(decode(compressed, expected, {physicalEnd, signature: (crc32(expected) ^ 1) >>> 0}).status).toBe(-4)
+                expect(decode(compressed, expected, {physicalEnd, size: expected.length - 1}).status).toBeLessThan(0)
+                expect(decode(compressed, expected, {physicalEnd, size: expected.length + 1}).status).toBe(-3)
+                const trailing = new Uint8Array(compressed.length + 1)
+                trailing.set(compressed)
+                expect(decode(trailing, expected, {physicalEnd}).status).toBe(-6)
+                expect(decode(compressed.subarray(0, -1), expected, {physicalEnd}).status).toBeLessThan(0)
+            }
+            // Rejected streams cannot leave decoder state that affects reuse.
+            expect(Buffer.compare(decode(compressed, expected).bytes, expected)).toBe(0)
+        }
+    })
+})
+
 describe('wide-word overlap and output-memory boundary controls', () => {
     test.each([1, 2, 3, 4, 5, 6, 7, 8, 9])('decodes repeated period %i across word-copy boundaries', (period) => {
         const pattern = 'abcdefghi'.slice(0, period)

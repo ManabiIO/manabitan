@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "completeOriginalEvidence": false,
+  "scope": "Exact recoverable original local evidence plus explicitly labelled recovery records; unavailable raw evidence is disclosed, not recreated.",
+  "localDisposition": "FAILED/HOLD: zero measured children, zero sweeps, no timing estimate, no unchanged local rerun.",
+  "archive": {
+    "path": "local-evidence.tar.gz",
+    "bytes": 29679,
+    "sha256": "ecf678587d330a188feb8931fb2376fd2496c4709cc5256e711dffce0326c8b9",
+    "memberCount": 23,
+    "payloadBytes": 108661,
+    "format": "USTAR regular files, lexical order, mode0644, zero uid/gid/mtime, empty owner names; gzip level9 mtime0 empty filename",
+    "compressionRuntime": "1.3.2"
+  },
+  "componentInputs": {
+    "observer": {
+      "member": "original-component/observe.mjs",
+      "bytes": 10088,
+      "sha256": "4bd1085be4fd16cc5e5246be3682bcabfdb546331afb4d5ce123084a9f37a4e4"
+    },
+    "controller": {
+      "member": "original-component/run.py",
+      "bytes": 10732,
+      "sha256": "6740a59f94254e2d0060f094993c818f73a472fd9b7be96deceaa13139274c92"
+    },
+    "plan": {
+      "member": "original-component/plan.json",
+      "bytes": 11776,
+      "sha256": "1ae467eaa524b3aa71d25463fab594379d6d2ee607294bfb351cdde266eee802"
+    }
+  },
+  "originalProduct": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "commit": "1c93b0a18f5dd53a13dfdd3d054687c85e097247",
+    "tree": "7bf2f889a94d955bf8845b9f8d9e2d4afb464617",
+    "sourceHashes": {
+      "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": "182cffdacc45c36381c674a4bc03c7ca178e00a2935f20fc2cbdf155af474c99",
+      "ext/js/dictionary/wasm/vendor/libdeflate/README.md": "8370e1c45bf97b7d26c6771fa3b65dfa3bed8cce37f28a3b00705540a2f0feb2",
+      "dev/data/dictionary-wasm/manifest.json": "90d96cdc97d81c1d215210d0848378bb64fc02f2ed38228bfc893a021fd127c6",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "e522cb7f60cef3c8d305853afc57e8eb6c5d2121bf39ae773bff407901cc04b6",
+      "test/term-bank-inflater.test.js": "4230e2f9839ac09bcb5358a6f2578f47ad020078b95617ca38c1395454c7c529",
+      "test/native/term-bank-inflater-sanitizer.c": "598a236c317054826d54b2761ca527e26ff530074b9e5782695d689779d56631"
+    },
+    "bundleMember": "original-product/product.bundle",
+    "bundleRequires": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  },
+  "availabilityMember": "recovery/evidence-availability.json",
+  "unavailableOriginalOracle": {
+    "sha256": "507c25a0257d5fd8b789e294386f6b703f77efda0863e0ef64b7c176e06d8023",
+    "available": false,
+    "notRecreated": true
+  },
+  "members": [
+    {
+      "member": "original-component/failed-cohort/controller-receipt.json",
+      "bytes": 475,
+      "sha256": "990c229edf6dc6b76d5215195bcef11b106b6dd1af9f2162b8eca4329fe64cd9",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/failed-cohort/controller.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/failed-cohort/report.json",
+      "bytes": 12460,
+      "sha256": "d44110e5083129327c21fb0af231ac2ec7adda02e5a614f28537899d83691402",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/observe.mjs",
+      "bytes": 10088,
+      "sha256": "4bd1085be4fd16cc5e5246be3682bcabfdb546331afb4d5ce123084a9f37a4e4",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/observer-manifest.json",
+      "bytes": 274,
+      "sha256": "881d693de5f1170c82da4e944e1bc38b7a05c226081a165f7951c6f4ed1e3f82",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/plan.json",
+      "bytes": 11776,
+      "sha256": "1ae467eaa524b3aa71d25463fab594379d6d2ee607294bfb351cdde266eee802",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-20261128/observer-manifest.json",
+      "bytes": 274,
+      "sha256": "d62a43d67d16f20c5b094bf637c354d5834ed00107957fea7b7c81797ae6e429",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-20261128/receipts.json",
+      "bytes": 1291,
+      "sha256": "d0db209556cc06c819eb5c7fca985d3920626942746f646fcdef59cc4fad07b6",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-plain-uint8array-20261128/observer-manifest.json",
+      "bytes": 274,
+      "sha256": "e1aa20efa81c1153d648933714e035d3debfe0364515069f11a527f66fe2192e",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-plain-uint8array-20261128/preflight-A.json",
+      "bytes": 3770,
+      "sha256": "2f772775a7eb6a28b6945a206c138f84c3d50bed12650fc14beea8828eba2b7f",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-plain-uint8array-20261128/preflight-B.json",
+      "bytes": 3775,
+      "sha256": "4b628ec8347bbf8dcd7130903a62c3414bc1e6d318cce64f455cfa2c12a0bb81",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/preflight-plain-uint8array-20261128/receipts.json",
+      "bytes": 1245,
+      "sha256": "dacf52b8cc39eae13caebae1a182b1e69be6beea0b8e3ae2eca8a9de5cd48ff2",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-component/run.py",
+      "bytes": 10732,
+      "sha256": "6740a59f94254e2d0060f094993c818f73a472fd9b7be96deceaa13139274c92",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-product/product.bundle",
+      "bytes": 5196,
+      "sha256": "de319859ca777bc14cbcd16a42600cb61411634cb6629ef058befad779d63b68",
+      "origin": "New bundle of surviving original Git objects; requires frozen baseline, no product source alteration."
+    },
+    {
+      "member": "original-reviews/prior-work-failure-review.json",
+      "bytes": 5954,
+      "sha256": "11ce7d08c149d065324038f6ffefa0c3143d475319c8e337a8eb2c065dbfc1b3",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-reviews/storage-pre-acquisition-review.json",
+      "bytes": 3949,
+      "sha256": "920ee42fc35556bb23b18e9bc4c4f6988e0c7d6c41793adf474f7f5e58c640e4",
+      "origin": "Exact original bytes recovered from complete recorded contents and accepted only after matching independently recorded pre-reset SHA-256."
+    },
+    {
+      "member": "original-reviews/storage-structured-failure-assessment.json",
+      "bytes": 1478,
+      "sha256": "0bacea5694163830c205c757b1ca81a8936d05349d71a91c534700ae3ef1afa8",
+      "origin": "Original structured assessment retained in the reviewer V8 store, newly serialized here. This is distinct from the exact recovered historical review920ee42f; it is not a reconstructed raw observation."
+    },
+    {
+      "member": "recovery/evidence-availability.json",
+      "bytes": 10971,
+      "sha256": "7f9131a5989e14c910c3c519c282ff1a66b307ab02a75701a054a285adf4b12e",
+      "origin": "New explicit availability and limitation ledger; no unavailable raw observations are synthesized."
+    },
+    {
+      "member": "recovery/post-reset-preparation-check.json",
+      "bytes": 1022,
+      "sha256": "eba1f4063210f4c1fd4dcf7540baf50297e27f11e6cdacec94b315b425603e97",
+      "origin": "New post-reset recovery/preparation artifact; not an original validation or timing observation."
+    },
+    {
+      "member": "recovery/provenance.json",
+      "bytes": 5922,
+      "sha256": "da0bb3ede48aa4a094524e0a7f0eeec58531486e9c6bc8c9e5b998ad9e6a0296",
+      "origin": "New recovery provenance record."
+    },
+    {
+      "member": "recovery/recover-plan.py",
+      "bytes": 8444,
+      "sha256": "1ffbfa9119482297cb89af17c38516d738d2dd406f9a34ad6a14d7ef4e1d2613",
+      "origin": "New post-reset recovery/preparation artifact; not an original validation or timing observation."
+    },
+    {
+      "member": "recovery/recover-preflights.py",
+      "bytes": 3917,
+      "sha256": "a9f83724af3b4764a404ca286c5dfa016f3ee22a6fa34a1b550eb305a764df04",
+      "origin": "New post-reset recovery/preparation artifact; not an original validation or timing observation."
+    },
+    {
+      "member": "recovery/recover-review.py",
+      "bytes": 5374,
+      "sha256": "ac69e618ae097736348929d6c271a303df754a66409094cc9f71b13b323458d3",
+      "origin": "New post-reset recovery/preparation artifact; not an original validation or timing observation."
+    }
+  ],
+  "verifier": {
+    "path": "verify-local-evidence.py",
+    "bytes": 13849,
+    "sha256": "4a19c6a020eb23940b464e63ea92a89f77f34f2a79406afa220cf560e45cec36"
+  }
+}

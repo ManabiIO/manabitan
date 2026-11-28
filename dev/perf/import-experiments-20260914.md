@@ -1,5 +1,56 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: short DEFLATE word-copy hypothesis and separate hosted study
+
+The candidate is a five-line shortcut in the existing portable libdeflate fast match loop. In the branch that already proves `offset >= WORDBYTES`, the first word load/store is unchanged. If `length <= WORDBYTES`, that word covers the whole logical match, so execution returns to the existing fast-loop condition without issuing the other four speculative word stores. The logical output cursor, prefetched Huffman entry, bit buffer, input/output guard, longer matches and smaller distances retain their original behavior. The cutoff is the native word width, not a dictionary or cache threshold. The vendor README records this second local header adaptation.
+
+The frozen baseline is `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, tree `d99ea4d04658f7ec1c76acdc5f3684594212a471`. The original local product commit is `1c93b0a18f5dd53a13dfdd3d054687c85e097247`, tree `7bf2f889a94d955bf8845b9f8d9e2d4afb464617`. That entire product/test tree was recovered from surviving Git objects after an environment reset. The hosted source guard reconstructs that exact tree from baseline plus the six product/test files, then separately permits the seven declared study and handoff files.
+
+The decoder header SHA-256 is `182cffdacc45c36381c674a4bc03c7ca178e00a2935f20fc2cbdf155af474c99`. Pinned Clang/LLD 21.1.8 generated parser WASM `e522cb7f60cef3c8d305853afc57e8eb6c5d2121bf39ae773bff407901cc04b6`, 67,667 bytes, eight bytes above baseline. The canonical scanner is unchanged. The three expected extension-package changes are the vendored decoder header, its README and `lib/term-bank-parser.wasm`.
+
+### Why this mechanism was selected
+
+The current JMdict diagnostic trace attributes substantial native inflate work to the decoder as well as CRC. Its decoder and CRC self samples are separate; concurrent worker samples and perturbed tracing are not ordinary import wall time. A pre-reset, untimed full-fixture native path census reported 1,509,260 eligible length-3-through-8 matches among 4,228,248 fast matches. At the source-code level, the shortcut avoids four redundant word copies for each such match, corresponding to 48,296,320 modeled store bytes and the same load bytes. These are neither measured machine instructions nor a speedup.
+
+The original census report was independently reconciled before the reset, but its full raw bytes are now unavailable. Its known SHA-256, `507c25a0257d5fd8b789e294386f6b703f77efda0863e0ef64b7c176e06d8023`, and the evidence gap are recorded explicitly. Those historical aggregate observations motivate a separate screen; this branch does not reconstruct missing per-bank native counts.
+
+### Correctness and the failed local acquisition
+
+The actual-WASM tests use crafted fixed-code streams with a 38-byte literal history, first-match lengths 3–9, distances 7/8/9, a later overlapping distance-1-through-7 match and 400 following literal bytes. That suffix keeps the crafted matches inside the fast loop rather than the generic physical tail. Tests check independent zlib output, input/output allocation ends, canaries, CRC, incorrect expected sizes, trailing or truncated streams and successful reuse after rejection. The native sanitizer companion covers the same discarded-speculative-byte hazard at actual allocation boundaries.
+
+Historical local checks passed 136 focused tests and the native rebuild; an AddressSanitizer/UBSan-only run passed 231,528 cases. Full LeakSanitizer failed under the local ptrace environment. Final exact-test-source lint was killed by signal 9, so an earlier lint pass was not transferred to that final source. The reset removed most original validation logs. These are disclosed historical results, and the new hosted workflow must pass its own complete validation gates.
+
+The frozen local component attempt remains **FAILED/HOLD with zero children and zero sweeps**. Its controller received signal 9 after creating an incomplete report and before opening the first child log. The receipts do not establish whether that happened in initial verification or the first pre-slot check, nor what caused the signal. No candidate effect, cold result or continuation decision can be calculated from that attempt. It is not retried.
+
+The original observer, controller, plan, manifest, incomplete report, outer failure receipt and available historical reviews were recovered only where their bytes match independently recorded pre-reset hashes. The archive distinguishes those exact recoveries from transcript-derived facts, post-reset preparation checks and unavailable raw files. It is not a complete copy of the lost local evidence.
+
+### Prospective hosted protocol
+
+The separately authorized hosted study begins with exact changed-test lint, all four TypeScript projects through `test:ts`, the complete unit suite, native artifact reproduction, JSON/build checks and a leak-enabled native ASan/UBSan run. A preparation-only gate verifies the recovered protocol inputs, compiles the bounded controller adaptation, checks observer syntax and exercises fifteen synthetic oracle integrity cases without running a candidate decoder or acquiring timings. Source validation must succeed before a new component job can start.
+
+The new component uses the original observer and acquisition logic. Unmeasured file hashing now reads bounded 1 MiB blocks instead of allocating the complete Node executable. That removes an observer allocation; it is not a diagnosis of the earlier signal. New hosted paths and candidate commit/tree identities are recorded separately.
+
+Because the original native census oracle is unavailable, the new host prepares an independent Python raw-zlib oracle from the exact locked JMdict ZIP, outside every measured call and before any child. It records all 53 compressed and decoded hashes, central CRCs, lengths and exact compressed consumption, including EOF and empty unused/unconsumed input. Partial preparation is checkpointed. The resulting oracle SHA is pinned before acquisition. No native census counts are recreated. Apart from this explicitly declared oracle identity/scope and host locations/commit identities, the original plan must compare equal.
+
+The fixture SHA-256 is `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f`: 53 banks, 171,617,523 decoded bytes and 15,632,849 compressed payload bytes. The unchanged three-worker/four-groups policy and 24 MiB balancing target produce twelve groups. Only their execution is serial for this component. Default flags are `{}`; the normal glossary-CRC transaction request is retained, and JMdict must still use immediate CRC.
+
+The twelve triplets are `ABC, ACB, BAC, BCA, CAB, CBA` repeated twice. A and C are identical baseline code in fresh processes; B is the exact candidate product. All 36 children retain a cold first complete decode and four individually reported subsequent complete sweeps. Module compilation and independent output verification are outside the measured calls. The primary wall clock includes the awaited production inflate helper's allocation and compressed-input copying; the secondary native counter includes immediate CRC. Process user/system CPU brackets the same calls. Every decoded bank's full SHA/CRC and every span must match, with identical native heap shapes. No steady-state claim, discarded tail, retry or replacement is permitted.
+
+Continuation requires all 36 children and all correctness/source gates, at least 2% paired median wall improvement against both A and C for the mean of all four prescribed postcold sweeps, negative equal-work wall and median CPU changes against both, and at least 9/12 faster triplets against each. Identical-code C/A median drift must stay within 2% for wall and CPU; cold median wall regression must not exceed 5% against either reference. Cold and all individual sweeps remain visible. Failure or an unmet criterion yields HOLD.
+
+Only a complete component pass enables six independent full-import cells: JMdict, Jitendex and VNDB, each AB and BA, twelve pairs per cell. The unchanged `a7f7` qualifier supplies timing warmups, same-code controls, exhaustive-media checks and separate whole-process memory observations: 42 observations per cell, 252 total. Its harness, receipt checks and fixture locks stay byte-identical to baseline. The current VNDB allocation policy is prospectively declared as 37–37 SAH units. A component gain alone cannot justify a performance PR.
+
+### Retained evidence and commands
+
+Study inputs and the incomplete local-evidence archive are under `test/perf/inflate-short-word-20261128-5a86/`. The archive manifest binds the three exact original protocol inputs and lists unavailable originals; the verifier rejects disabled Python assertions. The hosted workflow retains complete or partial validation, oracle, child, control and memory evidence for thirty days.
+
+```sh
+python test/perf/inflate-short-word-20261128-5a86/verify-local-evidence.py
+python dev/perf/inflate-short-word-screen-5a86.py check --candidate "$(git rev-parse HEAD)"
+```
+
+The acquisition workflow is branch-only and changes no main, release or default flags. Any later evidence-only follow-up must leave its measured source and observation plan frozen.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.

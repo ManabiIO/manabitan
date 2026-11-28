@@ -589,6 +589,11 @@ have_decode_tables:
 		 */
 		if (UNALIGNED_ACCESS_IS_FAST && offset >= WORDBYTES) {
 			store_word_unaligned(load_word_unaligned(src), dst);
+			/* The first word already covers a short match.  The next
+			 * symbol and bitbuffer were prepared above; retain the normal
+			 * loop condition without issuing the remaining wild stores. */
+			if (length <= WORDBYTES)
+				continue;
 			src += WORDBYTES;
 			dst += WORDBYTES;
 			store_word_unaligned(load_word_unaligned(src), dst);
