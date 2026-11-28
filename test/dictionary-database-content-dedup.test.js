@@ -257,7 +257,9 @@ function configureArtifactOverlapLifecycle(harness) {
     Object.assign(Reflect.get(harness.database, '_termRecordStore'), {
         endImportSession: endRecords, rollbackImportSession: rollbackRecords, getLastEndImportSessionMetrics: () => null,
     });
-    Reflect.set(Reflect.get(harness.database, '_termContentBlockImportSession'), 'close', vi.fn());
+    const contentSession = Reflect.get(harness.database, '_termContentBlockImportSession');
+    if (contentSession === null) { throw new Error('Expected an overlap content session'); }
+    Reflect.set(contentSession, 'close', vi.fn());
     Reflect.set(harness.database, '_applyRuntimePragmas', vi.fn());
     Reflect.set(harness.database, '_syncTermsVirtualTableFromRecordStore', vi.fn(async () => {}));
     Reflect.set(harness.database, '_rollbackGenerationMedia', vi.fn(async () => {}));
@@ -268,12 +270,20 @@ function configureArtifactOverlapLifecycle(harness) {
 describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
     test('waits for gathering before returning an owned chunk while compression continues', async () => {
         const harness = createOwnedArtifactOverlapHarness();
-        const begin = Reflect.get(harness.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const contentSession = Reflect.get(harness.database, '_termContentBlockImportSession');
+        if (contentSession === null) { throw new Error('Expected an overlap content session'); }
+        const begin = vi.mocked(contentSession.tryBeginAppendSpans);
         const originalBegin = begin.getMockImplementation();
+        if (typeof originalBegin !== 'function') { throw new Error('Expected a mocked append implementation'); }
         /** @type {() => void} */
         let resolveGather = () => {};
+        /** @type {Promise<void>} */
         const sourceConsumed = new Promise((resolve) => { resolveGather = () => resolve(void 0); });
-        begin.mockImplementation(() => ({...originalBegin(), sourceConsumed}));
+        begin.mockImplementation((...args) => {
+            const operation = originalBegin(...args);
+            if (operation === null) { throw new Error('Expected a reserved content append'); }
+            return {...operation, sourceConsumed};
+        });
         harness.resolveRecords();
         let returned = false;
         const writing = harness.run().then(() => { returned = true; });
@@ -290,13 +300,21 @@ describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
 
     test('joins the terminal content operation when gathering fails', async () => {
         const harness = createOwnedArtifactOverlapHarness();
-        const begin = Reflect.get(harness.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const contentSession = Reflect.get(harness.database, '_termContentBlockImportSession');
+        if (contentSession === null) { throw new Error('Expected an overlap content session'); }
+        const begin = vi.mocked(contentSession.tryBeginAppendSpans);
         const originalBegin = begin.getMockImplementation();
+        if (typeof originalBegin !== 'function') { throw new Error('Expected a mocked append implementation'); }
         /** @type {(error: Error) => void} */
         let rejectGather = () => {};
+        /** @type {Promise<void>} */
         const sourceConsumed = new Promise((_resolve, reject) => { rejectGather = reject; });
         void sourceConsumed.catch(() => {});
-        begin.mockImplementation(() => ({...originalBegin(), sourceConsumed}));
+        begin.mockImplementation((...args) => {
+            const operation = originalBegin(...args);
+            if (operation === null) { throw new Error('Expected a reserved content append'); }
+            return {...operation, sourceConsumed};
+        });
         harness.resolveRecords();
         let returned = false;
         const writing = harness.run().then(() => null, (error) => {
@@ -384,7 +402,9 @@ describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
         second.plan.persistedLookupRequired = true;
         second.plan.uniqueRowIndexes = new Uint32Array([0]);
         second.chunk.contentRowStart = 0;
-        const reserve = Reflect.get(first.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const contentSession = Reflect.get(first.database, '_termContentBlockImportSession');
+        if (contentSession === null) { throw new Error('Expected an overlap content session'); }
+        const reserve = contentSession.tryBeginAppendSpans;
         const completion = first.database.bulkAddArtifactTermsChunk(second.chunk);
         await vi.waitFor(() => expect(Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1));
         expect(reserve).toHaveBeenCalledOnce();
@@ -470,6 +490,7 @@ describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
         harness.resolveRecords();
         await harness.run();
         const pending = Reflect.get(harness.database, '_deferredArtifactContentPersistence');
+        if (pending === null) { throw new Error('Expected deferred content persistence'); }
         const rollback = vi.fn(pending.rollback);
         pending.rollback = rollback;
         const endContent = vi.fn(async () => {});
@@ -547,7 +568,7 @@ describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
         });
         const writeOutcome = first.database.bulkAddArtifactTermsChunk(second.chunk).then(() => null, (error) => error);
         await vi.waitFor(() => expect(matcherWaiting).toBe(true));
-        const cleanupOutcome = Reflect.get(first.database, operation).call(first.database).then(() => null, (error) => error);
+        const cleanupOutcome = Reflect.get(first.database, operation).call(first.database).then(() => null, (/** @type {unknown} */ error) => error);
         await vi.waitFor(() => expect(Reflect.get(first.database, '_bulkImportState')).toBe('finalizing'));
         first.rejectContent(new Error('owned content failed during cleanup'));
         await Promise.resolve();
