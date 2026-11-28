@@ -1,0 +1,74 @@
+name: Indexed score validation import screen 2ed
+
+on:
+  push:
+    branches: ['perf/indexed-validation-screen-20261127-2ed']
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Unit suite, scoped lint and types
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - run: npm run test:unit
+      - name: Lint changed JavaScript
+        if: always()
+        run: npx eslint ext/js/dictionary/term-record-opfs-store.js
+      - name: Check all TypeScript projects
+        if: always()
+        run: npm run test:ts
+  screen:
+    name: Six paired imports (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+      - name: Fetch frozen source revisions
+        run: git fetch --no-tags --depth=1 origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 7e488d809ba18ce120f5766651bdfdf622561fab
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prospectively fixed paired screen
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          extra=()
+          if [[ "$DICTIONARY" == vndb ]]; then
+            extra=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 \
+            --candidate 7e488d809ba18ce120f5766651bdfdf622561fab \
+            --dictionary "$DICTIONARY" --initial-order AB --pairs 6 \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --evidence "builds/perf/indexed-validation-screen-$DICTIONARY" "${extra[@]}"
+      - name: Print compact result
+        if: always()
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          if [[ -f "builds/perf/indexed-validation-screen-$DICTIONARY/analysis.json" ]]; then
+            cat "builds/perf/indexed-validation-screen-$DICTIONARY/analysis.json"
+          fi
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: indexed-validation-screen-2ed-${{ matrix.dictionary }}
+          path: builds/perf/indexed-validation-screen-${{ matrix.dictionary }}
+          retention-days: 14
