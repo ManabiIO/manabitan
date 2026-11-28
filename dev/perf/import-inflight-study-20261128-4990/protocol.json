@@ -1,0 +1,31 @@
+{
+    "schemaVersion": 1,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+    "candidateTree": "9d096d8cb88d081d3ceaa85c94c97003f459819e",
+    "localCandidateEquivalent": "dd685f791cb51ea4a7a59feebb0a1b86eed34432",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "browserVersion": "153.0.8010.12",
+    "nodeVersion": "v22.22.0",
+    "parserWasmSha256": {
+        "A": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "B": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "expectedPackageChanges": [
+        "js/dictionary/dictionary-database.js"
+    ],
+    "vndbSahAllocationUnits": [
+        37,
+        37
+    ],
+    "vndbSahAllocationPolicy": "Current baseline-bound 4096-byte allocation units; exact complete file-size equality remains required across every observation.",
+    "control": "A and C use the same immutable baseline package in independent fresh browser profiles.",
+    "timingPlan": "Three warmups followed by twelve balanced ABC blocks. The second independent hosted job reverses each block. No retries or appended observations.",
+    "timingBoundary": "Unchanged file-input change through post-UI import completion. No product or timing-harness overlay. Registration still validates all current numeric spans synchronously before publication; no work is deferred.",
+    "diagnostics": "The native parser, encoder, compressor, manifest, and complete native package members must match baseline exactly. The native-only replay is not repeated because it bypasses the changed database registration code. Complete unit tests, adversarial registration tests, semantic browser receipts, exhaustive media and four separate process-memory observations remain required. Separate baseline and candidate browser traces follow timing and memory.",
+    "memoryPolicy": "Existing complete-process-tree observer and fixed coverage rules, median PSS/private growth at most 5%, each individual pair at most 10%. Both independent host results remain separate.",
+    "statistics": "Twelve within-block B/A, B/C and unchanged C/A comparisons per host. Descriptive paired percentile bootstrap, 10000 resamples, seed 20261127. No control subtraction or pooling across hosts/corpora.",
+    "promotion": "No automatic promotion. Review requires a repeatable complete-import benefit compared with both unchanged controls on both hosts, assessed against control variation, plus all correctness and memory gates. An inconclusive result is not a speed claim; all raw observations and failures remain available.",
+    "hypothesis": "An origin-only plain-record brand and current internal-view/buffer brand checks allow a single complete ordered span validation before registration, avoiding per-row general object and duplicate-reservation dispatch for proven private numeric columns.",
+    "selection": "The guarded synchronous validation candidate was selected after a complete registration-only Node CPU screen and a separate hardened-source confirmation. Those component observations do not establish whole-import benefit. The candidate remains independent of parser key proof, composite fusion, and CRC experiments."
+}
