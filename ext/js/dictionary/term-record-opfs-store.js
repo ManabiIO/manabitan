@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+// eslint-disable-next-line @stylistic/semi
+import {hashTermIndexBytes as hashLookupIndexBytes, initializeTermIndexHash} from './term-index-hash.js'
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -586,14 +588,6 @@ function getContentOffsetDelta(offset, base) {
 }
 
 /**
- * @param {Uint8Array} bytes
- * @returns {number}
- */
-function hashLookupIndexBytes(bytes) {
-    return hashTermLookupKeyBytes(bytes);
-}
-
-/**
  * @param {Uint8Array} a
  * @param {Uint8Array} b
  * @returns {boolean}
@@ -825,6 +819,8 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {number} lookupIndexNativeHashCallCount
+ * @property {number} lookupIndexNativeHashBytes
  */
 
 /**
@@ -956,7 +952,7 @@ export class TermRecordOpfsStore {
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
+        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, nativeHashCallCount: number, nativeHashBytes: number}} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
@@ -1230,6 +1226,9 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async beginImportSession() {
+        // Optional compilation overlaps the existing asynchronous storage setup.
+        // eslint-disable-next-line @stylistic/semi
+        void initializeTermIndexHash()
         await this._runExclusiveStorageMutation(async () => {
             if (this._importSessionActive) {
                 return;
@@ -1529,6 +1528,8 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            lookupIndexNativeHashCallCount: this._lookupIndexWriteMetrics.nativeHashCallCount,
+            lookupIndexNativeHashBytes: this._lookupIndexWriteMetrics.nativeHashBytes,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -6270,9 +6271,11 @@ view.chunks :
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        /* eslint-disable @stylistic/semi */
+        view.setUint32(24, hashLookupIndexBytes(base, this._lookupIndexWriteMetrics), true)
+        view.setUint32(28, hashLookupIndexBytes(derived, this._lookupIndexWriteMetrics), true)
+        view.setUint32(32, hashLookupIndexBytes(recordFields, this._lookupIndexWriteMetrics), true)
+        /* eslint-enable @stylistic/semi */
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
@@ -7551,7 +7554,7 @@ view.chunks :
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, nativeHashCallCount: number, nativeHashBytes: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7560,6 +7563,8 @@ view.chunks :
             awaitMs: 0,
             maxQueuedBytes: 0,
             workerFileCount: 0,
+            nativeHashCallCount: 0,
+            nativeHashBytes: 0,
         };
     }
 

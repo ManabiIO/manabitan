@@ -19,7 +19,7 @@ async function fixture() {
         sourceDigest: identity.digest,
         sourceFileCount: identity.count,
         toolchain: {compilerVersion: '21.1.8', linkerVersion: '21.1.8'},
-        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
+        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm', 'term-index-hash-v1.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
     for (const {name} of manifest.targets) { await writeFile(join(artifacts, name), module); }
     const saveManifest = () => writeFile(join(artifacts, 'manifest.json'), JSON.stringify(manifest));
     await saveManifest();
@@ -98,7 +98,8 @@ test.each(['format', 'duplicate', 'path'])('rejects invalid manifest %s', async 
 test('checked-in artifacts match the current native inputs and are valid modules', () => {
     const manifest = getDictionaryWasmManifest();
     const modules = loadDictionaryWasm();
-    expect(modules.size).toBe(2);
+    // eslint-disable-next-line @stylistic/semi
+    expect(modules.size).toBe(3)
     for (const target of manifest.targets) {
         const bytes = /** @type {Buffer} */ (modules.get(target.name));
         expect(dictionaryWasmHash(bytes)).toBe(target.sha256);

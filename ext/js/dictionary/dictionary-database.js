@@ -1520,6 +1520,10 @@ export class DictionaryDatabase {
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
             let termRecordLookupIndexWorkerFileCount = 0;
+            /* eslint-disable @stylistic/semi */
+            let termRecordLookupIndexNativeHashCallCount = 0
+            let termRecordLookupIndexNativeHashBytes = 0
+            /* eslint-enable @stylistic/semi */
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1591,6 +1595,10 @@ export class DictionaryDatabase {
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
                             termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
+                            /* eslint-disable @stylistic/semi */
+                            termRecordLookupIndexNativeHashCallCount = metrics.lookupIndexNativeHashCallCount ?? 0
+                            termRecordLookupIndexNativeHashBytes = metrics.lookupIndexNativeHashBytes ?? 0
+                            /* eslint-enable @stylistic/semi */
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1768,6 +1776,8 @@ export class DictionaryDatabase {
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termRecordLookupIndexWorkerFileCount,
+                    termRecordLookupIndexNativeHashCallCount,
+                    termRecordLookupIndexNativeHashBytes,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
