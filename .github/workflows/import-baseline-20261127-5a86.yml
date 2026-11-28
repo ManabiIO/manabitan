@@ -1,0 +1,57 @@
+name: Import baseline profile 20261127 5a86
+
+on:
+  push:
+    branches: [perf/import-baseline-20261127-5a86]
+    paths: [.github/workflows/import-baseline-20261127-5a86.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-baseline-20261127-5a86
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    name: Current baseline (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Ordinary complete import, then separate diagnostic trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="builds/perf/baseline-20261127-5a86"
+          mkdir -p "$evidence"
+          git rev-parse HEAD HEAD^{tree} > "$evidence/source.txt"
+          node dev/perf/host-environment.js > "$evidence/host.json"
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" 2>&1 | tee "$evidence/fixtures.log"
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --build-target chrome --media-check sample --output "$evidence/ordinary" 2>&1 | tee "$evidence/ordinary.log"
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --trace --build-target chrome --media-check sample --output "$evidence/trace" 2>&1 | tee "$evidence/trace.log"
+      - name: Retain all receipts and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-baseline-5a86-${{ matrix.dictionary }}
+          path: builds/perf/baseline-20261127-5a86
+          if-no-files-found: error
+          retention-days: 30
