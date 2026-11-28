@@ -1,0 +1,75 @@
+name: Fingerprint complete import qualification 9bb32
+
+on:
+  push:
+    branches: [diagnostic/import-slot-qualification-20261128-9bb32]
+    paths: ['.github/workflows/import-slot-qualification-9bb32.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: 178ee43328141693e88b90b4b518d483c87b2fac
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify unchanged qualification checks
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch frozen product revisions
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Run fixed complete import and separate memory cohorts
+        run: |
+          qualification_extra_args=()
+          if [ "$PERF_DICTIONARY" = vndb ]; then
+            qualification_extra_args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/term-content-canonical-layout.js \
+            --expected-package-entry js/dictionary/term-content-metadata-arena.js \
+            --expected-package-entry lib/term-content-canonical-scan-v1.wasm \
+            "${qualification_extra_args[@]}" \
+            --evidence "builds/perf/slot-fingerprints-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Emit read-only evidence summary
+        if: always()
+        run: python dev/perf/emit-qualification-logs-9bb32.py "builds/perf/slot-fingerprints-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: slot-fingerprints-${{ matrix.dictionary }}-${{ matrix.order }}-9bb32
+          path: builds/perf/slot-fingerprints-${{ matrix.dictionary }}-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 14
