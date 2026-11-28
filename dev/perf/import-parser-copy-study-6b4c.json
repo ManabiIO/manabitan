@@ -1,0 +1,34 @@
+{
+    "schemaVersion": 2,
+    "stage": "frozen-browser-screen",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "purpose": "Measure the complete default-browser VNDB import effect of replacing Uint8Array.from with the typed-array copy constructor for shared parser text",
+    "productionDefaults": true,
+    "pairs": 6,
+    "orders": [
+        "AB",
+        "BA"
+    ],
+    "fixtureIntegrity": "Locked SHA-256 required before every observation",
+    "timingBoundary": "Browser monotonic file-input change through completed import UI; separate traces and memory observations are not timing evidence",
+    "controlPolicy": "Unchanged exact-source qualification schedule: four warmups, six alternating candidate pairs, and two interleaved identical-baseline AC/CA control pairs on each host",
+    "mediaPolicy": "Unchanged production browser storage path; sampled media byte validation during timed observations and separate exhaustive media byte validation for both source arms after timing",
+    "failurePolicy": "Retain every scheduled observation and failure; stop at the first failed observation; do not replace observations or trim tails",
+    "decisionPolicy": "No PR from component-only gains or an incomplete cohort. Require replicated useful complete-import improvement beyond identical-code controls, preserved semantics/storage, and passing existing prospective memory screen. Assess improvement against implementation complexity.",
+    "memoryPolicy": "Unchanged qualification gate: all observations covered; paired median PSS/private increases at most 5%, individual pairs at most 10%",
+    "localScreenLimitation": "The prior Node six-pair VNDB screen was incomplete after SIGKILL and used an in-memory SQLite media fallback. Its successful prefix is excluded from performance qualification; term-sidecar hashes and media counts did not establish SQLite media BLOB parity.",
+    "candidates": [
+        {
+            "label": "shared-parser-string-copy",
+            "sha": "90c3ef6aa911b48a7db2b65e1e411fbf221dab42",
+            "tree": "dc611da7fef31085f586933227c6874dfa73beeb",
+            "dictionaries": [
+                "vndb"
+            ],
+            "expectedPackageEntries": [
+                "js/dictionary/term-bank-wasm-parser.js"
+            ]
+        }
+    ]
+}
