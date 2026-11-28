@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sourceBoundary": "Frozen f28-versus68b browser cohort only; no later a300 qualification.",
+  "preservedEvidenceCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+  "files": [
+    {
+      "path": "assemble-current-browser-audit.py",
+      "blob": "b1858390f41863b0e8fe1f6e7e31477358b7ece5",
+      "bytes": 8780,
+      "sha256": "63dcacc77ce185f38363afd6e2dc82b4b41366a1760b50c0bab7e5052742091a"
+    },
+    {
+      "path": "browser-audit-all-six.json",
+      "blob": "db4ad70f9609b56c9d2ad0ed3b45aa4900fe9c75",
+      "bytes": 47757,
+      "sha256": "7073582822d98871fe921a51f69b69897a0314a72996effb139d5890b266c87d"
+    },
+    {
+      "path": "first-four-independent-audit.json",
+      "blob": "0ef3bd5d783d52c4ee6ef61320ed419c2c675f2a",
+      "bytes": 10533,
+      "sha256": "418603cd73227526117e2503c135f1d8dc364cad0f4debe6468e648a7ab022aa"
+    },
+    {
+      "path": "input-receipts.json",
+      "blob": "b9c3b3419ce8d04722f02acffc83f0187f4c5ad2",
+      "bytes": 7931,
+      "sha256": "b6f02944f7cc68a96a52065c0aa539152f1c0d42c091a2c6ea24d138f85e57ae"
+    },
+    {
+      "path": "README.md",
+      "blob": "cf39ad6860f92f723898b064218ee9d52466b5ff",
+      "bytes": 8369,
+      "sha256": "3e1a3a10e23404175a373916b3b956057e032ee485d7da725f568595f43230c1"
+    },
+    {
+      "path": "retained-old-memory-failures.json",
+      "blob": "06a682362d5f741b167bf33eb1c7d0a5991ecab6",
+      "bytes": 1519,
+      "sha256": "0ca588f31eace2db281d1f7e94e9a1c0ca7fc06b765afc7867821ee47742064b"
+    },
+    {
+      "path": "vndb-ba-memory-coverage.json",
+      "blob": "a56a9a7dfecad8f125af1b09761bd4cef26587f1",
+      "bytes": 839,
+      "sha256": "7a261b1e41dc292489fa7f470b3140c4e009d13c5a995a8b579637d120464094"
+    }
+  ]
+}
