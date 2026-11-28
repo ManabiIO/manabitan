@@ -79,7 +79,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, peekNextReadyChunk?: () => {chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}}|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -2915,6 +2915,10 @@ class ParallelTermBankPipelineRun {
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
         /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
         this._resultSlots = [];
+        /* eslint-disable @stylistic/semi */
+        /** @type {Map<number, {chunk: TermBankColumnChunk, rowCount: number}>} */
+        this._readyOwnedChunks = new Map()
+        /* eslint-enable @stylistic/semi */
         /** @type {Set<() => void>} */
         this._pendingResultConsumers = new Set();
         /** @type {Promise<void>[]} */
@@ -3003,6 +3007,9 @@ class ParallelTermBankPipelineRun {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
                 const {chunk, consume} = result;
+                /* eslint-disable @stylistic/semi */
+                this._readyOwnedChunks.delete(i)
+                /* eslint-enable @stylistic/semi */
                 // Settled slot promises live until the pipeline drains. Keep
                 // the chunk alive only through its ordered sink callback.
                 result.chunk = null;
@@ -3014,6 +3021,27 @@ class ParallelTermBankPipelineRun {
                 processedRows += result.rowCount;
                 exactTotalRows += result.rowCount;
                 if (chunk !== null) {
+                    /* eslint-disable @stylistic/semi */
+                    if (this._options.experimentalDedupLookahead === true && consume === null) {
+                        // Only already-owned results can be read ahead. A worker
+                        // failure may release borrowed slots before this sink joins.
+                        chunk.peekNextReadyChunk = () => {
+                            if (this._pipelineShouldCancel()) { return null }
+                            const next = this._readyOwnedChunks.get(i + 1)
+                            if (typeof next === 'undefined') { return null }
+                            const nextProcessedRows = processedRows + next.rowCount
+                            return {
+                                chunk: next.chunk,
+                                progress: {
+                                    processedRows: nextProcessedRows,
+                                    totalRows: i + 2 === this._resultSlots.length ? nextProcessedRows : Math.max(nextProcessedRows, estimatedTotalRows),
+                                    chunkIndex: i + 2,
+                                    chunkCount: this._resultSlots.length,
+                                },
+                            }
+                        }
+                    }
+                    /* eslint-enable @stylistic/semi */
                     try {
                         await this._onChunk(chunk, {
                             processedRows,
@@ -3024,6 +3052,9 @@ class ParallelTermBankPipelineRun {
                     } finally {
                         consume?.();
                         delete chunk.releaseBorrowedContent;
+                        /* eslint-disable @stylistic/semi */
+                        delete chunk.peekNextReadyChunk
+                        /* eslint-enable @stylistic/semi */
                         this._queuedOwnedContentBytes -= result.ownedContentBytes ?? 0;
                     }
                 }
@@ -3035,6 +3066,9 @@ class ParallelTermBankPipelineRun {
                 this._wakeLeadWaiters();
             }
             await Promise.all(this._workerLoops);
+            /* eslint-disable @stylistic/semi */
+            this._readyOwnedChunks.clear()
+            /* eslint-enable @stylistic/semi */
             if (this._error !== null) { throw this._error; }
             // The final sink can outlive every worker job. Cancellation during
             // that await must not be reported as successful parsing.
@@ -3136,6 +3170,11 @@ class ParallelTermBankPipelineRun {
                 this._ownedContentBytes += ownedContentBytes;
                 this._queuedOwnedContentBytes += ownedContentBytes;
                 this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
+                /* eslint-disable @stylistic/semi */
+                if (this._options.experimentalDedupLookahead === true && !result.borrowsWorkerMemory && result.chunk !== null) {
+                    this._readyOwnedChunks.set(groupIndex, {chunk: result.chunk, rowCount: result.rowCount})
+                }
+                /* eslint-enable @stylistic/semi */
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
                 if (consumed !== null) { await consumed; }
             }
@@ -3160,6 +3199,9 @@ class ParallelTermBankPipelineRun {
         if (this._failed) { return; }
         this._failed = true;
         this._error = createParallelParserError(error);
+        /* eslint-disable @stylistic/semi */
+        this._readyOwnedChunks.clear()
+        /* eslint-enable @stylistic/semi */
         this._wakeLeadWaiters();
         for (const consume of this._pendingResultConsumers) { consume(); }
         const result = {chunk: null, profile: null, error: this._error, finishedAt: safePerformance.now(), rowCount: 0, sourceBytes: 0, consume: null};

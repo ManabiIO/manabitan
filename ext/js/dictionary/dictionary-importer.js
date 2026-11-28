@@ -180,6 +180,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentMetaList?: Uint32Array,
  *   contentMetaByUniqueIndex?: boolean,
  *   releaseBorrowedContent?: () => void,
+ *   peekNextTermChunk?: () => DirectTermChunk|null,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
  *   termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null,
@@ -5169,6 +5170,39 @@ export class DictionaryImporter {
             let importerChunkSinkMs = 0;
             let importerChunkCount = 0;
             let importerTotalRows = 0;
+            /* eslint-disable @stylistic/semi */
+            /** @type {WeakMap<object, DirectTermChunk>} */
+            const readyDirectChunks = new WeakMap()
+            /**
+             * Materialize an owned ready slot once; its ordinary sink later uses
+             * this exact object and consumes the already-prepared dedup result.
+             * @param {import('./term-bank-wasm-parser.js').TermBankColumnChunk} columnChunk
+             * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} progress
+             * @returns {DirectTermChunk}
+             */
+            const getReadyDirectChunk = (columnChunk, progress) => {
+                let direct = readyDirectChunks.get(columnChunk)
+                if (typeof direct === 'undefined') {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const {mediaRows: _mediaRows, peekNextReadyChunk: _peekNextReadyChunk, ...payload} = columnChunk
+                    direct = {
+                        ...payload,
+                        dictionary: dictionaryTitle,
+                        dictionaryTotalRows: progress.totalRows,
+                        contentDictNameList: null,
+                        uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                    }
+                    readyDirectChunks.set(columnChunk, direct)
+                }
+                if (typeof columnChunk.peekNextReadyChunk === 'function') {
+                    direct.peekNextTermChunk = () => {
+                        const next = columnChunk.peekNextReadyChunk?.()
+                        return next ? getReadyDirectChunk(next.chunk, next.progress) : null
+                    }
+                }
+                return direct
+            }
+            /* eslint-enable @stylistic/semi */
             /**
              * @param {unknown} parsedRows
              * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} chunkProgress
@@ -5236,13 +5270,15 @@ export class DictionaryImporter {
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                     const tChunkSinkStart = Date.now();
                     await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
-                        {
-                            ...columnPayload,
-                            dictionary: dictionaryTitle,
-                            dictionaryTotalRows: chunkProgress.totalRows,
-                            contentDictNameList: null,
-                            uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
-                        },
+                        this._termBankExperiments.experimentalDedupLookahead && !useMediaPipeline ?
+                            getReadyDirectChunk(/** @type {import('./term-bank-wasm-parser.js').TermBankColumnChunk} */ (/** @type {unknown} */ (columnChunk)), chunkProgress) :
+                            {
+                                ...columnPayload,
+                                dictionary: dictionaryTitle,
+                                dictionaryTotalRows: chunkProgress.totalRows,
+                                contentDictNameList: null,
+                                uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                            },
                         requirementsForChunk,
                         chunkProgress,
                     );

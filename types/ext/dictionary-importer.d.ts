@@ -75,6 +75,8 @@ export type ImportExperiments = {
     experimentalFusedSingleBank?: boolean;
     experimentalGlobalExactContentReuse?: boolean;
     experimentalFastGlossaryNormalization?: boolean;
+    /** Experimental one-chunk dedup preparation during the preceding owned chunk's compression. */
+    experimentalDedupLookahead?: boolean;
 };
 
 export type ImportDetails = ImportExperiments & {

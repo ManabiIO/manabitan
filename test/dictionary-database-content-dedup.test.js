@@ -224,6 +224,193 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     };
 }
 
+/* eslint-disable @stylistic/semi */
+describe('one ready term chunk dedup lookahead', () => {
+    /**
+     * @param {boolean} [duplicate]
+     * @returns {{current: ReturnType<typeof createArtifactOverlapHarness>, next: ReturnType<typeof createArtifactOverlapHarness>, initialNextPlan: ReturnType<typeof createArtifactOverlapHarness>['plan']}}
+     */
+    function fixture(duplicate = false) {
+        const current = createArtifactOverlapHarness()
+        const next = duplicate ? createArtifactOverlapHarness() : createArtifactOverlapHarness([4, 5, 6], 30, 40)
+        delete current.chunk.releaseBorrowedContent
+        delete next.chunk.releaseBorrowedContent
+        Object.assign(next.plan, {
+            resolutionDeferred: true,
+            resolvedFlags: new Uint8Array(0),
+            resolvedOffsets: new Float64Array(0),
+            resolvedLengths: new Uint32Array(0),
+            uniqueRowIndexes: new Uint32Array([0]),
+            pendingEpochs: null,
+            pendingIndexes: null,
+            persistedLookupRequired: null,
+        })
+        next.chunk.contentRowStart = 0
+        Reflect.set(current.database, '_experimentalDedupLookahead', true)
+        current.chunk.peekNextTermChunk = () => next.chunk
+        return {current, next, initialNextPlan: {...next.plan}}
+    }
+
+    test('stages the successor during compression and consumes its result without a second scan', async () => {
+        const {current, next} = fixture()
+        const resolve = vi.spyOn(current.database, '_resolveArtifactTermContentDedup')
+        const importing = current.run()
+        await vi.waitFor(() => expect(Reflect.get(current.database, '_preparedArtifactTermDedup')?.chunk).toBe(next.chunk))
+
+        expect(current.appendRecords).toHaveBeenCalledOnce()
+        expect(getMeta(current.database, 10, 20)).toBeDefined()
+        expect(getMeta(current.database, 30, 40)).toBeUndefined()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1)
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+
+        Reflect.set(current.database, '_termContentBlockImportSession', null)
+        vi.spyOn(current.database, '_persistArtifactTermContent').mockResolvedValue({
+            pendingOffsets: [200], pendingLengths: [3], pendingResolvedDictNames: 'raw', blockProfile: null,
+        })
+        await current.database._bulkAddArtifactTermsChunkWithContentDedup(next.chunk)
+        expect(resolve).toHaveBeenCalledTimes(2)
+        expect(getMeta(current.database, 30, 40)).toMatchObject({offset: 200, length: 3})
+        expect(current.database.getLastBulkAddTermsMetrics()).toMatchObject({dedupLookaheadCount: 1})
+        expect(Reflect.get(current.database, '_preparedArtifactTermDedup')).toBeNull()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+    })
+
+    test('verifies a successor duplicate against current reserved content before durable completion', async () => {
+        const {current, next} = fixture(true)
+        const read = vi.spyOn(current.database, '_readTermEntryContentBytesDetailed')
+        const importing = current.run()
+        await vi.waitFor(() => expect(Reflect.get(current.database, '_preparedArtifactTermDedup')?.chunk).toBe(next.chunk))
+        expect(next.plan.resolvedFlags).toStrictEqual(new Uint8Array([1]))
+        expect(next.plan.resolvedOffsets).toStrictEqual(new Float64Array([100]))
+        expect(read).not.toHaveBeenCalled()
+        expect(current.appendRecords).toHaveBeenCalledOnce()
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+        await current.database._bulkAddArtifactTermsChunkWithContentDedup(next.chunk)
+        expect(current.appendRecords).toHaveBeenCalledTimes(2)
+        expect(current.database.getLastBulkAddTermsMetrics()).toMatchObject({dedupLookaheadCount: 1, dedupUniqueCount: 0})
+    })
+
+    test('joins the successor before rolling its staged metadata back ahead of a failed current chunk', async () => {
+        const {current, next, initialNextPlan} = fixture()
+        const originalResolve = current.database._resolveArtifactTermContentDedup.bind(current.database)
+        const gate = Promise.withResolvers()
+        let successorResolved = false
+        vi.spyOn(current.database, '_resolveArtifactTermContentDedup').mockImplementation(async (chunk, reserve) => {
+            const result = await originalResolve(chunk, reserve)
+            if (chunk === next.chunk) {
+                successorResolved = true
+                await gate.promise
+            }
+            return result
+        })
+        const rollback = vi.spyOn(current.database, '_rollbackStagedArtifactTermContentMetadata')
+        const importing = current.run()
+        const failed = expect(importing).rejects.toThrow('current record failed')
+        let settled = false
+        void importing.finally(() => { settled = true }).catch(() => {})
+        await vi.waitFor(() => expect(successorResolved).toBe(true))
+        current.rejectRecords(new Error('current record failed'))
+        current.resolveContent()
+        await Promise.resolve()
+        expect(settled).toBe(false)
+        expect(rollback).not.toHaveBeenCalled()
+        gate.resolve(void 0)
+        await failed
+        expect(rollback.mock.calls.flatMap(([stage]) => stage === null ? [] : [[...stage.indexes]])).toStrictEqual([[1], [0]])
+        expect(getMeta(current.database, 10, 20)).toBeUndefined()
+        expect(getMeta(current.database, 30, 40)).toBeUndefined()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+        expect(Reflect.get(current.database, '_preparedArtifactTermDedup')).toBeNull()
+        expect(next.plan).toStrictEqual(initialNextPlan)
+        expect(next.plan.resolvedFlags).toBe(initialNextPlan.resolvedFlags)
+    })
+
+    test('propagates a malformed successor after draining current writes', async () => {
+        const {current, next, initialNextPlan} = fixture()
+        const contentMetaList = /** @type {Uint32Array} */ (next.chunk.contentMetaList)
+        contentMetaList[1] = 10
+        const importing = current.run()
+        const failed = expect(importing).rejects.toThrow(/content.*invalid/i)
+        await vi.waitFor(() => expect(current.appendRecords).toHaveBeenCalledOnce())
+        current.resolveContent()
+        current.resolveRecords()
+        await failed
+        expect(getMeta(current.database, 10, 20)).toBeUndefined()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+        expect(next.plan).toStrictEqual(initialNextPlan)
+    })
+
+    test('discards prepared reservations during aborted import cache cleanup', async () => {
+        const {current, next, initialNextPlan} = fixture()
+        const importing = current.run()
+        await vi.waitFor(() => expect(Reflect.get(current.database, '_preparedArtifactTermDedup')?.chunk).toBe(next.chunk))
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+        await expect(current.database.finishBulkImport()).rejects.toThrow('prepared term chunk')
+        current.database._clearTermEntryContentMetaCaches()
+        expect(Reflect.get(current.database, '_preparedArtifactTermDedup')).toBeNull()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+        expect(next.plan).toStrictEqual(initialNextPlan)
+    })
+
+    test('rejects a different successor without publishing its prepared peer', async () => {
+        const {current, next, initialNextPlan} = fixture()
+        const importing = current.run()
+        await vi.waitFor(() => expect(Reflect.get(current.database, '_preparedArtifactTermDedup')?.chunk).toBe(next.chunk))
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+        const unexpected = createArtifactOverlapHarness([7, 8, 9], 50, 60)
+        await expect(current.database._bulkAddArtifactTermsChunkWithContentDedup(unexpected.chunk)).rejects.toThrow('out of order')
+        expect(getMeta(current.database, 10, 20)).toBeDefined()
+        expect(getMeta(current.database, 30, 40)).toBeUndefined()
+        expect(getMeta(current.database, 50, 60)).toBeUndefined()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+        expect(next.plan).toStrictEqual(initialNextPlan)
+        const retry = await current.database._resolveArtifactTermContentDedup(next.chunk, true)
+        expect(retry.pendingContentCount).toBe(1)
+        current.database._rollbackStagedArtifactTermContentMetadata(retry.stagedContentMetadata ?? null)
+    })
+
+    test('restores a consumed prepared plan when its persistence fails, then retries it', async () => {
+        const {current, next, initialNextPlan} = fixture()
+        const importing = current.run()
+        await vi.waitFor(() => expect(Reflect.get(current.database, '_preparedArtifactTermDedup')?.chunk).toBe(next.chunk))
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+        Reflect.set(current.database, '_termContentBlockImportSession', null)
+        const persist = vi.spyOn(current.database, '_persistArtifactTermContent').mockRejectedValueOnce(new Error('successor persistence failed'))
+        await expect(current.database._bulkAddArtifactTermsChunkWithContentDedup(next.chunk)).rejects.toThrow('successor persistence failed')
+        expect(next.plan).toStrictEqual(initialNextPlan)
+        expect(getMeta(current.database, 10, 20)).toBeDefined()
+        expect(getMeta(current.database, 30, 40)).toBeUndefined()
+        expect(Reflect.get(current.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0)
+        persist.mockResolvedValue({pendingOffsets: [200], pendingLengths: [3], pendingResolvedDictNames: 'raw', blockProfile: null})
+        await current.database._bulkAddArtifactTermsChunkWithContentDedup(next.chunk)
+        expect(getMeta(current.database, 30, 40)).toMatchObject({offset: 200, length: 3})
+    })
+
+    test('does not request the next slot when the experiment is disabled', async () => {
+        const {current} = fixture()
+        Reflect.set(current.database, '_experimentalDedupLookahead', false)
+        const peek = vi.fn(() => { throw new Error('disabled lookahead') })
+        current.chunk.peekNextTermChunk = peek
+        const importing = current.run()
+        await vi.waitFor(() => expect(current.appendRecords).toHaveBeenCalledOnce())
+        current.resolveContent()
+        current.resolveRecords()
+        await importing
+        expect(peek).not.toHaveBeenCalled()
+    })
+})
+/* eslint-enable @stylistic/semi */
+
 describe('DictionaryDatabase term content hash validation', () => {
     test.each([
         'deadbeeX0000000Y',

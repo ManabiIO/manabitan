@@ -41,6 +41,7 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
         experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
         experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,
+        experimentalDedupLookahead: typeof options.experimentalDedupLookahead === 'undefined' || options.experimentalDedupLookahead === true,
     })
 }
 

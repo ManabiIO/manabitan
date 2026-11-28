@@ -1525,6 +1525,107 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    /* eslint-disable @stylistic/semi */
+    maybeTest.each([
+        {enabled: true, firstOwned: true, secondOwned: true, cancel: false},
+        {enabled: false, firstOwned: true, secondOwned: true, cancel: false},
+        {enabled: true, firstOwned: false, secondOwned: true, cancel: false},
+        {enabled: true, firstOwned: true, secondOwned: false, cancel: false},
+        {enabled: true, firstOwned: true, secondOwned: true, cancel: true},
+    ])('peeks only an already-owned successor: $enabled/$firstOwned/$secondOwned/$cancel', async ({enabled, firstOwned, secondOwned, cancel}) => {
+        let parseCount = 0
+        let cancelled = false
+        /** @implements {WorkerMock} */
+        class ReadyOwnedWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map()
+            }
+
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener))
+            }
+
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener)
+            }
+
+            postMessage(/** @type {WorkerMessage} */ message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'})
+                        return
+                    }
+                    ++parseCount
+                    const owns = message.id === 1 ? firstOwned : (message.id === 2 ? secondOwned : true)
+                    const content = new Uint8Array(new SharedArrayBuffer(1))
+                    content[0] = getWorkerMessageId(message)
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        ownsContentBytes: owns,
+                        borrowsWorkerMemory: !owns,
+                        chunk: {rowCount: 1, contentBytesBuffer: content},
+                        profile: {chunkDispatchMs: 0},
+                    })
+                })
+            }
+
+            terminate() {}
+        }
+        vi.stubGlobal('Worker', ReadyOwnedWorker)
+        /** @type {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk[]} */
+        const firstChunks = []
+        /** @type {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk|null} */
+        let peeked = null
+        /** @type {number[]} */
+        const observedIndexes = []
+        try {
+            const sources = Array.from({length: 4}, () => textEncoder.encode('[]'))
+            const parsing = parseTermBankWithWasmColumnChunksParallel(sources, 3, async (chunk, progress) => {
+                observedIndexes.push(progress.chunkIndex)
+                if (progress.chunkIndex === 1) {
+                    firstChunks.push(chunk)
+                    await vi.waitFor(() => expect(parseCount).toBeGreaterThanOrEqual(2))
+                    if (!enabled || !firstOwned) {
+                        expect(chunk.peekNextReadyChunk).toBeUndefined()
+                    } else {
+                        if (typeof chunk.peekNextReadyChunk !== 'function') { throw new Error('Missing owned-slot peek') }
+                        const next = chunk.peekNextReadyChunk()
+                        if (secondOwned) {
+                            if (next === null) { throw new Error('Missing owned successor') }
+                            expect(next.progress).toStrictEqual({processedRows: 2, totalRows: 4, chunkIndex: 2, chunkCount: 4})
+                            peeked = next.chunk
+                            expect(peeked.contentBytesBuffer?.[0]).toBe(2)
+                        } else {
+                            expect(next).toBeNull()
+                        }
+                    }
+                    if (cancel) {
+                        cancelled = true
+                        expect(chunk.peekNextReadyChunk?.()).toBeNull()
+                    }
+                } else if (progress.chunkIndex === 2 && peeked !== null) {
+                    expect(chunk).toBe(peeked)
+                }
+            }, {emitContentSlab: true, experimentalDedupLookahead: enabled}, () => cancelled)
+            if (cancel) {
+                await expect(parsing).rejects.toThrow(/cancel/i)
+                expect(observedIndexes).toStrictEqual([1])
+            } else {
+                await expect(parsing).resolves.toBe(true)
+                expect(observedIndexes).toStrictEqual([1, 2, 3, 4])
+            }
+            expect(firstChunks[0].peekNextReadyChunk).toBeUndefined()
+        } finally {
+            await disposeParallelTermBankParser()
+            vi.stubGlobal('Worker', void 0)
+        }
+    })
+    /* eslint-enable @stylistic/semi */
+
     maybeTest('streams early groups while later ZIP sources are unresolved', async () => {
         /** @implements {WorkerMock} */
         class SuccessfulWorker {
