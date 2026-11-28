@@ -276,9 +276,21 @@ function createHeader(generationId, descriptorKey) {
  */
 function getPathId(path, prefix, suffix) {
     if (!path.startsWith(prefix) || !path.endsWith(suffix)) { return null; }
-    const digits = path.slice(prefix.length, -suffix.length);
-    const id = Number(digits);
-    return Number.isSafeInteger(id) && id > 0 && String(id) === digits ? id : null;
+    const start = prefix.length;
+    const end = path.length - suffix.length;
+    const length = end - start;
+    if (suffix.length === 0 || length < 1 || length > 16) { return null; }
+    // The namespace uses canonical positive integer IDs. Scan those digits in
+    // place so index construction, selection and reads need no temporary
+    // substring or numeric string for every image path.
+    let id = path.charCodeAt(start) - 0x30;
+    if (id < 1 || id > 9) { return null; }
+    for (let i = start + 1; i < end; ++i) {
+        const digit = path.charCodeAt(i) - 0x30;
+        if (digit < 0 || digit > 9) { return null; }
+        id = id * 10 + digit;
+    }
+    return Number.isSafeInteger(id) ? id : null;
 }
 
 /**
