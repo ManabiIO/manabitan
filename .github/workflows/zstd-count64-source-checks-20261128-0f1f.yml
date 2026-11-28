@@ -1,0 +1,84 @@
+name: Frozen Zstd count64 source checks 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/zstd-count64-source-checks-20261128-0f1f']
+    paths:
+      - '.github/workflows/zstd-count64-source-checks-20261128-0f1f.yml'
+
+permissions:
+  contents: read
+
+env:
+  PERF_CANDIDATE: b150866ac6ce80e4b164f1b90ef2f03658791705
+  EMSDK_COMMIT: a7c808831a666cc903fedb906c171a718cd97341
+
+jobs:
+  correctness:
+    name: Frozen count64 / ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [unit, lint-types-json, build]
+    env:
+      PERF_CHECK: ${{ matrix.check }}
+      PERF_EVIDENCE: builds/perf/zstd-count64-source-checks-20261128-0f1f
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: b150866ac6ce80e4b164f1b90ef2f03658791705
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact source and assets
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          test "$(git rev-parse 'HEAD^{tree}')" = '30ae249f227279b2b5b6766767f7532cda401114'
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/source.txt"
+          sha256sum dev/bin/build-zstd-wasm.js dev/data/zstd-simd.wasm dev/data/zstd-wasm-count.patch dev/lib/zstd-simd-module.js > "$PERF_EVIDENCE/input-sha256.txt"
+          echo '41e2d04f83607716d02f25f614fe67b0711fc3eff70de23ce846256aec3033f4  dev/data/zstd-simd.wasm' | sha256sum --check
+          echo 'bdca115498c52d22960c9feb9686a4c234b3a237e4577a9f2da5849a0c40a749  dev/data/zstd-wasm-count.patch' | sha256sum --check
+      - name: Install pinned compiler for product-generator verification
+        if: matrix.check == 'build'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/count64-product-emsdk"
+          git -C "$RUNNER_TEMP/count64-product-emsdk" init --quiet
+          git -C "$RUNNER_TEMP/count64-product-emsdk" remote add origin https://github.com/emscripten-core/emsdk.git
+          git -C "$RUNNER_TEMP/count64-product-emsdk" fetch --quiet --depth 1 origin "$EMSDK_COMMIT"
+          git -C "$RUNNER_TEMP/count64-product-emsdk" checkout --quiet FETCH_HEAD
+          cd "$RUNNER_TEMP/count64-product-emsdk"
+          ./emsdk install 5.0.1 > "$GITHUB_WORKSPACE/$PERF_EVIDENCE/compiler-install.log" 2>&1
+          ./emsdk activate 5.0.1 >> "$GITHUB_WORKSPACE/$PERF_EVIDENCE/compiler-install.log" 2>&1
+      - name: Run complete required source gate
+        run: |
+          set -euo pipefail
+          case "$PERF_CHECK" in
+            unit)
+              npm run test:ci:unit > "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            lint-types-json)
+              npm run test:ci:lint > "$PERF_EVIDENCE/check.log" 2>&1
+              npm run test:ci:types >> "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            build)
+              source "$RUNNER_TEMP/count64-product-emsdk/emsdk_env.sh"
+              emcc --version > "$PERF_EVIDENCE/compiler-version.txt"
+              npm run build:zstd-wasm > "$PERF_EVIDENCE/check.log" 2>&1
+              npm run test:build >> "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            *) exit 1 ;;
+          esac
+          git status --porcelain=v1 > "$PERF_EVIDENCE/source-status.txt"
+          test ! -s "$PERF_EVIDENCE/source-status.txt"
+      - name: Preserve results and every failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: zstd-count64-source-checks-${{ matrix.check }}-20261128-0f1f
+          path: builds/perf/zstd-count64-source-checks-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
