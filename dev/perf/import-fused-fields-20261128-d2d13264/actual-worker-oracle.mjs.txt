@@ -126,7 +126,7 @@ async function consume(chunk) {
         rows: chunk.rowCount,
         scoreColumnType: chunk.scoreList.constructor.name,
         uniqueContentCount: plan.uniqueCount,
-        sharedContentSlab: typeof SharedArrayBuffer !== 'undefined' && chunk.contentBytesBuffer instanceof SharedArrayBuffer,
+        sharedContentSlab: typeof SharedArrayBuffer !== 'undefined' && chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer,
         prepared: [...chunk.preparedLookupIndexes.keys()],
         runRows: after.writes.map((args) => args[2]),
         fusedRecordFieldRows: after.metrics.fusedRecordFieldRows ?? 0,

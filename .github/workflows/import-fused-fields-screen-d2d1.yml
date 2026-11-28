@@ -1,0 +1,416 @@
+name: Fused record fields screening d2d1
+
+on:
+  push:
+    branches: [perf/import-fused-fields-screen-20261128-d2d13264]
+    paths:
+      - .github/workflows/import-fused-fields-screen-d2d1.yml
+      - dev/perf/import-qualification-20261125-a7f7.py
+      - dev/perf/import-memory-20261125-a7f7/package_identity.py
+      - test/perf/import-package-identity-d2d1.test.py
+      - dev/perf/import-fused-fields-20261128-d2d13264/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fused-fields-screen-d2d1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_SHA: daddc68070aeb6156605bd114e8bf2d49367557f
+
+jobs:
+  validate:
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-fused-fields-screen-20261128-d2d13264'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - name: Record candidate validation provenance
+        run: |
+          mkdir -p builds/perf/fused-fields-validation
+          git rev-parse HEAD 'HEAD^{tree}' > builds/perf/fused-fields-validation/source.txt
+      - name: Install pinned native test compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update 2>&1 | tee builds/perf/fused-fields-validation/apt-update.log
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee builds/perf/fused-fields-validation/compiler.log
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check changed JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint \
+            ext/js/dictionary/term-bank-wasm-parser.js \
+            ext/js/dictionary/term-record-opfs-store.js \
+            ext/js/dictionary/term-record-field-preparation.js \
+            test/term-record-fused-fields.test.js \
+            eslint.config.js 2>&1 | tee builds/perf/fused-fields-validation/eslint.log
+      - name: Validate all type projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts 2>&1 | tee builds/perf/fused-fields-validation/types.log
+      - name: Run complete unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:unit 2>&1 | tee builds/perf/fused-fields-validation/unit.log
+      - name: Validate all build targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:build 2>&1 | tee builds/perf/fused-fields-validation/build.log
+      - name: Preserve validation separately from measurements
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: fused-fields-validation-${{ github.run_id }}
+          path: builds/perf/fused-fields-validation
+          if-no-files-found: error
+          retention-days: 90
+
+  validate-tooling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Record tooling provenance
+        run: |
+          mkdir -p builds/perf/fused-fields-tooling
+          git rev-parse HEAD 'HEAD^{tree}' > builds/perf/fused-fields-tooling/source.txt
+      - name: Test exact package additions and file types
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/perf/import-package-identity-d2d1.test.py 2>&1 | tee builds/perf/fused-fields-tooling/package-tests.log
+      - name: Verify existing qualification receipt tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee builds/perf/fused-fields-tooling/receipt-memory-tests.log
+      - name: Assert unchanged measurement suffix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, subprocess
+          path = "dev/perf/import-qualification-20261125-a7f7.py"
+          original = subprocess.check_output(["git", "show", os.environ["BASE_SHA"] + ":" + path], text=True)
+          current = pathlib.Path(path).read_text()
+          metadata = '    "expectedAddedPackageEntries": args.expected_added_package_entry,\n'
+          assert current.count(metadata) == 1
+          assert original.split("schedule = []", 1)[1] == current.split("schedule = []", 1)[1].replace(metadata, "")
+          print("FUSION_EVIDENCE measurement suffix is byte-identical to frozen baseline except prospective added-package metadata")
+          PY
+      - name: Replay deterministic helper and integration checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module < dev/perf/import-fused-fields-20261128-d2d13264/helper-oracle.mjs.txt > builds/perf/fused-fields-tooling/helper-oracle.json
+          node --input-type=module < dev/perf/import-fused-fields-20261128-d2d13264/integration-oracle.mjs.txt > builds/perf/fused-fields-tooling/integration-oracle.json
+          python3 - <<'PY'
+          import json, pathlib
+          root = pathlib.Path("builds/perf/fused-fields-tooling")
+          helper = json.loads((root / "helper-oracle.json").read_text())
+          integration = json.loads((root / "integration-oracle.json").read_text())
+          print("FUSION_EVIDENCE " + json.dumps({
+              "helperCases": helper["cases"],
+              "helperFailures": sum(not row["pass"] for row in helper["records"]),
+              "integrationCases": integration["cases"],
+              "integrationPassed": integration["passed"],
+              "scope": "extracted executable-source control flow; fallback lookup and persistence are stubs; separate real-source corpus oracle required",
+          }, sort_keys=True))
+          PY
+      - name: Preserve tooling checks
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: fused-fields-tooling-${{ github.run_id }}
+          path: builds/perf/fused-fields-tooling
+          if-no-files-found: error
+          retention-days: 90
+
+  corpus-oracle:
+    needs: [validate, validate-tooling]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record oracle tooling identity
+        shell: bash
+        run: |
+          mkdir -p builds/perf/fused-fields-oracle
+          git rev-parse HEAD 'HEAD^{tree}' > builds/perf/fused-fields-oracle/workflow-source.txt
+          sha256sum dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt > builds/perf/fused-fields-oracle/oracle-sha256.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare full envelopes from actual three-worker corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          oracle_evidence=builds/perf/fused-fields-oracle
+          oracle_sources="$RUNNER_TEMP/fused-fields-oracle-$DICTIONARY"
+          mkdir -p "$oracle_sources"
+          node dev/perf/prepare-dictionaries.js "$DICTIONARY" 2>&1 | tee "$oracle_evidence/fixtures.log"
+          git worktree add --detach "$oracle_sources/A" "$BASE_SHA"
+          git worktree add --detach "$oracle_sources/B" "$CANDIDATE_SHA"
+          for oracle_arm in A B; do
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$oracle_sources/$oracle_arm/node_modules"
+            npm --prefix "$oracle_sources/$oracle_arm" run build:libs 2>&1 | tee "$oracle_evidence/libs-$oracle_arm.log"
+          done
+          cp dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt builds/actual-fused-fields-oracle.mjs
+          node builds/actual-fused-fields-oracle.mjs \
+            "$oracle_sources/A" "$oracle_sources/B" \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            "$GITHUB_WORKSPACE/$oracle_evidence/$DICTIONARY.json" \
+            "$DICTIONARY" 4 8 2>&1 | tee "$oracle_evidence/replay.log"
+      - name: Require production shape and JMdict activation before timing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path("builds/perf/fused-fields-oracle") / (os.environ["DICTIONARY"] + ".json")
+          report = json.loads(path.read_text())
+          assert report["complete"] and report["error"] is None
+          assert report["summary"]["rows"] == report["fixture"]["termRows"]
+          assert report["executedWorkerCounts"] == [3]
+          assert report["identities"]["A"]["commitAndTree"][0] == os.environ["BASE_SHA"]
+          assert report["identities"]["B"]["commitAndTree"][0] == os.environ["CANDIDATE_SHA"]
+          if report["dictionary"] == "jmdict":
+              assert len(report["groups"]) == 12
+              assert report["summary"]["preparedGroups"] == 12
+              assert report["summary"]["fusedGroups"] == 12
+              assert report["summary"]["fusedRecordFieldRows"] == 528299
+          print("FUSION_EVIDENCE real-corpus byte oracle and prospective activation gate passed")
+          PY
+      - name: Print observed corpus shape and full envelope evidence
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          folder = pathlib.Path("builds/perf/fused-fields-oracle")
+          path = folder / (os.environ["DICTIONARY"] + ".json")
+          if path.is_file():
+              report = json.loads(path.read_text())
+              keys = ["complete", "error", "node", "identities", "fastPathActivated",
+                      "executedWorkerCounts", "dictionary", "hardwareConcurrency",
+                      "deviceMemory", "fixture", "lockSha256", "parserWasmSha256",
+                      "parentSourceSha256", "candidateSourceSha256", "candidateWorkerSourceSha256",
+                      "entryFactorySourceSha256", "scope", "summary", "encodedByteSha256", "groups"]
+              print("FUSION_EVIDENCE " + json.dumps({"file": path.name, "value": {key: report[key] for key in keys}}, sort_keys=True, separators=(",", ":")))
+          else:
+              print("FUSION_EVIDENCE no corpus report; validation or setup failed before comparison")
+          for log in sorted(folder.glob("*.log")):
+              print("FUSION_EVIDENCE " + json.dumps({"file": log.name, "tail": log.read_text(errors="replace").splitlines()[-15:]}, sort_keys=True))
+          PY
+      - name: Preserve every completed or failed corpus comparison
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: fused-fields-oracle-${{ matrix.dictionary }}-${{ github.run_id }}
+          path: builds/perf/fused-fields-oracle
+          if-no-files-found: error
+          retention-days: 90
+
+  screen:
+    needs: [validate, validate-tooling, corpus-oracle]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Register review criteria before timing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os, pathlib
+          folder = pathlib.Path("builds/perf/20261128-d2d1-fused-fields")
+          folder.mkdir(parents=True, exist_ok=True)
+          criteria = {
+              "status": "prospective; no performance result",
+              "recordedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "baseline": os.environ["BASE_SHA"],
+              "candidate": os.environ["CANDIDATE_SHA"],
+              "workflow": os.environ["GITHUB_SHA"],
+              "screen": {"pairs": 6, "initialOrder": "AB", "purpose": "descriptive candidate selection only; cannot establish a publishable gain"},
+              "jmdictQualification": {
+                  "independentHostCohorts": 2, "completePairsPerCohort": 12, "initialOrders": ["AB", "BA"],
+                  "maxMedianPairedChangePercent": -3.0, "minimumFasterPairsPerCohort": 10,
+                  "bootstrap95UpperPercentMustBeBelow": 0.0, "equalWorkChangePercentMustBeBelow": 0.0,
+                  "maxAbsoluteIdenticalControlMedianPercent": 1.5,
+                  "maxAbsoluteIdenticalControlEqualWorkPercent": 1.5,
+                  "minimumGainToLargerAbsoluteControlShiftRatio": 2.0,
+                  "applyAllConditionsIndependentlyToEachCohort": True,
+              },
+              "otherDictionaryConfirmation": {
+                  "dictionaries": ["jitendex", "vndb"], "independentConfirmationRequired": True,
+                  "maxMedianPairedChangePercent": 3.0, "maxEqualWorkChangePercent": 3.0,
+                  "maxBootstrap95UpperPercent": 3.0,
+              },
+              "correctnessAndResources": "all frozen receipt, exhaustive media and separate prospective memory gates must pass; inspect exact package ZIP byte delta and unchanged storage footprint",
+              "analysisPolicy": "retain every failed or completed observation; no host pooling, pair removal or data-dependent rerun; reverse-order qualification and confirmation must precede a product PR",
+          }
+          name = "review-criteria-" + os.environ["DICTIONARY"] + ".json"
+          (folder / name).write_text(json.dumps(criteria, indent=2, sort_keys=True) + "\n")
+          print("FUSION_EVIDENCE " + json.dumps({"file": name, "value": criteria}, sort_keys=True, separators=(",", ":")))
+          PY
+      - name: Run six alternating pairs and identical controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_root=builds/perf/20261128-d2d1-fused-fields
+          mkdir -p "$evidence_root"
+          git rev-parse HEAD 'HEAD^{tree}' > "$evidence_root/workflow-source.txt"
+          sha256sum \
+            .github/workflows/import-fused-fields-screen-d2d1.yml \
+            dev/perf/import-qualification-20261125-a7f7.py \
+            dev/perf/import-memory-20261125-a7f7/package_identity.py \
+            test/perf/import-package-identity-d2d1.test.py \
+            dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt > "$evidence_root/tooling-sha256.txt"
+          fused_fields_extra_args=()
+          if [[ "$DICTIONARY" == vndb ]]; then
+            fused_fields_extra_args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$BASE_SHA" \
+            --candidate "$CANDIDATE_SHA" \
+            --dictionary "$DICTIONARY" \
+            --initial-order AB \
+            --pairs 6 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --expected-package-entry js/dictionary/term-record-field-preparation.js \
+            --expected-added-package-entry js/dictionary/term-record-field-preparation.js \
+            --evidence "$evidence_root/$DICTIONARY-AB" \
+            "${fused_fields_extra_args[@]}" \
+            2>&1 | tee "$evidence_root/$DICTIONARY-acquisition.log"
+      - name: Print compact evidence receipts
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          folder = pathlib.Path("builds/perf/20261128-d2d1-fused-fields") / (os.environ["DICTIONARY"] + "-AB")
+          def emit(name, value):
+              print("FUSION_EVIDENCE " + json.dumps({"file": name, "value": value}, sort_keys=True, separators=(",", ":")))
+          for name in [
+              "registered-plan.json", "analysis.json", "observations.json",
+              "memory/plan.json", "memory/observations.json",
+              "memory/memory-comparison.json", "memory/memory-audit.json",
+              "memory/semantic-failures.json", "memory/memory-audit-failure.json",
+          ]:
+              path = folder / name
+              if path.is_file():
+                  value = json.loads(path.read_text())
+                  if name == "memory/plan.json":
+                      for arm in value.get("sourceHashes", {}).values():
+                          arm.pop("entries", None)
+                  emit(name, value)
+          source_path = folder / "source-identities.json"
+          if source_path.is_file():
+              source = json.loads(source_path.read_text())
+              emit("source-identities.json", {
+                  "changedPackageEntries": source["changedPackageEntries"],
+                  "arms": {
+                      key: {
+                          **{field: arm[field] for field in ["sha", "tree", "packageSha256", "lockSha256", "fixtureLockSha256", "sourceHashes"]},
+                          "changedEntries": {name: arm["entries"].get(name) for name in source["changedPackageEntries"]},
+                      }
+                      for key, arm in source["arms"].items()
+                  },
+              })
+          package_sizes = {
+              arm: (folder / ("package-" + arm + ".zip")).stat().st_size
+              for arm in ["A", "B"] if (folder / ("package-" + arm + ".zip")).is_file()
+          }
+          if package_sizes:
+              if "A" in package_sizes and "B" in package_sizes:
+                  package_sizes["deltaBytes"] = package_sizes["B"] - package_sizes["A"]
+                  package_sizes["candidateToBaselineRatio"] = package_sizes["B"] / package_sizes["A"]
+              emit("package-zip-bytes", package_sizes)
+          browser = folder / "browser-identity.json"
+          if browser.is_file():
+              emit("browser-identity.json", json.loads(browser.read_text()))
+          seen_receipts = set()
+          for receipt in sorted(folder.rglob("canonical-receipt.json")):
+              content = receipt.read_bytes()
+              signature = hashlib.sha256(content).hexdigest()
+              value = {"sha256": signature}
+              if signature not in seen_receipts:
+                  value["receipt"] = json.loads(content)
+                  seen_receipts.add(signature)
+              emit(str(receipt.relative_to(folder)), value)
+          for summary in sorted(folder.glob("*/summary.json")):
+              value = json.loads(summary.read_text())
+              keys = ["totalImportMs", "step4Breakdown", "phaseTimings", "phaseDurationsMs"]
+              emit(str(summary.relative_to(folder)), {
+                  "runs": [{key: run[key] for key in keys if key in run} for run in value.get("runs", [])],
+              })
+          for name in ["libs-A.log", "libs-B.log", "build-A.log", "build-B.log"]:
+              path = folder / name
+              if path.is_file():
+                  emit(name, {"tail": path.read_text(errors="replace").splitlines()[-12:]})
+          for path in sorted(folder.glob("*/run.log")):
+              if not (path.parent / "canonical-receipt.json").is_file():
+                  emit(str(path.relative_to(folder)), {"incomplete": True, "tail": path.read_text(errors="replace").splitlines()[-25:]})
+          PY
+      - name: Preserve every completed or failed receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: fused-fields-screen-d2d1-${{ matrix.dictionary }}-AB-${{ github.run_id }}
+          path: builds/perf/20261128-d2d1-fused-fields
+          if-no-files-found: error
+          retention-days: 90
