@@ -1,0 +1,2707 @@
+{
+  "oracle": "libxxhash.so.0 XXH32",
+  "version": 803,
+  "payload": "((index * 131) ^ ((index >>> 7) * 17) ^ length) & 0xff",
+  "vectors": [
+    {
+      "length": 0,
+      "seed": 2166136261,
+      "expected": 1786691832
+    },
+    {
+      "length": 0,
+      "seed": 0,
+      "expected": 46947589
+    },
+    {
+      "length": 0,
+      "seed": 1,
+      "expected": 187479954
+    },
+    {
+      "length": 0,
+      "seed": 4294967295,
+      "expected": 2422332061
+    },
+    {
+      "length": 0,
+      "seed": 305419896,
+      "expected": 3173027952
+    },
+    {
+      "length": 1,
+      "seed": 2166136261,
+      "expected": 536960313
+    },
+    {
+      "length": 1,
+      "seed": 0,
+      "expected": 949155633
+    },
+    {
+      "length": 1,
+      "seed": 1,
+      "expected": 640159891
+    },
+    {
+      "length": 1,
+      "seed": 4294967295,
+      "expected": 94149272
+    },
+    {
+      "length": 1,
+      "seed": 305419896,
+      "expected": 2770669821
+    },
+    {
+      "length": 2,
+      "seed": 2166136261,
+      "expected": 3772200934
+    },
+    {
+      "length": 2,
+      "seed": 0,
+      "expected": 940949678
+    },
+    {
+      "length": 2,
+      "seed": 1,
+      "expected": 128806142
+    },
+    {
+      "length": 2,
+      "seed": 4294967295,
+      "expected": 2424981883
+    },
+    {
+      "length": 2,
+      "seed": 305419896,
+      "expected": 2551411440
+    },
+    {
+      "length": 3,
+      "seed": 2166136261,
+      "expected": 769150472
+    },
+    {
+      "length": 3,
+      "seed": 0,
+      "expected": 2729103900
+    },
+    {
+      "length": 3,
+      "seed": 1,
+      "expected": 2037758287
+    },
+    {
+      "length": 3,
+      "seed": 4294967295,
+      "expected": 897126257
+    },
+    {
+      "length": 3,
+      "seed": 305419896,
+      "expected": 3542529544
+    },
+    {
+      "length": 4,
+      "seed": 2166136261,
+      "expected": 3732404790
+    },
+    {
+      "length": 4,
+      "seed": 0,
+      "expected": 1695688978
+    },
+    {
+      "length": 4,
+      "seed": 1,
+      "expected": 975877463
+    },
+    {
+      "length": 4,
+      "seed": 4294967295,
+      "expected": 2112332681
+    },
+    {
+      "length": 4,
+      "seed": 305419896,
+      "expected": 3413200729
+    },
+    {
+      "length": 5,
+      "seed": 2166136261,
+      "expected": 1458024087
+    },
+    {
+      "length": 5,
+      "seed": 0,
+      "expected": 2897997102
+    },
+    {
+      "length": 5,
+      "seed": 1,
+      "expected": 3491325825
+    },
+    {
+      "length": 5,
+      "seed": 4294967295,
+      "expected": 1978036646
+    },
+    {
+      "length": 5,
+      "seed": 305419896,
+      "expected": 2433222189
+    },
+    {
+      "length": 6,
+      "seed": 2166136261,
+      "expected": 2133529013
+    },
+    {
+      "length": 6,
+      "seed": 0,
+      "expected": 573591072
+    },
+    {
+      "length": 6,
+      "seed": 1,
+      "expected": 1389232630
+    },
+    {
+      "length": 6,
+      "seed": 4294967295,
+      "expected": 4106316340
+    },
+    {
+      "length": 6,
+      "seed": 305419896,
+      "expected": 3928317364
+    },
+    {
+      "length": 7,
+      "seed": 2166136261,
+      "expected": 2695509480
+    },
+    {
+      "length": 7,
+      "seed": 0,
+      "expected": 1082281340
+    },
+    {
+      "length": 7,
+      "seed": 1,
+      "expected": 945855020
+    },
+    {
+      "length": 7,
+      "seed": 4294967295,
+      "expected": 1897244641
+    },
+    {
+      "length": 7,
+      "seed": 305419896,
+      "expected": 2373697082
+    },
+    {
+      "length": 8,
+      "seed": 2166136261,
+      "expected": 93400910
+    },
+    {
+      "length": 8,
+      "seed": 0,
+      "expected": 1331533876
+    },
+    {
+      "length": 8,
+      "seed": 1,
+      "expected": 497318005
+    },
+    {
+      "length": 8,
+      "seed": 4294967295,
+      "expected": 2624701912
+    },
+    {
+      "length": 8,
+      "seed": 305419896,
+      "expected": 606646809
+    },
+    {
+      "length": 9,
+      "seed": 2166136261,
+      "expected": 4090447345
+    },
+    {
+      "length": 9,
+      "seed": 0,
+      "expected": 3773051731
+    },
+    {
+      "length": 9,
+      "seed": 1,
+      "expected": 2245751276
+    },
+    {
+      "length": 9,
+      "seed": 4294967295,
+      "expected": 2841737159
+    },
+    {
+      "length": 9,
+      "seed": 305419896,
+      "expected": 2721231635
+    },
+    {
+      "length": 10,
+      "seed": 2166136261,
+      "expected": 936877066
+    },
+    {
+      "length": 10,
+      "seed": 0,
+      "expected": 2555079752
+    },
+    {
+      "length": 10,
+      "seed": 1,
+      "expected": 1766516903
+    },
+    {
+      "length": 10,
+      "seed": 4294967295,
+      "expected": 1681719709
+    },
+    {
+      "length": 10,
+      "seed": 305419896,
+      "expected": 399949354
+    },
+    {
+      "length": 11,
+      "seed": 2166136261,
+      "expected": 102559865
+    },
+    {
+      "length": 11,
+      "seed": 0,
+      "expected": 3775287458
+    },
+    {
+      "length": 11,
+      "seed": 1,
+      "expected": 2574384671
+    },
+    {
+      "length": 11,
+      "seed": 4294967295,
+      "expected": 967594831
+    },
+    {
+      "length": 11,
+      "seed": 305419896,
+      "expected": 2674098498
+    },
+    {
+      "length": 12,
+      "seed": 2166136261,
+      "expected": 1536647701
+    },
+    {
+      "length": 12,
+      "seed": 0,
+      "expected": 712837455
+    },
+    {
+      "length": 12,
+      "seed": 1,
+      "expected": 3784093655
+    },
+    {
+      "length": 12,
+      "seed": 4294967295,
+      "expected": 1786725177
+    },
+    {
+      "length": 12,
+      "seed": 305419896,
+      "expected": 526120860
+    },
+    {
+      "length": 13,
+      "seed": 2166136261,
+      "expected": 2393273933
+    },
+    {
+      "length": 13,
+      "seed": 0,
+      "expected": 1778165031
+    },
+    {
+      "length": 13,
+      "seed": 1,
+      "expected": 785813911
+    },
+    {
+      "length": 13,
+      "seed": 4294967295,
+      "expected": 570027815
+    },
+    {
+      "length": 13,
+      "seed": 305419896,
+      "expected": 1196235669
+    },
+    {
+      "length": 14,
+      "seed": 2166136261,
+      "expected": 1313348870
+    },
+    {
+      "length": 14,
+      "seed": 0,
+      "expected": 2143818594
+    },
+    {
+      "length": 14,
+      "seed": 1,
+      "expected": 1602036516
+    },
+    {
+      "length": 14,
+      "seed": 4294967295,
+      "expected": 1938398464
+    },
+    {
+      "length": 14,
+      "seed": 305419896,
+      "expected": 425079819
+    },
+    {
+      "length": 15,
+      "seed": 2166136261,
+      "expected": 2152134394
+    },
+    {
+      "length": 15,
+      "seed": 0,
+      "expected": 3553924054
+    },
+    {
+      "length": 15,
+      "seed": 1,
+      "expected": 2714626693
+    },
+    {
+      "length": 15,
+      "seed": 4294967295,
+      "expected": 4137214549
+    },
+    {
+      "length": 15,
+      "seed": 305419896,
+      "expected": 3016156846
+    },
+    {
+      "length": 16,
+      "seed": 2166136261,
+      "expected": 3096359642
+    },
+    {
+      "length": 16,
+      "seed": 0,
+      "expected": 2044505617
+    },
+    {
+      "length": 16,
+      "seed": 1,
+      "expected": 280573453
+    },
+    {
+      "length": 16,
+      "seed": 4294967295,
+      "expected": 576418732
+    },
+    {
+      "length": 16,
+      "seed": 305419896,
+      "expected": 3635213893
+    },
+    {
+      "length": 17,
+      "seed": 2166136261,
+      "expected": 1177447463
+    },
+    {
+      "length": 17,
+      "seed": 0,
+      "expected": 2800969362
+    },
+    {
+      "length": 17,
+      "seed": 1,
+      "expected": 783567966
+    },
+    {
+      "length": 17,
+      "seed": 4294967295,
+      "expected": 2578895036
+    },
+    {
+      "length": 17,
+      "seed": 305419896,
+      "expected": 3362396671
+    },
+    {
+      "length": 18,
+      "seed": 2166136261,
+      "expected": 1164319992
+    },
+    {
+      "length": 18,
+      "seed": 0,
+      "expected": 2378092980
+    },
+    {
+      "length": 18,
+      "seed": 1,
+      "expected": 1973409093
+    },
+    {
+      "length": 18,
+      "seed": 4294967295,
+      "expected": 4190168215
+    },
+    {
+      "length": 18,
+      "seed": 305419896,
+      "expected": 3806266302
+    },
+    {
+      "length": 19,
+      "seed": 2166136261,
+      "expected": 3377832209
+    },
+    {
+      "length": 19,
+      "seed": 0,
+      "expected": 2043612606
+    },
+    {
+      "length": 19,
+      "seed": 1,
+      "expected": 864083548
+    },
+    {
+      "length": 19,
+      "seed": 4294967295,
+      "expected": 2089805962
+    },
+    {
+      "length": 19,
+      "seed": 305419896,
+      "expected": 899758460
+    },
+    {
+      "length": 20,
+      "seed": 2166136261,
+      "expected": 2632825415
+    },
+    {
+      "length": 20,
+      "seed": 0,
+      "expected": 3435658828
+    },
+    {
+      "length": 20,
+      "seed": 1,
+      "expected": 4066144252
+    },
+    {
+      "length": 20,
+      "seed": 4294967295,
+      "expected": 1953180931
+    },
+    {
+      "length": 20,
+      "seed": 305419896,
+      "expected": 727234229
+    },
+    {
+      "length": 21,
+      "seed": 2166136261,
+      "expected": 2750338463
+    },
+    {
+      "length": 21,
+      "seed": 0,
+      "expected": 1585636146
+    },
+    {
+      "length": 21,
+      "seed": 1,
+      "expected": 2938760074
+    },
+    {
+      "length": 21,
+      "seed": 4294967295,
+      "expected": 3150484447
+    },
+    {
+      "length": 21,
+      "seed": 305419896,
+      "expected": 3731391153
+    },
+    {
+      "length": 22,
+      "seed": 2166136261,
+      "expected": 2077734905
+    },
+    {
+      "length": 22,
+      "seed": 0,
+      "expected": 1199253046
+    },
+    {
+      "length": 22,
+      "seed": 1,
+      "expected": 1270505203
+    },
+    {
+      "length": 22,
+      "seed": 4294967295,
+      "expected": 1047285304
+    },
+    {
+      "length": 22,
+      "seed": 305419896,
+      "expected": 816275273
+    },
+    {
+      "length": 23,
+      "seed": 2166136261,
+      "expected": 3315741929
+    },
+    {
+      "length": 23,
+      "seed": 0,
+      "expected": 2759812369
+    },
+    {
+      "length": 23,
+      "seed": 1,
+      "expected": 3224181908
+    },
+    {
+      "length": 23,
+      "seed": 4294967295,
+      "expected": 2809043270
+    },
+    {
+      "length": 23,
+      "seed": 305419896,
+      "expected": 2131702047
+    },
+    {
+      "length": 24,
+      "seed": 2166136261,
+      "expected": 3188518777
+    },
+    {
+      "length": 24,
+      "seed": 0,
+      "expected": 1075228690
+    },
+    {
+      "length": 24,
+      "seed": 1,
+      "expected": 3626921464
+    },
+    {
+      "length": 24,
+      "seed": 4294967295,
+      "expected": 103451503
+    },
+    {
+      "length": 24,
+      "seed": 305419896,
+      "expected": 808565766
+    },
+    {
+      "length": 25,
+      "seed": 2166136261,
+      "expected": 4096240991
+    },
+    {
+      "length": 25,
+      "seed": 0,
+      "expected": 2264941450
+    },
+    {
+      "length": 25,
+      "seed": 1,
+      "expected": 2547864040
+    },
+    {
+      "length": 25,
+      "seed": 4294967295,
+      "expected": 2537447678
+    },
+    {
+      "length": 25,
+      "seed": 305419896,
+      "expected": 3913588319
+    },
+    {
+      "length": 26,
+      "seed": 2166136261,
+      "expected": 3296097006
+    },
+    {
+      "length": 26,
+      "seed": 0,
+      "expected": 2040136577
+    },
+    {
+      "length": 26,
+      "seed": 1,
+      "expected": 4149727976
+    },
+    {
+      "length": 26,
+      "seed": 4294967295,
+      "expected": 3787443640
+    },
+    {
+      "length": 26,
+      "seed": 305419896,
+      "expected": 3700501595
+    },
+    {
+      "length": 27,
+      "seed": 2166136261,
+      "expected": 3282305051
+    },
+    {
+      "length": 27,
+      "seed": 0,
+      "expected": 4048183860
+    },
+    {
+      "length": 27,
+      "seed": 1,
+      "expected": 244260968
+    },
+    {
+      "length": 27,
+      "seed": 4294967295,
+      "expected": 1792772358
+    },
+    {
+      "length": 27,
+      "seed": 305419896,
+      "expected": 2402971560
+    },
+    {
+      "length": 28,
+      "seed": 2166136261,
+      "expected": 1876074444
+    },
+    {
+      "length": 28,
+      "seed": 0,
+      "expected": 4092279967
+    },
+    {
+      "length": 28,
+      "seed": 1,
+      "expected": 2078738297
+    },
+    {
+      "length": 28,
+      "seed": 4294967295,
+      "expected": 4277985944
+    },
+    {
+      "length": 28,
+      "seed": 305419896,
+      "expected": 264360927
+    },
+    {
+      "length": 29,
+      "seed": 2166136261,
+      "expected": 2170777381
+    },
+    {
+      "length": 29,
+      "seed": 0,
+      "expected": 3736859305
+    },
+    {
+      "length": 29,
+      "seed": 1,
+      "expected": 3710371681
+    },
+    {
+      "length": 29,
+      "seed": 4294967295,
+      "expected": 909697473
+    },
+    {
+      "length": 29,
+      "seed": 305419896,
+      "expected": 3119320249
+    },
+    {
+      "length": 30,
+      "seed": 2166136261,
+      "expected": 577248782
+    },
+    {
+      "length": 30,
+      "seed": 0,
+      "expected": 3858115685
+    },
+    {
+      "length": 30,
+      "seed": 1,
+      "expected": 1788048590
+    },
+    {
+      "length": 30,
+      "seed": 4294967295,
+      "expected": 929013975
+    },
+    {
+      "length": 30,
+      "seed": 305419896,
+      "expected": 388234870
+    },
+    {
+      "length": 31,
+      "seed": 2166136261,
+      "expected": 1155932947
+    },
+    {
+      "length": 31,
+      "seed": 0,
+      "expected": 4263515827
+    },
+    {
+      "length": 31,
+      "seed": 1,
+      "expected": 2989440594
+    },
+    {
+      "length": 31,
+      "seed": 4294967295,
+      "expected": 2477397958
+    },
+    {
+      "length": 31,
+      "seed": 305419896,
+      "expected": 3815039477
+    },
+    {
+      "length": 32,
+      "seed": 2166136261,
+      "expected": 3695765420
+    },
+    {
+      "length": 32,
+      "seed": 0,
+      "expected": 4222822518
+    },
+    {
+      "length": 32,
+      "seed": 1,
+      "expected": 1561202712
+    },
+    {
+      "length": 32,
+      "seed": 4294967295,
+      "expected": 655496229
+    },
+    {
+      "length": 32,
+      "seed": 305419896,
+      "expected": 1871632665
+    },
+    {
+      "length": 33,
+      "seed": 2166136261,
+      "expected": 3854401954
+    },
+    {
+      "length": 33,
+      "seed": 0,
+      "expected": 3986897511
+    },
+    {
+      "length": 33,
+      "seed": 1,
+      "expected": 1560143310
+    },
+    {
+      "length": 33,
+      "seed": 4294967295,
+      "expected": 324321123
+    },
+    {
+      "length": 33,
+      "seed": 305419896,
+      "expected": 3625885074
+    },
+    {
+      "length": 34,
+      "seed": 2166136261,
+      "expected": 938137712
+    },
+    {
+      "length": 34,
+      "seed": 0,
+      "expected": 1093345685
+    },
+    {
+      "length": 34,
+      "seed": 1,
+      "expected": 2420788009
+    },
+    {
+      "length": 34,
+      "seed": 4294967295,
+      "expected": 2695139770
+    },
+    {
+      "length": 34,
+      "seed": 305419896,
+      "expected": 2818373072
+    },
+    {
+      "length": 35,
+      "seed": 2166136261,
+      "expected": 3562768553
+    },
+    {
+      "length": 35,
+      "seed": 0,
+      "expected": 4248313322
+    },
+    {
+      "length": 35,
+      "seed": 1,
+      "expected": 1974697091
+    },
+    {
+      "length": 35,
+      "seed": 4294967295,
+      "expected": 3076230258
+    },
+    {
+      "length": 35,
+      "seed": 305419896,
+      "expected": 3021998951
+    },
+    {
+      "length": 36,
+      "seed": 2166136261,
+      "expected": 561697429
+    },
+    {
+      "length": 36,
+      "seed": 0,
+      "expected": 180613096
+    },
+    {
+      "length": 36,
+      "seed": 1,
+      "expected": 3955726336
+    },
+    {
+      "length": 36,
+      "seed": 4294967295,
+      "expected": 4163354822
+    },
+    {
+      "length": 36,
+      "seed": 305419896,
+      "expected": 1412999132
+    },
+    {
+      "length": 37,
+      "seed": 2166136261,
+      "expected": 3169952922
+    },
+    {
+      "length": 37,
+      "seed": 0,
+      "expected": 3571061815
+    },
+    {
+      "length": 37,
+      "seed": 1,
+      "expected": 745333061
+    },
+    {
+      "length": 37,
+      "seed": 4294967295,
+      "expected": 3868457832
+    },
+    {
+      "length": 37,
+      "seed": 305419896,
+      "expected": 987013692
+    },
+    {
+      "length": 38,
+      "seed": 2166136261,
+      "expected": 2642564140
+    },
+    {
+      "length": 38,
+      "seed": 0,
+      "expected": 1496518725
+    },
+    {
+      "length": 38,
+      "seed": 1,
+      "expected": 3285520419
+    },
+    {
+      "length": 38,
+      "seed": 4294967295,
+      "expected": 373802680
+    },
+    {
+      "length": 38,
+      "seed": 305419896,
+      "expected": 3519312728
+    },
+    {
+      "length": 39,
+      "seed": 2166136261,
+      "expected": 4206783752
+    },
+    {
+      "length": 39,
+      "seed": 0,
+      "expected": 591958552
+    },
+    {
+      "length": 39,
+      "seed": 1,
+      "expected": 1472173113
+    },
+    {
+      "length": 39,
+      "seed": 4294967295,
+      "expected": 2332627351
+    },
+    {
+      "length": 39,
+      "seed": 305419896,
+      "expected": 1128464874
+    },
+    {
+      "length": 40,
+      "seed": 2166136261,
+      "expected": 171349350
+    },
+    {
+      "length": 40,
+      "seed": 0,
+      "expected": 15024942
+    },
+    {
+      "length": 40,
+      "seed": 1,
+      "expected": 609204422
+    },
+    {
+      "length": 40,
+      "seed": 4294967295,
+      "expected": 3431310005
+    },
+    {
+      "length": 40,
+      "seed": 305419896,
+      "expected": 3678755246
+    },
+    {
+      "length": 41,
+      "seed": 2166136261,
+      "expected": 3380340770
+    },
+    {
+      "length": 41,
+      "seed": 0,
+      "expected": 857576001
+    },
+    {
+      "length": 41,
+      "seed": 1,
+      "expected": 1795379948
+    },
+    {
+      "length": 41,
+      "seed": 4294967295,
+      "expected": 849509583
+    },
+    {
+      "length": 41,
+      "seed": 305419896,
+      "expected": 3536363868
+    },
+    {
+      "length": 42,
+      "seed": 2166136261,
+      "expected": 4105660001
+    },
+    {
+      "length": 42,
+      "seed": 0,
+      "expected": 304334722
+    },
+    {
+      "length": 42,
+      "seed": 1,
+      "expected": 3505866604
+    },
+    {
+      "length": 42,
+      "seed": 4294967295,
+      "expected": 1882717634
+    },
+    {
+      "length": 42,
+      "seed": 305419896,
+      "expected": 3326897800
+    },
+    {
+      "length": 43,
+      "seed": 2166136261,
+      "expected": 1520420805
+    },
+    {
+      "length": 43,
+      "seed": 0,
+      "expected": 673065717
+    },
+    {
+      "length": 43,
+      "seed": 1,
+      "expected": 2857670392
+    },
+    {
+      "length": 43,
+      "seed": 4294967295,
+      "expected": 930402576
+    },
+    {
+      "length": 43,
+      "seed": 305419896,
+      "expected": 1899831481
+    },
+    {
+      "length": 44,
+      "seed": 2166136261,
+      "expected": 3085593578
+    },
+    {
+      "length": 44,
+      "seed": 0,
+      "expected": 1670128985
+    },
+    {
+      "length": 44,
+      "seed": 1,
+      "expected": 3460322063
+    },
+    {
+      "length": 44,
+      "seed": 4294967295,
+      "expected": 817617015
+    },
+    {
+      "length": 44,
+      "seed": 305419896,
+      "expected": 3390938774
+    },
+    {
+      "length": 45,
+      "seed": 2166136261,
+      "expected": 1881558882
+    },
+    {
+      "length": 45,
+      "seed": 0,
+      "expected": 2410798359
+    },
+    {
+      "length": 45,
+      "seed": 1,
+      "expected": 701438146
+    },
+    {
+      "length": 45,
+      "seed": 4294967295,
+      "expected": 1473456145
+    },
+    {
+      "length": 45,
+      "seed": 305419896,
+      "expected": 538269612
+    },
+    {
+      "length": 46,
+      "seed": 2166136261,
+      "expected": 1304275137
+    },
+    {
+      "length": 46,
+      "seed": 0,
+      "expected": 2820945477
+    },
+    {
+      "length": 46,
+      "seed": 1,
+      "expected": 2929441572
+    },
+    {
+      "length": 46,
+      "seed": 4294967295,
+      "expected": 260607714
+    },
+    {
+      "length": 46,
+      "seed": 305419896,
+      "expected": 591073782
+    },
+    {
+      "length": 47,
+      "seed": 2166136261,
+      "expected": 1940531322
+    },
+    {
+      "length": 47,
+      "seed": 0,
+      "expected": 4245193294
+    },
+    {
+      "length": 47,
+      "seed": 1,
+      "expected": 3307856588
+    },
+    {
+      "length": 47,
+      "seed": 4294967295,
+      "expected": 3508272372
+    },
+    {
+      "length": 47,
+      "seed": 305419896,
+      "expected": 1575734900
+    },
+    {
+      "length": 48,
+      "seed": 2166136261,
+      "expected": 1899001036
+    },
+    {
+      "length": 48,
+      "seed": 0,
+      "expected": 2042216660
+    },
+    {
+      "length": 48,
+      "seed": 1,
+      "expected": 1787592662
+    },
+    {
+      "length": 48,
+      "seed": 4294967295,
+      "expected": 930223695
+    },
+    {
+      "length": 48,
+      "seed": 305419896,
+      "expected": 1169419007
+    },
+    {
+      "length": 49,
+      "seed": 2166136261,
+      "expected": 1523349454
+    },
+    {
+      "length": 49,
+      "seed": 0,
+      "expected": 4217295948
+    },
+    {
+      "length": 49,
+      "seed": 1,
+      "expected": 3501253296
+    },
+    {
+      "length": 49,
+      "seed": 4294967295,
+      "expected": 1730448123
+    },
+    {
+      "length": 49,
+      "seed": 305419896,
+      "expected": 980466108
+    },
+    {
+      "length": 50,
+      "seed": 2166136261,
+      "expected": 1636138080
+    },
+    {
+      "length": 50,
+      "seed": 0,
+      "expected": 2859760331
+    },
+    {
+      "length": 50,
+      "seed": 1,
+      "expected": 812833462
+    },
+    {
+      "length": 50,
+      "seed": 4294967295,
+      "expected": 2472911019
+    },
+    {
+      "length": 50,
+      "seed": 305419896,
+      "expected": 2769797309
+    },
+    {
+      "length": 51,
+      "seed": 2166136261,
+      "expected": 3928477784
+    },
+    {
+      "length": 51,
+      "seed": 0,
+      "expected": 1415894490
+    },
+    {
+      "length": 51,
+      "seed": 1,
+      "expected": 1835513145
+    },
+    {
+      "length": 51,
+      "seed": 4294967295,
+      "expected": 762152537
+    },
+    {
+      "length": 51,
+      "seed": 305419896,
+      "expected": 1872026642
+    },
+    {
+      "length": 52,
+      "seed": 2166136261,
+      "expected": 1663962680
+    },
+    {
+      "length": 52,
+      "seed": 0,
+      "expected": 1135336874
+    },
+    {
+      "length": 52,
+      "seed": 1,
+      "expected": 3221730457
+    },
+    {
+      "length": 52,
+      "seed": 4294967295,
+      "expected": 4134478705
+    },
+    {
+      "length": 52,
+      "seed": 305419896,
+      "expected": 1709902088
+    },
+    {
+      "length": 53,
+      "seed": 2166136261,
+      "expected": 1472077026
+    },
+    {
+      "length": 53,
+      "seed": 0,
+      "expected": 539859112
+    },
+    {
+      "length": 53,
+      "seed": 1,
+      "expected": 1128458906
+    },
+    {
+      "length": 53,
+      "seed": 4294967295,
+      "expected": 2912558521
+    },
+    {
+      "length": 53,
+      "seed": 305419896,
+      "expected": 2782292468
+    },
+    {
+      "length": 54,
+      "seed": 2166136261,
+      "expected": 1869478992
+    },
+    {
+      "length": 54,
+      "seed": 0,
+      "expected": 1602519720
+    },
+    {
+      "length": 54,
+      "seed": 1,
+      "expected": 442099811
+    },
+    {
+      "length": 54,
+      "seed": 4294967295,
+      "expected": 259731768
+    },
+    {
+      "length": 54,
+      "seed": 305419896,
+      "expected": 2684049495
+    },
+    {
+      "length": 55,
+      "seed": 2166136261,
+      "expected": 2617028827
+    },
+    {
+      "length": 55,
+      "seed": 0,
+      "expected": 3161049369
+    },
+    {
+      "length": 55,
+      "seed": 1,
+      "expected": 3838682516
+    },
+    {
+      "length": 55,
+      "seed": 4294967295,
+      "expected": 1845987235
+    },
+    {
+      "length": 55,
+      "seed": 305419896,
+      "expected": 887033169
+    },
+    {
+      "length": 56,
+      "seed": 2166136261,
+      "expected": 1688650643
+    },
+    {
+      "length": 56,
+      "seed": 0,
+      "expected": 3253130472
+    },
+    {
+      "length": 56,
+      "seed": 1,
+      "expected": 4171153769
+    },
+    {
+      "length": 56,
+      "seed": 4294967295,
+      "expected": 3958522064
+    },
+    {
+      "length": 56,
+      "seed": 305419896,
+      "expected": 3382628380
+    },
+    {
+      "length": 57,
+      "seed": 2166136261,
+      "expected": 3497699029
+    },
+    {
+      "length": 57,
+      "seed": 0,
+      "expected": 1113330359
+    },
+    {
+      "length": 57,
+      "seed": 1,
+      "expected": 3848381858
+    },
+    {
+      "length": 57,
+      "seed": 4294967295,
+      "expected": 496754061
+    },
+    {
+      "length": 57,
+      "seed": 305419896,
+      "expected": 723456468
+    },
+    {
+      "length": 58,
+      "seed": 2166136261,
+      "expected": 4217742480
+    },
+    {
+      "length": 58,
+      "seed": 0,
+      "expected": 1747880658
+    },
+    {
+      "length": 58,
+      "seed": 1,
+      "expected": 4081377565
+    },
+    {
+      "length": 58,
+      "seed": 4294967295,
+      "expected": 2690676111
+    },
+    {
+      "length": 58,
+      "seed": 305419896,
+      "expected": 2055427704
+    },
+    {
+      "length": 59,
+      "seed": 2166136261,
+      "expected": 3583120337
+    },
+    {
+      "length": 59,
+      "seed": 0,
+      "expected": 3322591372
+    },
+    {
+      "length": 59,
+      "seed": 1,
+      "expected": 1830516567
+    },
+    {
+      "length": 59,
+      "seed": 4294967295,
+      "expected": 499559755
+    },
+    {
+      "length": 59,
+      "seed": 305419896,
+      "expected": 74926695
+    },
+    {
+      "length": 60,
+      "seed": 2166136261,
+      "expected": 3774622898
+    },
+    {
+      "length": 60,
+      "seed": 0,
+      "expected": 4106821617
+    },
+    {
+      "length": 60,
+      "seed": 1,
+      "expected": 3991747718
+    },
+    {
+      "length": 60,
+      "seed": 4294967295,
+      "expected": 2550963612
+    },
+    {
+      "length": 60,
+      "seed": 305419896,
+      "expected": 1847785462
+    },
+    {
+      "length": 61,
+      "seed": 2166136261,
+      "expected": 2648813787
+    },
+    {
+      "length": 61,
+      "seed": 0,
+      "expected": 3681046801
+    },
+    {
+      "length": 61,
+      "seed": 1,
+      "expected": 4277365398
+    },
+    {
+      "length": 61,
+      "seed": 4294967295,
+      "expected": 2925793929
+    },
+    {
+      "length": 61,
+      "seed": 305419896,
+      "expected": 768402911
+    },
+    {
+      "length": 62,
+      "seed": 2166136261,
+      "expected": 2314468351
+    },
+    {
+      "length": 62,
+      "seed": 0,
+      "expected": 438810786
+    },
+    {
+      "length": 62,
+      "seed": 1,
+      "expected": 3618798682
+    },
+    {
+      "length": 62,
+      "seed": 4294967295,
+      "expected": 3230056798
+    },
+    {
+      "length": 62,
+      "seed": 305419896,
+      "expected": 3379961236
+    },
+    {
+      "length": 63,
+      "seed": 2166136261,
+      "expected": 1947676092
+    },
+    {
+      "length": 63,
+      "seed": 0,
+      "expected": 438119359
+    },
+    {
+      "length": 63,
+      "seed": 1,
+      "expected": 2026287616
+    },
+    {
+      "length": 63,
+      "seed": 4294967295,
+      "expected": 3041086045
+    },
+    {
+      "length": 63,
+      "seed": 305419896,
+      "expected": 113689933
+    },
+    {
+      "length": 64,
+      "seed": 2166136261,
+      "expected": 1687644341
+    },
+    {
+      "length": 64,
+      "seed": 0,
+      "expected": 4099410704
+    },
+    {
+      "length": 64,
+      "seed": 1,
+      "expected": 254048587
+    },
+    {
+      "length": 64,
+      "seed": 4294967295,
+      "expected": 1647519495
+    },
+    {
+      "length": 64,
+      "seed": 305419896,
+      "expected": 3851805475
+    },
+    {
+      "length": 65,
+      "seed": 2166136261,
+      "expected": 2800707149
+    },
+    {
+      "length": 65,
+      "seed": 0,
+      "expected": 3840104038
+    },
+    {
+      "length": 65,
+      "seed": 1,
+      "expected": 3668448273
+    },
+    {
+      "length": 65,
+      "seed": 4294967295,
+      "expected": 460159973
+    },
+    {
+      "length": 65,
+      "seed": 305419896,
+      "expected": 3308541619
+    },
+    {
+      "length": 66,
+      "seed": 2166136261,
+      "expected": 4009523819
+    },
+    {
+      "length": 66,
+      "seed": 0,
+      "expected": 3154748620
+    },
+    {
+      "length": 66,
+      "seed": 1,
+      "expected": 2994583018
+    },
+    {
+      "length": 66,
+      "seed": 4294967295,
+      "expected": 2006631946
+    },
+    {
+      "length": 66,
+      "seed": 305419896,
+      "expected": 1494789748
+    },
+    {
+      "length": 67,
+      "seed": 2166136261,
+      "expected": 2712100749
+    },
+    {
+      "length": 67,
+      "seed": 0,
+      "expected": 2602517056
+    },
+    {
+      "length": 67,
+      "seed": 1,
+      "expected": 2129891709
+    },
+    {
+      "length": 67,
+      "seed": 4294967295,
+      "expected": 1202388168
+    },
+    {
+      "length": 67,
+      "seed": 305419896,
+      "expected": 2563969493
+    },
+    {
+      "length": 68,
+      "seed": 2166136261,
+      "expected": 3028448586
+    },
+    {
+      "length": 68,
+      "seed": 0,
+      "expected": 3869637495
+    },
+    {
+      "length": 68,
+      "seed": 1,
+      "expected": 680254092
+    },
+    {
+      "length": 68,
+      "seed": 4294967295,
+      "expected": 3896150722
+    },
+    {
+      "length": 68,
+      "seed": 305419896,
+      "expected": 1484128413
+    },
+    {
+      "length": 69,
+      "seed": 2166136261,
+      "expected": 162362469
+    },
+    {
+      "length": 69,
+      "seed": 0,
+      "expected": 1542016441
+    },
+    {
+      "length": 69,
+      "seed": 1,
+      "expected": 3390060468
+    },
+    {
+      "length": 69,
+      "seed": 4294967295,
+      "expected": 467766950
+    },
+    {
+      "length": 69,
+      "seed": 305419896,
+      "expected": 620934724
+    },
+    {
+      "length": 70,
+      "seed": 2166136261,
+      "expected": 231685086
+    },
+    {
+      "length": 70,
+      "seed": 0,
+      "expected": 209675542
+    },
+    {
+      "length": 70,
+      "seed": 1,
+      "expected": 547603942
+    },
+    {
+      "length": 70,
+      "seed": 4294967295,
+      "expected": 2770276267
+    },
+    {
+      "length": 70,
+      "seed": 305419896,
+      "expected": 2703086554
+    },
+    {
+      "length": 71,
+      "seed": 2166136261,
+      "expected": 655186003
+    },
+    {
+      "length": 71,
+      "seed": 0,
+      "expected": 852374345
+    },
+    {
+      "length": 71,
+      "seed": 1,
+      "expected": 460735016
+    },
+    {
+      "length": 71,
+      "seed": 4294967295,
+      "expected": 1121709223
+    },
+    {
+      "length": 71,
+      "seed": 305419896,
+      "expected": 2738676064
+    },
+    {
+      "length": 72,
+      "seed": 2166136261,
+      "expected": 2038279
+    },
+    {
+      "length": 72,
+      "seed": 0,
+      "expected": 311389548
+    },
+    {
+      "length": 72,
+      "seed": 1,
+      "expected": 2648582699
+    },
+    {
+      "length": 72,
+      "seed": 4294967295,
+      "expected": 269744518
+    },
+    {
+      "length": 72,
+      "seed": 305419896,
+      "expected": 19934851
+    },
+    {
+      "length": 73,
+      "seed": 2166136261,
+      "expected": 1583578642
+    },
+    {
+      "length": 73,
+      "seed": 0,
+      "expected": 2753988711
+    },
+    {
+      "length": 73,
+      "seed": 1,
+      "expected": 1337645977
+    },
+    {
+      "length": 73,
+      "seed": 4294967295,
+      "expected": 347910065
+    },
+    {
+      "length": 73,
+      "seed": 305419896,
+      "expected": 3299634723
+    },
+    {
+      "length": 74,
+      "seed": 2166136261,
+      "expected": 2317464482
+    },
+    {
+      "length": 74,
+      "seed": 0,
+      "expected": 112831957
+    },
+    {
+      "length": 74,
+      "seed": 1,
+      "expected": 3570812886
+    },
+    {
+      "length": 74,
+      "seed": 4294967295,
+      "expected": 3107795155
+    },
+    {
+      "length": 74,
+      "seed": 305419896,
+      "expected": 915382396
+    },
+    {
+      "length": 75,
+      "seed": 2166136261,
+      "expected": 35307402
+    },
+    {
+      "length": 75,
+      "seed": 0,
+      "expected": 813488555
+    },
+    {
+      "length": 75,
+      "seed": 1,
+      "expected": 2494247039
+    },
+    {
+      "length": 75,
+      "seed": 4294967295,
+      "expected": 3161886973
+    },
+    {
+      "length": 75,
+      "seed": 305419896,
+      "expected": 367237084
+    },
+    {
+      "length": 76,
+      "seed": 2166136261,
+      "expected": 2373013091
+    },
+    {
+      "length": 76,
+      "seed": 0,
+      "expected": 2559539820
+    },
+    {
+      "length": 76,
+      "seed": 1,
+      "expected": 1328135863
+    },
+    {
+      "length": 76,
+      "seed": 4294967295,
+      "expected": 2692723862
+    },
+    {
+      "length": 76,
+      "seed": 305419896,
+      "expected": 9164853
+    },
+    {
+      "length": 77,
+      "seed": 2166136261,
+      "expected": 47977160
+    },
+    {
+      "length": 77,
+      "seed": 0,
+      "expected": 2301195821
+    },
+    {
+      "length": 77,
+      "seed": 1,
+      "expected": 1071954855
+    },
+    {
+      "length": 77,
+      "seed": 4294967295,
+      "expected": 2253891499
+    },
+    {
+      "length": 77,
+      "seed": 305419896,
+      "expected": 2280982071
+    },
+    {
+      "length": 78,
+      "seed": 2166136261,
+      "expected": 2495386114
+    },
+    {
+      "length": 78,
+      "seed": 0,
+      "expected": 1881969957
+    },
+    {
+      "length": 78,
+      "seed": 1,
+      "expected": 3337772708
+    },
+    {
+      "length": 78,
+      "seed": 4294967295,
+      "expected": 1875864714
+    },
+    {
+      "length": 78,
+      "seed": 305419896,
+      "expected": 3400616476
+    },
+    {
+      "length": 79,
+      "seed": 2166136261,
+      "expected": 3611472970
+    },
+    {
+      "length": 79,
+      "seed": 0,
+      "expected": 1637172720
+    },
+    {
+      "length": 79,
+      "seed": 1,
+      "expected": 3574455246
+    },
+    {
+      "length": 79,
+      "seed": 4294967295,
+      "expected": 4161185498
+    },
+    {
+      "length": 79,
+      "seed": 305419896,
+      "expected": 3772299654
+    },
+    {
+      "length": 80,
+      "seed": 2166136261,
+      "expected": 1624444970
+    },
+    {
+      "length": 80,
+      "seed": 0,
+      "expected": 942690477
+    },
+    {
+      "length": 80,
+      "seed": 1,
+      "expected": 4126603354
+    },
+    {
+      "length": 80,
+      "seed": 4294967295,
+      "expected": 3831399349
+    },
+    {
+      "length": 80,
+      "seed": 305419896,
+      "expected": 2125598443
+    },
+    {
+      "length": 127,
+      "seed": 2166136261,
+      "expected": 3864365817
+    },
+    {
+      "length": 127,
+      "seed": 0,
+      "expected": 3749280782
+    },
+    {
+      "length": 127,
+      "seed": 1,
+      "expected": 364983521
+    },
+    {
+      "length": 127,
+      "seed": 4294967295,
+      "expected": 2530583962
+    },
+    {
+      "length": 127,
+      "seed": 305419896,
+      "expected": 4003797191
+    },
+    {
+      "length": 128,
+      "seed": 2166136261,
+      "expected": 1824465222
+    },
+    {
+      "length": 128,
+      "seed": 0,
+      "expected": 3494223821
+    },
+    {
+      "length": 128,
+      "seed": 1,
+      "expected": 1670538172
+    },
+    {
+      "length": 128,
+      "seed": 4294967295,
+      "expected": 2979965694
+    },
+    {
+      "length": 128,
+      "seed": 305419896,
+      "expected": 197538851
+    },
+    {
+      "length": 129,
+      "seed": 2166136261,
+      "expected": 1246010106
+    },
+    {
+      "length": 129,
+      "seed": 0,
+      "expected": 2952022853
+    },
+    {
+      "length": 129,
+      "seed": 1,
+      "expected": 3182755057
+    },
+    {
+      "length": 129,
+      "seed": 4294967295,
+      "expected": 401182417
+    },
+    {
+      "length": 129,
+      "seed": 305419896,
+      "expected": 4203837415
+    },
+    {
+      "length": 255,
+      "seed": 2166136261,
+      "expected": 30034764
+    },
+    {
+      "length": 255,
+      "seed": 0,
+      "expected": 348863918
+    },
+    {
+      "length": 255,
+      "seed": 1,
+      "expected": 24217516
+    },
+    {
+      "length": 255,
+      "seed": 4294967295,
+      "expected": 410667866
+    },
+    {
+      "length": 255,
+      "seed": 305419896,
+      "expected": 3992319991
+    },
+    {
+      "length": 256,
+      "seed": 2166136261,
+      "expected": 939938559
+    },
+    {
+      "length": 256,
+      "seed": 0,
+      "expected": 1038609917
+    },
+    {
+      "length": 256,
+      "seed": 1,
+      "expected": 1226519392
+    },
+    {
+      "length": 256,
+      "seed": 4294967295,
+      "expected": 478091103
+    },
+    {
+      "length": 256,
+      "seed": 305419896,
+      "expected": 550005989
+    },
+    {
+      "length": 257,
+      "seed": 2166136261,
+      "expected": 1443480284
+    },
+    {
+      "length": 257,
+      "seed": 0,
+      "expected": 3061106346
+    },
+    {
+      "length": 257,
+      "seed": 1,
+      "expected": 2972193653
+    },
+    {
+      "length": 257,
+      "seed": 4294967295,
+      "expected": 3951612415
+    },
+    {
+      "length": 257,
+      "seed": 305419896,
+      "expected": 1974440066
+    },
+    {
+      "length": 1023,
+      "seed": 2166136261,
+      "expected": 4061057387
+    },
+    {
+      "length": 1023,
+      "seed": 0,
+      "expected": 3005380445
+    },
+    {
+      "length": 1023,
+      "seed": 1,
+      "expected": 1496145566
+    },
+    {
+      "length": 1023,
+      "seed": 4294967295,
+      "expected": 1010229411
+    },
+    {
+      "length": 1023,
+      "seed": 305419896,
+      "expected": 916539183
+    },
+    {
+      "length": 1024,
+      "seed": 2166136261,
+      "expected": 3057859126
+    },
+    {
+      "length": 1024,
+      "seed": 0,
+      "expected": 3945398242
+    },
+    {
+      "length": 1024,
+      "seed": 1,
+      "expected": 1018438930
+    },
+    {
+      "length": 1024,
+      "seed": 4294967295,
+      "expected": 999002616
+    },
+    {
+      "length": 1024,
+      "seed": 305419896,
+      "expected": 2520621966
+    },
+    {
+      "length": 1025,
+      "seed": 2166136261,
+      "expected": 3761688658
+    },
+    {
+      "length": 1025,
+      "seed": 0,
+      "expected": 529698628
+    },
+    {
+      "length": 1025,
+      "seed": 1,
+      "expected": 1517578262
+    },
+    {
+      "length": 1025,
+      "seed": 4294967295,
+      "expected": 926658943
+    },
+    {
+      "length": 1025,
+      "seed": 305419896,
+      "expected": 3553937867
+    },
+    {
+      "length": 4095,
+      "seed": 2166136261,
+      "expected": 1913717560
+    },
+    {
+      "length": 4095,
+      "seed": 0,
+      "expected": 1726740852
+    },
+    {
+      "length": 4095,
+      "seed": 1,
+      "expected": 1863574843
+    },
+    {
+      "length": 4095,
+      "seed": 4294967295,
+      "expected": 3859376000
+    },
+    {
+      "length": 4095,
+      "seed": 305419896,
+      "expected": 2205917425
+    },
+    {
+      "length": 4096,
+      "seed": 2166136261,
+      "expected": 2724852614
+    },
+    {
+      "length": 4096,
+      "seed": 0,
+      "expected": 95973659
+    },
+    {
+      "length": 4096,
+      "seed": 1,
+      "expected": 447029262
+    },
+    {
+      "length": 4096,
+      "seed": 4294967295,
+      "expected": 514457925
+    },
+    {
+      "length": 4096,
+      "seed": 305419896,
+      "expected": 4072030332
+    },
+    {
+      "length": 4097,
+      "seed": 2166136261,
+      "expected": 3366633754
+    },
+    {
+      "length": 4097,
+      "seed": 0,
+      "expected": 3727093893
+    },
+    {
+      "length": 4097,
+      "seed": 1,
+      "expected": 1026151280
+    },
+    {
+      "length": 4097,
+      "seed": 4294967295,
+      "expected": 1073968436
+    },
+    {
+      "length": 4097,
+      "seed": 305419896,
+      "expected": 2907982559
+    },
+    {
+      "length": 65519,
+      "seed": 2166136261,
+      "expected": 1193888162
+    },
+    {
+      "length": 65519,
+      "seed": 0,
+      "expected": 502814283
+    },
+    {
+      "length": 65519,
+      "seed": 1,
+      "expected": 320971151
+    },
+    {
+      "length": 65519,
+      "seed": 4294967295,
+      "expected": 4034112333
+    },
+    {
+      "length": 65519,
+      "seed": 305419896,
+      "expected": 1261751645
+    },
+    {
+      "length": 65520,
+      "seed": 2166136261,
+      "expected": 2551661536
+    },
+    {
+      "length": 65520,
+      "seed": 0,
+      "expected": 3284757746
+    },
+    {
+      "length": 65520,
+      "seed": 1,
+      "expected": 999368187
+    },
+    {
+      "length": 65520,
+      "seed": 4294967295,
+      "expected": 1203312554
+    },
+    {
+      "length": 65520,
+      "seed": 305419896,
+      "expected": 2320388380
+    },
+    {
+      "length": 65521,
+      "seed": 2166136261,
+      "expected": 598199529
+    },
+    {
+      "length": 65521,
+      "seed": 0,
+      "expected": 705091037
+    },
+    {
+      "length": 65521,
+      "seed": 1,
+      "expected": 140427413
+    },
+    {
+      "length": 65521,
+      "seed": 4294967295,
+      "expected": 4284913998
+    },
+    {
+      "length": 65521,
+      "seed": 305419896,
+      "expected": 932531100
+    },
+    {
+      "length": 65535,
+      "seed": 2166136261,
+      "expected": 1066372610
+    },
+    {
+      "length": 65535,
+      "seed": 0,
+      "expected": 524805882
+    },
+    {
+      "length": 65535,
+      "seed": 1,
+      "expected": 1206268745
+    },
+    {
+      "length": 65535,
+      "seed": 4294967295,
+      "expected": 1563248683
+    },
+    {
+      "length": 65535,
+      "seed": 305419896,
+      "expected": 3281132350
+    },
+    {
+      "length": 65536,
+      "seed": 2166136261,
+      "expected": 780141939
+    },
+    {
+      "length": 65536,
+      "seed": 0,
+      "expected": 3167106717
+    },
+    {
+      "length": 65536,
+      "seed": 1,
+      "expected": 3194741442
+    },
+    {
+      "length": 65536,
+      "seed": 4294967295,
+      "expected": 1695799509
+    },
+    {
+      "length": 65536,
+      "seed": 305419896,
+      "expected": 1958696697
+    },
+    {
+      "length": 65537,
+      "seed": 2166136261,
+      "expected": 2379506235
+    },
+    {
+      "length": 65537,
+      "seed": 0,
+      "expected": 1359221519
+    },
+    {
+      "length": 65537,
+      "seed": 1,
+      "expected": 926240569
+    },
+    {
+      "length": 65537,
+      "seed": 4294967295,
+      "expected": 2334769817
+    },
+    {
+      "length": 65537,
+      "seed": 305419896,
+      "expected": 2604861279
+    },
+    {
+      "length": 65551,
+      "seed": 2166136261,
+      "expected": 3392817071
+    },
+    {
+      "length": 65551,
+      "seed": 0,
+      "expected": 1349910092
+    },
+    {
+      "length": 65551,
+      "seed": 1,
+      "expected": 1484726011
+    },
+    {
+      "length": 65551,
+      "seed": 4294967295,
+      "expected": 2694100625
+    },
+    {
+      "length": 65551,
+      "seed": 305419896,
+      "expected": 70710954
+    },
+    {
+      "length": 65552,
+      "seed": 2166136261,
+      "expected": 1609185966
+    },
+    {
+      "length": 65552,
+      "seed": 0,
+      "expected": 2236384358
+    },
+    {
+      "length": 65552,
+      "seed": 1,
+      "expected": 1534510163
+    },
+    {
+      "length": 65552,
+      "seed": 4294967295,
+      "expected": 1808108369
+    },
+    {
+      "length": 65552,
+      "seed": 305419896,
+      "expected": 1353253771
+    },
+    {
+      "length": 65553,
+      "seed": 2166136261,
+      "expected": 3647727650
+    },
+    {
+      "length": 65553,
+      "seed": 0,
+      "expected": 3455538946
+    },
+    {
+      "length": 65553,
+      "seed": 1,
+      "expected": 2416567298
+    },
+    {
+      "length": 65553,
+      "seed": 4294967295,
+      "expected": 43862542
+    },
+    {
+      "length": 65553,
+      "seed": 305419896,
+      "expected": 1026492311
+    },
+    {
+      "length": 131071,
+      "seed": 2166136261,
+      "expected": 78254943
+    },
+    {
+      "length": 131071,
+      "seed": 0,
+      "expected": 809518523
+    },
+    {
+      "length": 131071,
+      "seed": 1,
+      "expected": 4243702044
+    },
+    {
+      "length": 131071,
+      "seed": 4294967295,
+      "expected": 1750169314
+    },
+    {
+      "length": 131071,
+      "seed": 305419896,
+      "expected": 2308983806
+    },
+    {
+      "length": 131072,
+      "seed": 2166136261,
+      "expected": 1860817281
+    },
+    {
+      "length": 131072,
+      "seed": 0,
+      "expected": 4210250971
+    },
+    {
+      "length": 131072,
+      "seed": 1,
+      "expected": 330122298
+    },
+    {
+      "length": 131072,
+      "seed": 4294967295,
+      "expected": 2291529875
+    },
+    {
+      "length": 131072,
+      "seed": 305419896,
+      "expected": 1307384012
+    },
+    {
+      "length": 131073,
+      "seed": 2166136261,
+      "expected": 952751161
+    },
+    {
+      "length": 131073,
+      "seed": 0,
+      "expected": 1755559166
+    },
+    {
+      "length": 131073,
+      "seed": 1,
+      "expected": 3591494782
+    },
+    {
+      "length": 131073,
+      "seed": 4294967295,
+      "expected": 1138240216
+    },
+    {
+      "length": 131073,
+      "seed": 305419896,
+      "expected": 2808653650
+    },
+    {
+      "length": 1048575,
+      "seed": 2166136261,
+      "expected": 757145133
+    },
+    {
+      "length": 1048575,
+      "seed": 0,
+      "expected": 2026243632
+    },
+    {
+      "length": 1048575,
+      "seed": 1,
+      "expected": 3638941816
+    },
+    {
+      "length": 1048575,
+      "seed": 4294967295,
+      "expected": 836684899
+    },
+    {
+      "length": 1048575,
+      "seed": 305419896,
+      "expected": 1415150867
+    },
+    {
+      "length": 1048576,
+      "seed": 2166136261,
+      "expected": 1626041054
+    },
+    {
+      "length": 1048576,
+      "seed": 0,
+      "expected": 3095979763
+    },
+    {
+      "length": 1048576,
+      "seed": 1,
+      "expected": 42617367
+    },
+    {
+      "length": 1048576,
+      "seed": 4294967295,
+      "expected": 4202856109
+    },
+    {
+      "length": 1048576,
+      "seed": 305419896,
+      "expected": 4171651785
+    },
+    {
+      "length": 1048577,
+      "seed": 2166136261,
+      "expected": 2766338833
+    },
+    {
+      "length": 1048577,
+      "seed": 0,
+      "expected": 2031687596
+    },
+    {
+      "length": 1048577,
+      "seed": 1,
+      "expected": 1809743280
+    },
+    {
+      "length": 1048577,
+      "seed": 4294967295,
+      "expected": 936622566
+    },
+    {
+      "length": 1048577,
+      "seed": 305419896,
+      "expected": 3955194261
+    }
+  ]
+}

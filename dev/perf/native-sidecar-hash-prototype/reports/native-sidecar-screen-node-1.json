@@ -1,0 +1,550 @@
+{
+  "scope": "Node first-bank checksum kernel screening; includes guarded input admission, bounded copies and WASM calls; not whole-import qualification",
+  "node": "v22.22.0",
+  "platform": "linux",
+  "architecture": "x64",
+  "wasmSha256": "5287d61ab35dd4544303f533cca101e969b6df3af4ff77256362517cdf8370a4",
+  "inputManifestSha256": "bfadd3c6abcd0027d75eb7394256b50b3b9a95ed6eb55a22b0f797a8d2428cd2",
+  "wrapperSha256": "771e17be1fd63016f99864e58c47df74eff35f98e8c3b1e7a6f88a3de2c9f78a",
+  "baselineHashSourceSha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+  "harnessSha256": "40d6f8b92c1bdcef3030b4a57494333943d2ad0d0cfccd35053978c11164e78a",
+  "initializationMs": 0.3767309999999995,
+  "memoryBytes": 65536,
+  "scratchBytes": 61440,
+  "fixedVectorCount": 151,
+  "checkedRanges": 604,
+  "sink": 0,
+  "results": [
+    {
+      "dictionary": "jmdict",
+      "bank": "term_bank_1.json",
+      "bankSha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c",
+      "rows": 10000,
+      "inputBytes": 335300,
+      "inputs": [
+        {
+          "filename": "jmdict-0-base.bin",
+          "section": "base",
+          "bytes": 164156,
+          "sha256": "03edd9b56781135dc5852c8bcebab02c5a3ec3ff1c802ccb9b77235069b768c5",
+          "xxh32": 3792366805
+        },
+        {
+          "filename": "jmdict-0-derived.bin",
+          "section": "derived",
+          "bytes": 90328,
+          "sha256": "f522b1c953a6df76f212e297346ecf85b96453f6ffedd9b4b51f636f7a50f87a",
+          "xxh32": 1982628408
+        },
+        {
+          "filename": "jmdict-0-records.bin",
+          "section": "records",
+          "bytes": 80816,
+          "sha256": "33d2b592bb36106e8a1d497195e35575834195a220afebdb0061f63eb71580bc",
+          "xxh32": 3941192917
+        }
+      ],
+      "rounds": 7,
+      "repeats": 256,
+      "samples": [
+        {
+          "round": 0,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            12.357270999999997,
+            12.185394000000002
+          ],
+          "native": [
+            14.526022000000012,
+            14.686130999999989
+          ],
+          "jsMs": 12.2713325,
+          "nativeMs": 14.6060765,
+          "nativeOverJs": 1.1902600226992464
+        },
+        {
+          "round": 1,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            12.072536999999983,
+            12.168450000000007
+          ],
+          "native": [
+            14.396188999999993,
+            13.819158999999985
+          ],
+          "jsMs": 12.120493499999995,
+          "nativeMs": 14.107673999999989,
+          "nativeOverJs": 1.1639521113558615
+        },
+        {
+          "round": 2,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            11.99229699999998,
+            12.013248000000033
+          ],
+          "native": [
+            13.89244800000003,
+            13.602184999999963
+          ],
+          "jsMs": 12.002772500000006,
+          "nativeMs": 13.747316499999997,
+          "nativeOverJs": 1.1453450858957785
+        },
+        {
+          "round": 3,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            13.754563000000019,
+            12.864877999999976
+          ],
+          "native": [
+            13.815312999999946,
+            19.318071999999972
+          ],
+          "jsMs": 13.309720499999997,
+          "nativeMs": 16.56669249999996,
+          "nativeOverJs": 1.244706265619925
+        },
+        {
+          "round": 4,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            17.342529000000013,
+            14.752129000000025
+          ],
+          "native": [
+            18.296500000000037,
+            16.891055999999992
+          ],
+          "jsMs": 16.04732900000002,
+          "nativeMs": 17.593778000000015,
+          "nativeOverJs": 1.0963679999331972
+        },
+        {
+          "round": 5,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            12.000819999999976,
+            12.002321999999992
+          ],
+          "native": [
+            13.665179000000023,
+            13.621765000000039
+          ],
+          "jsMs": 12.001570999999984,
+          "nativeMs": 13.643472000000031,
+          "nativeOverJs": 1.136807172994273
+        },
+        {
+          "round": 6,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            12.336160000000007,
+            12.236211000000026
+          ],
+          "native": [
+            13.897106000000008,
+            13.771888999999987
+          ],
+          "jsMs": 12.286185500000016,
+          "nativeMs": 13.834497499999998,
+          "nativeOverJs": 1.1260205618741455
+        }
+      ],
+      "medianJsMs": 12.2713325,
+      "medianNativeMs": 14.107673999999989,
+      "medianPairedRatio": 1.1453450858957785
+    },
+    {
+      "dictionary": "jitendex",
+      "bank": "term_bank_1.json",
+      "bankSha256": "ffc608e5a6df35604eca6c9fd16748710e9ce7f029156a72ffcc0acaa79ed20b",
+      "rows": 2000,
+      "inputBytes": 91360,
+      "inputs": [
+        {
+          "filename": "jitendex-0-base.bin",
+          "section": "base",
+          "bytes": 47432,
+          "sha256": "551770af88fb65ee15c4c9f82c8c472405475382933bfd013cbb88f2fdea170d",
+          "xxh32": 3784303888
+        },
+        {
+          "filename": "jitendex-0-derived.bin",
+          "section": "derived",
+          "bytes": 27776,
+          "sha256": "68d3efa596d35e23885dd4d31dbb8a9dfbfa764f7e2bec5921dddf9123eac23a",
+          "xxh32": 910881188
+        },
+        {
+          "filename": "jitendex-0-records.bin",
+          "section": "records",
+          "bytes": 16152,
+          "sha256": "a28bc9b86077d2ad194032a410d92d1f0b2fa8583d285e7faf87e39e286d9b39",
+          "xxh32": 3384076091
+        }
+      ],
+      "rounds": 7,
+      "repeats": 256,
+      "samples": [
+        {
+          "round": 0,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            3.5058629999999766,
+            3.401238000000035
+          ],
+          "native": [
+            4.016785000000027,
+            3.9592179999999644
+          ],
+          "jsMs": 3.4535505000000057,
+          "nativeMs": 3.9880014999999958,
+          "nativeOverJs": 1.1547540712087427
+        },
+        {
+          "round": 1,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            4.574675999999954,
+            3.4804149999999936
+          ],
+          "native": [
+            4.581176000000028,
+            3.864426999999978
+          ],
+          "jsMs": 4.027545499999974,
+          "nativeMs": 4.222801500000003,
+          "nativeOverJs": 1.0484801475241012
+        },
+        {
+          "round": 2,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            3.670047000000068,
+            3.591430999999943
+          ],
+          "native": [
+            3.775094999999965,
+            3.8574769999999035
+          ],
+          "jsMs": 3.6307390000000055,
+          "nativeMs": 3.816285999999934,
+          "nativeOverJs": 1.0511044721198435
+        },
+        {
+          "round": 3,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            3.384943999999905,
+            3.3266059999999698
+          ],
+          "native": [
+            4.0908849999999575,
+            3.7537019999999757
+          ],
+          "jsMs": 3.3557749999999373,
+          "nativeMs": 3.9222934999999666,
+          "nativeOverJs": 1.1688189762424597
+        },
+        {
+          "round": 4,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            3.301858999999922,
+            3.9757929999999533
+          ],
+          "native": [
+            3.75454400000001,
+            3.763708000000065
+          ],
+          "jsMs": 3.6388259999999377,
+          "nativeMs": 3.7591260000000375,
+          "nativeOverJs": 1.033060113344277
+        },
+        {
+          "round": 5,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            3.900502000000074,
+            3.4912819999999556
+          ],
+          "native": [
+            3.7791409999999814,
+            4.155270999999971
+          ],
+          "jsMs": 3.695892000000015,
+          "nativeMs": 3.967205999999976,
+          "nativeOverJs": 1.0734096126185397
+        },
+        {
+          "round": 6,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            3.3345689999999877,
+            3.6301789999999983
+          ],
+          "native": [
+            4.041620999999964,
+            4.076323000000002
+          ],
+          "jsMs": 3.482373999999993,
+          "nativeMs": 4.058971999999983,
+          "nativeOverJs": 1.16557612709031
+        }
+      ],
+      "medianJsMs": 3.6307390000000055,
+      "medianNativeMs": 3.967205999999976,
+      "medianPairedRatio": 1.0734096126185397
+    },
+    {
+      "dictionary": "vndb",
+      "bank": "term_bank_1.json",
+      "bankSha256": "5de77aab89f627f5f9a75d4773b9723c32c12c5eb79207b4522ddb21cf6f3354",
+      "rows": 10000,
+      "inputBytes": 548300,
+      "inputs": [
+        {
+          "filename": "vndb-0-base.bin",
+          "section": "base",
+          "bytes": 324644,
+          "sha256": "5c7ac3997822a7b3e44203896d2aa45064c7873acf3dd40ed930e8acef692048",
+          "xxh32": 1719106205
+        },
+        {
+          "filename": "vndb-0-derived.bin",
+          "section": "derived",
+          "bytes": 143628,
+          "sha256": "500ac81b2bc870e097f4dc6d9a4784e620c63b50b0ecb8321a4158c041b49172",
+          "xxh32": 2021087051
+        },
+        {
+          "filename": "vndb-0-records.bin",
+          "section": "records",
+          "bytes": 80028,
+          "sha256": "a4f1467f9f777fb893ef636df2c64028dc8f45841b2ad1b1d986a30ed7ce26f4",
+          "xxh32": 1971682583
+        }
+      ],
+      "rounds": 7,
+      "repeats": 256,
+      "samples": [
+        {
+          "round": 0,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            24.59660699999995,
+            39.87585100000001
+          ],
+          "native": [
+            23.83081500000003,
+            22.83755599999995
+          ],
+          "jsMs": 32.23622899999998,
+          "nativeMs": 23.33418549999999,
+          "nativeOverJs": 0.7238497251027719
+        },
+        {
+          "round": 1,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            22.012136000000055,
+            61.55309800000009
+          ],
+          "native": [
+            30.569335000000024,
+            43.64364499999999
+          ],
+          "jsMs": 41.78261700000007,
+          "nativeMs": 37.10649000000001,
+          "nativeOverJs": 0.8880843916502392
+        },
+        {
+          "round": 2,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            21.982782000000043,
+            21.495345000000043
+          ],
+          "native": [
+            26.351790999999935,
+            27.074888999999985
+          ],
+          "jsMs": 21.739063500000043,
+          "nativeMs": 26.71333999999996,
+          "nativeOverJs": 1.2288174235288427
+        },
+        {
+          "round": 3,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            19.781833000000006,
+            19.45669900000007
+          ],
+          "native": [
+            23.366743999999926,
+            23.75238900000022
+          ],
+          "jsMs": 19.61926600000004,
+          "nativeMs": 23.559566500000074,
+          "nativeOverJs": 1.200838323920988
+        },
+        {
+          "round": 4,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            21.909922999999935,
+            21.863843999999972
+          ],
+          "native": [
+            25.1724099999999,
+            23.80286299999989
+          ],
+          "jsMs": 21.886883499999954,
+          "nativeMs": 24.487636499999894,
+          "nativeOverJs": 1.118827013448486
+        },
+        {
+          "round": 5,
+          "order": [
+            "native",
+            "js",
+            "js",
+            "native"
+          ],
+          "js": [
+            22.715824999999995,
+            22.8968339999999
+          ],
+          "native": [
+            25.53417400000012,
+            25.253864999999905
+          ],
+          "jsMs": 22.806329499999947,
+          "nativeMs": 25.394019500000013,
+          "nativeOverJs": 1.1134636768270876
+        },
+        {
+          "round": 6,
+          "order": [
+            "js",
+            "native",
+            "native",
+            "js"
+          ],
+          "js": [
+            21.861217000000124,
+            19.854119999999966
+          ],
+          "native": [
+            23.40280800000005,
+            23.203580999999986
+          ],
+          "jsMs": 20.857668500000045,
+          "nativeMs": 23.303194500000018,
+          "nativeOverJs": 1.1172482916774695
+        }
+      ],
+      "medianJsMs": 21.886883499999954,
+      "medianNativeMs": 24.487636499999894,
+      "medianPairedRatio": 1.1172482916774695
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "compilerVersion": "21.1.8",
+  "linkerVersion": "21.1.8",
+  "sourceSha256": "4a02a4fe2189d2a614dc5e85d5798d9d8b39e3d4d4218c38436ef07b28bfe39b",
+  "wasmSha256": "5287d61ab35dd4544303f533cca101e969b6df3af4ff77256362517cdf8370a4",
+  "wasmBytes": 1779,
+  "memoryBytes": 65536,
+  "scratchBytes": 61440,
+  "arguments": [
+    "-fuse-ld=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/wasm-ld-21",
+    "--target=wasm32",
+    "-O3",
+    "-std=c11",
+    "-nostdlib",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-stack-protector",
+    "-Wl,--no-entry",
+    "-Wl,--export-memory",
+    "-Wl,--strip-all",
+    "-Wl,--initial-memory=65536",
+    "-Wl,--max-memory=65536",
+    "-Wl,--stack-first",
+    "-Wl,-z,stack-size=1024",
+    "-o",
+    "xxh32-stream.wasm",
+    "xxh32-stream.c"
+  ]
+}

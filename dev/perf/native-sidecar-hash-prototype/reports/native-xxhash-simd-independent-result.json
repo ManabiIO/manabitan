@@ -1,0 +1,16 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "oracle": "libxxhash.so.0 XXH32",
+  "oracleVersion": 803,
+  "vectors": 540,
+  "comparisons": 13240,
+  "rejectedUpdateChecks": 28,
+  "wasmPath": "/workspace/scratch/beb5caac0497/native-sidecar-hash/dev/perf/native-sidecar-hash-prototype/xxh32-stream-simd.wasm",
+  "wasmSha256": "b340b2f563f5b0bf06bf4c635d755fe0afe0ba0058741fe76c814c3df1fd9d80",
+  "vectorsSha256": "b3e295850da18a9f8fab423504d2669bf697497ce85f3429af385cb09e56cfc3",
+  "scratchPointer": 1024,
+  "capacity": 61440,
+  "wasmMemoryBytes": 65536,
+  "notes": "Correctness only. Uses pinned upstream vectors and current JS comparator; no browser latency or whole-import gain claim."
+}

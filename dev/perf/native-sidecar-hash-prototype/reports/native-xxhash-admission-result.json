@@ -1,0 +1,224 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "wrapperPath": "/workspace/scratch/beb5caac0497/native-sidecar-hash/dev/perf/native-sidecar-hash-prototype/native-checksum.mjs",
+  "wrapperSha256": "771e17be1fd63016f99864e58c47df74eff35f98e8c3b1e7a6f88a3de2c9f78a",
+  "wasmPath": "/workspace/scratch/beb5caac0497/native-sidecar-hash/dev/perf/native-sidecar-hash-prototype/xxh32-stream.wasm",
+  "wasmSha256": "ca4e2ea331cd8e2cd5959e4a9ac4201b266036dc17d436285aadfdecc7c5f2f1",
+  "cases": 41,
+  "counters": {
+    "init": 20,
+    "update": 36,
+    "finish": 20
+  },
+  "results": [
+    {
+      "name": "private offset=0 range=0:70003",
+      "native": true,
+      "value": 3813663459
+    },
+    {
+      "name": "private offset=0 range=1:70002",
+      "native": true,
+      "value": 2660333734
+    },
+    {
+      "name": "private offset=0 range=5:65542",
+      "native": true,
+      "value": 539748936
+    },
+    {
+      "name": "private offset=0 range=1000:2024",
+      "native": true,
+      "value": 893967620
+    },
+    {
+      "name": "private offset=1 range=0:70003",
+      "native": true,
+      "value": 3813663459
+    },
+    {
+      "name": "private offset=1 range=1:70002",
+      "native": true,
+      "value": 2660333734
+    },
+    {
+      "name": "private offset=1 range=5:65542",
+      "native": true,
+      "value": 539748936
+    },
+    {
+      "name": "private offset=1 range=1000:2024",
+      "native": true,
+      "value": 893967620
+    },
+    {
+      "name": "private offset=3 range=0:70003",
+      "native": true,
+      "value": 3813663459
+    },
+    {
+      "name": "private offset=3 range=1:70002",
+      "native": true,
+      "value": 2660333734
+    },
+    {
+      "name": "private offset=3 range=5:65542",
+      "native": true,
+      "value": 539748936
+    },
+    {
+      "name": "private offset=3 range=1000:2024",
+      "native": true,
+      "value": 893967620
+    },
+    {
+      "name": "private offset=7 range=0:70003",
+      "native": true,
+      "value": 3813663459
+    },
+    {
+      "name": "private offset=7 range=1:70002",
+      "native": true,
+      "value": 2660333734
+    },
+    {
+      "name": "private offset=7 range=5:65542",
+      "native": true,
+      "value": 539748936
+    },
+    {
+      "name": "private offset=7 range=1000:2024",
+      "native": true,
+      "value": 893967620
+    },
+    {
+      "name": "shared",
+      "native": false,
+      "value": 2818607597
+    },
+    {
+      "name": "resizable",
+      "native": false,
+      "value": 2818607597
+    },
+    {
+      "name": "subclass",
+      "native": false,
+      "value": 2818607597
+    },
+    {
+      "name": "node-buffer",
+      "native": false,
+      "value": 2818607597
+    },
+    {
+      "name": "proxy",
+      "native": false,
+      "error": {
+        "name": "TypeError",
+        "message": "Method get TypedArray.prototype.byteLength called on incompatible receiver [object Uint8Array]"
+      }
+    },
+    {
+      "name": "detached",
+      "native": false,
+      "value": 3964335159
+    },
+    {
+      "name": "own buffer data",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "own buffer getter",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "own byteOffset data",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "own byteOffset getter",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "own byteLength data",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "own byteLength getter",
+      "native": false,
+      "value": 1598899170
+    },
+    {
+      "name": "unused source property constructor",
+      "native": true,
+      "value": 1598899170
+    },
+    {
+      "name": "unused source property slice",
+      "native": true,
+      "value": 1598899170
+    },
+    {
+      "name": "unused source property subarray",
+      "native": true,
+      "value": 1598899170
+    },
+    {
+      "name": "unused source property Symbol(Symbol.species)",
+      "native": true,
+      "value": 1598899170
+    },
+    {
+      "name": "fallback range 0:1023",
+      "native": false,
+      "value": 3002625152
+    },
+    {
+      "name": "fallback range 0:0",
+      "native": false,
+      "value": 1786691832
+    },
+    {
+      "name": "fallback range -1:1024",
+      "native": false,
+      "value": 3257915271
+    },
+    {
+      "name": "fallback range 1.5:2048",
+      "native": false,
+      "value": 147102514
+    },
+    {
+      "name": "fallback range 0:70004",
+      "native": false,
+      "value": 3794716751
+    },
+    {
+      "name": "fallback range 2048:1024",
+      "native": false,
+      "value": 3262073430
+    },
+    {
+      "name": "fallback range NaN:1024",
+      "native": false,
+      "value": 0
+    },
+    {
+      "name": "fallback range 0:NaN",
+      "native": false,
+      "value": 0
+    },
+    {
+      "name": "own native memory alias",
+      "native": false
+    }
+  ],
+  "notes": "Admission and exact fallback semantics only; native export counters are wrapped in a test-only instance adapter."
+}
