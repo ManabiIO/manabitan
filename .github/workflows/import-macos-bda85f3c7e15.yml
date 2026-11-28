@@ -1,0 +1,127 @@
+name: Separate macOS JMdict screen bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-macos-bda85f3c7e15
+    paths:
+      - .github/workflows/import-macos-bda85f3c7e15.yml
+      - dev/perf/import-macos-screen-driver-bda85f3c7e15.py
+      - dev/perf/bda85f3c7e15/macos-import-screen.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-macos-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMPORT_MAC_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  IMPORT_MAC_LOOKAHEAD: 8dee0ebccd93dc3d64d3abcc581a17e93cc40af6
+  IMPORT_MAC_PRELOAD: 15e9577aadb513b2d4e6b194683bdfff8511ba36
+
+jobs:
+  validation:
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-macos-bda85f3c7e15'
+    name: macOS validation / ${{ matrix.cell }}
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        cell: [lookahead, preload]
+    env:
+      IMPORT_MAC_CELL: ${{ matrix.cell }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Record frozen validation plan
+        run: |
+          set -euo pipefail
+          mac_evidence="$GITHUB_WORKSPACE/builds/perf/import-macos-bda85f3c7e15/validation-$IMPORT_MAC_CELL"
+          mkdir -p "$mac_evidence"
+          python3 dev/perf/bda85f3c7e15/macos-import-screen.py \
+            --mode validation --cell "$IMPORT_MAC_CELL" \
+            --baseline "$IMPORT_MAC_BASELINE" --lookahead "$IMPORT_MAC_LOOKAHEAD" --preload "$IMPORT_MAC_PRELOAD" \
+            --worktree-parent "$RUNNER_TEMP/import-macos-bda85f3c7e15-validation-$IMPORT_MAC_CELL" \
+            --evidence "$mac_evidence" --check-plan > "$mac_evidence/requested-plan.json"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Validate exact candidate before timing is admitted
+        run: |
+          set -euo pipefail
+          python3 dev/perf/bda85f3c7e15/macos-import-screen.py \
+            --mode validation --cell "$IMPORT_MAC_CELL" \
+            --baseline "$IMPORT_MAC_BASELINE" --lookahead "$IMPORT_MAC_LOOKAHEAD" --preload "$IMPORT_MAC_PRELOAD" \
+            --worktree-parent "$RUNNER_TEMP/import-macos-bda85f3c7e15-validation-$IMPORT_MAC_CELL" \
+            --evidence "$GITHUB_WORKSPACE/builds/perf/import-macos-bda85f3c7e15/validation-$IMPORT_MAC_CELL"
+      - name: Retain validation evidence and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-macos-bda85f3c7e15-validation-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-macos-bda85f3c7e15/validation-${{ matrix.cell }}
+          if-no-files-found: error
+          retention-days: 90
+
+  comparison:
+    needs: validation
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-macos-bda85f3c7e15'
+    name: Separate macOS JMdict / ${{ matrix.cell }}
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        cell: [lookahead, preload, control]
+    env:
+      IMPORT_MAC_CELL: ${{ matrix.cell }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Record frozen macOS screen plan
+        run: |
+          set -euo pipefail
+          mac_evidence="$GITHUB_WORKSPACE/builds/perf/import-macos-bda85f3c7e15/$IMPORT_MAC_CELL"
+          mkdir -p "$mac_evidence"
+          python3 dev/perf/bda85f3c7e15/macos-import-screen.py \
+            --mode screen --cell "$IMPORT_MAC_CELL" \
+            --baseline "$IMPORT_MAC_BASELINE" --lookahead "$IMPORT_MAC_LOOKAHEAD" --preload "$IMPORT_MAC_PRELOAD" \
+            --worktree-parent "$RUNNER_TEMP/import-macos-bda85f3c7e15-screen-$IMPORT_MAC_CELL" \
+            --evidence "$mac_evidence" --check-plan > "$mac_evidence/requested-plan.json"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install lockfile-pinned full Chromium for macOS
+        run: node node_modules/playwright/cli.js install chromium
+      - name: Restore pinned archives for this platform
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare complete pinned fixtures
+        run: node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex
+      - name: Build isolated sources and run the unchanged six-pair screen
+        run: |
+          set -euo pipefail
+          python3 dev/perf/bda85f3c7e15/macos-import-screen.py \
+            --mode screen --cell "$IMPORT_MAC_CELL" \
+            --baseline "$IMPORT_MAC_BASELINE" --lookahead "$IMPORT_MAC_LOOKAHEAD" --preload "$IMPORT_MAC_PRELOAD" \
+            --worktree-parent "$RUNNER_TEMP/import-macos-bda85f3c7e15-screen-$IMPORT_MAC_CELL" \
+            --evidence "$GITHUB_WORKSPACE/builds/perf/import-macos-bda85f3c7e15/$IMPORT_MAC_CELL"
+      - name: Retain macOS-only raw evidence and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-macos-bda85f3c7e15-jmdict-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-macos-bda85f3c7e15/${{ matrix.cell }}
+          if-no-files-found: error
+          retention-days: 90
