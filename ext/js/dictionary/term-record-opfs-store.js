@@ -21,6 +21,8 @@ import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_S
 import {createTermKeyHashState, finishTermKeyHashState, updateTermKeyHashState} from './term-key-hash.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+// eslint-disable-next-line @stylistic/semi
+import {getOwnedWholePreparedLookupIndex} from './term-record-prepared-fields.js'
 import {toError} from '../core/to-error.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -117,6 +119,8 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
+// eslint-disable-next-line @stylistic/semi
+const FIELD_TYPED_BUFFER_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
@@ -436,6 +440,33 @@ function getSynchronousRecordFieldReferences(chunk, count) {
         ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(scores.buffer)
     } catch { return null }
     return references
+}
+
+/**
+ * A speculative whole attempt must decline proxy columns before the existing
+ * selector's instanceof checks can invoke their prototype traps. Only inspect
+ * the factory-owned chunk/reference records; accessor descriptors are never
+ * read, and arbitrary chunks decline at the WeakMap lookup.
+ * @param {Parameters<typeof getSynchronousRecordFieldReferences>[0]} chunk
+ * @param {number} count
+ * @returns {ReturnType<typeof getSynchronousRecordFieldReferences>}
+ */
+function getSynchronousWholeRecordFieldReferences(chunk, count) {
+    const origin = resolvedContentReferenceOrigins.get(chunk)
+    if (typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype || typeof FIELD_TYPED_BUFFER_DESCRIPTOR?.get !== 'function') { return null }
+    const referenceDescriptor = Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')
+    if (typeof referenceDescriptor === 'undefined' || !('value' in referenceDescriptor) || referenceDescriptor.value !== origin || Object.getPrototypeOf(origin) !== Object.prototype) { return null }
+    for (const [record, key, prototype] of [[chunk, 'scoreList', Int32Array.prototype], [origin, 'uniqueIndexList', Uint32Array.prototype], [origin, 'offsets', Float64Array.prototype], [origin, 'lengths', Uint32Array.prototype]]) {
+        const descriptor = Object.getOwnPropertyDescriptor(record, /** @type {string} */ (key))
+        if (typeof descriptor === 'undefined' || !('value' in descriptor)) { return null }
+        /** @type {unknown} */
+        const column = descriptor.value
+        if (!ArrayBuffer.isView(column) || Object.getPrototypeOf(column) !== prototype) { return null }
+        /** @type {unknown} */
+        const buffer = FIELD_TYPED_BUFFER_DESCRIPTOR.get.call(column)
+        if (Object.getPrototypeOf(buffer) !== ArrayBuffer.prototype) { return null }
+    }
+    return getSynchronousRecordFieldReferences(chunk, count)
 }
 /* eslint-enable @stylistic/semi */
 
@@ -2663,9 +2694,32 @@ export class TermRecordOpfsStore {
             const tValidationStart = safePerformance.now();
             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
             const references = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);
-            let runEnd = runStart;
+            /* eslint-disable @stylistic/semi */
+            /** @type {import('./term-record-fields.js').WholeRecordFieldAttempt|null} */
+            let wholeAttempt = null
+            let wholeEncodeMs = 0
+            const wholeEncoder = this._importRecordFieldSession?.encoder ?? null
+            if (
+                runStart === 0 && hasWholeChunkPreparedIndex && wholeEncoder !== null &&
+                getOwnedWholePreparedLookupIndex(preparedLookupIndexes, count) !== null
+            ) {
+                // Refresh after the existing completeness callbacks. The
+                // native guard requires the current own count to match count,
+                // and rechecks current column identities/dimensions here.
+                const start = safePerformance.now()
+                wholeAttempt = wholeEncoder.tryEncodeWhole(
+                    chunk,
+                    count,
+                    getSynchronousWholeRecordFieldReferences,
+                    () => getOwnedWholePreparedLookupIndex(preparedLookupIndexes, count) !== null,
+                )
+                wholeEncodeMs = safePerformance.now() - start
+            }
+            const encodedWhole = wholeAttempt !== null && wholeAttempt.recordFields !== null
+            /* eslint-enable @stylistic/semi */
+            let runEnd = encodedWhole ? count : runStart;
             const runLimitEnd = Math.min(count, runStart + runRowLimit);
-            let minContentOffset = Number.POSITIVE_INFINITY;
+            let minContentOffset = encodedWhole && wholeAttempt !== null ? wholeAttempt.contentOffsetBase : Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
             while (runEnd < runLimitEnd) {
                 let uniqueIndex = -1;
@@ -2705,7 +2759,7 @@ export class TermRecordOpfsStore {
                 }
             }
             const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
-            const runValidationMs = safePerformance.now() - tValidationStart;
+            const runValidationMs = safePerformance.now() - tValidationStart - wholeEncodeMs;
             const runCount = runEnd - runStart;
             const isWholeChunk = runStart === 0 && runEnd === count;
             const runChunk = isWholeChunk ?
@@ -2747,10 +2801,13 @@ export class TermRecordOpfsStore {
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
                 runContentOffsetBase,
+                // Suppress a second copied attempt only for this exact whole
+                // chunk. A true offset split keeps the original native path.
+                isWholeChunk ? wholeAttempt : null,
             );
-            encodeMs += safePerformance.now() - tEncodeStart;
+            encodeMs += safePerformance.now() - tEncodeStart + wholeEncodeMs;
             validationMs += runValidationMs + encodedChunk.validationMs;
-            recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
+            recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs + wholeEncodeMs;
             lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
             const tAppendStart = safePerformance.now();
             await this._appendEncodedChunk(
@@ -6357,13 +6414,15 @@ view.chunks :
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
+     * @param {import('./term-record-fields.js').WholeRecordFieldAttempt|null} [wholeAttempt]
      * @returns {Uint8Array}
      */
-    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase, wholeAttempt = null) {
         /* eslint-disable @stylistic/semi */
         const session = this._importRecordFieldSession
         if (session !== null) { ++session.calls }
-        const nativeFields = session?.encoder?.tryEncode(chunk, contentOffsetBase, getSynchronousRecordFieldReferences) ?? null
+        if (wholeAttempt !== null && wholeAttempt.copied && wholeAttempt.recordFields === null) { session?.encoder?.commitWholeFallback(wholeAttempt) }
+        const nativeFields = wholeAttempt?.recordFields ?? (wholeAttempt?.copied === true ? null : session?.encoder?.tryEncode(chunk, contentOffsetBase, getSynchronousRecordFieldReferences) ?? null)
         if (nativeFields !== null) { return nativeFields }
         if (session !== null) { ++session.javascriptCalls }
         /* eslint-enable @stylistic/semi */
@@ -6496,9 +6555,10 @@ view.chunks :
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
      * @param {number|null} [validatedContentOffsetBase=null]
+     * @param {import('./term-record-fields.js').WholeRecordFieldAttempt|null} [wholeAttempt]
      * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
+    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null, wholeAttempt = null) {
         if (chunk.rowCount === 0) {
             return {
                 contentOffsetBase: 0,
@@ -6535,6 +6595,7 @@ view.chunks :
             contentOffsets,
             contentLengths,
             contentOffsetBase,
+            wholeAttempt,
         );
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes

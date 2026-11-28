@@ -36,30 +36,30 @@ static uint32_t mix_score(uint32_t value) {
 }
 
 EXPORT("record_fields_abi_version")
-uint32_t record_fields_abi_version(void) { return 1u; }
+uint32_t record_fields_abi_version(void) { return 2u; }
 
 /*
  * Return an owned-arena compact byte length, zero for unsupported compact
  * format, or a negative code for malformed private arguments. Nothing outside
  * the passed private memory changes, and no output is published on failure.
  */
-EXPORT("encode_record_fields")
-int32_t encode_record_fields(
+static int32_t encode_fields(
     uint32_t count, uint32_t unique_count,
     uint32_t row_ptr, uint32_t input_score_ptr,
     uint32_t offset_ptr, uint32_t length_ptr,
     double content_base,
     uint32_t slot_ptr, uint32_t slot_count,
     uint32_t dictionary_ptr, uint32_t key_ptr,
-    uint32_t output_ptr, uint32_t output_capacity
+    uint32_t output_ptr, uint32_t output_capacity,
+    uint32_t derive_base, uint32_t base_ptr
 ) {
     if (!count || !unique_count) { return 0; }
     const uint32_t score_capacity = count < MAX_SCORE_COUNT ? count : MAX_SCORE_COUNT;
     if (
         !slot_count || (slot_count & (slot_count - 1u)) ||
         slot_count < score_capacity * 2u || slot_count > 131072u ||
-        !(content_base >= 0.0 && content_base <= MAX_SAFE_INTEGER) ||
-        (double)(uint64_t)content_base != content_base
+        (!derive_base && (!(content_base >= 0.0 && content_base <= MAX_SAFE_INTEGER) ||
+            (double)(uint64_t)content_base != content_base))
     ) { return -1; }
 
     const uint64_t memory_bytes = (uint64_t)__builtin_wasm_memory_size(0) * 65536u;
@@ -72,14 +72,16 @@ int32_t encode_record_fields(
         {dictionary_ptr, (uint64_t)score_capacity * 4u, 4u},
         {key_ptr, (uint64_t)count * 2u, 2u},
         {output_ptr, output_capacity, 4u},
+        {base_ptr, 8u, 8u},
     };
-    for (uint32_t i = 0; i < 8u; ++i) {
+    const uint32_t region_count = derive_base ? 9u : 8u;
+    for (uint32_t i = 0; i < region_count; ++i) {
         const Region a = regions[i];
         if (
             a.start < PREFIX || a.start % a.alignment ||
             (uint64_t)a.start + a.size > memory_bytes
         ) { return -2; }
-        for (uint32_t j = i + 1u; j < 8u; ++j) {
+        for (uint32_t j = i + 1u; j < region_count; ++j) {
             const Region b = regions[j];
             if ((uint64_t)a.start < (uint64_t)b.start + b.size &&
                 (uint64_t)b.start < (uint64_t)a.start + a.size) { return -2; }
@@ -99,6 +101,8 @@ int32_t encode_record_fields(
     // Keep adversarial score collisions linear in the admitted input/table
     // size. Exhaustion abandons only this private attempt; JS remains exact.
     uint64_t remaining_probes = (uint64_t)count * 4u + slot_count;
+    double minimum_offset = MAX_SAFE_INTEGER + 1.0;
+    double maximum_offset = -1.0;
 
     for (uint32_t row = 0; row < count; ++row) {
         const uint32_t unique = rows[row];
@@ -108,9 +112,15 @@ int32_t encode_record_fields(
         if (offset != -1.0) {
             if (!(offset >= 0.0 && offset <= MAX_SAFE_INTEGER) ||
                 (double)(uint64_t)offset != offset) { return -4; }
-            const double delta = offset - content_base;
-            if (!(delta >= 0.0 && delta <= MAX_DELTA) ||
-                (double)(uint32_t)delta != delta) { return -4; }
+            if (derive_base) {
+                if (offset < minimum_offset ||
+                    (offset == 0.0 && minimum_offset == 0.0 && __builtin_signbit(offset))) { minimum_offset = offset; }
+                if (offset > maximum_offset) { maximum_offset = offset; }
+            } else {
+                const double delta = offset - content_base;
+                if (!(delta >= 0.0 && delta <= MAX_DELTA) ||
+                    (double)(uint32_t)delta != delta) { return -4; }
+            }
         }
         const int32_t score = input_scores[row];
         uint32_t slot = mix_score((uint32_t)score) & mask;
@@ -130,6 +140,12 @@ int32_t encode_record_fields(
             slots[slot] = entry;
         }
         keys[row] = (uint16_t)(entry - 1u);
+    }
+    if (derive_base) {
+        content_base = maximum_offset < 0.0 ? 0.0 : minimum_offset;
+        // A wider span needs the original JavaScript run splitter. It is an
+        // ordinary unsupported whole attempt, not malformed native state.
+        if (maximum_offset - content_base > MAX_DELTA) { return 0; }
     }
     const uint64_t byte_length = 16u + (uint64_t)score_count * 4u + (uint64_t)count * 8u;
     if (!score_count || score_count >= MAX_SCORE_COUNT || byte_length >= (uint64_t)count * 12u) { return 0; }
@@ -152,5 +168,35 @@ int32_t encode_record_fields(
         output_lengths[row] = (uint16_t)lengths[unique];
     }
     __builtin_memcpy(output_keys, keys, (size_t)count * 2u);
+    if (derive_base) { *(double *)(uintptr_t)base_ptr = content_base; }
     return (int32_t)byte_length;
+}
+
+EXPORT("encode_record_fields")
+int32_t encode_record_fields(
+    uint32_t count, uint32_t unique_count,
+    uint32_t row_ptr, uint32_t input_score_ptr,
+    uint32_t offset_ptr, uint32_t length_ptr,
+    double content_base,
+    uint32_t slot_ptr, uint32_t slot_count,
+    uint32_t dictionary_ptr, uint32_t key_ptr,
+    uint32_t output_ptr, uint32_t output_capacity
+) {
+    return encode_fields(count, unique_count, row_ptr, input_score_ptr,
+        offset_ptr, length_ptr, content_base, slot_ptr, slot_count,
+        dictionary_ptr, key_ptr, output_ptr, output_capacity, 0u, 0u);
+}
+
+EXPORT("encode_whole_record_fields")
+int32_t encode_whole_record_fields(
+    uint32_t count, uint32_t unique_count,
+    uint32_t row_ptr, uint32_t input_score_ptr,
+    uint32_t offset_ptr, uint32_t length_ptr,
+    uint32_t slot_ptr, uint32_t slot_count,
+    uint32_t dictionary_ptr, uint32_t key_ptr,
+    uint32_t output_ptr, uint32_t output_capacity, uint32_t base_ptr
+) {
+    return encode_fields(count, unique_count, row_ptr, input_score_ptr,
+        offset_ptr, length_ptr, 0.0, slot_ptr, slot_count,
+        dictionary_ptr, key_ptr, output_ptr, output_capacity, 1u, base_ptr);
 }

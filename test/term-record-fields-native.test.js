@@ -31,7 +31,7 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 
 const wasmUrl = new URL('../ext/lib/term-record-fields.wasm', import.meta.url)
 const wasmBytes = readFileSync(wasmUrl)
-const wasmSha256 = '8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a'
+const wasmSha256 = '1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9'
 const nativeCompile = WebAssembly.compile
 const NativeModule = WebAssembly.Module
 const NativeMemory = WebAssembly.Memory
@@ -256,8 +256,8 @@ afterEach(() => {
 })
 
 describe('native record-field asset and initialization', () => {
-    test('uses the reviewed kernel and waits for the real asset without eager import-time fetch', async () => {
-        expect(wasmBytes.byteLength).toBe(1753)
+    test('uses the staged ABI2 kernel and waits for the real asset without eager import-time fetch', async () => {
+        expect(wasmBytes.byteLength).toBe(1860)
         expect(createHash('sha256').update(wasmBytes).digest('hex')).toBe(wasmSha256)
         const helper = await loadHelper()
         expect(fetchMock).not.toHaveBeenCalled()
@@ -313,7 +313,7 @@ describe('native record-field asset and initialization', () => {
                 } else {
                     exports.record_fields_abi_version = () => {
                         if (failure === 'throwing ABI') { throw new Error('Controlled ABI failure') }
-                        return 2
+                        return 1
                     }
                 }
             },

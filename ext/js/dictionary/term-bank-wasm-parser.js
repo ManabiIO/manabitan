@@ -29,6 +29,14 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+/* eslint-disable @stylistic/semi */
+import {createOwnedPreparedTermRecordPlan, createOwnedWholePreparedLookupIndexes} from './term-record-prepared-fields.js'
+
+/* eslint-disable @typescript-eslint/unbound-method -- Intrinsic Map operations are used only with explicit receivers. */
+const preparedMapGet = Map.prototype.get
+const preparedMapSize = Object.getOwnPropertyDescriptor(Map.prototype, 'size')?.get
+/* eslint-enable @typescript-eslint/unbound-method */
+/* eslint-enable @stylistic/semi */
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -3742,6 +3750,8 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                     data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
                     registerOwnedTermContent(chunk?.contentBytesBuffer)
                 );
+                // eslint-disable-next-line @stylistic/semi
+                renewWorkerPreparedLookupMetadata(chunk, /** @type {number} */ (data.rowCount))
                 resolve({
                     chunk,
                     profile,
@@ -4099,6 +4109,75 @@ function tryProjectNativeGlossaryImagePath(row, source) {
     return getImageMediaTypeFromFileName(path) === null ? null : [path];
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * A real worker message has already passed structured clone, which cannot
+ * carry proxies or accessors. Renew only its whole-range ordinary metadata,
+ * before the chunk is exposed to consumers. This is deliberately local to
+ * the receiver; there is no exported API which brands an arbitrary map.
+ * Payload views are retained, not copied or validated once for later reuse.
+ * @param {TermBankColumnChunk|null} chunk
+ * @param {number} count
+ * @returns {void}
+ */
+function renewWorkerPreparedLookupMetadata(chunk, count) {
+    if (chunk === null || Object.getPrototypeOf(chunk) !== Object.prototype) { return }
+    try {
+        const countDescriptor = Object.getOwnPropertyDescriptor(chunk, 'rowCount')
+        const mapDescriptor = Object.getOwnPropertyDescriptor(chunk, 'preparedLookupIndexes')
+        if (
+            typeof countDescriptor === 'undefined' || !('value' in countDescriptor) || countDescriptor.value !== count ||
+            typeof mapDescriptor === 'undefined' || !('value' in mapDescriptor) || mapDescriptor.writable !== true
+        ) { return }
+        /** @type {unknown} */
+        const map = mapDescriptor.value
+        if (preparedMapSize?.call(map) !== 1) { return }
+        /** @type {unknown} */
+        const entry = preparedMapGet.call(map, `0:${count}`)
+        if (typeof entry !== 'object' || entry === null || Object.getPrototypeOf(entry) !== Object.prototype) { return }
+        const bytesDescriptor = Object.getOwnPropertyDescriptor(entry, 'bytes')
+        const planDescriptor = Object.getOwnPropertyDescriptor(entry, 'preinternedPlan')
+        const routeDescriptor = Object.getOwnPropertyDescriptor(entry, 'routeFilter')
+        if (
+            typeof bytesDescriptor === 'undefined' || !('value' in bytesDescriptor) ||
+            typeof planDescriptor === 'undefined' || !('value' in planDescriptor) ||
+            (typeof routeDescriptor !== 'undefined' && !('value' in routeDescriptor))
+        ) { return }
+        /** @type {unknown} */
+        const sourcePlan = planDescriptor.value
+        if (typeof sourcePlan !== 'object' || sourcePlan === null || Object.getPrototypeOf(sourcePlan) !== Object.prototype) { return }
+        /** @type {Record<string, unknown>} */
+        const columns = {}
+        for (const key of ['stringLengths', 'stringOffsets', 'stringHashes', 'stringsBuffer', 'expressionIndexes', 'readingIndexes']) {
+            const descriptor = Object.getOwnPropertyDescriptor(sourcePlan, key)
+            if (typeof descriptor === 'undefined' || !('value' in descriptor)) { return }
+            columns[key] = descriptor.value
+        }
+        const values = /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (/** @type {unknown} */ (columns))
+        const plan = createOwnedPreparedTermRecordPlan(values.stringLengths, values.stringOffsets, values.stringHashes, values.stringsBuffer, values.expressionIndexes, values.readingIndexes)
+        /** @type {unknown} */
+        const bytesValue = bytesDescriptor.value
+        /** @type {unknown} */
+        const routeValue = routeDescriptor?.value
+        const replacement = createOwnedWholePreparedLookupIndexes(
+            count,
+            /** @type {Uint8Array} */ (bytesValue),
+            plan,
+            /** @type {Uint32Array|undefined} */ (routeValue),
+            typeof routeDescriptor !== 'undefined',
+        )
+        if (replacement === null) { return }
+        const chunkPlan = Object.getOwnPropertyDescriptor(chunk, 'termRecordPreinternedPlan')
+        if (typeof chunkPlan !== 'undefined' && 'value' in chunkPlan && chunkPlan.value === sourcePlan && chunkPlan.writable === true) {
+            chunk.termRecordPreinternedPlan = plan
+        }
+        chunk.preparedLookupIndexes = replacement
+    } catch {
+        // Malformed messages retain the existing downstream validation path.
+    }
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
@@ -4169,37 +4248,47 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
             },
         };
     });
-    const stablePlan = {
-        stringLengths: new Uint16Array(plan.stringLengths),
-        stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
+    /* eslint-disable @stylistic/semi */
+    const stablePlan = createOwnedPreparedTermRecordPlan(
+        new Uint16Array(plan.stringLengths),
+        chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             new Uint32Array(stringOffsets),
-        stringHashes: chunk.preparedLookupIndexes instanceof Map ?
+        chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             (
                 plan.stringHashes instanceof Uint32Array ?
                     new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: ownedStrings,
-        expressionIndexes: new Uint32Array(plan.expressionIndexes),
-        readingIndexes: new Uint32Array(plan.readingIndexes),
-    };
+        ownedStrings,
+        new Uint32Array(plan.expressionIndexes),
+        new Uint32Array(plan.readingIndexes),
+    )
+    let copiedEntryCount = 0
+    let copiedKey = ''
+    /** @type {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} */
+    let copiedEntry = null
+    /* eslint-enable @stylistic/semi */
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
     let preparedLookupIndexes;
     if (chunk.preparedLookupIndexes instanceof Map) {
         preparedLookupIndexes = new Map();
         for (const [key, prepared] of chunk.preparedLookupIndexes) {
-            preparedLookupIndexes.set(key, {
+            preparedLookupIndexes.set(key, copiedEntry = {
                 bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
                     new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,
                 ...(prepareLookupRoute ? {routeFilter: buildTermLookupFilter(prepared.preinternedPlan.stringHashes)} : {}),
             });
+            /* eslint-disable @stylistic/semi */
+            ++copiedEntryCount
+            copiedKey = key
+            /* eslint-enable @stylistic/semi */
         }
     }
-    return {
+    const result = {
         ...chunk,
         expressionBytesList: chunk.expressionBytesList.map((bytes) => new Uint8Array(bytes)),
         readingBytesList: chunk.readingBytesList.map((bytes) => new Uint8Array(bytes)),
@@ -4223,6 +4312,20 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
     };
+    /* eslint-disable @stylistic/semi */
+    // Inspect only the fresh result and copied entry. In particular this does
+    // not add a rowCount getter read on a foreign source chunk or brand the
+    // foreign prepared plan retained by the existing non-whole branch.
+    /** @type {unknown} */
+    const count = Object.getOwnPropertyDescriptor(result, 'rowCount')?.value
+    if (copiedEntryCount === 1 && copiedEntry !== null && copiedEntry.preinternedPlan === stablePlan && typeof count === 'number' && copiedKey === `0:${count}`) {
+        const route = Object.getOwnPropertyDescriptor(copiedEntry, 'routeFilter')
+        /** @type {unknown} */
+        const routeValue = route?.value
+        result.preparedLookupIndexes = createOwnedWholePreparedLookupIndexes(count, copiedEntry.bytes, stablePlan, /** @type {Uint32Array|undefined} */ (routeValue), typeof route !== 'undefined') ?? preparedLookupIndexes
+    }
+    return result
+    /* eslint-enable @stylistic/semi */
 }
 
 /**

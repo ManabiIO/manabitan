@@ -49,10 +49,11 @@ const widths = {Uint32Array: 4, Int32Array: 4, Float64Array: 8}
 /** @typedef {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: References}} RecordChunk */
 /** @typedef {(chunk: RecordChunk, count: number) => References|null} PrivateReferences */
 /** @typedef {{count: number, uniqueCount: number, indexes: Column, scores: Column, offsets: Column, lengths: Column}} Input */
-/** @typedef {{rows: number, scores: number, offsets: number, lengths: number, slots: number, dictionary: number, keys: number, output: number, outputCapacity: number, slotCount: number, scoreCapacity: number, end: number}} Layout */
+/** @typedef {{rows: number, scores: number, offsets: number, lengths: number, slots: number, dictionary: number, keys: number, output: number, outputCapacity: number, slotCount: number, scoreCapacity: number, base: number, end: number}} Layout */
 /** @typedef {(...args: number[]) => number} NativeEncode */
-/** @typedef {{memory: WebAssembly.Memory, encode: NativeEncode}} NativeState */
-/** @typedef {{nativeCalls: number, nativeRows: number, nativeAttempts: number, inputCopiedBytes: number, outputCopiedBytes: number, tableBytesRequested: number, memoryGrowthBytes: number, maximumLinearMemoryBytes: number, maximumScratchBytes: number, declines: Record<string, number>}} RecordFieldDiagnostics */
+/** @typedef {{memory: WebAssembly.Memory, encode: NativeEncode, encodeWhole: NativeEncode}} NativeState */
+/** @typedef {{recordFields: Uint8Array|null, contentOffsetBase: number, copied: boolean}} WholeRecordFieldAttempt */
+/** @typedef {{nativeCalls: number, nativeRows: number, nativeAttempts: number, wholeNativeCalls: number, wholeNativeRows: number, wholeNativeAttempts: number, inputCopiedBytes: number, outputCopiedBytes: number, tableBytesRequested: number, memoryGrowthBytes: number, maximumLinearMemoryBytes: number, maximumScratchBytes: number, declines: Record<string, number>, wholeAdmissionDeclines: Record<string, number>, wholeCopiedDeclines: Record<string, number>}} RecordFieldDiagnostics */
 
 /**
  * Missing private-buffer or resizability intrinsics select the JavaScript path.
@@ -61,6 +62,23 @@ const widths = {Uint32Array: 4, Int32Array: 4, Float64Array: 8}
  */
 function supported() {
     return littleEndian && typeof privateByteLength === 'function' && typeof privateResizable === 'function' && Object.values(typedGetters).every((getter) => typeof getter === 'function') && typeof WebAssembly === 'object' && typeof WebAssembly.Module === 'function' && typeof WebAssembly.compile === 'function' && typeof WebAssembly.Memory === 'function' && typeof WebAssembly.Instance === 'function'
+}
+
+/**
+ * The existing private selector and the post-encode reference predicate use
+ * ordinary length/buffer reads. A fused attempt must reject inherited hooks
+ * before calling that selector, so a fallback cannot move their callbacks.
+ * @returns {boolean}
+ */
+function ordinaryFieldViewAccessIsIntrinsic() {
+    for (const prototype of Object.values(prototypes)) {
+        if (Object.getPrototypeOf(prototype) !== typedPrototype) { return false }
+        for (const key of ['length', 'buffer']) {
+            if (Object.hasOwn(prototype, key)) { return false }
+        }
+    }
+    return Object.getOwnPropertyDescriptor(typedPrototype, 'length')?.get === typedGetters.length &&
+    Object.getOwnPropertyDescriptor(typedPrototype, 'buffer')?.get === typedGetters.buffer
 }
 
 /**
@@ -133,9 +151,10 @@ function selectInput(chunk, base, privateReferences) {
  * All byte counts are bounded before memory growth or the first input copy.
  * @param {number} count
  * @param {number} uniqueCount
+ * @param {boolean} whole
  * @returns {Layout|null}
  */
-function createLayout(count, uniqueCount) {
+function createLayout(count, uniqueCount, whole) {
     const scoreCapacity = Math.min(count, 65535)
     let slotCount = 2
     while (slotCount < scoreCapacity * 2) { slotCount *= 2 }
@@ -163,6 +182,7 @@ function createLayout(count, uniqueCount) {
         outputCapacity: count * 12,
         slotCount,
         scoreCapacity,
+        base: whole ? allocate(8, 8) : 0,
         end: cursor,
     }
     return Number.isSafeInteger(cursor) && cursor <= MAXIMUM_PAGES * PAGE_BYTES ? layout : null
@@ -179,6 +199,9 @@ class ImportRecordFieldEncoder {
     /** @type {RecordFieldDiagnostics} */
     #diagnostics
 
+    /** @type {WeakMap<WholeRecordFieldAttempt, {reason: string|null, committed: boolean}>} */
+    #wholeOutcomes = new WeakMap()
+
     /** @param {NativeState} state */
     constructor(state) {
         /** @type {NativeState|null} */
@@ -188,6 +211,9 @@ class ImportRecordFieldEncoder {
             nativeCalls: 0,
             nativeRows: 0,
             nativeAttempts: 0,
+            wholeNativeCalls: 0,
+            wholeNativeRows: 0,
+            wholeNativeAttempts: 0,
             inputCopiedBytes: 0,
             outputCopiedBytes: 0,
             tableBytesRequested: 0,
@@ -195,6 +221,8 @@ class ImportRecordFieldEncoder {
             maximumLinearMemoryBytes: state.memory.buffer.byteLength,
             maximumScratchBytes: 0,
             declines: {},
+            wholeAdmissionDeclines: {},
+            wholeCopiedDeclines: {},
         }
     }
 
@@ -207,21 +235,73 @@ class ImportRecordFieldEncoder {
      * @returns {Uint8Array|null}
      */
     tryEncode(chunk, base, privateReferences) {
+        return this.#tryEncode(chunk, base, privateReferences, null, null, null)
+    }
+
+    /**
+     * The first native validation pass also derives the whole run's base.
+     * A copied decline is explicit so the store cannot repeat these same four
+     * copies on an identical unsplit fallback. Real split runs remain eligible.
+     * @param {RecordChunk} chunk
+     * @param {number} count
+     * @param {PrivateReferences} privateReferences
+     * @param {() => boolean} preparedAdmission Refreshed after the private selector.
+     * @returns {WholeRecordFieldAttempt}
+     */
+    tryEncodeWhole(chunk, count, privateReferences, preparedAdmission) {
+        const attempt = {recordFields: /** @type {Uint8Array|null} */ (null), contentOffsetBase: 0, copied: false}
+        this.#wholeOutcomes.set(attempt, {reason: null, committed: false})
+        attempt.recordFields = this.#tryEncode(chunk, 0, privateReferences, attempt, count, preparedAdmission)
+        return attempt
+    }
+
+    /**
+     * Commit a planning decline as the final outcome only when the exact
+     * copied, unsplit attempt supplies this field call's JavaScript fallback.
+     * Pre-copy admission and real split failures remain separately visible;
+     * the ordinary helper owns the final outcomes of their actual field calls.
+     * @param {WholeRecordFieldAttempt} attempt
+     * @returns {void}
+     */
+    commitWholeFallback(attempt) {
+        const outcome = this.#wholeOutcomes.get(attempt)
+        if (typeof outcome === 'undefined' || outcome.committed || outcome.reason === null || !attempt.copied || attempt.recordFields !== null) { return }
+        outcome.committed = true
+        const declines = this.#diagnostics.declines
+        declines[outcome.reason] = (declines[outcome.reason] ?? 0) + 1
+    }
+
+    /**
+     * @param {RecordChunk} chunk
+     * @param {number} base
+     * @param {PrivateReferences} privateReferences
+     * @param {WholeRecordFieldAttempt|null} whole
+     * @param {number|null} expectedCount
+     * @param {(() => boolean)|null} preparedAdmission
+     * @returns {Uint8Array|null}
+     */
+    #tryEncode(chunk, base, privateReferences, whole, expectedCount, preparedAdmission) {
         const state = this.#state
-        if (state === null) { return this.#decline('unavailable') }
+        if (state === null) { return this.#decline('unavailable', false, whole) }
+        if (whole !== null && !ordinaryFieldViewAccessIsIntrinsic()) { return this.#decline('view-prototype', false, whole) }
         let input
         try {
             input = selectInput(chunk, base, privateReferences)
         } catch {
-            return this.#decline('guard-exception')
+            return this.#decline('guard-exception', false, whole)
         }
-        if (input === null) { return this.#decline('eligibility') }
+        if (input === null || (expectedCount !== null && input.count !== expectedCount)) { return this.#decline('eligibility', false, whole) }
+        try {
+            if (whole !== null && (!ordinaryFieldViewAccessIsIntrinsic() || preparedAdmission?.() !== true)) { return this.#decline('prepared-metadata', false, whole) }
+        } catch {
+            return this.#decline('guard-exception', false, whole)
+        }
         for (const column of [input.indexes, input.scores, input.offsets, input.lengths]) {
-            if (column.buffer === state.memory.buffer) { return this.#decline('native-memory-alias') }
+            if (column.buffer === state.memory.buffer) { return this.#decline('native-memory-alias', false, whole) }
         }
         const {count, uniqueCount} = input
-        const layout = createLayout(count, uniqueCount)
-        if (layout === null) { return this.#decline('memory-bound') }
+        const layout = createLayout(count, uniqueCount, whole !== null)
+        if (layout === null) { return this.#decline('memory-bound', false, whole) }
         const diagnostics = this.#diagnostics
         diagnostics.maximumScratchBytes = Math.max(diagnostics.maximumScratchBytes, layout.slotCount * 4 + layout.scoreCapacity * 4 + count * 2)
         const beforeBytes = state.memory.buffer.byteLength
@@ -231,13 +311,14 @@ class ImportRecordFieldEncoder {
                 state.memory.grow(requiredPages - beforeBytes / PAGE_BYTES)
             }
         } catch {
-            return this.#decline('memory-growth', true)
+            return this.#decline('memory-growth', true, whole)
         }
         const afterBytes = state.memory.buffer.byteLength
         diagnostics.memoryGrowthBytes += afterBytes - beforeBytes
         diagnostics.maximumLinearMemoryBytes = Math.max(diagnostics.maximumLinearMemoryBytes, afterBytes)
         try {
             const bytes = new Uint8Array(state.memory.buffer)
+            if (whole !== null) { whole.copied = true }
             /**
              * @param {Column} column
              * @param {number} size
@@ -253,50 +334,76 @@ class ImportRecordFieldEncoder {
             copy(input.offsets, uniqueCount * 8, layout.offsets)
             copy(input.lengths, uniqueCount * 4, layout.lengths)
         } catch {
-            return this.#decline('input-copy', true)
+            return this.#decline('input-copy', true, whole)
         }
         ++diagnostics.nativeAttempts
+        if (whole !== null) { ++diagnostics.wholeNativeAttempts }
         diagnostics.tableBytesRequested += layout.slotCount * 4
         let result
         try {
-            result = state.encode(
-                count,
-                uniqueCount,
-                layout.rows,
-                layout.scores,
-                layout.offsets,
-                layout.lengths,
-                base,
-                layout.slots,
-                layout.slotCount,
-                layout.dictionary,
-                layout.keys,
-                layout.output,
-                layout.outputCapacity,
-            )
+            result = whole === null ?
+state.encode(
+    count,
+    uniqueCount,
+    layout.rows,
+    layout.scores,
+    layout.offsets,
+    layout.lengths,
+    base,
+    layout.slots,
+    layout.slotCount,
+    layout.dictionary,
+    layout.keys,
+    layout.output,
+    layout.outputCapacity,
+) :
+state.encodeWhole(
+    count,
+    uniqueCount,
+    layout.rows,
+    layout.scores,
+    layout.offsets,
+    layout.lengths,
+    layout.slots,
+    layout.slotCount,
+    layout.dictionary,
+    layout.keys,
+    layout.output,
+    layout.outputCapacity,
+    layout.base,
+)
         } catch {
-            return this.#decline('native-trap', true)
+            return this.#decline('native-trap', true, whole)
         }
-        if (result === 0) { return this.#decline('unsupported-compact') }
+        if (result === 0) { return this.#decline('unsupported-compact', false, whole) }
         if (!Number.isInteger(result) || result < 20 || result > layout.outputCapacity || result >= count * 12) {
-            return this.#decline('native-return', true)
+            return this.#decline('native-return', true, whole)
         }
         try {
+            if (whole !== null) {
+                const derivedBase = new Float64Array(state.memory.buffer, layout.base, 1)[0]
+                if (!Number.isSafeInteger(derivedBase) || derivedBase < 0) { return this.#decline('native-base', true, whole) }
+                whole.contentOffsetBase = derivedBase
+            }
             const header = new Uint32Array(state.memory.buffer, layout.output, 4)
             const scoreCount = header[2]
             if (
                 header[0] !== COMPACT_MAGIC || header[1] !== count || header[3] !== 2 ||
                 scoreCount === 0 || scoreCount >= 65535 || scoreCount > layout.scoreCapacity ||
                 result !== 16 + scoreCount * 4 + count * 8
-            ) { return this.#decline('native-header', true) }
+            ) { return this.#decline('native-header', true, whole) }
             const output = new Uint8Array(result)
             output.set(new Uint8Array(state.memory.buffer, layout.output, result))
             ++diagnostics.nativeCalls
             diagnostics.nativeRows += count
-            diagnostics.outputCopiedBytes += result
+            if (whole !== null) {
+                ++diagnostics.wholeNativeCalls
+                diagnostics.wholeNativeRows += count
+            }
+            diagnostics.outputCopiedBytes += result + (whole === null ? 0 : 8)
             return output
         } catch {
-            return this.#decline('output-copy', true)
+            return this.#decline('output-copy', true, whole)
         }
     }
 
@@ -307,17 +414,25 @@ class ImportRecordFieldEncoder {
 
     /** @returns {RecordFieldDiagnostics} */
     getDiagnostics() {
-        return {...this.#diagnostics, declines: {...this.#diagnostics.declines}}
+        const {declines, wholeAdmissionDeclines, wholeCopiedDeclines} = this.#diagnostics
+        return {...this.#diagnostics, declines: {...declines}, wholeAdmissionDeclines: {...wholeAdmissionDeclines}, wholeCopiedDeclines: {...wholeCopiedDeclines}}
     }
 
     /**
      * @param {string} reason
      * @param {boolean} [disable]
+     * @param {WholeRecordFieldAttempt|null} [whole]
      * @returns {null}
      */
-    #decline(reason, disable = false) {
-        const declines = this.#diagnostics.declines
+    #decline(reason, disable = false, whole = null) {
+        const declines = whole === null ?
+this.#diagnostics.declines :
+            (whole.copied ? this.#diagnostics.wholeCopiedDeclines : this.#diagnostics.wholeAdmissionDeclines)
         declines[reason] = (declines[reason] ?? 0) + 1
+        if (whole !== null) {
+            const outcome = this.#wholeOutcomes.get(whole)
+            if (typeof outcome !== 'undefined') { outcome.reason = reason }
+        }
         if (disable) { this.dispose() }
         return null
     }
@@ -339,9 +454,10 @@ export async function createImportRecordFieldEncoder() {
             const exports = WebAssembly.Module.exports(value)
             if (
                 imports.length !== 1 || imports[0].module !== 'env' || imports[0].name !== 'memory' || imports[0].kind !== 'memory' ||
-                exports.length !== 2 ||
+                exports.length !== 3 ||
                 !exports.some((item) => item.name === 'record_fields_abi_version' && item.kind === 'function') ||
-                !exports.some((item) => item.name === 'encode_record_fields' && item.kind === 'function')
+                !exports.some((item) => item.name === 'encode_record_fields' && item.kind === 'function') ||
+                !exports.some((item) => item.name === 'encode_whole_record_fields' && item.kind === 'function')
             ) { throw new Error('Unexpected native record-field interface') }
             return value
         })
@@ -349,8 +465,9 @@ export async function createImportRecordFieldEncoder() {
         const instance = new WebAssembly.Instance(module, {env: {memory}})
         const abi = instance.exports.record_fields_abi_version
         const encode = instance.exports.encode_record_fields
-        if (typeof abi !== 'function' || abi() !== 1 || typeof encode !== 'function') { return null }
-        return new ImportRecordFieldEncoder({memory, encode: /** @type {NativeEncode} */ (encode)})
+        const encodeWhole = instance.exports.encode_whole_record_fields
+        if (typeof abi !== 'function' || abi() !== 2 || typeof encode !== 'function' || typeof encodeWhole !== 'function') { return null }
+        return new ImportRecordFieldEncoder({memory, encode: /** @type {NativeEncode} */ (encode), encodeWhole: /** @type {NativeEncode} */ (encodeWhole)})
     } catch {
         return null
     }
