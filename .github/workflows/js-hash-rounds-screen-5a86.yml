@@ -1,0 +1,115 @@
+name: Large JavaScript hash qualification 5a86
+
+on:
+  push:
+    branches: ['perf/js-hash-rounds-20261128-5a86']
+    paths:
+      - '.github/workflows/js-hash-rounds-screen-5a86.yml'
+      - 'dev/perf/js-hash-rounds-screen-5a86.py'
+      - 'ext/js/dictionary/term-key-hash.js'
+      - 'test/term-key-hash.test.js'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: js-hash-rounds-screen-5a86-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  PERF_CANDIDATE: ${{ github.sha }}
+
+jobs:
+  validate:
+    name: Validate exact JavaScript candidate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact source and unchanged qualification guards
+        run: |
+          mkdir -p builds/perf/js-hash-rounds-validation
+          python dev/perf/js-hash-rounds-screen-5a86.py check --candidate "$PERF_CANDIDATE" 2>&1 | tee builds/perf/js-hash-rounds-validation/source.log
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee builds/perf/js-hash-rounds-validation/observers.log
+      - name: Install pinned native toolchain required by the unit suite
+        run: |
+          sudo apt-get update 2>&1 | tee builds/perf/js-hash-rounds-validation/toolchain.log
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee -a builds/perf/js-hash-rounds-validation/toolchain.log
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/js-hash-rounds-validation/native-rebuild.log
+      - name: Validate JavaScript and TypeScript
+        run: |
+          npm run test:js 2>&1 | tee builds/perf/js-hash-rounds-validation/lint.log
+          npm run test:ts 2>&1 | tee builds/perf/js-hash-rounds-validation/types.log
+      - name: Run the complete unit suite
+        run: npm run test:unit 2>&1 | tee builds/perf/js-hash-rounds-validation/unit.log
+      - name: Validate every build target and study formatting
+        run: |
+          npm run test:build 2>&1 | tee builds/perf/js-hash-rounds-validation/build.log
+          npx prettier .github/workflows/js-hash-rounds-screen-5a86.yml dev/perf/import-experiments-20260914.md --check 2>&1 | tee builds/perf/js-hash-rounds-validation/format.log
+      - name: Retain validation receipts, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: js-hash-rounds-validation-5a86
+          path: builds/perf/js-hash-rounds-validation
+          if-no-files-found: warn
+          retention-days: 14
+
+  screen:
+    name: ${{ matrix.dictionary }} complete import (${{ matrix.order }})
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install lockfile Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run all registered timing, media, and memory observations
+        run: |
+          python dev/perf/js-hash-rounds-screen-5a86.py run \
+            --candidate "$PERF_CANDIDATE" --dictionary "$PERF_DICTIONARY" --order "$PERF_ORDER" \
+            --evidence "builds/perf/js-hash-rounds-5a86/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Print complete or partial evidence for independent review
+        if: always()
+        run: |
+          python dev/perf/js-hash-rounds-screen-5a86.py summary \
+            --evidence "builds/perf/js-hash-rounds-5a86/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: js-hash-rounds-${{ matrix.dictionary }}-${{ matrix.order }}-5a86
+          path: |
+            builds/perf/js-hash-rounds-5a86/${{ matrix.dictionary }}-${{ matrix.order }}
+            builds/perf/js-hash-rounds-5a86/${{ matrix.dictionary }}-${{ matrix.order }}-driver
+          if-no-files-found: error
+          retention-days: 14

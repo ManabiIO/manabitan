@@ -132,10 +132,15 @@ function hashLargeTermKeyByteRange(bytes, start, end) {
     let v3 = HASH_SEED;
     let v4 = (HASH_SEED - PRIME1) >>> 0;
     do {
-        v1 = round(v1, view.getUint32(offset, true)); offset += 4;
-        v2 = round(v2, view.getUint32(offset, true)); offset += 4;
-        v3 = round(v3, view.getUint32(offset, true)); offset += 4;
-        v4 = round(v4, view.getUint32(offset, true)); offset += 4;
+        // Shifts and imul retain the same low 32 bits with signed accumulators.
+        v1 += Math.imul(view.getUint32(offset, true), PRIME2);
+        v1 = Math.imul((v1 << 13) | (v1 >>> 19), PRIME1); offset += 4;
+        v2 += Math.imul(view.getUint32(offset, true), PRIME2);
+        v2 = Math.imul((v2 << 13) | (v2 >>> 19), PRIME1); offset += 4;
+        v3 += Math.imul(view.getUint32(offset, true), PRIME2);
+        v3 = Math.imul((v3 << 13) | (v3 >>> 19), PRIME1); offset += 4;
+        v4 += Math.imul(view.getUint32(offset, true), PRIME2);
+        v4 = Math.imul((v4 << 13) | (v4 >>> 19), PRIME1); offset += 4;
     } while (offset <= limit);
     let hash = (rotateLeft(v1, 1) + rotateLeft(v2, 7) + rotateLeft(v3, 12) + rotateLeft(v4, 18)) >>> 0;
     hash = (hash + length) >>> 0;

@@ -170,6 +170,17 @@ function makePayload(length) {
 }
 
 describe('stable term lookup key and integrity hashes', () => {
+    // Upstream XXH32 0.8.3, seed 0x811c9dc5. Repeated high-bit words exercise
+    // signed accumulator carries independently of the mixed-byte vectors.
+    test.each([
+        [1024, 0xff, 3261496489],
+        [1039, 0xff, 3711063955],
+        [4096, 0x80, 1444614423],
+        [65537, 0xff, 2137865208],
+    ])('matches upstream XXH32 for %i bytes filled with %i', (length, fill, expected) => {
+        expect(hashTermKeyBytes(new Uint8Array(length).fill(fill))).toBe(expected);
+    });
+
     test.each(VECTORS)('matches upstream XXH32 at %i bytes', (length, expected) => {
         const payload = makePayload(length);
         expect(hashTermKeyBytes(payload)).toBe(expected);
