@@ -1,0 +1,139 @@
+name: Descriptor queue corrected-fixture validation eef4
+
+on:
+  push:
+    branches: [experiment/import-descriptor-queue-20261128-eef4]
+    # Product/evidence commits alone must not reacquire a frozen cohort.
+    paths: [.github/workflows/import-descriptor-validation-eef4.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-descriptor-validation-eef4-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  # Only the failure-ownership fixture differs from the measured runtime.
+  PERF_RUNTIME: 88e5022923cd5f8506c6831e25bbf6649be33379
+  PERF_CANDIDATE: 2975b51fdfcb745c5bf597d831a76be0399cb850
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Complete validation with corrected ownership fixtures
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    env:
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_CANDIDATE }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Bind validation to the frozen candidate and unchanged harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/descriptor-queue-validation
+          [[ "$PERF_BASELINE" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git fetch --no-tags origin "$PERF_BASELINE" "$PERF_RUNTIME"
+          test "$(git rev-parse HEAD:ext)" = "$(git rev-parse "${PERF_RUNTIME}:ext")"
+          test "$(git rev-parse HEAD:dev)" = "$(git rev-parse "${PERF_RUNTIME}:dev")"
+          git diff --exit-code "$PERF_RUNTIME" HEAD -- . \
+            ':(exclude)test/fixtures/term-write-rejection-probe.js' \
+            ':(exclude)test/term-write-rejection-ownership.test.js' \
+            ':(exclude).github/workflows/import-descriptor-queue-eef4.yml'
+          git rev-parse HEAD 'HEAD^{tree}' > builds/descriptor-queue-validation/source.txt
+          git diff --name-only "$PERF_BASELINE" "$PERF_CANDIDATE" > builds/descriptor-queue-validation/changed-files.txt
+          git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
+            package.json package-lock.json .github/actions/setup/action.yml \
+            test/perf/dictionaries.lock.json test/e2e test/chromium dev/perf \
+            > builds/descriptor-queue-validation/frozen-harness.diff
+      - id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned dictionary WASM toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Run every validation gate and retain individual failures
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+          import time
+
+          output = pathlib.Path('builds/descriptor-queue-validation')
+          output.mkdir(parents=True, exist_ok=True)
+          baseline = os.environ['PERF_BASELINE']
+          candidate = os.environ['PERF_CANDIDATE']
+          changed = subprocess.check_output(
+              ['git', 'diff', '--name-only', '--diff-filter=ACMR', '-z', baseline, candidate],
+          ).decode().split('\0')
+          lint_files = [name for name in changed if name.endswith(('.js', '.mjs', '.ts'))]
+          if not lint_files:
+              raise RuntimeError('No changed JavaScript/TypeScript files to lint')
+          checks = [
+              ('pinned-native-rebuild', ['npm', 'run', 'build:dictionary-wasm', '--', '--check']),
+              ('qualification-observers', ['python3', '-m', 'unittest', 'discover', '-s', 'dev/perf/import-memory-20261125-a7f7', '-p', 'test_*.py']),
+              ('types-main', ['npm', 'run', 'test:ts:main']),
+              ('types-dev', ['npm', 'run', 'test:ts:dev']),
+              ('types-test', ['npm', 'run', 'test:ts:test']),
+              ('types-bench', ['npm', 'run', 'test:ts:bench']),
+              ('unit', ['npx', 'vitest', 'run', '--maxWorkers=2']),
+              ('unit-options', ['npx', 'vitest', 'run', '--config', 'test/data/vitest.options.config.json', '--maxWorkers=2']),
+              ('test-build', ['npm', 'run', 'test:build']),
+              ('build-all', ['npm', 'run', 'build', '--', '--all']),
+          ]
+          # Candidate-local directives cover its new semicolon-free sections;
+          # preserve all normal lint rules and avoid rewriting existing code.
+          # Match the bounded per-file command used in local validation.
+          checks[2:2] = [
+              (f'scoped-lint-{index:02d}', ['node', '--max-old-space-size=1536',
+                  'node_modules/eslint/bin/eslint.js', name])
+              for index, name in enumerate(lint_files)
+          ]
+          results = []
+          for name, command in checks:
+              started = time.monotonic()
+              with (output / f'{name}.log').open('wb') as log:
+                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+              record = {'name': name, 'command': command, 'exitCode': result.returncode,
+                        'elapsedSeconds': time.monotonic() - started}
+              results.append(record)
+              (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+              print(json.dumps(record), flush=True)
+          status = subprocess.check_output(['git', 'status', '--porcelain'], text=True)
+          (output / 'source-status.txt').write_text(status)
+          if status:
+              raise RuntimeError('Validation changed tracked or unignored source files')
+          sys.exit(1 if any(record['exitCode'] != 0 for record in results) else 0)
+          PY
+      - name: Preserve all validation results and built packages
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: descriptor-queue-eef4-validation-v2
+          path: |
+            builds/descriptor-queue-validation
+            builds/*.zip
+          if-no-files-found: error
+          retention-days: 30

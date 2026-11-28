@@ -1,10 +1,8 @@
 name: Frozen descriptor queue qualification eef4
 
-on:
-  push:
-    branches: [experiment/import-descriptor-queue-20261128-eef4]
-    # Product/evidence commits alone must not reacquire a frozen cohort.
-    paths: [.github/workflows/import-descriptor-queue-eef4.yml]
+# Original frozen cohort is retained in run46103114958.
+# Correcting validation fixtures must not acquire replacement timing observations.
+on: workflow_dispatch
 
 permissions:
   contents: read
@@ -44,7 +42,7 @@ jobs:
           [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
           git fetch --no-tags origin "$PERF_BASELINE"
-          git rev-parse HEAD HEAD^{tree} > builds/descriptor-queue-validation/source.txt
+          git rev-parse HEAD 'HEAD^{tree}' > builds/descriptor-queue-validation/source.txt
           git diff --name-only "$PERF_BASELINE" "$PERF_CANDIDATE" > builds/descriptor-queue-validation/changed-files.txt
           git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
             package.json package-lock.json .github/actions/setup/action.yml \
@@ -161,7 +159,7 @@ jobs:
           [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
           git fetch --no-tags origin "$PERF_CANDIDATE"
-          git rev-parse HEAD HEAD^{tree} "$PERF_CANDIDATE" "${PERF_CANDIDATE}^{tree}" > builds/descriptor-queue-context/sources.txt
+          git rev-parse HEAD 'HEAD^{tree}' "$PERF_CANDIDATE" "${PERF_CANDIDATE}^{tree}" > builds/descriptor-queue-context/sources.txt
           # This also freezes Python auditors, which the helper's JS/MJS/HTML
           # required_same expansion does not enumerate on its own.
           git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
