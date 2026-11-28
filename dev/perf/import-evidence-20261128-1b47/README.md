@@ -4,6 +4,8 @@ This branch preserves reproducible evidence for two small product proposals
 against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
 The bundles support component improvements; neither establishes a complete
 browser-import speedup. Product changes are on separate branches.
+Both product PRs remain held drafts. The completed browser results below retain
+the adverse timings and failed memory-coverage checks.
 
 | Proposal                                                                                                                                            | Product commit                             | Measured scope                                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -144,6 +146,27 @@ why the metric named `termRecordValidationMs` does not time the changed loop.
 The archive, member manifest and checksum are stored here as
 `score-remaining-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `3153e88443f1712e78d2ed500585b81baa738ff3e651c50b228e5f48257d06b8`.
+
+## Completed CRC browser results
+
+The [CRC browser addendum](crc-browser-addendum-README.md) preserves all three
+cohorts: 78 reports, 78 canonical receipts and 1,118 raw memory scan rows.
+JMdict and Jitendex are flat inactive-path controls with passing original gates.
+
+The active VNDB result is unfavorable on complete-import time: +4.643% paired
+median, +6.423% equal-work change and a retained +19.351% sixth pair. Baseline A2
+also exceeds the fixed memory sampling-gap limit, leaving that comparison
+unqualified.
+
+An added secondary analysis finds -4.049% median summed worker CRC-phase time,
+with identical work counts; its identical-code controls also improve. This is
+separate mechanism evidence, chosen while the cohort was running, and does not
+replace primary timing or qualification. PR #979 remains a held component
+proposal without a browser non-regression or merge-readiness claim.
+
+The archive, member manifest and checksum are stored here as
+`crc-browser-addendum-20261128-1b47.*`. Archive SHA-256:
+`84d5ae1f80c2a5ccfb2981c71eb335b4320d09ec19c649884fb512e5a561d8c5`.
 
 ## Why JMdict gains stayed small
 
