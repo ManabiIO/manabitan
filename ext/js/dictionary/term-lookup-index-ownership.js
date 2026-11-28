@@ -33,9 +33,18 @@ const sharedArrayBufferByteLengthDescriptor = typeof SharedArrayBuffer === 'func
     Object.getOwnPropertyDescriptor(SharedArrayBuffer.prototype, 'byteLength') :
     void 0
 const rowBindingNames = [
-    'rowCount', 'expressionBytesList', 'readingBytesList', 'contentBytesList', 'readingEqualsExpressionList',
-    'scoreList', 'sequenceList', 'termRecordPreinternedPlan', 'preparedLookupIndexes',
-    'contentDedupPlan', 'contentUniqueIndexList', 'contentBytesBuffer',
+    'rowCount',
+    'expressionBytesList',
+    'readingBytesList',
+    'contentBytesList',
+    'readingEqualsExpressionList',
+    'scoreList',
+    'sequenceList',
+    'termRecordPreinternedPlan',
+    'preparedLookupIndexes',
+    'contentDedupPlan',
+    'contentUniqueIndexList',
+    'contentBytesBuffer',
 ]
 const viewShadowNames = ['buffer', 'byteOffset', 'byteLength', 'length', 'constructor', 'subarray', 'slice', 'set', Symbol.iterator]
 const bufferShadowNames = ['byteLength', 'resizable', 'maxByteLength', 'constructor', 'transfer', 'transferToFixedLength']
@@ -181,8 +190,8 @@ function hasUnchangedOwner(witness, payloadBuffer, fieldsBuffer = null) {
     const {owner, indexes, bindings, plan, planBindings, contentPlan, mediaRows, emptyLists, entries} = witness
     if (
         !matchesBindings(owner, bindings) || !isPlainIndexMap(indexes) || indexes.size !== entries.length ||
-        getDataValue(owner, 'mediaRows') !== mediaRows || mediaRows.length !== 0 ||
-        emptyLists.some((list) => list.length !== 0) ||
+        getDataValue(owner, 'mediaRows') !== mediaRows || mediaRows.length > 0 ||
+        emptyLists.some((list) => list.length > 0) ||
         !hasDisjointDataViews(owner, payloadBuffer, false, fieldsBuffer) ||
         !matchesBindings(plan, planBindings) || !hasDisjointDataViews(plan, payloadBuffer, true, fieldsBuffer) ||
         (contentPlan !== null && !hasDisjointDataViews(contentPlan, payloadBuffer, true, fieldsBuffer))
@@ -223,8 +232,8 @@ export function registerOwnedTermLookupIndexes(chunk) {
     if (
         bindings === null || typeof plan !== 'object' || plan === null ||
         (contentPlan !== null && typeof contentPlan !== 'object') ||
-        !Array.isArray(mediaRows) || mediaRows.length !== 0 ||
-        emptyLists.some((list) => !Array.isArray(list) || list.length !== 0)
+        !Array.isArray(mediaRows) || mediaRows.length > 0 ||
+        emptyLists.some((list) => !Array.isArray(list) || list.length > 0)
     ) { return }
     const planBindings = getDataBindings(plan)
     if (planBindings === null) { return }
@@ -273,7 +282,7 @@ export function getTermLookupIndexConsumer(chunk, contentOffsets, contentLengths
         !consumerOrigins.has(chunk) ||
         getPlainViewBuffer(contentOffsets) === null || getPlainViewBuffer(contentLengths) === null ||
         !(contentOffsets instanceof Float64Array) || !(contentLengths instanceof Uint32Array) ||
-        contentOffsets.length !== 0 || contentLengths.length !== 0
+        contentOffsets.length > 0 || contentLengths.length > 0
     ) { return null }
     return chunk
 }
