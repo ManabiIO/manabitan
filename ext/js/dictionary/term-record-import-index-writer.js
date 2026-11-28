@@ -20,6 +20,7 @@ import {toError} from '../core/to-error.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
 const MAX_UNFLUSHED_BYTES = 16 * 1024 * 1024;
+const LOCAL_MAX_UNFLUSHED_BYTES = 8 * 1024 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
 
 /**
@@ -35,10 +36,10 @@ const WRITE_TIME_BUDGET_MS = 6;
  * Unsupported acquisition permits the established asynchronous writer fallback.
  * Once acquired, every failure belongs to this writer and must fail import.
  * @param {{createSyncAccessHandle?: () => Promise<SyncAccessHandle>}} fileHandle
- * @param {boolean} [periodicFlush=false] Only the dedicated I/O worker opts in.
+ * @param {boolean} [background=false] The dedicated I/O worker keeps its larger checkpoint interval.
  * @returns {Promise<SyncImportIndexWriter|null>}
  */
-export async function openSyncImportIndexWriter(fileHandle, periodicFlush = false) {
+export async function openSyncImportIndexWriter(fileHandle, background = false) {
     if (typeof fileHandle.createSyncAccessHandle !== 'function') {
         return null;
     }
@@ -55,24 +56,24 @@ export async function openSyncImportIndexWriter(fileHandle, periodicFlush = fals
         }
         throw error;
     }
-    return new SyncImportIndexWriter(access, periodicFlush);
+    return new SyncImportIndexWriter(access, background);
 }
 
 /** Ordered, bounded writes to an unpublished generation-bound index sidecar. */
 export class SyncImportIndexWriter {
     /**
      * @param {SyncAccessHandle} access
-     * @param {boolean} [periodicFlush=false]
+     * @param {boolean} [background=false]
      */
-    constructor(access, periodicFlush = false) {
+    constructor(access, background = false) {
         /** @type {SyncAccessHandle} */
         this._access = access;
         /** @type {number} */
         this._position = 0;
         /** @type {number} */
         this._unflushedBytes = 0;
-        /** @type {boolean} */
-        this._periodicFlush = periodicFlush;
+        /** @type {number} */
+        this._flushThresholdBytes = background ? MAX_UNFLUSHED_BYTES : LOCAL_MAX_UNFLUSHED_BYTES;
         /** @type {boolean} */
         this._closing = false;
         /** @type {boolean} */
@@ -275,8 +276,8 @@ export class SyncImportIndexWriter {
             offset += written;
             this._position += written;
             this._unflushedBytes += written;
-            if (this._periodicFlush && !this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
-                // Persist bounded batches while parser workers can still make progress.
+            if (!this._aborted && this._unflushedBytes >= this._flushThresholdBytes) {
+                // Persist bounded batches while parser/compression workers can still make progress.
                 // Successful close must also flush the final index header and tail.
                 this._access.flush();
                 this._unflushedBytes = 0;

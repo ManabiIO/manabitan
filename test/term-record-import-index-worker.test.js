@@ -353,9 +353,9 @@ describe('production import index worker', () => {
         expect(writer).toBeInstanceOf(SyncImportIndexWriter);
         expect(workerConstructor).toHaveBeenCalledTimes(1);
         await writer.write(new Uint8Array(18 * 1024 * 1024));
-        expect(access.flush).toHaveBeenCalledTimes(1);
+        expect(access.flush).toHaveBeenCalledTimes(3);
         await writer.close();
-        expect(access.flush).toHaveBeenCalledTimes(2);
+        expect(access.flush).toHaveBeenCalledTimes(4);
         await store._retireImportIndexWorker();
     });
 
@@ -378,13 +378,13 @@ describe('production import index worker', () => {
         expect(writer).toBeInstanceOf(remote ? WorkerImportIndexWriter : SyncImportIndexWriter);
         if (!remote) {
             await writer.write(new Uint8Array(18 * 1024 * 1024));
-            expect(local.flush).not.toHaveBeenCalled();
+            expect(local.flush).toHaveBeenCalledTimes(2);
         }
         await writer.close();
         await store.endImportSession();
         expect(workers).toHaveLength(remote ? 1 : 0);
         expect(store.getLastEndImportSessionMetrics()?.lookupIndexWorkerFileCount).toBe(remote ? 1 : 0);
-        expect(local.flush).toHaveBeenCalledTimes(remote ? 0 : 1);
+        expect(local.flush).toHaveBeenCalledTimes(remote ? 0 : 3);
     });
 
     test.each([void 0, null, -1, 1.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '1073741824'])(

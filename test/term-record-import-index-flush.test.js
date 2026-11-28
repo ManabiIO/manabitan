@@ -5,7 +5,6 @@ import {afterEach, describe, expect, test, vi} from 'vitest';
 import {safePerformance} from '../ext/js/core/safe-performance.js';
 import {openSyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 
-const FLUSH_INTERVAL_BYTES = 16 * 1024 * 1024;
 const MAX_WRITE_BYTES = 512 * 1024;
 
 /**
@@ -76,10 +75,11 @@ function createFile(capacity, options = {}) {
 
 /**
  * @param {ReturnType<typeof createFile>} file
+ * @param {boolean} background
  * @returns {Promise<NonNullable<Awaited<ReturnType<typeof openSyncImportIndexWriter>>>>}
  */
-async function writerFor(file) {
-    const writer = await openSyncImportIndexWriter({async createSyncAccessHandle() { return file.access; }}, true);
+async function writerFor(file, background) {
+    const writer = await openSyncImportIndexWriter({async createSyncAccessHandle() { return file.access; }}, background);
     if (writer === null) { throw new Error('Expected synchronous writer'); }
     return writer;
 }
@@ -97,30 +97,43 @@ afterEach(() => {
     vi.useRealTimers();
 });
 
-describe('bounded persistence of import index bytes', () => {
-    test('retains close-only persistence unless a dedicated worker opts in', async () => {
-        const file = createFile(2 * FLUSH_INTERVAL_BYTES);
-        const writer = await openSyncImportIndexWriter({async createSyncAccessHandle() { return file.access; }});
+describe.each([
+    {name: 'local', background: false, flushIntervalBytes: 8 * 1024 * 1024},
+    {name: 'worker', background: true, flushIntervalBytes: 16 * 1024 * 1024},
+])('bounded persistence of import index bytes ($name)', ({background, flushIntervalBytes}) => {
+    test('checkpoints at the boundary before later appends and still flushes the final header', async () => {
+        const file = createFile(flushIntervalBytes + 32);
+        const writer = await openSyncImportIndexWriter({async createSyncAccessHandle() { return file.access; }}, background ? true : void 0);
         if (writer === null) { throw new Error('Expected synchronous writer'); }
-        await writer.write(new Uint8Array(2 * FLUSH_INTERVAL_BYTES));
+        await writer.write(new Uint8Array(flushIntervalBytes - 1).fill(71));
         expect(file.flushes).toHaveLength(0);
-        await writer.close();
+        await writer.write(Uint8Array.of(72));
         expect(file.flushes).toHaveLength(1);
+        expect(file.flushes[0].writtenBytes).toBe(flushIntervalBytes);
+        expect(file.closes).toBe(0);
+        await writer.write(Uint8Array.of(73, 74));
+        await writer.seek(0);
+        await writer.write(Uint8Array.of(9, 8, 7));
+        await writer.close();
+        expect(file.flushes).toHaveLength(2);
+        expect(file.flushes[1].bytes).toBe(5);
+        expect(file.flushes[1].header.subarray(0, 3)).toEqual(Uint8Array.of(9, 8, 7));
+        expect(file.bytes.subarray(flushIntervalBytes - 1)).toEqual(Uint8Array.of(72, 73, 74));
         expect(file.closes).toBe(1);
     });
 
     test('flushes large fragmented short writes before close and preserves final header bytes', async () => {
-        const body = new Uint8Array(2 * FLUSH_INTERVAL_BYTES + 31);
+        const body = new Uint8Array(2 * flushIntervalBytes + 31);
         for (let i = 0; i < body.length; ++i) { body[i] = (i ^ (i >>> 8)) & 255; }
         const originalDigest = digest(body);
         const file = createFile(body.byteLength, {shortWrite: 173_021});
-        const writer = await writerFor(file);
+        const writer = await writerFor(file, background);
         const chunks = [
             body.subarray(0, 3),
             new Uint8Array(0),
-            body.subarray(3, FLUSH_INTERVAL_BYTES - 17),
-            body.subarray(FLUSH_INTERVAL_BYTES - 17, FLUSH_INTERVAL_BYTES + 29),
-            body.subarray(FLUSH_INTERVAL_BYTES + 29),
+            body.subarray(3, flushIntervalBytes - 17),
+            body.subarray(flushIntervalBytes - 17, flushIntervalBytes + 29),
+            body.subarray(flushIntervalBytes + 29),
             new Uint8Array(0),
         ];
         const writing = writer.writeChunks(chunks);
@@ -128,7 +141,7 @@ describe('bounded persistence of import index bytes', () => {
         await writing;
 
         expect(file.flushes.length).toBeGreaterThanOrEqual(2);
-        expect(file.flushes.every(({bytes}) => bytes >= FLUSH_INTERVAL_BYTES && bytes <= FLUSH_INTERVAL_BYTES + MAX_WRITE_BYTES)).toBe(true);
+        expect(file.flushes.every(({bytes}) => bytes >= flushIntervalBytes && bytes <= flushIntervalBytes + MAX_WRITE_BYTES)).toBe(true);
         expect(file.writes.every(({requestLength}) => requestLength <= MAX_WRITE_BYTES)).toBe(true);
         expect(digest(file.bytes)).toBe(originalDigest);
         expect(digest(body)).toBe(originalDigest);
@@ -153,16 +166,16 @@ describe('bounded persistence of import index bytes', () => {
 
     test('counts successful positional overwrites across calls and still flushes at final close', async () => {
         const file = createFile(MAX_WRITE_BYTES, {shortWrite: 131_071});
-        const writer = await writerFor(file);
+        const writer = await writerFor(file, background);
         const bytes = new Uint8Array(MAX_WRITE_BYTES).fill(57);
-        for (let written = 0; written < FLUSH_INTERVAL_BYTES; written += bytes.byteLength) {
+        for (let written = 0; written < flushIntervalBytes; written += bytes.byteLength) {
             await writer.seek(0);
             await writer.write(bytes);
         }
         expect(file.bytes.byteLength).toBe(bytes.byteLength);
-        expect(file.writtenBytes).toBe(FLUSH_INTERVAL_BYTES);
+        expect(file.writtenBytes).toBe(flushIntervalBytes);
         expect(file.flushes).toHaveLength(1);
-        expect(file.flushes[0].bytes).toBe(FLUSH_INTERVAL_BYTES);
+        expect(file.flushes[0].bytes).toBe(flushIntervalBytes);
         await writer.close();
         expect(file.flushes).toHaveLength(2);
         expect(file.flushes[1].bytes).toBe(0);
@@ -172,14 +185,14 @@ describe('bounded persistence of import index bytes', () => {
     test.each([false, true])('latches a periodic flush failure, drains queued operations, and closes once (close failure: %s)', async (failClose) => {
         const flushError = new Error('Periodic persistence failed');
         const closeError = new Error('Closing failed after periodic persistence');
-        const file = createFile(FLUSH_INTERVAL_BYTES + MAX_WRITE_BYTES, {
+        const file = createFile(flushIntervalBytes + MAX_WRITE_BYTES, {
             shortWrite: 173_021,
             flushFailureAt: 1,
             flushError,
             ...(failClose ? {closeError} : {}),
         });
-        const writer = await writerFor(file);
-        const body = new Uint8Array(FLUSH_INTERVAL_BYTES + MAX_WRITE_BYTES).fill(93);
+        const writer = await writerFor(file, background);
+        const body = new Uint8Array(flushIntervalBytes + MAX_WRITE_BYTES).fill(93);
         const originalDigest = digest(body);
         const results = await Promise.allSettled([
             writer.write(body),
@@ -189,7 +202,7 @@ describe('bounded persistence of import index bytes', () => {
         ]);
         expect(results).toEqual(new Array(4).fill({status: 'rejected', reason: flushError}));
         expect(file.flushes).toHaveLength(1);
-        expect(file.writtenBytes).toBeGreaterThanOrEqual(FLUSH_INTERVAL_BYTES);
+        expect(file.writtenBytes).toBeGreaterThanOrEqual(flushIntervalBytes);
         expect(file.writtenBytes).toBeLessThan(body.byteLength);
         expect(file.truncates).toEqual([0]);
         expect(digest(file.bytes)).toBe(digest(body.subarray(0, file.bytes.byteLength)));
@@ -210,9 +223,9 @@ describe('bounded persistence of import index bytes', () => {
 
     test('does not let an earlier periodic flush hide a failed final header flush', async () => {
         const flushError = new Error('Final header persistence failed');
-        const file = createFile(FLUSH_INTERVAL_BYTES, {flushFailureAt: 2, flushError});
-        const writer = await writerFor(file);
-        await writer.write(new Uint8Array(FLUSH_INTERVAL_BYTES).fill(37));
+        const file = createFile(flushIntervalBytes, {flushFailureAt: 2, flushError});
+        const writer = await writerFor(file, background);
+        await writer.write(new Uint8Array(flushIntervalBytes).fill(37));
         expect(file.flushes).toHaveLength(1);
         const header = Uint8Array.of(7, 8, 9);
         await writer.seek(0);
@@ -228,11 +241,11 @@ describe('bounded persistence of import index bytes', () => {
         vi.useFakeTimers();
         let clock = 0;
         vi.spyOn(safePerformance, 'now').mockImplementation(() => clock);
-        const body = new Uint8Array(FLUSH_INTERVAL_BYTES + 17).fill(119);
-        const file = createFile(body.byteLength + (flushBeforeAbort ? FLUSH_INTERVAL_BYTES : 0));
-        const writer = await writerFor(file);
+        const body = new Uint8Array(flushIntervalBytes + 17).fill(119);
+        const file = createFile(body.byteLength + (flushBeforeAbort ? flushIntervalBytes : 0));
+        const writer = await writerFor(file, background);
         if (flushBeforeAbort) {
-            await writer.write(body.subarray(0, FLUSH_INTERVAL_BYTES));
+            await writer.write(body.subarray(0, flushIntervalBytes));
             expect(file.flushes).toHaveLength(1);
         }
         const previousFlushCount = file.flushes.length;
