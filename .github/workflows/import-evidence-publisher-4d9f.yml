@@ -1,0 +1,56 @@
+name: Preserve import experiment evidence 4d9f
+
+on:
+  push:
+    branches: [experiment/import-evidence-publisher-20261128-4d9f]
+    paths: [.github/workflows/import-evidence-publisher-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  preserve:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: tooling
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: f28c2801fcfd9416f220b46b9cbafeee901c1cb2
+          persist-credentials: false
+          path: frozen-source
+      - name: Verify preservation contracts
+        working-directory: tooling
+        run: python -m unittest discover -s dev/perf/evidence-preservation-4d9f -p 'test_*.py'
+      - name: Preserve exact artifacts and audit remaining VN receipts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python tooling/dev/perf/evidence-preservation-4d9f/preserve-hosted-imports-4d9f.py \
+            --manifest tooling/builds/perf/20261128-4d9f-hosted-evidence/pinned-artifacts.json \
+            --manifest-sha256 4e8ad7613257e5a4c698d119614ea9d7235c721b621c9a7352d3c8ed5e84b267 \
+            --source-root frozen-source \
+            --audit-helper tooling/dev/perf/evidence-preservation-4d9f/audit-hosted-imports-4d9f.py \
+            --output preserved-evidence \
+            --scratch download-scratch
+      - name: Retain every preservation result and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: preserved-import-evidence-4d9f
+          path: preserved-evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Publish verified evidence to isolated branch
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tooling/dev/perf/evidence-preservation-4d9f/publish-evidence.py --output preserved-evidence
