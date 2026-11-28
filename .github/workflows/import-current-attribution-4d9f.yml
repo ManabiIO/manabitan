@@ -1,0 +1,72 @@
+name: Current JMdict browser attribution 4d9f
+
+on:
+  push:
+    branches: [experiment/current-jmdict-attribution-20261128-4d9f]
+    paths: [.github/workflows/import-current-attribution-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      IMPORT_SOURCE_SHA: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+      IMPORT_TOOLING_SHA: ${{ github.sha }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Record source and diagnostic scope
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          out = root / "builds/perf/current-jmdict-attribution-4d9f"
+          out.mkdir(parents=True, exist_ok=False)
+          git = lambda *args: subprocess.check_output(["git", *args], text=True).strip()
+          source = git("rev-parse", "HEAD")
+          assert source == os.environ["IMPORT_SOURCE_SHA"]
+          assert not git("status", "--porcelain", "--untracked-files=no")
+          files = ["package-lock.json", "test/perf/dictionaries.lock.json",
+                   "test/chromium/extension-two-dictionary-import.e2e.js",
+                   "dev/perf/import-benchmark.js", "dev/perf/benchmark-support.js",
+                   "ext/lib/term-bank-parser.wasm", "ext/lib/term-content-canonical-scan-v1.wasm"]
+          receipt = {
+              "scope": "One frozen-baseline release import with whole-browser tracing for attribution only; no speed, comparison or memory qualification.",
+              "tooling": os.environ["IMPORT_TOOLING_SHA"],
+              "source": source,
+              "sourceTree": git("rev-parse", "HEAD^{tree}"),
+              "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+              "files": {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in files},
+              "noRerun": "Retain a failed or incomplete first acquisition; do not replace it.",
+          }
+          (out / "scope.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          PY
+      - name: Capture complete current JMdict browser trace
+        run: |
+          node dev/perf/import-benchmark.js jmdict \
+            --runs 1 --trace --build-target chrome --media-check all \
+            --output builds/perf/current-jmdict-attribution-4d9f/import
+      - name: Retain complete attribution evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: current-jmdict-attribution-4d9f
+          path: builds/perf/current-jmdict-attribution-4d9f
+          if-no-files-found: error
+          retention-days: 14
