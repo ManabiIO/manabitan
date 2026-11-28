@@ -1,0 +1,91 @@
+--- canonical-census/replay.mjs
++++ native-record-fields/capture.mjs
+@@ -1,4 +1,4 @@
+-// One untimed current-source import with a stock-versus-shadow native oracle.
++// One untimed current-source import capturing every actual stock field call.
+ // Derived from the retained compression parity harness; no product file edits.
+ import assert from 'node:assert/strict'
+ import {createHash} from 'node:crypto'
+@@ -10,12 +10,13 @@
+ import {execFileSync} from 'node:child_process'
+ import os from 'node:os'
+ import {installCompressionObserver} from './compression-observer.mjs'
+-import {installCanonicalShadow} from './shadow-observer.mjs'
++import {installRecordFieldCapture} from './capture-observer.mjs'
++import {installRecordFieldExport} from './export-hook.mjs'
+ 
+ const here = fileURLToPath(new URL('.', import.meta.url))
+ const sourceRoot = resolve(here, '../../manabitan')
+ const outputDir = resolve(here, 'run')
+-const sourceBinding = JSON.parse(await readFile(new URL('./source-binding.json', import.meta.url), 'utf8'))
++const sourceBinding = JSON.parse(await readFile(new URL('./capture-binding.json', import.meta.url), 'utf8'))
+ const runtime = JSON.parse(await readFile(new URL('./runtime-identity.json', import.meta.url), 'utf8'))
+ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+ const moduleUrl = (name) => pathToFileURL(resolve(sourceRoot, name)).href
+@@ -124,6 +125,9 @@
+ const archiveBytes = await readFile(resolve(here, '../../fixtures/JMdict.zip'))
+ assert.equal(archiveBytes.byteLength, fixture.sizeBytes)
+ assert.equal(sha256(archiveBytes), fixture.sha256)
++const exportHook = installRecordFieldExport(sourceRoot, sourceBinding.recordEncoderSha256)
++const recordModule = await import(moduleUrl('ext/js/dictionary/term-record-opfs-store.js'))
++exportHook.finish()
+ const {DictionaryDatabase} = await import(moduleUrl('ext/js/dictionary/dictionary-database.js'))
+ const {DictionaryImporter} = await import(moduleUrl('ext/js/dictionary/dictionary-importer.js'))
+ const {getSqlite3} = await import(moduleUrl('ext/js/dictionary/sqlite-wasm.js'))
+@@ -160,7 +164,7 @@
+     return result
+ }
+ const compressionObserver = await installCompressionObserver(db, moduleUrl, () => chunks.length)
+-const shadow = await installCanonicalShadow({getGroupIndex: () => chunks.length, getOwner: () => db, outputDirectory: pathToFileURL(outputDir + '/')})
++const capture = installRecordFieldCapture({store: db._termRecordStore, module: recordModule, outputDirectory: outputDir, getGroupIndex: () => chunks.length})
+ const progress = []
+ const importer = new DictionaryImporter({async getImageDetails() { throw new Error('JMdict must not request image metadata') }}, (value) => progress.push(withoutTiming(value)))
+ let error
+@@ -192,13 +196,8 @@
+     assert.deepEqual(compressionCensus, oracle.compressionCensus, 'All compression frames, descriptors, and row references match retained stock output')
+     const metricTotals = {}
+     for (const chunk of chunks) for (const [key, value] of Object.entries(chunk.metrics)) if (typeof value === 'number') metricTotals[key] = (metricTotals[key] ?? 0) + value
+-    const census = await shadow.save()
+-    assert.equal(census.calls.length, metricTotals.dedupNativeCallCount)
+-    assert.equal(census.totals.rowsVisited, metricTotals.dedupNativeScannedRows)
+-    assert.equal(census.totals.pendingOutputRows, metricTotals.dedupNativeBulkPendingRows)
+-    assert.equal(census.totals.exactDescriptors, metricTotals.dedupNativeExactCandidates)
++    const captureTotals = capture.finish()
+     assert.equal(metricTotals.dedupNativeFallbackCount, 0)
+-    assert(census.calls.every((call) => call.reconciled))
+     const fileReceipts = []
+     async function inspectFiles(directory) {
+         for (const name of (await readdir(directory)).sort()) {
+@@ -249,7 +248,7 @@
+         sourceBinding,
+         fixture: {...fixture, lockSha256: sha256(lockBytes)},
+         node: process.version,
+-        scope: 'One stock JMdict import with full private-memory diagnostic shadow equality per canonical call, exact compressed frames and references, and complete finalized payload hashes. Node workers, in-memory SQLite, test file OPFS adapter; no browser qualification.',
++        scope: 'One stock JMdict import capturing every actual field encoder call, exact compressed frames and references, and complete finalized payload hashes. Node workers, in-memory SQLite, test file OPFS adapter; no browser qualification.',
+         substitutions: oracle.substitutions,
+         sameStockProductionOutput: true,
+         lookupReadSkipped: true,
+@@ -261,19 +260,19 @@
+         parserProfile: withoutTiming(parserProfile),
+         compressionCensus,
+         fileReceipts,
+-        censusTotals: census.totals,
++        captureTotals,
++        diagnosticExport: exportHook.receipt,
+         workers: workers.map(({id, role, ready, received, sent}) => ({id, role, ready, received, sent})),
+         workerEvents,
+         progress,
+     }
+     await writeFile(resolve(outputDir, 'report.json'), JSON.stringify(report, null, 2) + '\n')
+-    console.log(JSON.stringify({complete: true, rows: report.rows, groups: report.chunkCount, censusTotals: census.totals, finalizedOutputParity: true}))
++    console.log(JSON.stringify({complete: true, rows: report.rows, groups: report.chunkCount, captureTotals, finalizedOutputParity: true}))
+ } catch (caught) {
+     error = caught
+-    await shadow.save()
+     await writeFile(resolve(outputDir, 'failure.json'), JSON.stringify({complete: false, error: String(caught), stack: caught?.stack, workers: workers.map(({id, role, ready, received, sent}) => ({id, role, ready, received, sent})), workerEvents, chunks, progress}, null, 2) + '\n')
+ } finally {
+-    shadow.restore()
++    capture.restore()
+     await db.close().catch((caught) => { error ??= caught })
+     for (const worker of workers) worker.terminate()
+     await Promise.allSettled(terminations)

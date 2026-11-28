@@ -1,0 +1,99 @@
+{
+  "reviewer": "/root/benchmark_inventory",
+  "scope": "Independent read-only review of stage1 wrapper eligibility, bounds bridge, fallback semantics, input/output ownership and prospective complete-call benchmark boundary. No new test, import or timing acquisition by reviewer.",
+  "passed": true,
+  "runtimeIntegration": false,
+  "timingProtocolApproved": false,
+  "sources": {
+    "native-wrapper.mjs": {
+      "bytes": 9833,
+      "sha256": "aaf1e0c405bdf8aa241d501daa69a6b4df3636a4d57b1297e7c1b6d2f4c88830"
+    },
+    "record-fields.c": {
+      "bytes": 6181,
+      "sha256": "7344ab6d0b449a938bb848468ca0d8012baa940be02a5a07c32b419f072cbc30"
+    },
+    "record-fields.wasm": {
+      "bytes": 1753,
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+    },
+    "export-hook.mjs": {
+      "bytes": 1475,
+      "sha256": "27cc73c4f4b4af90b7b2b2d61919615b204816338d9b10caf9ba6d9c1ac0454d"
+    },
+    "capture-binding.json": {
+      "bytes": 1729,
+      "sha256": "c8a50b2ad905e119b55e257d7c419bac1e57f279c1d15225efbe364295d7f869"
+    },
+    "parity-attempts/001/report.json": {
+      "bytes": 12157,
+      "sha256": "c28bc20bdf2c68ca13d23d3e6a67d7adb0740547fb75713be564c03eaa5f9c00"
+    }
+  },
+  "initialReviewedWrapperSha256": "5afc8987319445737e9f7717ad52008d7640c0083b167ec4714177af91c03ae2",
+  "resolvedFindings": [
+    {
+      "finding": "An inherited fixedContentOffsetBase could invoke stock-visible accessors that native selection skipped.",
+      "resolution": "Reject inherited presence when own descriptor is absent; targeted inherited getter/value cases preserve generic behavior."
+    },
+    {
+      "finding": "Public diagnostic native memory could also back input columns, so growth could detach inputs or staging writes could overwrite them.",
+      "resolution": "Reject any input column whose buffer equals the helper memory before growth or copy; focused no-growth and growth cases assert fallback, unchanged buffer identity and unchanged bytes."
+    }
+  ],
+  "checks": [
+    "The actual existing private-origin predicate is used via a hash-bound appended diagnostic export; its body is unchanged.",
+    "Intrinsic typed-array element kinds and bounds are checked; forged prototypes, shadows, shared/resizable buffers and unusual object paths fall back.",
+    "No await or caller-owned accessor separates admitted column inspection and copies.",
+    "Four input columns are copied into separate private ranges; malformed/unsupported native results fall back to the original stock encoder.",
+    "Result bytes are copied into a fresh owned buffer and remain independent of later native memory reuse/growth.",
+    "The observed twelve-call complete parity receipt binds this corrected wrapper and exact C/WASM and reports zero fallback."
+  ],
+  "observedParity": {
+    "complete": true,
+    "timingAcquisition": false,
+    "actualSinkCalls": 12,
+    "rows": 528299,
+    "passed": 12,
+    "failed": 0,
+    "allConsumedStockOutputsReproduced": true,
+    "completeFinalizedStockImportParity": true,
+    "totals": {
+      "rows": 528299,
+      "uniqueRows": 366030,
+      "inputCopiedBytes": 8618752,
+      "inputCopyCalls": 48,
+      "outputCopiedBytes": 4239960,
+      "tableZeroedBytes": 6291456,
+      "scratchBytes": 9461250,
+      "memoryGrowthBytes": 2293760,
+      "nativeDictionaryCopiedBytes": 13376,
+      "nativeKeysCopiedBytes": 1056598,
+      "scoreCount": 3344,
+      "maximumScratchBytes": 824288,
+      "maximumLinearMemoryBytes": 2424832,
+      "initialLinearMemoryBytes": 131072,
+      "nativeCalls": 12,
+      "fallbackCalls": 0,
+      "totalInputAndOutputCopyBytes": 12858712
+    }
+  },
+  "benchmarkRequirements": [
+    "A later cold observation must start before constructor Module compile, Memory allocation and Instance creation, and include one full corpus of complete encode calls.",
+    "Each timed encode call must include guards, layout and growth, four input copies, table zeroing/native work, result-header checks and owned output copy.",
+    "Capture decoding and factory reconstruction must be outside both arms identically; kernel-only timings do not qualify the helper.",
+    "Retain activation, fallback and copy/growth counters and compare all output bytes outside the timer."
+  ],
+  "limitations": [
+    "No production integration or measured speedup exists at this stage.",
+    "Detailed C range/disjointness and format proof is separately owned by /root/pipeline_audit."
+  ],
+  "observedFinalFocusedTests": {
+    "receipt": "experiments/native-record-fields/test-attempts/003/report.json",
+    "sha256": "ecf33672dafa80a72cb1199ab89bafa6c86039f805c7c8a459879c31c34a8a2d",
+    "cases": 51,
+    "passed": 51,
+    "failed": 0,
+    "executedByReviewer": false
+  }
+}

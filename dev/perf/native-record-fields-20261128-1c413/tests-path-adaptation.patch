@@ -1,0 +1,29 @@
+--- stage1/test-helper.mjs
++++ kit/tests.mjs
+@@ -7,8 +7,8 @@
+ import {NativeRecordFields} from './native-wrapper.mjs'
+ 
+ const here = fileURLToPath(new URL('.', import.meta.url))
+-const sourceRoot = resolve(here, '../../manabitan')
+-const binding = JSON.parse(readFileSync(resolve(here, 'capture-binding.json')))
++const sourceRoot = resolve(here, '../../..')
++const binding = JSON.parse(readFileSync(resolve(here, 'plan.json')))
+ const hook = installRecordFieldExport(sourceRoot, binding.recordEncoderSha256)
+ const current = await import(pathToFileURL(resolve(sourceRoot, binding.recordEncoderSource)).href)
+ hook.finish()
+@@ -30,13 +30,13 @@
+ const call = (fn, value) => {
+     try { return {bytes: fn(value.chunk, value.offsets, value.lengths, value.base)} } catch (error) { return {error} }
+ }
+-const attempts = resolve(here, 'test-attempts')
++const attempts = resolve(process.env.RECORD_FIELD_TEST_OUTPUT ?? resolve(here, 'test-attempts'))
+ mkdirSync(attempts, {recursive: true})
+ const attempt = resolve(attempts, String(readdirSync(attempts).length + 1).padStart(3, '0'))
+ mkdirSync(attempt)
+ const results = []
+ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+-const sourceHashes = Object.fromEntries(['record-fields.c', 'record-fields.wasm', 'native-wrapper.mjs', 'test-helper.mjs', 'export-hook.mjs'].map((name) => [name, sha256(readFileSync(resolve(here, name)))]))
++const sourceHashes = Object.fromEntries(['record-fields.c', 'record-fields.wasm', 'native-wrapper.mjs', 'tests.mjs', 'export-hook.mjs'].map((name) => [name, sha256(readFileSync(resolve(here, name)))]))
+ function test(name, run) {
+     try { run(); results.push({name, pass: true}) } catch (error) { results.push({name, pass: false, error: String(error), stack: error.stack}) }
+     writeFileSync(resolve(attempt, 'report.json'), JSON.stringify({complete: false, timingAcquisition: false, sourceHashes, results}, null, 2) + '\n')

@@ -1,0 +1,39 @@
+{
+  "complete": true,
+  "attempt": 1,
+  "sourceSha256": "bc1a54bd133e098472ba49b2c01db10ba391461c88c2cb7e3900e67d6bcb440b",
+  "command": [
+    "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+    "-fuse-ld=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld",
+    "--target=wasm32",
+    "-O3",
+    "-nostdlib",
+    "-mbulk-memory",
+    "-Wl,--no-entry",
+    "-Wl,--import-memory",
+    "-Wl,-z,stack-size=65536",
+    "-Wl,--strip-all",
+    "-o",
+    "/workspace/scratch/1c4137568bc6/experiments/native-record-fields/build-attempts/001/record-fields.wasm",
+    "/workspace/scratch/1c4137568bc6/experiments/native-record-fields/record-fields.c"
+  ],
+  "arguments": [
+    "--target=wasm32",
+    "-O3",
+    "-nostdlib",
+    "-mbulk-memory",
+    "-Wl,--no-entry",
+    "-Wl,--import-memory",
+    "-Wl,-z,stack-size=65536",
+    "-Wl,--strip-all"
+  ],
+  "timingAcquisition": false,
+  "requiredWasmFeatures": [
+    "bulk-memory"
+  ],
+  "compilerVersion": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin",
+  "linkerVersion": "Debian LLD 21.1.8",
+  "exitCode": 0,
+  "wasmBytes": 1705,
+  "wasmSha256": "1991c1623f3f8e040ea673eeedd3c75eec8cba092767aba9a7dd34faae3938d9"
+}

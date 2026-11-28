@@ -1,0 +1,40 @@
+{
+  "reviewer": "pipeline_audit",
+  "scope": "Read-only C, private arena layout and compact byte-format review; no execution or timing; wrapper guards are separately reviewed by benchmark_inventory",
+  "cSha256": "7344ab6d0b449a938bb848468ca0d8012baa940be02a5a07c32b419f072cbc30",
+  "wasmSha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+  "stockSource": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2:ext/js/dictionary/term-record-opfs-store.js",
+  "blocker": false,
+  "checks": [
+    "Eight aligned disjoint regions checked using 64-bit extents before reads or writes",
+    "Reserved 128 KiB prefix exceeds the isolated build stack/data use; no caller input uses compiler stack",
+    "Output length and region checks bound the later 32-bit pointer arithmetic before any published output",
+    "NaN, infinities, negatives other than the supported -1 sentinel, nonintegers and out-of-range doubles are excluded before integer casts",
+    "Arbitrary Int32 scores retain stock first-occurrence dictionary order and exact signed value bits",
+    "Score cardinality >=65535 and non-smaller compact payloads fall back before writing the output region",
+    "MRF2 magic, row count, score count, version 2, Int32 dictionary, U32 offsets, U16 lengths and U16 keys match the stock layout",
+    "Row/unique bounds checked before content access; second pass consumes the same private copied inputs without callbacks",
+    "Global occupied-probe budget is at most 4*rows+slots, plus one empty-slot probe per row; exhaustion abandons private scratch without publishing output"
+  ],
+  "recommendedBoundaries": [
+    "Count 5/6 strict compact-size boundary",
+    "Length 65534/65535",
+    "Non-null offset delta 0xfffffffe/0xffffffff",
+    "65534/65535 distinct scores with enough repeated rows to make compact otherwise beneficial",
+    "Each overlapping, unaligned or out-of-memory region",
+    "NaN, infinity, fractional and unsafe offsets/base; -1 versus other negative offsets"
+  ],
+  "limits": [
+    "No whole-import performance conclusion",
+    "No product integration reviewed",
+    "Wrapper findings about inherited fixed base and input/native-memory aliasing belong to its separate review and need resolution before qualification"
+  ],
+  "staticWasmLayout": {
+    "mutableI32Initializers": [
+      66560
+    ],
+    "activeDataSectionPresent": false,
+    "privateInputPrefix": 131072,
+    "method": "Read-only binary section decoding, no instantiation or execution"
+  }
+}
