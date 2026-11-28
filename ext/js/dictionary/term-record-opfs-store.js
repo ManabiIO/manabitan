@@ -7985,10 +7985,10 @@ view.chunks :
     }
 }
 
-const originalTermRecordFieldEncoder = TermRecordOpfsStore.prototype._encodeArtifactRecordFields;
-const originalTermRecordChunkEncoder = TermRecordOpfsStore.prototype._encodeArtifactChunkRecords;
-const originalTermRecordAppend = TermRecordOpfsStore.prototype._appendEncodedChunk;
-const originalTermRecordEnvelope = TermRecordOpfsStore.prototype._createLookupIndexChunk;
+const originalTermRecordFieldEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactRecordFields']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactRecordFields'));
+const originalTermRecordChunkEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactChunkRecords']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactChunkRecords'));
+const originalTermRecordAppend = /** @type {TermRecordOpfsStore['_appendEncodedChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_appendEncodedChunk'));
+const originalTermRecordEnvelope = /** @type {TermRecordOpfsStore['_createLookupIndexChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_createLookupIndexChunk'));
 /** @type {Array<[string, unknown]>} */
 const originalTermRecordAppendMethods = [
     ['_encodeArtifactRecordFields', originalTermRecordFieldEncoder],

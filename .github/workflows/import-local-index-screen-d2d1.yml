@@ -19,7 +19,7 @@ concurrency:
 
 env:
   BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-  CANDIDATE_SHA: cc2528ccedc89504041774a9456df2b5b4789239
+  CANDIDATE_SHA: 7d92c437739ec84bb742afe9907944f9bfbd192e
 
 jobs:
   validate:

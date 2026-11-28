@@ -199,18 +199,23 @@ describe('local owned import index envelopes', () => {
         const fixture = await createImportIndexChunkFixture()
         let reads = 0
         let target
-        if (kind === 'owner') {
-            target = fixture.chunk
-        } else if (kind === 'consumer') {
-            target = fixture.consumer
-        } else if (kind === 'key-plan') {
-            target = fixture.prepared.preinternedPlan
-        } else if (kind === 'content-plan') {
-            target = fixture.chunk
-        } else if (kind === 'references') {
-            target = fixture.consumer.resolvedContentReferences
-        } else {
-            target = fixture.prepared
+        switch (kind) {
+            case 'owner':
+            case 'content-plan':
+                target = fixture.chunk
+                break
+            case 'consumer':
+                target = fixture.consumer
+                break
+            case 'key-plan':
+                target = fixture.prepared.preinternedPlan
+                break
+            case 'references':
+                target = fixture.consumer.resolvedContentReferences
+                break
+            default:
+                target = fixture.prepared
+                break
         }
         let name = 'mediaRows'
         if (kind === 'content-plan') { name = 'contentDedupPlan' }
@@ -337,7 +342,9 @@ describe('local owned import index envelopes', () => {
         expect(getTermLookupIndexConsumer(fixture.consumer, new Float64Array(1), emptyLengths)).toBeNull()
         expect(getTermLookupIndexConsumer(fixture.consumer, emptyOffsets, new Uint32Array(1))).toBeNull()
         let reads = 0
-        Object.defineProperty(emptyOffsets, 'length', {get() { ++reads; throw new Error('Projection shadow') }})
+        Object.defineProperty(emptyOffsets, 'length', {
+            get() { ++reads; throw new Error('Projection shadow') },
+        })
         expect(getTermLookupIndexConsumer(fixture.consumer, emptyOffsets, emptyLengths)).toBeNull()
         expect(reads).toBe(0)
     })
@@ -560,7 +567,10 @@ describe('local owned import index envelopes', () => {
         let retained
         const failure = new Error('Custom envelope implementation')
         if (kind === 'custom-envelope') {
-            store._createLookupIndexChunk = () => { ++calls; throw failure }
+            store._createLookupIndexChunk = () => {
+                ++calls
+                throw failure
+            }
         } else {
             const original = store._appendEncodedChunk.bind(store)
             store._appendEncodedChunk = async (...args) => {
@@ -585,5 +595,4 @@ describe('local owned import index envelopes', () => {
         expect(calls).toBe(1)
         expect(prepared.bytes.byteLength).toBeGreaterThan(0)
     })
-
 })
