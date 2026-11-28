@@ -1,0 +1,181 @@
+{
+  "format": 1,
+  "createdAtUtc": "2026-11-28T07:52:47.146443+00:00",
+  "purpose": "Small saved JMdict baseline profile core; no remeasurement or candidate qualification",
+  "source": {
+    "productCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "productTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "researchCommit": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f",
+    "runId": 46102820124,
+    "jobId": 140848885601,
+    "runAttempt": 1,
+    "node": "v22.22.0",
+    "browser": "153.0.8010.12",
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf",
+    "nativeSourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6"
+  },
+  "originalArtifact": {
+    "id": 15246484756,
+    "node_id": "MDg6QXJ0aWZhY3QxNTI0NjQ4NDc1Ng==",
+    "name": "baseline-import-profile-7c02-jmdict",
+    "size_in_bytes": 17389650,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246484756",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246484756/zip",
+    "expired": false,
+    "digest": "sha256:f142fed755878a6e4f6bfbb02efb30b35084872922f11af251a2668440ee311a",
+    "created_at": "2026-11-28T03:43:11Z",
+    "updated_at": "2026-11-28T03:43:11Z",
+    "expires_at": "2026-12-12T03:43:10Z",
+    "workflow_run": {
+      "id": 46102820124,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-baseline-20261128-7c02",
+      "head_sha": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f"
+    }
+  },
+  "scope": {
+    "originalCopies": 9,
+    "publicationAdaptedFiles": 1,
+    "newProvenanceFiles": 1,
+    "payloadFiles": 11,
+    "payloadBytes": 657502,
+    "indexSelfExcluded": true,
+    "ordinaryObservations": 2,
+    "diagnosticObservations": 1,
+    "measurementDuringPackaging": false,
+    "nativeExecutionDuringPackaging": false,
+    "traceAnalysisDuringPackaging": false,
+    "originalReportIncludesOtherDictionariesForContext": true,
+    "rawSourceArtifactIncluded": false,
+    "rawJmdictTraceIncluded": true,
+    "originalAnalysisScriptIncluded": true,
+    "originalNamedModuleIdentityReceiptIncluded": true,
+    "analysisScriptExecutedDuringPackaging": false
+  },
+  "packagingChecks": {
+    "originalObservationScheduleAndAuthorityFlagsPreserved": true,
+    "allThreeOriginalStatusesSuccessful": true,
+    "originalSemanticDigestEqualityPreserved": true,
+    "allNineOriginalCopiesByteIdentical": true,
+    "originalTraceExpandedBytesAndSha256Matched": true,
+    "originalGzipMtimeZeroAndFilenameAbsent": true
+  },
+  "files": [
+    {
+      "path": "BASELINE-PROFILE-REPORT.md",
+      "bytes": 12360,
+      "sha256": "610d5c488c4b82be54d4bb506b3e8e7e6a73aec8607a152c1aa2a3649adfed5c",
+      "gitBlobSha1": "5310390c14f1e09dbf4d7b1f6c24a6e1f94ef685",
+      "sourceRelativePath": "hosted-results/BASELINE-PROFILE-REPORT.md",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "FINDINGS.md",
+      "bytes": 6837,
+      "sha256": "77f55d52f69548af2522dad7fb8e5368d83a639b25edb92c1fd0f92777de5865",
+      "gitBlobSha1": "0bf5841715eb87d97a9f9e14009ff14daa61a55d",
+      "sourceRelativePath": "jmdict-study-findings.md",
+      "sourceSha256": "655397ebfd8a78c69031e92479c059a1724def72fcb94a83db0aedc5e09e4503",
+      "preservation": "publication-only links and status paragraph adapted; exact original included"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5944,
+      "sha256": "bdc08cc54a84360ddd04efb10f4e2296cda5743e356cc78ac639780ae840865f",
+      "gitBlobSha1": "c9837e946fa6111dabd1dd03a8ab7a17df531b4e",
+      "preservation": "new provenance documentation only"
+    },
+    {
+      "path": "all-dictionary-profile-compact.json",
+      "bytes": 10949,
+      "sha256": "62a7f7342962a1b51ab7637655b3a18fb130d61091b75cc752511a2d8c5b5d14",
+      "gitBlobSha1": "3afb05135f017c8185ef3f674d87630aba61e057",
+      "sourceRelativePath": "hosted-results/all-dictionary-profile-compact.json",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "analyze-validator-stack.py",
+      "bytes": 7291,
+      "sha256": "d15ef61c98f38036996cf107ac938ef6dd70a9aaf11484b22ef803285601ea9f",
+      "gitBlobSha1": "04a2a927a3b94af0627f727f434284ea8f15440f",
+      "sourceRelativePath": "hosted-results/analyze-validator-stack.py",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "artifact-manifest.json",
+      "bytes": 2964,
+      "sha256": "69e42991c6b58407cfc1b72c494670b265cfbccce9f7f5b8dcef6f8d50ea05c4",
+      "gitBlobSha1": "b505d567c49c2f47c4d642bc0e067ffe726ca4af",
+      "sourceRelativePath": "hosted-results/artifact-manifest.json",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "baseline-symbols.json",
+      "bytes": 2120,
+      "sha256": "6872e4d81f65c3cb42bd20ec43196f981e960bb60a01172ea67d57484da1dacb",
+      "gitBlobSha1": "1fd7e9762d3755dd5d4e326ba43f3b2486563d82",
+      "sourceRelativePath": "../strict-locals-prototype-checkpoint/baseline-symbols.json",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "findings-original.md",
+      "bytes": 6530,
+      "sha256": "655397ebfd8a78c69031e92479c059a1724def72fcb94a83db0aedc5e09e4503",
+      "gitBlobSha1": "4bd78c5d2e3eb6e600a3d7edba4cb95c4e9e5553",
+      "sourceRelativePath": "jmdict-study-findings.md",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "jmdict-receipts.json",
+      "bytes": 140834,
+      "sha256": "fb8952385821e0833291506078237e6cbe41e7223b5dbcd31db4e2ee26192eaa",
+      "gitBlobSha1": "31462ed64fd61ddeb730c274ff7ecc919f76365b",
+      "sourceRelativePath": "hosted-results/jmdict-receipts.json",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "jmdict.trace.json.gz",
+      "bytes": 457857,
+      "sha256": "bc6d895b287f6e6cf5bab795f5f613bc39c0d2fc90efd0ca5115549b86a4a1be",
+      "gitBlobSha1": "adf4fe69905bb07788cfb5cc09147b922bb174fa",
+      "sourceRelativePath": "hosted-results/jmdict.trace.json.gz",
+      "preservation": "byte-for-byte"
+    },
+    {
+      "path": "native-profile-compact-corrected.json",
+      "bytes": 3816,
+      "sha256": "d4d7f8a78239176e04a584aa2b23f41b6bd8722c9273d3ed7a31b01c667875c1",
+      "gitBlobSha1": "04fce56e1c0961089f93c2f07e2dc8da4f6e2d8c",
+      "sourceRelativePath": "hosted-results/native-profile-compact-corrected.json",
+      "preservation": "byte-for-byte"
+    }
+  ],
+  "updatedAtUtc": "2026-11-28T07:55:25.177028+00:00",
+  "previousUnpublishedIndexSha256": "8c5fe9f30bbce9c2ceb4b28fe238e7ddc5a53f5f93c8cef8c59596dd926ccc14",
+  "includedRawTrace": {
+    "path": "jmdict.trace.json.gz",
+    "uncompressedBytes": 5014171,
+    "uncompressedSha256": "9713413c3406f1d664bedc5a7fa2934f6049fee4f8f5946e2bd4b63eec531e0f",
+    "gzipBytes": 457857,
+    "gzipSha256": "bc6d895b287f6e6cf5bab795f5f613bc39c0d2fc90efd0ca5115549b86a4a1be",
+    "mtime": 0,
+    "gzipFlags": 0,
+    "storedFilenamePresent": false,
+    "existingCompressedBytesPreserved": true,
+    "originalReceiptIdentityMatched": true
+  }
+}

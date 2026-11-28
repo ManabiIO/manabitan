@@ -1,0 +1,3769 @@
+[
+  {
+    "tag": "BASELINE_PROFILE_SOURCE",
+    "value": {
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourceTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "workflowCommit": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f",
+      "dictionary": "jmdict",
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "node": "v22.22.0",
+      "browser": "153.0.8010.12",
+      "package": {
+        "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "sourceTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf",
+        "memberCount": 554,
+        "harnessSha256": {
+          "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+          "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+          "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+          "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+          "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+        },
+        "generatedLibrariesShared": true,
+        "nativeModulesRestoredFromOwnManifest": true
+      },
+      "nativeManifest": {
+        "format": 1,
+        "toolchain": {
+          "compilerVersion": "21.1.8",
+          "linkerVersion": "21.1.8"
+        },
+        "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
+        "sourceFileCount": 14,
+        "targets": [
+          {
+            "name": "term-content-canonical-scan-v1.wasm",
+            "sources": [
+              "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+            ],
+            "arguments": [
+              "--target=wasm32",
+              "-O3",
+              "-nostdlib",
+              "-Wl,--no-entry",
+              "-Wl,--import-memory",
+              "-Wl,-z,stack-size=65536",
+              "-Wl,--strip-all"
+            ],
+            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+          },
+          {
+            "name": "term-bank-parser.wasm",
+            "sources": [
+              "ext/js/dictionary/wasm/term-bank-parser.c",
+              "ext/js/dictionary/wasm/term-bank-inflate.c"
+            ],
+            "arguments": [
+              "--target=wasm32-freestanding",
+              "-O3",
+              "-matomics",
+              "-mbulk-memory",
+              "-msimd128",
+              "-nostdlib",
+              "-Wl,--no-entry",
+              "-Wl,--shared-memory",
+              "-Wl,--max-memory=4294967296",
+              "-Wl,--export=wasm_reset_heap",
+              "-Wl,--export=wasm_alloc",
+              "-Wl,--export=wasm_get_last_parse_capacity",
+              "-Wl,--export=wasm_get_last_content_capacity",
+              "-Wl,--export=inflate_and_join_term_banks",
+              "-Wl,--export=verify_term_bank_source_crcs",
+              "-Wl,--export=inflate_zip_media_batch",
+              "-Wl,--export=project_single_glossary_image_path",
+              "-Wl,--export=parse_term_bank",
+              "-Wl,--export=parse_term_bank_with_media_hints",
+              "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+              "-Wl,--export=build_term_string_plan",
+              "-Wl,--export=encode_term_lookup_index",
+              "-Wl,--export=compact_term_lookup_keys",
+              "-Wl,--export=encode_term_content",
+              "-Wl,--export=encode_term_content_no_hash",
+              "-Wl,--export=encode_term_content_token_binary",
+              "-Wl,--export=encode_term_content_token_binary_dedup",
+              "-Wl,--strip-all"
+            ],
+            "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          }
+        ]
+      },
+      "packageMemberCount": 554,
+      "generatedLegalSha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6",
+      "runnerSha256": "682d350662d7a395118c68b2a99e28eb27f1048963eceb8a3defbbe5d9de5c74",
+      "workflowSha256": "63c0309526f87ce1b695c5674e9b11de16ec9432cac94b5f92149243149edc0b",
+      "runId": "46102820124",
+      "runAttempt": "1",
+      "schedule": [
+        "ordinary-before",
+        "trace",
+        "ordinary-after"
+      ],
+      "mediaMode": "sample",
+      "failurePolicy": "Each observation attempted once. All failures retained. No replacement runs.",
+      "purpose": "Current baseline critical-path investigation, not candidate qualification or a performance improvement claim."
+    }
+  },
+  {
+    "tag": "BASELINE_PROFILE_OBSERVATION",
+    "value": {
+      "name": "ordinary-before",
+      "dictionary": "jmdict",
+      "trace": false,
+      "startedAt": "2026-11-28T03:42:43Z",
+      "status": "success",
+      "authoritativeTiming": true,
+      "totalImportMs": 959.8999999999942,
+      "workerImportMs": 931.8999999999942,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.19999999999708962,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 7.5,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 9.80000000000291,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 791.3000000000029,
+                "heapDeltaBytes": -413776,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 139,
+                "heapDeltaBytes": 291236,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.19999999999708962
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 7.5
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 9.80000000000291
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 791.3000000000029
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 139
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "JMdict [2026-11-22]",
+            "termParseMs": 196,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 561,
+            "bulkAddTagsMetaMs": 11,
+            "mediaResolveMs": 1,
+            "mediaWriteMs": 0,
+            "accountedMs": 769,
+            "otherMs": 20,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 4,
+            "parserGroupCount": 12
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 196,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 561,
+          "bulkAddTagsMetaMs": 11,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 769,
+          "otherMs": 20
+        }
+      },
+      "importerPhaseTimings": [
+        {
+          "phase": "archive-and-index",
+          "elapsedMs": 8,
+          "startEpochMs": 1795837368040,
+          "endEpochMs": 1795837368048,
+          "details": {
+            "ok": true,
+            "fileCount": 55,
+            "catalog": "zip.js",
+            "indexVersion": 3,
+            "zipMaxWorkers": 4,
+            "zipChunkSize": null,
+            "zipUseWebWorkers": true,
+            "autoZipMaxWorkersForLargeArchive": false,
+            "archiveSizeBytes": 15645766
+          }
+        },
+        {
+          "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+          "elapsedMs": 758,
+          "startEpochMs": 1795837368058,
+          "endEpochMs": 1795837368816,
+          "details": {
+            "batchedFileCount": 53,
+            "rows": 528299,
+            "chunkCount": 12,
+            "importerMaterializationMs": 0,
+            "importerChunkSinkMs": 574,
+            "sourceArchiveReadMs": 71.10000000000582,
+            "sourceBatchMaxBytes": 201326592,
+            "sourcePrefetchMaxBytes": 100663296,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "parserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "parserFusedAttempts": 12,
+            "parserFusedFallbacks": 0,
+            "parserDiscardedFusedMs": 0,
+            "parserDiscardedFusedRows": 0,
+            "parserBankSpanCount": 53,
+            "parserEscapedKeyDecodeCount": 0,
+            "parserValidatedGlossaryReuseCount": 54641,
+            "parserGlobalExactContentReuseCount": 0,
+            "parserFastGlossaryNormalizationCount": 0,
+            "parserFastGlossaryNormalizationFallbackCount": 0,
+            "parserFusedSingleBankGroups": 0,
+            "parserNativeLookupScratchReusedBytes": 29954640,
+            "parserNativeLookupScratchReuseGroups": 12,
+            "parserNativeLookupScratchReuseMisses": 0,
+            "parserNativeSegmentedLookupSegments": 0,
+            "parserNativeSegmentedLookupFallbacks": 0,
+            "parserDirectLookupArenaSegments": 0,
+            "parserDirectLookupArenaCopiedBytesAvoided": 0,
+            "parserLookupCompactionSourceValidationPasses": 0,
+            "parserMaxWasmHeapBytes": 43384832,
+            "parserBufferSetupMs": 843,
+            "parserAllocationMs": 1,
+            "parserCopyJsonMs": 0,
+            "parserParseBankMs": 823,
+            "parserEncodeContentMs": 0,
+            "parserRecentContentDedupHitCount": 154416,
+            "parserRowDecodeMs": 0,
+            "parserMediaHintRowsSkipped": 0,
+            "parserChunkDispatchMs": 92,
+            "parserSourcePreparationMs": 0.4999999999854481,
+            "parserSourceDeliveryMs": 6,
+            "parserSourceTransferredBytes": 15632849,
+            "parserSourceInflateMs": 343.6000000000349,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0,
+            "parserSourceCompressedBytes": 15632849,
+            "parserSourceUncompressedBytes": 171617523,
+            "parserResultCopyMs": 92.2999999999738,
+            "parserCompactContentMetadataGroups": 0,
+            "parserCompactContentMetadataBytesAvoided": 0,
+            "parserResultDeliveryMs": 321,
+            "parserOrderedSinkWaitMs": 1358.5000000000146,
+            "parserBorrowedContentResultCount": 0,
+            "parserLookupIndexPrepareMs": 33.399999999965075,
+            "parserLookupIndexCompactMs": 0,
+            "parserLookupIndexEncodeMs": 33.399999999965075,
+            "parserParallelWorkerCount": 3,
+            "parserParallelPipelineGroupsPerWorker": 4,
+            "parserParallelGroupCount": 12,
+            "parserParallelWorkerWallMs": 665.1000000000058,
+            "parserParallelSourceReadWallMs": 71.10000000000582,
+            "parserParallelOwnedContentBytes": 101143985,
+            "parserParallelPeakQueuedOwnedContentBytes": 50264698,
+            "parserParallelSkipReason": null,
+            "parserMetaCapacity": 530000,
+            "parserMetaAllocatedBytes": 36040000,
+            "parserEncodedContentBytes": 101143985,
+            "parserContentCapacity": 125760000,
+            "parserInitialContentBytesPerRow": 48,
+            "parserChunkSize": 0,
+            "parserMinimalDecode": true,
+            "dedupNativeCallCount": 12,
+            "dedupNativeScannedRows": 366030,
+            "dedupNativeBulkPendingRows": 362032,
+            "dedupNativeExactCandidates": 3998,
+            "dedupNativeCopiedInputBytes": 16788490,
+            "dedupNativeCopiedOutputBytes": 31984,
+            "dedupNativeSnapshotBytes": 0,
+            "dedupNativeFallbackCount": 0,
+            "dedupNativeFallbackEligibilityCount": 0,
+            "dedupNativeFallbackAssetCount": 0,
+            "dedupNativeFallbackUnsupportedCount": 0,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "serializationMs": 0,
+            "bulkAddTermsMs": 561,
+            "contentAppendMs": 516.6000000000058,
+            "dedupScanMs": 128.40000000002328,
+            "dedupCapacityMs": 2,
+            "dedupCanonicalScanMs": 107.19999999999709,
+            "dedupExactCompareMs": 17.300000000017462,
+            "contentStoreMs": 388.19999999998254,
+            "contentPackMs": 2.7999999999592546,
+            "contentCompressMs": 344.1000000000058,
+            "contentEnvelopeMs": 0,
+            "contentReferenceMs": 13.39999999999418,
+            "contentOpfsAppendMs": 21.30000000000291,
+            "contentInitialReservationCount": 1,
+            "contentInitialReservationSavingsMissCount": 0,
+            "contentMetadataMs": 152.19999999995343,
+            "contentMetadataStageMs": 0,
+            "contentMetadataPublishMs": 152.19999999995343,
+            "contentMetadataProjectionMs": 8.39999999999418,
+            "contentMetadataIndexPublishMs": 58.49999999998545,
+            "dedupPendingHitCount": 162269,
+            "dedupPersistedHitCount": 3998,
+            "dedupUniqueCount": 362032,
+            "dedupExactFallbackCount": 3998,
+            "dedupRecentSourceHitCount": 3998,
+            "dedupRecentSourceCacheMs": 36.599999999962165,
+            "dedupRecentSourceCacheBytes": 101143281,
+            "dedupRecentSourceAdoptedBytes": 101143281,
+            "termRecordBuildMs": 0,
+            "termRecordEncodeMs": 46.90000000000873,
+            "termRecordWriteMs": 56.09999999999127,
+            "termsVtabInsertMs": 0,
+            "termRecordInternMs": 0,
+            "termRecordPackLengthsMs": 0,
+            "termRecordHeapCopyMs": 0,
+            "termRecordFieldEncodeMs": 44.60000000002037,
+            "termRecordValidationMs": 37.09999999997672,
+            "termLookupIndexEncodeMs": 33.399999999965075
+          }
+        },
+        {
+          "phase": "import-data-banks",
+          "elapsedMs": 789,
+          "startEpochMs": 1795837368052,
+          "endEpochMs": 1795837368841,
+          "details": {
+            "terms": 528299,
+            "termMeta": 0,
+            "kanji": 0,
+            "kanjiMeta": 0,
+            "tagMeta": 327,
+            "media": 0,
+            "step4TermParseMs": 196,
+            "step4TermArchiveReadMs": 71.10000000000582,
+            "step4TermSerializationMs": 0,
+            "step4BulkAddTermsMs": 561,
+            "step4BulkAddTagsMetaMs": 11,
+            "step4MediaResolveMs": 1,
+            "step4MediaWriteMs": 0,
+            "step4MediaZipBatchReadMs": 0,
+            "step4MediaZipBatchInflateMs": 0,
+            "step4MediaZipBatchCount": 0,
+            "step4MediaZipBatchEntryCount": 0,
+            "step4MediaZipBatchRangeBytes": 0,
+            "step4MediaZipBatchCompressedBytes": 0,
+            "step4MediaZipBatchUncompressedBytes": 0,
+            "step4SourcePackedMediaEntryCount": 0,
+            "step4SourcePackedMediaBytes": 0,
+            "step4SourcePackedMediaAppendMs": 0,
+            "step4SourcePackedMediaParallel": false,
+            "step4SourcePackedMediaEarlyPayload": false,
+            "step4TermFileNonParseWriteMs": 0,
+            "step4ArtifactPreloadMs": 0,
+            "step4ArtifactReadBytesMs": 0,
+            "step4ArtifactMetadataRebaseMs": 0,
+            "step4ArtifactMetadataAppendMs": 0,
+            "step4SharedGlossaryAppendMs": 0,
+            "step4TermMetaReadMs": 0,
+            "step4KanjiReadMs": 0,
+            "step4KanjiMetaReadMs": 0,
+            "step4TagReadMs": 11,
+            "step4AccountedMs": 769,
+            "step4OtherMs": 20,
+            "fastPathChunkCount": 12,
+            "fastPathChunkSinkMs": 574,
+            "fastPathParserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserEffectiveExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserFusedAttempts": 12,
+            "fastPathParserFusedFallbacks": 0,
+            "fastPathParserDiscardedFusedMs": 0,
+            "fastPathParserDiscardedFusedRows": 0,
+            "fastPathParserBankSpanCount": 53,
+            "fastPathParserEscapedKeyDecodeCount": 0,
+            "fastPathParserValidatedGlossaryReuseCount": 54641,
+            "fastPathParserGlobalExactContentReuseCount": 0,
+            "fastPathParserFastGlossaryNormalizationCount": 0,
+            "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+            "fastPathParserFusedSingleBankGroups": 0,
+            "fastPathParserNativeLookupScratchReusedBytes": 29954640,
+            "fastPathParserNativeLookupScratchReuseGroups": 12,
+            "fastPathParserNativeLookupScratchReuseMisses": 0,
+            "fastPathParserNativeSegmentedLookupSegments": 0,
+            "fastPathParserNativeSegmentedLookupFallbacks": 0,
+            "fastPathParserDirectLookupArenaSegments": 0,
+            "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+            "fastPathParserLookupCompactionSourceValidationPasses": 0,
+            "fastPathParserMaxWasmHeapBytes": 43384832,
+            "fastPathParserBufferSetupMs": 843,
+            "fastPathParserAllocationMs": 1,
+            "fastPathParserCopyJsonMs": 0,
+            "fastPathParserParseBankMs": 823,
+            "fastPathParserEncodeContentMs": 0,
+            "fastPathParserRecentContentDedupHitCount": 154416,
+            "fastPathParserRowDecodeMs": 0,
+            "fastPathParserMediaHintRowsSkipped": 0,
+            "fastPathParserStringPlanMs": 0,
+            "fastPathParserChunkDispatchMs": 92,
+            "fastPathParserSourcePreparationMs": 0.4999999999854481,
+            "fastPathParserSourceDeliveryMs": 6,
+            "fastPathParserSourceTransferredBytes": 15632849,
+            "fastPathParserSourceInflateMs": 343.6000000000349,
+            "fastPathParserSourceCrcMs": 0,
+            "fastPathParserSourceCrcScannedBytes": 0,
+            "fastPathParserSourceCrcReusedBytes": 0,
+            "fastPathParserSourceCrcReusedGlossaryCount": 0,
+            "fastPathParserSourceCompressedBytes": 15632849,
+            "fastPathParserSourceUncompressedBytes": 171617523,
+            "fastPathParserResultCopyMs": 92.2999999999738,
+            "fastPathParserCompactContentMetadataGroups": 0,
+            "fastPathParserCompactContentMetadataBytesAvoided": 0,
+            "fastPathParserResultDeliveryMs": 321,
+            "fastPathParserOrderedSinkWaitMs": 1358.5000000000146,
+            "fastPathParserBorrowedContentResultCount": 0,
+            "fastPathParserLookupIndexPrepareMs": 33.399999999965075,
+            "fastPathParserLookupIndexCompactMs": 0,
+            "fastPathParserLookupIndexEncodeMs": 33.399999999965075,
+            "fastPathParserParallelWorkerCount": 3,
+            "fastPathParserParallelPipelineGroupsPerWorker": 4,
+            "fastPathParserParallelGroupCount": 12,
+            "fastPathParserParallelWorkerWallMs": 665.1000000000058,
+            "fastPathParserParallelSourceReadWallMs": 71.10000000000582,
+            "fastPathParserParallelOwnedContentBytes": 101143985,
+            "fastPathParserParallelPeakQueuedOwnedContentBytes": 50264698,
+            "fastPathParserParallelSkipReason": null,
+            "sourceZipLogicalRangeReadCount": 0,
+            "sourceZipPhysicalRangeReadCount": 0,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "useMediaPipeline": false,
+            "hasArchiveImageMediaFiles": false
+          }
+        },
+        {
+          "phase": "finalize-descriptor",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837368841,
+          "endEpochMs": 1795837368841,
+          "details": {
+            "hasStyles": false
+          }
+        },
+        {
+          "phase": "bulk-finalization",
+          "elapsedMs": 123,
+          "startEpochMs": 1795837368842,
+          "endEpochMs": 1795837368965,
+          "details": {
+            "ok": true,
+            "commitMs": 0.9000000000087311,
+            "termContentEndImportSessionMs": 9,
+            "termContentEndImportSessionFlushPendingWritesMs": 0,
+            "termContentEndImportSessionAwaitQueuedWritesMs": 0.10000000000582077,
+            "termContentEndImportSessionCloseWritableMs": 5.599999999991269,
+            "termContentDrainCycleCount": 3,
+            "termContentWriteCallCount": 3,
+            "termContentSingleChunkWriteCount": 0,
+            "termContentMergedWriteCount": 3,
+            "termContentTotalWriteBytes": 19566680,
+            "termContentMergedWriteBytes": 19566680,
+            "termContentMaxWriteBytes": 9507564,
+            "termContentMergedGroupChunkCount": 115,
+            "termContentMaxMergedGroupChunkCount": 56,
+            "termContentFlushDueToBytesCount": 0,
+            "termContentFlushDueToChunkCount": 0,
+            "termContentFlushFinalGroupCount": 3,
+            "termContentWriteCoalesceTargetBytes": 67108864,
+            "termContentWriteCoalesceMaxChunks": 8192,
+            "termContentWriteFlushThresholdBytes": 8388608,
+            "termRecordEndImportSessionMs": 117.80000000000291,
+            "termRecordEndImportSessionFlushPendingWritesMs": 8.80000000000291,
+            "termRecordEndImportSessionAwaitQueuedWritesMs": 1,
+            "termRecordEndImportSessionCloseWritableMs": 108,
+            "termRecordDrainCycleCount": 1,
+            "termRecordWriteCallCount": 1,
+            "termRecordSingleChunkWriteCount": 1,
+            "termRecordMergedWriteCount": 0,
+            "termRecordTotalWriteBytes": 45,
+            "termRecordMergedWriteBytes": 0,
+            "termRecordMaxWriteBytes": 45,
+            "termRecordMergedGroupChunkCount": 0,
+            "termRecordMaxMergedGroupChunkCount": 0,
+            "termRecordWriteCoalesceTargetBytes": 16777216,
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23748912,
+            "compressionExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6344592,
+            "termRecordLookupIndexWorkerFileCount": 0,
+            "termsVirtualTableSyncMs": 0,
+            "createIndexesMs": 0,
+            "createIndexesCheckpointCount": 0,
+            "cacheResetMs": 0,
+            "runtimePragmasMs": 0.20000000001164153,
+            "totalMs": 122.30000000000291,
+            "published": true,
+            "housekeepingErrors": []
+          }
+        },
+        {
+          "phase": "write-summary",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837368965,
+          "endEpochMs": 1795837368965,
+          "details": {
+            "ok": true,
+            "fusedWithBulkFinalization": true
+          }
+        },
+        {
+          "phase": "post-finalization-integrity-sample",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837368965,
+          "endEpochMs": 1795837368965,
+          "details": {
+            "skipped": true,
+            "reason": "transaction-commit-completed",
+            "termCount": 528299
+          }
+        }
+      ],
+      "localPhaseTimings": [
+        {
+          "phase": "read-archive",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837368034,
+          "endEpochMs": 1795837368034,
+          "details": {
+            "sizeBytes": 15645766,
+            "source": "file-handle"
+          }
+        },
+        {
+          "phase": "worker-import-dictionary",
+          "elapsedMs": 931.8999999999942,
+          "startEpochMs": 1795837368034.1,
+          "endEpochMs": 1795837368966,
+          "details": {
+            "useImportSession": true,
+            "finalizeImportSession": true
+          }
+        },
+        {
+          "phase": "page-side-finalization-queued",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "add-dictionary-settings",
+          "elapsedMs": 7.399999999994179,
+          "startEpochMs": 1795837368968.6,
+          "endEpochMs": 1795837368976,
+          "details": {
+            "settingsErrorCount": 0,
+            "skipped": false
+          }
+        },
+        {
+          "phase": "trigger-database-updated",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-options-batch-read",
+          "elapsedMs": 1.6000000000058208,
+          "startEpochMs": 1795837368978.4,
+          "endEpochMs": 1795837368980,
+          "details": {
+            "dictionaryCount": 1,
+            "batchFinalization": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-visible",
+          "elapsedMs": 0.39999999999417923,
+          "startEpochMs": 1795837368979.6,
+          "endEpochMs": 1795837368980,
+          "details": {
+            "dictionaryTitle": "JMdict [2026-11-22]",
+            "requireEnabledForActiveProfile": true,
+            "batchFinalization": true
+          }
+        }
+      ],
+      "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+      "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "termRows": 528299,
+      "restart": {
+        "title": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "contentReadable": true,
+        "probeCount": 12
+      },
+      "media": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "storageBytes": 43520477,
+      "storageFileCount": 11,
+      "storageSha256": "222dccb5a4816b61104be4203482df022309a415408d3fce5e59a3f322403916",
+      "source": {
+        "gitSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "dirty": true,
+        "sha256": {
+          "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+          "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+          "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+          "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+          "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+          "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+          "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+          "builds/manabitan-chrome-dev.zip": null,
+          "builds/manabitan-chrome.zip": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf"
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf"
+    }
+  },
+  {
+    "tag": "BASELINE_PROFILE_OBSERVATION",
+    "value": {
+      "name": "trace",
+      "dictionary": "jmdict",
+      "trace": true,
+      "startedAt": "2026-11-28T03:42:52Z",
+      "status": "success",
+      "authoritativeTiming": false,
+      "totalImportMs": 1349.300000000003,
+      "workerImportMs": 1149.7999999999884,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.3000000000029104,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 20.69999999999709,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 19.40000000000873,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 970.3999999999942,
+                "heapDeltaBytes": 725654,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 170.60000000000582,
+                "heapDeltaBytes": 295220,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.3000000000029104
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 20.69999999999709
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 19.40000000000873
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 970.3999999999942
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 170.60000000000582
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "JMdict [2026-11-22]",
+            "termParseMs": 291,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 634,
+            "bulkAddTagsMetaMs": 12,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "accountedMs": 937,
+            "otherMs": 29,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 4,
+            "parserGroupCount": 12
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 291,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 634,
+          "bulkAddTagsMetaMs": 12,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 937,
+          "otherMs": 29
+        }
+      },
+      "importerPhaseTimings": [
+        {
+          "phase": "archive-and-index",
+          "elapsedMs": 16,
+          "startEpochMs": 1795837377838,
+          "endEpochMs": 1795837377854,
+          "details": {
+            "ok": true,
+            "fileCount": 55,
+            "catalog": "zip.js",
+            "indexVersion": 3,
+            "zipMaxWorkers": 4,
+            "zipChunkSize": null,
+            "zipUseWebWorkers": true,
+            "autoZipMaxWorkersForLargeArchive": false,
+            "archiveSizeBytes": 15645766
+          }
+        },
+        {
+          "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+          "elapsedMs": 931,
+          "startEpochMs": 1795837377871,
+          "endEpochMs": 1795837378802,
+          "details": {
+            "batchedFileCount": 53,
+            "rows": 528299,
+            "chunkCount": 12,
+            "importerMaterializationMs": 0,
+            "importerChunkSinkMs": 668,
+            "sourceArchiveReadMs": 116.10000000000582,
+            "sourceBatchMaxBytes": 201326592,
+            "sourcePrefetchMaxBytes": 100663296,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "parserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "parserFusedAttempts": 12,
+            "parserFusedFallbacks": 0,
+            "parserDiscardedFusedMs": 0,
+            "parserDiscardedFusedRows": 0,
+            "parserBankSpanCount": 53,
+            "parserEscapedKeyDecodeCount": 0,
+            "parserValidatedGlossaryReuseCount": 54641,
+            "parserGlobalExactContentReuseCount": 0,
+            "parserFastGlossaryNormalizationCount": 0,
+            "parserFastGlossaryNormalizationFallbackCount": 0,
+            "parserFusedSingleBankGroups": 0,
+            "parserNativeLookupScratchReusedBytes": 29954640,
+            "parserNativeLookupScratchReuseGroups": 12,
+            "parserNativeLookupScratchReuseMisses": 0,
+            "parserNativeSegmentedLookupSegments": 0,
+            "parserNativeSegmentedLookupFallbacks": 0,
+            "parserDirectLookupArenaSegments": 0,
+            "parserDirectLookupArenaCopiedBytesAvoided": 0,
+            "parserLookupCompactionSourceValidationPasses": 0,
+            "parserMaxWasmHeapBytes": 43384832,
+            "parserBufferSetupMs": 1012,
+            "parserAllocationMs": 2,
+            "parserCopyJsonMs": 0,
+            "parserParseBankMs": 985,
+            "parserEncodeContentMs": 0,
+            "parserRecentContentDedupHitCount": 154416,
+            "parserRowDecodeMs": 0,
+            "parserMediaHintRowsSkipped": 0,
+            "parserChunkDispatchMs": 123,
+            "parserSourcePreparationMs": 0.19999999999708962,
+            "parserSourceDeliveryMs": 8,
+            "parserSourceTransferredBytes": 15632849,
+            "parserSourceInflateMs": 386.09999999999127,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0,
+            "parserSourceCompressedBytes": 15632849,
+            "parserSourceUncompressedBytes": 171617523,
+            "parserResultCopyMs": 122.30000000000291,
+            "parserCompactContentMetadataGroups": 0,
+            "parserCompactContentMetadataBytesAvoided": 0,
+            "parserResultDeliveryMs": 231,
+            "parserOrderedSinkWaitMs": 1973.800000000032,
+            "parserBorrowedContentResultCount": 0,
+            "parserLookupIndexPrepareMs": 36.89999999999418,
+            "parserLookupIndexCompactMs": 0,
+            "parserLookupIndexEncodeMs": 36.89999999999418,
+            "parserParallelWorkerCount": 3,
+            "parserParallelPipelineGroupsPerWorker": 4,
+            "parserParallelGroupCount": 12,
+            "parserParallelWorkerWallMs": 793.3000000000029,
+            "parserParallelSourceReadWallMs": 116.10000000000582,
+            "parserParallelOwnedContentBytes": 101143985,
+            "parserParallelPeakQueuedOwnedContentBytes": 52189597,
+            "parserParallelSkipReason": null,
+            "parserMetaCapacity": 530000,
+            "parserMetaAllocatedBytes": 36040000,
+            "parserEncodedContentBytes": 101143985,
+            "parserContentCapacity": 125760000,
+            "parserInitialContentBytesPerRow": 48,
+            "parserChunkSize": 0,
+            "parserMinimalDecode": true,
+            "dedupNativeCallCount": 12,
+            "dedupNativeScannedRows": 366030,
+            "dedupNativeBulkPendingRows": 362032,
+            "dedupNativeExactCandidates": 3998,
+            "dedupNativeCopiedInputBytes": 16788490,
+            "dedupNativeCopiedOutputBytes": 31984,
+            "dedupNativeSnapshotBytes": 0,
+            "dedupNativeFallbackCount": 0,
+            "dedupNativeFallbackEligibilityCount": 0,
+            "dedupNativeFallbackAssetCount": 0,
+            "dedupNativeFallbackUnsupportedCount": 0,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "serializationMs": 0,
+            "bulkAddTermsMs": 634,
+            "contentAppendMs": 581.0999999999331,
+            "dedupScanMs": 133.9999999999418,
+            "dedupCapacityMs": 2.1000000000203727,
+            "dedupCanonicalScanMs": 107.39999999996508,
+            "dedupExactCompareMs": 21.499999999985448,
+            "contentStoreMs": 446.99999999998545,
+            "contentPackMs": 4.199999999982538,
+            "contentCompressMs": 390.00000000001455,
+            "contentEnvelopeMs": 0,
+            "contentReferenceMs": 21.39999999999418,
+            "contentOpfsAppendMs": 16.199999999967986,
+            "contentInitialReservationCount": 1,
+            "contentInitialReservationSavingsMissCount": 0,
+            "contentMetadataMs": 128.40000000000873,
+            "contentMetadataStageMs": 0,
+            "contentMetadataPublishMs": 128.40000000000873,
+            "contentMetadataProjectionMs": 0.09999999999126885,
+            "contentMetadataIndexPublishMs": 58.69999999999709,
+            "dedupPendingHitCount": 162269,
+            "dedupPersistedHitCount": 3998,
+            "dedupUniqueCount": 362032,
+            "dedupExactFallbackCount": 3998,
+            "dedupRecentSourceHitCount": 3998,
+            "dedupRecentSourceCacheMs": 41.500000000029104,
+            "dedupRecentSourceCacheBytes": 101143281,
+            "dedupRecentSourceAdoptedBytes": 101143281,
+            "termRecordBuildMs": 0,
+            "termRecordEncodeMs": 44.39999999997963,
+            "termRecordWriteMs": 79.99999999998545,
+            "termsVtabInsertMs": 0,
+            "termRecordInternMs": 0,
+            "termRecordPackLengthsMs": 0,
+            "termRecordHeapCopyMs": 0,
+            "termRecordFieldEncodeMs": 42.19999999998254,
+            "termRecordValidationMs": 36.90000000002328,
+            "termLookupIndexEncodeMs": 36.89999999999418
+          }
+        },
+        {
+          "phase": "import-data-banks",
+          "elapsedMs": 966,
+          "startEpochMs": 1795837377862,
+          "endEpochMs": 1795837378828,
+          "details": {
+            "terms": 528299,
+            "termMeta": 0,
+            "kanji": 0,
+            "kanjiMeta": 0,
+            "tagMeta": 327,
+            "media": 0,
+            "step4TermParseMs": 291,
+            "step4TermArchiveReadMs": 116.10000000000582,
+            "step4TermSerializationMs": 0,
+            "step4BulkAddTermsMs": 634,
+            "step4BulkAddTagsMetaMs": 12,
+            "step4MediaResolveMs": 0,
+            "step4MediaWriteMs": 0,
+            "step4MediaZipBatchReadMs": 0,
+            "step4MediaZipBatchInflateMs": 0,
+            "step4MediaZipBatchCount": 0,
+            "step4MediaZipBatchEntryCount": 0,
+            "step4MediaZipBatchRangeBytes": 0,
+            "step4MediaZipBatchCompressedBytes": 0,
+            "step4MediaZipBatchUncompressedBytes": 0,
+            "step4SourcePackedMediaEntryCount": 0,
+            "step4SourcePackedMediaBytes": 0,
+            "step4SourcePackedMediaAppendMs": 0,
+            "step4SourcePackedMediaParallel": false,
+            "step4SourcePackedMediaEarlyPayload": false,
+            "step4TermFileNonParseWriteMs": 0,
+            "step4ArtifactPreloadMs": 0,
+            "step4ArtifactReadBytesMs": 0,
+            "step4ArtifactMetadataRebaseMs": 0,
+            "step4ArtifactMetadataAppendMs": 0,
+            "step4SharedGlossaryAppendMs": 0,
+            "step4TermMetaReadMs": 0,
+            "step4KanjiReadMs": 0,
+            "step4KanjiMetaReadMs": 0,
+            "step4TagReadMs": 8,
+            "step4AccountedMs": 937,
+            "step4OtherMs": 29,
+            "fastPathChunkCount": 12,
+            "fastPathChunkSinkMs": 668,
+            "fastPathParserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserEffectiveExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserFusedAttempts": 12,
+            "fastPathParserFusedFallbacks": 0,
+            "fastPathParserDiscardedFusedMs": 0,
+            "fastPathParserDiscardedFusedRows": 0,
+            "fastPathParserBankSpanCount": 53,
+            "fastPathParserEscapedKeyDecodeCount": 0,
+            "fastPathParserValidatedGlossaryReuseCount": 54641,
+            "fastPathParserGlobalExactContentReuseCount": 0,
+            "fastPathParserFastGlossaryNormalizationCount": 0,
+            "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+            "fastPathParserFusedSingleBankGroups": 0,
+            "fastPathParserNativeLookupScratchReusedBytes": 29954640,
+            "fastPathParserNativeLookupScratchReuseGroups": 12,
+            "fastPathParserNativeLookupScratchReuseMisses": 0,
+            "fastPathParserNativeSegmentedLookupSegments": 0,
+            "fastPathParserNativeSegmentedLookupFallbacks": 0,
+            "fastPathParserDirectLookupArenaSegments": 0,
+            "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+            "fastPathParserLookupCompactionSourceValidationPasses": 0,
+            "fastPathParserMaxWasmHeapBytes": 43384832,
+            "fastPathParserBufferSetupMs": 1012,
+            "fastPathParserAllocationMs": 2,
+            "fastPathParserCopyJsonMs": 0,
+            "fastPathParserParseBankMs": 985,
+            "fastPathParserEncodeContentMs": 0,
+            "fastPathParserRecentContentDedupHitCount": 154416,
+            "fastPathParserRowDecodeMs": 0,
+            "fastPathParserMediaHintRowsSkipped": 0,
+            "fastPathParserStringPlanMs": 0,
+            "fastPathParserChunkDispatchMs": 123,
+            "fastPathParserSourcePreparationMs": 0.19999999999708962,
+            "fastPathParserSourceDeliveryMs": 8,
+            "fastPathParserSourceTransferredBytes": 15632849,
+            "fastPathParserSourceInflateMs": 386.09999999999127,
+            "fastPathParserSourceCrcMs": 0,
+            "fastPathParserSourceCrcScannedBytes": 0,
+            "fastPathParserSourceCrcReusedBytes": 0,
+            "fastPathParserSourceCrcReusedGlossaryCount": 0,
+            "fastPathParserSourceCompressedBytes": 15632849,
+            "fastPathParserSourceUncompressedBytes": 171617523,
+            "fastPathParserResultCopyMs": 122.30000000000291,
+            "fastPathParserCompactContentMetadataGroups": 0,
+            "fastPathParserCompactContentMetadataBytesAvoided": 0,
+            "fastPathParserResultDeliveryMs": 231,
+            "fastPathParserOrderedSinkWaitMs": 1973.800000000032,
+            "fastPathParserBorrowedContentResultCount": 0,
+            "fastPathParserLookupIndexPrepareMs": 36.89999999999418,
+            "fastPathParserLookupIndexCompactMs": 0,
+            "fastPathParserLookupIndexEncodeMs": 36.89999999999418,
+            "fastPathParserParallelWorkerCount": 3,
+            "fastPathParserParallelPipelineGroupsPerWorker": 4,
+            "fastPathParserParallelGroupCount": 12,
+            "fastPathParserParallelWorkerWallMs": 793.3000000000029,
+            "fastPathParserParallelSourceReadWallMs": 116.10000000000582,
+            "fastPathParserParallelOwnedContentBytes": 101143985,
+            "fastPathParserParallelPeakQueuedOwnedContentBytes": 52189597,
+            "fastPathParserParallelSkipReason": null,
+            "sourceZipLogicalRangeReadCount": 0,
+            "sourceZipPhysicalRangeReadCount": 0,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "useMediaPipeline": false,
+            "hasArchiveImageMediaFiles": false
+          }
+        },
+        {
+          "phase": "finalize-descriptor",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837378829,
+          "endEpochMs": 1795837378829,
+          "details": {
+            "hasStyles": false
+          }
+        },
+        {
+          "phase": "bulk-finalization",
+          "elapsedMs": 136,
+          "startEpochMs": 1795837378832,
+          "endEpochMs": 1795837378968,
+          "details": {
+            "ok": true,
+            "commitMs": 1,
+            "termContentEndImportSessionMs": 6.2999999999883585,
+            "termContentEndImportSessionFlushPendingWritesMs": 0,
+            "termContentEndImportSessionAwaitQueuedWritesMs": 0.19999999999708962,
+            "termContentEndImportSessionCloseWritableMs": 2.8999999999941792,
+            "termContentDrainCycleCount": 3,
+            "termContentWriteCallCount": 3,
+            "termContentSingleChunkWriteCount": 0,
+            "termContentMergedWriteCount": 3,
+            "termContentTotalWriteBytes": 19566680,
+            "termContentMergedWriteBytes": 19566680,
+            "termContentMaxWriteBytes": 9507564,
+            "termContentMergedGroupChunkCount": 115,
+            "termContentMaxMergedGroupChunkCount": 56,
+            "termContentFlushDueToBytesCount": 0,
+            "termContentFlushDueToChunkCount": 0,
+            "termContentFlushFinalGroupCount": 3,
+            "termContentWriteCoalesceTargetBytes": 67108864,
+            "termContentWriteCoalesceMaxChunks": 8192,
+            "termContentWriteFlushThresholdBytes": 8388608,
+            "termRecordEndImportSessionMs": 127.80000000000291,
+            "termRecordEndImportSessionFlushPendingWritesMs": 5.80000000000291,
+            "termRecordEndImportSessionAwaitQueuedWritesMs": 1.8999999999941792,
+            "termRecordEndImportSessionCloseWritableMs": 120,
+            "termRecordDrainCycleCount": 1,
+            "termRecordWriteCallCount": 1,
+            "termRecordSingleChunkWriteCount": 1,
+            "termRecordMergedWriteCount": 0,
+            "termRecordTotalWriteBytes": 45,
+            "termRecordMergedWriteBytes": 0,
+            "termRecordMaxWriteBytes": 45,
+            "termRecordMergedGroupChunkCount": 0,
+            "termRecordMaxMergedGroupChunkCount": 0,
+            "termRecordWriteCoalesceTargetBytes": 16777216,
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23748912,
+            "compressionExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6344592,
+            "termRecordLookupIndexWorkerFileCount": 0,
+            "termsVirtualTableSyncMs": 0,
+            "createIndexesMs": 0,
+            "createIndexesCheckpointCount": 0,
+            "cacheResetMs": 0,
+            "runtimePragmasMs": 0.09999999999126885,
+            "totalMs": 134.59999999999127,
+            "published": true,
+            "housekeepingErrors": []
+          }
+        },
+        {
+          "phase": "write-summary",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837378968,
+          "endEpochMs": 1795837378968,
+          "details": {
+            "ok": true,
+            "fusedWithBulkFinalization": true
+          }
+        },
+        {
+          "phase": "post-finalization-integrity-sample",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837378968,
+          "endEpochMs": 1795837378968,
+          "details": {
+            "skipped": true,
+            "reason": "transaction-commit-completed",
+            "termCount": 528299
+          }
+        }
+      ],
+      "localPhaseTimings": [
+        {
+          "phase": "read-archive",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837377821,
+          "endEpochMs": 1795837377821,
+          "details": {
+            "sizeBytes": 15645766,
+            "source": "file-handle"
+          }
+        },
+        {
+          "phase": "worker-import-dictionary",
+          "elapsedMs": 1149.7999999999884,
+          "startEpochMs": 1795837377821.2,
+          "endEpochMs": 1795837378971,
+          "details": {
+            "useImportSession": true,
+            "finalizeImportSession": true
+          }
+        },
+        {
+          "phase": "page-side-finalization-queued",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "add-dictionary-settings",
+          "elapsedMs": 17.39999999999418,
+          "startEpochMs": 1795837378973.6,
+          "endEpochMs": 1795837378991,
+          "details": {
+            "settingsErrorCount": 0,
+            "skipped": false
+          }
+        },
+        {
+          "phase": "trigger-database-updated",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-options-batch-read",
+          "elapsedMs": 4.600000000005821,
+          "startEpochMs": 1795837378994.4,
+          "endEpochMs": 1795837378999,
+          "details": {
+            "dictionaryCount": 1,
+            "batchFinalization": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-visible",
+          "elapsedMs": 0.39999999999417923,
+          "startEpochMs": 1795837378998.6,
+          "endEpochMs": 1795837378999,
+          "details": {
+            "dictionaryTitle": "JMdict [2026-11-22]",
+            "requireEnabledForActiveProfile": true,
+            "batchFinalization": true
+          }
+        }
+      ],
+      "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+      "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "termRows": 528299,
+      "restart": {
+        "title": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "contentReadable": true,
+        "probeCount": 12
+      },
+      "media": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "storageBytes": 43520477,
+      "storageFileCount": 11,
+      "storageSha256": "6e6d0db1242aa19547bc0227c9ca6dfd539d3175f22942eec1fe8fb7c45422c8",
+      "source": {
+        "gitSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "dirty": true,
+        "sha256": {
+          "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+          "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+          "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+          "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+          "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+          "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+          "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+          "builds/manabitan-chrome-dev.zip": null,
+          "builds/manabitan-chrome.zip": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf"
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf",
+      "traceBytes": 5014171,
+      "traceSha256": "9713413c3406f1d664bedc5a7fa2934f6049fee4f8f5946e2bd4b63eec531e0f",
+      "traceStop": "worker completion"
+    }
+  },
+  {
+    "tag": "BASELINE_PROFILE_OBSERVATION",
+    "value": {
+      "name": "ordinary-after",
+      "dictionary": "jmdict",
+      "trace": false,
+      "startedAt": "2026-11-28T03:43:02Z",
+      "status": "success",
+      "authoritativeTiming": true,
+      "totalImportMs": 861.1999999999971,
+      "workerImportMs": 835,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.19999999999708962,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 7.30000000000291,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 10.80000000000291,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 690.5999999999913,
+                "heapDeltaBytes": -439264,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 140.8000000000029,
+                "heapDeltaBytes": 293204,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.19999999999708962
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 7.30000000000291
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 10.80000000000291
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 690.5999999999913
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 140.8000000000029
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "JMdict [2026-11-22]",
+            "termParseMs": 210,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 452,
+            "bulkAddTagsMetaMs": 8,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "accountedMs": 670,
+            "otherMs": 18,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 4,
+            "parserGroupCount": 12
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 210,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 452,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 670,
+          "otherMs": 18
+        }
+      },
+      "importerPhaseTimings": [
+        {
+          "phase": "archive-and-index",
+          "elapsedMs": 9,
+          "startEpochMs": 1795837386728,
+          "endEpochMs": 1795837386737,
+          "details": {
+            "ok": true,
+            "fileCount": 55,
+            "catalog": "zip.js",
+            "indexVersion": 3,
+            "zipMaxWorkers": 4,
+            "zipChunkSize": null,
+            "zipUseWebWorkers": true,
+            "autoZipMaxWorkersForLargeArchive": false,
+            "archiveSizeBytes": 15645766
+          }
+        },
+        {
+          "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+          "elapsedMs": 664,
+          "startEpochMs": 1795837386746,
+          "endEpochMs": 1795837387410,
+          "details": {
+            "batchedFileCount": 53,
+            "rows": 528299,
+            "chunkCount": 12,
+            "importerMaterializationMs": 0,
+            "importerChunkSinkMs": 482,
+            "sourceArchiveReadMs": 71.30000000000291,
+            "sourceBatchMaxBytes": 201326592,
+            "sourcePrefetchMaxBytes": 100663296,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "parserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "parserFusedAttempts": 12,
+            "parserFusedFallbacks": 0,
+            "parserDiscardedFusedMs": 0,
+            "parserDiscardedFusedRows": 0,
+            "parserBankSpanCount": 53,
+            "parserEscapedKeyDecodeCount": 0,
+            "parserValidatedGlossaryReuseCount": 54641,
+            "parserGlobalExactContentReuseCount": 0,
+            "parserFastGlossaryNormalizationCount": 0,
+            "parserFastGlossaryNormalizationFallbackCount": 0,
+            "parserFusedSingleBankGroups": 0,
+            "parserNativeLookupScratchReusedBytes": 29954640,
+            "parserNativeLookupScratchReuseGroups": 12,
+            "parserNativeLookupScratchReuseMisses": 0,
+            "parserNativeSegmentedLookupSegments": 0,
+            "parserNativeSegmentedLookupFallbacks": 0,
+            "parserDirectLookupArenaSegments": 0,
+            "parserDirectLookupArenaCopiedBytesAvoided": 0,
+            "parserLookupCompactionSourceValidationPasses": 0,
+            "parserMaxWasmHeapBytes": 43384832,
+            "parserBufferSetupMs": 817,
+            "parserAllocationMs": 0,
+            "parserCopyJsonMs": 0,
+            "parserParseBankMs": 802,
+            "parserEncodeContentMs": 0,
+            "parserRecentContentDedupHitCount": 154416,
+            "parserRowDecodeMs": 0,
+            "parserMediaHintRowsSkipped": 0,
+            "parserChunkDispatchMs": 100,
+            "parserSourcePreparationMs": 0.09999999999126885,
+            "parserSourceDeliveryMs": 4,
+            "parserSourceTransferredBytes": 15632849,
+            "parserSourceInflateMs": 295.199999999968,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0,
+            "parserSourceCompressedBytes": 15632849,
+            "parserSourceUncompressedBytes": 171617523,
+            "parserResultCopyMs": 97.40000000003783,
+            "parserCompactContentMetadataGroups": 0,
+            "parserCompactContentMetadataBytesAvoided": 0,
+            "parserResultDeliveryMs": 110,
+            "parserOrderedSinkWaitMs": 1454.3999999999796,
+            "parserBorrowedContentResultCount": 0,
+            "parserLookupIndexPrepareMs": 34.09999999997672,
+            "parserLookupIndexCompactMs": 0,
+            "parserLookupIndexEncodeMs": 34.09999999997672,
+            "parserParallelWorkerCount": 3,
+            "parserParallelPipelineGroupsPerWorker": 4,
+            "parserParallelGroupCount": 12,
+            "parserParallelWorkerWallMs": 563.5,
+            "parserParallelSourceReadWallMs": 71.30000000000291,
+            "parserParallelOwnedContentBytes": 101143985,
+            "parserParallelPeakQueuedOwnedContentBytes": 58114957,
+            "parserParallelSkipReason": null,
+            "parserMetaCapacity": 530000,
+            "parserMetaAllocatedBytes": 36040000,
+            "parserEncodedContentBytes": 101143985,
+            "parserContentCapacity": 125760000,
+            "parserInitialContentBytesPerRow": 48,
+            "parserChunkSize": 0,
+            "parserMinimalDecode": true,
+            "dedupNativeCallCount": 12,
+            "dedupNativeScannedRows": 366030,
+            "dedupNativeBulkPendingRows": 362032,
+            "dedupNativeExactCandidates": 3998,
+            "dedupNativeCopiedInputBytes": 16788490,
+            "dedupNativeCopiedOutputBytes": 31984,
+            "dedupNativeSnapshotBytes": 0,
+            "dedupNativeFallbackCount": 0,
+            "dedupNativeFallbackEligibilityCount": 0,
+            "dedupNativeFallbackAssetCount": 0,
+            "dedupNativeFallbackUnsupportedCount": 0,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "serializationMs": 0,
+            "bulkAddTermsMs": 452,
+            "contentAppendMs": 407.1000000000058,
+            "dedupScanMs": 106.89999999999418,
+            "dedupCapacityMs": 1.3000000000029104,
+            "dedupCanonicalScanMs": 90,
+            "dedupExactCompareMs": 14.400000000008731,
+            "contentStoreMs": 300.20000000001164,
+            "contentPackMs": 7.800000000017462,
+            "contentCompressMs": 263.40000000000873,
+            "contentEnvelopeMs": 0,
+            "contentReferenceMs": 13.699999999982538,
+            "contentOpfsAppendMs": 8.900000000008731,
+            "contentInitialReservationCount": 1,
+            "contentInitialReservationSavingsMissCount": 0,
+            "contentMetadataMs": 116.90000000002328,
+            "contentMetadataStageMs": 0,
+            "contentMetadataPublishMs": 116.90000000002328,
+            "contentMetadataProjectionMs": 0.19999999999708962,
+            "contentMetadataIndexPublishMs": 68.60000000000582,
+            "dedupPendingHitCount": 162269,
+            "dedupPersistedHitCount": 3998,
+            "dedupUniqueCount": 362032,
+            "dedupExactFallbackCount": 3998,
+            "dedupRecentSourceHitCount": 3998,
+            "dedupRecentSourceCacheMs": 39.30000000000291,
+            "dedupRecentSourceCacheBytes": 101143281,
+            "dedupRecentSourceAdoptedBytes": 101143281,
+            "termRecordBuildMs": 0.10000000000582077,
+            "termRecordEncodeMs": 41.399999999965075,
+            "termRecordWriteMs": 53.89999999999418,
+            "termsVtabInsertMs": 0,
+            "termRecordInternMs": 0,
+            "termRecordPackLengthsMs": 0,
+            "termRecordHeapCopyMs": 0,
+            "termRecordFieldEncodeMs": 40.999999999970896,
+            "termRecordValidationMs": 27.300000000032014,
+            "termLookupIndexEncodeMs": 34.09999999997672
+          }
+        },
+        {
+          "phase": "import-data-banks",
+          "elapsedMs": 688,
+          "startEpochMs": 1795837386741,
+          "endEpochMs": 1795837387429,
+          "details": {
+            "terms": 528299,
+            "termMeta": 0,
+            "kanji": 0,
+            "kanjiMeta": 0,
+            "tagMeta": 327,
+            "media": 0,
+            "step4TermParseMs": 210,
+            "step4TermArchiveReadMs": 71.30000000000291,
+            "step4TermSerializationMs": 0,
+            "step4BulkAddTermsMs": 452,
+            "step4BulkAddTagsMetaMs": 8,
+            "step4MediaResolveMs": 0,
+            "step4MediaWriteMs": 0,
+            "step4MediaZipBatchReadMs": 0,
+            "step4MediaZipBatchInflateMs": 0,
+            "step4MediaZipBatchCount": 0,
+            "step4MediaZipBatchEntryCount": 0,
+            "step4MediaZipBatchRangeBytes": 0,
+            "step4MediaZipBatchCompressedBytes": 0,
+            "step4MediaZipBatchUncompressedBytes": 0,
+            "step4SourcePackedMediaEntryCount": 0,
+            "step4SourcePackedMediaBytes": 0,
+            "step4SourcePackedMediaAppendMs": 0,
+            "step4SourcePackedMediaParallel": false,
+            "step4SourcePackedMediaEarlyPayload": false,
+            "step4TermFileNonParseWriteMs": 0,
+            "step4ArtifactPreloadMs": 0,
+            "step4ArtifactReadBytesMs": 0,
+            "step4ArtifactMetadataRebaseMs": 0,
+            "step4ArtifactMetadataAppendMs": 0,
+            "step4SharedGlossaryAppendMs": 0,
+            "step4TermMetaReadMs": 0,
+            "step4KanjiReadMs": 0,
+            "step4KanjiMetaReadMs": 0,
+            "step4TagReadMs": 8,
+            "step4AccountedMs": 670,
+            "step4OtherMs": 18,
+            "fastPathChunkCount": 12,
+            "fastPathChunkSinkMs": 482,
+            "fastPathParserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserEffectiveExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserFusedAttempts": 12,
+            "fastPathParserFusedFallbacks": 0,
+            "fastPathParserDiscardedFusedMs": 0,
+            "fastPathParserDiscardedFusedRows": 0,
+            "fastPathParserBankSpanCount": 53,
+            "fastPathParserEscapedKeyDecodeCount": 0,
+            "fastPathParserValidatedGlossaryReuseCount": 54641,
+            "fastPathParserGlobalExactContentReuseCount": 0,
+            "fastPathParserFastGlossaryNormalizationCount": 0,
+            "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+            "fastPathParserFusedSingleBankGroups": 0,
+            "fastPathParserNativeLookupScratchReusedBytes": 29954640,
+            "fastPathParserNativeLookupScratchReuseGroups": 12,
+            "fastPathParserNativeLookupScratchReuseMisses": 0,
+            "fastPathParserNativeSegmentedLookupSegments": 0,
+            "fastPathParserNativeSegmentedLookupFallbacks": 0,
+            "fastPathParserDirectLookupArenaSegments": 0,
+            "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+            "fastPathParserLookupCompactionSourceValidationPasses": 0,
+            "fastPathParserMaxWasmHeapBytes": 43384832,
+            "fastPathParserBufferSetupMs": 817,
+            "fastPathParserAllocationMs": 0,
+            "fastPathParserCopyJsonMs": 0,
+            "fastPathParserParseBankMs": 802,
+            "fastPathParserEncodeContentMs": 0,
+            "fastPathParserRecentContentDedupHitCount": 154416,
+            "fastPathParserRowDecodeMs": 0,
+            "fastPathParserMediaHintRowsSkipped": 0,
+            "fastPathParserStringPlanMs": 0,
+            "fastPathParserChunkDispatchMs": 100,
+            "fastPathParserSourcePreparationMs": 0.09999999999126885,
+            "fastPathParserSourceDeliveryMs": 4,
+            "fastPathParserSourceTransferredBytes": 15632849,
+            "fastPathParserSourceInflateMs": 295.199999999968,
+            "fastPathParserSourceCrcMs": 0,
+            "fastPathParserSourceCrcScannedBytes": 0,
+            "fastPathParserSourceCrcReusedBytes": 0,
+            "fastPathParserSourceCrcReusedGlossaryCount": 0,
+            "fastPathParserSourceCompressedBytes": 15632849,
+            "fastPathParserSourceUncompressedBytes": 171617523,
+            "fastPathParserResultCopyMs": 97.40000000003783,
+            "fastPathParserCompactContentMetadataGroups": 0,
+            "fastPathParserCompactContentMetadataBytesAvoided": 0,
+            "fastPathParserResultDeliveryMs": 110,
+            "fastPathParserOrderedSinkWaitMs": 1454.3999999999796,
+            "fastPathParserBorrowedContentResultCount": 0,
+            "fastPathParserLookupIndexPrepareMs": 34.09999999997672,
+            "fastPathParserLookupIndexCompactMs": 0,
+            "fastPathParserLookupIndexEncodeMs": 34.09999999997672,
+            "fastPathParserParallelWorkerCount": 3,
+            "fastPathParserParallelPipelineGroupsPerWorker": 4,
+            "fastPathParserParallelGroupCount": 12,
+            "fastPathParserParallelWorkerWallMs": 563.5,
+            "fastPathParserParallelSourceReadWallMs": 71.30000000000291,
+            "fastPathParserParallelOwnedContentBytes": 101143985,
+            "fastPathParserParallelPeakQueuedOwnedContentBytes": 58114957,
+            "fastPathParserParallelSkipReason": null,
+            "sourceZipLogicalRangeReadCount": 0,
+            "sourceZipPhysicalRangeReadCount": 0,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": true,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "useMediaPipeline": false,
+            "hasArchiveImageMediaFiles": false
+          }
+        },
+        {
+          "phase": "finalize-descriptor",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837387429,
+          "endEpochMs": 1795837387429,
+          "details": {
+            "hasStyles": false
+          }
+        },
+        {
+          "phase": "bulk-finalization",
+          "elapsedMs": 126,
+          "startEpochMs": 1795837387430,
+          "endEpochMs": 1795837387556,
+          "details": {
+            "ok": true,
+            "commitMs": 0.7000000000116415,
+            "termContentEndImportSessionMs": 4.100000000005821,
+            "termContentEndImportSessionFlushPendingWritesMs": 0,
+            "termContentEndImportSessionAwaitQueuedWritesMs": 0.10000000000582077,
+            "termContentEndImportSessionCloseWritableMs": 3.3000000000029104,
+            "termContentDrainCycleCount": 3,
+            "termContentWriteCallCount": 3,
+            "termContentSingleChunkWriteCount": 0,
+            "termContentMergedWriteCount": 3,
+            "termContentTotalWriteBytes": 19566680,
+            "termContentMergedWriteBytes": 19566680,
+            "termContentMaxWriteBytes": 9507564,
+            "termContentMergedGroupChunkCount": 115,
+            "termContentMaxMergedGroupChunkCount": 56,
+            "termContentFlushDueToBytesCount": 0,
+            "termContentFlushDueToChunkCount": 0,
+            "termContentFlushFinalGroupCount": 3,
+            "termContentWriteCoalesceTargetBytes": 67108864,
+            "termContentWriteCoalesceMaxChunks": 8192,
+            "termContentWriteFlushThresholdBytes": 8388608,
+            "termRecordEndImportSessionMs": 120.80000000000291,
+            "termRecordEndImportSessionFlushPendingWritesMs": 7.80000000000291,
+            "termRecordEndImportSessionAwaitQueuedWritesMs": 0.8999999999941792,
+            "termRecordEndImportSessionCloseWritableMs": 112,
+            "termRecordDrainCycleCount": 1,
+            "termRecordWriteCallCount": 1,
+            "termRecordSingleChunkWriteCount": 1,
+            "termRecordMergedWriteCount": 0,
+            "termRecordTotalWriteBytes": 45,
+            "termRecordMergedWriteBytes": 0,
+            "termRecordMaxWriteBytes": 45,
+            "termRecordMergedGroupChunkCount": 0,
+            "termRecordMaxMergedGroupChunkCount": 0,
+            "termRecordWriteCoalesceTargetBytes": 16777216,
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23748912,
+            "compressionExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "termRecordLookupIndexAwaitMs": 0.5,
+            "termRecordLookupIndexMaxQueuedBytes": 6344592,
+            "termRecordLookupIndexWorkerFileCount": 0,
+            "termsVirtualTableSyncMs": 0.09999999999126885,
+            "createIndexesMs": 0,
+            "createIndexesCheckpointCount": 0,
+            "cacheResetMs": 0,
+            "runtimePragmasMs": 0.09999999999126885,
+            "totalMs": 125.39999999999418,
+            "published": true,
+            "housekeepingErrors": []
+          }
+        },
+        {
+          "phase": "write-summary",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837387556,
+          "endEpochMs": 1795837387556,
+          "details": {
+            "ok": true,
+            "fusedWithBulkFinalization": true
+          }
+        },
+        {
+          "phase": "post-finalization-integrity-sample",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837387556,
+          "endEpochMs": 1795837387556,
+          "details": {
+            "skipped": true,
+            "reason": "transaction-commit-completed",
+            "termCount": 528299
+          }
+        }
+      ],
+      "localPhaseTimings": [
+        {
+          "phase": "read-archive",
+          "elapsedMs": 0,
+          "startEpochMs": 1795837386722,
+          "endEpochMs": 1795837386722,
+          "details": {
+            "sizeBytes": 15645766,
+            "source": "file-handle"
+          }
+        },
+        {
+          "phase": "worker-import-dictionary",
+          "elapsedMs": 835,
+          "startEpochMs": 1795837386723,
+          "endEpochMs": 1795837387558,
+          "details": {
+            "useImportSession": true,
+            "finalizeImportSession": true
+          }
+        },
+        {
+          "phase": "page-side-finalization-queued",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "add-dictionary-settings",
+          "elapsedMs": 5.80000000000291,
+          "startEpochMs": 1795837387559.2,
+          "endEpochMs": 1795837387565,
+          "details": {
+            "settingsErrorCount": 0,
+            "skipped": false
+          }
+        },
+        {
+          "phase": "trigger-database-updated",
+          "elapsedMs": 0,
+          "details": {
+            "deferred": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-options-batch-read",
+          "elapsedMs": 1.5,
+          "startEpochMs": 1795837387568.5,
+          "endEpochMs": 1795837387570,
+          "details": {
+            "dictionaryCount": 1,
+            "batchFinalization": true
+          }
+        },
+        {
+          "phase": "verify-imported-dictionary-visible",
+          "elapsedMs": 0.5,
+          "startEpochMs": 1795837387569.5,
+          "endEpochMs": 1795837387570,
+          "details": {
+            "dictionaryTitle": "JMdict [2026-11-22]",
+            "requireEnabledForActiveProfile": true,
+            "batchFinalization": true
+          }
+        }
+      ],
+      "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+      "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "termRows": 528299,
+      "restart": {
+        "title": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "contentReadable": true,
+        "probeCount": 12
+      },
+      "media": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "storageBytes": 43520477,
+      "storageFileCount": 11,
+      "storageSha256": "de0d09f1c51dcbbdc5fe56b2c473723227f3371e62cc1e1a0806e8e9ef9cfed1",
+      "source": {
+        "gitSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "dirty": true,
+        "sha256": {
+          "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+          "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+          "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+          "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+          "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+          "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+          "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+          "builds/manabitan-chrome-dev.zip": null,
+          "builds/manabitan-chrome.zip": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf"
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf"
+    }
+  },
+  {
+    "tag": "BASELINE_PROFILE_HOTSPOTS",
+    "value": {
+      "profileChunks": 494,
+      "missingNodeSamples": 210,
+      "missingDeltaSamples": 0,
+      "top": [
+        {
+          "pid": 3627,
+          "tid": 3694,
+          "thread": "v8:ProfEvntProc",
+          "function": "f",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/sqlite/sqlite3-opfs-async-proxy.js",
+          "line": 453,
+          "sampledMs": 1547.953,
+          "samples": 6900
+        },
+        {
+          "pid": 3627,
+          "tid": 3696,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 1250.13,
+          "samples": 5010
+        },
+        {
+          "pid": 3627,
+          "tid": 3695,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 1154.63,
+          "samples": 4794
+        },
+        {
+          "pid": 3627,
+          "tid": 3704,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 607.295,
+          "samples": 2552
+        },
+        {
+          "pid": 3627,
+          "tid": 3707,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 561.537,
+          "samples": 2258
+        },
+        {
+          "pid": 3627,
+          "tid": 3706,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 537.34,
+          "samples": 2185
+        },
+        {
+          "pid": 3627,
+          "tid": 3705,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 503.193,
+          "samples": 2033
+        },
+        {
+          "pid": 3627,
+          "tid": 3702,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 377.282,
+          "samples": 1405
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 335.611,
+          "samples": 1251
+        },
+        {
+          "pid": 3627,
+          "tid": 3697,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 329.74,
+          "samples": 1582
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "(idle)",
+          "source": "",
+          "line": null,
+          "sampledMs": 271.712,
+          "samples": 962
+        },
+        {
+          "pid": 3627,
+          "tid": 3695,
+          "thread": "v8:ProfEvntProc",
+          "function": "_onPermissionSettingChanged",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/pages/settings/generic-setting-controller.js",
+          "line": 95,
+          "sampledMs": 196.459,
+          "samples": 2
+        },
+        {
+          "pid": 3627,
+          "tid": 3695,
+          "thread": "v8:ProfEvntProc",
+          "function": "(program)",
+          "source": "",
+          "line": null,
+          "sampledMs": 132.38,
+          "samples": 649
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[13]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 126.768,
+          "samples": 429
+        },
+        {
+          "pid": 3627,
+          "tid": 3702,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[13]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 124.06,
+          "samples": 395
+        },
+        {
+          "pid": 3627,
+          "tid": 3697,
+          "thread": "v8:ProfEvntProc",
+          "function": "flush",
+          "source": "",
+          "line": null,
+          "sampledMs": 121.62,
+          "samples": 10
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[36]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 115.688,
+          "samples": 454
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[13]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 110,
+          "samples": 399
+        },
+        {
+          "pid": 3627,
+          "tid": 3697,
+          "thread": "v8:ProfEvntProc",
+          "function": "_onMessage",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/offscreen-dictionary-worker.js",
+          "line": 106,
+          "sampledMs": 95.773,
+          "samples": 3
+        },
+        {
+          "pid": 3627,
+          "tid": 3696,
+          "thread": "v8:ProfEvntProc",
+          "function": "_onMessageWrapper",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/backend.js",
+          "line": 1258,
+          "sampledMs": 92.091,
+          "samples": 1
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[36]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 88.293,
+          "samples": 313
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[48]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 83.13,
+          "samples": 266
+        },
+        {
+          "pid": 3627,
+          "tid": 3697,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[4]",
+          "source": "wasm://wasm/34e657a2",
+          "line": 0,
+          "sampledMs": 76.472,
+          "samples": 334
+        },
+        {
+          "pid": 3627,
+          "tid": 3702,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[48]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 75.131,
+          "samples": 190
+        },
+        {
+          "pid": 3627,
+          "tid": 3705,
+          "thread": "v8:ProfEvntProc",
+          "function": "postMessage",
+          "source": "",
+          "line": null,
+          "sampledMs": 71.882,
+          "samples": 78
+        },
+        {
+          "pid": 3627,
+          "tid": 3702,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[36]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 71.346,
+          "samples": 335
+        },
+        {
+          "pid": 3627,
+          "tid": 3707,
+          "thread": "v8:ProfEvntProc",
+          "function": "postMessage",
+          "source": "",
+          "line": null,
+          "sampledMs": 67.515,
+          "samples": 59
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[48]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 64.805,
+          "samples": 233
+        },
+        {
+          "pid": 3627,
+          "tid": 3704,
+          "thread": "v8:ProfEvntProc",
+          "function": "postMessage",
+          "source": "",
+          "line": null,
+          "sampledMs": 59.009,
+          "samples": 61
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[2]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 56.227,
+          "samples": 210
+        },
+        {
+          "pid": 3627,
+          "tid": 3706,
+          "thread": "v8:ProfEvntProc",
+          "function": "postMessage",
+          "source": "",
+          "line": null,
+          "sampledMs": 55.452,
+          "samples": 60
+        },
+        {
+          "pid": 3627,
+          "tid": 3705,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[101]",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+          "line": 0,
+          "sampledMs": 54.951,
+          "samples": 124
+        },
+        {
+          "pid": 3627,
+          "tid": 3702,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[2]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 52.964,
+          "samples": 187
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[2]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 50.527,
+          "samples": 175
+        },
+        {
+          "pid": 3627,
+          "tid": 3697,
+          "thread": "v8:ProfEvntProc",
+          "function": "_encodeAndAppendArtifactChunkForState",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-record-opfs-store.js",
+          "line": 2455,
+          "sampledMs": 39.722,
+          "samples": 96
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[27]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 39.665,
+          "samples": 127
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[18]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 39.133,
+          "samples": 150
+        },
+        {
+          "pid": 3627,
+          "tid": 3701,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[27]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 38.713,
+          "samples": 127
+        },
+        {
+          "pid": 3627,
+          "tid": 3706,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[149]",
+          "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+          "line": 0,
+          "sampledMs": 38.46,
+          "samples": 82
+        },
+        {
+          "pid": 3627,
+          "tid": 3703,
+          "thread": "v8:ProfEvntProc",
+          "function": "wasm-function[18]",
+          "source": "wasm://wasm/0004212e",
+          "line": 0,
+          "sampledMs": 36.677,
+          "samples": 123
+        }
+      ],
+      "threads": {
+        "3627:3694": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 1547.953,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3694,
+              "thread": "v8:ProfEvntProc",
+              "function": "f",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/sqlite/sqlite3-opfs-async-proxy.js",
+              "line": 453,
+              "sampledMs": 1547.953,
+              "samples": 6900
+            }
+          ]
+        },
+        "3627:3696": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 1349.7650000000003,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 1250.13,
+              "samples": 5010
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "_onMessageWrapper",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/backend.js",
+              "line": 1258,
+              "sampledMs": 92.091,
+              "samples": 1
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "setTimeout",
+              "source": "",
+              "line": null,
+              "sampledMs": 2.59,
+              "samples": 8
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "clearTimeout",
+              "source": "",
+              "line": null,
+              "sampledMs": 1.929,
+              "samples": 10
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "deliver",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/core/api-map.js",
+              "line": 105,
+              "sampledMs": 1.169,
+              "samples": 4
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 0.554,
+              "samples": 3
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "ExtensionError",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/core/extension-error.js",
+              "line": 26,
+              "sampledMs": 0.479,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 0.429,
+              "samples": 1
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/backend.js",
+              "line": 528,
+              "sampledMs": 0.345,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "setDefaultSuggestion",
+              "source": "",
+              "line": null,
+              "sampledMs": 0.126,
+              "samples": 5
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "",
+              "source": "",
+              "line": null,
+              "sampledMs": 0.111,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3696,
+              "thread": "v8:ProfEvntProc",
+              "function": "_superviseOwnedDictionaryImport",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/backend.js",
+              "line": 835,
+              "sampledMs": 0.081,
+              "samples": 2
+            }
+          ]
+        },
+        "3627:3695": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 1556.0020000000002,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 1154.63,
+              "samples": 4794
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "_onPermissionSettingChanged",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/pages/settings/generic-setting-controller.js",
+              "line": 95,
+              "sampledMs": 196.459,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 132.38,
+              "samples": 649
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "querySelector",
+              "source": "",
+              "line": null,
+              "sampledMs": 16.065,
+              "samples": 60
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "dispatchEvent",
+              "source": "",
+              "line": null,
+              "sampledMs": 5.479,
+              "samples": 337
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "isRegExp",
+              "source": "",
+              "line": 35,
+              "sampledMs": 5.388,
+              "samples": 1
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "",
+              "source": "",
+              "line": null,
+              "sampledMs": 5.125,
+              "samples": 20
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "(garbage collector)",
+              "source": "",
+              "line": null,
+              "sampledMs": 5.039,
+              "samples": 18
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "onProgress",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/pages/settings/dictionary-import-controller.js",
+              "line": 3830,
+              "sampledMs": 4.089,
+              "samples": 35
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "setTimeout",
+              "source": "",
+              "line": null,
+              "sampledMs": 3.818,
+              "samples": 36
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "log",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/core/log.js",
+              "line": 45,
+              "sampledMs": 2.529,
+              "samples": 12
+            },
+            {
+              "pid": 3627,
+              "tid": 3695,
+              "thread": "v8:ProfEvntProc",
+              "function": "query",
+              "source": "",
+              "line": 5718,
+              "sampledMs": 2.243,
+              "samples": 13
+            }
+          ]
+        },
+        "3627:3704": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 770.6919999999999,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 607.295,
+              "samples": 2552
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 59.009,
+              "samples": 61
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[106]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 25.316,
+              "samples": 33
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[149]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 17.547,
+              "samples": 53
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "prepareSpanCompression",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 554,
+              "sampledMs": 8.472,
+              "samples": 31
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[101]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 8.394,
+              "samples": 53
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 7.982,
+              "samples": 1
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "finishPreparedSpanCompression",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 626,
+              "sampledMs": 6.956,
+              "samples": 18
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[95]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 5.98,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[5]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 5.316,
+              "samples": 8
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[8]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 3.805,
+              "samples": 4
+            },
+            {
+              "pid": 3627,
+              "tid": 3704,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[185]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 2.869,
+              "samples": 7
+            }
+          ]
+        },
+        "3627:3707": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 764.1450000000002,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 561.537,
+              "samples": 2258
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 67.515,
+              "samples": 59
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[101]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 35.726,
+              "samples": 87
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[106]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 24.676,
+              "samples": 55
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 20.267,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[149]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 19.601,
+              "samples": 70
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[127]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 11.797,
+              "samples": 3
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[104]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 7.23,
+              "samples": 10
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[5]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 4.335,
+              "samples": 17
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "prepareSpanCompression",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 554,
+              "sampledMs": 2.475,
+              "samples": 26
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/zstd-term-content-compression-worker.js",
+              "line": 29,
+              "sampledMs": 2.275,
+              "samples": 3
+            },
+            {
+              "pid": 3627,
+              "tid": 3707,
+              "thread": "v8:ProfEvntProc",
+              "function": "prepareWrappedTermContentZstdSpans",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/zstd-term-content.js",
+              "line": 964,
+              "sampledMs": 2.215,
+              "samples": 2
+            }
+          ]
+        },
+        "3627:3706": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 763.4140000000002,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 537.34,
+              "samples": 2185
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 55.452,
+              "samples": 60
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[149]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 38.46,
+              "samples": 82
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[101]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 32.138,
+              "samples": 95
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 20.724,
+              "samples": 2
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[8]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 15.29,
+              "samples": 7
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[5]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 12.592,
+              "samples": 18
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[106]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 11.715,
+              "samples": 61
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "prepareSpanCompression",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 554,
+              "sampledMs": 10.5,
+              "samples": 32
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[52]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 7.345,
+              "samples": 11
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "checkResult",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 393,
+              "sampledMs": 6.727,
+              "samples": 3
+            },
+            {
+              "pid": 3627,
+              "tid": 3706,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[127]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 5.463,
+              "samples": 4
+            }
+          ]
+        },
+        "3627:3705": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 760.2880000000001,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 503.193,
+              "samples": 2033
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 71.882,
+              "samples": 78
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[101]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 54.951,
+              "samples": 124
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[149]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 31.568,
+              "samples": 145
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[106]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 22.598,
+              "samples": 74
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 11.328,
+              "samples": 1
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[5]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 10.473,
+              "samples": 29
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[104]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 10.283,
+              "samples": 18
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "prepareSpanCompression",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd-wasm.js",
+              "line": 554,
+              "sampledMs": 9.546,
+              "samples": 39
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[127]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 7.568,
+              "samples": 4
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[179]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 4.47,
+              "samples": 8
+            },
+            {
+              "pid": 3627,
+              "tid": 3705,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[94]",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/lib/zstd.wasm",
+              "line": 0,
+              "sampledMs": 3.373,
+              "samples": 3
+            }
+          ]
+        },
+        "3627:3702": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 881.6770000000001,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 377.282,
+              "samples": 1405
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[13]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 124.06,
+              "samples": 395
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[48]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 75.131,
+              "samples": 190
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[36]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 71.346,
+              "samples": 335
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[2]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 52.964,
+              "samples": 187
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[18]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 28.036,
+              "samples": 116
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWithWasmColumnChunks",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser-worker.js",
+              "line": 129,
+              "sampledMs": 26.007,
+              "samples": 95
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[27]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 17.915,
+              "samples": 89
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "copyWasmBackedColumnChunk",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 4110,
+              "sampledMs": 11.364,
+              "samples": 41
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWasmBuffersUnchecked",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 867,
+              "sampledMs": 11.262,
+              "samples": 29
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[24]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 10.735,
+              "samples": 53
+            },
+            {
+              "pid": 3627,
+              "tid": 3702,
+              "thread": "v8:ProfEvntProc",
+              "function": "buildContentUniqueRowIndexes",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 547,
+              "sampledMs": 9.572,
+              "samples": 15
+            }
+          ]
+        },
+        "3627:3701": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 873.8629999999999,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 335.611,
+              "samples": 1251
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[13]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 110,
+              "samples": 399
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[36]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 88.293,
+              "samples": 313
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[48]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 83.13,
+              "samples": 266
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[2]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 56.227,
+              "samples": 210
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[18]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 39.133,
+              "samples": 150
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[27]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 38.713,
+              "samples": 127
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWithWasmColumnChunks",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser-worker.js",
+              "line": 129,
+              "sampledMs": 29.141,
+              "samples": 114
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[24]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 11.149,
+              "samples": 56
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWasmBuffersUnchecked",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 867,
+              "sampledMs": 9.663,
+              "samples": 26
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 9.251,
+              "samples": 4
+            },
+            {
+              "pid": 3627,
+              "tid": 3701,
+              "thread": "v8:ProfEvntProc",
+              "function": "copyWasmBackedColumnChunk",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 4110,
+              "sampledMs": 8.346,
+              "samples": 19
+            }
+          ]
+        },
+        "3627:3697": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 1250.1929999999993,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 329.74,
+              "samples": 1582
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "flush",
+              "source": "",
+              "line": null,
+              "sampledMs": 121.62,
+              "samples": 10
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "_onMessage",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/background/offscreen-dictionary-worker.js",
+              "line": 106,
+              "sampledMs": 95.773,
+              "samples": 3
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[4]",
+              "source": "wasm://wasm/34e657a2",
+              "line": 0,
+              "sampledMs": 76.472,
+              "samples": 334
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "_encodeAndAppendArtifactChunkForState",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-record-opfs-store.js",
+              "line": 2455,
+              "sampledMs": 39.722,
+              "samples": 96
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "_cacheRecentPublishedTermContentSources",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/dictionary-database.js",
+              "line": 6794,
+              "sampledMs": 34.178,
+              "samples": 92
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "(garbage collector)",
+              "source": "",
+              "line": null,
+              "sampledMs": 30.398,
+              "samples": 110
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "_registerInFlightTermContentSources",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/dictionary-database.js",
+              "line": 6979,
+              "sampledMs": 29.48,
+              "samples": 47
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "write",
+              "source": "",
+              "line": null,
+              "sampledMs": 28.856,
+              "samples": 91
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseCompactRecordFields",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-record-opfs-store.js",
+              "line": 191,
+              "sampledMs": 26.265,
+              "samples": 54
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "_encodeArtifactRecordFields",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-record-opfs-store.js",
+              "line": 5839,
+              "sampledMs": 24.137,
+              "samples": 96
+            },
+            {
+              "pid": 3627,
+              "tid": 3697,
+              "thread": "v8:ProfEvntProc",
+              "function": "postMessage",
+              "source": "",
+              "line": null,
+              "sampledMs": 23.449,
+              "samples": 150
+            }
+          ]
+        },
+        "3627:3703": {
+          "thread": "v8:ProfEvntProc",
+          "sampledMs": 863.5259999999997,
+          "top": [
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "(idle)",
+              "source": "",
+              "line": null,
+              "sampledMs": 271.712,
+              "samples": 962
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[13]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 126.768,
+              "samples": 429
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[36]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 115.688,
+              "samples": 454
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[48]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 64.805,
+              "samples": 233
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[2]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 50.527,
+              "samples": 175
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[27]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 39.665,
+              "samples": 127
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[18]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 36.677,
+              "samples": 123
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "wasm-function[24]",
+              "source": "wasm://wasm/0004212e",
+              "line": 0,
+              "sampledMs": 34.5,
+              "samples": 70
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWithWasmColumnChunks",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser-worker.js",
+              "line": 129,
+              "sampledMs": 26.297,
+              "samples": 102
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "copyWasmBackedColumnChunk",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 4110,
+              "sampledMs": 14.478,
+              "samples": 54
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "parseTermBankWasmBuffersUnchecked",
+              "source": "chrome-extension://jhjckgbefigiedkgmponfnfccfjdaiaf/js/dictionary/term-bank-wasm-parser.js",
+              "line": 867,
+              "sampledMs": 7.357,
+              "samples": 21
+            },
+            {
+              "pid": 3627,
+              "tid": 3703,
+              "thread": "v8:ProfEvntProc",
+              "function": "(program)",
+              "source": "",
+              "line": null,
+              "sampledMs": 6.817,
+              "samples": 1
+            }
+          ]
+        }
+      },
+      "interpretation": "Per-thread sampled attribution only. Threads overlap; neither their sum nor a traced duration is ordinary import latency. Use the raw trace and ordinary phase receipts to locate waits and critical-path work."
+    }
+  },
+  {
+    "tag": "BASELINE_PROFILE_RESULT",
+    "value": {
+      "complete": true,
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "dictionary": "jmdict",
+      "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf",
+      "traceSummaryAvailable": true,
+      "traceSummaryError": null,
+      "ordinaryControlChangePercent": -10.282321075111756,
+      "interpretation": "Two ordinary baseline observations describe host/order variation only. Trace elapsed time is non-authoritative. Storage inventories are retained without asserting byte-size determinism.",
+      "observations": [
+        {
+          "name": "ordinary-before",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 959.8999999999942,
+          "workerImportMs": 931.8999999999942,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        },
+        {
+          "name": "trace",
+          "status": "success",
+          "authoritativeTiming": false,
+          "totalImportMs": 1349.300000000003,
+          "workerImportMs": 1149.7999999999884,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        },
+        {
+          "name": "ordinary-after",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 861.1999999999971,
+          "workerImportMs": 835,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        }
+      ]
+    }
+  }
+]

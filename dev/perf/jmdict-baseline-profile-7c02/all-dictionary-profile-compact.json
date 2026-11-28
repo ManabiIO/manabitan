@@ -1,0 +1,330 @@
+{
+  "jmdict": {
+    "ordinary": [
+      {
+        "name": "ordinary-before",
+        "totalMs": 959.8999999999942,
+        "workerMs": 931.8999999999942,
+        "parseUnhiddenMs": 196,
+        "bulkAddMs": 561,
+        "dataBanksMs": 789,
+        "finalizationMs": 123,
+        "recordCloseMs": 108,
+        "compressionMs": 344.1000000000058,
+        "metadataPublishMs": 152.19999999995343,
+        "recordFieldEncodeMs": 44.60000000002037,
+        "parserSummedMs": 823,
+        "inflateSummedMs": 343.6000000000349,
+        "crcSummedMs": 0,
+        "recordIndexWorkerFiles": 0
+      },
+      {
+        "name": "ordinary-after",
+        "totalMs": 861.1999999999971,
+        "workerMs": 835,
+        "parseUnhiddenMs": 210,
+        "bulkAddMs": 452,
+        "dataBanksMs": 688,
+        "finalizationMs": 126,
+        "recordCloseMs": 112,
+        "compressionMs": 263.40000000000873,
+        "metadataPublishMs": 116.90000000002328,
+        "recordFieldEncodeMs": 40.999999999970896,
+        "parserSummedMs": 802,
+        "inflateSummedMs": 295.199999999968,
+        "crcSummedMs": 0,
+        "recordIndexWorkerFiles": 0
+      }
+    ],
+    "nativeTopSampleWeights": {
+      "parse_composite_span_impl": {
+        "sampledMs": 360.828,
+        "threads": 3
+      },
+      "parse_and_encode_term_bank_token_binary_dedup": {
+        "sampledMs": 275.327,
+        "threads": 3
+      },
+      "libdeflate_deflate_decompress_ex": {
+        "sampledMs": 223.066,
+        "threads": 3
+      },
+      "crc32_bytes": {
+        "sampledMs": 159.718,
+        "threads": 3
+      },
+      "encode_term_content_token_binary_row": {
+        "sampledMs": 96.293,
+        "threads": 3
+      },
+      "parse_row_single_pass": {
+        "sampledMs": 103.846,
+        "threads": 3
+      },
+      "hash_content_xxh32_pair": {
+        "sampledMs": 56.384,
+        "threads": 3
+      }
+    },
+    "result": {
+      "complete": true,
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "dictionary": "jmdict",
+      "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "packageSha256": "c25770598d92c3d43cf7061fa62990c7a8758078a26dcf85829cb1d1dda11abf",
+      "traceSummaryAvailable": true,
+      "traceSummaryError": null,
+      "ordinaryControlChangePercent": -10.282321075111756,
+      "interpretation": "Two ordinary baseline observations describe host/order variation only. Trace elapsed time is non-authoritative. Storage inventories are retained without asserting byte-size determinism.",
+      "observations": [
+        {
+          "name": "ordinary-before",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 959.8999999999942,
+          "workerImportMs": 931.8999999999942,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        },
+        {
+          "name": "trace",
+          "status": "success",
+          "authoritativeTiming": false,
+          "totalImportMs": 1349.300000000003,
+          "workerImportMs": 1149.7999999999884,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        },
+        {
+          "name": "ordinary-after",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 861.1999999999971,
+          "workerImportMs": 835,
+          "semanticSha256": "039c9b4f8f04e1964f79e76392e1f106df281f8738aa2f7f98bfcaf7c70c935a",
+          "storageBytes": 43520477
+        }
+      ]
+    }
+  },
+  "jitendex": {
+    "ordinary": [
+      {
+        "name": "ordinary-before",
+        "totalMs": 1344.5,
+        "workerMs": 1314.5,
+        "parseUnhiddenMs": 419,
+        "bulkAddMs": 756,
+        "dataBanksMs": 1237,
+        "finalizationMs": 28,
+        "recordCloseMs": 10.599999999991269,
+        "compressionMs": 558.0999999999622,
+        "metadataPublishMs": 38.30000000006112,
+        "recordFieldEncodeMs": 31.40000000000873,
+        "parserSummedMs": 1100,
+        "inflateSummedMs": 845.3000000000175,
+        "crcSummedMs": 0,
+        "recordIndexWorkerFiles": 0
+      },
+      {
+        "name": "ordinary-after",
+        "totalMs": 1122,
+        "workerMs": 1097.5,
+        "parseUnhiddenMs": 364,
+        "bulkAddMs": 626,
+        "dataBanksMs": 1048,
+        "finalizationMs": 25,
+        "recordCloseMs": 10.699999999982538,
+        "compressionMs": 437.20000000004075,
+        "metadataPublishMs": 31.300000000017462,
+        "recordFieldEncodeMs": 34.200000000040745,
+        "parserSummedMs": 933,
+        "inflateSummedMs": 716.4999999999709,
+        "crcSummedMs": 0,
+        "recordIndexWorkerFiles": 0
+      }
+    ],
+    "nativeTopSampleWeights": {
+      "crc32_bytes": {
+        "sampledMs": 499.913,
+        "threads": 3
+      },
+      "parse_composite_span_impl": {
+        "sampledMs": 471.671,
+        "threads": 3
+      },
+      "libdeflate_deflate_decompress_ex": {
+        "sampledMs": 358.761,
+        "threads": 3
+      },
+      "parse_and_encode_term_bank_token_binary_dedup": {
+        "sampledMs": 145.589,
+        "threads": 3
+      },
+      "hash_content_xxh32_pair": {
+        "sampledMs": 121.299,
+        "threads": 3
+      },
+      "encode_term_content_token_binary_row": {
+        "sampledMs": 79.292,
+        "threads": 3
+      },
+      "reuse_validated_glossary": {
+        "sampledMs": 71.219,
+        "threads": 3
+      },
+      "parse_row_single_pass": {
+        "sampledMs": 45.275,
+        "threads": 3
+      }
+    },
+    "result": {
+      "complete": true,
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "dictionary": "jitendex",
+      "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "packageSha256": "d91e85b6678e3787e68c236b8374be4fa8c9b91e6afc16635d009f179ab135a4",
+      "traceSummaryAvailable": true,
+      "traceSummaryError": null,
+      "ordinaryControlChangePercent": -16.54890293789513,
+      "interpretation": "Two ordinary baseline observations describe host/order variation only. Trace elapsed time is non-authoritative. Storage inventories are retained without asserting byte-size determinism.",
+      "observations": [
+        {
+          "name": "ordinary-before",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 1344.5,
+          "workerImportMs": 1314.5,
+          "semanticSha256": "6072840ec8ed064a0a9b825ebd896e6004a471a801549b7780b62eac8c7a9aa8",
+          "storageBytes": 67466332
+        },
+        {
+          "name": "trace",
+          "status": "success",
+          "authoritativeTiming": false,
+          "totalImportMs": 1567.800000000003,
+          "workerImportMs": 1391.4000000000087,
+          "semanticSha256": "6072840ec8ed064a0a9b825ebd896e6004a471a801549b7780b62eac8c7a9aa8",
+          "storageBytes": 67466332
+        },
+        {
+          "name": "ordinary-after",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 1122,
+          "workerImportMs": 1097.5,
+          "semanticSha256": "6072840ec8ed064a0a9b825ebd896e6004a471a801549b7780b62eac8c7a9aa8",
+          "storageBytes": 67466332
+        }
+      ]
+    }
+  },
+  "vndb": {
+    "ordinary": [
+      {
+        "name": "ordinary-before",
+        "totalMs": 3785.4000000000233,
+        "workerMs": 3761.399999999965,
+        "parseUnhiddenMs": 1470,
+        "bulkAddMs": 1962,
+        "dataBanksMs": 3661,
+        "finalizationMs": 22,
+        "recordCloseMs": 7.600000000034925,
+        "compressionMs": 226.7999999994645,
+        "metadataPublishMs": 40.99999999982538,
+        "recordFieldEncodeMs": 262.79999999998836,
+        "parserSummedMs": 4989,
+        "inflateSummedMs": 948.0999999998603,
+        "crcSummedMs": 990.9000000001397,
+        "recordIndexWorkerFiles": 2
+      },
+      {
+        "name": "ordinary-after",
+        "totalMs": 3887.100000000035,
+        "workerMs": 3866.2999999999884,
+        "parseUnhiddenMs": 1595,
+        "bulkAddMs": 1923,
+        "dataBanksMs": 3761,
+        "finalizationMs": 23,
+        "recordCloseMs": 7.7000000000116415,
+        "compressionMs": 199.70000000012806,
+        "metadataPublishMs": 35.69999999937136,
+        "recordFieldEncodeMs": 283.60000000026776,
+        "parserSummedMs": 5070,
+        "inflateSummedMs": 955.2999999999884,
+        "crcSummedMs": 1092.6999999997206,
+        "recordIndexWorkerFiles": 2
+      }
+    ],
+    "nativeTopSampleWeights": {
+      "parse_and_encode_term_bank_token_binary_dedup": {
+        "sampledMs": 1750.288,
+        "threads": 3
+      },
+      "libdeflate_deflate_decompress_ex": {
+        "sampledMs": 996.038,
+        "threads": 3
+      },
+      "crc32_update_gap": {
+        "sampledMs": 911.503,
+        "threads": 3
+      },
+      "reuse_validated_glossary": {
+        "sampledMs": 865.483,
+        "threads": 3
+      },
+      "parse_row_single_pass": {
+        "sampledMs": 851.767,
+        "threads": 3
+      },
+      "crc32_bytes": {
+        "sampledMs": 152.377,
+        "threads": 1
+      },
+      "parse_composite_span_impl": {
+        "sampledMs": 241.924,
+        "threads": 3
+      }
+    },
+    "result": {
+      "complete": true,
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "dictionary": "vndb",
+      "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "packageSha256": "887074e8c06fcad677bea91f953aa0d4c71f1e6030ff85562497542a8ed66549",
+      "traceSummaryAvailable": true,
+      "traceSummaryError": null,
+      "ordinaryControlChangePercent": 2.6866381359964775,
+      "interpretation": "Two ordinary baseline observations describe host/order variation only. Trace elapsed time is non-authoritative. Storage inventories are retained without asserting byte-size determinism.",
+      "observations": [
+        {
+          "name": "ordinary-before",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 3785.4000000000233,
+          "workerImportMs": 3761.399999999965,
+          "semanticSha256": "72ecb5d04bacb1300cb6d6993a0e92b4d0392d84d8984e9bccdcb20b74d2594d",
+          "storageBytes": 609176779
+        },
+        {
+          "name": "trace",
+          "status": "success",
+          "authoritativeTiming": false,
+          "totalImportMs": 4644.099999999977,
+          "workerImportMs": 4470.599999999977,
+          "semanticSha256": "72ecb5d04bacb1300cb6d6993a0e92b4d0392d84d8984e9bccdcb20b74d2594d",
+          "storageBytes": 609176779
+        },
+        {
+          "name": "ordinary-after",
+          "status": "success",
+          "authoritativeTiming": true,
+          "totalImportMs": 3887.100000000035,
+          "workerImportMs": 3866.2999999999884,
+          "semanticSha256": "72ecb5d04bacb1300cb6d6993a0e92b4d0392d84d8984e9bccdcb20b74d2594d",
+          "storageBytes": 609176779
+        }
+      ]
+    }
+  }
+}

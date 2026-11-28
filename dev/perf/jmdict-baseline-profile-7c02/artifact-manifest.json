@@ -1,0 +1,70 @@
+{
+  "runId": 46102820124,
+  "head": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f",
+  "branch": "perf/import-baseline-20261128-7c02",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/46102820124",
+  "artifacts": [
+    {
+      "id": 15246796550,
+      "node_id": "MDg6QXJ0aWZhY3QxNTI0Njc5NjU1MA==",
+      "name": "baseline-import-profile-7c02-vndb",
+      "size_in_bytes": 18647960,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246796550",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246796550/zip",
+      "expired": false,
+      "digest": "sha256:138788a804ca4d6083b66d9d5eaedd28d3b49ab47a398378d959851ce418a99b",
+      "created_at": "2026-11-28T03:38:58Z",
+      "updated_at": "2026-11-28T03:38:58Z",
+      "expires_at": "2026-12-12T03:38:57Z",
+      "workflow_run": {
+        "id": 46102820124,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-baseline-20261128-7c02",
+        "head_sha": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f"
+      }
+    },
+    {
+      "id": 15246676338,
+      "node_id": "MDg6QXJ0aWZhY3QxNTI0NjY3NjMzOA==",
+      "name": "baseline-import-profile-7c02-jitendex",
+      "size_in_bytes": 17664517,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246676338",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246676338/zip",
+      "expired": false,
+      "digest": "sha256:89aa8c363ab6a60b3b0af00fba409a37df0cc4775be3ef93c5de48f611d85fa1",
+      "created_at": "2026-11-28T03:33:18Z",
+      "updated_at": "2026-11-28T03:33:18Z",
+      "expires_at": "2026-12-12T03:33:17Z",
+      "workflow_run": {
+        "id": 46102820124,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-baseline-20261128-7c02",
+        "head_sha": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f"
+      }
+    },
+    {
+      "id": 15246484756,
+      "node_id": "MDg6QXJ0aWZhY3QxNTI0NjQ4NDc1Ng==",
+      "name": "baseline-import-profile-7c02-jmdict",
+      "size_in_bytes": 17389650,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246484756",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15246484756/zip",
+      "expired": false,
+      "digest": "sha256:f142fed755878a6e4f6bfbb02efb30b35084872922f11af251a2668440ee311a",
+      "created_at": "2026-11-28T03:43:11Z",
+      "updated_at": "2026-11-28T03:43:11Z",
+      "expires_at": "2026-12-12T03:43:10Z",
+      "workflow_run": {
+        "id": 46102820124,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-baseline-20261128-7c02",
+        "head_sha": "dcabc5f2bb5f720d598da3f5aebd90367ef98c4f"
+      }
+    }
+  ]
+}
