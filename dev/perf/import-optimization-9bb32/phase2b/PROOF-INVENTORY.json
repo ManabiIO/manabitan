@@ -1,0 +1,867 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "files": [
+    {
+      "bytes": 1591,
+      "gitBlobSha1": "c53ee787dbb15389030fe942fad2b9a0c757f37f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/.github/workflows/import-group-stages-9bb32.yml",
+      "path": "frozen-diagnostic-source/.github/workflows/import-group-stages-9bb32.yml",
+      "repositoryPath": ".github/workflows/import-group-stages-9bb32.yml",
+      "sha256": "3f0d5c65743629c26c1c0f0a8b94d0482355f3f512c8b0303f6eada0d2140152",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 27270,
+      "gitBlobSha1": "9c4dd07d75ba6d289774c139a708c7e87d926c5e",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/dev/perf/import-group-stages-9bb32.json",
+      "path": "frozen-diagnostic-source/dev/perf/import-group-stages-9bb32.json",
+      "repositoryPath": "dev/perf/import-group-stages-9bb32.json",
+      "sha256": "6879a616ed256e7b987f647e5d22d278fa7e335f3bd1ca11eddb0df972f59c83",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 15254,
+      "gitBlobSha1": "6a719322b93f737c5b9d1a6a8a9821253c83f53f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/dev/perf/import-group-stages-9bb32.py",
+      "path": "frozen-diagnostic-source/dev/perf/import-group-stages-9bb32.py",
+      "repositoryPath": "dev/perf/import-group-stages-9bb32.py",
+      "sha256": "2c64e97dbcd5f7a610e1a2256e8206310d33dd63ffdb1be3e3a8d4cace013b08",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 19743,
+      "gitBlobSha1": "fdae5636d87af07bdd526e874a944ab434ee7ec8",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/dev/perf/import-group-stages-extract-9bb32.py",
+      "path": "frozen-diagnostic-source/dev/perf/import-group-stages-extract-9bb32.py",
+      "repositoryPath": "dev/perf/import-group-stages-extract-9bb32.py",
+      "sha256": "1a84db3bd186eabc36551ace3f32f45da11c95b29a67a010f4a8dcd304a29a2a",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 614813,
+      "gitBlobSha1": "77379954dabf2a57ab70c477f9ad735929653e37",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/ext/js/dictionary/dictionary-database.js",
+      "path": "frozen-diagnostic-source/ext/js/dictionary/dictionary-database.js",
+      "repositoryPath": "ext/js/dictionary/dictionary-database.js",
+      "sha256": "511bf6f27752c334a621dc8ec778361f9eb0a85e0caee6e939014eaaf7d98eee",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 345654,
+      "gitBlobSha1": "192a79d454323c6fa6ce444a95097e525465cad5",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/ext/js/dictionary/dictionary-importer.js",
+      "path": "frozen-diagnostic-source/ext/js/dictionary/dictionary-importer.js",
+      "repositoryPath": "ext/js/dictionary/dictionary-importer.js",
+      "sha256": "def12281edd80e0e575b7cf491930830163553b03a8e87cffed719a94975f734",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 14768,
+      "gitBlobSha1": "d23b9f0e523b4e10cf1df46f85df76d71162ab66",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/ext/js/dictionary/import-group-stage-diagnostic.js",
+      "path": "frozen-diagnostic-source/ext/js/dictionary/import-group-stage-diagnostic.js",
+      "repositoryPath": "ext/js/dictionary/import-group-stage-diagnostic.js",
+      "sha256": "4f3087c5a7f6c7f50cfe1057d8dbdce2337a2e7e160993b2ac7fd45bbcb83584",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 210969,
+      "gitBlobSha1": "0a86184e7d48c65895097dba0a8f000df6a5c432",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/ext/js/dictionary/term-bank-wasm-parser.js",
+      "path": "frozen-diagnostic-source/ext/js/dictionary/term-bank-wasm-parser.js",
+      "repositoryPath": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "ee3ed91a5bb6dff5bafef4aa97907801204863f30f65db4633f83d1c10699217",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 71197,
+      "gitBlobSha1": "6343a09ae510e3808bde90b1d9a6c04f30addc38",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/jm-group-diagnostic/ext/js/dictionary/term-content-block-store.js",
+      "path": "frozen-diagnostic-source/ext/js/dictionary/term-content-block-store.js",
+      "repositoryPath": "ext/js/dictionary/term-content-block-store.js",
+      "sha256": "67cfcf6dbceef0928f595ee1423f1c3b3f221855ec2833be4e1fdf4e790d3603",
+      "sourceCommit": "b66020e0def759142ab2106a3f634a970ad807d7",
+      "sourceTree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+    },
+    {
+      "bytes": 10965,
+      "gitBlobSha1": "2663a1e9730f916594e19941dba74afb27235528",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/analyze-jmdict-cross-group-trace.py",
+      "path": "profiling/analyze-jmdict-cross-group-trace.py",
+      "sha256": "fbc7bcc22117efcad890e211cda042a3b321af607474ab8f62db22cfe7963d29"
+    },
+    {
+      "bytes": 1037,
+      "gitBlobSha1": "62976228154192fd4b42af5bf476694ad1d0392c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-cell-identity-review.json",
+      "path": "profiling/audit-minsize-cell-identity-review.json",
+      "sha256": "a0f80633a7acddf62c229b88ca15fd88fcd1768a7698e226f35374cc0806b05d"
+    },
+    {
+      "bytes": 6907,
+      "gitBlobSha1": "eab0310b9a9d94534d16941147e78d2f3759c23c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-cell-identity.py",
+      "path": "profiling/audit-minsize-cell-identity.py",
+      "sha256": "e6c9708b9f6cb76f612bd44f261b6f67c311436992fc53b3a70a9d35a9208cfe"
+    },
+    {
+      "bytes": 579,
+      "gitBlobSha1": "da389a1699272b1634b9bda4c4a22cb5592d9cff",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-ba-identity-provenance.json",
+      "path": "profiling/audit-minsize-vndb-ba-identity-provenance.json",
+      "sha256": "98b7e8eb1d28bc1c45f36b014fceaf9a10ecb339489139fd1b18d80e7ae41962"
+    },
+    {
+      "bytes": 1055,
+      "gitBlobSha1": "d7dbe40c2ff59d5d33efdb1f8640f40216c689b4",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-ba-identity-review.json",
+      "path": "profiling/audit-minsize-vndb-ba-identity-review.json",
+      "sha256": "2411e13ca5476a32969ca05f7dea78154278dc9c045afa42a415e16ca9145b73"
+    },
+    {
+      "bytes": 7876,
+      "gitBlobSha1": "12efd6797cecf7f718990a6515088c87689ac7d0",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-ba-identity.diff",
+      "path": "profiling/audit-minsize-vndb-ba-identity.diff",
+      "sha256": "be3987cb61909fc6a7af13bbe7bcba44309e44bc30e4d8c9f5b4fc3eb880fa8a"
+    },
+    {
+      "bytes": 8574,
+      "gitBlobSha1": "3dff479479f6b1546bf5c1eb0a2ed054e19d06f4",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-ba-identity.py",
+      "path": "profiling/audit-minsize-vndb-ba-identity.py",
+      "sha256": "64cc1635055da6c08d16153810f0c64d064e8a214e192bf9f3e096dc38afc382"
+    },
+    {
+      "bytes": 955,
+      "gitBlobSha1": "c6a0b17a7ca63c532a58735bdecf5193fe97ac02",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-failed-coverage-provenance.json",
+      "path": "profiling/audit-minsize-vndb-failed-coverage-provenance.json",
+      "sha256": "1e8c86bc99f5eb29c13f8070c355a96cb3172ba708c1da7ca7b8e35ce556f0a6"
+    },
+    {
+      "bytes": 1107,
+      "gitBlobSha1": "62a51e337f41ce03c8f8c2fe6b461fecfeb34de7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-failed-coverage-review.json",
+      "path": "profiling/audit-minsize-vndb-failed-coverage-review.json",
+      "sha256": "c5047cffb23444ca1fe321a128261c4334e5d9f34b87cf96fb681e69505a79d5"
+    },
+    {
+      "bytes": 10278,
+      "gitBlobSha1": "43eb6b237b0525ce2be9d3f3f95e810cb992fd3c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-failed-coverage.diff",
+      "path": "profiling/audit-minsize-vndb-failed-coverage.diff",
+      "sha256": "2b9522e4807b0eee15f68b635be75c5c6128453e033828045d208a1e1d783124"
+    },
+    {
+      "bytes": 10435,
+      "gitBlobSha1": "ce81f02ccf7cf3e439c0f8b8a1133c1389f6af54",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/audit-minsize-vndb-failed-coverage.py",
+      "path": "profiling/audit-minsize-vndb-failed-coverage.py",
+      "sha256": "df9ca07be356d42729f5ce3614ed63067041bc02200994d61fbcf2828e691e79"
+    },
+    {
+      "bytes": 6267,
+      "gitBlobSha1": "47995c06845e51c754dc2601282a1d4d8a86caf7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2a-publication-receipt.json",
+      "path": "profiling/checkpoint-phase2a-publication-receipt.json",
+      "sha256": "2a8255c8e512e2091aed3095e77319a4af2505bdceafb067f176bc6124f9781b"
+    },
+    {
+      "bytes": 108138,
+      "gitBlobSha1": "3d6c97ca175735f9572d4c665732cbc8d289a737",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b-preparation/LAYOUT.json",
+      "path": "profiling/checkpoint-phase2b-preparation/LAYOUT.json",
+      "sha256": "929aaab6deff8a8ee940c65f46b316dce6fb548c0a711715c1a2f28c60d8be2a"
+    },
+    {
+      "bytes": 6250,
+      "gitBlobSha1": "d0ba6be1cd439d21940ecef49ee68a1c5756f77a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b-preparation/READINESS.json",
+      "path": "profiling/checkpoint-phase2b-preparation/READINESS.json",
+      "sha256": "baed486e15e0de00255458f465ef3e8df2896d2e8e07701fab883e641c84a505"
+    },
+    {
+      "bytes": 2063,
+      "gitBlobSha1": "45dc72e4d055cd144ddd62072b7df349a2ed265f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b-preparation/README.md",
+      "path": "profiling/checkpoint-phase2b-preparation/README.md",
+      "sha256": "adfc31e47f98c4b20de21c960694fe20339832de6817dd3901c8a5e93baa80ab"
+    },
+    {
+      "bytes": 1639,
+      "gitBlobSha1": "282322889bebf02085e3527ffef005b546a42a44",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-plans/wide-keyword-parallel-scheduling.json",
+      "path": "profiling/hosted-plans/wide-keyword-parallel-scheduling.json",
+      "sha256": "7481dd381f06aae24bc89a11344fd08b7a4c132a1ea4df27f3f2ca6b5a7c51d7"
+    },
+    {
+      "bytes": 1206,
+      "gitBlobSha1": "1594e7052b8f8384454f391a612f4f546f041e1d",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-plans/wide-keyword-qualification-publication.json",
+      "path": "profiling/hosted-plans/wide-keyword-qualification-publication.json",
+      "sha256": "2455e5d810c1c9e9fc72e360036dead6f58394d463802673f96df852f1d3290d"
+    },
+    {
+      "bytes": 398549,
+      "gitBlobSha1": "a01533e2c112c3bb1604945e5e3a339f85019149",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/audit-and-stage-analysis.json",
+      "sha256": "c9d09fc1a1f0d6556a701a6d520e3b9e9847a1f347b826640f29d8994a67eb14"
+    },
+    {
+      "bytes": 795,
+      "gitBlobSha1": "45e66bce730f68a833ab6d4754e68e261f231ba8",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/github-artifact.json",
+      "sha256": "15f9b6fe9ba246a6106b02d6dd3c15fad7b55e9de2dec2493376a2c33f2a1486"
+    },
+    {
+      "bytes": 3990,
+      "gitBlobSha1": "ae5e02e7241bfbf8dc3d27f135e2c0a484b4a923",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/independent-audit-run.log",
+      "sha256": "2ee9597a2206a23bd45f8f0e307820c12d33518f4639c7b297b0339b0eab7991"
+    },
+    {
+      "bytes": 2986,
+      "gitBlobSha1": "7d3c2d7ada97dd3ac10791c52b1f38b2f9f6b2bb",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/independent-identity-preflight.json",
+      "sha256": "732fd37cd0d842f8ff8765b63b2852b8514cd6f8a5a9eb9daecb10963a8a227e"
+    },
+    {
+      "bytes": 73872,
+      "gitBlobSha1": "07f75cde498f112049e50c05ba129aff93992ae6",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/independent-semantics-memory-audit.json",
+      "sha256": "30125f38d11244e036b1f7efdc0ecdd61fd140af8bc8694b6af867e107f2d3de"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "194b3ed016a382c4336dec16be725e1054dc5bfd",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-AB/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-AB/retention-manifest.json",
+      "sha256": "96cc87533c23aad85c40431fdca328af6638de68e95a465c78fcc441dd4d7be6"
+    },
+    {
+      "bytes": 397930,
+      "gitBlobSha1": "912750167d7a6a39ad73f4a4946a1f48fc3f7c75",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/audit-and-stage-analysis.json",
+      "sha256": "06b12ac783c000bf10f8ddd081adaa74673e93c18292db991e716c369c5d7621"
+    },
+    {
+      "bytes": 795,
+      "gitBlobSha1": "df855293599ffe48198a8d07087c3d08ef0e9765",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/github-artifact.json",
+      "sha256": "3ca6ebb8b8c3fd44c1b6070ab2eb9975a13161fc046a47cf4682129d5556a81b"
+    },
+    {
+      "bytes": 3990,
+      "gitBlobSha1": "a225677081940952da5f43ea76dfc77f9c21c46d",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/independent-audit-run.log",
+      "sha256": "6950c1765e88dbba0932607d35849f448f497ac186c6ba81e87df755ae97018a"
+    },
+    {
+      "bytes": 2986,
+      "gitBlobSha1": "444d1dbe86b24e97def02624fcecade1d632e818",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/independent-identity-preflight.json",
+      "sha256": "67928e9cd238f476c28f95a2dbf5ee1a6b860ccc22523568f6ad3550bdcb082d"
+    },
+    {
+      "bytes": 73872,
+      "gitBlobSha1": "d79a3099d4ce6699ff27c37856a05602a1981ca0",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/independent-semantics-memory-audit.json",
+      "sha256": "a84501507aa889502304dfa4fdd69b258913a1f458d1909853723b80f0b1a2f8"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "0b5ce9cbdb15d4a8b2fff31de621bedd95e342db",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jitendex-BA/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/jitendex-BA/retention-manifest.json",
+      "sha256": "d2e593d8c6e93fc02fddd0e7c4cd5edaf424c2a816f852a0d3d715a8514c9392"
+    },
+    {
+      "bytes": 398710,
+      "gitBlobSha1": "a49eb3846f589377d426fa2a21ee5316ea118045",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/audit-and-stage-analysis.json",
+      "sha256": "717580ea90a0166c0674969c4069175d782e8d106adc3cd73e57f01668e53de0"
+    },
+    {
+      "bytes": 793,
+      "gitBlobSha1": "17a8a78cc601b36e6d3208aa637eb8e830b7973f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/github-artifact.json",
+      "sha256": "f38c739bc75f40e294fd31c9ed25c28e3e390a3c4ffc93c227084ca7dd2994ab"
+    },
+    {
+      "bytes": 3967,
+      "gitBlobSha1": "f30a03b322f91ac2119253773be22803a805ae36",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/independent-audit-run.log",
+      "sha256": "53f165b114aa2d9f1c9920cbfd89248ced94d1c015ced707c6e2d60a39d51a16"
+    },
+    {
+      "bytes": 2982,
+      "gitBlobSha1": "785eec7dbc9ba56803fe5b5c75bde9569bf51366",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/independent-identity-preflight.json",
+      "sha256": "9375ed2c3db017424129d95b12919d69fa2d9cb59f2d676bd0757ea25d0004fa"
+    },
+    {
+      "bytes": 73217,
+      "gitBlobSha1": "52c03ab3b4aa4351697c1dc55854f887f43f1356",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/independent-semantics-memory-audit.json",
+      "sha256": "9c71f0aa4d04038fabe6cf05b8bbba7f5a8f5e6c876a0cbdfc4c90f96bf62137"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "7c4b3072730d4eb21964fbd12d0f88f00f3e317c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-AB/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-AB/retention-manifest.json",
+      "sha256": "093544c042cb41b753384d882cb2a7f5f010a3db66abc0da5fb9df64e92d0749"
+    },
+    {
+      "bytes": 397576,
+      "gitBlobSha1": "32a71d709768dbf35fe049b107fdf181e625f7b7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/audit-and-stage-analysis.json",
+      "sha256": "779cd75d0b45a58991280def62c26edd9c970b6e338b82f2ae781f397e6a6577"
+    },
+    {
+      "bytes": 793,
+      "gitBlobSha1": "5c33483f48c43b9a31704468e0dd572502607d0b",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/github-artifact.json",
+      "sha256": "923d692c6e1439b30ccd2113ce7f00516d9bda587058050f3cf3184f5a3f4341"
+    },
+    {
+      "bytes": 3961,
+      "gitBlobSha1": "04dcea2ef994aab25a9bf6ec219e16728ba3cd4f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/independent-audit-run.log",
+      "sha256": "5ee67183d339f89a90e54546030023e8458ef661c823e8dfb4940f785dded5bf"
+    },
+    {
+      "bytes": 2982,
+      "gitBlobSha1": "27bb89c8e6eccfc8eccb32f88ff14cc23cabb25a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/independent-identity-preflight.json",
+      "sha256": "46587775199597eab0fb99bc6f44941961754e54d6eb7bf2036bb662cd6c0f7a"
+    },
+    {
+      "bytes": 73211,
+      "gitBlobSha1": "712aa1aa10f5438b5037e1caa52d5fb24f99fdbf",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/independent-semantics-memory-audit.json",
+      "sha256": "44f63fe0f89aece8b5d90e9936c3e0aa06bd20e73d90fdbc4b6e6a79f722345f"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "46274beac4f5fe4800b598e7861accf5b9ee5368",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/jmdict-BA/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/jmdict-BA/retention-manifest.json",
+      "sha256": "6897da75b8233d8d51fb435631328556c05fe5654f3a1734297ad6121dfea5f8"
+    },
+    {
+      "bytes": 403097,
+      "gitBlobSha1": "a3b1bc6da24eea2dfcdaa786e49e4e992ddca6aa",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/audit-and-stage-analysis.json",
+      "sha256": "f5a1baa5567da2b4426ba67335a79000a475b2fbb3aa122e3256849b2948c611"
+    },
+    {
+      "bytes": 791,
+      "gitBlobSha1": "03b7a6052f28b22e078db1cece28624d6701cf0b",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/github-artifact.json",
+      "sha256": "f32552c211a2722c209611a2993cf53be297b84d078731f100cee1be0f5542eb"
+    },
+    {
+      "bytes": 4079,
+      "gitBlobSha1": "46a598872fd83de886083fc5a10b50716022d643",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/independent-audit-run.log",
+      "sha256": "6930526b6a18f628e6173ba4b8dc5b40bceca3380fd79bd06e28b1407327ed00"
+    },
+    {
+      "bytes": 7390,
+      "gitBlobSha1": "a3bd2923d400fde1b7e329f0abdd61693f15c17a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/independent-identity-preflight.json",
+      "sha256": "64d3b51aecc40ec4059d4ba7d2ad9a12b2e590a36973cfdd2151908463d3b472"
+    },
+    {
+      "bytes": 74313,
+      "gitBlobSha1": "e88886a617d5c1f461d729a6c054256b9b35c21a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/independent-semantics-memory-audit.json",
+      "sha256": "12e9fdaaf0d28d20d854eb305aa95b1c03d2a6dc6a1872d80efda52cede0d5f5"
+    },
+    {
+      "bytes": 6288,
+      "gitBlobSha1": "ced2971c5797a6c7f91af74096ae036e5d135d2c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/job-completion-summary.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/job-completion-summary.json",
+      "sha256": "9d0512fa43b61ea2ae1bc4517d8c5851571fa836f5829cb375593829b2789a01"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "66b02cdb8597f7835eb8c1a1bdd900803c618c40",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-AB/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-AB/retention-manifest.json",
+      "sha256": "f4c52821112e57928330b92b9bcdcb5f32dbe1fed3413a4179813b7b50b37e9d"
+    },
+    {
+      "bytes": 402506,
+      "gitBlobSha1": "5e16fd8f8436423f535427ae5e8dd762c2f582e0",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/audit-and-stage-analysis.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/audit-and-stage-analysis.json",
+      "sha256": "7889476a278b9c6feb99e0f296bc4f358926ede42cc667451463f54ca94494ac"
+    },
+    {
+      "bytes": 791,
+      "gitBlobSha1": "060eadda84e0540c2edf002ffd56056f19f65962",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/github-artifact.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/github-artifact.json",
+      "sha256": "ec487921fd2af3009b169a6d9cd584e9acb23790cbd4b609a8cd0814e7c2a84f"
+    },
+    {
+      "bytes": 4005,
+      "gitBlobSha1": "db9f2cd3769fb80e223a5b13f6d760e5da4a3155",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/independent-audit-run.log",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/independent-audit-run.log",
+      "sha256": "955585a542a53acd4cee451f4f40dedfe0c992c608ddc2815b756139d0a473bd"
+    },
+    {
+      "bytes": 3469,
+      "gitBlobSha1": "a9a28efd72c48d6acabf580484e4c9a2a58d07e4",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/independent-identity-preflight.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/independent-identity-preflight.json",
+      "sha256": "2a50119c7f1c5bb12445279997253114f91fb3615f3a400eaf69ae6f1ff37404"
+    },
+    {
+      "bytes": 74175,
+      "gitBlobSha1": "4999c703e1164b96e3ddd4dcc4d9140f090be887",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/independent-semantics-memory-audit.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/independent-semantics-memory-audit.json",
+      "sha256": "1ce1363b1aa622faaa65687cdb674ddb01fc3384ca2c8b185a23ba5092a0910d"
+    },
+    {
+      "bytes": 46155,
+      "gitBlobSha1": "043c5be0168369ca1e5eab18c6fae55deb2bb01f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/minsize/vndb-BA/retention-manifest.json",
+      "path": "profiling/hosted-qualification/minsize/vndb-BA/retention-manifest.json",
+      "sha256": "891fcff71e3f2f3ea9fb28f51ef5402d2af597a4cb8f913935e66c3d83ace0d8"
+    },
+    {
+      "bytes": 1505,
+      "gitBlobSha1": "4fe47e188945575824276e6e8f5e09d82c29b33a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/import-experiment-summary/DECISIONS.json",
+      "path": "profiling/import-experiment-summary/DECISIONS.json",
+      "sha256": "97106cf009bfc4e51c031f709a9e29a757c5b390392f086ac5246410ec3baf1f"
+    },
+    {
+      "bytes": 22668,
+      "gitBlobSha1": "577d1cac4863405ff201f2ad90a7eefcc9ad0788",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/import-experiment-summary/RESULTS.json",
+      "path": "profiling/import-experiment-summary/RESULTS.json",
+      "sha256": "c6260bcedcad2b439a1216ae5ffab076fd00335815f47a6ad19a9c4bbb5d7f62"
+    },
+    {
+      "bytes": 5038,
+      "gitBlobSha1": "18fcb51286ec16e10605029ea3ffa0488192a741",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/import-experiment-summary/RESULTS.md",
+      "path": "profiling/import-experiment-summary/RESULTS.md",
+      "sha256": "8ff7332300bc385f0460f3c1cb87bb964ae8b3a18f061ad04ba245c5385abd82"
+    },
+    {
+      "bytes": 968,
+      "gitBlobSha1": "a7d051aa4d7b9df67336e6bdd8bb16c92fc61ad4",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-cross-group-diagnostic-design.json",
+      "path": "profiling/jmdict-cross-group-diagnostic-design.json",
+      "sha256": "4fe75aaede5c9e5218244e2685de4f1eb5432ffcd5666412b3d01345b7082839"
+    },
+    {
+      "bytes": 7500,
+      "gitBlobSha1": "20042b344564b67998736a7b107c832ef225d693",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-cross-group-diagnostic-design.md",
+      "path": "profiling/jmdict-cross-group-diagnostic-design.md",
+      "sha256": "96383aca14df63f55f45c08605fe0c889e236cdccb0eff22fe48311b8a4b9d45"
+    },
+    {
+      "bytes": 25669,
+      "gitBlobSha1": "adba068039e8b1ffa8bd1729b0292db51a98f1c9",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-cross-group-trace-review.json",
+      "path": "profiling/jmdict-cross-group-trace-review.json",
+      "sha256": "4eda67f2f745965e25af4492ddf6c2a2631721771667bad82809d6f45d42d78a"
+    },
+    {
+      "bytes": 8967,
+      "gitBlobSha1": "b074cc199fa8b99f9c8fc476cac5c58067e51fcb",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/REVIEW.md",
+      "path": "profiling/jmdict-group-diagnostic/REVIEW.md",
+      "sha256": "9493e3e584c4c47dde02f93d046abbfed8583c4246836943ab6d7805da4c0e17"
+    },
+    {
+      "bytes": 1405,
+      "gitBlobSha1": "45a8209f2a8a16a431cac5d0d4e02f9e7618c443",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/acquisition-identity-review-final.json",
+      "path": "profiling/jmdict-group-diagnostic/acquisition-identity-review-final.json",
+      "sha256": "0626da18be270e763f9e51627e3f27615df4d650ba43ad8cea5f6cd1e0d60ec3"
+    },
+    {
+      "bytes": 5781,
+      "gitBlobSha1": "5d61f17d069f108ead6b56a1f63ed25b005737e5",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/acquisition-identity-review.json",
+      "path": "profiling/jmdict-group-diagnostic/acquisition-identity-review.json",
+      "sha256": "689ddaa2190cdb2dddc411f40505740656140a01486dad5c9c9ba7dfc63c9100"
+    },
+    {
+      "bytes": 9691,
+      "gitBlobSha1": "fc696b52bc563d6fa004f867039c3b314d4b6dab",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/apply-hooks.py",
+      "path": "profiling/jmdict-group-diagnostic/apply-hooks.py",
+      "sha256": "3c1a63a2bc2537236412bc6193290edb83787c3fa3a98e1055c454c52a479925"
+    },
+    {
+      "bytes": 31727,
+      "gitBlobSha1": "b242a0cc3fefd1fd8e7bf0ac7ebf72650cc37266",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/draft-overlay-1.patch",
+      "path": "profiling/jmdict-group-diagnostic/draft-overlay-1.patch",
+      "sha256": "dc120bf02d5532acc0115ecbd120ad5720a4513cb0d2a40da9a564904bd7df59"
+    },
+    {
+      "bytes": 18581,
+      "gitBlobSha1": "d12e8e1a6dba8195bd0b5056b0153353320ad0b9",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/extract-group-stages.draft1.py",
+      "path": "profiling/jmdict-group-diagnostic/extract-group-stages.draft1.py",
+      "sha256": "59a7bc8c967a81f6f6a7fdcb83e294c0332619255b42ec1961936a3c07da24ea"
+    },
+    {
+      "bytes": 19109,
+      "gitBlobSha1": "e661ce37fff3549a1099bc3fa6f4243b1246b5ec",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/extract-group-stages.py",
+      "path": "profiling/jmdict-group-diagnostic/extract-group-stages.py",
+      "sha256": "e72277626368d6a771d64f1469bdf13ff078ad438c1234025a0b1052969ae0f9"
+    },
+    {
+      "bytes": 7800,
+      "gitBlobSha1": "10b6fefe0a65ec956180143f79f95fa30cc267d6",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/independent-final-source-binding.json",
+      "path": "profiling/jmdict-group-diagnostic/independent-final-source-binding.json",
+      "sha256": "17df7b46fbf761fe6f44b0c365a6e93930c1bd6649a6d9712cbc76c34eec8160"
+    },
+    {
+      "bytes": 1694,
+      "gitBlobSha1": "56c0fefad3d54be33434a028b38eedc275eaf7e7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/independent-local-commit-binding.json",
+      "path": "profiling/jmdict-group-diagnostic/independent-local-commit-binding.json",
+      "sha256": "560e981e8f534da4113e28143675cfe4a9446b7c567677746efe30ebb2949f69"
+    },
+    {
+      "bytes": 7771,
+      "gitBlobSha1": "182c4f31e7dfc4704b480559379fe696ffeabf10",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/independent-review-byte-audit.initial.py",
+      "path": "profiling/jmdict-group-diagnostic/independent-review-byte-audit.initial.py",
+      "sha256": "63abeacbbaf3ac22e525ffce58d01d6dd0656ccf00425f9897d3cc397d56ebf9"
+    },
+    {
+      "bytes": 8628,
+      "gitBlobSha1": "469011540b84d675d721fdd8df4ce105b3a07b28",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/independent-review-byte-audit.py",
+      "path": "profiling/jmdict-group-diagnostic/independent-review-byte-audit.py",
+      "sha256": "2e290904d95b96561a40f79aa4fd7abf981500830648ff9f7ea14e9297d5b749"
+    },
+    {
+      "bytes": 17486,
+      "gitBlobSha1": "8402e8c41573e9671736ed9b72dcf146c8b674bc",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/independent-source-review.json",
+      "path": "profiling/jmdict-group-diagnostic/independent-source-review.json",
+      "sha256": "a53279ba959a005bc146c82d6d4cccad6ffeeae9e268d2eaa4102738f3c13337"
+    },
+    {
+      "bytes": 3408,
+      "gitBlobSha1": "798280d76f8bd7027f9dd47527b63b6d4e68ce36",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/local-commit-binding.json",
+      "path": "profiling/jmdict-group-diagnostic/local-commit-binding.json",
+      "sha256": "3f9b1491fc2fd1cdb7b43d53be18f4dc5dafc5147e613cd317338b8bc4ba40e9"
+    },
+    {
+      "bytes": 7354,
+      "gitBlobSha1": "65299b8aa27e1cf5fc599b285a235e779a83f9db",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/make-spec.py",
+      "path": "profiling/jmdict-group-diagnostic/make-spec.py",
+      "sha256": "72c1170ee5eb7a8d87af710ab8fe6c680fcb5b9dd416093d092a6ff3cd0576b1"
+    },
+    {
+      "bytes": 7626,
+      "gitBlobSha1": "41e1692e9d27e7788c83cb186fbdd7584134657e",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-failure-policy.diff",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-failure-policy.diff",
+      "sha256": "d80824958b86b0b501b1db2299ca7092c6441d30bc6c8aa61699161d2ed201c1"
+    },
+    {
+      "bytes": 4497,
+      "gitBlobSha1": "1a8f80a0491a48318180c8c30223b3ed87e6f639",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-receipt-stage.diff",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-receipt-stage.diff",
+      "sha256": "cebbf76e4391032d5c4410f0742760cdf2380eeef5c20be55a2150d79a5cd81b"
+    },
+    {
+      "bytes": 7852,
+      "gitBlobSha1": "6d3a4f472c2c4c904a9cca3eb75a253db203ddab",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/REVIEW.md",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/REVIEW.md",
+      "sha256": "321f41cff1d0d0b3c678896d56a2b83b2ea4b3f37bc2419b680113a5b742e923"
+    },
+    {
+      "bytes": 26907,
+      "gitBlobSha1": "207771b8758ccddad97ecb8bc91871da41752405",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/import-group-stages-9bb32.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/import-group-stages-9bb32.json",
+      "sha256": "6ba6fdc108c5490742d2b2cbf8e6ac3f16fe1dd2ac9d31459a01880cc91ed438"
+    },
+    {
+      "bytes": 13961,
+      "gitBlobSha1": "7a5de64e560baa9a39ec07482292463cb3cdd3b1",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/import-group-stages-9bb32.py",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/import-group-stages-9bb32.py",
+      "sha256": "48f9719bfbcb2ed10c7873c5ee3ee446b0c40d886d446c67f024ff40e684e28d"
+    },
+    {
+      "bytes": 17486,
+      "gitBlobSha1": "8402e8c41573e9671736ed9b72dcf146c8b674bc",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/independent-source-review.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/independent-source-review.json",
+      "sha256": "a53279ba959a005bc146c82d6d4cccad6ffeeae9e268d2eaa4102738f3c13337"
+    },
+    {
+      "bytes": 6991,
+      "gitBlobSha1": "60cd576ae8e31de9fa3c487f76930a43e65e0aba",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/make-spec.py",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/make-spec.py",
+      "sha256": "db190c7cd7628f84115f7cd18d0980e68e62ce728286738e52d69b1519c96a90"
+    },
+    {
+      "bytes": 4119,
+      "gitBlobSha1": "0facc41e6d7cbd25907be2b83e8d93294b67cc77",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/publication-files.proposed.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/publication-files.proposed.json",
+      "sha256": "2baec5f52106fc1bc8956e2f8457fe1ddda289c07da787ff7a6176659532124d"
+    },
+    {
+      "bytes": 3248,
+      "gitBlobSha1": "cdc053bac04cfad43bb67eb17a3a2ddeb78e16ee",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v1/static-checks.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v1/static-checks.json",
+      "sha256": "14585a71da09fa5e72c9e3876ce1397419403b6f13692f3d62e5b2fb6a457819"
+    },
+    {
+      "bytes": 8459,
+      "gitBlobSha1": "2a54c714c42a4fc97e07bfe716a5a17a62ed45d6",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/REVIEW.md",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/REVIEW.md",
+      "sha256": "4a00feae815630886df2415ebcc660352efee751bce5cfb82d2216c6d5d454df"
+    },
+    {
+      "bytes": 5781,
+      "gitBlobSha1": "5d61f17d069f108ead6b56a1f63ed25b005737e5",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/acquisition-identity-review.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/acquisition-identity-review.json",
+      "sha256": "689ddaa2190cdb2dddc411f40505740656140a01486dad5c9c9ba7dfc63c9100"
+    },
+    {
+      "bytes": 27120,
+      "gitBlobSha1": "0e684cc3721148a5f0e756019249627803d56416",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/import-group-stages-9bb32.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/import-group-stages-9bb32.json",
+      "sha256": "3b5d544e2b754831fbb67bae7d6d536c2f4f1bbf80fe7b4b3deffc78c99c46a5"
+    },
+    {
+      "bytes": 15198,
+      "gitBlobSha1": "4acdd5345a7c09f648eb91588a69ee18ed19037a",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/import-group-stages-9bb32.py",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/import-group-stages-9bb32.py",
+      "sha256": "2c392ffc72900f915c8d433e278e86ac122805759592db1d7dd7eb37848c4c28"
+    },
+    {
+      "bytes": 7204,
+      "gitBlobSha1": "301c3f2c6ff7427da8d99b89b8568bdf8b5942a6",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/make-spec.py",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/make-spec.py",
+      "sha256": "1b2cde0d3ea056519034b658dbe2dd29c91b34f582018e0a6a97430590575b52"
+    },
+    {
+      "bytes": 4303,
+      "gitBlobSha1": "942ca32bfd676feade40652d651a95a059ed5a35",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/publication-files.proposed.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/publication-files.proposed.json",
+      "sha256": "8637e191b8dc8304e3bdaed93d8caae587619513ebebcc125ab8dfa61940e54a"
+    },
+    {
+      "bytes": 1508,
+      "gitBlobSha1": "1b5f07a241689ee86dd1e5ffb72ddf81d8535c96",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/pre-acquisition-v2/static-checks-v2.json",
+      "path": "profiling/jmdict-group-diagnostic/pre-acquisition-v2/static-checks-v2.json",
+      "sha256": "5723ebdd6b6724bf7397222edfd16bfbf7aeed2749e9f78659f907a5f80eea1f"
+    },
+    {
+      "bytes": 27270,
+      "gitBlobSha1": "9c4dd07d75ba6d289774c139a708c7e87d926c5e",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/prospective-spec.json",
+      "path": "profiling/jmdict-group-diagnostic/prospective-spec.json",
+      "sha256": "6879a616ed256e7b987f647e5d22d278fa7e335f3bd1ca11eddb0df972f59c83"
+    },
+    {
+      "bytes": 4302,
+      "gitBlobSha1": "cb758cb6cda7e13661b512ebef49ba288e927a2d",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/publication-files.final.json",
+      "path": "profiling/jmdict-group-diagnostic/publication-files.final.json",
+      "sha256": "917207d9094c7f1f4525554842d89ad47c621281b75ef82d996ff88aa93e9de1"
+    },
+    {
+      "bytes": 4303,
+      "gitBlobSha1": "942ca32bfd676feade40652d651a95a059ed5a35",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/publication-files.proposed.json",
+      "path": "profiling/jmdict-group-diagnostic/publication-files.proposed.json",
+      "sha256": "8637e191b8dc8304e3bdaed93d8caae587619513ebebcc125ab8dfa61940e54a"
+    },
+    {
+      "bytes": 2424,
+      "gitBlobSha1": "82b6c4fa8e1d807fadf2db2962a041036beabf1c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/remote-alignment.json",
+      "path": "profiling/jmdict-group-diagnostic/remote-alignment.json",
+      "sha256": "8e01668d76b50ba371e71499c7c4459d9e134fb4825ddd863b3deca6df167abb"
+    },
+    {
+      "bytes": 2485,
+      "gitBlobSha1": "5a52fb8480ee518bea80341e5f5b840e6b0102de",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/remote-publication.json",
+      "path": "profiling/jmdict-group-diagnostic/remote-publication.json",
+      "sha256": "93767ef9747e637cf5bafe109cb3d8cc74a26562fb6e0462ca4c97167a7341a1"
+    },
+    {
+      "bytes": 2658,
+      "gitBlobSha1": "3a86a91e52db47142a776e9d13178d2a5f847bd7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/root-publication-authorization.json",
+      "path": "profiling/jmdict-group-diagnostic/root-publication-authorization.json",
+      "sha256": "1946e85cc4b8c416f060aa0e1ddfc0c0f8787411d7974b04f593b577fe623898"
+    },
+    {
+      "bytes": 1508,
+      "gitBlobSha1": "1b5f07a241689ee86dd1e5ffb72ddf81d8535c96",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/static-checks-v2.json",
+      "path": "profiling/jmdict-group-diagnostic/static-checks-v2.json",
+      "sha256": "5723ebdd6b6724bf7397222edfd16bfbf7aeed2749e9f78659f907a5f80eea1f"
+    },
+    {
+      "bytes": 1395,
+      "gitBlobSha1": "92525afaa139ef131f3dad87c43d8e5a12fb97a1",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/static-checks-v3.json",
+      "path": "profiling/jmdict-group-diagnostic/static-checks-v3.json",
+      "sha256": "312746640731df536fb18b9f44b20ee50156014533bad99ec52eca029981a78b"
+    },
+    {
+      "bytes": 3248,
+      "gitBlobSha1": "cdc053bac04cfad43bb67eb17a3a2ddeb78e16ee",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/static-checks.json",
+      "path": "profiling/jmdict-group-diagnostic/static-checks.json",
+      "sha256": "14585a71da09fa5e72c9e3876ce1397419403b6f13692f3d62e5b2fb6a457819"
+    },
+    {
+      "bytes": 4986,
+      "gitBlobSha1": "ed3eb5171f192aab6520a2587ce3189d96cbb2d5",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/synthetic-extractor-check.json",
+      "path": "profiling/jmdict-group-diagnostic/synthetic-extractor-check.json",
+      "sha256": "d154e55ebb61c911684f0806bb87df200b619c97c7a43b29add3b4684937491b"
+    },
+    {
+      "bytes": 7419,
+      "gitBlobSha1": "9fc67f034df36cbddb4c28d0c00018717d6d7328",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/synthetic-extractor-check.py",
+      "path": "profiling/jmdict-group-diagnostic/synthetic-extractor-check.py",
+      "sha256": "9fa615fee13d106a66f6321c61d38bfb9369173333dbcced0e3789388571cd95"
+    },
+    {
+      "bytes": 429328,
+      "gitBlobSha1": "5545a1b6ced8c9a4bc3bfe22e0defd5129755669",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/valid-multiple-content-and-record-children.synthetic-audit.json",
+      "path": "profiling/jmdict-group-diagnostic/valid-multiple-content-and-record-children.synthetic-audit.json",
+      "sha256": "bff36b1c00747eaf6bf0ad55ee3c3c3518e221119369755cb921c9b9cf08d181"
+    },
+    {
+      "bytes": 454350,
+      "gitBlobSha1": "60f97e5e03b83cd7742f844661df494cc96e3898",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-group-diagnostic/valid-multiple-dbs.synthetic-audit.json",
+      "path": "profiling/jmdict-group-diagnostic/valid-multiple-dbs.synthetic-audit.json",
+      "sha256": "4af45589c7eac35b1765b6b215fe488b160e466b2bb1e78d05d9ee549ef1ec5f"
+    },
+    {
+      "bytes": 56676,
+      "gitBlobSha1": "d58dbe10f0f71d034481294bb9f46e6f856fa2b7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-remaining-opportunities-ownership.json",
+      "path": "profiling/jmdict-remaining-opportunities-ownership.json",
+      "sha256": "20e5d3d5cc6675c32e160c1b1f98b04b836bf62ef0f3ae1b59999754e91f40e8"
+    },
+    {
+      "bytes": 3385,
+      "gitBlobSha1": "7834bc0ee6aa9a46a8b985871af551f95f6743ed",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-remaining-opportunities-synthesis.json",
+      "path": "profiling/jmdict-remaining-opportunities-synthesis.json",
+      "sha256": "64de7633df5da0a627a0b68200f990e455366102bde7d8966c8b6ebfdcd3fdc0"
+    },
+    {
+      "bytes": 7460,
+      "gitBlobSha1": "75fd32eb8a8040b86569b68c660d96109cf4ddc5",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/jmdict-remaining-opportunities-synthesis.md",
+      "path": "profiling/jmdict-remaining-opportunities-synthesis.md",
+      "sha256": "d187a774e02cc9f1c2ea2c4e67a029313992ef4f71a6fe28402b334b19417240"
+    },
+    {
+      "bytes": 20907,
+      "gitBlobSha1": "f5475a26fbc4e096d12c3c318cc5195bca21bc27",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/prepare-phase2b-checkpoint.py",
+      "path": "profiling/prepare-phase2b-checkpoint.py",
+      "sha256": "3574528a0afcdfaea6c903db606a543588a41e3a17079e28fc4a40a68d2e6c40"
+    },
+    {
+      "bytes": 8439,
+      "gitBlobSha1": "ff38b8871d69fcec610a9efacae244a84b5e957c",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/summarize-import-experiments.py",
+      "path": "profiling/summarize-import-experiments.py",
+      "sha256": "eeaae14dda397b1eb1614da203e83ed0343d95c1fabfceea57df9d7faeacfba7"
+    },
+    {
+      "bytes": 3837,
+      "gitBlobSha1": "2b8c092132d706223953062dcd384eb2324e22c7",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/wide-hosted-qa-log-writer.js",
+      "path": "profiling/wide-hosted-qa-log-writer.js",
+      "sha256": "2849f5d84cbcfec3e0ff3b203fc7c3bdb853a7bb5b63d31bb88f79745432ce44"
+    },
+    {
+      "bytes": 1691,
+      "gitBlobSha1": "41ce3efc1028490a713841575fb704b687cc991f",
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/wide-qualification-prospective-review.json",
+      "path": "profiling/wide-qualification-prospective-review.json",
+      "sha256": "165c710ba02e923defe565db632c7098cd11e624724148d55d1540f5c1a47f09"
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "Exact frozen input members only; outer checkpoint metadata is not duplicated inside the proof archive"
+}

@@ -1,0 +1,94 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "cells": [
+    {
+      "allImportCount": 42,
+      "cell": "jmdict-AB",
+      "independentChecks": 804,
+      "members": 270,
+      "memoryQualified": true,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 256,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 18525707
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jmdict-BA",
+      "independentChecks": 804,
+      "members": 270,
+      "memoryQualified": true,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 268,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 18699366
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jitendex-AB",
+      "independentChecks": 804,
+      "members": 270,
+      "memoryQualified": true,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 277,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 19324673
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jitendex-BA",
+      "independentChecks": 804,
+      "members": 270,
+      "memoryQualified": true,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 335,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 21593102
+    },
+    {
+      "allImportCount": 42,
+      "cell": "vndb-AB",
+      "independentChecks": 807,
+      "members": 270,
+      "memoryQualified": false,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 418,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 24113935
+    },
+    {
+      "allImportCount": 42,
+      "cell": "vndb-BA",
+      "independentChecks": 807,
+      "members": 270,
+      "memoryQualified": true,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 598,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 30727984
+    }
+  ],
+  "dependencies": {
+    "phase1": {
+      "archiveVerified": true,
+      "memberBytesVerified": 2
+    },
+    "phase2a": {
+      "archiveVerified": true,
+      "memberBytesVerified": 23
+    }
+  },
+  "deterministicRepackEqual": null,
+  "originalImportReceiptsBound": 252,
+  "outerFilesVerified": 19,
+  "passed": true,
+  "pendingOutcomePayloadsIncluded": false,
+  "proofArchive": {
+    "members": 119,
+    "uncompressedBytes": 6105462
+  },
+  "proofSha256": "508573a2295c1000f096ea71fb47f27bad71ddcd540e910d780428247f8da2cc",
+  "rawArchiveMembersVerified": 1620,
+  "scope": "Retained bytes, original receipt bindings and dependency identities; no new imports/tests/timing or omitted-payload rehash",
+  "unresolvedSummaryBindings": []
+}

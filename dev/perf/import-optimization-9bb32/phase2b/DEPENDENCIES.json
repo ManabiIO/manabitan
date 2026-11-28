@@ -1,0 +1,192 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "phase1": {
+    "archive": {
+      "bytes": 5737812,
+      "gitBlobSha1": "b6ce6a5a350f26074a273d3d772276867182e76a",
+      "name": "checkpoint-phase1.tar.gz",
+      "sha256": "050a01b9994034c0e070d66e17d1f879b20d724772e8c187af354a879936d161"
+    },
+    "archiveIdentity": {
+      "bytes": 5737812,
+      "gitBlobSha1": "b6ce6a5a350f26074a273d3d772276867182e76a",
+      "name": "checkpoint-phase1.tar.gz",
+      "sha256": "050a01b9994034c0e070d66e17d1f879b20d724772e8c187af354a879936d161"
+    },
+    "archivePayloadCopied": false,
+    "commit": "35069bdeb7a904fb9a39c919717b61021af9e78b",
+    "members": [
+      {
+        "bytes": 4787329,
+        "member": "profiling/hosted-baseline-jmdict/trace/run-1.trace.json",
+        "sha256": "681c363dad733577c4b65b25cc8b0de978037e5b14918df9355281e3abff428b"
+      },
+      {
+        "bytes": 151430,
+        "member": "profiling/hosted-baseline-jmdict/trace/run-1.json",
+        "sha256": "6b87091f4d7036a6c3e0a9bc2af1a22b440602fc15fed7a8e1e8d6443bc675ed"
+      }
+    ],
+    "repositoryDirectory": "dev/perf/import-optimization-9bb32/phase1"
+  },
+  "phase2a": {
+    "archive": {
+      "bytes": 1092904,
+      "gitBlobSha1": "e3246934cf6bd8c21f2fd32b7d259cea31544f4c",
+      "name": "proofs-and-sources.tar.gz",
+      "sha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1"
+    },
+    "archivePayloadsCopied": false,
+    "commit": "e341fd6749750e3d3eaf7bdcb5e4f0f4e9acd0b6",
+    "members": [
+      {
+        "bytes": 3099,
+        "gitBlobSha1": "c39c6189c19b064b28c8b9786fdb44d99eaac5ae",
+        "member": "profiling/hosted-plans/wide-keyword-qualification.yml",
+        "sha256": "10b6e60058572311acbfe36f4aa0b2a0d008fd6f8904993f173d0b6ddae484c1"
+      },
+      {
+        "bytes": 3134,
+        "gitBlobSha1": "414197fc2544f5fe27888af6cc354179cb1aa797",
+        "member": "profiling/hosted-plans/minsize-qualification.yml",
+        "sha256": "c4b986528b7df9e77ec05c6c7d64ce787e3a46c1aa3d5187042a2cb51dfe943e"
+      },
+      {
+        "bytes": 2252,
+        "gitBlobSha1": "4bef610481cbeb26ca4e80ef3bad6dfd523975d0",
+        "member": "profiling/hosted-plans/wide-keyword-source-qa.yml",
+        "sha256": "29e0fd93e68ae6384bb182cff0d1edb3b7c3c7dbaa950bb1459ed638b27765e2"
+      },
+      {
+        "bytes": 994,
+        "gitBlobSha1": "9488a987f7f20c6d24df5cc5ae4c6e809751311b",
+        "member": "profiling/hosted-wide-parity-spec/publication.json",
+        "sha256": "4700ae88fe3de6d82a05201ccacd6a7dff2c9e9e0d2fa28e83582c32571722e7"
+      },
+      {
+        "bytes": 17951,
+        "gitBlobSha1": "22cda84966ac9cba9f25d0ba2e4b5d34c91be927",
+        "member": "profiling/hosted-wide-parity-spec/independent-review.json",
+        "sha256": "4ab5ef68e6f4dc1d4cfeb2a4501f591905d43b869ece52b195fc080fc3c3e705"
+      },
+      {
+        "bytes": 1431,
+        "gitBlobSha1": "a8fc3f78073fae8c3febe4047acd4e0d589a023a",
+        "member": "profiling/minsize-hosted-qa.json",
+        "sha256": "a56cc05b09bdb27d21f27f2ac1048b8a4e41da9f158f4a1ad4039004489aa8f3"
+      },
+      {
+        "bytes": 1024760,
+        "gitBlobSha1": "8d240421b5cb68b9d6dde4cf93144728d573ef43",
+        "member": "profiling/minsize-hosted-qa.log",
+        "sha256": "69c652b587c5a30e8bb53d13c37542eab9bd35564911de079ff20e846f491a31"
+      },
+      {
+        "bytes": 6652,
+        "gitBlobSha1": "3d4f81f11a3cb16d46b8d20f146346d995a036ff",
+        "member": "profiling/archive-hosted-artifact.py",
+        "sha256": "d62890e09f88cdffe8a4ec1a9ce8ee5ab6fed41c7d2e5e2ed68236351fe12e50"
+      },
+      {
+        "bytes": 9155,
+        "gitBlobSha1": "f8652342b7af78fad79e52a42ab5764f26eba1e6",
+        "member": "profiling/analyze-hosted-cell.py",
+        "sha256": "b75f7faa8c40e5bd37cebd082cb863d938179c9e7ef3761d5f4c51a20a7a295e"
+      },
+      {
+        "bytes": 12904,
+        "gitBlobSha1": "22e159fbad0b8d09f96bb76c68b120a658b30a54",
+        "member": "profiling/audit-hosted-cell-semantics-memory.py",
+        "sha256": "a367bc360aa97881aa879eaf8f5b53952a579f5d0e7dd72996749df4f08bb5f7"
+      },
+      {
+        "bytes": 13453,
+        "gitBlobSha1": "950ee3e20fa821c57f69632ea2436abf432416c8",
+        "member": "profiling/audit-hosted-cell-semantics-memory-v2.py",
+        "sha256": "6b2d688e79c4f97c3f04729fed534c4abf731c6489f5fad098bd4ed37ba0101a"
+      },
+      {
+        "bytes": 396914,
+        "gitBlobSha1": "297fb356ff933c56c88f654b9c8fb74c7e5c3948",
+        "member": "profiling/hosted-qualification/fingerprint/jmdict-AB/audit-and-stage-analysis.json",
+        "sha256": "8d4eea6831e8b404d0d7368703e9c36280606a48a5cd3fe6bb8a48aeee03a4be"
+      },
+      {
+        "bytes": 74026,
+        "gitBlobSha1": "b35b6a16d92cd8c85b3f6b9a8d413a54715af0e1",
+        "member": "profiling/hosted-qualification/fingerprint/jmdict-AB/independent-semantics-memory-audit.json",
+        "sha256": "ae132387f5b31b8f74e2ccadcd527449b636d49d9d56bfd049ff446a1d7bd68f"
+      },
+      {
+        "bytes": 398315,
+        "gitBlobSha1": "6cb66fdcc378853b7dfd0c7023dbc881ff195a9d",
+        "member": "profiling/hosted-qualification/fingerprint/jmdict-BA/audit-and-stage-analysis.json",
+        "sha256": "3cc2189d365f9658ec52894214e1a052482af88d47377276d1cc94659cc9ab35"
+      },
+      {
+        "bytes": 74027,
+        "gitBlobSha1": "b17a717c4c9b5bb594de57d2ad8c2d70cf289f9a",
+        "member": "profiling/hosted-qualification/fingerprint/jmdict-BA/independent-semantics-memory-audit.json",
+        "sha256": "ac71b4c95f25e5347b56c52fdf2c3f190b381786cc0141080e4a8134cf48228b"
+      },
+      {
+        "bytes": 397840,
+        "gitBlobSha1": "3e2c86b4a0b3ff109aacc0f7e8192ac0db3e9377",
+        "member": "profiling/hosted-qualification/fingerprint/jitendex-AB/audit-and-stage-analysis.json",
+        "sha256": "b0685ff9c71ec189af0d1b9e52f86ac72e250f9172abb397f20b12851b75eebf"
+      },
+      {
+        "bytes": 74685,
+        "gitBlobSha1": "5973f421ca77d57633365062b3dd9e0a8db91d90",
+        "member": "profiling/hosted-qualification/fingerprint/jitendex-AB/independent-semantics-memory-audit.json",
+        "sha256": "1bdd0040501c6d0121a34fc627e17cce6a6fa9072f0de55e8b72a27bc35cee86"
+      },
+      {
+        "bytes": 399040,
+        "gitBlobSha1": "2c8dbb08fd6d89088d810296514039f6fb8d3a43",
+        "member": "profiling/hosted-qualification/fingerprint/jitendex-BA/audit-and-stage-analysis.json",
+        "sha256": "105e9f0c3b11b022d682d1b1af07cd24231828a47215350f4e20eac47ca52659"
+      },
+      {
+        "bytes": 74684,
+        "gitBlobSha1": "f79da2ca6e83d4d514054bba2752ebae2e6a1072",
+        "member": "profiling/hosted-qualification/fingerprint/jitendex-BA/independent-semantics-memory-audit.json",
+        "sha256": "000a2940236e2a26708912140d809053bff082edcc4afe963bb34d9e653622dd"
+      },
+      {
+        "bytes": 402409,
+        "gitBlobSha1": "1bc368c4e8c93378b7ca83455d2eb5aa60008b7f",
+        "member": "profiling/hosted-qualification/fingerprint/vndb-AB/audit-and-stage-analysis.json",
+        "sha256": "df33f9566f6f5a3e2b2d69d8c90db07c4543d4d9e0efe2df90be4dd7e6cbb960"
+      },
+      {
+        "bytes": 74993,
+        "gitBlobSha1": "e4b6aa34029c47938e2c051024edd73d4c3482a8",
+        "member": "profiling/hosted-qualification/fingerprint/vndb-AB/independent-semantics-memory-audit.json",
+        "sha256": "33f86f44e066dd6d197251457042f121e6f753cdd3bf1b438ba507fa86056d80"
+      },
+      {
+        "bytes": 403375,
+        "gitBlobSha1": "cd88dd27617d8d8d7adcfa7c256a15aa4edec640",
+        "member": "profiling/hosted-qualification/fingerprint/vndb-BA/audit-and-stage-analysis.json",
+        "sha256": "f6e5ebe4d8a5d673ae9fc2351614c91903143229195ac935496800ff94d772a6"
+      },
+      {
+        "bytes": 74988,
+        "gitBlobSha1": "810b16c91ae4b10af6298a62524b8fe2f5c65100",
+        "member": "profiling/hosted-qualification/fingerprint/vndb-BA/independent-semantics-memory-audit.json",
+        "sha256": "b978035bbd95cc5ad6c5d7e4a6ff9df54bb978b4573e25563949e875b656b4c9"
+      }
+    ],
+    "repositoryDirectory": "dev/perf/import-optimization-9bb32/phase2a",
+    "source": "profiling/checkpoint-phase2a-publication-receipt.json",
+    "tree": "0285e08744a44562f0efd9f57676d26022d46fb6"
+  },
+  "policy": "No prior archive payload is copied. Immutable parent archive identities and exact member locators bind reused evidence.",
+  "repositorySourceDependency": {
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "repository": "ManabiIO/manabitan",
+    "scope": "Baseline JS/C and build/harness sources remain recoverable from this immutable Git commit. No code execution is required for checkpoint byte verification."
+  },
+  "schemaVersion": 1
+}

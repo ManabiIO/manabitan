@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b-audit/audit-phase2b.py", line 143, in <module>
+    for c in summary['candidates']['wide']['cells']:check('wide projection still pending '+c['cell'],c['state'],'pending')
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b-audit/audit-phase2b.py", line 12, in check
+    if not good:raise AssertionError(name)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: wide projection still pending jmdict-AB

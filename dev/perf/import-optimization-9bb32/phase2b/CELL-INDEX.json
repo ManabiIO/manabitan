@@ -1,0 +1,557 @@
+{
+  "allImportCount": 252,
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "cells": [
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:09:09Z",
+      "bytes": 1559627,
+      "cell": "jmdict-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -2.325722220733284,
+            0.5085210498532389
+          ],
+          "equalWorkChangePercent": -2.0673528317588175,
+          "fasterPairs": 9,
+          "medianPairedChangePercent": -1.4226164712927036,
+          "ratios": [
+            0.8247095134349993,
+            1.0692290651307053,
+            0.9864777849323829,
+            0.9661428119396925,
+            0.9713158455961128,
+            1.0192222713212804,
+            0.9821697099892214,
+            0.985069885641763,
+            0.9831639135959097,
+            0.9882685205301014,
+            0.9918156364419183,
+            1.0183547845551464
+          ],
+          "worstPairChangePercent": 6.922906513070526
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -14.886702175671552,
+            2.1419299004746817
+          ],
+          "equalWorkChangePercent": -3.466749085661447,
+          "fasterPairs": 1,
+          "medianPairedChangePercent": 0.5689353876999981,
+          "ratios": [
+            1.0084764181699821,
+            1.0029022895840176,
+            0.8511329782432845,
+            1.0214192990047468
+          ],
+          "worstPairChangePercent": 2.1419299004746817
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "2ce07ef4eeeb95e89c3a36c52e76ee3c059ea4ef",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249845548",
+      "includedOriginalFiles": 269,
+      "independentChecks": 804,
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -0.22940993017269706,
+            "medianPairedChangePercent": -0.3573903469500317
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.021509369258043698,
+            "medianPairedChangePercent": -0.37574021949378644
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 256,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/jmdict-AB",
+      "publicationName": "minsize-jmdict-AB.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 256,
+      "sha256": "129e30d0b31f1a44665084dc8ea4cacdf016ec55f5bb2c8e79407c1fd4d1945a",
+      "sourceArtifact": {
+        "bytes": 35544052,
+        "id": 15249845548,
+        "jobId": 140855328442,
+        "runId": 46104898097,
+        "sha256": "e5645211307dac99f689911527ad4099f0e41ac79f40cd90a4098c650dd29ffe"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:57:21Z",
+      "bytes": 1559411,
+      "cell": "jmdict-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            0.3380864239848069,
+            2.2055270486324607
+          ],
+          "equalWorkChangePercent": 1.6685922502657657,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 1.6853693499685685,
+          "ratios": [
+            1.0033134526176275,
+            1.1392217584488953,
+            1.008246073298414,
+            0.8998151571164653,
+            1.0202756427246067,
+            1.058661778185135,
+            1.0233001771358576,
+            0.9994656692492342,
+            1.0167955211943562,
+            1.0034482758620689,
+            1.0208103638367916,
+            1.0169118658050151
+          ],
+          "worstPairChangePercent": 13.922175844889528
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -3.2454629752285302,
+            4.367878459031749
+          ],
+          "equalWorkChangePercent": 0.21719644211803946,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.07086305051813291,
+          "ratios": [
+            0.9675453702477147,
+            1.0436787845903175,
+            1.0173135189728157,
+            0.9812692200168217
+          ],
+          "worstPairChangePercent": 4.367878459031749
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "d59b034a6b9329ca7cb301030115c805f3e975ef",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249650708",
+      "includedOriginalFiles": 269,
+      "independentChecks": 804,
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 1.7043585630354574,
+            "medianPairedChangePercent": 0.5087630187716075
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.625486753440386,
+            "medianPairedChangePercent": 0.6400582149824696
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 268,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/jmdict-BA",
+      "publicationName": "minsize-jmdict-BA.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 268,
+      "sha256": "7d403f6d3dc9a5b5dd26d84809b4915ad8be18d9e9b4b53f27f2ded036e6d431",
+      "sourceArtifact": {
+        "bytes": 35543018,
+        "id": 15249650708,
+        "jobId": 140855328275,
+        "runId": 46104898097,
+        "sha256": "854c2f1147d92232e2aee341142bdbf5fdc2081af3837d614ba5110c9ca3c7e0"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:11:17Z",
+      "bytes": 1593595,
+      "cell": "jitendex-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.7003669933858259,
+            1.5892977853585233
+          ],
+          "equalWorkChangePercent": 0.6966827916162766,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 0.7549666454525816,
+          "ratios": [
+            0.9934558268311228,
+            0.9925368333011608,
+            1.0163522822378126,
+            1.0283461488335721,
+            1.0019819150254006,
+            1.0122314468597242,
+            1.015433673469358,
+            1.051400668208686,
+            0.9747713654998423,
+            1.015060435653796,
+            0.9809114468112294,
+            1.0028678860493276
+          ],
+          "worstPairChangePercent": 5.140066820868605
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -0.8648381517173287,
+            1.0811160743193993
+          ],
+          "equalWorkChangePercent": -0.02365781338716788,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.13440445975202442,
+          "ratios": [
+            1.010811160743194,
+            1.0023153942428107,
+            0.9949965165621488,
+            0.9913516184828267
+          ],
+          "worstPairChangePercent": 1.0811160743193993
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "4f44cbe38890b9a1cac0ded3ba0bb2a2e8268fad",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249443239",
+      "includedOriginalFiles": 269,
+      "independentChecks": 804,
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 0.7262543314187964,
+            "medianPairedChangePercent": -1.48397944222875
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.4227021149047161,
+            "medianPairedChangePercent": -1.2110349283547983
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 277,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/jitendex-AB",
+      "publicationName": "minsize-jitendex-AB.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 277,
+      "sha256": "a72f9e583642fc79e7ee454780ac5d21fb0d58d7d7862a9f5d3ecf38cc2f30b0",
+      "sourceArtifact": {
+        "bytes": 35583652,
+        "id": 15249443239,
+        "jobId": 140855328432,
+        "runId": 46104898097,
+        "sha256": "e1a07c7eeb83f548f639bd3ff0c5b7824bc8e571ebfb5085e66085209cf2556f"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:13:18Z",
+      "bytes": 1648030,
+      "cell": "jitendex-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.3650833910859408,
+            2.3144558651372105
+          ],
+          "equalWorkChangePercent": 2.352906488183959,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 1.3142422119697628,
+          "ratios": [
+            1.0122715404700042,
+            0.997341603898981,
+            0.9892330773983288,
+            1.014013303769391,
+            1.0200252570809605,
+            0.9779239892649982,
+            1.023464580926108,
+            1.0376703179268394,
+            0.9953567282793003,
+            1.0063520070577445,
+            1.1852987559137862,
+            1.0228245363766364
+          ],
+          "worstPairChangePercent": 18.52987559137862
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.7165878437585547,
+            -0.008754267703470209
+          ],
+          "equalWorkChangePercent": -1.0930873158160548,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": -1.3247331009053065,
+          "ratios": [
+            0.9999124573229653,
+            0.9828341215624145,
+            0.9835835308576338,
+            0.98992180712426
+          ],
+          "worstPairChangePercent": -0.008754267703470209
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "95c76ded1b526927189e29743b5e1d23f31310ff",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249841145",
+      "includedOriginalFiles": 269,
+      "independentChecks": 804,
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 2.6618733110250536,
+            "medianPairedChangePercent": -0.8600467771931517
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.8955094827618924,
+            "medianPairedChangePercent": -0.8048350965178197
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 335,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/jitendex-BA",
+      "publicationName": "minsize-jitendex-BA.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 335,
+      "sha256": "455c53588934f88a7d0a5399a3597a2c158bb83e050a8337f9f1820327c601e6",
+      "sourceArtifact": {
+        "bytes": 35641848,
+        "id": 15249841145,
+        "jobId": 140855328443,
+        "runId": 46104898097,
+        "sha256": "f9a1005efa2a4f39331fe7ba2b91a61944c52b39509b1995cfee635b24756043"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:25:17Z",
+      "bytes": 1728195,
+      "cell": "vndb-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.331836562234634,
+            0.5143331307828625
+          ],
+          "equalWorkChangePercent": 0.36575887784122685,
+          "fasterPairs": 8,
+          "medianPairedChangePercent": -0.3783963772590493,
+          "ratios": [
+            0.9830564839294287,
+            0.9995145041874034,
+            0.9876543209876543,
+            0.9979078447453429,
+            1.0920661561593024,
+            0.9945242277094761,
+            0.9858431189971044,
+            0.984635569519732,
+            1.0066220609229604,
+            1.0232147897262165,
+            1.003664601692697,
+            0.987520149758203
+          ],
+          "worstPairChangePercent": 9.206615615930236
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -4.319094859390127,
+            0.7689764957638623
+          ],
+          "equalWorkChangePercent": -1.7785983797813154,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -1.7053181295398345,
+          "ratios": [
+            1.0076897649576386,
+            0.9842738205365323,
+            0.9568090514060987,
+            0.981619816872671
+          ],
+          "worstPairChangePercent": 0.7689764957638623
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": false,
+        "status": "memory-or-semantics-failed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "88623a9bb079d7c2495837dec7069c3b4f43250c",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249169491",
+      "includedOriginalFiles": 269,
+      "independentChecks": 807,
+      "memorySummary": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 418,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/vndb-AB",
+      "publicationName": "minsize-vndb-AB.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 418,
+      "sha256": "368a1ccb1a1aace462b24945e8280d46c9eb8e5bf542ba4a82c212318d7ef1cc",
+      "sourceArtifact": {
+        "bytes": 35739458,
+        "id": 15249169491,
+        "jobId": 140855328400,
+        "runId": 46104898097,
+        "sha256": "0ed1a05dc6dc56ff8a1aea6037ae5cabdf6b3eb59e897e2bc2819239e6f4867f"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:53:14Z",
+      "bytes": 1890742,
+      "cell": "vndb-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.6018590985099492,
+            3.334928660722314
+          ],
+          "equalWorkChangePercent": 1.3669801720368024,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 0.9073549200956599,
+          "ratios": [
+            1.026598516736835,
+            0.9687173284680557,
+            1.0294546633174018,
+            1.0034142177783056,
+            1.0688245737170279,
+            0.9871534287123644,
+            1.0372439098970447,
+            1.0039782495701706,
+            0.9987090267271999,
+            0.9892537913026012,
+            1.0385448245994233,
+            1.0141688488317424
+          ],
+          "worstPairChangePercent": 6.882457371702788
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -3.856259507298787,
+            -0.7943476751528067
+          ],
+          "equalWorkChangePercent": -2.623448317167887,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": -2.893629777940143,
+          "ratios": [
+            0.9614374049270121,
+            0.9745124464880112,
+            0.9676149579531861,
+            0.9920565232484719
+          ],
+          "worstPairChangePercent": -0.7943476751528067
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "84a0478be5b0ce7e5b0087e62e67449cbe8ffd96",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251027300",
+      "includedOriginalFiles": 269,
+      "independentChecks": 807,
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.6950877069307886,
+            "medianPairedChangePercent": -1.2655148407399617
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 3.313811158750224,
+            "medianPairedChangePercent": -1.204419762277681
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 598,
+        "schemaVersion": 1
+      },
+      "omittedOriginalPayloads": 44,
+      "proofDirectory": "profiling/hosted-qualification/minsize/vndb-BA",
+      "publicationName": "minsize-vndb-BA.raw-evidence.tar.gz",
+      "rawArchiveRepacked": false,
+      "rawMemoryScans": 598,
+      "sha256": "9f94a4d05c04f2d0e3827ce4bd7bb84b98e8b371ec90abecddcd798d3d0abe0e",
+      "sourceArtifact": {
+        "bytes": 35920265,
+        "id": 15251027300,
+        "jobId": 140855328461,
+        "runId": 46104898097,
+        "sha256": "c747622861fb31f9403fa6f892794e2112a3b0977ff2a1aea0d177cb1474a8e9"
+      },
+      "sourceNativeStageChecks": 585
+    }
+  ],
+  "decision": "Shelved; no reproducible full-import gain; no PR",
+  "rawMemoryScans": 2152,
+  "schemaVersion": 1,
+  "scope": "All six fixed minsize cohorts; no observations removed, replaced or repeated",
+  "timingPolicy": "Use the unchanged root RESULTS projection; independent initial-order cohorts are not pooled"
+}

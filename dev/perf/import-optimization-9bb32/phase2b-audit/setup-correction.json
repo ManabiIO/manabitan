@@ -1,0 +1,10 @@
+{
+  "reason": "Auditor setup used shorthand state pending instead of exact frozen projection literal no-retained-completed-cohort. The six frozen wide projection entries have the latter value. No evidence, acceptance policy, source, archive or frozen metadata changed.",
+  "initialScriptSha256": "6ad342dc864d09e2f5eab7af3daf38f408a795929abf3c57c9b10123dcad4f80",
+  "correctedScriptSha256": "27aaca74887a56554dc825a2ecd7553b976fe58a9f10a0ae1a497c75da874509",
+  "initialReceiptSha256": "738efeff747804ca71f92fc0b2f14325a87161a5db063542c1a8afa9e87fb06e",
+  "initialChecksCompleted": 10689,
+  "initialFailure": "wide projection still pending jmdict-AB",
+  "correctionCount": 1,
+  "noProductExecution": true
+}

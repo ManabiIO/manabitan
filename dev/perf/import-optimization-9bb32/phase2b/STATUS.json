@@ -1,0 +1,117 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "assemblyStatus": "Packaged; independent checkpoint review/publication are separate later receipts",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "coordinatorDiagnostic": {
+    "fixedSlots": [
+      1,
+      2,
+      3
+    ],
+    "outcomePayloadsIncluded": false,
+    "purpose": "Coordinator-observed dependency order only; no relative-speed or removable-duration claim",
+    "runId": 46116931392,
+    "source": "b66020e0def759142ab2106a3f634a970ad807d7",
+    "sourceSpecHistoryAndRemoteAlignmentIncluded": true,
+    "tree": "dad39eefe469361fc5f74a14446b352b431bc77f"
+  },
+  "fingerprint": {
+    "decision": {
+      "completeImportObservations": 252,
+      "decision": "shelved-no-pr",
+      "qualifiedMemoryCohorts": 6,
+      "rawMemoryScans": 2177,
+      "reason": "No dictionary has a repeatable complete-import improvement across the independent initial-order cohorts. JMdict equal-work totals are slower in both; all six semantic/memory cohorts qualified, which does not establish a speed gain."
+    },
+    "scope": "Completed evidence remains in phase2A; unchanged root decision projection retained here"
+  },
+  "limits": [
+    "Correctness or reproduced audit passes do not establish a speed gain",
+    "Persisted lookup receipts are sampled; full parser-output parity has a different scope",
+    "Sampled process-tree PSS/private is not a guaranteed absolute peak; failed coverage is not a measured regression",
+    "Internal stage durations overlap and do not isolate CPU cost",
+    "No wide or coordinator outcome is inferred from queued status; later evidence is additive"
+  ],
+  "minsize": {
+    "completeCells": 6,
+    "decision": {
+      "completeImportObservations": 252,
+      "decision": "shelved-no-pr",
+      "qualifiedMemoryCohorts": 5,
+      "rawMemoryScans": 2152,
+      "reason": "JMdict cohort directions disagree, both Jitendex cohorts point slower, and VNDB does not replicate an import-speed improvement. VNDB AB separately fails frozen memory sampling coverage in both arms; this is not proof of increased memory use."
+    },
+    "memoryFailure": "VNDB AB failed frozen sampling coverage in both arms; null comparison metrics and all scans retained. This is not proof of increased memory use.",
+    "qualificationRun": 46104898097,
+    "qualifiedMemoryCohorts": 5,
+    "rawMemoryScans": 2152,
+    "source": "2907ba1bad0958c22fe363f88d7cceb4d4bc604e",
+    "sourceQa": "PASS; raw log/receipt reused through immutable phase2A dependencies",
+    "sourceQaRun": 46104779877,
+    "totalImports": 252,
+    "workflowCommit": "0c2a8a75cd0322cc13348b977a7e915b555d5a88"
+  },
+  "parentEvidenceCommit": "e341fd6749750e3d3eaf7bdcb5e4f0f4e9acd0b6",
+  "pendingOutcomePayloadsIncluded": false,
+  "pendingOutcomes": [
+    {
+      "jobId": 140871530407,
+      "lastObservedAtUtc": "2026-11-28T06:30:01Z",
+      "lastObservedStatus": "queued",
+      "name": "wide source QA",
+      "runId": 46110109833
+    },
+    {
+      "jobId": 140871530360,
+      "lastObservedAtUtc": "2026-11-28T06:30:01Z",
+      "lastObservedStatus": "queued",
+      "name": "wide actionlint",
+      "runId": 46110109799
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "wide untimed full-parser parity",
+      "runId": 46111036970
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "wide six-cell qualification",
+      "runId": 46112384728
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "coordinator three-slot diagnostic",
+      "runId": 46116931392
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28 06:31:40 UTC",
+      "lastObservedStatus": "queued at publication",
+      "name": "coordinator actionlint",
+      "runId": 46116931346
+    }
+  ],
+  "pullRequestsCreatedByThisTask": 0,
+  "purpose": "As-of phase2B evidence checkpoint; packaging only, no new acquisition or product change",
+  "runtimeVersions": {
+    "hostedQaAndQualification": "Node 22.22.0",
+    "priorLocalComponentScreens": "Node 24.20.0",
+    "separatePendingHostedParity": "Node 24.20.0"
+  },
+  "schemaVersion": 1,
+  "wideKeyword": {
+    "decision": {
+      "decision": "pending-hosted-evidence",
+      "reason": "Complete source QA, untimed full-parser corpus parity, and all six full-import cohorts are still required. Static code reduction and local correctness do not establish an import-speed gain."
+    },
+    "outcomePayloadsIncluded": false,
+    "parallelSchedulingWaivesNoGate": true,
+    "qualificationRun": 46112384728,
+    "source": "ebf4278afc59d83f191692bd587f0e1f7e8682b3",
+    "sourceQaRun": 46110109833,
+    "untimedParityRun": 46111036970,
+    "workflowCommit": "2720d950c2f0bad612e3611f14951eb0e092c5db"
+  }
+}

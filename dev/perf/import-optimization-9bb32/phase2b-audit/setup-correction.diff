@@ -1,0 +1,11 @@
+--- initial-setup/audit-phase2b.py
++++ audit-phase2b.py
+@@ -140,7 +140,7 @@
+  check('no observation exclusions',exclusions['observationExclusions'],[]);check('failed/unqualified not removed',exclusions['failedOrUnqualifiedObservationsRemoved'],False)
+  check('pending status alignment',[status['pendingOutcomes'],exclusions['pendingOutcomes']],[freeze['pendingOutcomes'],freeze['pendingOutcomes']]);check('pending outcome payloads excluded',[freeze['pendingOutcomePayloadsIncluded'],status['pendingOutcomePayloadsIncluded'],status['wideKeyword']['outcomePayloadsIncluded'],status['coordinatorDiagnostic']['outcomePayloadsIncluded']],[False]*4)
+  check('pending run identities',sorted(x['runId'] for x in status['pendingOutcomes']),sorted([46110109833,46110109799,46111036970,46112384728,46116931392,46116931346]))
+- for c in summary['candidates']['wide']['cells']:check('wide projection still pending '+c['cell'],c['state'],'pending')
++ for c in summary['candidates']['wide']['cells']:check('wide projection still pending '+c['cell'],c['state'],'no-retained-completed-cohort')
+  check('no wide/diagnostic acquired outcome paths',not any('/hosted-qualification/wide/' in n or '/hosted-wide-parity-result/' in n or n.startswith('profiling/wide-hosted-qa.') or '/slot-1/' in n or '/slot-2/' in n or '/slot-3/' in n for n in proofs))
+  check('no large dependency/corpus payload members',not any('node_modules/' in n or '/runtime/node/' in n or n.endswith(('.wasm','.zip','.so','.dll','.exe')) for n in proofs))
+  pubdiag=js(proofs['profiling/jmdict-group-diagnostic/remote-publication.json']);diagmanifest=js(proofs['profiling/jmdict-group-diagnostic/publication-files.final.json'])

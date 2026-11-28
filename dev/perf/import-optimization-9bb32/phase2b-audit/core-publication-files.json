@@ -1,0 +1,169 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "files": [
+    {
+      "bytes": 20922,
+      "gitBlobSha1": "4ef444b4ffb48cafb06c703abc045758b20a6eb5",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/CELL-INDEX.json",
+      "name": "CELL-INDEX.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/CELL-INDEX.json",
+      "sha256": "e0bf7dc68b52b1b6541f94abce9df41afccd8c5a5d2a3e024aedbbc5cd531a4b"
+    },
+    {
+      "bytes": 1505,
+      "gitBlobSha1": "4fe47e188945575824276e6e8f5e09d82c29b33a",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/DECISIONS.json",
+      "name": "DECISIONS.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/DECISIONS.json",
+      "sha256": "97106cf009bfc4e51c031f709a9e29a757c5b390392f086ac5246410ec3baf1f"
+    },
+    {
+      "bytes": 8654,
+      "gitBlobSha1": "b657927e6a3a7c2b88dae26518e9596449e1b0d7",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/DEPENDENCIES.json",
+      "name": "DEPENDENCIES.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/DEPENDENCIES.json",
+      "sha256": "71351e81498470ddf91393081c0a42b98c7b69eda8bf1d92c9cb904dfa106a1e"
+    },
+    {
+      "bytes": 2307,
+      "gitBlobSha1": "736820c273279c99f9e970549c89568be6193a1e",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/EXCLUSIONS.json",
+      "name": "EXCLUSIONS.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/EXCLUSIONS.json",
+      "sha256": "05488d68d3544432603a9cbc0e5b7ffec9d4b4e392a9f601751f50fca355cd20"
+    },
+    {
+      "bytes": 84885,
+      "gitBlobSha1": "2d105d5f2c8f8033217ea8b22454a587eb15b846",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/INPUT-FREEZE.json",
+      "name": "INPUT-FREEZE.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/INPUT-FREEZE.json",
+      "sha256": "29db58073ed1aef1cf33c165a342db43311f0cb133d7b85ab246cb26d6f0e87f"
+    },
+    {
+      "bytes": 6471,
+      "gitBlobSha1": "dfc6122bb7f7c3ccc2b13180bd9276b34d151262",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/INVENTORY.json",
+      "name": "INVENTORY.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/INVENTORY.json",
+      "sha256": "670b0adecb8b7bf9f5fd0f546f64c44233be2611d907c568d9196c4f025396c4"
+    },
+    {
+      "bytes": 623,
+      "gitBlobSha1": "5134d4c25e50bad4cb9c5967c39a4ca7338493e4",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/PACKAGING.json",
+      "name": "PACKAGING.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/PACKAGING.json",
+      "sha256": "e4c64d38a29e550107a40ea77b6b205b8b104d26862843a04291372fd9e14015"
+    },
+    {
+      "bytes": 48412,
+      "gitBlobSha1": "b95fad5ca5a7c99138161bca2ef52b404d5a39b9",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/PROOF-INVENTORY.json",
+      "name": "PROOF-INVENTORY.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/PROOF-INVENTORY.json",
+      "sha256": "533820cced94d8d29899460ba9a5a518287825866891974966e5166d1442822d"
+    },
+    {
+      "bytes": 6687,
+      "gitBlobSha1": "8c7e363c7d9b929e20c5d2ea32a99aee91209a34",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/README.md",
+      "name": "README.md",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/README.md",
+      "sha256": "c58914f197011340ff0d2a09f8b3eb5e61e750a0a43797438b710e6e6418971c"
+    },
+    {
+      "bytes": 5038,
+      "gitBlobSha1": "18fcb51286ec16e10605029ea3ffa0488192a741",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/RESULTS.md",
+      "name": "RESULTS.md",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/RESULTS.md",
+      "sha256": "8ff7332300bc385f0460f3c1cb87bb964ae8b3a18f061ad04ba245c5385abd82"
+    },
+    {
+      "bytes": 4849,
+      "gitBlobSha1": "bd75989e7152d80faf5f313c66cdd3bbea85ec11",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/STATUS.json",
+      "name": "STATUS.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/STATUS.json",
+      "sha256": "914eeafb824e913df5f8d675befe72dde819d87bc52da0394c216fce69c2c0fc"
+    },
+    {
+      "bytes": 20674,
+      "gitBlobSha1": "b41c98990ec6e31fe9c764c72bf6b9046461b3ed",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/build-phase2b-checkpoint.py",
+      "name": "build-phase2b-checkpoint.py",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/build-phase2b-checkpoint.py",
+      "sha256": "3b45e3cd201cf0c212cb558a7d4f48e12345f41c958e2ae93bc635e5ba3d6b3a"
+    },
+    {
+      "bytes": 1593595,
+      "gitBlobSha1": "4f44cbe38890b9a1cac0ded3ba0bb2a2e8268fad",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-jitendex-AB.raw-evidence.tar.gz",
+      "name": "minsize-jitendex-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-jitendex-AB.raw-evidence.tar.gz",
+      "sha256": "a72f9e583642fc79e7ee454780ac5d21fb0d58d7d7862a9f5d3ecf38cc2f30b0"
+    },
+    {
+      "bytes": 1648030,
+      "gitBlobSha1": "95c76ded1b526927189e29743b5e1d23f31310ff",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-jitendex-BA.raw-evidence.tar.gz",
+      "name": "minsize-jitendex-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-jitendex-BA.raw-evidence.tar.gz",
+      "sha256": "455c53588934f88a7d0a5399a3597a2c158bb83e050a8337f9f1820327c601e6"
+    },
+    {
+      "bytes": 1559627,
+      "gitBlobSha1": "2ce07ef4eeeb95e89c3a36c52e76ee3c059ea4ef",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-jmdict-AB.raw-evidence.tar.gz",
+      "name": "minsize-jmdict-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-jmdict-AB.raw-evidence.tar.gz",
+      "sha256": "129e30d0b31f1a44665084dc8ea4cacdf016ec55f5bb2c8e79407c1fd4d1945a"
+    },
+    {
+      "bytes": 1559411,
+      "gitBlobSha1": "d59b034a6b9329ca7cb301030115c805f3e975ef",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-jmdict-BA.raw-evidence.tar.gz",
+      "name": "minsize-jmdict-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-jmdict-BA.raw-evidence.tar.gz",
+      "sha256": "7d403f6d3dc9a5b5dd26d84809b4915ad8be18d9e9b4b53f27f2ded036e6d431"
+    },
+    {
+      "bytes": 1728195,
+      "gitBlobSha1": "88623a9bb079d7c2495837dec7069c3b4f43250c",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-vndb-AB.raw-evidence.tar.gz",
+      "name": "minsize-vndb-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-vndb-AB.raw-evidence.tar.gz",
+      "sha256": "368a1ccb1a1aace462b24945e8280d46c9eb8e5bf542ba4a82c212318d7ef1cc"
+    },
+    {
+      "bytes": 1890742,
+      "gitBlobSha1": "84a0478be5b0ce7e5b0087e62e67449cbe8ffd96",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/minsize-vndb-BA.raw-evidence.tar.gz",
+      "name": "minsize-vndb-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/minsize-vndb-BA.raw-evidence.tar.gz",
+      "sha256": "9f94a4d05c04f2d0e3827ce4bd7bb84b98e8b371ec90abecddcd798d3d0abe0e"
+    },
+    {
+      "bytes": 764000,
+      "gitBlobSha1": "430cf67082d195c0ffec25c3b0f26ebbe49c0246",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/proofs-and-sources.tar.gz",
+      "name": "proofs-and-sources.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/proofs-and-sources.tar.gz",
+      "sha256": "508573a2295c1000f096ea71fb47f27bad71ddcd540e910d780428247f8da2cc"
+    },
+    {
+      "bytes": 16150,
+      "gitBlobSha1": "06065e231afd063eac72f3abafeb70452f59bdac",
+      "localPath": "/workspace/scratch/9bb32f82fa3b/profiling/checkpoint-phase2b/verify-phase2b-checkpoint.py",
+      "name": "verify-phase2b-checkpoint.py",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2b/verify-phase2b-checkpoint.py",
+      "sha256": "6856e57ab9b66b062ade9dad6923051661d74a85ae51e5027195dddc86ae306d"
+    }
+  ],
+  "parentEvidenceCommit": "e341fd6749750e3d3eaf7bdcb5e4f0f4e9acd0b6",
+  "publicationAuthorized": false,
+  "repositoryDirectory": "dev/perf/import-optimization-9bb32/phase2b",
+  "schemaVersion": 1
+}

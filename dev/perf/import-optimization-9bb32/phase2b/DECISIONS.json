@@ -1,0 +1,30 @@
+{
+  "asOfUtc": "2026-11-28T05:56:10.464462+00:00",
+  "scope": "Root review decisions for frozen candidates; no observations or qualification thresholds changed. Wide remains pending.",
+  "projection": {
+    "path": "RESULTS.json",
+    "bytes": 22668,
+    "sha256": "c6260bcedcad2b439a1216ae5ffab076fd00335815f47a6ad19a9c4bbb5d7f62"
+  },
+  "decisions": {
+    "fingerprint": {
+      "decision": "shelved-no-pr",
+      "reason": "No dictionary has a repeatable complete-import improvement across the independent initial-order cohorts. JMdict equal-work totals are slower in both; all six semantic/memory cohorts qualified, which does not establish a speed gain.",
+      "completeImportObservations": 252,
+      "rawMemoryScans": 2177,
+      "qualifiedMemoryCohorts": 6
+    },
+    "minsize": {
+      "decision": "shelved-no-pr",
+      "reason": "JMdict cohort directions disagree, both Jitendex cohorts point slower, and VNDB does not replicate an import-speed improvement. VNDB AB separately fails frozen memory sampling coverage in both arms; this is not proof of increased memory use.",
+      "completeImportObservations": 252,
+      "rawMemoryScans": 2152,
+      "qualifiedMemoryCohorts": 5
+    },
+    "wide": {
+      "decision": "pending-hosted-evidence",
+      "reason": "Complete source QA, untimed full-parser corpus parity, and all six full-import cohorts are still required. Static code reduction and local correctness do not establish an import-speed gain."
+    }
+  },
+  "pullRequestsCreated": 0
+}

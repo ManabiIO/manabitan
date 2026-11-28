@@ -1,0 +1,112 @@
+{
+  "passed": true,
+  "scope": "Independent read-only audit of the exact frozen phase2B checkpoint; no product processes, imports, tests, benchmarks, acquisitions, retries or threshold changes.",
+  "snapshotAsOfUtc": "2026-11-28T06:34:31Z",
+  "publicationManifest": {
+    "path": "profiling/checkpoint-phase2b-publication-files.json",
+    "bytes": 8912,
+    "sha256": "f78158b103392c4cf7fff153d71de6f8581b2811c1f0b18382e64fab51306f30",
+    "gitBlobSha1": "6c03d96766d10be0b1e6d22d1dbed29908cde5c1"
+  },
+  "coreDirectory": "profiling/checkpoint-phase2b",
+  "coreOuterFileCount": 20,
+  "independentCheckCount": 10730,
+  "independentReceipt": {
+    "path": "profiling/checkpoint-phase2b-audit/independent-checkpoint-audit.json",
+    "bytes": 1173351,
+    "sha256": "c969ce4895c4c466385c27cd3fb4fd100160d7bddc169d677334d589ca6cd82f",
+    "gitBlobSha1": "b169b039857dd204455a9988a0fcae9005ae7e77"
+  },
+  "independentScript": {
+    "path": "profiling/checkpoint-phase2b-audit/audit-phase2b.py",
+    "bytes": 19285,
+    "sha256": "27aaca74887a56554dc825a2ecd7553b976fe58a9f10a0ae1a497c75da874509",
+    "gitBlobSha1": "37c9ec2defc183b2e62c4ff1ae2aed9e888734de"
+  },
+  "proofArchive": {
+    "members": 119,
+    "rawBytes": 6105462,
+    "sha256": "508573a2295c1000f096ea71fb47f27bad71ddcd540e910d780428247f8da2cc",
+    "repackByteIdentical": true
+  },
+  "rawArchiveCount": 6,
+  "rawMembers": 1620,
+  "completedImportsRetained": 252,
+  "rawMemoryScansRetained": 2152,
+  "qualifiedMemoryCells": 5,
+  "priorDependencyMembers": {
+    "phase1": 2,
+    "phase2a": 23
+  },
+  "sevenArchiveHashes": {
+    "minsize-jmdict-AB.raw-evidence.tar.gz": "129e30d0b31f1a44665084dc8ea4cacdf016ec55f5bb2c8e79407c1fd4d1945a",
+    "minsize-vndb-BA.raw-evidence.tar.gz": "9f94a4d05c04f2d0e3827ce4bd7bb84b98e8b371ec90abecddcd798d3d0abe0e",
+    "proofs-and-sources.tar.gz": "508573a2295c1000f096ea71fb47f27bad71ddcd540e910d780428247f8da2cc",
+    "minsize-jitendex-BA.raw-evidence.tar.gz": "455c53588934f88a7d0a5399a3597a2c158bb83e050a8337f9f1820327c601e6",
+    "minsize-jmdict-BA.raw-evidence.tar.gz": "7d403f6d3dc9a5b5dd26d84809b4915ad8be18d9e9b4b53f27f2ded036e6d431",
+    "minsize-jitendex-AB.raw-evidence.tar.gz": "a72f9e583642fc79e7ee454780ac5d21fb0d58d7d7862a9f5d3ecf38cc2f30b0",
+    "minsize-vndb-AB.raw-evidence.tar.gz": "368a1ccb1a1aace462b24945e8280d46c9eb8e5bf542ba4a82c212318d7ef1cc"
+  },
+  "scopeFindings": {
+    "exactMembershipAndEveryRetainedMemberHashVerified": true,
+    "independentProofRepackByteIdentical": true,
+    "rootResultsAndDecisionsByteIdenticalToFrozenInputs": true,
+    "rootProjectionRetainsOriginal055610Timestamp": true,
+    "allSixMinSizeProjectionNumbersEqualRawAnalysis": true,
+    "all42CanonicalReceiptsPerCellRetainedAndCommonSemanticsEqual": true,
+    "sampledPersistedScope": "12 probe terms across six cold/warm passes (72 observations), counts and restart checks; not exhaustive persisted-row equivalence. Separate all-referenced-media checks remain explicit.",
+    "fullParserOutputParityDistinctFromPersistedSampling": true,
+    "vndbABCoverageFailure": {
+      "auditReproducedCorrectly": true,
+      "qualificationPassed": false,
+      "maximumCoveredSampleGapMs": {
+        "A1": 258.452668,
+        "B1": 251.822165,
+        "B2": 270.497028,
+        "A2": 258.260357
+      },
+      "limitMs": 250,
+      "allFourMemoryMaximaNull": true,
+      "allPairAndAggregateComparisonsNull": true,
+      "rawBenchmarkExitCodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "meaning": "Unqualified coverage on both arms; not an inferred memory regression. No replacement or threshold relaxation."
+    },
+    "wideAndCoordinatorOutcomesAbsentAndPending": true,
+    "mandatoryWideCorrectnessGatesRemainRequired": true,
+    "diagnosticNinePublishedSourceBlobsHashBound": true,
+    "diagnosticSupersededPreparationAndFailuresPreserved": true,
+    "noProductionGainOrProductPrClaim": true,
+    "noRuntimeDependencyCorpusLargePayloadsInProof": true,
+    "coreUnchanged": true
+  },
+  "limits": [
+    "Omitted duplicate package ZIP and rendered HTML bytes are not present and were not rehashed by this audit. Their earlier actual-byte/member audits, original hashes and omission map remain bound and preserved.",
+    "Prior complete per-cell semantic/memory recomputation receipts are hash-bound; this checkpoint audit independently rechecks all retained member bytes, raw receipt equality, raw scan accounting, failed-coverage fields and projection bindings without acquiring imports.",
+    "As-of pending states are historical snapshot claims, not a statement about any later CI completion.",
+    "Sampled PSS/private memory does not establish an absolute process-memory peak; stage elapsed times may overlap."
+  ],
+  "auditorSetupCorrection": {
+    "preservedInitialDirectory": "profiling/checkpoint-phase2b-audit/initial-setup",
+    "reason": "One auditor literal used pending instead of the exact frozen projection value no-retained-completed-cohort. Initial receipt/script/failure and one-line diff are retained; no checkpoint evidence or criterion changed.",
+    "record": {
+      "path": "profiling/checkpoint-phase2b-audit/setup-correction.json",
+      "bytes": 706,
+      "sha256": "480f0f14095980c232a8dd9e1f48ec70d5ee0362c9cd6912f63be597a87d1325",
+      "gitBlobSha1": "99e16bf0ff3da150c10e7e5d0ce4651613b1ede7"
+    }
+  },
+  "reviewedSuppliedVerifier": {
+    "receipt": {
+      "bytes": 2649,
+      "sha256": "5699baf5ab822f6be67cba784ce2e5b17fa2c32de1980cad8598e38812ab0cbd",
+      "gitBlobSha1": "1e76d8d63f4eaecae08de176e8e5da20ea0fa11d"
+    },
+    "stderrBytes": 0,
+    "independentFindingsDoNotRelyOnlyOnSuppliedPass": true
+  }
+}

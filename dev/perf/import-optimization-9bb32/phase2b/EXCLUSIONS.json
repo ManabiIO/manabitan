@@ -1,0 +1,57 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "failedOrUnqualifiedObservationsRemoved": false,
+  "observationExclusions": [],
+  "originalArtifactPayloads": {
+    "perCell": "42 duplicate HTML renderings and two product ZIP payloads omitted only after original ZIP and both packages/all members were hashed and verified",
+    "receipts": "Each cell retention-manifest.json lists every included, omitted and derived member size/SHA256 and original GitHub artifact identity",
+    "retained": "All 269 original JSON/JSONL/log/protocol JS files plus derived-package-audit.json per cell",
+    "verificationLimit": "This checkpoint can rehash retained bytes and check omission receipts. It cannot rehash absent original ZIP/HTML/package payloads."
+  },
+  "otherExcludedPayloads": [
+    "Dictionary corpus binaries, compiler/runtime distributions, node_modules, browser executables, reproducible cache files",
+    "Already-published phase1/phase2A archive payloads; immutable archive/member dependency locators retained instead"
+  ],
+  "pendingOutcomes": [
+    {
+      "jobId": 140871530407,
+      "lastObservedAtUtc": "2026-11-28T06:30:01Z",
+      "lastObservedStatus": "queued",
+      "name": "wide source QA",
+      "runId": 46110109833
+    },
+    {
+      "jobId": 140871530360,
+      "lastObservedAtUtc": "2026-11-28T06:30:01Z",
+      "lastObservedStatus": "queued",
+      "name": "wide actionlint",
+      "runId": 46110109799
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "wide untimed full-parser parity",
+      "runId": 46111036970
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "wide six-cell qualification",
+      "runId": 46112384728
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28T06:33:12Z",
+      "lastObservedStatus": "queued",
+      "name": "coordinator three-slot diagnostic",
+      "runId": 46116931392
+    },
+    {
+      "lastObservedAtUtc": "2026-11-28 06:31:40 UTC",
+      "lastObservedStatus": "queued at publication",
+      "name": "coordinator actionlint",
+      "runId": 46116931346
+    }
+  ],
+  "pendingPayloadPolicy": "Excluded because pending at this snapshot, not because of their results; retain later as separate evidence",
+  "schemaVersion": 1
+}

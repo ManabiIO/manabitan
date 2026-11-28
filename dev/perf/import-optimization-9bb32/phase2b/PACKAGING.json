@@ -1,0 +1,25 @@
+{
+  "asOfUtc": "2026-11-28T06:34:31Z",
+  "determinism": {
+    "compressionLevel": 9,
+    "gid": 0,
+    "gzipFilename": "",
+    "gzipMtime": 0,
+    "memberOrder": "sorted path",
+    "mode": "0644",
+    "mtime": 0,
+    "tarFormat": "PAX",
+    "uid": 0,
+    "userGroupNames": ""
+  },
+  "proofArchive": {
+    "bytes": 764000,
+    "gitBlobSha1": "430cf67082d195c0ffec25c3b0f26ebbe49c0246",
+    "sha256": "508573a2295c1000f096ea71fb47f27bad71ddcd540e910d780428247f8da2cc"
+  },
+  "proofMembers": 119,
+  "proofUncompressedBytes": 6105462,
+  "rawArchivesCopiedByteForByte": 6,
+  "rawArchivesRepacked": false,
+  "schemaVersion": 1
+}
