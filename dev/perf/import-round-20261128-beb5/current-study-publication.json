@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "crc": {
+    "localRuntime": "59ad5a6ddb8342e563cfd09b6fe605cb76bae765",
+    "remoteRuntime": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+    "runtimeTree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+    "localStudy": "bff4cdbe5939d795e28e96124aa5ce0a9b1c81de",
+    "remoteStudy": "477fb271ef25fac533fb1faf737a5dab898190e3",
+    "studyTree": "f4b08d4dfc6f2493336a5318c20c4f2b64b90593",
+    "runId": 46127721419
+  },
+  "canonical": {
+    "localRuntime": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+    "remoteRuntime": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+    "runtimeTree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+    "localStudy": "c32e55cd307bf8a673d0bdcafaac5f7224be5d0b",
+    "remoteStudy": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+    "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+    "runId": 46128439514
+  },
+  "relationship": "Each local/remote runtime pair and each local/remote study pair has the exact same complete tree. API publication changes commit metadata only. All remote commits have sole parent dcfc; the CRC local study preserves its local construction chain. Runtime candidates are separate, never stacked.",
+  "sourceQualification": "Both candidates pass required local source and full unit gates; CRC also passes hosted prerequisite jobs. Canonical hosted prerequisites and both browser studies remain pending at this checkpoint. No current-base performance result is claimed.",
+  "publicationReadbackVerified": true,
+  "evidenceReadbackCommit": "d32c3f68aa86c5b7fa97864cc9fbc4dda10af0a2"
+}

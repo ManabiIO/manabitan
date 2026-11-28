@@ -1,0 +1,51 @@
+{
+  "complete": true,
+  "scope": "Local source and unit qualification only. No import performance measurements. Browser confirmation on current baseline remains pending.",
+  "localCandidate": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+  "publishedCandidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "tree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sourceGateReportSha256": "8926b43c86fc16216a4f0ae609d9e011dc80748265a0ef44596d6d7f4cacb2c8",
+  "all11GatesPassed": true,
+  "unit": {
+    "filesPassed": 670,
+    "filesTotal": 670,
+    "testsPassed": 15151,
+    "testsSkipped": 47,
+    "testsTotal": 15198,
+    "vitestDurationSeconds": 270.89,
+    "concurrency": 2,
+    "timeoutsUnchanged": true,
+    "originalChecksumRegressionCases": 12,
+    "regressionTestSourceSha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53",
+    "caseInclusionEvidence": "The unrestricted full unit suite passed all670 matching files. The added test has12 ordinary top-level test calls and no skip/only/todo; total is exactly12 more than the same-current-baseline CRC unit suite."
+  },
+  "fullJavaScriptLintPassed": true,
+  "typeProjectsPassed": [
+    "main",
+    "dev",
+    "test",
+    "bench"
+  ],
+  "allDryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "jsonFormatPassed": true,
+  "nativeReproductionPassed": true,
+  "nativeCompilerVersion": "21.1.8",
+  "nativeLinkerVersion": "21.1.8",
+  "nodeVersion": "v22.22.0",
+  "canonicalWasmSha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+  "unchangedCurrentParserWasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+  "crcOptimizationAbsent": true,
+  "runtimeAndTestsUnchangedThroughout": true,
+  "failuresInThisGateRun": 0,
+  "retriesInThisGateRun": 0,
+  "dependencyAcquisition": "Reused existing installed cache with byte-identical package-lock; no new install."
+}

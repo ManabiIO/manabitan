@@ -1,0 +1,79 @@
+{
+  "scope": "Independent Git and source-manifest composition review only; no compilation, parser/import execution or performance measurement.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "localConstruction": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+  "tree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+  "reviewedOriginal": "ee903e032650430839468fef391b8d820196e61d",
+  "complete": true,
+  "exactSevenProductPathsPlusOriginalTest": true,
+  "changedPaths": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "gitBlob": "2a011412738cc30c64795846791f6793c3aa5667",
+      "sha256": "5a0ce28ef82c86994535db8fe6a35934ee793a7dc5035e24369b812eaefe1dc9",
+      "bytes": 2588,
+      "byteIdenticalToReviewedEe903": false
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "gitBlob": "44ec5ff2b33c23b8bf31460c9933e9e66f63f273",
+      "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+      "bytes": 6206,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "gitBlob": "722f0a0056aec03fa2eec9f8cedc4843afcfc3ea",
+      "sha256": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb",
+      "bytes": 613435,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-layout.js",
+      "gitBlob": "f3e1299fa99117950dd72fad5e5d1fd8784e3fdb",
+      "sha256": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80",
+      "bytes": 2346,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "gitBlob": "02456bab6712d4722780167505531600686e2733",
+      "sha256": "874f1b9465f7206eaa86e2895df33c55bf1fce5c36e02753873e5dd99ab79a28",
+      "bytes": 29026,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "gitBlob": "205311563fc991a76388d600b817e6b883a91ceb",
+      "sha256": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59",
+      "bytes": 366499,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "gitBlob": "49789ee1ce89102e4ca9ef143cc5131b8b37dd32",
+      "sha256": "d485531b3796491c7cc22657decff9f9a19e5096ed29e2823911a990699d0f97",
+      "bytes": 13861,
+      "byteIdenticalToReviewedEe903": true
+    },
+    {
+      "path": "test/term-lookup-native-checksum.test.js",
+      "gitBlob": "de4174b63a1a5e0b64d502a5b1bd4bba33aca8de",
+      "sha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53",
+      "bytes": 16877,
+      "byteIdenticalToReviewedEe903": true
+    }
+  ],
+  "nativeSourceDigestIndependentlyRecomputed": "29254b19c825e1fc31b56fc205f4a378a47eb1051ae563aea8a964f1d650b839",
+  "nativeSourceFileCount": 14,
+  "canonicalWasmMatchesReviewedOriginal": true,
+  "parserSourceAndWasmMatchCurrentDevelop": true,
+  "compilerAndArgumentsUnchanged": true,
+  "originalTwelveCaseTestByteIdentical": true,
+  "notes": [
+    "Only the combined native source manifest differs from reviewedEe903 among the admitted product changes.",
+    "The original current-develop parser remains unchanged; this candidate does not include the CRC pragma.",
+    "This confirms exact algorithm/source composition; new baseline browser qualification remains separate."
+  ]
+}

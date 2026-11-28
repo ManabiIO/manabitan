@@ -1,0 +1,54 @@
+{
+  "complete": true,
+  "scope": "Read-only independent check of the original hosted source artifact; no measurements or native execution repeated.",
+  "artifactId": 15256776270,
+  "runId": 46127721419,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "studyTree": "f4b08d4dfc6f2493336a5318c20c4f2b64b90593",
+  "runtimeCommit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+  "runtimeTree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+  "productFilesByteEqualPublishedGit": [
+    {
+      "arm": "baseline",
+      "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 161067,
+      "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+    },
+    {
+      "arm": "baseline",
+      "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    {
+      "arm": "candidate",
+      "commit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 161110,
+      "sha256": "9b7167fa52c0752dfc10c1a55efea537581ca321ecb65743f113941317139bf4"
+    },
+    {
+      "arm": "candidate",
+      "commit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 68047,
+      "sha256": "91774a3c167689211fe49e75b68eb0f91bed42c319bf83e01325dfcf976d0fc3"
+    }
+  ],
+  "vectors": 837,
+  "productionConformance": 157,
+  "jmdictGroups": 12,
+  "localAndHostedCorrectnessPayloadsDeepEqual": true,
+  "metadataDifferences": [
+    "buildSha256",
+    "registrationSha256"
+  ],
+  "metadataDifferenceExplanation": "Local construction used59ad before API publication; hosted source binds remote19db and its different study/host build receipt. Both commits have identical runtime tree6f6c. All correctness vectors, source/error cases, full-group outputs and capacities are identical.",
+  "hostedVerifySha256": "d62b2746e948389d221027cc369d728917fc373d8f4f04627d339f308e349a6d",
+  "localVerifySha256": "da61e0d715c61681660b326402185622153fe8f77ec4b99f7cc0d6a5e51e2f98",
+  "nodeVersion": "v22.22.0",
+  "v8Version": "12.4.254.21-node.33",
+  "untestedStandaloneDsFormatEntries": 14
+}

@@ -1,0 +1,131 @@
+{
+  "artifactId": 15256776270,
+  "runId": 46127721419,
+  "sourceCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "bytes": 352020,
+  "sha256": "907d91b12c18a4a984727dd7996b83f7fe815e74c7d454ecf806b57fd2d94a0f",
+  "gitBlob": "33b807a2aef141fe48a044cea3fdfe00f5b7d7d1",
+  "members": [
+    {
+      "path": "build-dry-run.log",
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "path": "capture-identities/conformance.json",
+      "bytes": 109210,
+      "sha256": "ad4637fd21020d02994d039fe18c7253f784023aadbb0e16db0211b80c4acdea"
+    },
+    {
+      "path": "capture-identities/manifest.json",
+      "bytes": 29656,
+      "sha256": "6c99bf187e086fea2b4f52eb41b0ee04d8db72833d39922a4aaae441b3e12f75"
+    },
+    {
+      "path": "capture.log",
+      "bytes": 136,
+      "sha256": "e7c7d84aad3508d1dd09e8eb06441e1cfa5471fc923b6ed70eb06c98fa707d72"
+    },
+    {
+      "path": "json-format.log",
+      "bytes": 759,
+      "sha256": "e739f86f192724afd466e6fd712b8f12d80c11f56c471bab2c5c06d120e33d6a"
+    },
+    {
+      "path": "lint.log",
+      "bytes": 764,
+      "sha256": "7299800c2295e66c451f9ab2a9407eee7e7968f1066572ee3cccb7030b15ff4c"
+    },
+    {
+      "path": "native/build-progress.json",
+      "bytes": 44,
+      "sha256": "7573b418e44bafdeeaa6f48bf7ed780612e274360a51d5b43389bac332477b21"
+    },
+    {
+      "path": "native/build.json",
+      "bytes": 13533,
+      "sha256": "275c7aed59d1359d00de0fb6eb361a3a848b11793c7563dd572181464a4d44b3"
+    },
+    {
+      "path": "native/modules/baseline-test.wasm",
+      "bytes": 69166,
+      "sha256": "7ecd8b18f2ac6b9bfd4a04e3938713bd3f283b612ef475f98fb7fa189db7529d"
+    },
+    {
+      "path": "native/modules/baseline.c",
+      "bytes": 161067,
+      "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+    },
+    {
+      "path": "native/modules/baseline.s",
+      "bytes": 786218,
+      "sha256": "7b85af7ebb223eaf4c28fc9a1dd09da29c5b964de47f644e6865e4f0cf3b1053"
+    },
+    {
+      "path": "native/modules/baseline.wasm",
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    {
+      "path": "native/modules/candidate-test.wasm",
+      "bytes": 68145,
+      "sha256": "5199abfca8ec2d89a7ea50d811c39a097ee643ea4f940f0084b76b4f508beefd"
+    },
+    {
+      "path": "native/modules/candidate.c",
+      "bytes": 161110,
+      "sha256": "9b7167fa52c0752dfc10c1a55efea537581ca321ecb65743f113941317139bf4"
+    },
+    {
+      "path": "native/modules/candidate.s",
+      "bytes": 780200,
+      "sha256": "85be12546d05c0ca63e56aff641e5541c76512e39543f7af62a3d39b730b19b4"
+    },
+    {
+      "path": "native/modules/candidate.wasm",
+      "bytes": 68047,
+      "sha256": "91774a3c167689211fe49e75b68eb0f91bed42c319bf83e01325dfcf976d0fc3"
+    },
+    {
+      "path": "native/verify.json",
+      "bytes": 339541,
+      "sha256": "d62b2746e948389d221027cc369d728917fc373d8f4f04627d339f308e349a6d"
+    },
+    {
+      "path": "native/verify.observations.jsonl",
+      "bytes": 223731,
+      "sha256": "5fbc64104c2c8c8f71037b62f70079035ddfad881e03a875294ec5a0393741ef"
+    },
+    {
+      "path": "native-build.log",
+      "bytes": 500,
+      "sha256": "c181ddb16ca8c75c1e1883a832b0316ddb9cc52153040bf5e17300819f47ba41"
+    },
+    {
+      "path": "native-proof.log",
+      "bytes": 324,
+      "sha256": "37d641ab46bc9ace22db4a439d038cb5b54f2f67f87743a0d71e4920b4fb61f9"
+    },
+    {
+      "path": "oracle.log",
+      "bytes": 122,
+      "sha256": "404f9aea26a6e3b957786182eea405e5e701d7646b867c67a934ea2d70481b9d"
+    },
+    {
+      "path": "source-preflight/qualification-config.json",
+      "bytes": 7159,
+      "sha256": "258da57c1058d9ff5f08b105af89920969990f632018011773f431eaab4d2afb"
+    },
+    {
+      "path": "source-preflight/qualification-source-identities.json",
+      "bytes": 4613,
+      "sha256": "455033467e54a8c104b54b286963ddd95512a2580a5e7cdd497c78ff81c1701d"
+    },
+    {
+      "path": "types.log",
+      "bytes": 444,
+      "sha256": "493d95206d825009022843ae583d9cebbfd9d664d812523227e48c71d733d454"
+    }
+  ],
+  "archiveIndependentlyDownloadedAndRehashed": true
+}

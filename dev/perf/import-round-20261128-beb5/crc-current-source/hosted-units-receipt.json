@@ -1,0 +1,31 @@
+{
+  "artifactId": 15257230165,
+  "runId": 46127721419,
+  "sourceCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "bytes": 48535,
+  "sha256": "e8a5aca40cdddc2c2e6e127fc745e6ad2f1865fb77b548775f96d8a71a9b38e3",
+  "gitBlob": "6e5d6a6d997297fdeff3803601f9cf0818158918",
+  "members": [
+    {
+      "path": "compiler-probe.json",
+      "bytes": 306,
+      "sha256": "02fe6712e281c285a42ffbf0b64144f67700e0e4921fbcc1746c8b945ffb8493"
+    },
+    {
+      "path": "wasm-compiler-probe.c",
+      "bytes": 20,
+      "sha256": "560a7695bae5b3e5c00e5b918bcaffa414efb2bd2fb1097424953fce22dae8d8"
+    },
+    {
+      "path": "unit.log",
+      "bytes": 594283,
+      "sha256": "4dd7386486983060192a5c81d3dbfe4c6027ef169680f982a38aebd859bf90be"
+    },
+    {
+      "path": "wasm-compiler-probe.wasm",
+      "bytes": 63,
+      "sha256": "927715d9a632200b86cc7117bd76883d01313236a6a64745fdb43a0bde4da697"
+    }
+  ],
+  "archiveIndependentlyDownloadedAndRehashed": true
+}

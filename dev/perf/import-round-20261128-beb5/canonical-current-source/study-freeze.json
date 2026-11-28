@@ -1,0 +1,434 @@
+{
+  "complete": true,
+  "studyCommit": "c32e55cd307bf8a673d0bdcafaac5f7224be5d0b",
+  "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+  "soleParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateCommit": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "candidateLocalConstructionCommit": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+  "candidateTree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+  "registeredSourceCount": 8,
+  "sourceOnlyPreflight": {
+    "configSha256": "3776441de5f190fa136eff61f7b79358fef64b246d3f5abfd6200c461feb1408",
+    "memoryAcquisition": {
+      "cadence": "Original25ms wait during import and100ms after import.",
+      "eligibility": "Original stable tree/identity and readability rules, pre/post brackets, at least5 fully contained scans and maximum250ms coverage gap remain unchanged.",
+      "limitations": "No acquisition-speed claim or equivalence of sampled process peaks across different acquisition policies. Not a hard total-process memory cap.",
+      "localSourceReviewCommit": "dbdc348ad704e71b2fa95a2e4ff780fa21d9a00a",
+      "policy": "Concurrent per-PID smaps_rollup reads, cap4, all joined inside the original complete before/after process-inventory bracket; deterministic PID order.",
+      "scope": "Diagnostic non-atomic import-window samples only. All earlier serial acquisitions and failures remain unchanged and unpooled."
+    },
+    "preflightComplete": true,
+    "qualificationSourceHashes": {
+      ".github/workflows/canonical-current-confirmation-beb5.yml": "63229c26ebe2e0f29956dabdea9e40be925b5bf1d5b0a3459b27647d7b810a88",
+      "dev/perf/canonical-current-confirmation-20261128-beb5/audit-browser.py": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+      "dev/perf/canonical-current-confirmation-20261128-beb5/run.py": "f3f96d269fd1e31dfcf02e49087edb399811d8acd9a63ea17a1b1c7a848dd511",
+      "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+      "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "dev/perf/import-qualification-20261128-beb5.py": "326e8ca36aa0162ba4c22957b8331016284fef9f28a48cc395f3d664f1d7ffd4"
+    },
+    "runtimeSources": {
+      "A": {
+        "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "files": {
+          "dev/data/dictionary-wasm/manifest.json": {
+            "gitBlob": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+            "sha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+          },
+          "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": {
+            "gitBlob": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+          },
+          "ext/js/dictionary/dictionary-database.js": {
+            "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+            "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+          },
+          "ext/js/dictionary/term-content-canonical-layout.js": {
+            "gitBlob": "a66886f06155861d12f7150393205f9f21222aff",
+            "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c"
+          },
+          "ext/js/dictionary/term-content-canonical-scan.js": {
+            "gitBlob": "e41743615a82936db8ad0315ea6ac0aa271ec52e",
+            "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+          },
+          "ext/js/dictionary/term-record-opfs-store.js": {
+            "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+            "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+          },
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+            "gitBlob": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+            "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+          },
+          "test/term-lookup-native-checksum.test.js": null
+        },
+        "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+      },
+      "B": {
+        "commit": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+        "files": {
+          "dev/data/dictionary-wasm/manifest.json": {
+            "gitBlob": "2a011412738cc30c64795846791f6793c3aa5667",
+            "sha256": "5a0ce28ef82c86994535db8fe6a35934ee793a7dc5035e24369b812eaefe1dc9"
+          },
+          "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": {
+            "gitBlob": "44ec5ff2b33c23b8bf31460c9933e9e66f63f273",
+            "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896"
+          },
+          "ext/js/dictionary/dictionary-database.js": {
+            "gitBlob": "722f0a0056aec03fa2eec9f8cedc4843afcfc3ea",
+            "sha256": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb"
+          },
+          "ext/js/dictionary/term-content-canonical-layout.js": {
+            "gitBlob": "f3e1299fa99117950dd72fad5e5d1fd8784e3fdb",
+            "sha256": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80"
+          },
+          "ext/js/dictionary/term-content-canonical-scan.js": {
+            "gitBlob": "02456bab6712d4722780167505531600686e2733",
+            "sha256": "874f1b9465f7206eaa86e2895df33c55bf1fce5c36e02753873e5dd99ab79a28"
+          },
+          "ext/js/dictionary/term-record-opfs-store.js": {
+            "gitBlob": "205311563fc991a76388d600b817e6b883a91ceb",
+            "sha256": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59"
+          },
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+            "gitBlob": "49789ee1ce89102e4ca9ef143cc5131b8b37dd32",
+            "sha256": "d485531b3796491c7cc22657decff9f9a19e5096ed29e2823911a990699d0f97"
+          },
+          "test/term-lookup-native-checksum.test.js": {
+            "gitBlob": "de4174b63a1a5e0b64d502a5b1bd4bba33aca8de",
+            "sha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53"
+          }
+        },
+        "tree": "fc90894e914a29de988753bbe4b062bb2f617f93"
+      }
+    },
+    "studyCommit": "c32e55cd307bf8a673d0bdcafaac5f7224be5d0b",
+    "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+    "trackedSourceClean": true
+  },
+  "copiedProtocolFilesExact": [
+    "dev/perf/import-memory-20261125-a7f7/README.md",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+    "dev/perf/import-memory-20261125-a7f7/parallel-acquisition-provenance.json",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+    "dev/perf/import-memory-20261125-a7f7/source-provenance.json",
+    "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py",
+    "dev/perf/import-memory-20261125-a7f7/test_import_window.py",
+    "dev/perf/import-memory-20261125-a7f7/test_parallel_acquisition.py",
+    "dev/perf/import-memory-20261125-a7f7/test_protocol.py",
+    "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+    "dev/perf/import-qualification-20261128-beb5.py"
+  ],
+  "unchangedAuditorHelpers": [
+    "read",
+    "sha",
+    "git_blob",
+    "same",
+    "close",
+    "paired",
+    "phase_metrics"
+  ],
+  "ordinaryScheduleMatchesUnchangedRunnerBA": [
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "B"
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "A"
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "A"
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "B"
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "B"
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "A"
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "A"
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "B"
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "B"
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "arm": "C"
+    },
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "arm": "A"
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "A"
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "B"
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "B"
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "A"
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "A"
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "B"
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "arm": "A"
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "arm": "C"
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "B"
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "A"
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "A"
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "B"
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "B"
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "A"
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "arm": "C"
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "arm": "A"
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "A"
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "B"
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "B"
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "A"
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "A"
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "B"
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "arm": "A"
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "arm": "C"
+    }
+  ],
+  "memoryScheduleMatchesUnchangedProtocolBA": [
+    {
+      "index": 1,
+      "arm": "B",
+      "name": "B1",
+      "pair": 1
+    },
+    {
+      "index": 2,
+      "arm": "A",
+      "name": "A1",
+      "pair": 1
+    },
+    {
+      "index": 3,
+      "arm": "A",
+      "name": "A2",
+      "pair": 2
+    },
+    {
+      "index": 4,
+      "arm": "B",
+      "name": "B2",
+      "pair": 2
+    }
+  ],
+  "protocolUnitTestsPassed": 37,
+  "pythonSyntaxAndYamlParsed": true,
+  "readmePrettierPassed": true,
+  "timingExecuted": false,
+  "files": {
+    ".github/workflows/canonical-current-confirmation-beb5.yml": {
+      "gitBlob": "3b378534d780af42803c4afa74e5590d34fcc9ce",
+      "sha256": "63229c26ebe2e0f29956dabdea9e40be925b5bf1d5b0a3459b27647d7b810a88",
+      "bytes": 7946
+    },
+    "dev/perf/canonical-current-confirmation-20261128-beb5/README.md": {
+      "gitBlob": "456829b9d3e7832edf0a31326cab7503eb830dd7",
+      "sha256": "96edea2c01f515aded50d64717e5d3572f29ebc5d253df568982f0d511f0eb42",
+      "bytes": 6377
+    },
+    "dev/perf/canonical-current-confirmation-20261128-beb5/audit-browser.py": {
+      "gitBlob": "c72f5a6c528ff3fdde824fe69537d9b450fcade4",
+      "sha256": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+      "bytes": 15167
+    },
+    "dev/perf/canonical-current-confirmation-20261128-beb5/registration.json": {
+      "gitBlob": "970695bb65ed6a1f3b4f39e53baf432db437fbf7",
+      "sha256": "3776441de5f190fa136eff61f7b79358fef64b246d3f5abfd6200c461feb1408",
+      "bytes": 10061
+    },
+    "dev/perf/canonical-current-confirmation-20261128-beb5/run.py": {
+      "gitBlob": "6907923adc4483bc12bea57e5cc7426ad5621e29",
+      "sha256": "f3f96d269fd1e31dfcf02e49087edb399811d8acd9a63ea17a1b1c7a848dd511",
+      "bytes": 6075
+    },
+    "dev/perf/import-memory-20261125-a7f7/README.md": {
+      "gitBlob": "1ffed969c3ab6ab81a9f9dd0b2efccad3c62fad0",
+      "sha256": "61afb5107ad464566efbc43a1a772e0cec18719e9ff73eff9fb2f97aefc9fb7e",
+      "bytes": 9277
+    },
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "gitBlob": "8badd73c09c2c0dabe0ee30b540696713d64c2cb",
+      "sha256": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+      "bytes": 18967
+    },
+    "dev/perf/import-memory-20261125-a7f7/parallel-acquisition-provenance.json": {
+      "gitBlob": "44f5d608de1f021f18257e52fdae682ae342cc77",
+      "sha256": "0f3b95fed6ed15c4b2075d42d04c661f3127893bd3cf5ffec8c78b4ad4b75fe3",
+      "bytes": 5359
+    },
+    "dev/perf/import-memory-20261125-a7f7/test_parallel_acquisition.py": {
+      "gitBlob": "6783fa8253ed67f437fa35910b2dd6fdfadfc629",
+      "sha256": "e68c8d56460491a1fd2b5af91b8bad535565dc9b0ea0697e0a11f9873d4feb29",
+      "bytes": 11825
+    },
+    "dev/perf/import-qualification-20261128-beb5.py": {
+      "gitBlob": "8070be9d971c1a1d9c445561f096acc4dc4e8f17",
+      "sha256": "326e8ca36aa0162ba4c22957b8331016284fef9f28a48cc395f3d664f1d7ffd4",
+      "bytes": 20608
+    }
+  }
+}
