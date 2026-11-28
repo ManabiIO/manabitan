@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:16:43.156Z",
+  "scope": "Read-only JavaScript string/identity checks of the newly composed prerequisite; not a Python/YAML parser or execution.",
+  "workflowSha256": "8451ed1aebbbb57b7c71d96de3072006b5b95fe38f1841cb637d9c9a9eda7fcd",
+  "scriptSha256": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5",
+  "checks": {
+    "noUnresolvedCompositionTokens": true,
+    "exactFrozenBaseAndCandidate": true,
+    "exactlyTwoJobs": true,
+    "correctnessDependency": true,
+    "fixedThreeCellMatrix": true,
+    "matrixDoesNotStopOtherCells": true,
+    "noFullQualificationInvocation": true,
+    "oneSamplerInvocation": true,
+    "oneObservationProducerRun": true,
+    "noRuntimeProductOverlay": true,
+    "browserHashBeforeInvocation": true,
+    "zeroExitAfterPersistingSummary": true,
+    "archiveAfterAcquisition": true,
+    "archiveHelperByteIdentical": true,
+    "noThresholdMutation": true
+  },
+  "localExecutorAvailable": false,
+  "pythonSyntaxExecutionPending": true
+}

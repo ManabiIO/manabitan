@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 11:17:24 UTC",
+  "reviewer": "pipeline_audit",
+  "kind": "Source-only independent review of fresh a300 correctness and excluded baseline-storage prerequisite",
+  "sourcePair": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044"
+  },
+  "reviewedFiles": {
+    "workflow": {
+      "gitBlobSha1": "4330483d22843fafec37ccc856340862eb19a93e",
+      "sha256": "8451ed1aebbbb57b7c71d96de3072006b5b95fe38f1841cb637d9c9a9eda7fcd",
+      "bytes": 8259
+    },
+    "script": {
+      "gitBlobSha1": "34ecffaaaa8142ea1b67b666e3b1b1a2dc02d6b9",
+      "sha256": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5",
+      "bytes": 21030
+    },
+    "binding": {
+      "gitBlobSha1": "2a84523b47528a92f29e638a6d16604808c3d112",
+      "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+      "bytes": 7368
+    },
+    "archiveHelper": {
+      "gitBlobSha1": "e994ee477e5b996b5453e17626a65785ff2dacaa",
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+      "bytes": 6895
+    }
+  },
+  "verdict": "No remaining source/protocol blocker found for this prerequisite-only workflow; not an approval or launch of the full252 comparison.",
+  "checks": [
+    "The exact direct-child candidate commit/tree and complete8-file changed set are checked, including each product byte count/SHA256/Gitblob.",
+    "All59 current source-inventory rows are checked against a300; the39 required-same paths are independently rederived and checked on candidate/tooling;9 extra unchanged-source hashes agree with independently fetched primary bytes.",
+    "Fresh correctness uses a detached exact candidate and11 ordered command receipts, including native --check, five-file lint, strict main/test types, full unit/options suites and all dry build targets. Final source cleanliness and runtime WASM equality are required.",
+    "Compiler21.1.8 and Node22.22.0 identities are explicit. Workflow compiler paths feed the native builder.",
+    "Each storage job depends on successful validate. Matrix has exactly jmdict/jitendex/vndb, one baseline invocation each, no candidate observation and no automatic full252 job.",
+    "Browser SHA256 and complete version output are checked before invocation. Prior expected Git3a7dc580/bfeeb222 was independently fetched and proves exact browser153.0.8010.12/SHA8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e.",
+    "The existing a7f7 marker overlay and run_with_sampling source are unchanged. All instrumented durations are explicitly excluded from performance comparisons; no optimizer, cache, worker, flag or memory policy change is introduced.",
+    "The initial draft lacked child-exit propagation. The reviewed final driver retains/emits sampled-summary then explicitly requires benchmarkExitCode0. Coverage failures remain honest diagnostic limits rather than being repaired or mistaken for product memory qualification.",
+    "The marker overlay is restored in finally; release package bytes are checked before and after observation, and the worktree must return to exact clean baseline.",
+    "Complete storage validation, source/package fields and actual files are recorded. No guessed37-unit bound is installed; storageCompatibilityAccepted remains false and manual structural review is mandatory.",
+    "The reused archive helper writes sibling outputs, excludes only root release-package copies from its inner ZIP, retains their exact sizes/hashes and all original non-package members, roundtrips every member, then emits6144-byte chunks plus whole SHA256/Gitblob. The outer artifact still retains the release package and per-entry size/hash map.",
+    "Workflow pins actions, uses explicit bash, read-only permissions and always retains failures. It runs no full-cohort comparison command."
+  ],
+  "failureSemantics": {
+    "correctnessFailure": "validate failure prevents every baseline_storage matrix job; zero baseline attempts and zero full-comparison attempts.",
+    "earlyBrowserOrSourceFailure": "That storage job fails before invoking its sole baseline import and retains diagnostics.",
+    "oneStorageCellFailure": "fail-fast:false means other already-declared independent one-shot corpus cells may still run. The failed cell is not retried/replaced; the whole storage prerequisite remains unaccepted pending review.",
+    "fullQualification": "There is no automatic full launch on success or failure. A prospective exact VNDB allocation bound requires independent/root review of the excluded baseline inventory before a distinct252 plan is frozen."
+  },
+  "preservedPreFreezeDeltas": {
+    "initialScript": "b095ae82998868218ad10c5cb1826b7d75836865",
+    "inventoryLogOnly": "bfc237efc53d61692919eb2b4329c8df44deab13",
+    "explicitExitGuard": "24d283fedfc6b6d93208e761d79563ab96d38fc7",
+    "finalBrowserGuard": "34ecffaaaa8142ea1b67b666e3b1b1a2dc02d6b9",
+    "originalBinding": "192d4cc54b6cc6a58e17af3c84ff92dca0e644a5",
+    "finalBinding": "2a84523b47528a92f29e638a6d16604808c3d112",
+    "exactDeltaCheck": "Final script differs from the reviewed preceding guard version only in browser identity persistence and two comparisons. Final binding adds only browser identity/provenance. No source, timer, observation schedule or criterion changed."
+  },
+  "sourceReview": {
+    "gitBlobSha1": "8eef0b64df6f6cef378f9edee0824001ab1319ff",
+    "sha256": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de"
+  },
+  "sourceInventory": {
+    "gitBlobSha1": "ead1b75b3ca69ca4caf04ad7297d8395df54b425",
+    "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87"
+  },
+  "limitations": [
+    "No local executor, Python/YAML execution, compiler, test, browser or acquisition was used for this review.",
+    "A single excluded baseline inventory does not prove allocation stability across the future cohort; exact canonical storage equality remains required for every full observation.",
+    "Fresh a300 correctness and actual storage compatibility remain unobserved at review time.",
+    "The frozen f28 component measurements are separate source evidence and confer no a300 performance result."
+  ]
+}

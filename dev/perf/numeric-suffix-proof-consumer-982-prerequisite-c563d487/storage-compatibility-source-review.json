@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 11:11:19 UTC",
+  "kind": "Read-only a300 fresh-import storage compatibility review; prospective acquisition prerequisite",
+  "reviewer": "pipeline_audit",
+  "sources": {
+    "repository": "ManabiIO/manabitan",
+    "sourceCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "sourceTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "componentBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "proposedProduct": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "proposedProductProvenance": "Root-reported exact eight-file child of a300; this source-only review does not claim a fresh build or correctness pass.",
+    "sourceInventory": {
+      "gitBlobSha1": "ead1b75b3ca69ca4caf04ad7297d8395df54b425",
+      "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+      "bytes": 49784
+    }
+  },
+  "disposition": {
+    "sourceContractReviewed": true,
+    "storageCompatibilityEstablishedByExecution": false,
+    "carryHistoricalVndb37UnitBound": false,
+    "full252AcquisitionAuthorizedByThisReview": false,
+    "requiresExcludedBaselineStoragePreflight": true,
+    "observerOrProductionChangesMade": false
+  },
+  "findings": [
+    {
+      "id": "fresh-root-routing",
+      "conclusion": "A fresh database begins on the legacy epoch-0 content path. New version-2 import arenas are conditional on an already activated committed root; their existence is not an unconditional consequence of #982.",
+      "evidence": [
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "lines": [
+            13137,
+            13156
+          ],
+          "detail": "Open recovers any journal, then activates committed addressing only if stored epoch>0; otherwise prepares the legacy store."
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "lines": [
+            13411,
+            13546
+          ],
+          "detail": "Schema adds metadata; seeding writes legacy-root-v0 with activeEpoch0 and a legacy manifest."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-opfs-store.js",
+          "lines": [
+            499,
+            525
+          ],
+          "detail": "A version2 checkpoint with no committed root throws; arena namespace/file creation is inside committedRoot!==null."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-opfs-store.js",
+          "lines": [
+            569,
+            582
+          ],
+          "detail": "createImportCheckpoint returns version2 only for a committed root; the fresh route snapshots legacy segments."
+        },
+        {
+          "path": "test/term-content-import-arena.test.js",
+          "lines": [
+            119,
+            147
+          ],
+          "detail": "The arena fixtures explicitly activate storageEpoch1 or7 before expecting an arena or version2 checkpoint."
+        },
+        {
+          "path": "test/dictionary-database-online-optimization-schema.test.js",
+          "lines": [
+            25,
+            77
+          ],
+          "detail": "The additive-schema test expects legacy-root-v0/activeEpoch0 after initialization."
+        }
+      ]
+    },
+    {
+      "id": "sah-pool-cardinality",
+      "conclusion": "The source still installs and reserves a minimum of eight SAH files. This supports retaining the existing eight-file structural requirement; it is not proof that every observed inventory has exactly eight files or seven idle4096B files.",
+      "evidence": [
+        {
+          "path": "ext/js/dictionary/sqlite-wasm.js",
+          "lines": [
+            24,
+            26
+          ],
+          "detail": "OPFS_SAHPOOL_MIN_CAPACITY=8."
+        },
+        {
+          "path": "ext/js/dictionary/sqlite-wasm.js",
+          "lines": [
+            289,
+            315
+          ],
+          "detail": "installOpfsSAHPoolVfs receives initialCapacity8; reserveMinimumCapacity8 follows; actual capacity/fileCount are diagnostics."
+        }
+      ],
+      "unchangedFromF28": true
+    },
+    {
+      "id": "active-sqlite-allocation",
+      "conclusion": "Historical VNDB active SAH allocation37/37 cannot be asserted from a300 source. Initialization always creates eight new metadata tables, their keys/indexes and two seeded rows; optimizer discovery may also persist job metadata. Source alone does not determine SQLite page reuse, free-list use, final byte size, or cross-observation equality.",
+      "tables": [
+        "termContentStorageState",
+        "termContentStorageRoots",
+        "termContentStorageLayouts",
+        "termContentStorageRootLayouts",
+        "termContentStorageFiles",
+        "termContentStorageCodecs",
+        "termContentOptimizationJobs",
+        "termContentOptimizationCheckpoints"
+      ],
+      "evidence": [
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "lines": [
+            13411,
+            13546
+          ],
+          "detail": "Unconditional CREATE TABLE IF NOT EXISTS statements, primary/unique keys, explicit idx_term_content_single_active_job and legacy seeding."
+        },
+        {
+          "path": "test/dictionary-database-online-optimization-schema.test.js",
+          "lines": [
+            44,
+            75
+          ],
+          "detail": "Six storage tables plus two optimization tables and legacy state asserted."
+        },
+        {
+          "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+          "lines": [
+            117,
+            170
+          ],
+          "detail": "Eight SAH files/seven4096B files, one aligned active file and explicit VNDB unit range are validated; canonical bytes remain exact for every comparison."
+        }
+      ],
+      "newExactUnitBound": null
+    },
+    {
+      "id": "idle-activation-and-eligibility",
+      "conclusion": "The optional optimizer is not disabled by default. It starts only after admission/ownership release and a10000ms idle deadline, and visible foreground requests preempt it. Raw/preset-JMdict selectors are skipped before activation, while a shared raw-v4 artifact is inspected independently and can be eligible. Thus known raw-block-v2:jmdict/raw-v6 layouts do not alone prove absence of every possible eligible artifact on an unseen fresh a300 run.",
+      "evidence": [
+        {
+          "path": "ext/js/dictionary/term-content-idle-scheduler.js",
+          "lines": [
+            28,
+            28
+          ],
+          "detail": "Default idleMs10000, continuationMs1, retryMs30000."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-idle-scheduler.js",
+          "lines": [
+            95,
+            111
+          ],
+          "detail": "Wake schedules only after no foreground/holds."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-idle-scheduler.js",
+          "lines": [
+            141,
+            157
+          ],
+          "detail": "Foreground admission synchronously preempts; last release resets the idle deadline."
+        },
+        {
+          "path": "ext/js/background/offscreen-dictionary-worker.js",
+          "lines": [
+            79,
+            83
+          ],
+          "detail": "Production worker installs the scheduler with default options and initial backend-startup hold."
+        },
+        {
+          "path": "test/term-content-optimization-lifecycle.test.js",
+          "lines": [
+            189,
+            239
+          ],
+          "detail": "Backend refresh/UI completion holds remain; diagnostic/status polling does not preempt optional maintenance."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-legacy-eligibility.js",
+          "lines": [
+            28,
+            38
+          ],
+          "detail": "Raw selectors and getLegacyTermContentZstdCodecId(blockCodec??selector) are skipped."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-zstd-codec.js",
+          "lines": [
+            18,
+            27
+          ],
+          "detail": "The preset jmdict codec returns a non-null known codec ID."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-legacy-eligibility.js",
+          "lines": [
+            61,
+            70
+          ],
+          "detail": "Shared artifact handling is separate; raw-v4 artifact payloads are inspected even though raw references skip."
+        },
+        {
+          "path": "ext/js/dictionary/term-content-optimization-controller.js",
+          "lines": [
+            800,
+            835
+          ],
+          "detail": "Activation requires a successful eligible-frame proof; a complete skip scan persists no-gain without activation."
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "lines": [
+            5804,
+            5838
+          ],
+          "detail": "Discovery scans record references with skipSelector and then queries sharedGlossaryArtifacts separately."
+        },
+        {
+          "path": "test/term-content-legacy-eligibility.test.js",
+          "lines": [
+            38,
+            76
+          ],
+          "detail": "Tests raw-block-v2:jmdict skip, generic compressed eligibility, dictionary-bearing skip, and separate shared artifact extent."
+        },
+        {
+          "path": "test/dictionary-database-online-optimization-schema.test.js",
+          "lines": [
+            1682,
+            1713
+          ],
+          "detail": "Matched-generation no-op test asserts activation is never called, while durable job metadata is retained."
+        }
+      ]
+    },
+    {
+      "id": "unchanged-observer-boundary",
+      "conclusion": "The frozen observer inventories complete logical OPFS sizes after browser restart, lookup verification and media validation. It adds no optimizer hold and establishes no less-than10000ms upper bound for these steps. Future baseline observations must demonstrate that the fixed known-path/eight-SAH contract and exact bytes still apply; this review does not infer it from earlier f28/dcfc runs.",
+      "evidence": [
+        {
+          "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+          "lines": [
+            4264,
+            4308
+          ],
+          "detail": "Relaunch, settings readiness, dictionary counts, lookup/readability checks, media verification, then recursive OPFS listing."
+        },
+        {
+          "path": "dev/perf/import-qualification-20261125-a7f7.py",
+          "lines": [
+            217,
+            249
+          ],
+          "detail": "Every observation is canonicalized and must match the first canonical receipt; no allocation allowance is removed from the exact comparison."
+        }
+      ]
+    }
+  ],
+  "prospectivePrerequisite": {
+    "status": "Root accepted this prerequisite before any fresh a300 full cohort acquisition.",
+    "after": "Fresh exact a300/61ac correctness and native reproduction gates.",
+    "observations": "Exactly one separately identified excluded baseline storage observation for each locked dictionary; fresh profile, production defaults, pinned fixtures/browser and unchanged observer/verification boundary.",
+    "retainedEvidence": "Retain complete raw reports, full OPFS file inventories/sizes, source/package/browser identities, original logs and any failed observation. Every emitted duration is excluded from candidate comparisons and performance claims.",
+    "admission": "Keep the existing known product path set and eight-SAH/seven4096B-file structural checks. Inspect the observed aligned active allocation and record a new exact VNDB bound prospectively before the separately launched252 plan.",
+    "mismatch": "If any structural mismatch occurs, hold for a source-grounded review and a separately recorded prospective decision. Do not broaden paths, normalize away bytes, disable maintenance, alter cache/workers/flags/memory limits, choose favorable measurements, or silently relax an old bound.",
+    "downstream": "No automatic252 launch. Full latency/non-target/memory/storage gates remain unchanged; all actual canonical bytes must match across observations."
+  },
+  "limitations": [
+    "This review read immutable primary source and tests; it did not execute those tests, native code, imports, browser verification, or a current build.",
+    "Known-vector hashing and Git blob comparisons are source-integrity checks only.",
+    "No exact a300 OPFS path inventory, SQLite page count, idle-job state or active SAH unit count has been observed yet.",
+    "The corrected f28 VNDB primary component result remains separate; its original artifact audit is still pending during the executor outage.",
+    "The pre-outage local broad review dfec08104588ef733b0ee3d0d7a2f5201ce8646cb191a19bd9773a2b0a26dc5a is not reconstructed or assigned to these new bytes."
+  ]
+}

@@ -1,0 +1,161 @@
+name: Fresh a300 proof-consumer correctness and excluded storage prerequisite c563d487
+
+on:
+  push:
+    branches: ['perf/import-suffix-proof-982-prerequisite-20261128-c563d487']
+    paths: ['.github/workflows/import-suffix-proof-982-prerequisite-c563d487.yml']
+
+permissions:
+  contents: read
+  actions: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PERF_BASELINE: a300da36d00df8e353c5679b1528b50a1299b75f
+  PERF_CANDIDATE: 61ac55c50d9ade7b90dbeb9299de18e094e25044
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    name: Fresh exact-a300 candidate correctness
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Bind frozen prerequisite code and syntax
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib
+          from pathlib import Path
+          root = Path("dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487")
+          expected = {
+              "prerequisite.py": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5",
+              "source-binding.json": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+              "prospective-review-criteria.json": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+              "a300-source-inventory.json": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+              "storage-compatibility-source-review.json": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de",
+              "archive-evidence.py": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+          }
+          for name, digest in expected.items():
+              if hashlib.sha256((root / name).read_bytes()).hexdigest() != digest:
+                  raise SystemExit("Frozen prerequisite tooling differs: " + name)
+          PYTHON
+          python3 -m py_compile \
+            dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py \
+            dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py
+      - name: Set up the exact Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the pinned compiler family
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Fetch only the frozen source commits
+        run: git fetch --no-tags --depth=2 origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Validate the exact product with fresh complete gates
+        run: |
+          python3 dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py correctness \
+            --binding dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/source-binding.json \
+            --output builds/perf/suffix-proof-982-prerequisite-correctness \
+            --worktree "$GITHUB_WORKSPACE/../suffix-proof-982-correctness-candidate"
+      - name: Preserve every original correctness byte in bounded log chunks
+        if: always()
+        run: |
+          python3 dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py \
+            --evidence builds/perf/suffix-proof-982-prerequisite-correctness
+      - name: Retain all fresh correctness evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suffix-proof-982-prerequisite-correctness-${{ github.run_attempt }}
+          path: |
+            builds/perf/suffix-proof-982-prerequisite-correctness
+            builds/perf/suffix-proof-982-prerequisite-correctness.raw-evidence.zip
+            builds/perf/suffix-proof-982-prerequisite-correctness.raw-evidence-manifest.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  baseline_storage:
+    name: '${{ matrix.dictionary }} one excluded baseline storage observation'
+    needs: validate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Bind frozen prerequisite code and syntax
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib
+          from pathlib import Path
+          root = Path("dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487")
+          expected = {
+              "prerequisite.py": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5",
+              "source-binding.json": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+              "prospective-review-criteria.json": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+              "a300-source-inventory.json": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+              "storage-compatibility-source-review.json": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de",
+              "archive-evidence.py": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+          }
+          for name, digest in expected.items():
+              if hashlib.sha256((root / name).read_bytes()).hexdigest() != digest:
+                  raise SystemExit("Frozen prerequisite tooling differs: " + name)
+          PYTHON
+          python3 -m py_compile \
+            dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py \
+            dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install the same pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Validate the unchanged observation helpers
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Fetch only the frozen source commits
+        run: git fetch --no-tags --depth=2 origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Observe one fresh baseline with fixed production defaults and sampler
+        run: |
+          python3 dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py storage \
+            --binding dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/source-binding.json \
+            --dictionary "$PERF_DICTIONARY" \
+            --output "builds/perf/suffix-proof-982-prerequisite-$PERF_DICTIONARY" \
+            --worktree "$GITHUB_WORKSPACE/../suffix-proof-982-prerequisite-baseline"
+      - name: Preserve every original baseline report and process scan
+        if: always()
+        run: |
+          python3 dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py \
+            --evidence "builds/perf/suffix-proof-982-prerequisite-$PERF_DICTIONARY"
+      - name: Retain all original prerequisite evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suffix-proof-982-prerequisite-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: |
+            builds/perf/suffix-proof-982-prerequisite-${{ matrix.dictionary }}
+            builds/perf/suffix-proof-982-prerequisite-${{ matrix.dictionary }}.raw-evidence.zip
+            builds/perf/suffix-proof-982-prerequisite-${{ matrix.dictionary }}.raw-evidence-manifest.json
+          if-no-files-found: warn
+          retention-days: 14

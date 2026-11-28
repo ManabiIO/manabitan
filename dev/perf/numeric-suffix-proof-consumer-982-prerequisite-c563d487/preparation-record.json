@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:16:06.568Z",
+  "status": "Source-only cloud preparation; final independent review and root publication approval pending.",
+  "authorization": "Separate prerequisite: fresh exact a300/61ac correctness, then exactly one excluded baseline storage observation per locked dictionary. No candidate timing comparison and no automatic full qualification.",
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidate": {
+    "commit": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+    "soleParent": "a300da36d00df8e353c5679b1528b50a1299b75f"
+  },
+  "plannedObservations": {
+    "baselineOnly": 3,
+    "candidate": 0,
+    "authoritativeTiming": 0,
+    "future252Started": false
+  },
+  "activeFiles": [
+    {
+      "path": ".github/workflows/import-suffix-proof-982-prerequisite-c563d487.yml",
+      "gitBlobSha1": "4330483d22843fafec37ccc856340862eb19a93e",
+      "bytes": 8259,
+      "sha256": "8451ed1aebbbb57b7c71d96de3072006b5b95fe38f1841cb637d9c9a9eda7fcd"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py",
+      "gitBlobSha1": "34ecffaaaa8142ea1b67b666e3b1b1a2dc02d6b9",
+      "bytes": 21030,
+      "sha256": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/source-binding.json",
+      "gitBlobSha1": "2a84523b47528a92f29e638a6d16604808c3d112",
+      "bytes": 7368,
+      "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prospective-review-criteria.json",
+      "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263",
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/a300-source-inventory.json",
+      "gitBlobSha1": "ead1b75b3ca69ca4caf04ad7297d8395df54b425",
+      "bytes": 49784,
+      "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/storage-compatibility-source-review.json",
+      "gitBlobSha1": "8eef0b64df6f6cef378f9edee0824001ab1319ff",
+      "bytes": 12853,
+      "sha256": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py",
+      "gitBlobSha1": "e994ee477e5b996b5453e17626a65785ff2dacaa",
+      "bytes": 6895,
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+    }
+  ],
+  "preservation": {
+    "rawReports": "Every original run-1.json, summary, log, OPFS validation/inventory and sampled process/marker record is preserved.",
+    "commands": "All reached correctness command logs and receipts, complete prospective command plan and failures are retained.",
+    "archiveHelper": "Byte-identical c667e543 helper from faf6; deterministic inner ZIP, member hashes, bounded base64 and Git blob identities. Only root package-A.zip/package-B.zip copies are excluded from inner ZIP; complete package-entry map and outer original artifact remain.",
+    "noRetry": "No selected retry/resume/overwrite; each matrix cell invokes only one original sampler child."
+  },
+  "sourceReviewScope": {
+    "a300InventorySha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+    "storageSourceReviewSha256": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de",
+    "expectedNativeManifestSourceDigest": "2457445640a1dc21c4908b5c38d8d7987846a0d189e8e0d357312944a732ccb8",
+    "oldComponentNativeProof": "Exact native bytes recovered from prior f28 build; fresh a300 reproduction/correctness remains mandatory. No old source gain transfer."
+  },
+  "observerBoundary": {
+    "benchmarkCommand": "Unchanged a7f7 memory-phase baseline command with --runs 1 --no-build --build-target chrome --media-check sample; no --flags means production default null report value and requested empty object.",
+    "samplerSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "overlayProviderSha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "runtimePackageChangedByOverlay": false,
+    "reportedProducerTiming": "The unchanged producer still emits its normal timing fields. All durations from these three prerequisite observations are excluded by this plan and are not candidate comparisons.",
+    "memory": "Unchanged 25ms wait and 250ms/five-covered-scan qualification. Any coverage failure is retained; this baseline-only prerequisite does not make a paired memory claim."
+  },
+  "storageDecision": {
+    "knownPathsAndEightSah": "Remain required for later manual compatibility review.",
+    "old37UnitBound": "Not used or relaxed in this prerequisite.",
+    "newFullBound": "Must be exactly frozen from the separate baseline storage evidence and source explanation before any separate full acquisition.",
+    "noAutomaticAcceptance": true,
+    "noOptimizerDisable": true,
+    "noFullWorkflowIncluded": true
+  },
+  "validationLimits": [
+    "Executor unavailable; no local Python/YAML parser, native build, browser import or current correctness run was performed.",
+    "Source is reviewed independently; first hosted step checks all frozen SHA256 values and compiles both Python modules before executing either mode.",
+    "Pinned Chromium binary and complete version are gated before invocation using previously verified exact browser identity, with unchanged dependency/fixture locks."
+  ],
+  "preparationEvents": [
+    {
+      "kind": "pre-acquisition-review-fix",
+      "scope": "prerequisite observer only",
+      "change": "Require zero benchmark process exit status after preserving sampled summary; prevents a late failed process being accepted from earlier successful report.",
+      "priorSha256": "3d0e03ddbefdd131d1e846641c2259e32c7fd61f72a46588380c180974eec5b6",
+      "nextSha256": "edecf6498b95257b694c68f6f8f2558b7f87073ef86cd13d9394395f4ba146e4"
+    },
+    {
+      "kind": "cloud-composition-failure",
+      "scope": "scratch JavaScript string assembly",
+      "detail": "Unescaped GitHub expression ${...} caused JavaScript syntax error before any workflow content was created, stored, published, or executed. Replaced string interpolation syntax with literal composition tokens; no source/acquisition changed."
+    },
+    {
+      "kind": "pre-acquisition-review-fix",
+      "scope": "prerequisite observer only",
+      "change": "Gate exact locked Chromium binary SHA256 and full version before baseline invocation, preserving actual browser receipt on mismatch.",
+      "identitySource": "3a7dc580bfb8ec273e0fda0c3cc2b8157f9b9c4d",
+      "priorScriptSha256": "edecf6498b95257b694c68f6f8f2558b7f87073ef86cd13d9394395f4ba146e4",
+      "nextScriptSha256": "82c6521adea2acfa2a8e97c8b150cbbd1df7f49f2005c324701115671fb698c5"
+    }
+  ],
+  "scriptHistory": [
+    {
+      "role": "initial reviewer draft before storage-inventory log emission",
+      "sha256": "ff82cd77600d30a21054f101a9f58b20db0b7a05b0686050ff8ad6fb9b07e4dd",
+      "gitBlobSha1": "b095ae82998868218ad10c5cb1826b7d75836865"
+    },
+    {
+      "role": "inventory emission added; before explicit process-exit guard",
+      "sha256": "3d0e03ddbefdd131d1e846641c2259e32c7fd61f72a46588380c180974eec5b6",
+      "gitBlobSha1": "bfc237efc53d61692919eb2b4329c8df44deab13"
+    },
+    {
+      "role": "process-exit guard added; before exact browser gate",
+      "sha256": "edecf6498b95257b694c68f6f8f2558b7f87073ef86cd13d9394395f4ba146e4",
+      "gitBlobSha1": "24d283fedfc6b6d93208e761d79563ab96d38fc7"
+    }
+  ]
+}

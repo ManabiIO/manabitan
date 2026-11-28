@@ -1,0 +1,1075 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:09:04Z",
+  "kind": "source-only primary Git blob inventory",
+  "repository": "ManabiIO/manabitan",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "current": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "method": {
+    "treeCompleteness": "Both primary recursive Git trees reported truncated:false.",
+    "sourceBytes": "Each decoded UTF-8 source was independently counted and hashed with SHA-256 and Git SHA-1; every computed Git blob ID and byte count matches the primary current tree.",
+    "hashSelfChecks": "Empty and abc SHA-1/SHA-256 known vectors passed; all 59 current immutable source blobs independently match their Git IDs and byte counts.",
+    "noExecution": "No local executor, native/parser code, build, tests, corpus decoding, browser, or acquisition ran for this inventory."
+  },
+  "observer": {
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "gitBlobSha1": "964ab9c061b2490b65852344244f11dce62fa644",
+    "requiredSameDefinition": "Exact ten explicit paths union .js/.mjs/.html blobs under baseline test/e2e, test/chromium, dev/perf, sorted and deduplicated.",
+    "requiredSameCount": 39,
+    "requiredSame": [
+      {
+        "path": ".github/actions/setup/action.yml",
+        "bytes": 930,
+        "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "gitBlobSha1": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+        "baselineGitBlobSha1": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/benchmark-support.js",
+        "bytes": 16788,
+        "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "gitBlobSha1": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+        "baselineGitBlobSha1": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/dictionary-fixtures.js",
+        "bytes": 6765,
+        "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "gitBlobSha1": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+        "baselineGitBlobSha1": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/host-environment.js",
+        "bytes": 3090,
+        "sha256": "0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5",
+        "gitBlobSha1": "53edf15e5afdc19e65a774ab47e69c316ae70a3d",
+        "baselineGitBlobSha1": "53edf15e5afdc19e65a774ab47e69c316ae70a3d",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/import-ab.js",
+        "bytes": 1221,
+        "sha256": "b3d2403da238f7be624b06a9a51f8a202d07be8707935b1de4d59ebc31d21067",
+        "gitBlobSha1": "74168d80dcf19c95e8f8fa7dbc161a4ff280f8e7",
+        "baselineGitBlobSha1": "74168d80dcf19c95e8f8fa7dbc161a4ff280f8e7",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/import-benchmark.js",
+        "bytes": 11064,
+        "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "gitBlobSha1": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+        "baselineGitBlobSha1": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/import-lookup-screen.js",
+        "bytes": 19395,
+        "sha256": "1250e1e3b3150dc809b44329e34cacccfbcbb12d8dbaecf21bcc54b09e4a7cf5",
+        "gitBlobSha1": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f",
+        "baselineGitBlobSha1": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/import-media-validation.js",
+        "bytes": 6348,
+        "sha256": "e493225cd4c66a6b3bcc4a5d309439b7a08e584b340b9d54d67115252da461bb",
+        "gitBlobSha1": "9fb06f491131d17b83c9fdc46cad1c244f76522c",
+        "baselineGitBlobSha1": "9fb06f491131d17b83c9fdc46cad1c244f76522c",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/overflow-layout-benchmark.js",
+        "bytes": 13083,
+        "sha256": "1bd54f784f2ac0b216bb050ee10aa1d4cbab905f130e501c879948c2d30fe838",
+        "gitBlobSha1": "13fb5365b01ec7f3798e58cd6dd576a515026741",
+        "baselineGitBlobSha1": "13fb5365b01ec7f3798e58cd6dd576a515026741",
+        "identicalToF28": true
+      },
+      {
+        "path": "dev/perf/prepare-dictionaries.js",
+        "bytes": 1539,
+        "sha256": "c727bc62d04e6362442cfe981b13ba82b0d7e183191b3b3783dcece5b46a4f63",
+        "gitBlobSha1": "0a768a6c0fafa1e4d21ea2dc69363517e8ee06bf",
+        "baselineGitBlobSha1": "0a768a6c0fafa1e4d21ea2dc69363517e8ee06bf",
+        "identicalToF28": true
+      },
+      {
+        "path": "package-lock.json",
+        "bytes": 333801,
+        "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "gitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+        "baselineGitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+        "identicalToF28": true
+      },
+      {
+        "path": "package.json",
+        "bytes": 9595,
+        "sha256": "d23b58a7e5aab32183d4f09e38067d7bacd6b67229c14b18e1e8aa3a0a6c22f9",
+        "gitBlobSha1": "deebe199e2d0b57cfc4c769599545447207cbeef",
+        "baselineGitBlobSha1": "55e166cdeec6ac759a25296c33025e6e52ea9c82",
+        "identicalToF28": false
+      },
+      {
+        "path": "test/chromium/anki-deduplication.e2e.js",
+        "bytes": 33384,
+        "sha256": "ee87d2bcc0e13542c6dc465ec915faed45a1e8220b29cb94e5f4d38a9f808e58",
+        "gitBlobSha1": "f10274e46cf3306830d2020fa2fff9461fa02989",
+        "baselineGitBlobSha1": "f10274e46cf3306830d2020fa2fff9461fa02989",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+        "bytes": 325917,
+        "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "gitBlobSha1": "142825fbd36090d693de416801eac50312194ef2",
+        "baselineGitBlobSha1": "142825fbd36090d693de416801eac50312194ef2",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/freemdict-import-soak-util.js",
+        "bytes": 19518,
+        "sha256": "d460b5f642c6d16580913a869c80537d98c0a4c8103781a567b85d9f4e4e66f4",
+        "gitBlobSha1": "504caebbc553876af6a38a7755bfe9b5761886a5",
+        "baselineGitBlobSha1": "504caebbc553876af6a38a7755bfe9b5761886a5",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/freemdict-import-soak.e2e.js",
+        "bytes": 30119,
+        "sha256": "7a875ad06183270b412d24522e42f41ea43241667b738904333d1dbd11b6ea57",
+        "gitBlobSha1": "d4c6241bff07cd61e3212b60e0d9d90156da5024",
+        "baselineGitBlobSha1": "d4c6241bff07cd61e3212b60e0d9d90156da5024",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/import-flags-ab-benchmark.js",
+        "bytes": 25889,
+        "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "gitBlobSha1": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+        "baselineGitBlobSha1": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/restart-interruption-process-tree.js",
+        "bytes": 2525,
+        "sha256": "cfedf84866dc2d23263b5b5b69de2837bcae3ca27baa597c372dfda6e317f705",
+        "gitBlobSha1": "96466e57d929ec0210d49037943b9545f298ad8e",
+        "baselineGitBlobSha1": "96466e57d929ec0210d49037943b9545f298ad8e",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/restart-interruption-process-tree.test.js",
+        "bytes": 4139,
+        "sha256": "3ed88e5a40c800c84e11bb323563b949c20aa1e58a3346dba072ff5c3988b173",
+        "gitBlobSha1": "56b4925c892496bb8cf5ab5fa6f6450c15e98b9f",
+        "baselineGitBlobSha1": "56b4925c892496bb8cf5ab5fa6f6450c15e98b9f",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/restart-interruption-settings.js",
+        "bytes": 2252,
+        "sha256": "43ed4ecb8a513d35cc14c1881bf89946b697032efcb56f192599765ab072fd3d",
+        "gitBlobSha1": "96980766794744c7a44786745d94f61c2228bea9",
+        "baselineGitBlobSha1": "96980766794744c7a44786745d94f61c2228bea9",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/restart-interruption.e2e.js",
+        "bytes": 47562,
+        "sha256": "29332614fff8d4ca1eae19f53852a41a2c6f0a744129afac940e5a639041d009",
+        "gitBlobSha1": "e342b1882ba902809b6787f0c73c0d38dcd4eb7e",
+        "baselineGitBlobSha1": "e342b1882ba902809b6787f0c73c0d38dcd4eb7e",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/schema-upgrade.e2e.js",
+        "bytes": 16100,
+        "sha256": "0e8a542fc8b5174e918be8586acc368e3a7533617842026b534b8730268dea3b",
+        "gitBlobSha1": "ada447fbc887f83db1a2987d5f2d17979228f40e",
+        "baselineGitBlobSha1": "ada447fbc887f83db1a2987d5f2d17979228f40e",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/chromium/term-bank-shared-decoder.e2e.js",
+        "bytes": 6567,
+        "sha256": "050d4edb370dc78bce340d955f6f01aa0ecfff4eb973be9fb25f99cf5d65b98b",
+        "gitBlobSha1": "66b4950594c81a3c23e10937abc465a31c1b24d1",
+        "baselineGitBlobSha1": "66b4950594c81a3c23e10937abc465a31c1b24d1",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/anki-dedupe-matrix.js",
+        "bytes": 18830,
+        "sha256": "8c755e80ada4e15290e97e6cfbd70089aba45e4e677616a4725d947106b2e724",
+        "gitBlobSha1": "381d41225bb20a74a8395a90c3403b6cd4f64a7e",
+        "baselineGitBlobSha1": "381d41225bb20a74a8395a90c3403b6cd4f64a7e",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/anki-mock-http-server.js",
+        "bytes": 5004,
+        "sha256": "bca3db882fa31f9aa4d91e4300b12f032d21ff42ceb50a9fc418dec4bce196cb",
+        "gitBlobSha1": "a0b68aca95fe15c5eb5bb6ad54e6b8f6e17ad5fc",
+        "baselineGitBlobSha1": "a0b68aca95fe15c5eb5bb6ad54e6b8f6e17ad5fc",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/anki-mock-state.js",
+        "bytes": 24816,
+        "sha256": "6936a409f75b10cd5842a859fb34bb6207af42449ceade9338ee977b9e26e855",
+        "gitBlobSha1": "66bd18d42c554c2a97ec2beb04f09447978c3ea4",
+        "baselineGitBlobSha1": "66bd18d42c554c2a97ec2beb04f09447978c3ea4",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/anki-save-destination.js",
+        "bytes": 11680,
+        "sha256": "46e0c259bf16db3195f71629f5bf1942c8b952d4887dcc821ac78d737722148a",
+        "gitBlobSha1": "a5981d5024552d82d7e86517f0a6f0421fbdee8c",
+        "baselineGitBlobSha1": "a5981d5024552d82d7e86517f0a6f0421fbdee8c",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/anki-screenshot-ownership.js",
+        "bytes": 3983,
+        "sha256": "180acf6986ced2290837e8e7d9157146b5f1c5eff70890246591e22295e33cbc",
+        "gitBlobSha1": "f5736bfbcfcdb5f093337783061d4016e1820144",
+        "baselineGitBlobSha1": "f5736bfbcfcdb5f093337783061d4016e1820144",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/chromium-launch-options.js",
+        "bytes": 2780,
+        "sha256": "a631dd35a96c7123075b3b9879bed94197275f81beb480f717a6355a2c2362e5",
+        "gitBlobSha1": "e8323c7754cb0fa234b3af14a402915e96bf194e",
+        "baselineGitBlobSha1": "e8323c7754cb0fa234b3af14a402915e96bf194e",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/dictionary-auto-update-fixture.js",
+        "bytes": 6996,
+        "sha256": "44a4d5e8340521c2921529b5542cda7ebb7e64aca006136c9a8d80700b5a0827",
+        "gitBlobSha1": "0e308625f33a1ebf210a1c831edac22c1e7208e1",
+        "baselineGitBlobSha1": "0e308625f33a1ebf210a1c831edac22c1e7208e1",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/display-history-recovery.js",
+        "bytes": 6304,
+        "sha256": "4b3af640ebd2f117a0c6458723e71e44a4df12fb4a962ba104ed8dab4d00a58e",
+        "gitBlobSha1": "a815fa38873d6d28991cb7147f8ff2bed88295a1",
+        "baselineGitBlobSha1": "a815fa38873d6d28991cb7147f8ff2bed88295a1",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/firefox-extension-base-url.js",
+        "bytes": 4149,
+        "sha256": "603474b34fdcf06d7d60c46f9868cede2dfeb9273981e1d4588d45864037daf7",
+        "gitBlobSha1": "a6db5f9a6845f4e70667be1ad53f837ef8d981f0",
+        "baselineGitBlobSha1": "a6db5f9a6845f4e70667be1ad53f837ef8d981f0",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/firefox-extension-base-url.test.js",
+        "bytes": 5676,
+        "sha256": "2f46b2113d0f0549c464226c8e79c23520af1527c65a57f9fe63cf793bb175ad",
+        "gitBlobSha1": "c5a52e6192eaa654c2871ed6c3dddf038004d83f",
+        "baselineGitBlobSha1": "c5a52e6192eaa654c2871ed6c3dddf038004d83f",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/import-timing.js",
+        "bytes": 3293,
+        "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "gitBlobSha1": "6788524700bf8075d04a6899eb15fb8003a4c187",
+        "baselineGitBlobSha1": "6788524700bf8075d04a6899eb15fb8003a4c187",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/reader-finalization.js",
+        "bytes": 4181,
+        "sha256": "7f9b4b3e36d0eb64bfbca8251177c2dd31d37ad602ba929638119062ddcc1c6a",
+        "gitBlobSha1": "dd24a441bb3307e1e3ff237c7742496be5619688",
+        "baselineGitBlobSha1": "dd24a441bb3307e1e3ff237c7742496be5619688",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/repeat-command.js",
+        "bytes": 2332,
+        "sha256": "4b673b9daee25f73c5b8a3cf416474655e58b732d7c316ada2ac0f3e5bce484a",
+        "gitBlobSha1": "f88595ddb7aeffe56fcd71250fa0925a3663c2f2",
+        "baselineGitBlobSha1": "f88595ddb7aeffe56fcd71250fa0925a3663c2f2",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/report-tabs.js",
+        "bytes": 4776,
+        "sha256": "fce2a926396a301759875ed821794ace46bd0f3f8d0f6253d737d24675b2abfa",
+        "gitBlobSha1": "9c73dacc65522e76ff538c403c544130adad5622",
+        "baselineGitBlobSha1": "9c73dacc65522e76ff538c403c544130adad5622",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/e2e/request-builder-rule-matching.js",
+        "bytes": 4586,
+        "sha256": "6da0852a97a52f2a9206c00c30d62bb251c2384dcd1394e583a6868de63531c6",
+        "gitBlobSha1": "065dff33836c7a3a1be04ea79f935c5b4282c8a9",
+        "baselineGitBlobSha1": "065dff33836c7a3a1be04ea79f935c5b4282c8a9",
+        "identicalToF28": true
+      },
+      {
+        "path": "test/perf/dictionaries.lock.json",
+        "bytes": 3047,
+        "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "gitBlobSha1": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+        "baselineGitBlobSha1": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+        "identicalToF28": true
+      }
+    ],
+    "requiredSameMeaning": "These paths must match baseline and candidate within the new a300 comparison; old f28 package.json is not overlaid."
+  },
+  "sourceFiles": [
+    {
+      "path": ".github/actions/setup/action.yml",
+      "bytes": 930,
+      "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+      "gitBlobSha1": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+      "baselineGitBlobSha1": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/bin/audit-release-packages.js",
+      "bytes": 4485,
+      "sha256": "17cc92de13917649c306842bcc76239d03ff0b668527203c721c782c9270d004",
+      "gitBlobSha1": "c1fd9d04969df7d32550ae47065321cc0bc02fb6",
+      "baselineGitBlobSha1": "14b132c8cc34ea59f52f5f667a654d97163ab28e",
+      "identicalToF28": false
+    },
+    {
+      "path": "dev/perf/benchmark-support.js",
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "gitBlobSha1": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+      "baselineGitBlobSha1": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/dictionary-fixtures.js",
+      "bytes": 6765,
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "gitBlobSha1": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+      "baselineGitBlobSha1": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/host-environment.js",
+      "bytes": 3090,
+      "sha256": "0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5",
+      "gitBlobSha1": "53edf15e5afdc19e65a774ab47e69c316ae70a3d",
+      "baselineGitBlobSha1": "53edf15e5afdc19e65a774ab47e69c316ae70a3d",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-ab.js",
+      "bytes": 1221,
+      "sha256": "b3d2403da238f7be624b06a9a51f8a202d07be8707935b1de4d59ebc31d21067",
+      "gitBlobSha1": "74168d80dcf19c95e8f8fa7dbc161a4ff280f8e7",
+      "baselineGitBlobSha1": "74168d80dcf19c95e8f8fa7dbc161a4ff280f8e7",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-benchmark.js",
+      "bytes": 11064,
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "gitBlobSha1": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+      "baselineGitBlobSha1": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-lookup-screen.js",
+      "bytes": 19395,
+      "sha256": "1250e1e3b3150dc809b44329e34cacccfbcbb12d8dbaecf21bcc54b09e4a7cf5",
+      "gitBlobSha1": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f",
+      "baselineGitBlobSha1": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-media-validation.js",
+      "bytes": 6348,
+      "sha256": "e493225cd4c66a6b3bcc4a5d309439b7a08e584b340b9d54d67115252da461bb",
+      "gitBlobSha1": "9fb06f491131d17b83c9fdc46cad1c244f76522c",
+      "baselineGitBlobSha1": "9fb06f491131d17b83c9fdc46cad1c244f76522c",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "gitBlobSha1": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "baselineGitBlobSha1": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+      "gitBlobSha1": "964ab9c061b2490b65852344244f11dce62fa644",
+      "baselineGitBlobSha1": "964ab9c061b2490b65852344244f11dce62fa644",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/overflow-layout-benchmark.js",
+      "bytes": 13083,
+      "sha256": "1bd54f784f2ac0b216bb050ee10aa1d4cbab905f130e501c879948c2d30fe838",
+      "gitBlobSha1": "13fb5365b01ec7f3798e58cd6dd576a515026741",
+      "baselineGitBlobSha1": "13fb5365b01ec7f3798e58cd6dd576a515026741",
+      "identicalToF28": true
+    },
+    {
+      "path": "dev/perf/prepare-dictionaries.js",
+      "bytes": 1539,
+      "sha256": "c727bc62d04e6362442cfe981b13ba82b0d7e183191b3b3783dcece5b46a4f63",
+      "gitBlobSha1": "0a768a6c0fafa1e4d21ea2dc69363517e8ee06bf",
+      "baselineGitBlobSha1": "0a768a6c0fafa1e4d21ea2dc69363517e8ee06bf",
+      "identicalToF28": true
+    },
+    {
+      "path": "ext/js/background/offscreen-dictionary-worker.js",
+      "bytes": 51014,
+      "sha256": "8193212fdfad5c3c39c96d25ffe41481b434d04a3ca5644ad7779c8d1d7f451c",
+      "gitBlobSha1": "9b09d261eb727ae2f014c7c3630fdc8f58c3dc71",
+      "baselineGitBlobSha1": "2e4cb1c1cfb2aa19628ce6e08076c144c1f19caa",
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/background/term-content-optimization-control.js",
+      "bytes": 2968,
+      "sha256": "b8f415e04f3f1e4d5fba18b58092258d24b1e7dadba989268beb9fc95ffe2ec3",
+      "gitBlobSha1": "f632a52e02296eba08b72a6413133a5ad82ad4ab",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 796193,
+      "sha256": "0d44ce707ec5c263eb045f83be2b7cd52161cb54115790950e0c5246f93fbf74",
+      "gitBlobSha1": "1b3f8367f4b4863916e7c6189a07f5f750636d20",
+      "baselineGitBlobSha1": "b77dd9804f7b037f010d3e83996e63bb2f19bf18",
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-import-journal.js",
+      "bytes": 10291,
+      "sha256": "f7f99d966a4165380a4f6753cd3a8753c4eb343ec0f2f29a65c63d429fabfd07",
+      "gitBlobSha1": "d0739ab78c49c39d18a96f1fdb9c02c72af45ea3",
+      "baselineGitBlobSha1": "5379ca555d60174f48a3eb19f4666ae7721916ed",
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/raw-term-content.js",
+      "bytes": 27379,
+      "sha256": "45303d150b5117b070966ff7a28e668c0e089331a3f12a31225a8950638baf33",
+      "gitBlobSha1": "c64bb389a58ccc0102562b81eb070a3bda3c4399",
+      "baselineGitBlobSha1": "c64bb389a58ccc0102562b81eb070a3bda3c4399",
+      "identicalToF28": true
+    },
+    {
+      "path": "ext/js/dictionary/sqlite-wasm.js",
+      "bytes": 20018,
+      "sha256": "87faa573e4cb1cfcf36a304ea4eb6ff18f56f85b481c680a20d98661d451da14",
+      "gitBlobSha1": "adafcf039974a7416ac015d1f60d295e9b3bec7c",
+      "baselineGitBlobSha1": "adafcf039974a7416ac015d1f60d295e9b3bec7c",
+      "identicalToF28": true
+    },
+    {
+      "path": "ext/js/dictionary/term-content-idle-scheduler.js",
+      "bytes": 8945,
+      "sha256": "d6ac809ce59a916fa23901db3c28042c55af5cfb690b560260ae98eaf6d5553e",
+      "gitBlobSha1": "cfe978ad5bd9d40a33d3d3a301667364b539fef2",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/term-content-legacy-eligibility.js",
+      "bytes": 7359,
+      "sha256": "a726f93b80b57b27e9e5eba64d7df34fc95ce558cce7d96b0cff0ac98f0875e2",
+      "gitBlobSha1": "98efb7b71af46de67995f663b69685c0b3198043",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/term-content-opfs-store.js",
+      "bytes": 123512,
+      "sha256": "4f33dd7337d070672fddfbcddb97595686e155d4c830398e0143fbeaae59d7c0",
+      "gitBlobSha1": "814f264ee50a0ad31f0816c924fa036b62ede837",
+      "baselineGitBlobSha1": "cd1de078c2cfa58d67f2a7abc6a897805ef2f318",
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/term-content-optimization-controller.js",
+      "bytes": 59337,
+      "sha256": "4201b463e46f767b16e131fcebbaad8c1a8ec3f88fca635229efebaf4ac3acdb",
+      "gitBlobSha1": "b2dd4157fe0e4bbb7f03894c3b1d9162204ce1d2",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/term-content-zstd-codec.js",
+      "bytes": 1099,
+      "sha256": "1a461fd4bd330475796b2f7eff22031bc315a045b924e992aa578bfe7892661f",
+      "gitBlobSha1": "70e8a6aacb33de7ea89e4ac475ddf5657de74756",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/dictionary/term-key-hash.js",
+      "bytes": 7326,
+      "sha256": "351962548f1d73096b85a53cbbe387d6fab165d43591cd7e426d4ab583cae7ba",
+      "gitBlobSha1": "1cd9183901db06bc1a20e3c8b274f908a1fac27e",
+      "baselineGitBlobSha1": "7662c1fcd9d167aa68953c7272e3f21e25eb95cd",
+      "identicalToF28": false
+    },
+    {
+      "path": "ext/js/pages/settings/dictionary-import-controller.js",
+      "bytes": 188111,
+      "sha256": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "gitBlobSha1": "39888b2a25a22fd91d2aa1239dea64fc4c636ded",
+      "baselineGitBlobSha1": "8e00953fbe812bc2368a38304957e0b7def63f77",
+      "identicalToF28": false
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "gitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "baselineGitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "identicalToF28": true
+    },
+    {
+      "path": "package.json",
+      "bytes": 9595,
+      "sha256": "d23b58a7e5aab32183d4f09e38067d7bacd6b67229c14b18e1e8aa3a0a6c22f9",
+      "gitBlobSha1": "deebe199e2d0b57cfc4c769599545447207cbeef",
+      "baselineGitBlobSha1": "55e166cdeec6ac759a25296c33025e6e52ea9c82",
+      "identicalToF28": false
+    },
+    {
+      "path": "test/chromium/anki-deduplication.e2e.js",
+      "bytes": 33384,
+      "sha256": "ee87d2bcc0e13542c6dc465ec915faed45a1e8220b29cb94e5f4d38a9f808e58",
+      "gitBlobSha1": "f10274e46cf3306830d2020fa2fff9461fa02989",
+      "baselineGitBlobSha1": "f10274e46cf3306830d2020fa2fff9461fa02989",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+      "gitBlobSha1": "142825fbd36090d693de416801eac50312194ef2",
+      "baselineGitBlobSha1": "142825fbd36090d693de416801eac50312194ef2",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/freemdict-import-soak-util.js",
+      "bytes": 19518,
+      "sha256": "d460b5f642c6d16580913a869c80537d98c0a4c8103781a567b85d9f4e4e66f4",
+      "gitBlobSha1": "504caebbc553876af6a38a7755bfe9b5761886a5",
+      "baselineGitBlobSha1": "504caebbc553876af6a38a7755bfe9b5761886a5",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/freemdict-import-soak.e2e.js",
+      "bytes": 30119,
+      "sha256": "7a875ad06183270b412d24522e42f41ea43241667b738904333d1dbd11b6ea57",
+      "gitBlobSha1": "d4c6241bff07cd61e3212b60e0d9d90156da5024",
+      "baselineGitBlobSha1": "d4c6241bff07cd61e3212b60e0d9d90156da5024",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/import-flags-ab-benchmark.js",
+      "bytes": 25889,
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "gitBlobSha1": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+      "baselineGitBlobSha1": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/restart-interruption-process-tree.js",
+      "bytes": 2525,
+      "sha256": "cfedf84866dc2d23263b5b5b69de2837bcae3ca27baa597c372dfda6e317f705",
+      "gitBlobSha1": "96466e57d929ec0210d49037943b9545f298ad8e",
+      "baselineGitBlobSha1": "96466e57d929ec0210d49037943b9545f298ad8e",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/restart-interruption-process-tree.test.js",
+      "bytes": 4139,
+      "sha256": "3ed88e5a40c800c84e11bb323563b949c20aa1e58a3346dba072ff5c3988b173",
+      "gitBlobSha1": "56b4925c892496bb8cf5ab5fa6f6450c15e98b9f",
+      "baselineGitBlobSha1": "56b4925c892496bb8cf5ab5fa6f6450c15e98b9f",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/restart-interruption-settings.js",
+      "bytes": 2252,
+      "sha256": "43ed4ecb8a513d35cc14c1881bf89946b697032efcb56f192599765ab072fd3d",
+      "gitBlobSha1": "96980766794744c7a44786745d94f61c2228bea9",
+      "baselineGitBlobSha1": "96980766794744c7a44786745d94f61c2228bea9",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/restart-interruption.e2e.js",
+      "bytes": 47562,
+      "sha256": "29332614fff8d4ca1eae19f53852a41a2c6f0a744129afac940e5a639041d009",
+      "gitBlobSha1": "e342b1882ba902809b6787f0c73c0d38dcd4eb7e",
+      "baselineGitBlobSha1": "e342b1882ba902809b6787f0c73c0d38dcd4eb7e",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/schema-upgrade.e2e.js",
+      "bytes": 16100,
+      "sha256": "0e8a542fc8b5174e918be8586acc368e3a7533617842026b534b8730268dea3b",
+      "gitBlobSha1": "ada447fbc887f83db1a2987d5f2d17979228f40e",
+      "baselineGitBlobSha1": "ada447fbc887f83db1a2987d5f2d17979228f40e",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/chromium/term-bank-shared-decoder.e2e.js",
+      "bytes": 6567,
+      "sha256": "050d4edb370dc78bce340d955f6f01aa0ecfff4eb973be9fb25f99cf5d65b98b",
+      "gitBlobSha1": "66b4950594c81a3c23e10937abc465a31c1b24d1",
+      "baselineGitBlobSha1": "66b4950594c81a3c23e10937abc465a31c1b24d1",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/dictionary-database-online-optimization-schema.test.js",
+      "bytes": 103135,
+      "sha256": "2e398a5644e36436aed93de2cc23691269b838d40946f09b26ae30ac0e24163a",
+      "gitBlobSha1": "2099c47a8d710f4cc35ee573cab28f5749ed6ff1",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "test/e2e/anki-dedupe-matrix.js",
+      "bytes": 18830,
+      "sha256": "8c755e80ada4e15290e97e6cfbd70089aba45e4e677616a4725d947106b2e724",
+      "gitBlobSha1": "381d41225bb20a74a8395a90c3403b6cd4f64a7e",
+      "baselineGitBlobSha1": "381d41225bb20a74a8395a90c3403b6cd4f64a7e",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/anki-mock-http-server.js",
+      "bytes": 5004,
+      "sha256": "bca3db882fa31f9aa4d91e4300b12f032d21ff42ceb50a9fc418dec4bce196cb",
+      "gitBlobSha1": "a0b68aca95fe15c5eb5bb6ad54e6b8f6e17ad5fc",
+      "baselineGitBlobSha1": "a0b68aca95fe15c5eb5bb6ad54e6b8f6e17ad5fc",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/anki-mock-state.js",
+      "bytes": 24816,
+      "sha256": "6936a409f75b10cd5842a859fb34bb6207af42449ceade9338ee977b9e26e855",
+      "gitBlobSha1": "66bd18d42c554c2a97ec2beb04f09447978c3ea4",
+      "baselineGitBlobSha1": "66bd18d42c554c2a97ec2beb04f09447978c3ea4",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/anki-save-destination.js",
+      "bytes": 11680,
+      "sha256": "46e0c259bf16db3195f71629f5bf1942c8b952d4887dcc821ac78d737722148a",
+      "gitBlobSha1": "a5981d5024552d82d7e86517f0a6f0421fbdee8c",
+      "baselineGitBlobSha1": "a5981d5024552d82d7e86517f0a6f0421fbdee8c",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/anki-screenshot-ownership.js",
+      "bytes": 3983,
+      "sha256": "180acf6986ced2290837e8e7d9157146b5f1c5eff70890246591e22295e33cbc",
+      "gitBlobSha1": "f5736bfbcfcdb5f093337783061d4016e1820144",
+      "baselineGitBlobSha1": "f5736bfbcfcdb5f093337783061d4016e1820144",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/chromium-launch-options.js",
+      "bytes": 2780,
+      "sha256": "a631dd35a96c7123075b3b9879bed94197275f81beb480f717a6355a2c2362e5",
+      "gitBlobSha1": "e8323c7754cb0fa234b3af14a402915e96bf194e",
+      "baselineGitBlobSha1": "e8323c7754cb0fa234b3af14a402915e96bf194e",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/dictionary-auto-update-fixture.js",
+      "bytes": 6996,
+      "sha256": "44a4d5e8340521c2921529b5542cda7ebb7e64aca006136c9a8d80700b5a0827",
+      "gitBlobSha1": "0e308625f33a1ebf210a1c831edac22c1e7208e1",
+      "baselineGitBlobSha1": "0e308625f33a1ebf210a1c831edac22c1e7208e1",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/display-history-recovery.js",
+      "bytes": 6304,
+      "sha256": "4b3af640ebd2f117a0c6458723e71e44a4df12fb4a962ba104ed8dab4d00a58e",
+      "gitBlobSha1": "a815fa38873d6d28991cb7147f8ff2bed88295a1",
+      "baselineGitBlobSha1": "a815fa38873d6d28991cb7147f8ff2bed88295a1",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/firefox-extension-base-url.js",
+      "bytes": 4149,
+      "sha256": "603474b34fdcf06d7d60c46f9868cede2dfeb9273981e1d4588d45864037daf7",
+      "gitBlobSha1": "a6db5f9a6845f4e70667be1ad53f837ef8d981f0",
+      "baselineGitBlobSha1": "a6db5f9a6845f4e70667be1ad53f837ef8d981f0",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/firefox-extension-base-url.test.js",
+      "bytes": 5676,
+      "sha256": "2f46b2113d0f0549c464226c8e79c23520af1527c65a57f9fe63cf793bb175ad",
+      "gitBlobSha1": "c5a52e6192eaa654c2871ed6c3dddf038004d83f",
+      "baselineGitBlobSha1": "c5a52e6192eaa654c2871ed6c3dddf038004d83f",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/import-timing.js",
+      "bytes": 3293,
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "gitBlobSha1": "6788524700bf8075d04a6899eb15fb8003a4c187",
+      "baselineGitBlobSha1": "6788524700bf8075d04a6899eb15fb8003a4c187",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/reader-finalization.js",
+      "bytes": 4181,
+      "sha256": "7f9b4b3e36d0eb64bfbca8251177c2dd31d37ad602ba929638119062ddcc1c6a",
+      "gitBlobSha1": "dd24a441bb3307e1e3ff237c7742496be5619688",
+      "baselineGitBlobSha1": "dd24a441bb3307e1e3ff237c7742496be5619688",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/repeat-command.js",
+      "bytes": 2332,
+      "sha256": "4b673b9daee25f73c5b8a3cf416474655e58b732d7c316ada2ac0f3e5bce484a",
+      "gitBlobSha1": "f88595ddb7aeffe56fcd71250fa0925a3663c2f2",
+      "baselineGitBlobSha1": "f88595ddb7aeffe56fcd71250fa0925a3663c2f2",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/report-tabs.js",
+      "bytes": 4776,
+      "sha256": "fce2a926396a301759875ed821794ace46bd0f3f8d0f6253d737d24675b2abfa",
+      "gitBlobSha1": "9c73dacc65522e76ff538c403c544130adad5622",
+      "baselineGitBlobSha1": "9c73dacc65522e76ff538c403c544130adad5622",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/e2e/request-builder-rule-matching.js",
+      "bytes": 4586,
+      "sha256": "6da0852a97a52f2a9206c00c30d62bb251c2384dcd1394e583a6868de63531c6",
+      "gitBlobSha1": "065dff33836c7a3a1be04ea79f935c5b4282c8a9",
+      "baselineGitBlobSha1": "065dff33836c7a3a1be04ea79f935c5b4282c8a9",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "gitBlobSha1": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "baselineGitBlobSha1": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "identicalToF28": true
+    },
+    {
+      "path": "test/term-content-import-arena.test.js",
+      "bytes": 11305,
+      "sha256": "9464578702c94ddca746d985af9df7fbab99ef7daaec9a6f103bf88803127d43",
+      "gitBlobSha1": "bbf6dbb51a1328cf3e194fb31d4a5ed3bb5a9d86",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "test/term-content-legacy-eligibility.test.js",
+      "bytes": 4353,
+      "sha256": "62604d228da1855805af7b934f8cef02c00409b0e163e49c4840ae318b4726c2",
+      "gitBlobSha1": "160af3b7ffd1f99c3d14a56a6091488d3e7409d6",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    },
+    {
+      "path": "test/term-content-optimization-lifecycle.test.js",
+      "bytes": 22276,
+      "sha256": "fa79dc68928ac8c0f775d977be5965338cfc6a6d9000345030105ab1aaf40cab",
+      "gitBlobSha1": "9cdf4bb74b320cdf909f64fd6105cb7c95616fea",
+      "baselineGitBlobSha1": null,
+      "identicalToF28": false
+    }
+  ],
+  "nativeManifestInputs": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-inflate.c",
+      "baselineGitBlobSha1": "3583271bf1214e9379a4db6fabaa7eb43479860e",
+      "currentGitBlobSha1": "3583271bf1214e9379a4db6fabaa7eb43479860e",
+      "baselineBytes": 1234,
+      "currentBytes": 1234,
+      "identical": true,
+      "baselineVerifiedSha256": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "baselineGitBlobSha1": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "currentGitBlobSha1": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "baselineBytes": 161067,
+      "currentBytes": 161067,
+      "identical": true,
+      "baselineVerifiedSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "baselineGitBlobSha1": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+      "currentGitBlobSha1": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+      "baselineBytes": 6853,
+      "currentBytes": 6853,
+      "identical": true,
+      "baselineVerifiedSha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/common_defs.h",
+      "baselineGitBlobSha1": "6ca69fc919c6c99c784c3ff59f0b1bc311324c16",
+      "currentGitBlobSha1": "6ca69fc919c6c99c784c3ff59f0b1bc311324c16",
+      "baselineBytes": 21674,
+      "currentBytes": 21674,
+      "identical": true,
+      "baselineVerifiedSha256": "00ff4bdc24e0003fb9a3f18e692d21cc59200f09920d327fa1341a33915bbc71",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+      "baselineGitBlobSha1": "8c874c364499bc537dffd2a1316c3d30796ca249",
+      "currentGitBlobSha1": "8c874c364499bc537dffd2a1316c3d30796ca249",
+      "baselineBytes": 25048,
+      "currentBytes": 25048,
+      "identical": true,
+      "baselineVerifiedSha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_constants.h",
+      "baselineGitBlobSha1": "95c9e0a503c1fe8f98b600b6ccb4d57cc35f8a0a",
+      "currentGitBlobSha1": "95c9e0a503c1fe8f98b600b6ccb4d57cc35f8a0a",
+      "baselineBytes": 1747,
+      "currentBytes": 1747,
+      "identical": true,
+      "baselineVerifiedSha256": "72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_decompress.c",
+      "baselineGitBlobSha1": "d5af5eb02472af00e53d5a51b45eee3fc26982df",
+      "currentGitBlobSha1": "d5af5eb02472af00e53d5a51b45eee3fc26982df",
+      "baselineBytes": 49357,
+      "currentBytes": 49357,
+      "identical": true,
+      "baselineVerifiedSha256": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/lib_common.h",
+      "baselineGitBlobSha1": "faedfcb0375eb853ccfdd92f0d459550a356d011",
+      "currentGitBlobSha1": "faedfcb0375eb853ccfdd92f0d459550a356d011",
+      "baselineBytes": 3624,
+      "currentBytes": 3624,
+      "identical": true,
+      "baselineVerifiedSha256": "e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/libdeflate.h",
+      "baselineGitBlobSha1": "1821acda8e30b20e6fc5dd65d7c75517b083369a",
+      "currentGitBlobSha1": "1821acda8e30b20e6fc5dd65d7c75517b083369a",
+      "baselineBytes": 17157,
+      "currentBytes": 17157,
+      "identical": true,
+      "baselineVerifiedSha256": "1bb50a3ff8c6980c1031c0e9bb324cf99df51379fdca77a358644cca841765cc",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/miniz/miniz.h",
+      "baselineGitBlobSha1": "22d72694d7361cc2642e845a7136eb38e6afeb63",
+      "currentGitBlobSha1": "22d72694d7361cc2642e845a7136eb38e6afeb63",
+      "baselineBytes": 28333,
+      "currentBytes": 28333,
+      "identical": true,
+      "baselineVerifiedSha256": "619fbff2e98605a83f327a2879d52f219b5edaa579036a657937910f0707a43b",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/miniz/miniz_common.h",
+      "baselineGitBlobSha1": "4d058093e7f01bf25aae8497b2a639760186ed48",
+      "currentGitBlobSha1": "4d058093e7f01bf25aae8497b2a639760186ed48",
+      "baselineBytes": 2469,
+      "currentBytes": 2469,
+      "identical": true,
+      "baselineVerifiedSha256": "e015eb5bc667062cbd53451438dd49bb9904c6a7765c806b765f6f735cf01a06",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/miniz/miniz_export.h",
+      "baselineGitBlobSha1": "fbbef8e866ee81cef07338ad6894345e6239c4d6",
+      "currentGitBlobSha1": "fbbef8e866ee81cef07338ad6894345e6239c4d6",
+      "baselineBytes": 34,
+      "currentBytes": 34,
+      "identical": true,
+      "baselineVerifiedSha256": "195259dc89fb3f83a96426a90ee03dc45acef113150cd3475ea9cfbf1f7784f3",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c",
+      "baselineGitBlobSha1": "e608573cfa85453189ebe65d307327701fe357af",
+      "currentGitBlobSha1": "e608573cfa85453189ebe65d307327701fe357af",
+      "baselineBytes": 41234,
+      "currentBytes": 41234,
+      "identical": true,
+      "baselineVerifiedSha256": "05930a45b5d9fdd5786c4e631373cdfec32b7be50ec0906d3b98caa503e068f3",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.h",
+      "baselineGitBlobSha1": "7edca607cfcfce704b3a8875aa93390b12d6e300",
+      "currentGitBlobSha1": "7edca607cfcfce704b3a8875aa93390b12d6e300",
+      "baselineBytes": 8695,
+      "currentBytes": 8695,
+      "identical": true,
+      "baselineVerifiedSha256": "da4850920fdf09f8877d9affabe1ebba1852ce4b1ebbd121f2ba7a7ea8e57e5d",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    }
+  ],
+  "explicitComponentSourceColumns": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "baselineGitBlobSha1": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+      "currentGitBlobSha1": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+      "baselineBytes": 210111,
+      "currentBytes": 210111,
+      "identical": true,
+      "baselineVerifiedSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-experiments.js",
+      "baselineGitBlobSha1": "38ffe9035ffad5a4cb00de5406ce2dda5b823b4c",
+      "currentGitBlobSha1": "38ffe9035ffad5a4cb00de5406ce2dda5b823b4c",
+      "baselineBytes": 3523,
+      "currentBytes": 3523,
+      "identical": true,
+      "baselineVerifiedSha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-scratch.js",
+      "baselineGitBlobSha1": "147e31b6536e9ad5323d6a679e3623b12124541f",
+      "currentGitBlobSha1": "147e31b6536e9ad5323d6a679e3623b12124541f",
+      "baselineBytes": 2970,
+      "currentBytes": 2970,
+      "identical": true,
+      "baselineVerifiedSha256": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "baselineGitBlobSha1": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+      "currentGitBlobSha1": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+      "baselineBytes": 11139,
+      "currentBytes": 11139,
+      "identical": true,
+      "baselineVerifiedSha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index.js",
+      "baselineGitBlobSha1": "e0d30279b67300cb47d519a1b8d809eb4ba784f6",
+      "currentGitBlobSha1": "e0d30279b67300cb47d519a1b8d809eb4ba784f6",
+      "baselineBytes": 67962,
+      "currentBytes": 67962,
+      "identical": true,
+      "baselineVerifiedSha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "baselineGitBlobSha1": "a91ec492ae9f576c5f079e21071efc72cfe9cd4f",
+      "currentGitBlobSha1": "a91ec492ae9f576c5f079e21071efc72cfe9cd4f",
+      "baselineBytes": 25435,
+      "currentBytes": 25435,
+      "identical": true,
+      "baselineVerifiedSha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "baselineGitBlobSha1": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "currentGitBlobSha1": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "baselineBytes": 161067,
+      "currentBytes": 161067,
+      "identical": true,
+      "baselineVerifiedSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-source-pipeline.js",
+      "baselineGitBlobSha1": "8fc3ba89987cac5da4f6ac18a1b76e05ceeb9831",
+      "currentGitBlobSha1": "8fc3ba89987cac5da4f6ac18a1b76e05ceeb9831",
+      "baselineBytes": 47175,
+      "currentBytes": 47175,
+      "identical": true,
+      "baselineVerifiedSha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "ext/js/dictionary/dense-zip-directory.js",
+      "baselineGitBlobSha1": "99b4d6761b4946526d03a4979c5724f90f408524",
+      "currentGitBlobSha1": "99b4d6761b4946526d03a4979c5724f90f408524",
+      "baselineBytes": 9309,
+      "currentBytes": 9309,
+      "identical": true,
+      "baselineVerifiedSha256": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "baselineGitBlobSha1": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+      "currentGitBlobSha1": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+      "baselineBytes": 2588,
+      "currentBytes": 2588,
+      "identical": true,
+      "baselineVerifiedSha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    },
+    {
+      "path": "package-lock.json",
+      "baselineGitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "currentGitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "baselineBytes": 333801,
+      "currentBytes": 333801,
+      "identical": true,
+      "baselineVerifiedSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "sha256Scope": "Inherited from the exact-f28 verified source binding; new-tree equality is independently established by equal Git blob identities."
+    }
+  ],
+  "limitations": [
+    "Native14 and component11 source identity is source-only and does not transfer correctness or timing from f28.",
+    "Package release bytes and actual browser binary hashes are unknown until fresh build/host acquisition.",
+    "The observed a300 settings import controller hash replaces the historical source field only through fresh source-bound provenance."
+  ]
+}
