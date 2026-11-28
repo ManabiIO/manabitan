@@ -126,7 +126,15 @@ describe('term bank CRC32', () => {
         const pointer = writeBytes(bytes)
         const lengths = [
             ...Array.from({length: 129}, (_, length) => length),
-            255, 256, 257, 511, 512, 513, 1023, 1024, 1025,
+            255,
+            256,
+            257,
+            511,
+            512,
+            513,
+            1023,
+            1024,
+            1025,
             ...Array.from({length: 32}, (_, tail) => 65520 + tail),
         ]
         for (const length of lengths) {
