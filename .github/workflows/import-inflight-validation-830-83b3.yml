@@ -1,0 +1,167 @@
+name: Import in-flight validation qualification 830 83b3
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "ext/**"
+      - "package.json"
+      - "package-lock.json"
+      - "dev/*.js"
+      - "dev/bin/**"
+      - "dev/data/**"
+      - "dev/lib/**"
+      - "dev/perf/**/*.js"
+      - "dev/perf/**/*.mjs"
+      - "dev/perf/**/*.html"
+      - "dev/perf/**/*.py"
+      - "test/e2e/**"
+      - "test/chromium/**"
+      - "test/perf/dictionaries.lock.json"
+      - ".github/actions/setup/action.yml"
+      - ".github/workflows/import-inflight-validation-830-83b3.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-inflight-validation-830-83b3-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'perf/jmdict-inflight-validation-20261123-71149' &&
+      github.base_ref == 'develop'
+    runs-on: ubuntu-latest
+    outputs:
+      acquire: ${{ steps.changed.outputs.acquire }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: changed
+        name: Skip follow-ups that leave runtime and acquisition unchanged
+        shell: bash
+        env:
+          PERF_ACTION: ${{ github.event.action }}
+          PERF_BEFORE: ${{ github.event.before }}
+          PERF_CANDIDATE: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          acquire=true
+          if [[ "$PERF_ACTION" == synchronize && "$PERF_BEFORE" =~ ^[a-f0-9]{40}$ ]] &&
+             git cat-file -e "${PERF_BEFORE}^{commit}" &&
+             git diff --quiet "$PERF_BEFORE" "$PERF_CANDIDATE" -- \
+               ext package.json package-lock.json \
+               ':(glob)dev/*.js' dev/bin dev/data dev/lib \
+               ':(glob)dev/perf/**/*.js' ':(glob)dev/perf/**/*.mjs' \
+               ':(glob)dev/perf/**/*.html' ':(glob)dev/perf/**/*.py' \
+               test/e2e test/chromium test/perf/dictionaries.lock.json \
+               .github/actions/setup/action.yml \
+               .github/workflows/import-inflight-validation-830-83b3.yml; then
+            acquire=false
+          fi
+          echo "acquire=$acquire" >> "$GITHUB_OUTPUT"
+
+  qualify:
+    needs: select
+    if: needs.select.outputs.acquire == 'true'
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }}, ${{ matrix.pairs }} pairs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            initial_order: AB
+            pairs: 12
+          - dictionary: jmdict
+            initial_order: BA
+            pairs: 12
+          - dictionary: jitendex
+            initial_order: AB
+            pairs: 6
+          - dictionary: vndb
+            initial_order: AB
+            pairs: 6
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.event.pull_request.head.sha }}
+      PERF_DATABASE_SHA256: 12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_INITIAL_ORDER: ${{ matrix.initial_order }}
+      PERF_PAIRS: ${{ matrix.pairs }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the exact final guard and unchanged qualification sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/import-inflight-validation-830-83b3-logs
+          {
+            printf 'baseline=%s\ncandidate=%s\ndatabase-sha256=%s\n' \
+              "$PERF_BASELINE" "$PERF_CANDIDATE" "$PERF_DATABASE_SHA256"
+            test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+            test -z "$(git status --porcelain)"
+            test "$(git diff --name-only "$PERF_BASELINE" "$PERF_CANDIDATE" -- ext)" = \
+              ext/js/dictionary/dictionary-database.js
+            printf '%s  %s\n' "$PERF_DATABASE_SHA256" ext/js/dictionary/dictionary-database.js \
+              | sha256sum --check --strict
+            git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
+              package.json package-lock.json .github/actions/setup/action.yml \
+              test/perf/dictionaries.lock.json test/e2e test/chromium \
+              ':(glob)dev/*.js' dev/bin dev/data dev/lib \
+              ':(glob)dev/perf/**/*.js' ':(glob)dev/perf/**/*.mjs' \
+              ':(glob)dev/perf/**/*.html' ':(glob)dev/perf/**/*.py'
+            git diff --stat "$PERF_BASELINE" "$PERF_CANDIDATE" -- ext
+          } 2>&1 | tee builds/perf/import-inflight-validation-830-83b3-logs/source-guard.log
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare frozen release packages with unchanged qualification tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          storage=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Prospective contract; neighboring page counts fail. The current
+            # baseline must pass before this cohort can qualify either arm.
+            storage=(--vndb-sah-allocation-units 37 37)
+          fi
+          # The frozen driver downloads and verifies the locked corpus, builds
+          # both exact sources, and checks all packaged entries before timing.
+          # It preserves its existing post-UI, restart, media and memory gates.
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_INITIAL_ORDER" \
+            --pairs "$PERF_PAIRS" \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            "${storage[@]}" \
+            --evidence builds/perf/import-inflight-validation-830-83b3 \
+            2>&1 | tee builds/perf/import-inflight-validation-830-83b3-logs/browser-qualification.log
+      - name: Preserve every browser observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-inflight-validation-830-83b3-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+          path: |
+            builds/perf/import-inflight-validation-830-83b3
+            builds/perf/import-inflight-validation-830-83b3-logs
+          if-no-files-found: error
+          retention-days: 14

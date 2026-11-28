@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "createdUtc": "2026-11-28T05:52:08.870978+00:00",
+  "scope": "Compact publication derivative of preserved complete local tool validation; original archive and manifest remain unchanged.",
+  "workflowSha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5",
+  "actionlintVersion": "1.7.12",
+  "actionlintExitCode": 0,
+  "sourceGuardExitCode": 0,
+  "excludedPublicToolPayloads": [
+    {
+      "path": "actionlint",
+      "bytes": 6074530,
+      "sha256": "c872d6db8c6bf83a8eaa704fc93999f027d55dffbc63b8a6abdccb47df5f4cd4"
+    },
+    {
+      "path": "actionlint_1.7.12_linux_amd64.tar.gz",
+      "bytes": 2353908,
+      "sha256": "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8",
+      "url": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+    }
+  ],
+  "originalLocalArchiveSha256": "d528900ac5dfd0944dc2596a21c8bc0954cc1d09f6425d37bc47351c8aced8d3",
+  "originalLocalManifestSha256": "ebf8423033bcdf4cd3e19d697329df62faba72f8697dd3c08997e8fa2bef9311",
+  "files": [
+    {
+      "path": "LICENSE.txt",
+      "bytes": 1067,
+      "sha256": "03a26b06d224380a02bf100e05fff3b2dfc71b14d4e2fa685ec9963a87563c22"
+    },
+    {
+      "path": "actionlint-receipt.json",
+      "bytes": 2113,
+      "sha256": "b182d8ebaad162dd6af8e730466f6db921b38dfdbe5f56d7ee13f570142deade"
+    },
+    {
+      "path": "actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "actionlint_1.7.12_checksums.txt",
+      "bytes": 1130,
+      "sha256": "433028cf0ba3c42163ea1a668dedce30fcdbe84fe912b1a5e288c006eab8a4f5"
+    },
+    {
+      "path": "actionlint_1.7.12_checksums.txt.download.log",
+      "bytes": 871,
+      "sha256": "2a77f482e4c0d015bb563404363f508453e3bbb1b8e038cc380529db2067065c"
+    },
+    {
+      "path": "actionlint_1.7.12_linux_amd64.tar.gz.download.log",
+      "bytes": 950,
+      "sha256": "8e3dd107d56e5f20f5982a95096d26ebc1769bf50e8186349d1b3218cd19244b"
+    },
+    {
+      "path": "archive-extract.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "archive.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "download-actionlint.bash",
+      "bytes": 4059,
+      "sha256": "72fa3e45ac20f3c3a512d6747b4fcf719e21f890e8c43e78d48a41fdfb900c4e"
+    },
+    {
+      "path": "download-script-receipt.json",
+      "bytes": 742,
+      "sha256": "ecdd852f191ea34c53d32be6687e2ac04e295ce307727cd6c4e7d4654be7896b"
+    },
+    {
+      "path": "download-script.log",
+      "bytes": 633,
+      "sha256": "8e4bcca176efa6aa77d3d4ddf3182535cf512dd9254f5e207ac68e2ee7b042dd"
+    },
+    {
+      "path": "extract-setup-failure.json",
+      "bytes": 317,
+      "sha256": "113af6b4feb605db199fc9f4515c25f14bf4f74bcec6c3a971e306c1feaf78c7"
+    },
+    {
+      "path": "source-guard-inner.log",
+      "bytes": 359,
+      "sha256": "debc4b5de1d726edc9e724d090ac9e3992891ea09f51b42ef4f1f49fccfc4a9e"
+    },
+    {
+      "path": "source-guard-receipt.json",
+      "bytes": 3624,
+      "sha256": "3db084ca34dd5ceea656fcbce733a7697682fce5a408b2d5363c5a7506704a1c"
+    },
+    {
+      "path": "source-guard-run.log",
+      "bytes": 359,
+      "sha256": "debc4b5de1d726edc9e724d090ac9e3992891ea09f51b42ef4f1f49fccfc4a9e"
+    },
+    {
+      "path": "source-guard.sh",
+      "bytes": 1043,
+      "sha256": "f87997dc7b356fd111767d3997f8819bca68cd1927b89872fcf93a0c81fd6482"
+    },
+    {
+      "path": "version.log",
+      "bytes": 95,
+      "sha256": "9d34cdaec053c6005199c08f2bac628bd8c087303faa26fd8ab58c3e22216ff5"
+    }
+  ],
+  "archive": {
+    "path": "workflow-validation-830-83b3-compact.tar.gz",
+    "bytes": 6566,
+    "sha256": "44cca872705b58b258df7c1a10c5ba1e036b5e5a6c525fe5e50cff09ff993ae9"
+  },
+  "limits": [
+    "Shellcheck and pyflakes were absent; actionlint ran with default detection, and separate bash -n checks passed.",
+    "No dependencies, benchmark acquisition, original branch changes or frozen workflow edits.",
+    "Initial license-member extraction failure happened before actionlint execution and is retained."
+  ]
+}

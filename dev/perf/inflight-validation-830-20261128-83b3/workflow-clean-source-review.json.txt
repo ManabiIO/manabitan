@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "startedUtc": "2026-11-28T05:49:50.592792+00:00",
+  "finishedUtc": "2026-11-28T05:49:52.569474+00:00",
+  "candidate": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+  "tree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "archiveFileCount": 2852,
+  "archiveTrackedPayloadBytes": 157003776,
+  "archiveStreamExitCode": 0,
+  "extractExitCode": 0,
+  "gitObjects": "Read-only alternates reference to existing local object store; all index/HEAD/config writes occurred inside the temporary standalone repository.",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "init",
+        "-q"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "git",
+        "update-ref",
+        "--no-deref",
+        "HEAD",
+        "3eb1b7afa13c821af96e95fee1d6b4583af8e434"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "git",
+        "read-tree",
+        "3eb1b7afa13c821af96e95fee1d6b4583af8e434"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "git",
+        "archive",
+        "--format=tar",
+        "3eb1b7afa13c821af96e95fee1d6b4583af8e434"
+      ],
+      "cwd": "/workspace/scratch/83b3b3bfba02/manabitan",
+      "stdoutPipeTo": [
+        "tar",
+        "-xf",
+        "-",
+        "-C",
+        "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+      ]
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    },
+    {
+      "command": [
+        "bash",
+        "/tmp/manabitan-actionlint-830-83b3-20261128/source-guard.sh"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate",
+      "addedEnvironment": {
+        "PERF_BASELINE": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "PERF_CANDIDATE": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+        "PERF_DATABASE_SHA256": "12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd"
+      }
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "/tmp/manabitan-actionlint-830-83b3-20261128/clean-candidate"
+    }
+  ],
+  "cleanBefore": true,
+  "sourceGuardSha256": "f87997dc7b356fd111767d3997f8819bca68cd1927b89872fcf93a0c81fd6482",
+  "sourceGuardExitCode": 0,
+  "sourceGuardOutput": "baseline=9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\ncandidate=3eb1b7afa13c821af96e95fee1d6b4583af8e434\ndatabase-sha256=12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd\next/js/dictionary/dictionary-database.js: OK\n ext/js/dictionary/dictionary-database.js | 122 ++++++++++++++++++++++++++-----\n 1 file changed, 104 insertions(+), 18 deletions(-)\n",
+  "sourceGuardOutputSha256": "debc4b5de1d726edc9e724d090ac9e3992891ea09f51b42ef4f1f49fccfc4a9e",
+  "cleanAfter": true,
+  "benchmarkRuns": 0,
+  "dependencySetup": false,
+  "originalBranchesMutated": false,
+  "cleanup": "Exact temporary candidate archive directory removed after receipts; pinned source commit and all commands remain reproducible."
+}
