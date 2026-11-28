@@ -193,7 +193,9 @@ describe('publication receipts share the import transaction', () => {
         const exec = vi.spyOn(connection, 'exec');
         let currentSessionId = '';
         vi.mocked(Reflect.get(database, '_importJournal').clear).mockImplementation(async () => {
-            expect(sqlite3.capi.sqlite3_get_autocommit(connection.pointer)).toBe(1);
+            const dbPointer = connection.pointer;
+            if (typeof dbPointer === 'undefined') { throw new Error('Database closed before journal removal'); }
+            expect(sqlite3.capi.sqlite3_get_autocommit(dbPointer)).toBe(1);
             expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual([currentSessionId]);
             exec.mockClear();
         });
