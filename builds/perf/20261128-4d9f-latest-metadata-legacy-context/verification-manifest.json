@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Separate a300 Jitendex/VNDB qualification with actual SQLite epoch-zero metadata for cold persisted comparisons; original source and output oracles unchanged",
+  "recordedNodeVersion": "v22.22.0",
+  "recordedLinuxX64NodeSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "sourceProfiles": {
+    "A": {
+      "runtimeCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "trees": {
+        "ext": "ec21373fe93d34294721905e80556060fa46691f",
+        "dev/data/dictionary-wasm": "af8cb3aa7dfdec313024b973ca72c84f220871cc",
+        "dev/lib": "4d4b281ddf0baf15e9bb10cce12e98724bd2a64a"
+      },
+      "canonicalIdentity": {
+        "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/fixtures/opfs-continuation/node-opfs-adapter.mjs": "5ae07ae3f36e712a13f7b17aa18a264373b98d263102a2f50bbe86bf748f429a",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+        "ext/js/dictionary/dictionary-database.js": "0d44ce707ec5c263eb045f83be2b7cd52161cb54115790950e0c5246f93fbf74",
+        "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+        "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+        "ext/js/dictionary/term-content-opfs-store.js": "4f33dd7337d070672fddfbcddb97595686e155d4c830398e0143fbeaae59d7c0",
+        "ext/js/dictionary/term-record-opfs-store.js": "4294d3518bca7519abf65abdad19a35e035e6961ca93a127d688698b994f466b",
+        "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/raw-term-content.js": "45303d150b5117b070966ff7a28e668c0e089331a3f12a31225a8950638baf33",
+        "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+        "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+        "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+        "ext/js/dictionary/term-content-block-store.js": "b993ff8ad9646ccb45905048995831b4a54b298d5ecbdcb181b588400bc27789",
+        "ext/js/dictionary/zstd-term-content.js": "252bd9c87a276e12fbdf2baebf82129eb54cb6ec0fac75ae4df580e2f2856e64",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+        "ext/js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+        "ext/js/dictionary/dense-zip-file-map.js": "b0dfe1e72086389da33f7ff31bdd65e62dc45f580e97f27997bc195beb6c8d3d",
+        "ext/js/dictionary/dense-zip-filenames.js": "5e1a0073d3188b6073915c4b68b63a96314c356c22544e57520cb5673d0907a6",
+        "dev/data/dictionary-wasm/manifest.json": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "ext/lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+        "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+        "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+        "ext/lib/zip.js": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+        "ext/js/dictionary/term-record-import-index-worker.js": "b3c37ab9f128e4ffda68720f48612874acacf0ae520c7b6d968d063f12b69974",
+        "ext/js/dictionary/term-record-import-index-worker-client.js": "789cc3e561b3d0dee8b2392686e3d8fb5bc4ee9c37b79d71968685b7f9168afd",
+        "ext/js/dictionary/term-record-import-index-writer.js": "ec650fdf525642cf5340ca1da7a928d65b9a68e770847c3b08b17a2d3a5c1585",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+        "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999"
+      }
+    },
+    "B": {
+      "runtimeCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+      "trees": {
+        "ext": "6882b13827d4bb648a4a9297f293e55f055b74ed",
+        "dev/data/dictionary-wasm": "051bcdc890367aa050bbcdc21caead300c4824e8",
+        "dev/lib": "4d4b281ddf0baf15e9bb10cce12e98724bd2a64a"
+      },
+      "canonicalIdentity": {
+        "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/fixtures/opfs-continuation/node-opfs-adapter.mjs": "5ae07ae3f36e712a13f7b17aa18a264373b98d263102a2f50bbe86bf748f429a",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+        "ext/js/dictionary/dictionary-database.js": "50bb924703b2cf8d870a1e93534663f01fbf6847fa59cebb6d9f659d060021b3",
+        "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+        "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+        "ext/js/dictionary/term-content-opfs-store.js": "4f33dd7337d070672fddfbcddb97595686e155d4c830398e0143fbeaae59d7c0",
+        "ext/js/dictionary/term-record-opfs-store.js": "4294d3518bca7519abf65abdad19a35e035e6961ca93a127d688698b994f466b",
+        "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/raw-term-content.js": "45303d150b5117b070966ff7a28e668c0e089331a3f12a31225a8950638baf33",
+        "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+        "ext/js/dictionary/term-content-canonical-scan.js": "746dc752e0fa555f7924d1340998674bb10fff624554f212da859bff865b5fda",
+        "ext/js/dictionary/term-content-metadata-arena.js": "74c97b58688e86267ce84106c7e23bb03eeb90d135d32af473cc9798de16401c",
+        "ext/js/dictionary/term-content-block-store.js": "b993ff8ad9646ccb45905048995831b4a54b298d5ecbdcb181b588400bc27789",
+        "ext/js/dictionary/zstd-term-content.js": "252bd9c87a276e12fbdf2baebf82129eb54cb6ec0fac75ae4df580e2f2856e64",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "c2439ff67d54e21625385a8aa7c79aca6d3b4bb2714aee4a5169140facab991e",
+        "ext/js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+        "ext/js/dictionary/dense-zip-file-map.js": "b0dfe1e72086389da33f7ff31bdd65e62dc45f580e97f27997bc195beb6c8d3d",
+        "ext/js/dictionary/dense-zip-filenames.js": "5e1a0073d3188b6073915c4b68b63a96314c356c22544e57520cb5673d0907a6",
+        "dev/data/dictionary-wasm/manifest.json": "c8fe77203ea654ff748b12ed0cb52c95443ce85f2eb17d67c90d07a6ecaccabb",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "d629347973c6d7eb98a1125302dd4713e22a5d0a7059b25dd2c2ee37d3e3baf0",
+        "ext/lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "d629347973c6d7eb98a1125302dd4713e22a5d0a7059b25dd2c2ee37d3e3baf0",
+        "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+        "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+        "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+        "ext/lib/zip.js": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+        "ext/js/dictionary/term-record-import-index-worker.js": "b3c37ab9f128e4ffda68720f48612874acacf0ae520c7b6d968d063f12b69974",
+        "ext/js/dictionary/term-record-import-index-worker-client.js": "789cc3e561b3d0dee8b2392686e3d8fb5bc4ee9c37b79d71968685b7f9168afd",
+        "ext/js/dictionary/term-record-import-index-writer.js": "ec650fdf525642cf5340ca1da7a928d65b9a68e770847c3b08b17a2d3a5c1585",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+        "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999"
+      }
+    }
+  },
+  "historicalSource": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "canonicalIdentity": {
+      "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/fixtures/opfs-continuation/node-opfs-adapter.mjs": "5ae07ae3f36e712a13f7b17aa18a264373b98d263102a2f50bbe86bf748f429a",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-content-opfs-store.js": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+      "ext/js/dictionary/term-record-opfs-store.js": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+      "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+      "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+      "ext/js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+      "ext/js/dictionary/dense-zip-file-map.js": "b0dfe1e72086389da33f7ff31bdd65e62dc45f580e97f27997bc195beb6c8d3d",
+      "ext/js/dictionary/dense-zip-filenames.js": "5e1a0073d3188b6073915c4b68b63a96314c356c22544e57520cb5673d0907a6",
+      "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "ext/lib/zip.js": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+      "ext/js/dictionary/term-record-import-index-worker.js": "b3c37ab9f128e4ffda68720f48612874acacf0ae520c7b6d968d063f12b69974",
+      "ext/js/dictionary/term-record-import-index-worker-client.js": "789cc3e561b3d0dee8b2392686e3d8fb5bc4ee9c37b79d71968685b7f9168afd",
+      "ext/js/dictionary/term-record-import-index-writer.js": "ec650fdf525642cf5340ca1da7a928d65b9a68e770847c3b08b17a2d3a5c1585",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+      "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+      "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+    }
+  },
+  "mergedParserChanges": [
+    "ext/js/dictionary/wasm/term-bank-parser.c",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm",
+    "ext/lib/term-bank-parser.wasm"
+  ],
+  "signatureChanges": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-content-canonical-scan.js",
+    "ext/js/dictionary/term-content-metadata-arena.js",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+    "ext/lib/term-content-canonical-scan-v1.wasm"
+  ],
+  "zipSourceCommentNormalization": {
+    "canonicalSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+    "commentLines": 24,
+    "rule": "Only anchored esbuild // [path/]node_modules/@zip.js/zip.js/ source comments are normalized to // node_modules/@zip.js/zip.js/; all other bytes must match exactly."
+  },
+  "oracles": {
+    "jmdict-reference": {
+      "path": "oracles/jmdict-reference.json",
+      "bytes": 124620,
+      "sha256": "1fec0474fcc8f8fc5a32b4322fb052432dcf265cf076f16d9ce4b2986b0dc923"
+    },
+    "jmdict-output": {
+      "path": "oracles/jmdict-output.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "jitendex-output": {
+      "path": "oracles/jitendex-output.json",
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "vndb-output": {
+      "path": "oracles/vndb-output.json",
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    },
+    "vndb-directory": {
+      "path": "oracles/vndb-directory.json",
+      "bytes": 78941,
+      "sha256": "c2f75c06a1f8408e6a8dd6cbc348f06d0bbb4fe5e05ec9cb09bd6a454096564e"
+    },
+    "vndb-media-files": {
+      "path": "oracles/vndb-media-files.json",
+      "bytes": 708,
+      "sha256": "31af569cea779b28393b9bdb1d34f40280194265dc64da73de2119673f531aeb"
+    },
+    "vndb-media-original-helper": {
+      "path": "oracles/vndb-media-original-helper.py",
+      "bytes": 2518,
+      "sha256": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0"
+    },
+    "vndb-corpus": {
+      "path": "oracles/vndb-corpus.json",
+      "bytes": 578999,
+      "sha256": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a"
+    }
+  },
+  "representationProperties": [
+    "_termEntryContentMetaDictNameIdPrefixValue",
+    "_termEntryContentMetaDictNameIdPrefixEnd"
+  ],
+  "upstreamIntegrationChanges": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/raw-term-content.js",
+    "ext/js/dictionary/term-content-block-store.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/term-content-opfs-store.js",
+    "ext/js/dictionary/zstd-term-content.js",
+    "ext/js/pages/settings/dictionary-import-controller.js"
+  ],
+  "logicalRecordIdRepresentation": "implicit-positive-zero-or-full-float64",
+  "priorCombinedManifest": {
+    "path": "builds/perf/20261128-4d9f-signature1/verification-manifest.json",
+    "sha256": "08ad17889523d9efd00f70c05a42724c17b5a80921abae8e2a406614c0d02644",
+    "helperCommit": "434855c698d82ac336d37be63397d29d4936e6ec",
+    "runtimeCommit": "55e87bc64c9b043a91f1d075f0324d3176c18c9a"
+  },
+  "priorCurrentManifest": {
+    "path": "builds/perf/20261128-4d9f-current-metadata/verification-manifest.json",
+    "sha256": "70354d122d0297554f9ea9cd70e47744c0b0062ecee747006e87b94fe70130e6",
+    "helperCommit": "fb9d9612f34bdb002d846364ef089f25ed188b29",
+    "publishedEvidenceCommit": "3da567143d51e2857eeec7550aef4e7e4de921e6",
+    "qualificationNotTransferred": true
+  },
+  "legacyImportReadContext": {
+    "mode": "real-sqlite-epoch-zero-v1",
+    "assets": {
+      "ext/lib/sqlite/index.mjs": {
+        "bytes": 373254,
+        "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+      },
+      "ext/lib/sqlite/sqlite3.wasm": {
+        "bytes": 859730,
+        "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+      }
+    },
+    "scope": "Owned in-memory SQLite; unchanged production additive metadata schema and one-time legacy root seed after both actual stores prepare. Original production frame resolver, null epoch-zero lease, bounds, checksums, codec and full-byte dedupe comparisons remain active."
+  },
+  "priorLatestManifest": {
+    "path": "builds/perf/20261128-4d9f-latest-metadata/verification-manifest.json",
+    "sha256": "7fbb44eba25fea790606b211bf0dc7143d716f1a8e75b85c58091b79225b4d3f",
+    "runId": 46140311762,
+    "qualificationNotRelabeled": true
+  }
+}
