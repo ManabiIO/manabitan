@@ -5,8 +5,12 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import {describe, expect, test, vi} from 'vitest'
+import fs from 'node:fs/promises'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
+import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonical-scan.js'
 import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metadata-arena.js'
+
+const canonicalModule = await WebAssembly.compile(await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)))
 
 const arenaColumnNames = /** @type {const} */ ([
     'hash1',
@@ -200,5 +204,126 @@ describe('metadata growth with reusable dense IDs', () => {
         Reflect.get(database, '_ensureTermEntryContentMetaDenseCapacity').call(database, 33)
         expect(getArena(database)).not.toBe(previous)
         expect(getArena(database).state[6]).toBe(previous.state[6])
+    })
+})
+
+describe('native replacement-slot rebuild', () => {
+    /** @returns {NativeCanonicalScanner} */
+    function loadedScanner() {
+        const scanner = new NativeCanonicalScanner()
+        Reflect.set(scanner, '_module', canonicalModule)
+        return scanner
+    }
+
+    /**
+     * @param {number} count
+     * @returns {DictionaryDatabase}
+     */
+    function collisionDatabase(count) {
+        const database = new DictionaryDatabase()
+        if (count === 0) { Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').call(database, 1) }
+        for (let i = 0; i < count; ++i) {
+            const seed = i + 1
+            Reflect.get(database, '_setTermEntryContentMetaByHashPair').call(database, (seed << 16) | (seed ^ 63), 0, {
+                id: seed, offset: seed * 10, length: seed, dictName: 'native-rehash',
+                signature1: seed, signature2: seed + 1, signature3: seed + 2,
+            })
+        }
+        return database
+    }
+
+    test.each([0, 1, 31, 129])('matches complete JS slot layout and all metadata for %s colliding rows', (count) => {
+        const js = collisionDatabase(count)
+        const native = collisionDatabase(count)
+        const scanner = loadedScanner()
+        Reflect.set(native, '_nativeCanonicalScanner', scanner)
+        const before = getArena(native)
+        const oldSlots = before.slots.slice()
+        const previousColumns = arenaColumnNames.map((name) => before[name].slice())
+        for (const database of [js, native]) {
+            Reflect.get(database, '_resizeTermContentMetadataArena').call(database, count + 17, Math.max(32, before.slots.length * 2), true)
+        }
+        const actual = getArena(native)
+        const expected = getArena(js)
+        expect(actual.slots).toEqual(expected.slots)
+        for (const name of databaseColumnNames) { expect(Reflect.get(native, name)).toEqual(Reflect.get(js, name)) }
+        expect(before.slots).toEqual(oldSlots)
+        for (const [i, name] of arenaColumnNames.entries()) { expect(before[name]).toEqual(previousColumns[i]) }
+        expect(scanner.stats.instances).toBe(count === 0 ? 0 : 1)
+    })
+
+    test('retains holes, pending states and high IDs in the dense branch', () => {
+        const previous = new TermContentMetadataArena(32, 64)
+        for (let i = 0; i < 32; ++i) {
+            previous.hash1[i] = (i << 16) | (i ^ 63)
+            previous.hash2[i] = 0
+            previous.state[i] = i % 3 === 0 ? 0 : i % 2 + 1
+        }
+        const next = new TermContentMetadataArena(64, 128)
+        next.copyFrom(previous, 32, false)
+        expect(loadedScanner().rehash(next, 32, previous.slots.length)).toBe(true)
+        const expected = new Uint32Array(128)
+        for (let i = 0; i < 32; ++i) {
+            if (previous.state[i] === 0) { continue }
+            let slot = 63
+            while (expected[slot] !== 0) { slot = (slot + 1) & 127 }
+            expected[slot] = i + 1
+        }
+        expect(next.slots).toEqual(expected)
+        for (const name of arenaColumnNames) { expect(next[name].subarray(0, 32)).toEqual(previous[name]) }
+    })
+
+    test('keeps a synchronous cold fallback without loading a module', () => {
+        const loadModule = vi.fn(async () => canonicalModule)
+        const scanner = new NativeCanonicalScanner({loadModule})
+        const arena = new TermContentMetadataArena(16, 32)
+        arena.state[0] = 1
+        arena.hash1[0] = 99
+        expect(scanner.rehash(arena, 1, 16)).toBe(false)
+        expect(loadModule).not.toHaveBeenCalled()
+        expect(arena.slots.every((value) => value === 0)).toBe(true)
+    })
+
+    test('retains sparse old-slot order without constructing a native instance', () => {
+        const scanner = loadedScanner()
+        const arena = new TermContentMetadataArena(32, 32)
+        arena.state[31] = 2
+        const instance = vi.spyOn(scanner, '_getInstance')
+        expect(scanner.rehash(arena, 32, 16)).toBe(false)
+        expect(instance).not.toHaveBeenCalled()
+        expect(arena.slots.every((value) => value === 0)).toBe(true)
+    })
+
+    test('clears a partial native failure before the unchanged JS rebuild and publishes atomically', () => {
+        const js = collisionDatabase(31)
+        const native = collisionDatabase(31)
+        const previous = getArena(native)
+        const oldSlots = previous.slots.slice()
+        const scanner = loadedScanner()
+        Reflect.set(native, '_nativeCanonicalScanner', scanner)
+        vi.spyOn(scanner, '_getInstance').mockImplementationOnce((arena) => ({
+            module: canonicalModule,
+            scan: () => 0,
+            rehash: () => {
+                expect(getArena(native)).toBe(previous)
+                arena.slots[0] = 999
+                arena.slots[127] = 998
+                throw new WebAssembly.RuntimeError('injected partial rehash trap')
+            },
+        }))
+        for (const database of [js, native]) {
+            Reflect.get(database, '_resizeTermContentMetadataArena').call(database, 64, 128, true)
+        }
+        expect(getArena(native).slots).toEqual(getArena(js).slots)
+        expect(previous.slots).toEqual(oldSlots)
+        for (const name of databaseColumnNames) { expect(Reflect.get(native, name)).toEqual(Reflect.get(js, name)) }
+    })
+
+    test('clears partial native output after a bounded full-table error', () => {
+        const arena = new TermContentMetadataArena(2, 1)
+        arena.state.fill(1)
+        expect(loadedScanner().rehash(arena, 2, 2)).toBe(false)
+        expect([...arena.slots]).toEqual([0])
+        expect([...arena.state]).toEqual([1, 1])
     })
 })

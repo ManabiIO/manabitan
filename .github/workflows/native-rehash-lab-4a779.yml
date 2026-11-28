@@ -1,0 +1,119 @@
+name: Native metadata rehash experiment 4a779
+
+on:
+  push:
+    branches: [perf/native-rehash-lab-20261128-4a779]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-rehash-lab-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install the existing CI native toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Validate source, pinned native output, tests and packages
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-rehash-validation
+          npx eslint ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-canonical-scan.js test/term-content-metadata-growth.test.js 2>&1 | tee builds/perf/native-rehash-validation/lint.log
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/native-rehash-validation/native.log
+          npm run test:ts 2>&1 | tee builds/perf/native-rehash-validation/types.log
+          npm run test:unit -- --maxWorkers=2 2>&1 | tee builds/perf/native-rehash-validation/unit.log
+          npm run test:build 2>&1 | tee builds/perf/native-rehash-validation/build.log
+      - name: Preserve all validation outcomes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-rehash-validation
+          path: builds/perf/native-rehash-validation
+          if-no-files-found: error
+          retention-days: 14
+
+  jitendex:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare isolated baseline and exact Jitendex snapshots
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-rehash-component
+          node dev/perf/prepare-dictionaries.js jitendex
+          git worktree add --detach "$RUNNER_TEMP/native-rehash-baseline" "$PERF_BASELINE"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/native-rehash-baseline/node_modules"
+          (cd "$RUNNER_TEMP/native-rehash-baseline" && npm run build:libs)
+          node .github/scripts/native-rehash-capture.mjs \
+            "$RUNNER_TEMP/native-rehash-baseline" "$GITHUB_WORKSPACE" jitendex \
+            builds/e2e-dictionary-cache/jitendex-yomitan.zip builds/perf/native-rehash-component \
+            2>&1 | tee builds/perf/native-rehash-component/capture.log
+      - name: Measure complete replacement creation with identical-code controls
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib, subprocess
+          output = pathlib.Path('builds/perf/native-rehash-component')
+          protocol = {'blocks': ['ABC', 'BCA', 'CAB', 'ACB', 'CBA', 'BAC'], 'observations': 18,
+              'scope': 'Fresh-process whole Jitendex resize, including replacement allocation, copying, native instance and publication. Separate from complete-import timing.',
+              'controls': 'A and C are identical baseline sources; retain every outcome.',
+              'baseline': os.environ['PERF_BASELINE'], 'candidate': os.environ['PERF_CANDIDATE']}
+          (output / 'protocol.json').write_text(json.dumps(protocol, indent=2) + '\n')
+          for block, order in enumerate(protocol['blocks'], 1):
+              for arm in order:
+                  command = ['node', '--expose-gc', '.github/scripts/native-rehash-screen.mjs',
+                      os.environ['RUNNER_TEMP'] + '/native-rehash-baseline', os.environ['GITHUB_WORKSPACE'],
+                      str(output / 'jitendex-capture.json'), arm, str(output / f'block-{block}-{arm}.json')]
+                  result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                  (output / f'block-{block}-{arm}.log').write_text(result.stdout)
+                  print(block, arm, result.stdout, flush=True)
+                  if result.returncode:
+                      raise SystemExit(result.returncode)
+          PY
+      - name: Compare complete Jitendex imports using the frozen qualifier
+        run: |
+          set -euo pipefail
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary jitendex --initial-order AB --pairs 6 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/term-content-canonical-scan.js \
+            --expected-package-entry js/dictionary/wasm/term-content-canonical-scan-v1.c \
+            --expected-package-entry lib/term-content-canonical-scan-v1.wasm \
+            --evidence builds/perf/native-rehash-imports/jitendex
+      - name: Preserve every component and complete-import observation
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-rehash-jitendex
+          path: |
+            builds/perf/native-rehash-component
+            builds/perf/native-rehash-imports/jitendex
+          if-no-files-found: error
+          retention-days: 14

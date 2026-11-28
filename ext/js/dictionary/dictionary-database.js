@@ -7289,7 +7289,7 @@ void 0 :
             recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable.subarray(0, denseCount))
         }
         /* eslint-enable @stylistic/semi */
-        if (rehash) {
+        if (rehash && !this._nativeCanonicalScanner.rehash(arena, denseCount, oldSlotTable.length)) {
             // A fresh WASM memory is already zeroed; no old slots were copied.
             const mask = slotCapacity - 1;
             const useDense = denseCount <= oldSlotTable.length;

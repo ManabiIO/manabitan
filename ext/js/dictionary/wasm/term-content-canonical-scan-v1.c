@@ -52,6 +52,42 @@ uint32_t canonical_max_rows(void) { return MAX_ROWS; }
 __attribute__((export_name("canonical_prefix_bytes")))
 uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 
+// Rebuild only a replacement arena's slot table, in the same ascending dense
+// ID order as the JavaScript owner. Hash/state columns are read-only. Sparse
+// old-bucket-order rebuilds remain with that owner.
+__attribute__((export_name("rehash_canonical")))
+int32_t rehash_canonical(uint32_t slots_offset, uint32_t slot_capacity,
+                         uint32_t hash1_offset, uint32_t hash2_offset,
+                         uint32_t state_offset, uint32_t dense_count) {
+    const uint64_t bytes = (uint64_t)__builtin_wasm_memory_size(0) * 65536u;
+    if (slot_capacity == 0 || (slot_capacity & (slot_capacity - 1)) ||
+        slots_offset < PREFIX || slots_offset % 4 ||
+        hash1_offset < PREFIX || hash1_offset % 4 ||
+        hash2_offset < PREFIX || hash2_offset % 4 || state_offset < PREFIX ||
+        (uint64_t)slots_offset + (uint64_t)slot_capacity * 4 > bytes ||
+        (uint64_t)hash1_offset + (uint64_t)dense_count * 4 > bytes ||
+        (uint64_t)hash2_offset + (uint64_t)dense_count * 4 > bytes ||
+        (uint64_t)state_offset + dense_count > bytes) {
+        return -1;
+    }
+    uint32_t *slots = U32(slots_offset);
+    const uint32_t *hash1 = U32(hash1_offset), *hash2 = U32(hash2_offset);
+    const uint8_t *state = U8(state_offset);
+    const uint32_t mask = slot_capacity - 1;
+    for (uint32_t index = 0; index < dense_count; ++index) {
+        if (state[index] == 0) { continue; }
+        uint32_t hash = hash1[index] ^ (hash2[index] * 0x9e3779b1u);
+        hash ^= hash >> 16;
+        uint32_t slot = hash & mask, probes = 0;
+        while (slots[slot] != 0) {
+            if (++probes >= slot_capacity) { return -2; }
+            slot = (slot + 1) & mask;
+        }
+        slots[slot] = index + 1;
+    }
+    return 0;
+}
+
 // Header at 1024: journal progress, next cursor, pending count, exact count,
 // resolved count, dense count, reserved. The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.

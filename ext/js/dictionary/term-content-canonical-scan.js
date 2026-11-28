@@ -18,13 +18,14 @@
 
 /* eslint-disable no-underscore-dangle -- Typed private metadata-owner ABI shared with DictionaryDatabase. */
 /* eslint-disable unicorn/prefer-spread -- TypedArray.slice must return owned typed columns, never number arrays. */
+/* eslint-disable @stylistic/semi */
 
 import {CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './term-content-canonical-layout.js';
 
 const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT} = layout;
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null;
-/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number}>} */
+/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number, rehash: RehashFunction|null}>} */
 const instances = new WeakMap();
 
 /** @returns {Promise<WebAssembly.Module>} */
@@ -46,6 +47,7 @@ export function compileCanonicalScanModule() {
 
 /**
  * @typedef {import('./term-content-metadata-arena.js').TermContentMetadataArena} Arena
+ * @typedef {(slots: number, capacity: number, hash1: number, hash2: number, state: number, count: number) => number} RehashFunction
  * @typedef {import('./dictionary-database.js').TermContentMeta} TermContentMeta
  * @typedef {import('./dictionary-database.js').ArtifactTermContentDedupPlan} DedupPlan
  * @typedef {{columns: Uint32Array[], planStart: number}} PendingBatch
@@ -104,6 +106,8 @@ export class NativeCanonicalScanner {
     constructor({loadModule = compileCanonicalScanModule, hooks = {}} = {}) {
         /** @type {() => Promise<WebAssembly.Module>} */
         this._loadModule = loadModule;
+        /** @type {WebAssembly.Module|null} */
+        this._module = null
         /** @type {ScanHooks} */
         this._hooks = hooks;
         /** Cumulative segment counters; no database or arena references. */
@@ -130,6 +134,74 @@ export class NativeCanonicalScanner {
             fallbackUnsupported: 0,
             fallbackReason: '',
         };
+    }
+
+    /**
+     * A resize is synchronous. Use native code only after an ordinary scan
+     * loaded it, and only for the existing ascending dense-ID scan. The caller
+     * owns a fresh unpublished arena and falls back to its old bucket loop.
+     * @param {Arena} arena
+     * @param {number} denseCount
+     * @param {number} previousSlotCount
+     * @returns {boolean}
+     */
+    rehash(arena, denseCount, previousSlotCount) {
+        const module = this._module
+        const {slots, hash1, hash2, state} = arena
+        const buffer = arena.memory.buffer
+        if (
+            module === null || denseCount === 0 || denseCount > previousSlotCount ||
+            !Number.isSafeInteger(denseCount) || denseCount < 0 || denseCount > state.length ||
+            slots.length === 0 || (slots.length & (slots.length - 1)) !== 0 ||
+            slots.buffer !== buffer || hash1.buffer !== buffer || hash2.buffer !== buffer || state.buffer !== buffer ||
+            hash1.length !== state.length || hash2.length !== state.length ||
+            slots.byteOffset < PREFIX || hash1.byteOffset < slots.byteOffset + slots.byteLength ||
+            hash2.byteOffset < hash1.byteOffset + hash1.byteLength || state.byteOffset < hash2.byteOffset + hash2.byteLength
+        ) {
+            return false
+        }
+        try {
+            const native = this._getInstance(arena, module).rehash
+            if (native === null) { return false }
+            if (native(slots.byteOffset, slots.length, hash1.byteOffset, hash2.byteOffset, state.byteOffset, denseCount) === 0) {
+                return true
+            }
+        } catch { /* The unpublished replacement can be rebuilt synchronously. */ }
+        slots.fill(0)
+        return false
+    }
+
+    /**
+     * @param {Arena} arena
+     * @param {WebAssembly.Module} module
+     * @returns {{module: WebAssembly.Module, scan: () => number, rehash: RehashFunction|null}}
+     * @throws {Error} If the supplied module does not match the canonical ABI.
+     */
+    _getInstance(arena, module) {
+        let cached = instances.get(arena.memory)
+        if (typeof cached !== 'undefined' && cached.module === module) { return cached }
+        const exports = new WebAssembly.Instance(module, {env: {memory: arena.memory}}).exports
+        if (
+            typeof exports.scan_canonical !== 'function' ||
+            typeof exports.canonical_abi_version !== 'function' ||
+            exports.canonical_abi_version() !== CANONICAL_SCAN_ABI_VERSION ||
+            typeof exports.canonical_layout_end !== 'function' ||
+            exports.canonical_layout_end() !== layout.usedBytes ||
+            typeof exports.canonical_max_rows !== 'function' ||
+            exports.canonical_max_rows() !== MAX ||
+            typeof exports.canonical_prefix_bytes !== 'function' ||
+            exports.canonical_prefix_bytes() !== PREFIX
+        ) {
+            throw new Error('Canonical scan WASM ABI/layout mismatch')
+        }
+        cached = {
+            module,
+            scan: /** @type {() => number} */ (exports.scan_canonical),
+            rehash: typeof exports.rehash_canonical === 'function' ? /** @type {RehashFunction} */ (exports.rehash_canonical) : null,
+        }
+        instances.set(arena.memory, cached)
+        ++this.stats.instances
+        return cached
     }
 
     /**
@@ -215,6 +287,7 @@ export class NativeCanonicalScanner {
         let module;
         try {
             module = await this._loadModule();
+            this._module = module
         } catch {
             ++stats.fallbacks;
             ++stats.fallbackAsset;
@@ -239,27 +312,7 @@ export class NativeCanonicalScanner {
             }
             let native;
             try {
-                let cached = instances.get(a.memory);
-                if (typeof cached === 'undefined' || cached.module !== module) {
-                    const exports = new WebAssembly.Instance(module, {env: {memory: a.memory}}).exports;
-                    if (
-                        typeof exports.scan_canonical !== 'function' ||
-                        typeof exports.canonical_abi_version !== 'function' ||
-                        exports.canonical_abi_version() !== CANONICAL_SCAN_ABI_VERSION ||
-                        typeof exports.canonical_layout_end !== 'function' ||
-                        exports.canonical_layout_end() !== layout.usedBytes ||
-                        typeof exports.canonical_max_rows !== 'function' ||
-                        exports.canonical_max_rows() !== MAX ||
-                        typeof exports.canonical_prefix_bytes !== 'function' ||
-                        exports.canonical_prefix_bytes() !== PREFIX
-                    ) {
-                        throw new Error('Canonical scan WASM ABI/layout mismatch');
-                    }
-                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical)};
-                    instances.set(a.memory, cached);
-                    ++stats.instances;
-                }
-                native = cached.scan;
+                native = this._getInstance(a, module).scan
             } catch (error) {
                 if (cursor !== 0) {
                     throw error;
