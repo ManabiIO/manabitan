@@ -1,0 +1,16 @@
+{
+  "scope": "Auditor setup corrections only; no checkpoint bytes or validation policy changed.",
+  "initialAuditorSha256": "3b1db485bfe461f288f96cd8bb5055120f614d80dca38c89679ec61891a2a75f",
+  "initialReceiptSha256": "3a0dbd52abf5bfc00722c3cf97420b0855f63adfac5fe8e51a0ecb3542120e1b",
+  "findings": [
+    {
+      "check": "raw tar member sorting",
+      "reason": "Copied raw archives intentionally retain original sorted members followed by the derived package audit; only the newly built proof archive promises global sorted order. Their full per-member hashes and exact membership all passed."
+    },
+    {
+      "check": "outage wording search",
+      "reason": "Remote-alignment receipt records the precise exec-server disconnected/recovery-timed-out failure; it does not contain the literal word outage. Check structured executed:false, exactly one later successful same-tree alignment, and frozen input bindings instead."
+    }
+  ],
+  "reacquisitionOrProductExecution": false
+}

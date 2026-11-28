@@ -1,0 +1,64 @@
+{
+  "asOfUtc": "2026-11-28T05:16:45Z",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "failedAttemptsRetained": [
+    "First wide static compile wrapper failed only at the assembler subprocess; retained optimized output was subsequently assembled/linked without another source optimization variant",
+    "New-case test setup rejected unsupported --minWorkers before discovery; corrected setup passed all 56 cases",
+    "Changed-file lint SIGKILL, no verdict or retry",
+    "Eleven existing focused suites SIGKILL, no JSON verdict or retry",
+    "Initial same-tree remote alignment did not execute during exec-server outage; exactly one guarded alignment succeeded after recovery"
+  ],
+  "fingerprint": {
+    "allRawObservationsRetained": true,
+    "completeCells": 6,
+    "decision": "SHELVE; no reproducible full-import gain; no PR",
+    "independentSemanticsMemoryChecks": 4866,
+    "qualificationRun": 46104243724,
+    "rawMemoryScansAudited": 2177,
+    "source": "178ee43328141693e88b90b4b518d483c87b2fac",
+    "sourceNativeStageChecksPerCell": 585,
+    "sourceQa": "PASS; raw receipt/log retained in phase1",
+    "sourceQaRun": 46102827974,
+    "totalImports": 252,
+    "workflowCommit": "b64b3d0423d758252fce9333ceef6e98431de47b"
+  },
+  "limits": [
+    "Static smaller code or reduced load counts are hypotheses, not import-speed claims",
+    "Full parser-output component digests and hosted sampled persisted lookup checks have different coverage",
+    "Each hosted lookup receipt covers twelve fixed terms over one cold and five warm passes; prescribed separate media slots scan all referenced media",
+    "Memory is sampled process-tree PSS/private with qualifying coverage, not a guaranteed absolute peak",
+    "Internal stage durations overlap and cannot be summed as independent CPU time"
+  ],
+  "minsize": {
+    "partialObservationContext": "Two JMdict cells disagree. Their partial projections do not constitute full qualification; raw cohorts remain outside phase2A for later retention.",
+    "qualification": "INCOMPLETE at snapshot; no complete performance conclusion in this checkpoint",
+    "qualificationRun": 46104898097,
+    "source": "2907ba1bad0958c22fe363f88d7cceb4d4bc604e",
+    "sourceQa": "PASS: pinned native regeneration; 380 focused tests; JS lint; four TypeScript projects; 669 unit files / 15135 passed / 47 skipped; all-target dry build",
+    "sourceQaRun": 46104779877,
+    "workflowCommit": "0c2a8a75cd0322cc13348b977a7e915b555d5a88"
+  },
+  "pullRequestsCreatedByThisTask": 0,
+  "purpose": "Phase2A evidence checkpoint; no product publication or new measurements",
+  "repository": "ManabiIO/manabitan",
+  "runtimeVersions": {
+    "hostedQaAndQualification": "Node 22.22.0",
+    "localValidation": "Node 24.20.0"
+  },
+  "schemaVersion": 1,
+  "supersedesPhase1": false,
+  "wideKeyword": {
+    "localValidation": "56 actual-WASM cases passed; ordinary pinned regeneration matched; lint and broader focused tests ended by SIGKILL without verdict or retry",
+    "originalLocalCommit": "1ec7369996d8b4e24802854b0524709aa54aadb3",
+    "parserSha256": "6962928b4810ac489048b6a686e3a6cdbcd7fe3116328a13fa458bd02634024c",
+    "performanceRunLaunched": false,
+    "source": "ebf4278afc59d83f191692bd587f0e1f7e8682b3",
+    "sourceQa": "PENDING at snapshot",
+    "sourceQaRun": 46110109833,
+    "speedupClaim": false,
+    "tree": "611b6e1591ffbbc9c978c33dee9af72a7b618536",
+    "untimedParity": "PENDING at snapshot; reviewed helper/workflow and baseline digests retained",
+    "untimedParityRun": 46111036970,
+    "untimedParityWorkflowCommit": "52a7f01ef88021a35f90d05510cec7f58557e935"
+  }
+}

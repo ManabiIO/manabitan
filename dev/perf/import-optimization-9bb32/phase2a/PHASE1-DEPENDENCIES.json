@@ -1,0 +1,1044 @@
+{
+  "archive": {
+    "bytes": 5737812,
+    "gitBlobSha1": "b6ce6a5a350f26074a273d3d772276867182e76a",
+    "name": "checkpoint-phase1.tar.gz",
+    "sha256": "050a01b9994034c0e070d66e17d1f879b20d724772e8c187af354a879936d161"
+  },
+  "commit": "35069bdeb7a904fb9a39c919717b61021af9e78b",
+  "fullPriorInventoryCopy": "prior-checkpoint/phase1-INVENTORY.json",
+  "inventory": {
+    "bytes": 80505,
+    "gitBlobSha1": "aa3dfe2b4f6bed94f3b2ba7c354811415009fee2",
+    "name": "INVENTORY.json",
+    "sha256": "bd57cff8bd2624dfefa4881106ca75c1b00dc78b5e55918efbc35376d0f17206"
+  },
+  "limits": "The execution environment recovered with /tmp reset. Original path strings are historical. Missing inputs remain recoverable from the exact phase1 archive; no toolchains or lost worktrees were reconstructed.",
+  "members": [
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/composite-minsize-baseline.ll",
+      "phase1InventoryEntry": {
+        "bytes": 706345,
+        "origin": "/tmp/manabitan-profiling-9bb32/composite-minsize-baseline.ll",
+        "path": "compiler-static/composite-minsize-baseline.ll",
+        "sha256": "ece9a3842bb7470d0c52521a49f0c3f1e9c7bfd3e1199c61c5d94023598b3ca5"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/composite-minsize-candidate.ll",
+      "phase1InventoryEntry": {
+        "bytes": 691386,
+        "origin": "/tmp/manabitan-profiling-9bb32/composite-minsize-candidate.ll",
+        "path": "compiler-static/composite-minsize-candidate.ll",
+        "sha256": "8ae7aed709ad97a5dbf1158e94871b12af0c68552c3a66ef9a8fcd8d69cd170d"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/composite-minsize-compiler-attributes.json",
+      "phase1InventoryEntry": {
+        "bytes": 1906,
+        "origin": "/tmp/manabitan-profiling-9bb32/composite-minsize-compiler-attributes.json",
+        "path": "compiler-static/composite-minsize-compiler-attributes.json",
+        "sha256": "37f8b0932f581ced50ef37b6c782be7e4684f70dbedfe543e03287d816ba6000"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/composite-minsize-regeneration-check.json",
+      "phase1InventoryEntry": {
+        "bytes": 410,
+        "origin": "/tmp/manabitan-profiling-9bb32/composite-minsize-regeneration-check.json",
+        "path": "compiler-static/composite-minsize-regeneration-check.json",
+        "sha256": "8453e6bad4683f18d21ddb3c711545b0d08503c9ab7ab81c6f4c64b9e049034e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/composite-minsize-semantic-tests.json",
+      "phase1InventoryEntry": {
+        "bytes": 135890,
+        "origin": "/tmp/manabitan-profiling-9bb32/composite-minsize-semantic-tests.json",
+        "path": "compiler-static/composite-minsize-semantic-tests.json",
+        "sha256": "473eb88a6b65a7539fd678bbed0a94d2d92deaeafc36c13760c43f1c6ca2ba5c"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/identity.json",
+      "phase1InventoryEntry": {
+        "bytes": 2196,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/identity.json",
+        "path": "compiler-static/no-media-static/identity.json",
+        "sha256": "d6d8371ad277f1321a623be65e41e2473c5aeb84ed980318f2ba59e1c8a5456f"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/isolated-assembly-comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 965,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/isolated-assembly-comparison.json",
+        "path": "compiler-static/no-media-static/isolated-assembly-comparison.json",
+        "sha256": "0787652b0000b468c6b099e61f80e9f1b0bb1ec08c91d828b56cbe46bb6dac3c"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/isolated-hint-kernel.diff",
+      "phase1InventoryEntry": {
+        "bytes": 2850,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/isolated-hint-kernel.diff",
+        "path": "compiler-static/no-media-static/isolated-hint-kernel.diff",
+        "sha256": "6e5df1d49ea8ccf25092ea408a8ff608a56d637c2469c3b827380061bb1df6d0"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/isolated-ir-summary.json",
+      "phase1InventoryEntry": {
+        "bytes": 7517,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/isolated-ir-summary.json",
+        "path": "compiler-static/no-media-static/isolated-ir-summary.json",
+        "sha256": "ce5de9c6c20a2dfc939e749b95b352af5323ccf066218dbe8190e8b3e3fb58b6"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/isolated-no-media-kernel.diff",
+      "phase1InventoryEntry": {
+        "bytes": 75122,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/isolated-no-media-kernel.diff",
+        "path": "compiler-static/no-media-static/isolated-no-media-kernel.diff",
+        "sha256": "f3d4ea77b6a1b2c4b58eac65cc24f4d0526f873d40eb184422175950fd388f21"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/prepare.py",
+      "phase1InventoryEntry": {
+        "bytes": 3990,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/prepare.py",
+        "path": "compiler-static/no-media-static/prepare.py",
+        "sha256": "225975e4d8fa18d84254a1cdc3ae5c557c2bbe6e51f38deacfddfdfb6dbeb6d9"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/report.json",
+      "phase1InventoryEntry": {
+        "bytes": 3259,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/report.json",
+        "path": "compiler-static/no-media-static/report.json",
+        "sha256": "c4be24a94606356ec33b2e32c3c2058ef3f08f053145281ee9d5ad9eef1198bc"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.c",
+      "phase1InventoryEntry": {
+        "bytes": 159627,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media-isolated.c",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.c",
+        "sha256": "e22b338ab9806bdf2f4989d83f5202994237dcb2aa354ce4a3ddc1b213e3e1af"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 1246,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media-isolated.comparison.json",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.comparison.json",
+        "sha256": "9dc78a1a9f0919679d4a0382df0791ea88a6e1bb63b0b4b840eea1190296c14b"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.ll",
+      "phase1InventoryEntry": {
+        "bytes": 776889,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media-isolated.ll",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.ll",
+        "sha256": "9d87d7410967088bb45c90ca6601ade747ef48b7e2e82de446d5bb26cfbaad75"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.s",
+      "phase1InventoryEntry": {
+        "bytes": 863667,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media-isolated.s",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.s",
+        "sha256": "2ca0d848fec9e9e01be818a76e6e1a5ef586d2cb043053911b2ff08fd8b050be"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 75011,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media-isolated.wasm",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media-isolated.wasm",
+        "sha256": "3534f8dd3b1d6665157f7312acc4a4ec0abcca0479337ea1c810ecbf8d0104d4"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media.c",
+      "phase1InventoryEntry": {
+        "bytes": 159539,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media.c",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media.c",
+        "sha256": "28e19d4cee1479229b08c8135e4ae49b6a4cd94bd05411f0a0f750cd616ee2df"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media.comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 1241,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media.comparison.json",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media.comparison.json",
+        "sha256": "b35beaf90ee2d680ff0f4b94bed62e65d8c35be1ae968ce21342fea3fb8543d3"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media.ll",
+      "phase1InventoryEntry": {
+        "bytes": 758644,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media.ll",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media.ll",
+        "sha256": "812e7a20c938e3c4bf3fccaeaa4324d4ed70130759489dc17f1a4183728d9e34"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media.s",
+      "phase1InventoryEntry": {
+        "bytes": 832511,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media.s",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media.s",
+        "sha256": "39cd84f063d2faa0eba961bba3725b487f580a868f6370073e185f8614034612"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "compiler-static/no-media-static/term-bank-parser-no-media.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 73590,
+        "origin": "/tmp/manabitan-profiling-9bb32/no-media-static/term-bank-parser-no-media.wasm",
+        "path": "compiler-static/no-media-static/term-bank-parser-no-media.wasm",
+        "sha256": "020c7e77cb2fd6574ad14d7054b3d81b41a4186c191dbaf7e9d938f28d55a587"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/canonical-corpus.mjs",
+      "phase1InventoryEntry": {
+        "bytes": 3005,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/canonical-corpus.mjs",
+        "path": "profiling/canonical-corpus.mjs",
+        "sha256": "5d822d0ce1d29e9954e9168ea82ff2de17905d8ef3ed70012c56afb17d16b1cc"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-final-source-binding.json",
+      "phase1InventoryEntry": {
+        "bytes": 5639,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-final-source-binding.json",
+        "path": "profiling/composite-minsize-final-source-binding.json",
+        "sha256": "19dde9fe22cfdfea793451965303b0624fe8c8b96bd76d9cca895febffb780ac"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/analysis-partial.json",
+      "phase1InventoryEntry": {
+        "bytes": 3069,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/analysis-partial.json",
+        "path": "profiling/composite-minsize-screen-1/analysis-partial.json",
+        "sha256": "26e563a92a9f75656516893df8b03a41b06ae54e4c1def5ef3f5280dc90c4d43"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/cohort-status.json",
+      "phase1InventoryEntry": {
+        "bytes": 227,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/cohort-status.json",
+        "path": "profiling/composite-minsize-screen-1/cohort-status.json",
+        "sha256": "016c308f5025fdf1b103a14dd638fcad1bb42b4522aabb68bb7a1ff909728052"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 15023,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-pair-1-A.json",
+        "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-A.json",
+        "sha256": "86fbaf481fa950a20b9085a21410bd601028f9283e7e0c6703ff7040b5cbe391"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 130,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-pair-1-A.log",
+        "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-A.log",
+        "sha256": "3119f500e3b622b427a4f8a41873041aa51431660105d892fc4f664d893c988e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 15040,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-pair-1-B.json",
+        "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-B.json",
+        "sha256": "aebc2627679c5f5a95329792b20423194e5087cccf942f1ea0a68bf484db6b1e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 130,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-pair-1-B.log",
+        "path": "profiling/composite-minsize-screen-1/jitendex-pair-1-B.log",
+        "sha256": "916759cd442d8a048277b1e50b8b12501b1a6ef937656431f70c7c1bca66a550"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-pair-2-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 0,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-pair-2-B.log",
+        "path": "profiling/composite-minsize-screen-1/jitendex-pair-2-B.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-verify-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 15097,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-verify-A.json",
+        "path": "profiling/composite-minsize-screen-1/jitendex-verify-A.json",
+        "sha256": "85018fc74e5f8cb8531741729f1d5fa6ae4a9ac62ef2f23ecef00892ba4e4371"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-verify-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 183,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-verify-A.log",
+        "path": "profiling/composite-minsize-screen-1/jitendex-verify-A.log",
+        "sha256": "cf6078dab27a8a66769f3aaec98413ec7805d0752a15d887cd5a38c5e953fe6b"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-verify-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 15109,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-verify-B.json",
+        "path": "profiling/composite-minsize-screen-1/jitendex-verify-B.json",
+        "sha256": "72c3cdaa76fb68df87f68c88a5c9a7858332807f8786fbda24dfd83a2f8fa913"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jitendex-verify-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 183,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jitendex-verify-B.log",
+        "path": "profiling/composite-minsize-screen-1/jitendex-verify-B.log",
+        "sha256": "a1f6e2b4aad4914960ffd342f3eabdd67c783ed1578d4a6b7bdf792347b27924"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 12618,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-1-A.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-A.json",
+        "sha256": "4130a7635ba4f6740770e7da963b229cd01d084718f9b705e03255909207f94b"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 122,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-1-A.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-A.log",
+        "sha256": "764ef60d0fb5919f82c98f434859b1e383cffae070c035496047c9a40096b105"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 12609,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-1-B.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-B.json",
+        "sha256": "4e4fa6b0b1eb086e66c38b82c1c6f9df78cf16d777560615943ff3af84bcf8d4"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 122,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-1-B.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-1-B.log",
+        "sha256": "8bd95ea60e5f4c808ab18c53bd420a3dc69f4bf1b92f0bbeb9425f04d3c4dbd8"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 12623,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-2-A.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-A.json",
+        "sha256": "b2ba71b0948f1d021b429069f796764ea2e8827c964c0a7ec730e8a5cf9922c4"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 129,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-2-A.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-A.log",
+        "sha256": "ed75f90fc5469534db206a6fec255b13ae3d0a7e862f1d1518ad298222543b04"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 12643,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-2-B.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-B.json",
+        "sha256": "3add0ea721779af2c93af80d289798af73147d1bf8b94d657b344611ab934968"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 122,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-2-B.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-2-B.log",
+        "sha256": "efa5273fa31573e8025a9f1fe8aba2beb53f7a42fb90a01b52f07a7c3377a2f6"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 12658,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-3-A.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-A.json",
+        "sha256": "ec6cc621f67005cf36a85518cd5f2244d5c156d591e5362f649aeda534bd15d4"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 122,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-3-A.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-A.log",
+        "sha256": "0073be5783809a9ed7564de783d70baee904b7858f51d158e6a45deeab28b7b5"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 12648,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-3-B.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-B.json",
+        "sha256": "26dc19027c195c699a1d487615e283bd69058c2eb50fcc851d59db1e5687c4e1"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 122,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-pair-3-B.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-pair-3-B.log",
+        "sha256": "b267f6eabb27b6fac03b39b7a301bd1e428219b66dba4bc295ee0a50193e6c9a"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-verify-A.json",
+      "phase1InventoryEntry": {
+        "bytes": 12685,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-verify-A.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-verify-A.json",
+        "sha256": "3f25a30bc1dec602e8727de2149fb7e84b408ccf3bfa5dddd9622d1fdf19df72"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-verify-A.log",
+      "phase1InventoryEntry": {
+        "bytes": 182,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-verify-A.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-verify-A.log",
+        "sha256": "01e8fa9aa4c633e5ec5753824bb267df3f815dfd0deb074c5e555d84a1793a68"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-verify-B.json",
+      "phase1InventoryEntry": {
+        "bytes": 12685,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-verify-B.json",
+        "path": "profiling/composite-minsize-screen-1/jmdict-verify-B.json",
+        "sha256": "ebe0e32b816101dbfae476708139a2442cfee19b201031ae7d0259e96499274f"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/jmdict-verify-B.log",
+      "phase1InventoryEntry": {
+        "bytes": 181,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/jmdict-verify-B.log",
+        "path": "profiling/composite-minsize-screen-1/jmdict-verify-B.log",
+        "sha256": "9812ebe92b8ef39393d9324b9e3d6014dc8ae43b9573bb08e4c2941e72f47dbd"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/observations.json",
+      "phase1InventoryEntry": {
+        "bytes": 32273,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/observations.json",
+        "path": "profiling/composite-minsize-screen-1/observations.json",
+        "sha256": "4cfd1cda4f29edb4f460049f6ae3e5c3d46e2377525b2f299794d8a9f667915b"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-screen-1/plan.json",
+      "phase1InventoryEntry": {
+        "bytes": 4786,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-screen-1/plan.json",
+        "path": "profiling/composite-minsize-screen-1/plan.json",
+        "sha256": "042166be3b4331204e6b8afd046324ba6633eb902e0dce4372e4d135976c4343"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/A.json",
+      "phase1InventoryEntry": {
+        "bytes": 41320,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/A.json",
+        "path": "profiling/composite-minsize-vndb-parity-1/A.json",
+        "sha256": "4106dfae754be0122f7abda2e94abdc08397399ee903e2464f124a569e63c7b2"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/A.log",
+      "phase1InventoryEntry": {
+        "bytes": 192,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/A.log",
+        "path": "profiling/composite-minsize-vndb-parity-1/A.log",
+        "sha256": "2cf3e5a2bf0dfd67e53f5430b64828f1e93df4d4ae727635c10b3942a23225be"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/B.json",
+      "phase1InventoryEntry": {
+        "bytes": 41361,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/B.json",
+        "path": "profiling/composite-minsize-vndb-parity-1/B.json",
+        "sha256": "2af62506059e7e618cb670625986f17e624eb6fd15c88fe8dae1becb89b051f0"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/B.log",
+      "phase1InventoryEntry": {
+        "bytes": 186,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/B.log",
+        "path": "profiling/composite-minsize-vndb-parity-1/B.log",
+        "sha256": "4eb83ecfc9232effe7fdd40f1d74b30a3b5ce2adca5649695352edd375fe611f"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/plan.json",
+      "phase1InventoryEntry": {
+        "bytes": 392,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/plan.json",
+        "path": "profiling/composite-minsize-vndb-parity-1/plan.json",
+        "sha256": "693adc2d420043ed1bfaab843474557db03757ff129b0b9c88d661aa74e1dbea"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/composite-minsize-vndb-parity-1/status.json",
+      "phase1InventoryEntry": {
+        "bytes": 2049,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/composite-minsize-vndb-parity-1/status.json",
+        "path": "profiling/composite-minsize-vndb-parity-1/status.json",
+        "sha256": "c646e88a5aa37655ef7ee56d0eea74267f4e251a44916bce5eec93c70c605c0e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/exploratory-observation-status.json",
+      "phase1InventoryEntry": {
+        "bytes": 926,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/exploratory-observation-status.json",
+        "path": "profiling/exploratory-observation-status.json",
+        "sha256": "6933f73f4b9b8a01a74dea2eb31248f4f188718e923ca2fad33b84aac620ee44"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/finalization-tail-analysis.json",
+      "phase1InventoryEntry": {
+        "bytes": 18706,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/finalization-tail-analysis.json",
+        "path": "profiling/finalization-tail-analysis.json",
+        "sha256": "3ba1595abd02247a9556b8a90ef528655bc496967041cfa7ddaf40b9ba63aa11"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/hosted-baseline-summary.json",
+      "phase1InventoryEntry": {
+        "bytes": 120073,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-baseline-summary.json",
+        "path": "profiling/hosted-baseline-summary.json",
+        "sha256": "b3c7ca0008f965821526f684e5739cd85715e04868755b9383fbda650f3bcc97"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-cold-path-analysis.json",
+      "phase1InventoryEntry": {
+        "bytes": 6816,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-cold-path-analysis.json",
+        "path": "profiling/parser-cold-path-analysis.json",
+        "sha256": "27612576f74e31f69dda36050ea51409a7c3d929f7cfb7ae35d07d2a5087813f"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-slot-compatibility.json",
+      "phase1InventoryEntry": {
+        "bytes": 7509,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-slot-compatibility.json",
+        "path": "profiling/parser-slot-compatibility.json",
+        "sha256": "235330d6ffbb9e2cfadd10da06b73521feb74c5e43e99c303050d4599cedfcb7"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map.mjs",
+      "phase1InventoryEntry": {
+        "bytes": 5310,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map.mjs",
+        "path": "profiling/parser-symbol-map.mjs",
+        "sha256": "5528ccb04a30993b5bf816bbcf2d36c458a6008dc2ee0b34b20ea2e15e49cd6e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/baseline.s",
+      "phase1InventoryEntry": {
+        "bytes": 770641,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/baseline.s",
+        "path": "profiling/parser-symbol-map/baseline.s",
+        "sha256": "b0c308a32c7d40cfa53819f7c9e388683f2c9ea469ade9f15ee53a876cfc33e3"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/columns-restrict.s",
+      "phase1InventoryEntry": {
+        "bytes": 772359,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/columns-restrict.s",
+        "path": "profiling/parser-symbol-map/columns-restrict.s",
+        "sha256": "a96d2d2dde34819f08dd086d349282f3aa1363ddf7cdf1eedf416bd314b6b69a"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/columns-restrict.s.diff",
+      "phase1InventoryEntry": {
+        "bytes": 14836,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/columns-restrict.s.diff",
+        "path": "profiling/parser-symbol-map/columns-restrict.s.diff",
+        "sha256": "03b9191c60c981a90bb205a98a3ad4bc1535e2b28cfb5e992693ceccf414af3a"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/compare-code.py",
+      "phase1InventoryEntry": {
+        "bytes": 2692,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/compare-code.py",
+        "path": "profiling/parser-symbol-map/compare-code.py",
+        "sha256": "f02dc2160ec3b0cb7cf77cd0d1e5ca1566065a21c509e5b0ec94e81cc1d86036"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/composite-minsize-artifact.json",
+      "phase1InventoryEntry": {
+        "bytes": 1646,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/composite-minsize-artifact.json",
+        "path": "profiling/parser-symbol-map/composite-minsize-artifact.json",
+        "sha256": "1fb028fd2b9f789d86673675b9b81c02a58b943f61496a30556fabc36e9da2db"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/composite-minsize.assembly.diff",
+      "phase1InventoryEntry": {
+        "bytes": 67672,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/composite-minsize.assembly.diff",
+        "path": "profiling/parser-symbol-map/composite-minsize.assembly.diff",
+        "sha256": "fd3281d1bff123290d323852edb6297a3ca6fabd2613bc9578c1166a8679031a"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/composite-minsize.s",
+      "phase1InventoryEntry": {
+        "bytes": 747119,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/composite-minsize.s",
+        "path": "profiling/parser-symbol-map/composite-minsize.s",
+        "sha256": "60a2e8d6cbe2c778b6360af1353f652d6e5e7bf91c5d9231f85f52835e0a520b"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/local-restrict-code-comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 116,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/local-restrict-code-comparison.json",
+        "path": "profiling/parser-symbol-map/local-restrict-code-comparison.json",
+        "sha256": "34d08b706159611361cfc41bcb9cfcd1854a49fe7a45f722a8207df5a03c49fa"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/source-restrict.s",
+      "phase1InventoryEntry": {
+        "bytes": 772108,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/source-restrict.s",
+        "path": "profiling/parser-symbol-map/source-restrict.s",
+        "sha256": "ea8ebe8961f9a84624b3abe4d4de45eddc1c003e8e5fe9dff5f8b11101289c26"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/source-restrict.s.diff",
+      "phase1InventoryEntry": {
+        "bytes": 1897,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/source-restrict.s.diff",
+        "path": "profiling/parser-symbol-map/source-restrict.s.diff",
+        "sha256": "02ef741bccf5ccd019b4107e00e88fc33e9ef152ef63f810ec25cf388af0c5c3"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/symbol-map.json",
+      "phase1InventoryEntry": {
+        "bytes": 10167,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/symbol-map.json",
+        "path": "profiling/parser-symbol-map/symbol-map.json",
+        "sha256": "afab5a712b65d0dc206cd4b46770ec9e55a54e9c279826126d7729b5f6e9e9a5"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.c",
+      "phase1InventoryEntry": {
+        "bytes": 164360,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-columns-restrict.c",
+        "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.c",
+        "sha256": "cc4bdf62331da9e267a3243d20b88ca55a90b204b88f770af6bb1e8e91da90ad"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 1260,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-columns-restrict.comparison.json",
+        "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.comparison.json",
+        "sha256": "586daa8708a5ed7efd04f4e43329ff1caac8347fcdf36f28106a038c1f71e073"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 69384,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-columns-restrict.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-columns-restrict.wasm",
+        "sha256": "0eeef92fe1ddb1ce3cf25a6107b306733169e122e41d6aac5039863cb2e68dd3"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize-stripped.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 65971,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-composite-minsize-stripped.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize-stripped.wasm",
+        "sha256": "363136045b400ea9bab953cb7b52febaedd23b4d1e3b666cde3d4df859b72ff0"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.c",
+      "phase1InventoryEntry": {
+        "bytes": 158466,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-composite-minsize.c",
+        "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.c",
+        "sha256": "c93cd0d1981f2add17239009dc859a5b24c78d973dd14b8ed0fa0af5e6cd5b74"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 234,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-composite-minsize.comparison.json",
+        "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.comparison.json",
+        "sha256": "7ef7cc4aa3ff7462349251af4406464cc77790ee790727456e599034e0886800"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 67575,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-composite-minsize.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-composite-minsize.wasm",
+        "sha256": "19372aa6725e0866c175f2b297cb4a57fb961e72328370f189c63905a21ef10e"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-local-restrict.c",
+      "phase1InventoryEntry": {
+        "bytes": 158657,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-local-restrict.c",
+        "path": "profiling/parser-symbol-map/term-bank-parser-local-restrict.c",
+        "sha256": "7d3855cccc0d3e4c346fa394d6ade2e290d02267a77f37422168e3c385297b9a"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-local-restrict.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 69260,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-local-restrict.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-local-restrict.wasm",
+        "sha256": "9eed99a74b6d8af541909fb91709badd18549da954154d6f9ec0f194c98e9a67"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-named.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 69251,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-named.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-named.wasm",
+        "sha256": "498b3c9d68b1b167c3985421477d8047c8584569005e9b3e0a82266b1e514eac"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.c",
+      "phase1InventoryEntry": {
+        "bytes": 160965,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-source-restrict.c",
+        "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.c",
+        "sha256": "9d09169068f697e9280a158cdcb121d7a71bc821240f214561af0b5c1e51a57f"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.comparison.json",
+      "phase1InventoryEntry": {
+        "bytes": 1259,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-source-restrict.comparison.json",
+        "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.comparison.json",
+        "sha256": "a827904fe1e141a087c3ed856686e23b3a8366554f013389983f7a6956a4a9ff"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.wasm",
+      "phase1InventoryEntry": {
+        "bytes": 69383,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/parser-symbol-map/term-bank-parser-source-restrict.wasm",
+        "path": "profiling/parser-symbol-map/term-bank-parser-source-restrict.wasm",
+        "sha256": "589bb5040e746fe0d92df6f42d33ec8cbe0fd908a315241a808a4fc16391af65"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": true,
+      "path": "profiling/pipeline-replay.mjs",
+      "phase1InventoryEntry": {
+        "bytes": 20137,
+        "origin": "/workspace/scratch/9bb32f82fa3b/profiling/pipeline-replay.mjs",
+        "path": "profiling/pipeline-replay.mjs",
+        "sha256": "f872a41547445c24d113c3718fcd9bb5e0cd5ea08e7f75d98ff3354c0ef3f214"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "toolchain-provenance/bin/clang",
+      "phase1InventoryEntry": {
+        "bytes": 403,
+        "origin": "/tmp/manabitan-native-9bb32/native-toolchain/bin/clang",
+        "path": "toolchain-provenance/bin/clang",
+        "sha256": "f1900e435e9b038d7468d1618374b45001253c62f431909b426fe5ae94371363"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "toolchain-provenance/bin/wasm-ld",
+      "phase1InventoryEntry": {
+        "bytes": 182,
+        "origin": "/tmp/manabitan-native-9bb32/native-toolchain/bin/wasm-ld",
+        "path": "toolchain-provenance/bin/wasm-ld",
+        "sha256": "a11d1c2b03db50b7508feafa37f10b5a862d110c9265d2285ad91110500fc868"
+      }
+    },
+    {
+      "authority": "Immutable phase1 archive member, regardless of original scratch path availability",
+      "originalPathExistsAtCheckpoint": false,
+      "path": "toolchain-provenance/manifest.json",
+      "phase1InventoryEntry": {
+        "bytes": 50020,
+        "origin": "/tmp/manabitan-native-9bb32/native-toolchain/manifest.json",
+        "path": "toolchain-provenance/manifest.json",
+        "sha256": "6f3a9dfdc85d6b64939905cf2bf50beb46d89ec83a1037537c9e08e448c7a387"
+      }
+    }
+  ],
+  "repository": "ManabiIO/manabitan",
+  "repositoryDirectory": "dev/perf/import-optimization-9bb32/phase1"
+}

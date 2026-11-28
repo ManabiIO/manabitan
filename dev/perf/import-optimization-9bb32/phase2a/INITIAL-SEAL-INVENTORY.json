@@ -1,0 +1,120 @@
+{
+  "asOfUtc": "2026-11-28T05:16:45Z",
+  "files": [
+    {
+      "bytes": 18175,
+      "gitBlobSha1": "d11c5b2d68f7cf8b9322dbe8032f8528a7a4fa13",
+      "name": "CELL-INDEX.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/CELL-INDEX.json",
+      "sha256": "671bd55e2bbbe1149f884a23f73962e7b56a1bd60291b94460c3a9e58683d1b1"
+    },
+    {
+      "bytes": 1958,
+      "gitBlobSha1": "0f641e029b67257e4edfc7fda5570362d3a58adb",
+      "name": "EXCLUSIONS.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/EXCLUSIONS.json",
+      "sha256": "dcec3d29204a0a0deaa551eb8652e91de22336af43626cab57e53d56eabc14ab"
+    },
+    {
+      "bytes": 788,
+      "gitBlobSha1": "738a745c5ba0e5b7f5c208efd8d8a0454d47530e",
+      "name": "PACKAGING.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/PACKAGING.json",
+      "sha256": "d5efdcacc842f77749855d84c26a3dd3a6b25b108c7895f48ca8836df16d86dc"
+    },
+    {
+      "bytes": 53358,
+      "gitBlobSha1": "0f0811800c853273fc438ce6af68328f490c8f80",
+      "name": "PHASE1-DEPENDENCIES.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/PHASE1-DEPENDENCIES.json",
+      "sha256": "e9c866858626185d01235bcbb2a8cd56540fa24b02ef6d7c834812430e10f740"
+    },
+    {
+      "bytes": 75755,
+      "gitBlobSha1": "ace8aea8e8a32c456288820b14d8e31d46f2443f",
+      "name": "PROOF-INVENTORY.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/PROOF-INVENTORY.json",
+      "sha256": "7e28a37793a6901ec98ce4b22707867f9f11759c76fe89964727a80ba0a48a9c"
+    },
+    {
+      "bytes": 9095,
+      "gitBlobSha1": "53a4ac3801d428c795196fc9d590cdf372810bf7",
+      "name": "README.md",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/README.md",
+      "sha256": "3880d49d3287cdc05f61553c6ca080325e01b553111944502d07c5832df51806"
+    },
+    {
+      "bytes": 3637,
+      "gitBlobSha1": "21b77d6b2384fc50dd725d54f8691085d3b6a2f8",
+      "name": "STATUS.json",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/STATUS.json",
+      "sha256": "8d17003e6f83c4025ae29beb8b1bb5a8234ba5282b84da4af6ea840f646a6b4e"
+    },
+    {
+      "bytes": 30903,
+      "gitBlobSha1": "da7220ad5cfff56d246f4536a4ef65cf704a8a7f",
+      "name": "build-phase2a-checkpoint.py",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/build-phase2a-checkpoint.py",
+      "sha256": "8f539d2282f0f0df3443fe05c9b7ebd7694d37612dd197c3723a8031aa924a15"
+    },
+    {
+      "bytes": 1610111,
+      "gitBlobSha1": "ee977a63f76fb9e18dbeffc8e1a068f15c667c0b",
+      "name": "fingerprint-jitendex-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-jitendex-AB.raw-evidence.tar.gz",
+      "sha256": "18d2cc66d6a49e30e4ff7460a9acb6419cabf41215342210ac8684658f7125f3"
+    },
+    {
+      "bytes": 1674740,
+      "gitBlobSha1": "e07aa8ce58386c0920cafac65a85f89820619d43",
+      "name": "fingerprint-jitendex-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-jitendex-BA.raw-evidence.tar.gz",
+      "sha256": "16514b0ab3859b04cd6442ae153a8b0e1efe6ebeff0cc4ec2774dfe3e574e6dd"
+    },
+    {
+      "bytes": 1552574,
+      "gitBlobSha1": "5780d52caa54e0df655b79e02a275f33b9740bf7",
+      "name": "fingerprint-jmdict-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-jmdict-AB.raw-evidence.tar.gz",
+      "sha256": "60ddeb398d3eb6aed7664fb142a88a44fbd501554cb8263e0c9a75d1595b04a6"
+    },
+    {
+      "bytes": 1562777,
+      "gitBlobSha1": "f4ae91c27673b6a1d3cc7aa34987e003ae709cb6",
+      "name": "fingerprint-jmdict-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-jmdict-BA.raw-evidence.tar.gz",
+      "sha256": "ff38faf1cd25801cd556b79c69d3b7ba7bb12e5109c4902d173400d472ce25d1"
+    },
+    {
+      "bytes": 1809051,
+      "gitBlobSha1": "da3b70a854dcb2407e4832b289dfe1786de41dc4",
+      "name": "fingerprint-vndb-AB.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-vndb-AB.raw-evidence.tar.gz",
+      "sha256": "d894e7f47ef6790803576b85b87b0f4193551dee50b1a4bfbeaf77fd04d3cd01"
+    },
+    {
+      "bytes": 1823101,
+      "gitBlobSha1": "307f333673a5112f94ff68449fffd60169128c43",
+      "name": "fingerprint-vndb-BA.raw-evidence.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/fingerprint-vndb-BA.raw-evidence.tar.gz",
+      "sha256": "4be32703ff50f259c6113a8405f3136d6d5e8924020e507f7762c3eba2b4d706"
+    },
+    {
+      "bytes": 1092904,
+      "gitBlobSha1": "e3246934cf6bd8c21f2fd32b7d259cea31544f4c",
+      "name": "proofs-and-sources.tar.gz",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/proofs-and-sources.tar.gz",
+      "sha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1"
+    },
+    {
+      "bytes": 13831,
+      "gitBlobSha1": "8c13581b241a516cd7fac5bd12ab31f51214ab55",
+      "name": "verify-phase2a-checkpoint.py",
+      "proposedRepositoryPath": "dev/perf/import-optimization-9bb32/phase2a/verify-phase2a-checkpoint.py",
+      "sha256": "5540cb8334119a5727a2b212a797825d5c3cd9a5e35c6365078e1031f845be7e"
+    }
+  ],
+  "repositoryDirectory": "dev/perf/import-optimization-9bb32/phase2a",
+  "schemaVersion": 1,
+  "selfExcluded": "INVENTORY.json; authoritative bytes are bound by its containing Git tree and external publication receipt"
+}

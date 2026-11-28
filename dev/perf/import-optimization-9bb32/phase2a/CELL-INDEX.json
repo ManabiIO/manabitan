@@ -1,0 +1,454 @@
+{
+  "allImportCount": 252,
+  "asOfUtc": "2026-11-28T05:16:45Z",
+  "cells": [
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:52:18Z",
+      "bytes": 1552574,
+      "cell": "jmdict-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.2927883720494684,
+            3.0856207692582016
+          ],
+          "equalWorkChangePercent": 1.504368658400912,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": 1.1676694254767694,
+          "ratios": [
+            1.0050797234373292,
+            1.0063971689125768,
+            0.9896751101320788,
+            1.0169562195969586,
+            0.9817483189241263,
+            1.0311859443630869,
+            1.031254500936212,
+            0.9795226662900713,
+            1.0172076105204093,
+            1.0934606906685918,
+            1.0305264710220772,
+            1.0044691224269318
+          ],
+          "worstPairChangePercent": 9.346069066859176
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -5.364983534582269,
+            4.141169773726516
+          ],
+          "equalWorkChangePercent": -0.5943588661510568,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.4861881464048645,
+          "ratios": [
+            1.0414116977372652,
+            1.0160260955892608,
+            0.9463501646541773,
+            0.974250141482642
+          ],
+          "worstPairChangePercent": 4.141169773726516
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "5780d52caa54e0df655b79e02a275f33b9740bf7",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249326220",
+      "includedOriginalFiles": 269,
+      "independentChecks": 810,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/jmdict-AB/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/jmdict-AB",
+      "publicationName": "fingerprint-jmdict-AB.raw-evidence.tar.gz",
+      "rawMemoryScans": 253,
+      "sha256": "60ddeb398d3eb6aed7664fb142a88a44fbd501554cb8263e0c9a75d1595b04a6",
+      "sourceArtifact": {
+        "bytes": 35536955,
+        "id": 15249326220,
+        "jobId": 140853308364,
+        "runId": 46104243724,
+        "sha256": "240dc92cec1e1994f2b938193b003e88d7b0b94ecc74e9983d25e324a950532a"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:44:21Z",
+      "bytes": 1562777,
+      "cell": "jmdict-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -2.750623995509338,
+            2.1454739200664985
+          ],
+          "equalWorkChangePercent": 0.9692342873220294,
+          "fasterPairs": 7,
+          "medianPairedChangePercent": -1.218586944838207,
+          "ratios": [
+            0.9840599598860008,
+            0.9656764983730333,
+            1.0010713520462824,
+            1.1946209233375578,
+            0.9672509709247284,
+            1.005047318611975,
+            1.0378621597893547,
+            0.9777365491650849,
+            1.0582224587546691,
+            0.9537113402061616,
+            0.9890339425587468,
+            0.9865943185444892
+          ],
+          "worstPairChangePercent": 19.462092333755777
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.5359999999962737,
+            1.2432260121084893
+          ],
+          "equalWorkChangePercent": -0.3615867276402729,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.5778581245881931,
+          "ratios": [
+            0.9977619098369329,
+            0.9846400000000373,
+            1.012432260121085,
+            0.9906809276713031
+          ],
+          "worstPairChangePercent": 1.2432260121084893
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "f4ae91c27673b6a1d3cc7aa34987e003ae709cb6",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248622786",
+      "includedOriginalFiles": 269,
+      "independentChecks": 810,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/jmdict-BA/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/jmdict-BA",
+      "publicationName": "fingerprint-jmdict-BA.raw-evidence.tar.gz",
+      "rawMemoryScans": 262,
+      "sha256": "ff38faf1cd25801cd556b79c69d3b7ba7bb12e5109c4902d173400d472ce25d1",
+      "sourceArtifact": {
+        "bytes": 35548362,
+        "id": 15248622786,
+        "jobId": 140853308317,
+        "runId": 46104243724,
+        "sha256": "31abe87a4b9e5f09cf7f1f3f23d3fcbd9b41307cc119b1805017e7bf9dfe3113"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:26:52Z",
+      "bytes": 1610111,
+      "cell": "jitendex-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.6538789474069384,
+            3.8520258772357874
+          ],
+          "equalWorkChangePercent": 6.724739208907771,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 1.7689359529706072,
+          "ratios": [
+            1.6842763922409958,
+            0.9898760691220058,
+            1.0127675553886513,
+            0.9381611065907297,
+            0.9932300843921094,
+            1.0226111636707609,
+            1.043444902656553,
+            1.0447691734921873,
+            1.01,
+            1.0255004112969237,
+            0.9936923366597519,
+            1.0335956148881627
+          ],
+          "worstPairChangePercent": 68.42763922409958
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.2226229219803209,
+            3.5500272380638354
+          ],
+          "equalWorkChangePercent": 1.1214995280274476,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 1.079905899270317,
+          "ratios": [
+            0.9877737707801968,
+            0.9921550530687586,
+            1.0355002723806384,
+            1.029443064916648
+          ],
+          "worstPairChangePercent": 3.5500272380638354
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "ee977a63f76fb9e18dbeffc8e1a068f15c667c0b",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247909459",
+      "includedOriginalFiles": 269,
+      "independentChecks": 810,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/jitendex-AB/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/jitendex-AB",
+      "publicationName": "fingerprint-jitendex-AB.raw-evidence.tar.gz",
+      "rawMemoryScans": 290,
+      "sha256": "18d2cc66d6a49e30e4ff7460a9acb6419cabf41215342210ac8684658f7125f3",
+      "sourceArtifact": {
+        "bytes": 35601308,
+        "id": 15247909459,
+        "jobId": 140853308103,
+        "runId": 46104243724,
+        "sha256": "02478d55004a73e98bdc55c7408c6b9d9ae35b42cd0e3ac2241944eb766749c7"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:50:15Z",
+      "bytes": 1674740,
+      "cell": "jitendex-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -2.086720464368008,
+            1.8371299622271797
+          ],
+          "equalWorkChangePercent": -0.19149650584396882,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.06445954462162007,
+          "ratios": [
+            1.022809812042007,
+            0.9732937685460775,
+            1.0252805365664608,
+            0.9634088482979747,
+            0.9976451120163229,
+            1.009328958373544,
+            1.0010656970912446,
+            0.9716752593328224,
+            1.0228881096588505,
+            1.0139327872025365,
+            0.9960806990491772,
+            0.9849718221665623
+          ],
+          "worstPairChangePercent": 2.5280536566460787
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.025576095218339,
+            4.015935230996481
+          ],
+          "equalWorkChangePercent": 1.04721221588302,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.6183606198546077,
+          "ratios": [
+            0.9897442390478166,
+            0.9991078256436994,
+            1.0401593523099648,
+            1.0132593867533928
+          ],
+          "worstPairChangePercent": 4.015935230996481
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "e07aa8ce58386c0920cafac65a85f89820619d43",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248991361",
+      "includedOriginalFiles": 269,
+      "independentChecks": 810,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/jitendex-BA/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/jitendex-BA",
+      "publicationName": "fingerprint-jitendex-BA.raw-evidence.tar.gz",
+      "rawMemoryScans": 358,
+      "sha256": "16514b0ab3859b04cd6442ae153a8b0e1efe6ebeff0cc4ec2774dfe3e574e6dd",
+      "sourceArtifact": {
+        "bytes": 35672381,
+        "id": 15248991361,
+        "jobId": 140853308341,
+        "runId": 46104243724,
+        "sha256": "76c8999a0e2d2094c37d254456aca2d0c46f9ad4bbc0d0de1b1e4fe032592ef1"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T05:06:02Z",
+      "bytes": 1809051,
+      "cell": "vndb-AB",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            0.6879136189489543,
+            2.0311630573667916
+          ],
+          "equalWorkChangePercent": 1.5748280196843156,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 1.1433755417764147,
+          "ratios": [
+            1.0051002637209678,
+            1.0714462115973649,
+            1.0086580086580115,
+            1.0255989911727617,
+            1.0116215272582407,
+            1.0150242699745744,
+            1.0112459835772878,
+            0.9914639351259069,
+            1.0095648864645321,
+            0.9952584770741257,
+            1.0127005177118784,
+            1.0306854479761096
+          ],
+          "worstPairChangePercent": 7.144621159736486
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -2.933843713012141,
+            0.9403218985544193
+          ],
+          "equalWorkChangePercent": -1.154216897634297,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -1.319734837659703,
+          "ratios": [
+            1.0094032189855442,
+            0.9911025731762919,
+            0.9825027300705141,
+            0.9706615628698786
+          ],
+          "worstPairChangePercent": 0.9403218985544193
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "da3b70a854dcb2407e4832b289dfe1786de41dc4",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249152457",
+      "includedOriginalFiles": 269,
+      "independentChecks": 813,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/vndb-AB/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/vndb-AB",
+      "publicationName": "fingerprint-vndb-AB.raw-evidence.tar.gz",
+      "rawMemoryScans": 507,
+      "sha256": "d894e7f47ef6790803576b85b87b0f4193551dee50b1a4bfbeaf77fd04d3cd01",
+      "sourceArtifact": {
+        "bytes": 35827323,
+        "id": 15249152457,
+        "jobId": 140853308356,
+        "runId": 46104243724,
+        "sha256": "61da4268f530344ea36a4384b7f350c4ab8729ee102085e81a176b4c02a97eb3"
+      },
+      "sourceNativeStageChecks": 585
+    },
+    {
+      "allImportCount": 42,
+      "artifactExpiresAt": "2026-12-12T04:51:28Z",
+      "bytes": 1823101,
+      "cell": "vndb-BA",
+      "derivedFiles": 1,
+      "frozenHarnessAnalysis": {
+        "candidateVsBaseline": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -0.8876231608756502,
+            0.7217509439062741
+          ],
+          "equalWorkChangePercent": -0.052903352316180374,
+          "fasterPairs": 7,
+          "medianPairedChangePercent": -0.29760840576962266,
+          "ratios": [
+            0.9920772040675274,
+            0.9989239777788929,
+            0.9901703327149596,
+            0.9837732113104553,
+            1.008599068434253,
+            0.9845547079800485,
+            1.0185008774128825,
+            1.0250542463541226,
+            0.9923088121118125,
+            1.0007291745241567,
+            1.0058359504438728,
+            0.9951238541057148
+          ],
+          "worstPairChangePercent": 2.5054246354122567
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.4638034735118932,
+            3.4544430016904215
+          ],
+          "equalWorkChangePercent": 0.24775679657200733,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.48385864612715546,
+          "ratios": [
+            0.9853619652648811,
+            0.9959325831750179,
+            1.0345444300169042,
+            0.994390243902439
+          ],
+          "worstPairChangePercent": 3.4544430016904215
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "gitBlobSha1": "307f333673a5112f94ff68449fffd60169128c43",
+      "githubArtifactUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249131160",
+      "includedOriginalFiles": 269,
+      "independentChecks": 813,
+      "omittedOriginalPayloads": 44,
+      "originalPath": "/workspace/scratch/9bb32f82fa3b/profiling/hosted-qualification/fingerprint/vndb-BA/raw-evidence.tar.gz",
+      "proofDirectory": "profiling/hosted-qualification/fingerprint/vndb-BA",
+      "publicationName": "fingerprint-vndb-BA.raw-evidence.tar.gz",
+      "rawMemoryScans": 507,
+      "sha256": "4be32703ff50f259c6113a8405f3136d6d5e8924020e507f7762c3eba2b4d706",
+      "sourceArtifact": {
+        "bytes": 35841881,
+        "id": 15249131160,
+        "jobId": 140853308373,
+        "runId": 46104243724,
+        "sha256": "181a62588a130aebcb2a07ec2bf127a657ff8a611d120421b09fae58a09d59c9"
+      },
+      "sourceNativeStageChecks": 585
+    }
+  ],
+  "decision": "No repeatable full-import gain. No PR for fingerprint candidate.",
+  "memoryScope": "Separate qualified sampled Linux process-tree PSS/private memory, not an absolute peak guarantee",
+  "scope": "All six fixed fingerprint cells; no observations removed or repeated",
+  "timingUnits": "Percent change B versus A; positive means slower. Controls use identical A code."
+}

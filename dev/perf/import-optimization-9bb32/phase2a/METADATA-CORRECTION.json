@@ -1,0 +1,156 @@
+{
+  "changesToAnyBinaryArchive": false,
+  "changesToOriginalProofsOrObservations": false,
+  "changesToOriginalVerifier": false,
+  "clarification": {
+    "bytes": 2403,
+    "gitBlobSha1": "8ae3b05fb14eebd196454e73f2881c0ad2132b10",
+    "path": "READ-FIRST.md",
+    "sha256": "000ff13fe58e8a72fafdae194b85b7cc43ba08f6ae5c2cec21dd7c0f31eef7e7"
+  },
+  "corrections": [
+    {
+      "correctInterpretation": "One JMdict BA stage projection plus its binding record, both job140855328275; no separate AB projection retained in phase2A.",
+      "evidence": [
+        {
+          "bytes": 5599,
+          "gitBlobSha1": "aa2e01e61f2730d1bb4d539aa8dfe6b2c7c1499b",
+          "path": "profiling/minsize-jmdict-ba-log-stage-projection.json",
+          "sha256": "9967a91b3858bc271e4757c1a50a3f634da082cfe783c7e2c3efc31e04c7e622"
+        },
+        {
+          "bytes": 571,
+          "gitBlobSha1": "210faa357bba91577e3e3b0db9c2cb5b018f3411",
+          "path": "profiling/minsize-jmdict-ba-log-projection-binding.json",
+          "sha256": "2c20d969a57437ffa5ccb28ba4a70de16692d0e12f64010de90b655d92435cb9"
+        }
+      ],
+      "originalWording": "two partial JMdict log projections",
+      "topic": "Partial minsize scope"
+    },
+    {
+      "correctInterpretation": "Source QA and frozen browser qualification use Node22.22.0; the separately queued untimed full-output parity job uses Node24.20.0, matching retained local components.",
+      "evidence": [
+        {
+          "bytes": 2434,
+          "gitBlobSha1": "dcebc683f6e7c1aa74d66634dc6a3df9b96f5ce9",
+          "path": "profiling/hosted-wide-parity-spec/import-wide-keyword-parity-9bb32.yml",
+          "sha256": "21e0dbdc7f3ebaa7591291a27121e982b7326dac8a53164c26c9aedb1d1c7f45"
+        },
+        {
+          "bytes": 2252,
+          "gitBlobSha1": "4bef610481cbeb26ca4e80ef3bad6dfd523975d0",
+          "path": "profiling/hosted-plans/wide-keyword-source-qa.yml",
+          "sha256": "29e0fd93e68ae6384bb182cff0d1edb3b7c3c7dbaa950bb1459ed638b27765e2"
+        }
+      ],
+      "topic": "Hosted untimed parity runtime"
+    }
+  ],
+  "initialOuterInventory": {
+    "bytes": 5634,
+    "gitBlobSha1": "25ad40ad799df3db0010f522a1a89996a52dad19",
+    "path": "INITIAL-SEAL-INVENTORY.json",
+    "sha256": "af75f47935f56ef70549684c7e3ecb6d548de844115ac8d1bb637a3ef72dcf57"
+  },
+  "initialVerification": {
+    "bytes": 2240,
+    "gitBlobSha1": "f2a107ff3d60001f1885a5b241b6fd6aaa862bb6",
+    "path": "INITIAL-SEAL-VERIFICATION.json",
+    "sha256": "ef86f6cc3832dd9d5750a0acfde4cba9c9948cb1572c811ad8821b706fa65c4e"
+  },
+  "kind": "Additive documentation clarification before publication; no overlay or verifier bypass",
+  "originalOuterFilesPreserved": [
+    {
+      "gitBlobSha1": "d11c5b2d68f7cf8b9322dbe8032f8528a7a4fa13",
+      "name": "CELL-INDEX.json",
+      "sha256": "671bd55e2bbbe1149f884a23f73962e7b56a1bd60291b94460c3a9e58683d1b1"
+    },
+    {
+      "gitBlobSha1": "0f641e029b67257e4edfc7fda5570362d3a58adb",
+      "name": "EXCLUSIONS.json",
+      "sha256": "dcec3d29204a0a0deaa551eb8652e91de22336af43626cab57e53d56eabc14ab"
+    },
+    {
+      "gitBlobSha1": "738a745c5ba0e5b7f5c208efd8d8a0454d47530e",
+      "name": "PACKAGING.json",
+      "sha256": "d5efdcacc842f77749855d84c26a3dd3a6b25b108c7895f48ca8836df16d86dc"
+    },
+    {
+      "gitBlobSha1": "0f0811800c853273fc438ce6af68328f490c8f80",
+      "name": "PHASE1-DEPENDENCIES.json",
+      "sha256": "e9c866858626185d01235bcbb2a8cd56540fa24b02ef6d7c834812430e10f740"
+    },
+    {
+      "gitBlobSha1": "ace8aea8e8a32c456288820b14d8e31d46f2443f",
+      "name": "PROOF-INVENTORY.json",
+      "sha256": "7e28a37793a6901ec98ce4b22707867f9f11759c76fe89964727a80ba0a48a9c"
+    },
+    {
+      "gitBlobSha1": "53a4ac3801d428c795196fc9d590cdf372810bf7",
+      "name": "README.md",
+      "sha256": "3880d49d3287cdc05f61553c6ca080325e01b553111944502d07c5832df51806"
+    },
+    {
+      "gitBlobSha1": "21b77d6b2384fc50dd725d54f8691085d3b6a2f8",
+      "name": "STATUS.json",
+      "sha256": "8d17003e6f83c4025ae29beb8b1bb5a8234ba5282b84da4af6ea840f646a6b4e"
+    },
+    {
+      "gitBlobSha1": "da7220ad5cfff56d246f4536a4ef65cf704a8a7f",
+      "name": "build-phase2a-checkpoint.py",
+      "sha256": "8f539d2282f0f0df3443fe05c9b7ebd7694d37612dd197c3723a8031aa924a15"
+    },
+    {
+      "gitBlobSha1": "ee977a63f76fb9e18dbeffc8e1a068f15c667c0b",
+      "name": "fingerprint-jitendex-AB.raw-evidence.tar.gz",
+      "sha256": "18d2cc66d6a49e30e4ff7460a9acb6419cabf41215342210ac8684658f7125f3"
+    },
+    {
+      "gitBlobSha1": "e07aa8ce58386c0920cafac65a85f89820619d43",
+      "name": "fingerprint-jitendex-BA.raw-evidence.tar.gz",
+      "sha256": "16514b0ab3859b04cd6442ae153a8b0e1efe6ebeff0cc4ec2774dfe3e574e6dd"
+    },
+    {
+      "gitBlobSha1": "5780d52caa54e0df655b79e02a275f33b9740bf7",
+      "name": "fingerprint-jmdict-AB.raw-evidence.tar.gz",
+      "sha256": "60ddeb398d3eb6aed7664fb142a88a44fbd501554cb8263e0c9a75d1595b04a6"
+    },
+    {
+      "gitBlobSha1": "f4ae91c27673b6a1d3cc7aa34987e003ae709cb6",
+      "name": "fingerprint-jmdict-BA.raw-evidence.tar.gz",
+      "sha256": "ff38faf1cd25801cd556b79c69d3b7ba7bb12e5109c4902d173400d472ce25d1"
+    },
+    {
+      "gitBlobSha1": "da3b70a854dcb2407e4832b289dfe1786de41dc4",
+      "name": "fingerprint-vndb-AB.raw-evidence.tar.gz",
+      "sha256": "d894e7f47ef6790803576b85b87b0f4193551dee50b1a4bfbeaf77fd04d3cd01"
+    },
+    {
+      "gitBlobSha1": "307f333673a5112f94ff68449fffd60169128c43",
+      "name": "fingerprint-vndb-BA.raw-evidence.tar.gz",
+      "sha256": "4be32703ff50f259c6113a8405f3136d6d5e8924020e507f7762c3eba2b4d706"
+    },
+    {
+      "gitBlobSha1": "e3246934cf6bd8c21f2fd32b7d259cea31544f4c",
+      "name": "proofs-and-sources.tar.gz",
+      "sha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1"
+    },
+    {
+      "gitBlobSha1": "8c13581b241a516cd7fac5bd12ab31f51214ab55",
+      "name": "verify-phase2a-checkpoint.py",
+      "sha256": "5540cb8334119a5727a2b212a797825d5c3cd9a5e35c6365078e1031f845be7e"
+    }
+  ],
+  "recordedAtUtc": "2026-11-28T05:26:57.301591+00:00",
+  "schemaVersion": 1,
+  "snapshotAsOfUtc": "2026-11-28T05:16:45Z",
+  "unchangedProofArchive": {
+    "bytes": 1092904,
+    "gitBlobSha1": "e3246934cf6bd8c21f2fd32b7d259cea31544f4c",
+    "members": 167,
+    "name": "proofs-and-sources.tar.gz",
+    "sha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1",
+    "uncompressedBytes": 7396442
+  }
+}

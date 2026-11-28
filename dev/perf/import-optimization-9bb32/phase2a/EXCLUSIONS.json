@@ -1,0 +1,25 @@
+{
+  "deferredEvidence": [
+    "MinSize full browser raw cohorts and their later independent audits: preserve separately for a later checkpoint; this snapshot contains only two explicitly partial JMdict log projections.",
+    "Wide source-QA and untimed parity result artifacts, not completed/reviewed at the 05:16:45 snapshot; no wide performance run launched."
+  ],
+  "omittedBulk": [
+    "Locked dictionary ZIPs, canonical .groups and compressed corpus captures; capture manifests and archival receipts are retained",
+    "Node/Clang distributions, dependency directories, and generated release packages",
+    "Previously published phase1 bulk evidence; exact dependency/member locators retained instead"
+  ],
+  "omittedReproducibleCaches": [
+    {
+      "path": "/workspace/scratch/9bb32f82fa3b/profiling/minsize-causal-phase2/__pycache__/analyze.cpython-312.pyc",
+      "reason": "Reproducible Python bytecode cache"
+    }
+  ],
+  "originalHostedArtifacts": {
+    "currentVerificationLimit": "Omitted bytes are not recreated or rehashed now. The verifier checks the retained original verification records and their consistency. HTML hashes are recorded, not a proof of independent HTML/JSON equivalence.",
+    "omittedPayloads": "42 rendered HTML and 2 package ZIP payloads per cell; every original size/SHA256 is retained",
+    "retainedRawEvidence": "All 269 original JSON/JSONL/log/protocol-JS files per fingerprint cell, byte-for-byte, plus one derived package audit",
+    "verificationBeforeOmission": "Original GitHub ZIP digest checked; both actual nested package byte hashes and all 554 members per arm rehashed; exact five prospective package changes checked"
+  },
+  "scope": "Selection boundaries only; no deletion of retained original evidence by this checkpoint",
+  "smallDiagnosticBinariesRetained": "Wide compiler .bc/.o/.wasm outputs and exact parser artifact are retained as diagnostic/source proofs, not distribution/toolchain bundles"
+}

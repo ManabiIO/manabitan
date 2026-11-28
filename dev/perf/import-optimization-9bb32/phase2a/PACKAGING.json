@@ -1,0 +1,22 @@
+{
+  "allPayloadBytes": 11125258,
+  "asOfUtc": "2026-11-28T05:16:45Z",
+  "deterministicProofRepackByteIdentical": true,
+  "independentAudit": "Required after seal; its receipt is outside this immutable proof archive",
+  "originalsModified": false,
+  "outerInventorySelfExcluded": true,
+  "phase1DependencyMembers": 93,
+  "phase1Modified": false,
+  "proofArchive": {
+    "bytes": 1092904,
+    "gitBlobSha1": "e3246934cf6bd8c21f2fd32b7d259cea31544f4c",
+    "members": 167,
+    "name": "proofs-and-sources.tar.gz",
+    "sha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1",
+    "uncompressedBytes": 7396442
+  },
+  "rawArchivePayloadBytes": 10032354,
+  "rawArchivesCopiedByteIdentically": 6,
+  "rawArchivesRepacked": false,
+  "sourceFilesCopiedFromExactWideCommit": 5
+}

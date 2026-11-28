@@ -1,0 +1,80 @@
+{
+  "cells": [
+    {
+      "allImportCount": 42,
+      "cell": "jmdict-AB",
+      "independentChecks": 810,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 253,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 18502117
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jmdict-BA",
+      "independentChecks": 810,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 262,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 18667504
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jitendex-AB",
+      "independentChecks": 810,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 290,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 19995947
+    },
+    {
+      "allImportCount": 42,
+      "cell": "jitendex-BA",
+      "independentChecks": 810,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 358,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 22415786
+    },
+    {
+      "allImportCount": 42,
+      "cell": "vndb-AB",
+      "independentChecks": 813,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 507,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 27606677
+    },
+    {
+      "allImportCount": 42,
+      "cell": "vndb-BA",
+      "independentChecks": 813,
+      "members": 270,
+      "omittedPayloadsRehashedByThisVerifier": false,
+      "rawMemoryScans": 507,
+      "sourceNativeStageChecks": 585,
+      "uncompressedBytes": 27832190
+    }
+  ],
+  "deterministicRepackEqual": true,
+  "originalImportReceiptsBound": 252,
+  "outerFilesVerified": 16,
+  "passed": true,
+  "phase1": {
+    "archiveVerified": true,
+    "dependencyMembersVerified": 93
+  },
+  "proofArchive": {
+    "members": 167,
+    "uncompressedBytes": 7396442
+  },
+  "proofSha256": "c00ef090f0e0177361f78306b29b3beb4824b766c9d787fbaea83079a9c8ffc1",
+  "rawArchiveMembersVerified": 1620,
+  "scope": "Retained-byte integrity and receipt binding; no new import, test, timing, or omitted-payload rehash",
+  "unlistedOuterFiles": []
+}
