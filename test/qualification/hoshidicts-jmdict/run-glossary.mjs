@@ -33,10 +33,11 @@ const specs = {
 }
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 const hostSnapshot = () => ({loadavg: os.loadavg(), freeMemBytes: os.freemem(), totalMemBytes: os.totalmem(), platform: process.platform, arch: process.arch})
-function recordImportMemoryMarker(event) {
+async function recordImportMemoryMarker(event) {
     const markerPath = process.env.MANABITAN_IMPORT_MEMORY_MARKERS
     if (!markerPath) return
     appendFileSync(markerPath, `${JSON.stringify({event, monotonicNs: process.hrtime.bigint().toString()})}\n`)
+    if (event === 'end') await new Promise((resolve) => setTimeout(resolve, 200))
 }
 function send(page, action, params) {
     return page.evaluate(({action, params}) => new Promise((resolve, reject) => {
