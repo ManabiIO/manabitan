@@ -1,0 +1,69 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+  "emscripten": {
+    "version": "5.0.1-git",
+    "revision": "8c5f43157a3f069ade75876e23061330521eabde",
+    "sdkRelease": "bf32ae8b61ac8efeb7eca01b54c8307f992724f7",
+    "url": "https://storage.googleapis.com/webassembly/emscripten-releases-builds/linux/bf32ae8b61ac8efeb7eca01b54c8307f992724f7/wasm-binaries.tar.xz",
+    "sha256": "bda6917b630fcc604cca39af433180adfd7195e378075331ceac926553684249",
+    "bytes": 342144156
+  },
+  "node": "v24.22.3",
+  "captureArtifact": 15245899188,
+  "captureReportSha256": "6c897506cdc81a7c24520e861415c0523f24437f8c20ff684bdc60ce4702ac76",
+  "guardedHeaderSha256": "a4121756c5735ca90241d46f7054b0d1345538e854f1fc721a6656c3046b6ba9",
+  "unchangedFiles": {
+    "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+    "dev/lib/zstd-simd-module.js": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+    "dev/data/zstd-block-envelope.c": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2",
+    "dev/data/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+    "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "productSources": {
+    "dev/bin/build-zstd-wasm.js": "239059ad7885fd22d8e76037b2b2b03c0cf0bd329f01a1f4a6ee13e9282699ee",
+    "dev/data/zstd-wasm32-count.patch": "9bd9847abd7b0fec06ebe6f13d372e9796faeb363865671baf1ec10ed65fd816",
+    "dev/data/zstd-wasm.PROVENANCE.md": "31fed09f5ff1086b2c40fbe01a0f471706dea5f1eac4dd29e71abfbb2b20ed7c"
+  },
+  "verificationSources": {
+    "build-boundaries.py": "a260135fd14245f2c5f0f971301014bfab047c3b081fcfe706a5711dcfff6b14",
+    "count-boundaries.c": "f42c2dba613a7fd21fe40687a4e4f02db91aa04ae3f1252383ab507ff0a5de1e",
+    "boundaries.mjs": "8e0ac19e4afabe01811476f075c8333bea51eaf529b48e907487863af53fff0e",
+    "verify.py": "10157fb2340fd535b2e10b47075807fa07f91e4336ca1736c58b45a0e66a3f82",
+    "README.md": "771a5ad575cd9b9f8b208d95403f3d5cd57ef1a24505d08d7ac51cee56e3a1ed"
+  },
+  "parityHarnesses": {
+    "dev/perf/wasm-word-width-v2/verify.mjs": "0176915cc1e30254480bdbe745734cdede0ef5611a48af9d295222cb9cf3fe81",
+    "dev/perf/wasm-word-width-v2/screen.mjs": "5f93fd0ed084b2f499192e64dbcafa16823c37a883c311c3a5313298a30ad1d4"
+  },
+  "expected": {
+    "baseline": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "wasmBytes": 433631
+    },
+    "count16guarded": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "13890c7e75e7a2ff5fa00bd65f1e518e15f545da85154719be6a2eaa2a773a22",
+      "wasmBytes": 433757
+    }
+  },
+  "supersededExploratoryCandidate": {
+    "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+    "wasmSha256": "97d501650796ba7080b6242d9d2aa49c7c05c84c7d8c5107d7796c25b5599afe",
+    "wasmBytes": 430878
+  },
+  "supersededCohort": {
+    "run": 46104781415,
+    "head": "03aaef1730788c59ecdb5d8bb45f3c87fe90cb40",
+    "status": "Ineligible for promotion: missing reversed-limit guard. Old timings do not qualify the guarded binary."
+  },
+  "externalBoundaryFinding": {
+    "repository": "ManabiIO/manabitan",
+    "commit": "ede7e7a6b92e2c752ac631a503231a5a8aa62d3e",
+    "path": "dev/perf/zstd-count128-20261128/zstd-count128.patch",
+    "patchSha256": "b33a7f887b7142faf3e12caff0570bc1d15c656e00985ce5b2c019bc2ca38502"
+  }
+}
