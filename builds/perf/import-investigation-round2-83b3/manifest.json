@@ -1,0 +1,38 @@
+{
+  "study": "Manabitan import investigation, continuation 2026-11-28",
+  "checkpoint": "second-pass-1",
+  "publishedAtUtc": "2026-11-28T08:58:00Z",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "currentDevelopProfile": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sharedCodecSource": "1d6803caf249fa02ea5eea652731e5b9953ce7d9",
+  "archives": [
+    {
+      "path": "native-recovery.tar.gz",
+      "bytes": 1261393,
+      "sha256": "22ffe506b351607d74889eb58e2159d6d257ae4d6142485b30628d7b4fe9647f",
+      "gitBlob": "034a08b6228d3e2f70ccea2929a43a638f1f2259"
+    },
+    {
+      "path": "codec-index-local-validation.tar.gz",
+      "bytes": 79286,
+      "sha256": "061c7c1c6cf92e81cf72c490bffb133a83072f58195d442c183ded32db6192e6",
+      "gitBlob": "b47d31a0d6a8f6922063995a4fa60a64d33508b6"
+    },
+    {
+      "path": "inflight-830-jmdict-AB.tar.gz",
+      "bytes": 2239133,
+      "sha256": "0ee495fecbb4d3b51b2a0f41d2773155dd32c93251335333e65d3ef62cb0fb35",
+      "gitBlob": "9a3bec4ac9951edd0375ecc2afdd7555a10f16e3"
+    }
+  ],
+  "constraints": {
+    "performanceCohortRetries": false,
+    "relaxedGates": false,
+    "sharedCodecTimingStarted": false
+  },
+  "notes": [
+    "Archive contents retain earlier failed environment/preparation attempts.",
+    "The native profile is diagnostic, not an import speed comparison.",
+    "The #830 AB result is one independent JMdict host and is not pooled with the other host."
+  ]
+}
