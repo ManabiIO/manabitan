@@ -38,6 +38,8 @@ import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
+// eslint-disable-next-line @stylistic/semi
+import {planContentSpansIntoSlabs, planTermContentCompressionSpans, validateTermContentSpans} from './term-content-compression-spans.js'
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
 
@@ -699,7 +701,15 @@ export class TermContentBlockStore {
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
-        const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+        /* eslint-disable @stylistic/semi */
+        const validation = validateTermContentSpans(
+            sourceBytes,
+            sourceOffsets,
+            sourceLengths,
+            compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true ? this._blockTargetBytes : null,
+        )
+        const {uncompressedBytes} = validation
+        /* eslint-enable @stylistic/semi */
         if (uncompressedBytes === 0) { return null; }
         if (
             (compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true) &&
@@ -713,6 +723,7 @@ export class TermContentBlockStore {
                 compressionDictName,
                 force,
                 uncompressedBytes,
+                validation,
             );
         }
         return await this._tryAppendPacked(
@@ -750,7 +761,10 @@ export class TermContentBlockStore {
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}|null}
      */
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
-        const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+        /* eslint-disable @stylistic/semi */
+        const validation = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName === 'jmdict' ? this._blockTargetBytes : null)
+        const {uncompressedBytes} = validation
+        /* eslint-enable @stylistic/semi */
         if (
             uncompressedBytes === 0 ||
             compressionDictName !== 'jmdict' ||
@@ -779,6 +793,7 @@ export class TermContentBlockStore {
             compressionDictName,
             uncompressedBytes,
             !force,
+            validation,
         );
     }
 
@@ -789,12 +804,14 @@ export class TermContentBlockStore {
      * @param {string} compressionDictName
      * @param {number} uncompressedBytes
      * @param {boolean} initialSelection
+     * @param {import('./term-content-compression-spans.js').SpanValidation|null} [validation=null]
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
-    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, validation = null) {
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        // eslint-disable-next-line @stylistic/semi
+        const packed = planTermContentCompressionSpans(sourceOffsets, sourceLengths, this._blockTargetBytes, validation)
         let packMs = safePerformance.now() - planStart;
         const referenceLayout = createTermContentReferenceLayout(
             sourceLengths.length,
@@ -818,9 +835,9 @@ export class TermContentBlockStore {
             try {
                 const operation = beginCompressWrappedTermContentZstdSpansBatch(
                     sourceBytes,
-                    sourceOffsets,
-                    sourceLengths,
-                    packed.blockStartIndexes,
+                    packed.compressionSourceOffsets,
+                    packed.compressionSourceLengths,
+                    packed.compressionBlockStartIndexes,
                     packed.packedChunkLengths,
                     compressionDictName,
                     compressionExperiments,
@@ -972,14 +989,16 @@ export class TermContentBlockStore {
      * @param {string|null} compressionDictName
      * @param {boolean} force
      * @param {number} uncompressedBytes
+     * @param {import('./term-content-compression-spans.js').SpanValidation|null} [validation=null]
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
+    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes, validation = null) {
         const compressionExperiments = this._compressionExperiments;
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        // eslint-disable-next-line @stylistic/semi
+        const packed = planTermContentCompressionSpans(sourceOffsets, sourceLengths, this._blockTargetBytes, validation)
         const packMs = safePerformance.now() - phaseStart;
         let compressedChunks;
         let envelopeMs = 0;
@@ -987,9 +1006,9 @@ export class TermContentBlockStore {
         try {
             const result = await compressWrappedTermContentZstdSpansBatch(
                 sourceBytes,
-                sourceOffsets,
-                sourceLengths,
-                packed.blockStartIndexes,
+                packed.compressionSourceOffsets,
+                packed.compressionSourceLengths,
+                packed.compressionBlockStartIndexes,
                 packed.packedChunkLengths,
                 compressionDictName,
                 compressionExperiments,
@@ -1260,36 +1279,6 @@ function shouldSelectInitialSharedBlockStorage(
 }
 
 /**
- * @param {Uint8Array} sourceBytes
- * @param {Uint32Array} sourceOffsets
- * @param {Uint32Array} sourceLengths
- * @returns {number} The total number of logical source bytes.
- * @throws {TypeError|RangeError} If the source span table is malformed.
- */
-function validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths) {
-    if (!(sourceBytes instanceof Uint8Array)) {
-        throw new TypeError('Term content source must be a Uint8Array');
-    }
-    if (
-        !(sourceOffsets instanceof Uint32Array) ||
-        !(sourceLengths instanceof Uint32Array) ||
-        sourceOffsets.length !== sourceLengths.length
-    ) {
-        throw new TypeError('Term content span offsets and lengths must be equally sized Uint32Arrays');
-    }
-    let totalBytes = 0;
-    for (let i = 0; i < sourceOffsets.length; ++i) {
-        const start = sourceOffsets[i];
-        const length = sourceLengths[i];
-        if (start > sourceBytes.byteLength || length > sourceBytes.byteLength - start) {
-            throw new RangeError(`Term content span ${i} is out of bounds`);
-        }
-        totalBytes += length;
-    }
-    return totalBytes;
-}
-
-/**
  * @param {number} entryCount
  * @param {number} targetBytes
  * @returns {{entriesPerSlab: number, slabLengths: Uint32Array}}
@@ -1443,42 +1432,6 @@ function packContentChunksIntoSlabs(chunks, sourceLengths, targetBytes) {
         return output;
     });
     return {packedChunks, blockStartIndexes};
-}
-
-/**
- * @param {Uint32Array} sourceLengths
- * @param {number} targetBytes
- * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array}}
- * @throws {RangeError} If a planned block cannot use the 32-bit storage format.
- */
-function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
-    /** @type {number[]} */
-    const packedChunkLengths = [];
-    /** @type {number[]} */
-    const blockStartIndexes = [0];
-    let startIndex = 0;
-    while (startIndex < sourceLengths.length) {
-        let totalBytes = 0;
-        let endIndex = startIndex;
-        while (endIndex < sourceLengths.length) {
-            const nextBytes = sourceLengths[endIndex];
-            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
-                break;
-            }
-            totalBytes += nextBytes;
-            ++endIndex;
-        }
-        if (totalBytes > 0xffffffff) {
-            throw new RangeError('Packed term content block exceeds the 32-bit storage format');
-        }
-        packedChunkLengths.push(totalBytes);
-        blockStartIndexes.push(endIndex);
-        startIndex = endIndex;
-    }
-    return {
-        packedChunkLengths: Uint32Array.from(packedChunkLengths),
-        blockStartIndexes: Uint32Array.from(blockStartIndexes),
-    };
 }
 
 /**

@@ -541,7 +541,6 @@ describe('TermContentBlockStore', () => {
 
         if (result === null) { throw new Error('Expected compressed content'); }
         expect(compress).toHaveBeenCalledOnce();
-        const blockStarts = compress.mock.calls[0][3];
         const blockLengths = compress.mock.calls[0][4];
         const actual = new Uint8Array(lengths.length * 20);
         let outputOffset = 0;
@@ -551,9 +550,15 @@ describe('TermContentBlockStore', () => {
             outputOffset += bytes.byteLength;
         }
         expect(outputOffset).toBe(actual.byteLength);
+        // Compression descriptors may join several logical rows. Verify stored
+        // references using the original row lengths and unchanged block sizes.
+        // eslint-disable-next-line @stylistic/semi
+        let index = 0
         for (let blockIndex = 0; blockIndex < blockLengths.length; ++blockIndex) {
             let entryOffset = 0;
-            for (let index = blockStarts[blockIndex]; index < blockStarts[blockIndex + 1]; ++index) {
+            for (; index < lengths.length; ++index) {
+                // eslint-disable-next-line @stylistic/semi
+                if (entryOffset > 0 && entryOffset + lengths[index] > blockLengths[blockIndex] && lengths[index] > 0) { break }
                 expect(actual.subarray(index * 20, (index + 1) * 20)).toStrictEqual(
                     encodeRawTermContentCompactBlockReference(
                         blockOffsets[blockIndex],
@@ -566,6 +571,8 @@ describe('TermContentBlockStore', () => {
             }
             expect(entryOffset).toBe(blockLengths[blockIndex]);
         }
+        // eslint-disable-next-line @stylistic/semi
+        expect(index).toBe(lengths.length)
         expect(result.contentLengths).toStrictEqual(lengths);
     });
 
