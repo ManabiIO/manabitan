@@ -27,3 +27,7 @@ Nine new controlled-operation tests pass on the final test source. They establis
 The eight existing persistence suites passed all 333 cases on the same runtime. The first combined run had one new test-double expectation error, subsequently corrected; a combined rerun was killed with exit 137 before producing results. Official local lint attempts were also killed with exit 137 before diagnostics. A narrow style/JSDoc precheck passed, but full lint, TypeScript, build and complete-unit gates remain pending hosted validation. Node exposes no actual FileSystem/OPFS interface here, so no local mock timing is presented as browser evidence.
 
 An independent source review found no correctness blocker and explicitly retained the multiple-shard scheduling and counter-interpretation caveats. This record does not claim full correctness qualification, a browser gain or approval for merging.
+
+## Retained local review bundle
+
+[LOCAL_REPORT.md](LOCAL_REPORT.md) describes the source audit, prior work, baseline phases, exact implementation and local limitations. [evidence.tar.gz](evidence.tar.gz) retains all twelve source-bound ordinary baseline observations, their extractor, independent review, the exact runtime/test patch, and every local gate attempt including failures. [evidence-files.sha256.json](evidence-files.sha256.json) binds the original member bytes. The bundle contains no dictionary payloads or release-package archives and supplies no candidate browser timing claim.

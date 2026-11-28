@@ -1,0 +1,98 @@
+{
+  "README.md": {
+    "bytes": 11056,
+    "sha256": "ea5f3c7e91ca0b57766ef2cb7c21d4a2ef5210b7492412adbac763924e062e0d"
+  },
+  "baseline-phases.json": {
+    "bytes": 79283,
+    "sha256": "4c87b7ad806553c14e431135af45fd048572de18aec555e0d0b3236a4836a6e4"
+  },
+  "extract-finalization-evidence.py": {
+    "bytes": 5095,
+    "sha256": "42d4d2f13b1583d84e0d42a717838921ffc003b4682758bc4772131b023ef67a"
+  },
+  "finalization-independent-review.json": {
+    "bytes": 3486,
+    "sha256": "1c3bc887fb6dba5330035a13cf454ddd31e086390ba0e3e4894f4ce4eacd3724"
+  },
+  "import-finalization-0119.yml": {
+    "bytes": 5592,
+    "sha256": "aeddc25ee70323ea782cddfca3e4fc660b04dd5590c2ab7e7e8d2fbd3c8460dc"
+  },
+  "local/commands-and-results.json": {
+    "bytes": 6595,
+    "sha256": "832c9971372624c96dfbd8970aa20e3f82464d1672ed0e9a461064b532aad8ec"
+  },
+  "local/eslint-new-test-256.log": {
+    "bytes": 1042,
+    "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+  },
+  "local/eslint-tests.log": {
+    "bytes": 1042,
+    "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+  },
+  "local/focused-overlap.log": {
+    "bytes": 567,
+    "sha256": "0eb9b16717c5668ee587b739297d4ef55a819798f11df62adf70730c91325f7a"
+  },
+  "local/markdown-check-final.log": {
+    "bytes": 241,
+    "sha256": "b103e52bb022623947cb71001b56a413892d48b173682dc800b819ad0f181e53"
+  },
+  "local/markdown-check.log": {
+    "bytes": 356,
+    "sha256": "95fb286efd47de0af4015e7fcfd405c9ecfd8a5c15cb2c1432c17a245b8fb655"
+  },
+  "local/markdown-format.log": {
+    "bytes": 247,
+    "sha256": "e07c755eadde3e066852f70e8c5c4b91600eea8a27216bdbdd3a9eb238912724"
+  },
+  "local/overlap-corrected-isolated.log": {
+    "bytes": 567,
+    "sha256": "14d2ca6491809c2eb9300870796b2ef49a3a40c57072c86215abb93a69a9910b"
+  },
+  "local/overlap-final-isolated.log": {
+    "bytes": 568,
+    "sha256": "aca41e583721cd6d38ca3243e8fe1606117ce4429fe8880e62762524a9dee018"
+  },
+  "local/overlap-formatted-isolated.log": {
+    "bytes": 568,
+    "sha256": "47823788c58af00fddedad52b6c0c429c39f85792f12fa3ca735394dc75b7125"
+  },
+  "local/overlap-test-before-fixture-fix.js": {
+    "bytes": 13257,
+    "sha256": "bcaf9a38b13a99295c466a09ac820ebb972fd841ff7ee7cb2ad66685d6ec1d5a"
+  },
+  "local/persistence-focused-corrected.log": {
+    "bytes": 573,
+    "sha256": "b73cea4508713b60b73603e394f419ab5c2cf66fdc1a49bfa4c84b311aba482d"
+  },
+  "local/persistence-focused-source-manifest.json": {
+    "bytes": 348,
+    "sha256": "8455d45d85481d799d8cffe5b56ac6682a405ec966980ad886d4aa1dd627b5f5"
+  },
+  "local/persistence-focused.log": {
+    "bytes": 5263,
+    "sha256": "92a73bb701090a0f1f18aba391fc086c5cc80d33b48136e399bbf3c548b8b585"
+  },
+  "local/style-precheck-before.log": {
+    "bytes": 4133,
+    "sha256": "0d9039750505f2c4dbd61061b2d39d5e2b547fadac186f76cc2d7acad12ada34"
+  },
+  "local/style-precheck-final.log": {
+    "bytes": 174,
+    "sha256": "db12ad97221988bf346c55d06788e21a01bb6a683d69266bf732ed4d6d9763c8"
+  },
+  "local/style-precheck-fix.log": {
+    "bytes": 174,
+    "sha256": "db12ad97221988bf346c55d06788e21a01bb6a683d69266bf732ed4d6d9763c8"
+  },
+  "local/style-precheck.config.mjs": {
+    "bytes": 1747,
+    "sha256": "818659f3e3a1a4e3cf3ee0392a2511823da82f3588f20a70c6870b2caa5971b4"
+  },
+  "runtime-and-tests.patch": {
+    "bytes": 21476,
+    "sha256": "03278ba034cc8e79d3d3810311d68b8cb3a43e089b5301fd77ae112447738fcb"
+  }
+}
