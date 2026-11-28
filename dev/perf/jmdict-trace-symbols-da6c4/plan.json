@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "scope": "Analysis-only symbol recovery for the already completed current-dcfc JMdict trace. No import, browser launch, performance measurement, source edit, product package build, or native optimization.",
+  "productSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "researchBranch": "perf/bounded-content-overlap-20261128-da6c4",
+  "workflowPath": ".github/workflows/jmdict-trace-symbols-da6c4.yml",
+  "scriptPath": "dev/perf/jmdict-trace-symbols-da6c4/recover.py",
+  "scriptSha256": "60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a",
+  "testsPath": "dev/perf/jmdict-trace-symbols-da6c4/test_recover.py",
+  "testsSha256": "c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c",
+  "analysisHelperSource": "a4fb865b8d926053d661b3a390aed28352cc8f27",
+  "analysisHelperPath": "dev/perf/jmdict-completed-trace-analysis-da6c4/analyze.py",
+  "analysisHelperSha256": "a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b",
+  "nodeVersion": "v22.22.0",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "manifestSha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+  "nativeSourceDigest": "7b5bb45309d141eaa296ecef6c3cef7a94f22760266217a7c26dc467ea6db39c",
+  "nativeSourceFileCount": 14,
+  "tracedParserSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+  "traceSha256": "39058e1688a428e68d6c97180c9cfcad2d3a68e6fbe5850870d790c2ae0e5458",
+  "toolingGitBlobs": {
+    "dev/bin/build-dictionary-wasm.js": "69e615807ae5293273ed5a67be58cb7dd44ab34c",
+    "dev/dictionary-wasm.js": "840fa7aaa110e2509c77545caef219940d0d30e1",
+    "dev/json.js": "338ddfee8acc134f38682c9c95120e7a25622aff",
+    "ext/js/core/json.js": "9fb110bdd2cfc9753247e8aae8be5ee92fd815d0"
+  },
+  "analysisInput": {
+    "headSha": "a4fb865b8d926053d661b3a390aed28352cc8f27",
+    "runId": 46130295082,
+    "jobId": 140933725716,
+    "artifactId": 15257800501,
+    "artifactName": "jmdict-completed-trace-analysis-da6c4-46130295082-1",
+    "artifactBytes": 1599208,
+    "artifactSha256": "c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a",
+    "analysisSha256": "b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca",
+    "completedReceiptBlob": "93464af3e88bd89841d0a349cc04ee4fce15c477",
+    "fullJobLogBlob": "a280549674dfd898f9eafc8051944ac95733c2fb"
+  },
+  "protocol": [
+    "Check out exact product dcfc with all14 native .c/.h inputs, manifest/checked WASM and stock builder dependencies. Verify commit/tree/clean source, exact native digest/count and tooling Git blobs before and after.",
+    "Install the same clang-21/lld-21 packages as current dcfc CI; require both report exact21.1.8. Use Node22.22.0. No npm install or browser dependencies are needed by this stock builder.",
+    "First run unchanged node dev/bin/build-dictionary-wasm.js --check. The stock builder must independently reproduce both checked native targets with pinned toolchain.",
+    "Compile a separate retained stripped parser using the exact manifest argv and stock builder's explicit -fuse-ld linker path; require complete byte equality and SHA256 with the exact traced parser.",
+    "Compile a second separate parser with only the single -Wl,--strip-all argument omitted. Output paths differ, but no source, optimization, feature, memory, export, or linker argument changes.",
+    "Compare every ordered raw noncustom WASM section, including its header/length and payload. Require equality before parsing/accepting the name section. Validate no imports, matching function/code counts, name indices, bounds, duplicates, and name-section uniqueness.",
+    "Download only the exact already completed analysis artifact; validate run/source/digest/size and analysis JSON hash. Add recovered names to parser native rows whose source module SHA matches the traced parser. Preserve original sample counts, adjacent weights, exported ancestors and JS contexts.",
+    "Print the entire exact function-index/name map and all symbolicated parser context rows. Preserve both generated binaries, all commands/logs, source snapshots, section hashes, name map, input identities, and failures.",
+    "Do not retry unchanged failures, generate a different target, infer names from nonmatching modules, or acquire another import."
+  ],
+  "limitations": [
+    "Names are accepted only after all executable/index/data/memory sections match the actual traced module byte for byte. A successful source rebuild alone is insufficient.",
+    "The name section identifies emitted functions, including surviving static helpers. It does not recover inlined source locations or per-instruction C line attribution.",
+    "Sample counts and adjacent wall weights come from the prior immutable diagnostic. They remain non-comparative wall/sample attribution, not CPU time, additive critical-path cost, or a speedup ceiling.",
+    "The original timed-import clock window remains unestablished; explicit benchmark readback/probes occur after trace stop by the source-bound harness.",
+    "No product runtime/package/source change, new import, or performance promotion is authorized by this analysis.",
+    "All seven new Python tests are authored but unexecuted locally during the executor outage; they run before hosted recovery. Frozen helper's13tests passed in46130295082. Current actionlint will run on publication."
+  ],
+  "tests": 7
+}

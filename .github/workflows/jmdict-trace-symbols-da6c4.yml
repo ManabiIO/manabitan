@@ -1,0 +1,114 @@
+name: Recover exact JMdict trace symbols (analysis only)
+
+on:
+  push:
+    branches: [perf/bounded-content-overlap-20261128-da6c4]
+    paths:
+      - .github/workflows/jmdict-trace-symbols-da6c4.yml
+      - dev/perf/jmdict-trace-symbols-da6c4/**
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  symbols:
+    name: Verify executable identity and recover parser names
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Fetch hash-bound analysis controls without executing product code
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$GITHUB_REPOSITORY" == "ManabiIO/manabitan" ]]
+          mkdir symbol-controls
+          for name in recover.py test_recover.py plan.json; do
+            curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \
+              "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/dev/perf/jmdict-trace-symbols-da6c4/$name" \
+              --output "symbol-controls/$name"
+          done
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \
+            "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/.github/workflows/jmdict-trace-symbols-da6c4.yml" \
+            --output symbol-controls/workflow.yml
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \
+            "https://raw.githubusercontent.com/ManabiIO/manabitan/a4fb865b8d926053d661b3a390aed28352cc8f27/dev/perf/jmdict-completed-trace-analysis-da6c4/analyze.py" \
+            --output symbol-controls/analysis_helpers.py
+          sha256sum --check <<'SHA256'
+          60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a  symbol-controls/recover.py
+          c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c  symbol-controls/test_recover.py
+          b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527  symbol-controls/plan.json
+          a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b  symbol-controls/analysis_helpers.py
+          SHA256
+
+      - name: Test exact section parity and index attribution guards
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s symbol-controls -p test_recover.py -v 2>&1 | tee symbol-tests.log
+
+      - name: Check out only the exact native source and stock builder inputs
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+          path: product
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /package.json
+            /dev/bin/build-dictionary-wasm.js
+            /dev/dictionary-wasm.js
+            /dev/json.js
+            /dev/data/dictionary-wasm/
+            /ext/js/core/json.js
+            /ext/js/dictionary/wasm/
+
+      - name: Set up the original pinned Node runtime without dependencies
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+
+      - name: Install the same pinned-toolchain packages as frozen current CI
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+
+      - name: Reproduce exact code, recover names, and relabel saved samples only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 symbol-controls/recover.py \
+            --product product --plan symbol-controls/plan.json \
+            --output symbol-output 2>&1 | tee symbol-recovery.log
+
+      - name: Print terminal analysis outcome even on failure
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('symbol-output/recovery-receipt.json')
+          value = json.loads(path.read_text()) if path.exists() else {
+              'complete': False,
+              'missingReceipt': str(path),
+              'scope': 'Exact-code symbol recovery only; no import, browser or performance acquisition.'
+          }
+          print('EXACT_SYMBOL_RECOVERY_TERMINAL ' + json.dumps(value, separators=(',', ':')))
+          PY
+
+      - name: Preserve code-parity proofs, symbols, source identities and every failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-trace-symbols-da6c4-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            symbol-controls
+            symbol-output
+            symbol-tests.log
+            symbol-recovery.log
+          if-no-files-found: warn
+          retention-days: 30
