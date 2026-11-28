@@ -7191,7 +7191,8 @@ void 0 :
     _readTermEntryContentMetaHashPairIndex(index) {
         const meta = {
             id: this._termEntryContentMetaIdTable.length === 0 && typeof this._termEntryContentMetaStateTable[index] !== 'undefined' ?
-                0 : this._termEntryContentMetaIdTable[index],
+                0 :
+                this._termEntryContentMetaIdTable[index],
             offset: this._termEntryContentMetaOffsetTable[index],
             length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?
                 -1 :

@@ -157,7 +157,11 @@ describe('implicit zero content metadata IDs', () => {
         const previous = get(database, 10)
         const column = database._termEntryContentMetaIdTable
         const fault = vi.spyOn(database, '_internTermEntryContentMetaDictName').mockImplementationOnce(() => { throw new Error('intern failure') })
-        try { expect(() => set(database, 10, 7)).toThrow('intern failure') } finally { fault.mockRestore() }
+        try {
+            expect(() => set(database, 10, 7)).toThrow('intern failure')
+        } finally {
+            fault.mockRestore()
+        }
         expect(get(database, 10)).toEqual(previous)
         expect(database._termEntryContentMetaIdTable).toBe(column)
         set(database, 10, 7)
@@ -191,8 +195,8 @@ describe('implicit zero content metadata IDs', () => {
         } else {
             database._termEntryContentMetaIdTable = database._termEntryContentMetaOffsetTable
         }
-        const previous = database._termEntryContentMetaIdTable.slice()
-        const states = database._termEntryContentMetaStateTable.slice()
+        const previous = new Float64Array(database._termEntryContentMetaIdTable)
+        const states = new Uint8Array(database._termEntryContentMetaStateTable)
         expect(database._tryPublishContiguousArtifactTermContentMetadata(staged, hashes, hashes, offsets, lengths, 0, false)).toBe(false)
         expect(database._termEntryContentMetaIdTable).toEqual(previous)
         expect(database._termEntryContentMetaStateTable).toEqual(states)
