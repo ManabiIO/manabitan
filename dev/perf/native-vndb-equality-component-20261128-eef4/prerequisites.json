@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "variants": {
+    "equality-bounded-tail": {
+      "focusedReportSha256": "eaf8607e01fd273b0165300af2e97dd011324b97c19be8652e613cf7aadfe674",
+      "corpusReportSha256": "699420aa860f884a1544c1d78a16f2efcc16dcc8864a78ae8bb6340fd9553004",
+      "focusedAssertions": 3588886,
+      "focusedCases": 859932,
+      "allThreeCorporaPassed": true,
+      "rowsPerArm": 7613164,
+      "digests": {
+        "jmdict": "b45ba963161294c0ea398e65e86b6ee669df09dd83c13c0dec7cc33fb09d81d2",
+        "jitendex": "7bf32d68a87033639043d80fb5790a924f222ad3417f0eb8a0c84430b081304b",
+        "vndb": "fa7435ef7e6f3583e3f06e971c889d02122f899a92ec438d313edbd5a889b3cf"
+      },
+      "sourceSha256": "9570174624c1076825ed3ad569730371f9c75fd6d28d0032d4cf42db5013ea32",
+      "wasmSha256": "a921cc6b71fb5fc59d22ab769416db6fbe9a6a5e5cedfa705ae3cace16ffefe7",
+      "note": "Original complete local raw reports remain in the work session. This compact receipt binds the publication prerequisites; it is not a timing observation.",
+      "productionSourceCommit": "9a1134b3b4ac8daea31038383ef87ffbbb694eb1",
+      "productionSourceTree": "de0477faec353783e998a709d5c715f48a84cc8f",
+      "productionSourceReceiptSha256": "bccab6d578b8da343e888a94f2dbb990de9d1acd4aa3122b242eac825f04c798",
+      "productionManifestSha256": "7120e9c1d64cb780a06d91fd194b5d4acc932cb7577992d51d47d9bc460aa3cf",
+      "publicRegressionTestSha256": "7e707bf0cf2ece398c4e8d5b5d34d97918fe463c7b4db03c085751bda62a1502",
+      "publicRegressionTestsPassed": 65,
+      "fullUnitFilesPassed": 670,
+      "fullUnitTestsPassed": 15200,
+      "fullUnitTestsSkipped": 47,
+      "fullUnitAndDryBuildReceiptSha256": "4cbff624f8afa9b8f0a51550b354df8480ac08d2a51013b505ccf6f8d26fb57c",
+      "vndbBaselineProofSha256": "5a78ce08717f9d8488740f8e72909384ba1da795e1d62171bed4096d12c98340",
+      "workProof": {
+        "path": "bench-work/equality-tail-corpus-v1/work-interpretation.json",
+        "sha256": "ba1b6d8d75c74453aaf18a67566a3f58cad4aa70237b162d55c532650fa7d27a",
+        "baselineTailByteComparisons": 103926153,
+        "candidateBoundedComparisons": 42611110,
+        "removedByteComparisons": 61315043,
+        "zeroTailEncounters": 14231639,
+        "extraBytePositionsComparedPerOperandOnEarlyMismatch": 2359040,
+        "moduleGrowthBytes": 811,
+        "note": "Untimed mechanism counts, not elapsed-time observations. Added guards, early wider reads and code footprint can offset saved loops."
+      }
+    }
+  }
+}

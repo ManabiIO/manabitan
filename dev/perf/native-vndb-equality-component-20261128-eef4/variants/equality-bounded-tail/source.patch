@@ -1,0 +1,62 @@
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -2396,10 +2396,24 @@
+         if (first != second) { return 0; }
+         i += 8u;
+     }
+-    while (i < length) {
+-        if (bytes[first_offset + i] != bytes[second_offset + i]) { return 0; }
+-        ++i;
+-    }
++    // Compare only complete words within the remaining zero to seven bytes.
++    if (length - i >= 4u) {
++        uint32_t first;
++        uint32_t second;
++        __builtin_memcpy(&first, bytes + first_offset + i, sizeof(first));
++        __builtin_memcpy(&second, bytes + second_offset + i, sizeof(second));
++        if (first != second) { return 0; }
++        i += 4u;
++    }
++    if (length - i >= 2u) {
++        uint16_t first;
++        uint16_t second;
++        __builtin_memcpy(&first, bytes + first_offset + i, sizeof(first));
++        __builtin_memcpy(&second, bytes + second_offset + i, sizeof(second));
++        if (first != second) { return 0; }
++        i += 2u;
++    }
++    if (i < length && bytes[first_offset + i] != bytes[second_offset + i]) { return 0; }
+     return 1;
+ }
+ 
+@@ -2432,12 +2446,24 @@
+         if (first != second) { return 0; }
+         i += 8u;
+     }
+-    while (i < length) {
+-        if (first_bytes[first_offset + i] != second_bytes[second_offset + i]) {
+-            return 0;
+-        }
+-        ++i;
+-    }
++    // Compare only complete words within the remaining zero to seven bytes.
++    if (length - i >= 4u) {
++        uint32_t first;
++        uint32_t second;
++        __builtin_memcpy(&first, first_bytes + first_offset + i, sizeof(first));
++        __builtin_memcpy(&second, second_bytes + second_offset + i, sizeof(second));
++        if (first != second) { return 0; }
++        i += 4u;
++    }
++    if (length - i >= 2u) {
++        uint16_t first;
++        uint16_t second;
++        __builtin_memcpy(&first, first_bytes + first_offset + i, sizeof(first));
++        __builtin_memcpy(&second, second_bytes + second_offset + i, sizeof(second));
++        if (first != second) { return 0; }
++        i += 2u;
++    }
++    if (i < length && first_bytes[first_offset + i] != second_bytes[second_offset + i]) { return 0; }
+     return 1;
+ }
+ 
