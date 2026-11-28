@@ -1,0 +1,86 @@
+{
+  "allMembersReopenedAndByteVerified": true,
+  "archive": {
+    "bytes": 18836,
+    "path": "independently-recomputed-receipts.tar.xz",
+    "sha256": "74aea225be46b025d59f65edaf325f5be7b1a9bfdfb08fd70dabe34ef4697854"
+  },
+  "members": [
+    {
+      "bytes": 9692,
+      "path": "audit-tools/common.mjs",
+      "sha256": "8266a7d8aa2d4bc3c067353c3c3cd7baf04df40f71107b244e54daca4f274c79"
+    },
+    {
+      "bytes": 9243,
+      "path": "audit-tools/compare-results-with-legacy-context.mjs",
+      "sha256": "2990df54931eb76ebe019ef0872cdbea168b083d724a885b94f77821af3ff3e3"
+    },
+    {
+      "bytes": 16267,
+      "path": "auditor-correction/audit-latest-metadata-v1.py",
+      "sha256": "0a0582de7d7b67f36c9d4c5b792d624292128b1988c422203f82fe983e070cdc"
+    },
+    {
+      "bytes": 1277,
+      "path": "auditor-correction/schema-correction.json",
+      "sha256": "208262774de1c247a6e96f0c773d89b391d79cc3a7866d2df1e4ecb8d5095653"
+    },
+    {
+      "bytes": 1601,
+      "path": "auditor-correction/v1-to-v2.patch",
+      "sha256": "c4e20588a5159b15be2f51df1186108f29712f8445510b3d3e58c54efcb3499d"
+    },
+    {
+      "bytes": 677,
+      "path": "jitendex/independent-comparator-command.json",
+      "sha256": "2d5c283cb6a0f41f0a452e2cb045da9e855b2c89fb334c76f13f770234e34ebf"
+    },
+    {
+      "bytes": 0,
+      "path": "jitendex/independent-comparator.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 288,
+      "path": "jitendex/independent-comparator.stdout.log",
+      "sha256": "19093f4d25e9f63e7a7911ba580b1c93ef6db3a1e6a49c92351c4b673de6eb9d"
+    },
+    {
+      "bytes": 53831,
+      "path": "jitendex/independent-comparison.json",
+      "sha256": "755e7698369cdf007074d545f2604cc210788e0108f84767cb2cf79d5302ffeb"
+    },
+    {
+      "bytes": 7091,
+      "path": "jitendex/independent-members.json",
+      "sha256": "2bc4aa16e7a9da8875533146ff94f25b00044da5cecddab1daa0bda1f593c12f"
+    },
+    {
+      "bytes": 653,
+      "path": "vndb/independent-comparator-command.json",
+      "sha256": "8443fa8e3bacebfbab88bb29891f67502fc8a9e92327c937a0a425d1eb47f2fc"
+    },
+    {
+      "bytes": 0,
+      "path": "vndb/independent-comparator.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 287,
+      "path": "vndb/independent-comparator.stdout.log",
+      "sha256": "6d439ffe18bbcfd11443e203041bab997f60041fb29dc1362d89d341d6a033ad"
+    },
+    {
+      "bytes": 367946,
+      "path": "vndb/independent-comparison.json",
+      "sha256": "40924b62702206a5477a9541105737c08b9d8ed065d369e449e5c4f8dbd290e1"
+    },
+    {
+      "bytes": 7948,
+      "path": "vndb/independent-members.json",
+      "sha256": "e5cbd3af0b18148a56c448ad2e9d49da830771c5b60ed82b00d021f239d59b5a"
+    }
+  ],
+  "schemaVersion": 1
+}

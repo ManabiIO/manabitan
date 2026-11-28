@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": 46144729522,
+  "toolingCommit": "8ec2c45d182dd7615317e1675197aadd494ae964",
+  "contractGitBlob": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+  "moduleGitBlob": "15f7845ae38ee47459b53ed5066321b53f382e36",
+  "sets": [
+    {
+      "corpus": "jitendex",
+      "arm": "A",
+      "boundary": {
+        "name": "actual-public-sink-sqlite-boundary",
+        "sourceCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "initialSqlite": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "afterEmptyInvalidation": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+        "beforeRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+          "userVersion": 0
+        },
+        "afterRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+          "userVersion": 0
+        },
+        "root": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        },
+        "actualTermRows": 2,
+        "coldPersistedExactComparison": true,
+        "publicDuplicateExactReuse": true,
+        "actualScopedGlossaryInvalidation": true
+      },
+      "cleanup": {
+        "name": "actual-public-sink-cleanup",
+        "errors": []
+      }
+    },
+    {
+      "corpus": "jitendex",
+      "arm": "B",
+      "boundary": {
+        "name": "actual-public-sink-sqlite-boundary",
+        "sourceCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+        "initialSqlite": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "afterEmptyInvalidation": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+        "beforeRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+          "userVersion": 0
+        },
+        "afterRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+          "userVersion": 0
+        },
+        "root": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        },
+        "actualTermRows": 2,
+        "coldPersistedExactComparison": true,
+        "publicDuplicateExactReuse": true,
+        "actualScopedGlossaryInvalidation": true
+      },
+      "cleanup": {
+        "name": "actual-public-sink-cleanup",
+        "errors": []
+      }
+    },
+    {
+      "corpus": "vndb",
+      "arm": "A",
+      "boundary": {
+        "name": "actual-public-sink-sqlite-boundary",
+        "sourceCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "initialSqlite": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "afterEmptyInvalidation": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+        "beforeRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+          "userVersion": 0
+        },
+        "afterRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+          "userVersion": 0
+        },
+        "root": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        },
+        "actualTermRows": 2,
+        "coldPersistedExactComparison": true,
+        "publicDuplicateExactReuse": true,
+        "actualScopedGlossaryInvalidation": true
+      },
+      "cleanup": {
+        "name": "actual-public-sink-cleanup",
+        "errors": []
+      }
+    },
+    {
+      "corpus": "vndb",
+      "arm": "B",
+      "boundary": {
+        "name": "actual-public-sink-sqlite-boundary",
+        "sourceCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+        "initialSqlite": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "afterEmptyInvalidation": {
+          "bytes": 311296,
+          "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+          "userVersion": 0
+        },
+        "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+        "beforeRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+          "userVersion": 0
+        },
+        "afterRealInvalidation": {
+          "bytes": 311296,
+          "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+          "userVersion": 0
+        },
+        "root": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        },
+        "actualTermRows": 2,
+        "coldPersistedExactComparison": true,
+        "publicDuplicateExactReuse": true,
+        "actualScopedGlossaryInvalidation": true
+      },
+      "cleanup": {
+        "name": "actual-public-sink-cleanup",
+        "errors": []
+      }
+    }
+  ]
+}

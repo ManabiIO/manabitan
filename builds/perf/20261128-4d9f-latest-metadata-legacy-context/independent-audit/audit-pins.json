@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "runId": 46144729522,
+  "toolingCommit": "8ec2c45d182dd7615317e1675197aadd494ae964",
+  "toolingTree": "b306fdf5aca3b73064ae74835bdac7e30ef1b9fb",
+  "source": {
+    "A": {
+      "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+    },
+    "B": {
+      "commit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+      "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
+      "equivalentLocalCommit": "5b178ff002216d74cc8a09336c375832fc4dd994"
+    }
+  },
+  "files": {
+    "verification-manifest.json": {
+      "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
+      "bytes": 21852
+    },
+    "protocol.json": {
+      "sha256": "d2ea3b978ea6d2cb2aedd678898b1d11f4385c0525dd383cf5bd8c2e3d619944",
+      "bytes": 12011
+    },
+    "source-profile-transition.json": {
+      "sha256": "e25371e3d19c7dd01362598de6edef4251b13fd4cea1eb8fb828edc57e7af7df",
+      "bytes": 13764
+    }
+  },
+  "orchestratorSha256": "909836669861ca59100b5cf532a1e808b349d3d9742580047a08aba936e55041",
+  "workflowSha256": "2031358284b84eb936c43b53686b1048a14104703c78adee8bf813986d6a0f28",
+  "helpers": [
+    {
+      "path": "test/perf/signature1-corpus-verification/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46320d92ec511faf189d8af2de8f629f4eb5e962",
+      "bytes": 11544,
+      "sha256": "6183df9ec7eef19fd406db97bee0ef7030731373cf611427fb142f03daf6da52"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/archive-catalog.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea1267f1c5cc6be84ce22c27e4441590e2d0fd7e",
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/common.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efa68fdb1bf8609af428dde134ac83fb244c78c1",
+      "bytes": 9692,
+      "sha256": "8266a7d8aa2d4bc3c067353c3c3cd7baf04df40f71107b244e54daca4f274c79"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/compare-results.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ca7c17fe50e29562a6aa6a2a30af56693cbc65e",
+      "bytes": 7585,
+      "sha256": "c490ca644d76aef431ae9a2564c0180c7d34b15320f999e1c634583874205693"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/field-analysis.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e23832e2a02797baab44896b086434123850f361",
+      "bytes": 6689,
+      "sha256": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/file-oracle.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1589b4b7c56e7f0763873542ad914ed1a012dda6",
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20a33abd0eeb019aa67480fee8b7b95d82fe25ea",
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/logical-record-ids.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b980f3132c884f33323403cc8947f39b7f33a7c0",
+      "bytes": 3046,
+      "sha256": "2e79d4909f4eab78459703ce0f1e762763f8510988da53171a3d2ee3b106965d"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/logical-record-ids.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2633ad1b193b1eeafaa39c389d0a92b460d03cc8",
+      "bytes": 1515,
+      "sha256": "a7900f780f101d32a0d1526983cb9aca9050790de8e0b3b847228acaa9a2baac"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/metadata-oracle.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca753baee23a5d053a45868a9a474ed6f04f2201",
+      "bytes": 7311,
+      "sha256": "709d78a6470fec962b68e2c0d0653afac3f6195ed808c211279ca82c1450ebfa"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/metadata-oracle.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58503348507fbcd9785eaecb901f706be3bed462",
+      "bytes": 9935,
+      "sha256": "369b507d2f2eea7f4ff36804e13786f8fbb01581836696fdc389629a816cf152"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/node-opfs-bounded.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29c3e2d0046013fb6e22318f6cd18fe602ca8c56",
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/node-opfs-bounded.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60044cb9e814b873410d1dcdeffc088fd9ab0730",
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/run.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7839945fb9a06f13db65fd404064f9ddfdc3ce33",
+      "bytes": 42080,
+      "sha256": "4f8522eeb0baa660d1bee7132a409fbf0576748ca0340c34de0f0441690f2105"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/vndb-media-oracle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a41300f989f72f417e80ea4d9cd6116fa1c0cb2e",
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15f7845ae38ee47459b53ed5066321b53f382e36",
+      "bytes": 5825,
+      "sha256": "247bd800ea9397ef9e6b4dd78c9a19fffe570ddea20ce884d337b4ec70b99233"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25b7f6b0deca943f54aa75db4acb152264fa0930",
+      "bytes": 46368,
+      "sha256": "67383e8ef0c02931fe50d0051a2cbce6ff9f18a93ccf22cb76aac4341011ef12"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/launch-with-legacy-context.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "941b94be88945614cddfa506b5b815daea80511f",
+      "sha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+      "bytes": 3277
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d5f8587cba9ff7eed2f9c47cf5126d9e35d7aef",
+      "bytes": 9243,
+      "sha256": "2990df54931eb76ebe019ef0872cdbea168b083d724a885b94f77821af3ff3e3"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+      "bytes": 26052,
+      "sha256": "9aa0c71cb18e56b8711e7dfdeab9eb1d2c5f166da22da738b3a9560a2086e22c"
+    }
+  ],
+  "oracleArchive": {
+    "gitBlob": "ae9a7d731b0b257e71256726003b3fe25699c69c",
+    "sha256": "456120a04cb75c4772aeedba7738060d0a7ed956f18610f292aea5b501022a71",
+    "bytes": 74109,
+    "members": 8
+  },
+  "dictionaryLock": {
+    "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+    "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "fixtures": {
+    "jmdict": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "jmnedict": {
+      "label": "JMnedict",
+      "cacheFile": "JMnedict.zip",
+      "release": "2026-09-06",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip",
+      "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+      "sizeBytes": 11432315,
+      "expectedTitle": "JMnedict [2026-09-06]",
+      "revision": "JMnedict.2026-09-06",
+      "termRows": 667942
+    },
+    "jitendex": {
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    "vndb": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    }
+  },
+  "artifacts": [
+    {
+      "id": 15263545780,
+      "name": "latest-metadata-legacy-context-jitendex-46144729522",
+      "bytes": 195000,
+      "sha256": "be4d01efa18294ea5b67366949267db2288635afffdf5af9f07ad7d83a4259a5",
+      "corpus": "jitendex",
+      "toolingCommit": "8ec2c45d182dd7615317e1675197aadd494ae964",
+      "runId": 46144729522
+    },
+    {
+      "id": 15263351327,
+      "name": "latest-metadata-legacy-context-vndb-46144729522",
+      "bytes": 833958,
+      "sha256": "0440aa2918394ffe7aaec47adfaf910ff5333f6995e60a4ade3e0ce3e12cfc8d",
+      "corpus": "vndb",
+      "toolingCommit": "8ec2c45d182dd7615317e1675197aadd494ae964",
+      "runId": 46144729522
+    }
+  ],
+  "jobs": [
+    {
+      "id": 140978145744,
+      "name": "Latest schema context vndb",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout frozen tooling",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact parent",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact candidate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Setup exact Node runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify pipeline failures remain failures",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify sources, helper bytes, oracle members and locked archive",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run unchanged verifier contracts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build ordinary parent libraries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build ordinary candidate libraries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build normal tooling bundles and lint new helper sources",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual public-sink and cold-read boundary on both exact source arms",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Acquire one fresh A and B and compare complete outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain every attempted observation",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Setup exact Node runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact candidate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact parent",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout frozen tooling",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 140978145922,
+      "name": "Latest schema context jitendex",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout frozen tooling",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact parent",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Checkout exact candidate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Setup exact Node runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify pipeline failures remain failures",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify sources, helper bytes, oracle members and locked archive",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run unchanged verifier contracts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build ordinary parent libraries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build ordinary candidate libraries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build normal tooling bundles and lint new helper sources",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual public-sink and cold-read boundary on both exact source arms",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Acquire one fresh A and B and compare complete outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain every attempted observation",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Setup exact Node runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact candidate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout exact parent",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Checkout frozen tooling",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "groupCounts": {
+    "jitendex": 22,
+    "vndb": 170
+  },
+  "expectedOwnedBytesAvoided": {
+    "jitendex": 4194304,
+    "vndb": 1048576
+  },
+  "readOnlyAuditExecution": "The unchanged comparator is rerun on Node24.22.3 for JSON receipt validation only. Original corpus execution remains the pinned Node22.22.0/SHA1bec56 runtime."
+}
