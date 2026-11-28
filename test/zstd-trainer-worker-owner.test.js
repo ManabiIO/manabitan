@@ -107,8 +107,8 @@ test('does not construct or load a worker before admission; invalid/preaborted j
 test('transfers private exact copies of borrowed subarrays and returns owned output after disposal', async () => {
     const {owner, worker} = setup();
     const {source, table, request} = input();
-    const originalSource = source.slice();
-    const originalTable = table.slice();
+    const originalSource = new Uint8Array(source);
+    const originalTable = new Uint8Array(table);
     const {controller, add, remove} = trackedAbort();
     const promise = owner.train(request, {signal: controller.signal});
     const [posted, transfers] = worker.postMessage.mock.calls[0];
