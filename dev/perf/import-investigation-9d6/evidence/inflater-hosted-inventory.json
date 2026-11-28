@@ -1,0 +1,3073 @@
+{
+  "complete": true,
+  "scope": "Separate completed hosted appendix; does not alter or supersede original local evidence.",
+  "archive": {
+    "bytes": 207854,
+    "sha256": "977afd33c2d8ba6a6378678c8c75f33b2b3bec290edc7dc391803fb84887b6e8",
+    "files": 278,
+    "uncompressedBytes": 2329052
+  },
+  "files": [
+    {
+      "archivePath": "AB/baseline-head.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/baseline-head.log",
+      "bytes": 41,
+      "sha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+    },
+    {
+      "archivePath": "AB/baseline-production-rebuild.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/baseline-production-rebuild.log",
+      "bytes": 410,
+      "sha256": "6862f71189054af53640484de03ca2f83a642792c31bc8b97d955a88597404fe"
+    },
+    {
+      "archivePath": "AB/baseline-timing-module.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/baseline-timing-module.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/build-receipt.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/build-receipt.json",
+      "bytes": 4200,
+      "sha256": "e821b0f2e0a755c5e92eeff99b3a2efa56ef9767b6b82194eb7a7f6a0e153386"
+    },
+    {
+      "archivePath": "AB/candidate-apply-check.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/candidate-apply-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/candidate-apply.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/candidate-apply.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/candidate-changed-paths.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/candidate-changed-paths.log",
+      "bytes": 149,
+      "sha256": "464ff05b618e1648627742f5eb3654a4a545613f756683b4f149da2a8c104e47"
+    },
+    {
+      "archivePath": "AB/candidate-timing-module.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/candidate-timing-module.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/candidate-worktree.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/candidate-worktree.log",
+      "bytes": 154,
+      "sha256": "b57f0238d891dc9ff42c6e98c8635d2b791b8008d6a915a8dee053061e565c53"
+    },
+    {
+      "archivePath": "AB/capture-artifacts.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/capture-artifacts.json",
+      "bytes": 3680,
+      "sha256": "54e7749b85f4a8e565a2ea5cc8dc83e19e1c8b85c2ff6f29e71f0ea2956bb3eb"
+    },
+    {
+      "archivePath": "AB/capture-identity.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/capture-identity.json",
+      "bytes": 316,
+      "sha256": "3ec2696e153eb0b452d6a22ec9fcbe6bb6a1b8eee1b17fca27abd7ae649244ae"
+    },
+    {
+      "archivePath": "AB/capture-run.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/capture-run.json",
+      "bytes": 12123,
+      "sha256": "bf07a7161e4a60584ed3b3a2a2dd207a3078dc3845cca267bd3e63ed2b6954df"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-A.command.json",
+      "bytes": 650,
+      "sha256": "e4e99085488c28ac8be334c16adaff67617ae1b317d68e22aadffcf3d5904cde"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-A.json",
+      "bytes": 5498,
+      "sha256": "88465df57ec0a3e51465991315ade8148bba9e6369273d027e9f40d9f0bcea3e"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-A.log",
+      "bytes": 222,
+      "sha256": "4f539d9d3cba653490742141557329421f87759ee4cd7b43a3835adab7129dfb"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-B.command.json",
+      "bytes": 651,
+      "sha256": "4aaaaf91a98ca01779a10628910a4ec433ddc9e01510b9eb0e83b25172ff174a"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-B.json",
+      "bytes": 5507,
+      "sha256": "cad0dcc498b39abc55344cbb38b460424bfb99ef8e853a99e5277775be8e60e1"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-B.log",
+      "bytes": 222,
+      "sha256": "b03c1905fe282f7aae2cdbcc7191b7fc5df3f55bc11e908916dcae3f8ef66171"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-C.command.json",
+      "bytes": 650,
+      "sha256": "987c5190e2d321f8d5d3abad4955f052d9e4c46e1819c4f40bac563919978c83"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-C.json",
+      "bytes": 5506,
+      "sha256": "3594c891575240583e0013d66501f06cb8b0b9f37a44a4143eb08574692f9629"
+    },
+    {
+      "archivePath": "AB/cohort/cold-01-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-01-C.log",
+      "bytes": 222,
+      "sha256": "d51589101de886bb2ab2f09ff089c42e9d1a9e8daaee23b099986043decc069f"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-A.command.json",
+      "bytes": 650,
+      "sha256": "4998fdd1c139c22f70427037de8a41cdc02055b937ab33324470d7df0a8e078f"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-A.json",
+      "bytes": 5488,
+      "sha256": "1717c6c9b5c8b138978736f070a321a0a56bcc2afd1baeb92c38fe5c4782e9ef"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-A.log",
+      "bytes": 222,
+      "sha256": "6416906fed8a0d0b404bb0079346253e3a89295272524b4729b58ee0efc405eb"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-B.command.json",
+      "bytes": 651,
+      "sha256": "85682de43252489eee5ab5571de5e44b0d57d60c6691293df5a3bdb216e3b4b7"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-B.json",
+      "bytes": 5490,
+      "sha256": "7c937da4b62a7450bf893b00a1c0b2e4a8d695e1b013d1cc6f3d340b07f33bb2"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-B.log",
+      "bytes": 214,
+      "sha256": "01958832621486ec9c71a812e05254480c394b629dfb2ca889bfeb2830ff55b3"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-C.command.json",
+      "bytes": 650,
+      "sha256": "3f6473cf9e3d8073008e17eab6f3a6aa16dc860d84916145e7c78d3113766216"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-C.json",
+      "bytes": 5507,
+      "sha256": "caef76c97a0db882e129ea86e468d02d48eea0df6168dc217080e5ed765e39ff"
+    },
+    {
+      "archivePath": "AB/cohort/cold-02-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-02-C.log",
+      "bytes": 222,
+      "sha256": "d6e90752a25440cf31c6cc7ab75890ff5c243ea39d10c56b549d24057425abf6"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-A.command.json",
+      "bytes": 650,
+      "sha256": "d5274df47b9711aacc19b22207af62c089e07c8f4fcd302638b38e914d24fded"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-A.json",
+      "bytes": 5487,
+      "sha256": "6cb5a45569f1d7dd1ef2eaeb2768d050f6bf2e2b82e67b92d35bfd98a29b88e8"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-A.log",
+      "bytes": 222,
+      "sha256": "ea6d60e75759ac6f9eba667728fa129cbe5718c9097bcb327868878899159885"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-B.command.json",
+      "bytes": 651,
+      "sha256": "05cb76a9dcd7bea768206266cfce1854af08d34c510b18192100a54bc28a18a4"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-B.json",
+      "bytes": 5491,
+      "sha256": "3807b6827cd747e4624dec6a66783f1d3a1a55a56af8ae536414d66ed081e9a8"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-B.log",
+      "bytes": 214,
+      "sha256": "50372a4ca0df316000b6f72cf471af8344c91524a65de148214999c68f5ca5bc"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-C.command.json",
+      "bytes": 650,
+      "sha256": "4e0e95d9a50d36c666d04eaea83dd3f1b22fa45c2e47cfe9a6dc7552150f4e97"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-C.json",
+      "bytes": 5490,
+      "sha256": "9d4d7807d676b3db23ee5d4cf8341c2633890e5fd4d15541919cba7b5924b4fa"
+    },
+    {
+      "archivePath": "AB/cohort/cold-03-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-03-C.log",
+      "bytes": 222,
+      "sha256": "cd2962526d613097c67645ee852e5a7a9ff619601b88a09170780acadcfd4b39"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-A.command.json",
+      "bytes": 650,
+      "sha256": "83cac428a27682bdc4ac11306a630aac7879683e41ca0fc6e8b1a8be0ce6fe5c"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-A.json",
+      "bytes": 5496,
+      "sha256": "4cb3ff32bca372a1a84454e51c7b4a5431678c2c17de0b70fbde21d6f11dbc0d"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-A.log",
+      "bytes": 222,
+      "sha256": "73b076daf46669d0b1e7486315f004172ad086d14657b20876dd2201b451422f"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-B.command.json",
+      "bytes": 651,
+      "sha256": "4827579a77f2a58620273334019fa1d006a4d774bdf11bb24708c7f40011e3a6"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-B.json",
+      "bytes": 5508,
+      "sha256": "91130fcf3a8e2bb729be57625b42a75dfe46c604040794ba54a1b788a56fde2b"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-B.log",
+      "bytes": 222,
+      "sha256": "22a62c19e6b90b8f84685876c22a63bee967b893482a7c505a7b1216db23a7c3"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-C.command.json",
+      "bytes": 650,
+      "sha256": "71dbf1687c6d81b52f5217e5f3dea3fdfab3a554225cb57882cd453f297c02d4"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-C.json",
+      "bytes": 5473,
+      "sha256": "fd4dedba0cef7520f41da55ad32c99b8eb0e14353786e3d02653404022bdd4a7"
+    },
+    {
+      "archivePath": "AB/cohort/cold-04-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-04-C.log",
+      "bytes": 214,
+      "sha256": "33ddd01784709ce50a5780654e18e8d0f7036fd7bbefacf39f37519a0a31c86e"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-A.command.json",
+      "bytes": 650,
+      "sha256": "b3789010cc527f321b8567599d7e9e79298b237d55d78b7ef939cc9c53d3f8ba"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-A.json",
+      "bytes": 5487,
+      "sha256": "7ab61db6579d0794727e39470cea27a6c4a82b933efbb1c3319649e82978d4e3"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-A.log",
+      "bytes": 222,
+      "sha256": "33aa1e8e1cfd5bc3303463cd343917b12a091c057cad41caf2da1bbb6d9f63b6"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-B.command.json",
+      "bytes": 651,
+      "sha256": "e752a230ac59df2e7854b3f83fa5b3cd3966d566dec6ceb7ba64682e93b2edd4"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-B.json",
+      "bytes": 5489,
+      "sha256": "07e038da215b004742218fbc579a5a81af7725d1b48669d397c56071aef01841"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-B.log",
+      "bytes": 222,
+      "sha256": "3a66bb8b9fe8a7f5af951c7f6774cf86c881f61745b1afa4fd941dedbf575e93"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-C.command.json",
+      "bytes": 650,
+      "sha256": "1d77e7e3fe099b9e8d61af6f29645d6e07f3f5ef89ce857718889a631dc44e2d"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-C.json",
+      "bytes": 5506,
+      "sha256": "14d003e1524b88544710b9d29255c79615494c2e676c95138c67034f6c896a64"
+    },
+    {
+      "archivePath": "AB/cohort/cold-05-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-05-C.log",
+      "bytes": 222,
+      "sha256": "f4129a1f5cc88b2aa37d57344304e78f3e5f3920a82d020eaecbc3bcda990adb"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-A.command.json",
+      "bytes": 650,
+      "sha256": "c02891fa340d9e0f636757346c3cd6a4631e8e6108a1f4541b3d242471596a6e"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-A.json",
+      "bytes": 5490,
+      "sha256": "bd6008aaf59b55615dd859f7d5f058ddaaea6a16e9936a20acfb50eb04461ada"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-A.log",
+      "bytes": 222,
+      "sha256": "55e079fddfbcdf977351877d760656ac43f88b817a7c53245ab17c294351361a"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-B.command.json",
+      "bytes": 651,
+      "sha256": "64adc9415a0dafb0902cfc8d2697a5b2bec08ca04e0f51e912986bcb7e9651dc"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-B.json",
+      "bytes": 5507,
+      "sha256": "3fc2faf6364d0188c6946a0adc6e405bce76dd4a93b74ce97df1d248794d9aea"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-B.log",
+      "bytes": 222,
+      "sha256": "2a5faf5a0db3b7fbead47a89fa96043f0d0f02884fc8c7f6bb33297676c766c4"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-C.command.json",
+      "bytes": 650,
+      "sha256": "384f6ec48b9066f8d3af5e085f0d838c225bd9fa6b35667dec8ef729605f8c85"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-C.json",
+      "bytes": 5497,
+      "sha256": "bb3ab09984ccab3e7e7aeecd76731c73767ef89233ca7524c5d85d7b1561d918"
+    },
+    {
+      "archivePath": "AB/cohort/cold-06-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/cold-06-C.log",
+      "bytes": 222,
+      "sha256": "87d61b435bc391d2df99e2766925d4c573383e2a32eac2eba7b1e336647e4cb8"
+    },
+    {
+      "archivePath": "AB/cohort/observations.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/observations.json",
+      "bytes": 5368,
+      "sha256": "41284fac6a9e23d332bcc99e588e096d3176e3490c3f27674b96f5d0c83f7d07"
+    },
+    {
+      "archivePath": "AB/cohort/protocol.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/protocol.json",
+      "bytes": 2137,
+      "sha256": "e5c333ccbe209b4e5f808cee1bb58d3a2faf10109f69367c4af9333647069556"
+    },
+    {
+      "archivePath": "AB/cohort/result.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/result.json",
+      "bytes": 15294,
+      "sha256": "ec235314c447842ab365b3265c44b10c19a90264c1e07249b7271f06de8c9c44"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-A.command.json",
+      "bytes": 650,
+      "sha256": "bf49e37c40515df0258d8086479019c7e23ce2403e87bcd76e6bb72aab76c1bd"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-A.json",
+      "bytes": 48826,
+      "sha256": "61017ff1484762ceb328a77f89932201a6972f45fb9645d64b101bd2caf89ae1"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-A.log",
+      "bytes": 222,
+      "sha256": "5aee548482747bdd32ef1f00d38dde4f2da0512953774ab8cd8966581dcd64cb"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-B.command.json",
+      "bytes": 651,
+      "sha256": "18b3e32e496194e0662abf0e6a99966a010c13a691595ad477a14fe36cee406e"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-B.json",
+      "bytes": 48781,
+      "sha256": "6d774734861c41e7e56f90f9a2af776589000feaf5499666bbc86529bc2b8c57"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-B.log",
+      "bytes": 222,
+      "sha256": "ec67b69d6ec7b9c0379f20aa5d3ec025b63811d9205562f1e30313c8df351858"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-C.command.json",
+      "bytes": 650,
+      "sha256": "2af38dea703d5eee9013fd0fea96cde82359f9848ca17d0b6c26b750f88ef960"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-C.json",
+      "bytes": 48847,
+      "sha256": "90c97e19a459933c45ccdb980860ff84d9ad908b85ec0bd1349804a3bc9a29f8"
+    },
+    {
+      "archivePath": "AB/cohort/warm-01-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-01-C.log",
+      "bytes": 222,
+      "sha256": "7138674be7a7cd88916fc66ef9c44211e00144e964dd3c42d5f6e1994a0060ce"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-A.command.json",
+      "bytes": 650,
+      "sha256": "243ebf48f5c2cad5e01df19382622d2a30bb753bbf0cd8b67426063b6d4b6d82"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-A.json",
+      "bytes": 48821,
+      "sha256": "9735a9982d709fc73c9b1e07b0e91cb8cbc0ab36a33ff9ba4a927b4a0d020c73"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-A.log",
+      "bytes": 222,
+      "sha256": "7518c3fa4ddebc90b6c785606bd93733344a589ea69cdcc67466b631b2f73836"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-B.command.json",
+      "bytes": 651,
+      "sha256": "3afb1bcd1224fd5c241c0dda4ce5c69b881001ac5245cd407af7702415f4bc27"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-B.json",
+      "bytes": 48853,
+      "sha256": "89a87d985b1cda702260d0c6be72e6d5b2e1ba245118380bcaa76cf89a6180ff"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-B.log",
+      "bytes": 222,
+      "sha256": "0c5c799c0bc4ea8c1f921730a113e46b4637f19b93d51688eb4afc4406d536e0"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-C.command.json",
+      "bytes": 650,
+      "sha256": "0c5811aabe0ea92ae0ef082bf29a620213c248b53b2afca9eee3c2cc1e2d7fa4"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-C.json",
+      "bytes": 48850,
+      "sha256": "2316e5f10a531fc001b4e7a07850e0ea0d28fc2a881348404b8ecb7ae75dafd4"
+    },
+    {
+      "archivePath": "AB/cohort/warm-02-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-02-C.log",
+      "bytes": 222,
+      "sha256": "d993e42f52d09b8d7a81e5cf6560bf5becbda7fecb951d08c2159d034d7c2b69"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-A.command.json",
+      "bytes": 650,
+      "sha256": "46ffea3e10f1ac2a1bc2520c2cf703176cd09be2a857eb5ef190aa4f080e27c0"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-A.json",
+      "bytes": 48825,
+      "sha256": "b6851293572063b44fe0089093ee07b342b5836721620516398bb950d31d5941"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-A.log",
+      "bytes": 222,
+      "sha256": "c7def72cb6179522e6ce723cccb0d15ab1fd617e259761b9b43331baa19f01a0"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-B.command.json",
+      "bytes": 651,
+      "sha256": "aabc11714003f1dbbcd6bbecc8b87f5e15e11332d036410a3e5ed116e3b9c2b9"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-B.json",
+      "bytes": 48814,
+      "sha256": "c039983f1d20dc0fb004755b3ab85fde3430aeef7ca8405645ad1d7e314fb408"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-B.log",
+      "bytes": 221,
+      "sha256": "dccdd787cb6af5918c5e1a3a08a4e400814489b18cb1c099b2a1ab25f51e5d7d"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-C.command.json",
+      "bytes": 650,
+      "sha256": "7c4238876e42585618a7b47ec0115e374f19d30235548ccba1b04a7ec9c9535c"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-C.json",
+      "bytes": 48817,
+      "sha256": "36b974da7652d878b2f4c160df2ca7bf3f879f7b932dbf164601501a167ff110"
+    },
+    {
+      "archivePath": "AB/cohort/warm-03-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-03-C.log",
+      "bytes": 222,
+      "sha256": "41c5bbe071ea6921fbe96ab8bdb4246ce573231078d3e19d2b9c574d4f6d0a56"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-A.command.json",
+      "bytes": 650,
+      "sha256": "37b85092b36425201a339f7ca2e1bba5d04f02e647df2fc861c5dca114033f76"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-A.json",
+      "bytes": 48804,
+      "sha256": "06fb6a420485098a27489c54b0cd94809f8ffccb1012ffedea9de0c7cbb364c0"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-A.log",
+      "bytes": 221,
+      "sha256": "ebfbc0761a6568305d4f975386d3f599f21c824b5b59952ffb601a165e2c0a5d"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-B.command.json",
+      "bytes": 651,
+      "sha256": "103402d0259633bf3398d385fef36681f9db939078e45114ba4b57c6ee6e1ea0"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-B.json",
+      "bytes": 48808,
+      "sha256": "b2a84d214e1f2dbafdaf886d33079849dd743869ed9e9d340b803e659ac1e456"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-B.log",
+      "bytes": 221,
+      "sha256": "a2290968ac83f6cf4d172e817f175c19b8d5e905248eff64f76478dd224f488e"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-C.command.json",
+      "bytes": 650,
+      "sha256": "094e4c0ad5599a7f39874e454842fee7177ef94b2cbdec585d9624a842ca6792"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-C.json",
+      "bytes": 48778,
+      "sha256": "7747e0ab04203bf0b9c766a35a537c15c0fece388107b5d894f442b802cdbd05"
+    },
+    {
+      "archivePath": "AB/cohort/warm-04-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-04-C.log",
+      "bytes": 220,
+      "sha256": "d615b05b86335927abb4f10ad1be786e9cbd1c7460ee716d2c61da64b5d5269d"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-A.command.json",
+      "bytes": 650,
+      "sha256": "83dff41e0f3ecf4867e877694c71233883fa33e9a5875acaccdec38dde3f6174"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-A.json",
+      "bytes": 48816,
+      "sha256": "128babd6ffcfe5e1d784e473c8205ec0845684004a3b1b3bbb70ce7f62d686a2"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-A.log",
+      "bytes": 222,
+      "sha256": "a0b1db8b6b8d4b3ebd9551f389449a7b77ce22f324d57af2500396a3f180fffd"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-B.command.json",
+      "bytes": 651,
+      "sha256": "93985bf440a79797aa843b5b6766fdf7e70d5121b21ca756be3b41d719a594d2"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-B.json",
+      "bytes": 48799,
+      "sha256": "56ea9f33d2f3094ed6bc4ed2210abc62be873bc92ca0157cbffee0f552798442"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-B.log",
+      "bytes": 220,
+      "sha256": "2a4cf00f539803658972d8e766b879f5ebc029fe93084b8cf90bea929ff9fa9d"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-C.command.json",
+      "bytes": 650,
+      "sha256": "82b4046089f5d6d52cc7a5179dc63cc55f53b53725845cb5979f92e906b6073a"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-C.json",
+      "bytes": 48791,
+      "sha256": "f7d09b7e5f93f782aca075f2036807bf17c92e431c9f86d5702ef2f4c8cc15b4"
+    },
+    {
+      "archivePath": "AB/cohort/warm-05-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-05-C.log",
+      "bytes": 221,
+      "sha256": "60f49dbcdea38abf5250097b11d4dfd586856d14a27604b7c3d2dc952415ae76"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-A.command.json",
+      "bytes": 650,
+      "sha256": "609b7cf75159da1a61eb70a875597f0f306588577bec1925d06a493e7b38b4e7"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-A.json",
+      "bytes": 48831,
+      "sha256": "8a84153af59532746888b696f62ea2ea7f9fdb9168a0344c47f6ea910e3c83cd"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-A.log",
+      "bytes": 221,
+      "sha256": "0fd5c756d4719eaaee571b2e84dfba0f4e622d2e9f0ab049911d25e9eca44855"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-B.command.json",
+      "bytes": 651,
+      "sha256": "a351f0287775769fe0b321784b42c81ce41abfa9f9a414ab3b6b72eca2de0dd4"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-B.json",
+      "bytes": 48809,
+      "sha256": "20a7b45a9c49e9e3fc3481112454902ae52920bb0d789404578514e52350826f"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-B.log",
+      "bytes": 221,
+      "sha256": "b465633892bbfd4f6c4418a1f70cb43f12b604080a5a941b1568cc9e257e4d2e"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-C.command.json",
+      "bytes": 650,
+      "sha256": "47bfe55cc0c64a634e3544fb52811524f7272ca8e2b9cf3555607724113164d8"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-C.json",
+      "bytes": 48809,
+      "sha256": "466b6466a865a174e94fb7977919712e5c2646d18b0a5a2ef6a1fdba587c1cde"
+    },
+    {
+      "archivePath": "AB/cohort/warm-06-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/cohort/warm-06-C.log",
+      "bytes": 221,
+      "sha256": "ecb1e82719dccd801b29ad55cee3866767c789f97e6644548c2466ea7cc6c490"
+    },
+    {
+      "archivePath": "AB/commands.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/commands.json",
+      "bytes": 7537,
+      "sha256": "c540108059dccd4a2864ca6e686f92da8900f95f3cbe4c721c40fb9f9cc5f962"
+    },
+    {
+      "archivePath": "AB/compiler-path.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/compiler-path.log",
+      "bytes": 18,
+      "sha256": "c8a696e5fabf26f4a5df8d7c5a8ac76153f44d811f5420326a3a64fdbd2f509c"
+    },
+    {
+      "archivePath": "AB/compiler-version.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/compiler-version.log",
+      "bytes": 122,
+      "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+    },
+    {
+      "archivePath": "AB/focused-tests.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/focused-tests.log",
+      "bytes": 659,
+      "sha256": "b9b330b7d0d79d355fd9bd68fe992225375f69cd97015b49c88378faeb187114"
+    },
+    {
+      "archivePath": "AB/linker-path.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/linker-path.log",
+      "bytes": 20,
+      "sha256": "d33f2432764fcd3eb1e4ce84e08b4bb24ec69d968d48a0ad42109d93fad1b876"
+    },
+    {
+      "archivePath": "AB/linker-version.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/linker-version.log",
+      "bytes": 18,
+      "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+    },
+    {
+      "archivePath": "AB/measurement/jmdict-groups.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/measurement/jmdict-groups.json",
+      "bytes": 14349,
+      "sha256": "b10b05c36b64f8388006f2a454528ad1609e3a2909932ceae628421b96403662"
+    },
+    {
+      "archivePath": "AB/prepare-inputs.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/prepare-inputs.log",
+      "bytes": 215,
+      "sha256": "3a66ce28f7cec78f40d432dbb697f43e607e4776611837d1806f64be90f0daa4"
+    },
+    {
+      "archivePath": "AB/run.stderr.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/run.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/run.stdout.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/run.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "AB/screen.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/screen.log",
+      "bytes": 6869,
+      "sha256": "6433c33e82b550cf3f68dc8f1bf8104f9ea6ffe75f81ebdda8d67530d7905d0c"
+    },
+    {
+      "archivePath": "AB/status.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313/status.json",
+      "bytes": 9774,
+      "sha256": "512b0a75744f590b9239a12e71dead9857b5fc404e66f90a125b5ca721ca19ef"
+    },
+    {
+      "archivePath": "BA/baseline-head.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/baseline-head.log",
+      "bytes": 41,
+      "sha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+    },
+    {
+      "archivePath": "BA/baseline-production-rebuild.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/baseline-production-rebuild.log",
+      "bytes": 410,
+      "sha256": "6862f71189054af53640484de03ca2f83a642792c31bc8b97d955a88597404fe"
+    },
+    {
+      "archivePath": "BA/baseline-timing-module.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/baseline-timing-module.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/build-receipt.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/build-receipt.json",
+      "bytes": 4200,
+      "sha256": "e821b0f2e0a755c5e92eeff99b3a2efa56ef9767b6b82194eb7a7f6a0e153386"
+    },
+    {
+      "archivePath": "BA/candidate-apply-check.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/candidate-apply-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/candidate-apply.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/candidate-apply.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/candidate-changed-paths.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/candidate-changed-paths.log",
+      "bytes": 149,
+      "sha256": "464ff05b618e1648627742f5eb3654a4a545613f756683b4f149da2a8c104e47"
+    },
+    {
+      "archivePath": "BA/candidate-timing-module.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/candidate-timing-module.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/candidate-worktree.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/candidate-worktree.log",
+      "bytes": 154,
+      "sha256": "b57f0238d891dc9ff42c6e98c8635d2b791b8008d6a915a8dee053061e565c53"
+    },
+    {
+      "archivePath": "BA/capture-artifacts.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/capture-artifacts.json",
+      "bytes": 3680,
+      "sha256": "54e7749b85f4a8e565a2ea5cc8dc83e19e1c8b85c2ff6f29e71f0ea2956bb3eb"
+    },
+    {
+      "archivePath": "BA/capture-identity.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/capture-identity.json",
+      "bytes": 316,
+      "sha256": "3ec2696e153eb0b452d6a22ec9fcbe6bb6a1b8eee1b17fca27abd7ae649244ae"
+    },
+    {
+      "archivePath": "BA/capture-run.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/capture-run.json",
+      "bytes": 12123,
+      "sha256": "bf07a7161e4a60584ed3b3a2a2dd207a3078dc3845cca267bd3e63ed2b6954df"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-A.command.json",
+      "bytes": 650,
+      "sha256": "d8d012f5f07f704d4b37d5d1b4e62fe6b080970e23d4b3ba58e18d2e90bed189"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-A.json",
+      "bytes": 5499,
+      "sha256": "b025ff67a54eb98cfd30f7356dd483a305b0b3eab73a48de9692a45db5cafec6"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-A.log",
+      "bytes": 222,
+      "sha256": "045d4827ecb1ac108973d034f32a3793a901bbe3b11ea77b8cdc73b616156dd8"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-B.command.json",
+      "bytes": 651,
+      "sha256": "2b0d140d3c74e66b477673978d5df6b0383bf5fb1ec7a943e7a88f9ccc4847f1"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-B.json",
+      "bytes": 5517,
+      "sha256": "217e16e7d11714e6f53ef29f1ab96cf45a5ff3e2e0719d21e48bffbc28162f49"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-B.log",
+      "bytes": 222,
+      "sha256": "bdd9ebe32ac5d910bc2388d6e0bead112867d597632cb7a75f1192548dfd4593"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-C.command.json",
+      "bytes": 650,
+      "sha256": "0781211716ce0a12f1b5d464524ce2842b6583fa77f5120f36127ceaa512c318"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-C.json",
+      "bytes": 5507,
+      "sha256": "d54220abedfe1a541710869d99689769ee5fcd93603dff5add1ca118c03449ac"
+    },
+    {
+      "archivePath": "BA/cohort/cold-01-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-01-C.log",
+      "bytes": 222,
+      "sha256": "d87db2f8fc1328716f55d2dd95faf35c1f4aa783e01756e607c26d7bc86f2e33"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-A.command.json",
+      "bytes": 650,
+      "sha256": "8895a119267db6c562ac082233747edd0a8b9f88ce9781768ffd3b13d92e0dd0"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-A.json",
+      "bytes": 5479,
+      "sha256": "6eaa725c4462c514c60aac8afc22eea9264c2f6b0d6268bc84eb1609f000b7b9"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-A.log",
+      "bytes": 214,
+      "sha256": "f49150d2a7c52c30e4865bf0e7d43a0f418846b6de696c234d49e420f0e667fc"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-B.command.json",
+      "bytes": 651,
+      "sha256": "f7edfa00a4a60ae8393212840b411336e222d29915408d23fdbcf1c3d3399b53"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-B.json",
+      "bytes": 5488,
+      "sha256": "742e7d585162e4bb49d6176a5b130b131ad84660b3b9997009896d0a44437fd8"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-B.log",
+      "bytes": 214,
+      "sha256": "5fe7b6fd01e646cf9904184c42ac5de22ae8d09d39d61c6a4d0d569332d85922"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-C.command.json",
+      "bytes": 650,
+      "sha256": "2c709b412c7789f0e6658b651c98784db0690b6c6b3fe0992ec1dd16a8487539"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-C.json",
+      "bytes": 5506,
+      "sha256": "c19884f336c207e60f69e36a3d150da5c0423093f27dd77fc5b42621eb103b03"
+    },
+    {
+      "archivePath": "BA/cohort/cold-02-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-02-C.log",
+      "bytes": 222,
+      "sha256": "9b4970f125b7f560401c778de55e579a2ce49b70679b4912a4d9234c6158e270"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-A.command.json",
+      "bytes": 650,
+      "sha256": "496ee550d37f023b328008d6aeedf4ea0a923253a5f5dce481a862412c1901c3"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-A.json",
+      "bytes": 5513,
+      "sha256": "fd5ebaa1695807f3ad3b1442c055f920da81635603c6a6a97397fe1d96ae387d"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-A.log",
+      "bytes": 222,
+      "sha256": "f1c645e21a6ef8e466046b55117c6fd46adff9793a561a4254d3b32bc09680ba"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-B.command.json",
+      "bytes": 651,
+      "sha256": "5e03c47e17fde83fded98448bf5bb42c70651447d1c2e1cb2c1d9ba5c46fd938"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-B.json",
+      "bytes": 5506,
+      "sha256": "2e2db98ae18a273285e86f6f0591eb24b5253f54d7aead5bff614027cb619a5f"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-B.log",
+      "bytes": 222,
+      "sha256": "67c2132905b323a63fb38d156628705de5a79b4b25af2c8ba3bf0b9586079d25"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-C.command.json",
+      "bytes": 650,
+      "sha256": "8f705776cf4dad40ffea3207b842213cd64f44c502c936283598cea8fe28531b"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-C.json",
+      "bytes": 5495,
+      "sha256": "010f357a0f2b989f9c88b4e163ff732452b4e726b2f19c6409dd045c64dc636d"
+    },
+    {
+      "archivePath": "BA/cohort/cold-03-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-03-C.log",
+      "bytes": 222,
+      "sha256": "b932f61d64b8e57e4f3c1a1b21ca801e080c0148e88e4c6041c20074ff10f87f"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-A.command.json",
+      "bytes": 650,
+      "sha256": "e04f8b693e2847273e2a6e0818373658007f1658b88bf0d0ab6d1ce217f6e32b"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-A.json",
+      "bytes": 5513,
+      "sha256": "79613b6947642cdec7f09a94c4997b71068bb0de0f7cd3b52d122560c3322afc"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-A.log",
+      "bytes": 222,
+      "sha256": "a7859e391a64b2538b35ea6845486a7e324f384f856546d341c52b1e7b07312f"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-B.command.json",
+      "bytes": 651,
+      "sha256": "2083a6b74be308b49d4afaa03d29a4a3854f50ec0f9953110b254f8f08c25861"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-B.json",
+      "bytes": 5504,
+      "sha256": "0f299269f3c9735cb51483e9467600a0015d9aa7b682c33de59531b258a045b8"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-B.log",
+      "bytes": 222,
+      "sha256": "4bbd32b8e57598702f138da2c8def1d43a4c4fa0bbda4d458f880093bd4225f3"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-C.command.json",
+      "bytes": 650,
+      "sha256": "51c4ff3af5ad70eaba1af537b090bc5b76c4793c809487ce7bc392b306fe90dc"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-C.json",
+      "bytes": 5506,
+      "sha256": "53d3d93783f5e54ba8ed712cc1ff71b67c9121f6f42be00d44cd30576169ed17"
+    },
+    {
+      "archivePath": "BA/cohort/cold-04-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-04-C.log",
+      "bytes": 222,
+      "sha256": "3d7ae3a27f065adbf503b6a0e7e5b0e1a7936cc03f74d0c1bacd33f39f4a0ef3"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-A.command.json",
+      "bytes": 650,
+      "sha256": "1e47374f8a1affcef005f8979709d522c4de407d85ccccf89de4b685512b3d11"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-A.json",
+      "bytes": 5513,
+      "sha256": "21f113bf7c9ca8b48792d11b1f243d5b6524af78e30563ec32221c949623ea10"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-A.log",
+      "bytes": 222,
+      "sha256": "3d218f62d41161b667b4e429837dfd902a8ceb76ec6cbdb815b5a88bce4de6a2"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-B.command.json",
+      "bytes": 651,
+      "sha256": "3611f1564192f3804aafe1ce943197a8cb456af92a937120d434ad190b1ea490"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-B.json",
+      "bytes": 5515,
+      "sha256": "c16ef7672aae8430f793b1ea69141bc7d459d645c555a4d287591063d947170e"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-B.log",
+      "bytes": 222,
+      "sha256": "b6a0eab89abbd8ad9700917505a4e681cd53a39c2efcf52256d5178c1dff7e47"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-C.command.json",
+      "bytes": 650,
+      "sha256": "34013bdb255bc1c72fb52b2d5cd8ef67430f5e1cfc1007f6e5af87a34a059ef7"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-C.json",
+      "bytes": 5478,
+      "sha256": "858c114ef0ad274d55c2248db179ccf36514b3dc34fccb6b70ab9227caff2659"
+    },
+    {
+      "archivePath": "BA/cohort/cold-05-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-05-C.log",
+      "bytes": 214,
+      "sha256": "68e5ef536ed39f036024f53fd4bbaa5870a9bb884a4ffd8a6fee554049b8c07c"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-A.command.json",
+      "bytes": 650,
+      "sha256": "802fe9a1918d315fd12bef5f7389b09fa262657c48bf2434bd77ca5aabc1a7ee"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-A.json",
+      "bytes": 5512,
+      "sha256": "75a977e58ab8edb7c1c79e13dce776ca851975c95ab8f91e3b7604211e6fa8e3"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-A.log",
+      "bytes": 222,
+      "sha256": "0e273d8f0e578386b4af391337164bbe7ab58878accffebf20d5a05a1ced5d86"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-B.command.json",
+      "bytes": 651,
+      "sha256": "d3759803c711e60afb7000351283109fb43ed13e0e2d71761acbbf5ad1750a6b"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-B.json",
+      "bytes": 5501,
+      "sha256": "6700d7d0957d518b15b7a6fd1424591a9463250f11f8c5a23783d059078d0b23"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-B.log",
+      "bytes": 214,
+      "sha256": "72b7fec232238ef570ae375e92882d9d692a6f3c00da2eee4741a267784e5d61"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-C.command.json",
+      "bytes": 650,
+      "sha256": "70d33e327d5790a5a23507eb11966c89c44869f36e3850f210587f5bd9f50ddc"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-C.json",
+      "bytes": 5504,
+      "sha256": "9449b53dd8778c0d8aa3827c5c295d747f8a0ab850e9d4ff875100228c8dd6ae"
+    },
+    {
+      "archivePath": "BA/cohort/cold-06-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/cold-06-C.log",
+      "bytes": 222,
+      "sha256": "e8a25bcc5773ad0c99d1232bde7805443d4a0d69aa503ca7e81537846485ee1b"
+    },
+    {
+      "archivePath": "BA/cohort/observations.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/observations.json",
+      "bytes": 5359,
+      "sha256": "ffabf312d0f65607277b783f830eff8ba34e59a651c8035bc89ea3935e7703c6"
+    },
+    {
+      "archivePath": "BA/cohort/protocol.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/protocol.json",
+      "bytes": 2137,
+      "sha256": "9f88ffceb5d5bb3288f50a935f3d6ee82be678904c99a6a997d65ee709668eb0"
+    },
+    {
+      "archivePath": "BA/cohort/result.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/result.json",
+      "bytes": 15275,
+      "sha256": "29c636bae49da8225a1fd61f0b1a9970c1d9dd3426018eee619bf53459ce53b5"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-A.command.json",
+      "bytes": 650,
+      "sha256": "93b87918f579aff932196ab8ff42d709f4093152efdca6c9abfd318d9787ac01"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-A.json",
+      "bytes": 48984,
+      "sha256": "061b05eb85c1a9de1d59272420ee86bc95abc951cff10893b0b4c3e623e8f01d"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-A.log",
+      "bytes": 221,
+      "sha256": "d8a9484cfff5e186436052b3a899410e3c1e97b899bf12389366191320824071"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-B.command.json",
+      "bytes": 651,
+      "sha256": "3923b1da44cda09dc88809bc23c082fe565b5a7ccc22eb38bc6422725c3493dc"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-B.json",
+      "bytes": 48952,
+      "sha256": "e9d549a9c1d58be164d382342c4daad0846631fbbd43d23227c08d1e35f2d3e5"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-B.log",
+      "bytes": 222,
+      "sha256": "5b4d127160b74b9ea5eda89081637d10a6d01fb847d8a73dfeb5311cb53aa105"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-C.command.json",
+      "bytes": 650,
+      "sha256": "97aa1e8ab6105ad3cd9eca96f439e06d37d2bebb97ad8783d9afcb065ceef835"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-C.json",
+      "bytes": 48990,
+      "sha256": "8fcc7cd0c0a3ab89b9c220aaaa4b39ff094a646f3ff27cf7425d941e73731c1b"
+    },
+    {
+      "archivePath": "BA/cohort/warm-01-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-01-C.log",
+      "bytes": 221,
+      "sha256": "16fe9274ee85e3ab378c152e0b609c53922bccaabdc7f021ec1a88f6ec0540e2"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-A.command.json",
+      "bytes": 650,
+      "sha256": "f1272972aa34461004ffc04038ee9914d0dc44211c438ed978d1abb0997a93aa"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-A.json",
+      "bytes": 48992,
+      "sha256": "7b28150fe09e139b32ad24c93fc887c72e0d11095eac5f2928a9c605ee746ff7"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-A.log",
+      "bytes": 221,
+      "sha256": "ea717f0e64b7c8927d64c0c025b3174c535e2cd0d9ec012b9709c82d4d445016"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-B.command.json",
+      "bytes": 651,
+      "sha256": "6d2e8cfe65448b42fdf953f9fb5a232ea5c15804ce6205c1f01e55b83a22f750"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-B.json",
+      "bytes": 48946,
+      "sha256": "224646ff74c4202c2a520639c24c01ed685da27ac285877179fd525fbb9e41bb"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-B.log",
+      "bytes": 222,
+      "sha256": "80dbb6cb8d8e488e0ad7abfc6c3b4b1d0f2e40fa87b23aa89b8ded88c52a2a48"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-C.command.json",
+      "bytes": 650,
+      "sha256": "c2a22028b4b4430ed77813193516a0c3e63658c319f1bb0844ec1aebb9693d13"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-C.json",
+      "bytes": 48973,
+      "sha256": "b0b9eaaee3b2e53055b049062f6f101fea369c0fe33d8671bd45ce49fe59e08b"
+    },
+    {
+      "archivePath": "BA/cohort/warm-02-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-02-C.log",
+      "bytes": 222,
+      "sha256": "7ddbe0adb07a0adee8cfa2fc20f7c3626a06d7ee1ea122908295f725eefdb21f"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-A.command.json",
+      "bytes": 650,
+      "sha256": "80a4bcd5a6f675f43f356cc46072a8eb8aa413b0583fa63b0bc67ab38482e8d4"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-A.json",
+      "bytes": 48964,
+      "sha256": "e0df8b3f04fe3bb85443ab417294a780ac9df95dc89b2fe555900f5be640d2fd"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-A.log",
+      "bytes": 221,
+      "sha256": "994c3a09e9616a3cfeb5bb33f4301866ff675aae606c18401cb35a156b22004c"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-B.command.json",
+      "bytes": 651,
+      "sha256": "a716422b7317b87bcf8f0f9851ad4f671f34bb504d3bc25756db748e4e491a58"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-B.json",
+      "bytes": 48958,
+      "sha256": "8758d394822627e826e3201a9202a4545a6c95005a35b12f692e544b17c16d51"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-B.log",
+      "bytes": 215,
+      "sha256": "de97af5e2cbc38c7d3134ddcf4c56790f8cab807b34fb857e1931a63c45dc1ca"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-C.command.json",
+      "bytes": 650,
+      "sha256": "d30788943a8c796932286ddfe8a64f2554aad8f7162ffd47f8c9379099cadb44"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-C.json",
+      "bytes": 48967,
+      "sha256": "63e1dfd639ffa37b128c193777cac1da08e51eca6b004fe8be2ec7ac1f6017b2"
+    },
+    {
+      "archivePath": "BA/cohort/warm-03-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-03-C.log",
+      "bytes": 222,
+      "sha256": "925a5ec9ed00fcbd143f502771be18d8ad34afb0b628034687ccf459c2d40af9"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-A.command.json",
+      "bytes": 650,
+      "sha256": "9355c48b0ef2c41b8973dd0c8a567da3c3c593e85435e77bc10284e3f0c6caa7"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-A.json",
+      "bytes": 48966,
+      "sha256": "0c66469bfc309225392cb9832a7c2445f6f3da61cd78ce0cd764f18a02568a12"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-A.log",
+      "bytes": 222,
+      "sha256": "8f99d5afff552bc4689cc7cadf661a30c632e66690e2be81a59e74311ff45770"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-B.command.json",
+      "bytes": 651,
+      "sha256": "73c64c72e3f1bb4361ca8c362ac010ec1b73bcaa261303e4145c743ea546288a"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-B.json",
+      "bytes": 48971,
+      "sha256": "f21ba337faa8bc6912b865b6e71fa4cc698cc421902cc62e9a62a88cb643ba45"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-B.log",
+      "bytes": 222,
+      "sha256": "dff18fdd2f6fb06fb3ff0165ea34bfa11b87136be22a2cc73f7407af1c28efe4"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-C.command.json",
+      "bytes": 650,
+      "sha256": "2d6333d6a1edc16c206affff1ae02f51917779ca322b9c3368466b21029d91b7"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-C.json",
+      "bytes": 48988,
+      "sha256": "39c4d4033eac9a858a0a364feb15b0e2472b2ed3cf77beb339454aa43057b03d"
+    },
+    {
+      "archivePath": "BA/cohort/warm-04-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-04-C.log",
+      "bytes": 222,
+      "sha256": "caf1c97e5f8f8387a341a637eea9b93e04db39a6b3cc28c400d33b23ec446f33"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-A.command.json",
+      "bytes": 650,
+      "sha256": "392a05e478969de2d9ae9544e6df2e516423de58fd162e1b468d24acb1add44a"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-A.json",
+      "bytes": 48989,
+      "sha256": "7d3237434135b729cbc9b01709a786d226ba546bb7b4627587983599a0fcf251"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-A.log",
+      "bytes": 222,
+      "sha256": "88df848047163048abf7fb46b22824749bb94475f11997439bdb928f1bdbf214"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-B.command.json",
+      "bytes": 651,
+      "sha256": "9330f36e93aa3c7f32cf24e15528c117780cda0b6433b4736d4762c4c58ad398"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-B.json",
+      "bytes": 48970,
+      "sha256": "bbef452221dcdf7c8f06f07c2c46c40bb5c99313c0f91a70ee805e9f835964ec"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-B.log",
+      "bytes": 222,
+      "sha256": "f5cb6e11f0c04621199c002c3822c42ef1cae9a694cb4450e46094b5398371bf"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-C.command.json",
+      "bytes": 650,
+      "sha256": "ee63560f5fb5bf3d52814b38078116fd04335d8372b094a7e8d478abe154bb9c"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-C.json",
+      "bytes": 48963,
+      "sha256": "a53265dbb3ca6b35daf909ce7e695055698a48502e469c2d07b821f36690052b"
+    },
+    {
+      "archivePath": "BA/cohort/warm-05-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-05-C.log",
+      "bytes": 222,
+      "sha256": "3bad63897a6b70531bc5770123a8c62d917f5d13eb63e344f2e33df288381fb8"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-A.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-A.command.json",
+      "bytes": 650,
+      "sha256": "4f099548bddf8be30321b0198615f8c8f42acf520de30bf992533a41b2f59c1a"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-A.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-A.json",
+      "bytes": 48953,
+      "sha256": "8edcf928b7be938a68400f428ab3dea90ad3c68533d0d654e06b12550405916e"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-A.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-A.log",
+      "bytes": 222,
+      "sha256": "09d468b96707de37f1829ca4897b02a43f1e117848eec70c9f4ffbaa6f609f16"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-B.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-B.command.json",
+      "bytes": 651,
+      "sha256": "97687077864d9e9a9016dc70d11e42eb31f8beafd2a910531c24143c4d5c29ef"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-B.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-B.json",
+      "bytes": 48965,
+      "sha256": "b4306560ad66ce16bf23ed2654dfd7c381722c8a732784f07d351cc52bb2dd41"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-B.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-B.log",
+      "bytes": 222,
+      "sha256": "af6e08535ff54b0743e045a2182559cd0efa82c9dbe64131ddc61d1b6a9b2feb"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-C.command.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-C.command.json",
+      "bytes": 650,
+      "sha256": "c0d7f95ac8f59c6372c5bda44f90004d8f25261167919fbc0a9645f4d44edd0b"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-C.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-C.json",
+      "bytes": 48972,
+      "sha256": "f1c4f576411b3abb98ed6077136fe5ac3027008ad680e65d34938a2f734fe116"
+    },
+    {
+      "archivePath": "BA/cohort/warm-06-C.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/cohort/warm-06-C.log",
+      "bytes": 221,
+      "sha256": "dbe155fc1552615bf2636a761ca16dad57b3ba766f5b2ca6d17cc08ee88d25c8"
+    },
+    {
+      "archivePath": "BA/commands.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/commands.json",
+      "bytes": 7537,
+      "sha256": "c16287452977182b71dd103e30184a13049ca6f1fd01871a3e8df2febb13636f"
+    },
+    {
+      "archivePath": "BA/compiler-path.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/compiler-path.log",
+      "bytes": 18,
+      "sha256": "c8a696e5fabf26f4a5df8d7c5a8ac76153f44d811f5420326a3a64fdbd2f509c"
+    },
+    {
+      "archivePath": "BA/compiler-version.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/compiler-version.log",
+      "bytes": 122,
+      "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+    },
+    {
+      "archivePath": "BA/linker-path.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/linker-path.log",
+      "bytes": 20,
+      "sha256": "d33f2432764fcd3eb1e4ce84e08b4bb24ec69d968d48a0ad42109d93fad1b876"
+    },
+    {
+      "archivePath": "BA/linker-version.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/linker-version.log",
+      "bytes": 18,
+      "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+    },
+    {
+      "archivePath": "BA/measurement/jmdict-groups.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/measurement/jmdict-groups.json",
+      "bytes": 14349,
+      "sha256": "b10b05c36b64f8388006f2a454528ad1609e3a2909932ceae628421b96403662"
+    },
+    {
+      "archivePath": "BA/prepare-inputs.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/prepare-inputs.log",
+      "bytes": 215,
+      "sha256": "3a66ce28f7cec78f40d432dbb697f43e607e4776611837d1806f64be90f0daa4"
+    },
+    {
+      "archivePath": "BA/run.stderr.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/run.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/run.stdout.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/run.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archivePath": "BA/screen.log",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/screen.log",
+      "bytes": 6847,
+      "sha256": "26061b996314dec2e4a32d4091adb5aea36d9bf6507fa7222277886873c0eb5e"
+    },
+    {
+      "archivePath": "BA/status.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886/status.json",
+      "bytes": 9774,
+      "sha256": "6853f950c00b7ab6b380f620bd04131515762de304531811a511feaf3b3967c8"
+    },
+    {
+      "archivePath": "analysis/audit-AB.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/audit-AB.json",
+      "bytes": 19357,
+      "sha256": "eb7861a11a3c1d3e4edd89735a89b7e65e4e866e07157438663f7b3bff9b7b25"
+    },
+    {
+      "archivePath": "analysis/audit-BA.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/audit-BA.json",
+      "bytes": 19335,
+      "sha256": "ad3049284b91f4d8c157a1e3ee0b46675f8a8b431dbd24c2ee567d417959e27f"
+    },
+    {
+      "archivePath": "analysis/disposition.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/disposition.json",
+      "bytes": 23896,
+      "sha256": "a769cfe48dfef34d0bdde328499158fa9143839379a061baf89c1233f935bd65"
+    },
+    {
+      "archivePath": "analysis/local-cohort-audit.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-simd/local-cohort-audit.json",
+      "bytes": 19246,
+      "sha256": "e1bbebb166eeca9116757062f4b9e733d2d7cdd9bc3c8a1e5439463f0d50adc7"
+    },
+    {
+      "archivePath": "identity/artifact-15249129886-receipt.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15249129886-receipt.json",
+      "bytes": 14416,
+      "sha256": "98539c9590f116200f78cc6ab48e650da0d0c2499e8d87b7f0169b192ced200a"
+    },
+    {
+      "archivePath": "identity/artifact-15250090313-receipt.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/artifact-15250090313-receipt.json",
+      "bytes": 14509,
+      "sha256": "8aac19bb3d7d1f246956e5cbf30e9157a8d8eaf301b4afb36b895ec06de98227"
+    },
+    {
+      "archivePath": "identity/workflow-api.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/workflow-api.json",
+      "bytes": 9248,
+      "sha256": "a998f035410f65986fa9cd37e5dd87dc093f8effceb851f0d5a3de61a0af643c"
+    },
+    {
+      "archivePath": "tools/audit-cohort.py",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-simd/audit-cohort.py",
+      "bytes": 8226,
+      "sha256": "9b2604a84fe2422b7b6d8a88ce4d02e4ead46a53e74ab41ce825c5eaaca37bc6"
+    },
+    {
+      "archivePath": "tools/build-appendix.py",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/inflater-hosted-9d6/build-appendix.py",
+      "bytes": 13778,
+      "sha256": "fa716e9bb118e601b5ca4513a6af84e9ab0a1efee0f249078521cb645e7c9c41"
+    }
+  ],
+  "originalArtifacts": [
+    {
+      "artifactId": 15250090313,
+      "name": "import-inflater-copy-AB-9d6-46106878218-1",
+      "runId": 46106878218,
+      "runAttempt": 1,
+      "headSha": "bc22226a2299b58ddb26b23d928b1b99c28422eb",
+      "zipBytes": 194511,
+      "zipSha256": "4910d770c8678631424f3b491888bdd0aa6bcfd766cb0e04f724160c3b9da7ab",
+      "originalMembers": [
+        {
+          "path": "baseline-head.log",
+          "bytes": 41,
+          "sha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+        },
+        {
+          "path": "baseline-timing-module.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "baseline-production-rebuild.log",
+          "bytes": 410,
+          "sha256": "6862f71189054af53640484de03ca2f83a642792c31bc8b97d955a88597404fe"
+        },
+        {
+          "path": "build-receipt.json",
+          "bytes": 4200,
+          "sha256": "e821b0f2e0a755c5e92eeff99b3a2efa56ef9767b6b82194eb7a7f6a0e153386"
+        },
+        {
+          "path": "candidate-apply-check.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-apply.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-changed-paths.log",
+          "bytes": 149,
+          "sha256": "464ff05b618e1648627742f5eb3654a4a545613f756683b4f149da2a8c104e47"
+        },
+        {
+          "path": "candidate-timing-module.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-worktree.log",
+          "bytes": 154,
+          "sha256": "b57f0238d891dc9ff42c6e98c8635d2b791b8008d6a915a8dee053061e565c53"
+        },
+        {
+          "path": "capture-artifacts.json",
+          "bytes": 3680,
+          "sha256": "54e7749b85f4a8e565a2ea5cc8dc83e19e1c8b85c2ff6f29e71f0ea2956bb3eb"
+        },
+        {
+          "path": "capture-identity.json",
+          "bytes": 316,
+          "sha256": "3ec2696e153eb0b452d6a22ec9fcbe6bb6a1b8eee1b17fca27abd7ae649244ae"
+        },
+        {
+          "path": "capture-run.json",
+          "bytes": 12123,
+          "sha256": "bf07a7161e4a60584ed3b3a2a2dd207a3078dc3845cca267bd3e63ed2b6954df"
+        },
+        {
+          "path": "cohort/cold-01-A.command.json",
+          "bytes": 650,
+          "sha256": "e4e99085488c28ac8be334c16adaff67617ae1b317d68e22aadffcf3d5904cde"
+        },
+        {
+          "path": "cohort/cold-01-A.json",
+          "bytes": 5498,
+          "sha256": "88465df57ec0a3e51465991315ade8148bba9e6369273d027e9f40d9f0bcea3e"
+        },
+        {
+          "path": "cohort/cold-01-A.log",
+          "bytes": 222,
+          "sha256": "4f539d9d3cba653490742141557329421f87759ee4cd7b43a3835adab7129dfb"
+        },
+        {
+          "path": "cohort/cold-01-B.command.json",
+          "bytes": 651,
+          "sha256": "4aaaaf91a98ca01779a10628910a4ec433ddc9e01510b9eb0e83b25172ff174a"
+        },
+        {
+          "path": "cohort/cold-01-B.json",
+          "bytes": 5507,
+          "sha256": "cad0dcc498b39abc55344cbb38b460424bfb99ef8e853a99e5277775be8e60e1"
+        },
+        {
+          "path": "cohort/cold-01-B.log",
+          "bytes": 222,
+          "sha256": "b03c1905fe282f7aae2cdbcc7191b7fc5df3f55bc11e908916dcae3f8ef66171"
+        },
+        {
+          "path": "cohort/cold-01-C.command.json",
+          "bytes": 650,
+          "sha256": "987c5190e2d321f8d5d3abad4955f052d9e4c46e1819c4f40bac563919978c83"
+        },
+        {
+          "path": "cohort/cold-01-C.log",
+          "bytes": 222,
+          "sha256": "d51589101de886bb2ab2f09ff089c42e9d1a9e8daaee23b099986043decc069f"
+        },
+        {
+          "path": "cohort/cold-01-C.json",
+          "bytes": 5506,
+          "sha256": "3594c891575240583e0013d66501f06cb8b0b9f37a44a4143eb08574692f9629"
+        },
+        {
+          "path": "cohort/cold-02-A.command.json",
+          "bytes": 650,
+          "sha256": "4998fdd1c139c22f70427037de8a41cdc02055b937ab33324470d7df0a8e078f"
+        },
+        {
+          "path": "cohort/cold-02-A.json",
+          "bytes": 5488,
+          "sha256": "1717c6c9b5c8b138978736f070a321a0a56bcc2afd1baeb92c38fe5c4782e9ef"
+        },
+        {
+          "path": "cohort/cold-02-A.log",
+          "bytes": 222,
+          "sha256": "6416906fed8a0d0b404bb0079346253e3a89295272524b4729b58ee0efc405eb"
+        },
+        {
+          "path": "cohort/cold-02-B.command.json",
+          "bytes": 651,
+          "sha256": "85682de43252489eee5ab5571de5e44b0d57d60c6691293df5a3bdb216e3b4b7"
+        },
+        {
+          "path": "cohort/cold-02-B.json",
+          "bytes": 5490,
+          "sha256": "7c937da4b62a7450bf893b00a1c0b2e4a8d695e1b013d1cc6f3d340b07f33bb2"
+        },
+        {
+          "path": "cohort/cold-02-B.log",
+          "bytes": 214,
+          "sha256": "01958832621486ec9c71a812e05254480c394b629dfb2ca889bfeb2830ff55b3"
+        },
+        {
+          "path": "cohort/cold-02-C.command.json",
+          "bytes": 650,
+          "sha256": "3f6473cf9e3d8073008e17eab6f3a6aa16dc860d84916145e7c78d3113766216"
+        },
+        {
+          "path": "cohort/cold-02-C.json",
+          "bytes": 5507,
+          "sha256": "caef76c97a0db882e129ea86e468d02d48eea0df6168dc217080e5ed765e39ff"
+        },
+        {
+          "path": "cohort/cold-02-C.log",
+          "bytes": 222,
+          "sha256": "d6e90752a25440cf31c6cc7ab75890ff5c243ea39d10c56b549d24057425abf6"
+        },
+        {
+          "path": "cohort/cold-03-A.command.json",
+          "bytes": 650,
+          "sha256": "d5274df47b9711aacc19b22207af62c089e07c8f4fcd302638b38e914d24fded"
+        },
+        {
+          "path": "cohort/cold-03-A.json",
+          "bytes": 5487,
+          "sha256": "6cb5a45569f1d7dd1ef2eaeb2768d050f6bf2e2b82e67b92d35bfd98a29b88e8"
+        },
+        {
+          "path": "cohort/cold-03-A.log",
+          "bytes": 222,
+          "sha256": "ea6d60e75759ac6f9eba667728fa129cbe5718c9097bcb327868878899159885"
+        },
+        {
+          "path": "cohort/cold-03-B.command.json",
+          "bytes": 651,
+          "sha256": "05cb76a9dcd7bea768206266cfce1854af08d34c510b18192100a54bc28a18a4"
+        },
+        {
+          "path": "cohort/cold-03-B.json",
+          "bytes": 5491,
+          "sha256": "3807b6827cd747e4624dec6a66783f1d3a1a55a56af8ae536414d66ed081e9a8"
+        },
+        {
+          "path": "cohort/cold-03-B.log",
+          "bytes": 214,
+          "sha256": "50372a4ca0df316000b6f72cf471af8344c91524a65de148214999c68f5ca5bc"
+        },
+        {
+          "path": "cohort/cold-03-C.command.json",
+          "bytes": 650,
+          "sha256": "4e0e95d9a50d36c666d04eaea83dd3f1b22fa45c2e47cfe9a6dc7552150f4e97"
+        },
+        {
+          "path": "cohort/cold-03-C.json",
+          "bytes": 5490,
+          "sha256": "9d4d7807d676b3db23ee5d4cf8341c2633890e5fd4d15541919cba7b5924b4fa"
+        },
+        {
+          "path": "cohort/cold-03-C.log",
+          "bytes": 222,
+          "sha256": "cd2962526d613097c67645ee852e5a7a9ff619601b88a09170780acadcfd4b39"
+        },
+        {
+          "path": "cohort/cold-04-A.command.json",
+          "bytes": 650,
+          "sha256": "83cac428a27682bdc4ac11306a630aac7879683e41ca0fc6e8b1a8be0ce6fe5c"
+        },
+        {
+          "path": "cohort/cold-04-A.json",
+          "bytes": 5496,
+          "sha256": "4cb3ff32bca372a1a84454e51c7b4a5431678c2c17de0b70fbde21d6f11dbc0d"
+        },
+        {
+          "path": "cohort/cold-04-A.log",
+          "bytes": 222,
+          "sha256": "73b076daf46669d0b1e7486315f004172ad086d14657b20876dd2201b451422f"
+        },
+        {
+          "path": "cohort/cold-04-B.command.json",
+          "bytes": 651,
+          "sha256": "4827579a77f2a58620273334019fa1d006a4d774bdf11bb24708c7f40011e3a6"
+        },
+        {
+          "path": "cohort/cold-04-B.log",
+          "bytes": 222,
+          "sha256": "22a62c19e6b90b8f84685876c22a63bee967b893482a7c505a7b1216db23a7c3"
+        },
+        {
+          "path": "cohort/cold-04-B.json",
+          "bytes": 5508,
+          "sha256": "91130fcf3a8e2bb729be57625b42a75dfe46c604040794ba54a1b788a56fde2b"
+        },
+        {
+          "path": "cohort/cold-04-C.command.json",
+          "bytes": 650,
+          "sha256": "71dbf1687c6d81b52f5217e5f3dea3fdfab3a554225cb57882cd453f297c02d4"
+        },
+        {
+          "path": "cohort/cold-04-C.json",
+          "bytes": 5473,
+          "sha256": "fd4dedba0cef7520f41da55ad32c99b8eb0e14353786e3d02653404022bdd4a7"
+        },
+        {
+          "path": "cohort/cold-04-C.log",
+          "bytes": 214,
+          "sha256": "33ddd01784709ce50a5780654e18e8d0f7036fd7bbefacf39f37519a0a31c86e"
+        },
+        {
+          "path": "cohort/cold-05-A.command.json",
+          "bytes": 650,
+          "sha256": "b3789010cc527f321b8567599d7e9e79298b237d55d78b7ef939cc9c53d3f8ba"
+        },
+        {
+          "path": "cohort/cold-05-A.json",
+          "bytes": 5487,
+          "sha256": "7ab61db6579d0794727e39470cea27a6c4a82b933efbb1c3319649e82978d4e3"
+        },
+        {
+          "path": "cohort/cold-05-A.log",
+          "bytes": 222,
+          "sha256": "33aa1e8e1cfd5bc3303463cd343917b12a091c057cad41caf2da1bbb6d9f63b6"
+        },
+        {
+          "path": "cohort/cold-05-B.json",
+          "bytes": 5489,
+          "sha256": "07e038da215b004742218fbc579a5a81af7725d1b48669d397c56071aef01841"
+        },
+        {
+          "path": "cohort/cold-05-B.command.json",
+          "bytes": 651,
+          "sha256": "e752a230ac59df2e7854b3f83fa5b3cd3966d566dec6ceb7ba64682e93b2edd4"
+        },
+        {
+          "path": "cohort/cold-05-B.log",
+          "bytes": 222,
+          "sha256": "3a66bb8b9fe8a7f5af951c7f6774cf86c881f61745b1afa4fd941dedbf575e93"
+        },
+        {
+          "path": "cohort/cold-05-C.command.json",
+          "bytes": 650,
+          "sha256": "1d77e7e3fe099b9e8d61af6f29645d6e07f3f5ef89ce857718889a631dc44e2d"
+        },
+        {
+          "path": "cohort/cold-05-C.json",
+          "bytes": 5506,
+          "sha256": "14d003e1524b88544710b9d29255c79615494c2e676c95138c67034f6c896a64"
+        },
+        {
+          "path": "cohort/cold-05-C.log",
+          "bytes": 222,
+          "sha256": "f4129a1f5cc88b2aa37d57344304e78f3e5f3920a82d020eaecbc3bcda990adb"
+        },
+        {
+          "path": "cohort/cold-06-A.json",
+          "bytes": 5490,
+          "sha256": "bd6008aaf59b55615dd859f7d5f058ddaaea6a16e9936a20acfb50eb04461ada"
+        },
+        {
+          "path": "cohort/cold-06-A.command.json",
+          "bytes": 650,
+          "sha256": "c02891fa340d9e0f636757346c3cd6a4631e8e6108a1f4541b3d242471596a6e"
+        },
+        {
+          "path": "cohort/cold-06-A.log",
+          "bytes": 222,
+          "sha256": "55e079fddfbcdf977351877d760656ac43f88b817a7c53245ab17c294351361a"
+        },
+        {
+          "path": "cohort/cold-06-B.command.json",
+          "bytes": 651,
+          "sha256": "64adc9415a0dafb0902cfc8d2697a5b2bec08ca04e0f51e912986bcb7e9651dc"
+        },
+        {
+          "path": "cohort/cold-06-B.json",
+          "bytes": 5507,
+          "sha256": "3fc2faf6364d0188c6946a0adc6e405bce76dd4a93b74ce97df1d248794d9aea"
+        },
+        {
+          "path": "cohort/cold-06-B.log",
+          "bytes": 222,
+          "sha256": "2a5faf5a0db3b7fbead47a89fa96043f0d0f02884fc8c7f6bb33297676c766c4"
+        },
+        {
+          "path": "cohort/cold-06-C.json",
+          "bytes": 5497,
+          "sha256": "bb3ab09984ccab3e7e7aeecd76731c73767ef89233ca7524c5d85d7b1561d918"
+        },
+        {
+          "path": "cohort/cold-06-C.command.json",
+          "bytes": 650,
+          "sha256": "384f6ec48b9066f8d3af5e085f0d838c225bd9fa6b35667dec8ef729605f8c85"
+        },
+        {
+          "path": "cohort/cold-06-C.log",
+          "bytes": 222,
+          "sha256": "87d61b435bc391d2df99e2766925d4c573383e2a32eac2eba7b1e336647e4cb8"
+        },
+        {
+          "path": "cohort/observations.json",
+          "bytes": 5368,
+          "sha256": "41284fac6a9e23d332bcc99e588e096d3176e3490c3f27674b96f5d0c83f7d07"
+        },
+        {
+          "path": "cohort/result.json",
+          "bytes": 15294,
+          "sha256": "ec235314c447842ab365b3265c44b10c19a90264c1e07249b7271f06de8c9c44"
+        },
+        {
+          "path": "cohort/protocol.json",
+          "bytes": 2137,
+          "sha256": "e5c333ccbe209b4e5f808cee1bb58d3a2faf10109f69367c4af9333647069556"
+        },
+        {
+          "path": "cohort/warm-01-A.command.json",
+          "bytes": 650,
+          "sha256": "bf49e37c40515df0258d8086479019c7e23ce2403e87bcd76e6bb72aab76c1bd"
+        },
+        {
+          "path": "cohort/warm-01-A.json",
+          "bytes": 48826,
+          "sha256": "61017ff1484762ceb328a77f89932201a6972f45fb9645d64b101bd2caf89ae1"
+        },
+        {
+          "path": "cohort/warm-01-A.log",
+          "bytes": 222,
+          "sha256": "5aee548482747bdd32ef1f00d38dde4f2da0512953774ab8cd8966581dcd64cb"
+        },
+        {
+          "path": "cohort/warm-01-B.command.json",
+          "bytes": 651,
+          "sha256": "18b3e32e496194e0662abf0e6a99966a010c13a691595ad477a14fe36cee406e"
+        },
+        {
+          "path": "cohort/warm-01-B.json",
+          "bytes": 48781,
+          "sha256": "6d774734861c41e7e56f90f9a2af776589000feaf5499666bbc86529bc2b8c57"
+        },
+        {
+          "path": "cohort/warm-01-B.log",
+          "bytes": 222,
+          "sha256": "ec67b69d6ec7b9c0379f20aa5d3ec025b63811d9205562f1e30313c8df351858"
+        },
+        {
+          "path": "cohort/warm-01-C.command.json",
+          "bytes": 650,
+          "sha256": "2af38dea703d5eee9013fd0fea96cde82359f9848ca17d0b6c26b750f88ef960"
+        },
+        {
+          "path": "cohort/warm-01-C.log",
+          "bytes": 222,
+          "sha256": "7138674be7a7cd88916fc66ef9c44211e00144e964dd3c42d5f6e1994a0060ce"
+        },
+        {
+          "path": "cohort/warm-01-C.json",
+          "bytes": 48847,
+          "sha256": "90c97e19a459933c45ccdb980860ff84d9ad908b85ec0bd1349804a3bc9a29f8"
+        },
+        {
+          "path": "cohort/warm-02-A.command.json",
+          "bytes": 650,
+          "sha256": "243ebf48f5c2cad5e01df19382622d2a30bb753bbf0cd8b67426063b6d4b6d82"
+        },
+        {
+          "path": "cohort/warm-02-A.json",
+          "bytes": 48821,
+          "sha256": "9735a9982d709fc73c9b1e07b0e91cb8cbc0ab36a33ff9ba4a927b4a0d020c73"
+        },
+        {
+          "path": "cohort/warm-02-A.log",
+          "bytes": 222,
+          "sha256": "7518c3fa4ddebc90b6c785606bd93733344a589ea69cdcc67466b631b2f73836"
+        },
+        {
+          "path": "cohort/warm-02-B.command.json",
+          "bytes": 651,
+          "sha256": "3afb1bcd1224fd5c241c0dda4ce5c69b881001ac5245cd407af7702415f4bc27"
+        },
+        {
+          "path": "cohort/warm-02-B.json",
+          "bytes": 48853,
+          "sha256": "89a87d985b1cda702260d0c6be72e6d5b2e1ba245118380bcaa76cf89a6180ff"
+        },
+        {
+          "path": "cohort/warm-02-B.log",
+          "bytes": 222,
+          "sha256": "0c5c799c0bc4ea8c1f921730a113e46b4637f19b93d51688eb4afc4406d536e0"
+        },
+        {
+          "path": "cohort/warm-02-C.json",
+          "bytes": 48850,
+          "sha256": "2316e5f10a531fc001b4e7a07850e0ea0d28fc2a881348404b8ecb7ae75dafd4"
+        },
+        {
+          "path": "cohort/warm-02-C.command.json",
+          "bytes": 650,
+          "sha256": "0c5811aabe0ea92ae0ef082bf29a620213c248b53b2afca9eee3c2cc1e2d7fa4"
+        },
+        {
+          "path": "cohort/warm-02-C.log",
+          "bytes": 222,
+          "sha256": "d993e42f52d09b8d7a81e5cf6560bf5becbda7fecb951d08c2159d034d7c2b69"
+        },
+        {
+          "path": "cohort/warm-03-A.command.json",
+          "bytes": 650,
+          "sha256": "46ffea3e10f1ac2a1bc2520c2cf703176cd09be2a857eb5ef190aa4f080e27c0"
+        },
+        {
+          "path": "cohort/warm-03-A.json",
+          "bytes": 48825,
+          "sha256": "b6851293572063b44fe0089093ee07b342b5836721620516398bb950d31d5941"
+        },
+        {
+          "path": "cohort/warm-03-A.log",
+          "bytes": 222,
+          "sha256": "c7def72cb6179522e6ce723cccb0d15ab1fd617e259761b9b43331baa19f01a0"
+        },
+        {
+          "path": "cohort/warm-03-B.command.json",
+          "bytes": 651,
+          "sha256": "aabc11714003f1dbbcd6bbecc8b87f5e15e11332d036410a3e5ed116e3b9c2b9"
+        },
+        {
+          "path": "cohort/warm-03-B.json",
+          "bytes": 48814,
+          "sha256": "c039983f1d20dc0fb004755b3ab85fde3430aeef7ca8405645ad1d7e314fb408"
+        },
+        {
+          "path": "cohort/warm-03-B.log",
+          "bytes": 221,
+          "sha256": "dccdd787cb6af5918c5e1a3a08a4e400814489b18cb1c099b2a1ab25f51e5d7d"
+        },
+        {
+          "path": "cohort/warm-03-C.command.json",
+          "bytes": 650,
+          "sha256": "7c4238876e42585618a7b47ec0115e374f19d30235548ccba1b04a7ec9c9535c"
+        },
+        {
+          "path": "cohort/warm-03-C.json",
+          "bytes": 48817,
+          "sha256": "36b974da7652d878b2f4c160df2ca7bf3f879f7b932dbf164601501a167ff110"
+        },
+        {
+          "path": "cohort/warm-03-C.log",
+          "bytes": 222,
+          "sha256": "41c5bbe071ea6921fbe96ab8bdb4246ce573231078d3e19d2b9c574d4f6d0a56"
+        },
+        {
+          "path": "cohort/warm-04-A.command.json",
+          "bytes": 650,
+          "sha256": "37b85092b36425201a339f7ca2e1bba5d04f02e647df2fc861c5dca114033f76"
+        },
+        {
+          "path": "cohort/warm-04-A.json",
+          "bytes": 48804,
+          "sha256": "06fb6a420485098a27489c54b0cd94809f8ffccb1012ffedea9de0c7cbb364c0"
+        },
+        {
+          "path": "cohort/warm-04-A.log",
+          "bytes": 221,
+          "sha256": "ebfbc0761a6568305d4f975386d3f599f21c824b5b59952ffb601a165e2c0a5d"
+        },
+        {
+          "path": "cohort/warm-04-B.command.json",
+          "bytes": 651,
+          "sha256": "103402d0259633bf3398d385fef36681f9db939078e45114ba4b57c6ee6e1ea0"
+        },
+        {
+          "path": "cohort/warm-04-B.json",
+          "bytes": 48808,
+          "sha256": "b2a84d214e1f2dbafdaf886d33079849dd743869ed9e9d340b803e659ac1e456"
+        },
+        {
+          "path": "cohort/warm-04-B.log",
+          "bytes": 221,
+          "sha256": "a2290968ac83f6cf4d172e817f175c19b8d5e905248eff64f76478dd224f488e"
+        },
+        {
+          "path": "cohort/warm-04-C.command.json",
+          "bytes": 650,
+          "sha256": "094e4c0ad5599a7f39874e454842fee7177ef94b2cbdec585d9624a842ca6792"
+        },
+        {
+          "path": "cohort/warm-04-C.json",
+          "bytes": 48778,
+          "sha256": "7747e0ab04203bf0b9c766a35a537c15c0fece388107b5d894f442b802cdbd05"
+        },
+        {
+          "path": "cohort/warm-04-C.log",
+          "bytes": 220,
+          "sha256": "d615b05b86335927abb4f10ad1be786e9cbd1c7460ee716d2c61da64b5d5269d"
+        },
+        {
+          "path": "cohort/warm-05-A.json",
+          "bytes": 48816,
+          "sha256": "128babd6ffcfe5e1d784e473c8205ec0845684004a3b1b3bbb70ce7f62d686a2"
+        },
+        {
+          "path": "cohort/warm-05-A.command.json",
+          "bytes": 650,
+          "sha256": "83dff41e0f3ecf4867e877694c71233883fa33e9a5875acaccdec38dde3f6174"
+        },
+        {
+          "path": "cohort/warm-05-A.log",
+          "bytes": 222,
+          "sha256": "a0b1db8b6b8d4b3ebd9551f389449a7b77ce22f324d57af2500396a3f180fffd"
+        },
+        {
+          "path": "cohort/warm-05-B.command.json",
+          "bytes": 651,
+          "sha256": "93985bf440a79797aa843b5b6766fdf7e70d5121b21ca756be3b41d719a594d2"
+        },
+        {
+          "path": "cohort/warm-05-B.json",
+          "bytes": 48799,
+          "sha256": "56ea9f33d2f3094ed6bc4ed2210abc62be873bc92ca0157cbffee0f552798442"
+        },
+        {
+          "path": "cohort/warm-05-B.log",
+          "bytes": 220,
+          "sha256": "2a4cf00f539803658972d8e766b879f5ebc029fe93084b8cf90bea929ff9fa9d"
+        },
+        {
+          "path": "cohort/warm-05-C.command.json",
+          "bytes": 650,
+          "sha256": "82b4046089f5d6d52cc7a5179dc63cc55f53b53725845cb5979f92e906b6073a"
+        },
+        {
+          "path": "cohort/warm-05-C.json",
+          "bytes": 48791,
+          "sha256": "f7d09b7e5f93f782aca075f2036807bf17c92e431c9f86d5702ef2f4c8cc15b4"
+        },
+        {
+          "path": "cohort/warm-06-A.command.json",
+          "bytes": 650,
+          "sha256": "609b7cf75159da1a61eb70a875597f0f306588577bec1925d06a493e7b38b4e7"
+        },
+        {
+          "path": "cohort/warm-05-C.log",
+          "bytes": 221,
+          "sha256": "60f49dbcdea38abf5250097b11d4dfd586856d14a27604b7c3d2dc952415ae76"
+        },
+        {
+          "path": "cohort/warm-06-A.json",
+          "bytes": 48831,
+          "sha256": "8a84153af59532746888b696f62ea2ea7f9fdb9168a0344c47f6ea910e3c83cd"
+        },
+        {
+          "path": "cohort/warm-06-A.log",
+          "bytes": 221,
+          "sha256": "0fd5c756d4719eaaee571b2e84dfba0f4e622d2e9f0ab049911d25e9eca44855"
+        },
+        {
+          "path": "cohort/warm-06-B.command.json",
+          "bytes": 651,
+          "sha256": "a351f0287775769fe0b321784b42c81ce41abfa9f9a414ab3b6b72eca2de0dd4"
+        },
+        {
+          "path": "cohort/warm-06-B.json",
+          "bytes": 48809,
+          "sha256": "20a7b45a9c49e9e3fc3481112454902ae52920bb0d789404578514e52350826f"
+        },
+        {
+          "path": "cohort/warm-06-B.log",
+          "bytes": 221,
+          "sha256": "b465633892bbfd4f6c4418a1f70cb43f12b604080a5a941b1568cc9e257e4d2e"
+        },
+        {
+          "path": "cohort/warm-06-C.command.json",
+          "bytes": 650,
+          "sha256": "47bfe55cc0c64a634e3544fb52811524f7272ca8e2b9cf3555607724113164d8"
+        },
+        {
+          "path": "cohort/warm-06-C.json",
+          "bytes": 48809,
+          "sha256": "466b6466a865a174e94fb7977919712e5c2646d18b0a5a2ef6a1fdba587c1cde"
+        },
+        {
+          "path": "cohort/warm-06-C.log",
+          "bytes": 221,
+          "sha256": "ecb1e82719dccd801b29ad55cee3866767c789f97e6644548c2466ea7cc6c490"
+        },
+        {
+          "path": "commands.json",
+          "bytes": 7537,
+          "sha256": "c540108059dccd4a2864ca6e686f92da8900f95f3cbe4c721c40fb9f9cc5f962"
+        },
+        {
+          "path": "compiler-version.log",
+          "bytes": 122,
+          "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+        },
+        {
+          "path": "compiler-path.log",
+          "bytes": 18,
+          "sha256": "c8a696e5fabf26f4a5df8d7c5a8ac76153f44d811f5420326a3a64fdbd2f509c"
+        },
+        {
+          "path": "focused-tests.log",
+          "bytes": 659,
+          "sha256": "b9b330b7d0d79d355fd9bd68fe992225375f69cd97015b49c88378faeb187114"
+        },
+        {
+          "path": "linker-path.log",
+          "bytes": 20,
+          "sha256": "d33f2432764fcd3eb1e4ce84e08b4bb24ec69d968d48a0ad42109d93fad1b876"
+        },
+        {
+          "path": "measurement/baseline/parser.wasm",
+          "bytes": 67679,
+          "sha256": "674741af5e0ee70afa9f902b52870041ffd95a20dccc6e898f03f49dba339c31"
+        },
+        {
+          "path": "linker-version.log",
+          "bytes": 18,
+          "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+        },
+        {
+          "path": "measurement/jmdict-groups.json",
+          "bytes": 14349,
+          "sha256": "b10b05c36b64f8388006f2a454528ad1609e3a2909932ceae628421b96403662"
+        },
+        {
+          "path": "measurement/candidate/parser.wasm",
+          "bytes": 67757,
+          "sha256": "f2a8aac2961b6ee806a5fe33f23ccff6fc240fad64ec528ce1f20d2780a0c3d5"
+        },
+        {
+          "path": "prepare-inputs.log",
+          "bytes": 215,
+          "sha256": "3a66ce28f7cec78f40d432dbb697f43e607e4776611837d1806f64be90f0daa4"
+        },
+        {
+          "path": "run.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "run.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "screen.log",
+          "bytes": 6869,
+          "sha256": "6433c33e82b550cf3f68dc8f1bf8104f9ea6ffe75f81ebdda8d67530d7905d0c"
+        },
+        {
+          "path": "status.json",
+          "bytes": 9774,
+          "sha256": "512b0a75744f590b9239a12e71dead9857b5fc404e66f90a125b5ca721ca19ef"
+        }
+      ]
+    },
+    {
+      "artifactId": 15249129886,
+      "name": "import-inflater-copy-BA-9d6-46106878218-1",
+      "runId": 46106878218,
+      "runAttempt": 1,
+      "headSha": "bc22226a2299b58ddb26b23d928b1b99c28422eb",
+      "zipBytes": 193553,
+      "zipSha256": "0a606c725074b888ac3cefa736f4497ef7246fb32e4d41c67be7f4d94e815b9b",
+      "originalMembers": [
+        {
+          "path": "baseline-head.log",
+          "bytes": 41,
+          "sha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+        },
+        {
+          "path": "baseline-production-rebuild.log",
+          "bytes": 410,
+          "sha256": "6862f71189054af53640484de03ca2f83a642792c31bc8b97d955a88597404fe"
+        },
+        {
+          "path": "baseline-timing-module.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "build-receipt.json",
+          "bytes": 4200,
+          "sha256": "e821b0f2e0a755c5e92eeff99b3a2efa56ef9767b6b82194eb7a7f6a0e153386"
+        },
+        {
+          "path": "candidate-apply-check.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-apply.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-changed-paths.log",
+          "bytes": 149,
+          "sha256": "464ff05b618e1648627742f5eb3654a4a545613f756683b4f149da2a8c104e47"
+        },
+        {
+          "path": "candidate-timing-module.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "candidate-worktree.log",
+          "bytes": 154,
+          "sha256": "b57f0238d891dc9ff42c6e98c8635d2b791b8008d6a915a8dee053061e565c53"
+        },
+        {
+          "path": "capture-artifacts.json",
+          "bytes": 3680,
+          "sha256": "54e7749b85f4a8e565a2ea5cc8dc83e19e1c8b85c2ff6f29e71f0ea2956bb3eb"
+        },
+        {
+          "path": "capture-identity.json",
+          "bytes": 316,
+          "sha256": "3ec2696e153eb0b452d6a22ec9fcbe6bb6a1b8eee1b17fca27abd7ae649244ae"
+        },
+        {
+          "path": "capture-run.json",
+          "bytes": 12123,
+          "sha256": "bf07a7161e4a60584ed3b3a2a2dd207a3078dc3845cca267bd3e63ed2b6954df"
+        },
+        {
+          "path": "cohort/cold-01-A.command.json",
+          "bytes": 650,
+          "sha256": "d8d012f5f07f704d4b37d5d1b4e62fe6b080970e23d4b3ba58e18d2e90bed189"
+        },
+        {
+          "path": "cohort/cold-01-A.json",
+          "bytes": 5499,
+          "sha256": "b025ff67a54eb98cfd30f7356dd483a305b0b3eab73a48de9692a45db5cafec6"
+        },
+        {
+          "path": "cohort/cold-01-A.log",
+          "bytes": 222,
+          "sha256": "045d4827ecb1ac108973d034f32a3793a901bbe3b11ea77b8cdc73b616156dd8"
+        },
+        {
+          "path": "cohort/cold-01-B.command.json",
+          "bytes": 651,
+          "sha256": "2b0d140d3c74e66b477673978d5df6b0383bf5fb1ec7a943e7a88f9ccc4847f1"
+        },
+        {
+          "path": "cohort/cold-01-B.json",
+          "bytes": 5517,
+          "sha256": "217e16e7d11714e6f53ef29f1ab96cf45a5ff3e2e0719d21e48bffbc28162f49"
+        },
+        {
+          "path": "cohort/cold-01-B.log",
+          "bytes": 222,
+          "sha256": "bdd9ebe32ac5d910bc2388d6e0bead112867d597632cb7a75f1192548dfd4593"
+        },
+        {
+          "path": "cohort/cold-01-C.command.json",
+          "bytes": 650,
+          "sha256": "0781211716ce0a12f1b5d464524ce2842b6583fa77f5120f36127ceaa512c318"
+        },
+        {
+          "path": "cohort/cold-01-C.json",
+          "bytes": 5507,
+          "sha256": "d54220abedfe1a541710869d99689769ee5fcd93603dff5add1ca118c03449ac"
+        },
+        {
+          "path": "cohort/cold-01-C.log",
+          "bytes": 222,
+          "sha256": "d87db2f8fc1328716f55d2dd95faf35c1f4aa783e01756e607c26d7bc86f2e33"
+        },
+        {
+          "path": "cohort/cold-02-A.command.json",
+          "bytes": 650,
+          "sha256": "8895a119267db6c562ac082233747edd0a8b9f88ce9781768ffd3b13d92e0dd0"
+        },
+        {
+          "path": "cohort/cold-02-A.json",
+          "bytes": 5479,
+          "sha256": "6eaa725c4462c514c60aac8afc22eea9264c2f6b0d6268bc84eb1609f000b7b9"
+        },
+        {
+          "path": "cohort/cold-02-A.log",
+          "bytes": 214,
+          "sha256": "f49150d2a7c52c30e4865bf0e7d43a0f418846b6de696c234d49e420f0e667fc"
+        },
+        {
+          "path": "cohort/cold-02-B.command.json",
+          "bytes": 651,
+          "sha256": "f7edfa00a4a60ae8393212840b411336e222d29915408d23fdbcf1c3d3399b53"
+        },
+        {
+          "path": "cohort/cold-02-B.json",
+          "bytes": 5488,
+          "sha256": "742e7d585162e4bb49d6176a5b130b131ad84660b3b9997009896d0a44437fd8"
+        },
+        {
+          "path": "cohort/cold-02-B.log",
+          "bytes": 214,
+          "sha256": "5fe7b6fd01e646cf9904184c42ac5de22ae8d09d39d61c6a4d0d569332d85922"
+        },
+        {
+          "path": "cohort/cold-02-C.command.json",
+          "bytes": 650,
+          "sha256": "2c709b412c7789f0e6658b651c98784db0690b6c6b3fe0992ec1dd16a8487539"
+        },
+        {
+          "path": "cohort/cold-02-C.json",
+          "bytes": 5506,
+          "sha256": "c19884f336c207e60f69e36a3d150da5c0423093f27dd77fc5b42621eb103b03"
+        },
+        {
+          "path": "cohort/cold-02-C.log",
+          "bytes": 222,
+          "sha256": "9b4970f125b7f560401c778de55e579a2ce49b70679b4912a4d9234c6158e270"
+        },
+        {
+          "path": "cohort/cold-03-A.command.json",
+          "bytes": 650,
+          "sha256": "496ee550d37f023b328008d6aeedf4ea0a923253a5f5dce481a862412c1901c3"
+        },
+        {
+          "path": "cohort/cold-03-A.json",
+          "bytes": 5513,
+          "sha256": "fd5ebaa1695807f3ad3b1442c055f920da81635603c6a6a97397fe1d96ae387d"
+        },
+        {
+          "path": "cohort/cold-03-A.log",
+          "bytes": 222,
+          "sha256": "f1c645e21a6ef8e466046b55117c6fd46adff9793a561a4254d3b32bc09680ba"
+        },
+        {
+          "path": "cohort/cold-03-B.command.json",
+          "bytes": 651,
+          "sha256": "5e03c47e17fde83fded98448bf5bb42c70651447d1c2e1cb2c1d9ba5c46fd938"
+        },
+        {
+          "path": "cohort/cold-03-B.json",
+          "bytes": 5506,
+          "sha256": "2e2db98ae18a273285e86f6f0591eb24b5253f54d7aead5bff614027cb619a5f"
+        },
+        {
+          "path": "cohort/cold-03-B.log",
+          "bytes": 222,
+          "sha256": "67c2132905b323a63fb38d156628705de5a79b4b25af2c8ba3bf0b9586079d25"
+        },
+        {
+          "path": "cohort/cold-03-C.command.json",
+          "bytes": 650,
+          "sha256": "8f705776cf4dad40ffea3207b842213cd64f44c502c936283598cea8fe28531b"
+        },
+        {
+          "path": "cohort/cold-03-C.json",
+          "bytes": 5495,
+          "sha256": "010f357a0f2b989f9c88b4e163ff732452b4e726b2f19c6409dd045c64dc636d"
+        },
+        {
+          "path": "cohort/cold-03-C.log",
+          "bytes": 222,
+          "sha256": "b932f61d64b8e57e4f3c1a1b21ca801e080c0148e88e4c6041c20074ff10f87f"
+        },
+        {
+          "path": "cohort/cold-04-A.command.json",
+          "bytes": 650,
+          "sha256": "e04f8b693e2847273e2a6e0818373658007f1658b88bf0d0ab6d1ce217f6e32b"
+        },
+        {
+          "path": "cohort/cold-04-A.json",
+          "bytes": 5513,
+          "sha256": "79613b6947642cdec7f09a94c4997b71068bb0de0f7cd3b52d122560c3322afc"
+        },
+        {
+          "path": "cohort/cold-04-A.log",
+          "bytes": 222,
+          "sha256": "a7859e391a64b2538b35ea6845486a7e324f384f856546d341c52b1e7b07312f"
+        },
+        {
+          "path": "cohort/cold-04-B.command.json",
+          "bytes": 651,
+          "sha256": "2083a6b74be308b49d4afaa03d29a4a3854f50ec0f9953110b254f8f08c25861"
+        },
+        {
+          "path": "cohort/cold-04-B.json",
+          "bytes": 5504,
+          "sha256": "0f299269f3c9735cb51483e9467600a0015d9aa7b682c33de59531b258a045b8"
+        },
+        {
+          "path": "cohort/cold-04-B.log",
+          "bytes": 222,
+          "sha256": "4bbd32b8e57598702f138da2c8def1d43a4c4fa0bbda4d458f880093bd4225f3"
+        },
+        {
+          "path": "cohort/cold-04-C.command.json",
+          "bytes": 650,
+          "sha256": "51c4ff3af5ad70eaba1af537b090bc5b76c4793c809487ce7bc392b306fe90dc"
+        },
+        {
+          "path": "cohort/cold-04-C.json",
+          "bytes": 5506,
+          "sha256": "53d3d93783f5e54ba8ed712cc1ff71b67c9121f6f42be00d44cd30576169ed17"
+        },
+        {
+          "path": "cohort/cold-04-C.log",
+          "bytes": 222,
+          "sha256": "3d7ae3a27f065adbf503b6a0e7e5b0e1a7936cc03f74d0c1bacd33f39f4a0ef3"
+        },
+        {
+          "path": "cohort/cold-05-A.command.json",
+          "bytes": 650,
+          "sha256": "1e47374f8a1affcef005f8979709d522c4de407d85ccccf89de4b685512b3d11"
+        },
+        {
+          "path": "cohort/cold-05-A.json",
+          "bytes": 5513,
+          "sha256": "21f113bf7c9ca8b48792d11b1f243d5b6524af78e30563ec32221c949623ea10"
+        },
+        {
+          "path": "cohort/cold-05-A.log",
+          "bytes": 222,
+          "sha256": "3d218f62d41161b667b4e429837dfd902a8ceb76ec6cbdb815b5a88bce4de6a2"
+        },
+        {
+          "path": "cohort/cold-05-B.command.json",
+          "bytes": 651,
+          "sha256": "3611f1564192f3804aafe1ce943197a8cb456af92a937120d434ad190b1ea490"
+        },
+        {
+          "path": "cohort/cold-05-B.json",
+          "bytes": 5515,
+          "sha256": "c16ef7672aae8430f793b1ea69141bc7d459d645c555a4d287591063d947170e"
+        },
+        {
+          "path": "cohort/cold-05-B.log",
+          "bytes": 222,
+          "sha256": "b6a0eab89abbd8ad9700917505a4e681cd53a39c2efcf52256d5178c1dff7e47"
+        },
+        {
+          "path": "cohort/cold-05-C.command.json",
+          "bytes": 650,
+          "sha256": "34013bdb255bc1c72fb52b2d5cd8ef67430f5e1cfc1007f6e5af87a34a059ef7"
+        },
+        {
+          "path": "cohort/cold-05-C.json",
+          "bytes": 5478,
+          "sha256": "858c114ef0ad274d55c2248db179ccf36514b3dc34fccb6b70ab9227caff2659"
+        },
+        {
+          "path": "cohort/cold-05-C.log",
+          "bytes": 214,
+          "sha256": "68e5ef536ed39f036024f53fd4bbaa5870a9bb884a4ffd8a6fee554049b8c07c"
+        },
+        {
+          "path": "cohort/cold-06-A.command.json",
+          "bytes": 650,
+          "sha256": "802fe9a1918d315fd12bef5f7389b09fa262657c48bf2434bd77ca5aabc1a7ee"
+        },
+        {
+          "path": "cohort/cold-06-A.json",
+          "bytes": 5512,
+          "sha256": "75a977e58ab8edb7c1c79e13dce776ca851975c95ab8f91e3b7604211e6fa8e3"
+        },
+        {
+          "path": "cohort/cold-06-A.log",
+          "bytes": 222,
+          "sha256": "0e273d8f0e578386b4af391337164bbe7ab58878accffebf20d5a05a1ced5d86"
+        },
+        {
+          "path": "cohort/cold-06-B.command.json",
+          "bytes": 651,
+          "sha256": "d3759803c711e60afb7000351283109fb43ed13e0e2d71761acbbf5ad1750a6b"
+        },
+        {
+          "path": "cohort/cold-06-B.log",
+          "bytes": 214,
+          "sha256": "72b7fec232238ef570ae375e92882d9d692a6f3c00da2eee4741a267784e5d61"
+        },
+        {
+          "path": "cohort/cold-06-B.json",
+          "bytes": 5501,
+          "sha256": "6700d7d0957d518b15b7a6fd1424591a9463250f11f8c5a23783d059078d0b23"
+        },
+        {
+          "path": "cohort/cold-06-C.command.json",
+          "bytes": 650,
+          "sha256": "70d33e327d5790a5a23507eb11966c89c44869f36e3850f210587f5bd9f50ddc"
+        },
+        {
+          "path": "cohort/cold-06-C.json",
+          "bytes": 5504,
+          "sha256": "9449b53dd8778c0d8aa3827c5c295d747f8a0ab850e9d4ff875100228c8dd6ae"
+        },
+        {
+          "path": "cohort/cold-06-C.log",
+          "bytes": 222,
+          "sha256": "e8a25bcc5773ad0c99d1232bde7805443d4a0d69aa503ca7e81537846485ee1b"
+        },
+        {
+          "path": "cohort/observations.json",
+          "bytes": 5359,
+          "sha256": "ffabf312d0f65607277b783f830eff8ba34e59a651c8035bc89ea3935e7703c6"
+        },
+        {
+          "path": "cohort/protocol.json",
+          "bytes": 2137,
+          "sha256": "9f88ffceb5d5bb3288f50a935f3d6ee82be678904c99a6a997d65ee709668eb0"
+        },
+        {
+          "path": "cohort/result.json",
+          "bytes": 15275,
+          "sha256": "29c636bae49da8225a1fd61f0b1a9970c1d9dd3426018eee619bf53459ce53b5"
+        },
+        {
+          "path": "cohort/warm-01-A.command.json",
+          "bytes": 650,
+          "sha256": "93b87918f579aff932196ab8ff42d709f4093152efdca6c9abfd318d9787ac01"
+        },
+        {
+          "path": "cohort/warm-01-A.json",
+          "bytes": 48984,
+          "sha256": "061b05eb85c1a9de1d59272420ee86bc95abc951cff10893b0b4c3e623e8f01d"
+        },
+        {
+          "path": "cohort/warm-01-A.log",
+          "bytes": 221,
+          "sha256": "d8a9484cfff5e186436052b3a899410e3c1e97b899bf12389366191320824071"
+        },
+        {
+          "path": "cohort/warm-01-B.command.json",
+          "bytes": 651,
+          "sha256": "3923b1da44cda09dc88809bc23c082fe565b5a7ccc22eb38bc6422725c3493dc"
+        },
+        {
+          "path": "cohort/warm-01-B.json",
+          "bytes": 48952,
+          "sha256": "e9d549a9c1d58be164d382342c4daad0846631fbbd43d23227c08d1e35f2d3e5"
+        },
+        {
+          "path": "cohort/warm-01-B.log",
+          "bytes": 222,
+          "sha256": "5b4d127160b74b9ea5eda89081637d10a6d01fb847d8a73dfeb5311cb53aa105"
+        },
+        {
+          "path": "cohort/warm-01-C.command.json",
+          "bytes": 650,
+          "sha256": "97aa1e8ab6105ad3cd9eca96f439e06d37d2bebb97ad8783d9afcb065ceef835"
+        },
+        {
+          "path": "cohort/warm-01-C.json",
+          "bytes": 48990,
+          "sha256": "8fcc7cd0c0a3ab89b9c220aaaa4b39ff094a646f3ff27cf7425d941e73731c1b"
+        },
+        {
+          "path": "cohort/warm-01-C.log",
+          "bytes": 221,
+          "sha256": "16fe9274ee85e3ab378c152e0b609c53922bccaabdc7f021ec1a88f6ec0540e2"
+        },
+        {
+          "path": "cohort/warm-02-A.command.json",
+          "bytes": 650,
+          "sha256": "f1272972aa34461004ffc04038ee9914d0dc44211c438ed978d1abb0997a93aa"
+        },
+        {
+          "path": "cohort/warm-02-A.json",
+          "bytes": 48992,
+          "sha256": "7b28150fe09e139b32ad24c93fc887c72e0d11095eac5f2928a9c605ee746ff7"
+        },
+        {
+          "path": "cohort/warm-02-A.log",
+          "bytes": 221,
+          "sha256": "ea717f0e64b7c8927d64c0c025b3174c535e2cd0d9ec012b9709c82d4d445016"
+        },
+        {
+          "path": "cohort/warm-02-B.command.json",
+          "bytes": 651,
+          "sha256": "6d2e8cfe65448b42fdf953f9fb5a232ea5c15804ce6205c1f01e55b83a22f750"
+        },
+        {
+          "path": "cohort/warm-02-B.json",
+          "bytes": 48946,
+          "sha256": "224646ff74c4202c2a520639c24c01ed685da27ac285877179fd525fbb9e41bb"
+        },
+        {
+          "path": "cohort/warm-02-B.log",
+          "bytes": 222,
+          "sha256": "80dbb6cb8d8e488e0ad7abfc6c3b4b1d0f2e40fa87b23aa89b8ded88c52a2a48"
+        },
+        {
+          "path": "cohort/warm-02-C.command.json",
+          "bytes": 650,
+          "sha256": "c2a22028b4b4430ed77813193516a0c3e63658c319f1bb0844ec1aebb9693d13"
+        },
+        {
+          "path": "cohort/warm-02-C.json",
+          "bytes": 48973,
+          "sha256": "b0b9eaaee3b2e53055b049062f6f101fea369c0fe33d8671bd45ce49fe59e08b"
+        },
+        {
+          "path": "cohort/warm-02-C.log",
+          "bytes": 222,
+          "sha256": "7ddbe0adb07a0adee8cfa2fc20f7c3626a06d7ee1ea122908295f725eefdb21f"
+        },
+        {
+          "path": "cohort/warm-03-A.json",
+          "bytes": 48964,
+          "sha256": "e0df8b3f04fe3bb85443ab417294a780ac9df95dc89b2fe555900f5be640d2fd"
+        },
+        {
+          "path": "cohort/warm-03-A.command.json",
+          "bytes": 650,
+          "sha256": "80a4bcd5a6f675f43f356cc46072a8eb8aa413b0583fa63b0bc67ab38482e8d4"
+        },
+        {
+          "path": "cohort/warm-03-A.log",
+          "bytes": 221,
+          "sha256": "994c3a09e9616a3cfeb5bb33f4301866ff675aae606c18401cb35a156b22004c"
+        },
+        {
+          "path": "cohort/warm-03-B.command.json",
+          "bytes": 651,
+          "sha256": "a716422b7317b87bcf8f0f9851ad4f671f34bb504d3bc25756db748e4e491a58"
+        },
+        {
+          "path": "cohort/warm-03-B.json",
+          "bytes": 48958,
+          "sha256": "8758d394822627e826e3201a9202a4545a6c95005a35b12f692e544b17c16d51"
+        },
+        {
+          "path": "cohort/warm-03-B.log",
+          "bytes": 215,
+          "sha256": "de97af5e2cbc38c7d3134ddcf4c56790f8cab807b34fb857e1931a63c45dc1ca"
+        },
+        {
+          "path": "cohort/warm-03-C.command.json",
+          "bytes": 650,
+          "sha256": "d30788943a8c796932286ddfe8a64f2554aad8f7162ffd47f8c9379099cadb44"
+        },
+        {
+          "path": "cohort/warm-03-C.json",
+          "bytes": 48967,
+          "sha256": "63e1dfd639ffa37b128c193777cac1da08e51eca6b004fe8be2ec7ac1f6017b2"
+        },
+        {
+          "path": "cohort/warm-03-C.log",
+          "bytes": 222,
+          "sha256": "925a5ec9ed00fcbd143f502771be18d8ad34afb0b628034687ccf459c2d40af9"
+        },
+        {
+          "path": "cohort/warm-04-A.command.json",
+          "bytes": 650,
+          "sha256": "9355c48b0ef2c41b8973dd0c8a567da3c3c593e85435e77bc10284e3f0c6caa7"
+        },
+        {
+          "path": "cohort/warm-04-A.json",
+          "bytes": 48966,
+          "sha256": "0c66469bfc309225392cb9832a7c2445f6f3da61cd78ce0cd764f18a02568a12"
+        },
+        {
+          "path": "cohort/warm-04-A.log",
+          "bytes": 222,
+          "sha256": "8f99d5afff552bc4689cc7cadf661a30c632e66690e2be81a59e74311ff45770"
+        },
+        {
+          "path": "cohort/warm-04-B.command.json",
+          "bytes": 651,
+          "sha256": "73c64c72e3f1bb4361ca8c362ac010ec1b73bcaa261303e4145c743ea546288a"
+        },
+        {
+          "path": "cohort/warm-04-B.json",
+          "bytes": 48971,
+          "sha256": "f21ba337faa8bc6912b865b6e71fa4cc698cc421902cc62e9a62a88cb643ba45"
+        },
+        {
+          "path": "cohort/warm-04-B.log",
+          "bytes": 222,
+          "sha256": "dff18fdd2f6fb06fb3ff0165ea34bfa11b87136be22a2cc73f7407af1c28efe4"
+        },
+        {
+          "path": "cohort/warm-04-C.command.json",
+          "bytes": 650,
+          "sha256": "2d6333d6a1edc16c206affff1ae02f51917779ca322b9c3368466b21029d91b7"
+        },
+        {
+          "path": "cohort/warm-04-C.json",
+          "bytes": 48988,
+          "sha256": "39c4d4033eac9a858a0a364feb15b0e2472b2ed3cf77beb339454aa43057b03d"
+        },
+        {
+          "path": "cohort/warm-04-C.log",
+          "bytes": 222,
+          "sha256": "caf1c97e5f8f8387a341a637eea9b93e04db39a6b3cc28c400d33b23ec446f33"
+        },
+        {
+          "path": "cohort/warm-05-A.command.json",
+          "bytes": 650,
+          "sha256": "392a05e478969de2d9ae9544e6df2e516423de58fd162e1b468d24acb1add44a"
+        },
+        {
+          "path": "cohort/warm-05-A.json",
+          "bytes": 48989,
+          "sha256": "7d3237434135b729cbc9b01709a786d226ba546bb7b4627587983599a0fcf251"
+        },
+        {
+          "path": "cohort/warm-05-A.log",
+          "bytes": 222,
+          "sha256": "88df848047163048abf7fb46b22824749bb94475f11997439bdb928f1bdbf214"
+        },
+        {
+          "path": "cohort/warm-05-B.command.json",
+          "bytes": 651,
+          "sha256": "9330f36e93aa3c7f32cf24e15528c117780cda0b6433b4736d4762c4c58ad398"
+        },
+        {
+          "path": "cohort/warm-05-B.json",
+          "bytes": 48970,
+          "sha256": "bbef452221dcdf7c8f06f07c2c46c40bb5c99313c0f91a70ee805e9f835964ec"
+        },
+        {
+          "path": "cohort/warm-05-B.log",
+          "bytes": 222,
+          "sha256": "f5cb6e11f0c04621199c002c3822c42ef1cae9a694cb4450e46094b5398371bf"
+        },
+        {
+          "path": "cohort/warm-05-C.command.json",
+          "bytes": 650,
+          "sha256": "ee63560f5fb5bf3d52814b38078116fd04335d8372b094a7e8d478abe154bb9c"
+        },
+        {
+          "path": "cohort/warm-05-C.json",
+          "bytes": 48963,
+          "sha256": "a53265dbb3ca6b35daf909ce7e695055698a48502e469c2d07b821f36690052b"
+        },
+        {
+          "path": "cohort/warm-05-C.log",
+          "bytes": 222,
+          "sha256": "3bad63897a6b70531bc5770123a8c62d917f5d13eb63e344f2e33df288381fb8"
+        },
+        {
+          "path": "cohort/warm-06-A.command.json",
+          "bytes": 650,
+          "sha256": "4f099548bddf8be30321b0198615f8c8f42acf520de30bf992533a41b2f59c1a"
+        },
+        {
+          "path": "cohort/warm-06-A.log",
+          "bytes": 222,
+          "sha256": "09d468b96707de37f1829ca4897b02a43f1e117848eec70c9f4ffbaa6f609f16"
+        },
+        {
+          "path": "cohort/warm-06-A.json",
+          "bytes": 48953,
+          "sha256": "8edcf928b7be938a68400f428ab3dea90ad3c68533d0d654e06b12550405916e"
+        },
+        {
+          "path": "cohort/warm-06-B.command.json",
+          "bytes": 651,
+          "sha256": "97687077864d9e9a9016dc70d11e42eb31f8beafd2a910531c24143c4d5c29ef"
+        },
+        {
+          "path": "cohort/warm-06-B.json",
+          "bytes": 48965,
+          "sha256": "b4306560ad66ce16bf23ed2654dfd7c381722c8a732784f07d351cc52bb2dd41"
+        },
+        {
+          "path": "cohort/warm-06-C.command.json",
+          "bytes": 650,
+          "sha256": "c0d7f95ac8f59c6372c5bda44f90004d8f25261167919fbc0a9645f4d44edd0b"
+        },
+        {
+          "path": "cohort/warm-06-B.log",
+          "bytes": 222,
+          "sha256": "af6e08535ff54b0743e045a2182559cd0efa82c9dbe64131ddc61d1b6a9b2feb"
+        },
+        {
+          "path": "cohort/warm-06-C.json",
+          "bytes": 48972,
+          "sha256": "f1c4f576411b3abb98ed6077136fe5ac3027008ad680e65d34938a2f734fe116"
+        },
+        {
+          "path": "cohort/warm-06-C.log",
+          "bytes": 221,
+          "sha256": "dbe155fc1552615bf2636a761ca16dad57b3ba766f5b2ca6d17cc08ee88d25c8"
+        },
+        {
+          "path": "commands.json",
+          "bytes": 7537,
+          "sha256": "c16287452977182b71dd103e30184a13049ca6f1fd01871a3e8df2febb13636f"
+        },
+        {
+          "path": "compiler-path.log",
+          "bytes": 18,
+          "sha256": "c8a696e5fabf26f4a5df8d7c5a8ac76153f44d811f5420326a3a64fdbd2f509c"
+        },
+        {
+          "path": "compiler-version.log",
+          "bytes": 122,
+          "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+        },
+        {
+          "path": "linker-path.log",
+          "bytes": 20,
+          "sha256": "d33f2432764fcd3eb1e4ce84e08b4bb24ec69d968d48a0ad42109d93fad1b876"
+        },
+        {
+          "path": "linker-version.log",
+          "bytes": 18,
+          "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+        },
+        {
+          "path": "measurement/baseline/parser.wasm",
+          "bytes": 67679,
+          "sha256": "674741af5e0ee70afa9f902b52870041ffd95a20dccc6e898f03f49dba339c31"
+        },
+        {
+          "path": "measurement/candidate/parser.wasm",
+          "bytes": 67757,
+          "sha256": "f2a8aac2961b6ee806a5fe33f23ccff6fc240fad64ec528ce1f20d2780a0c3d5"
+        },
+        {
+          "path": "measurement/jmdict-groups.json",
+          "bytes": 14349,
+          "sha256": "b10b05c36b64f8388006f2a454528ad1609e3a2909932ceae628421b96403662"
+        },
+        {
+          "path": "prepare-inputs.log",
+          "bytes": 215,
+          "sha256": "3a66ce28f7cec78f40d432dbb697f43e607e4776611837d1806f64be90f0daa4"
+        },
+        {
+          "path": "run.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "run.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "screen.log",
+          "bytes": 6847,
+          "sha256": "26061b996314dec2e4a32d4091adb5aea36d9bf6507fa7222277886873c0eb5e"
+        },
+        {
+          "path": "status.json",
+          "bytes": 9774,
+          "sha256": "6853f950c00b7ab6b380f620bd04131515762de304531811a511feaf3b3967c8"
+        }
+      ]
+    }
+  ],
+  "auditorSha256": "9b2604a84fe2422b7b6d8a88ce4d02e4ead46a53e74ab41ce825c5eaaca37bc6",
+  "packagerSha256": "fa716e9bb118e601b5ca4513a6af84e9ab0a1efee0f249078521cb645e7c9c41",
+  "verification": "Original ZIP sizes/digests, every original extracted byte, all selected source hashes and every newly saved tar member verified. Two exact candidate native modules and their source/build/input receipts verified by the independent audit. No new timing.",
+  "excluded": "Original ZIPs and the generated timing WASM duplicates only; their exact identities remain recorded."
+}

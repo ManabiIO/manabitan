@@ -1,0 +1,810 @@
+{
+  "complete": true,
+  "createdAt": "2026-11-28T05:31:56.096509+00:00",
+  "status": "Closed without promotion",
+  "decision": "No product branch, whole-import cohort, or PR. Warm gains are only about one millisecond for the full sequential corpus, and the cold gain does not replicate on BA. The retained local cohort also has cold losses and substantial control drift.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "experimentCommit": "bc22226a2299b58ddb26b23d928b1b99c28422eb",
+  "runId": 46106878218,
+  "runAttempt": 1,
+  "candidate": "18 native lines: bounded 16+16+8-byte copies in the existing 40-byte libdeflate fast match loop, for distances >=16 only; same maximum overwrite allowance.",
+  "workload": {
+    "dictionary": "jmdict",
+    "groups": 12,
+    "banks": 53,
+    "uncompressedBytes": 171617523,
+    "compressedSourceBytes": 15632849,
+    "outputDigest": "343a73cf768e5feaa5a1e557de40b3742a3de404524d164884c4787c668c6be8",
+    "scope": "Sequential native inflate plus immediate CRC in one WASM instance; excludes parser, worker scheduling/transport, storage and UI. Cold and warm remain separate."
+  },
+  "protocol": {
+    "hosts": 2,
+    "childrenPerHost": 36,
+    "totalChildren": 72,
+    "verifiedCorpusPasses": 540,
+    "cold": "Six A/B/C permutations, one timed corpus per fresh child, no warmup",
+    "warm": "Six A/B/C permutations, four excluded warmups and ten measured corpus passes per fresh child",
+    "controls": "A/C identical baseline; B candidate. Every observation, warmup, tail, command receipt and log retained."
+  },
+  "correctness": {
+    "byteAndCrcDigestsEqual": true,
+    "nativeModuleHashesExact": true,
+    "frozenSourceAndInputIdentitiesExact": true,
+    "focusedTestsOnAB": 96,
+    "testFilesOnAB": 2,
+    "limitations": "Correctness evidence does not establish an import-latency improvement."
+  },
+  "hosts": {
+    "AB": {
+      "artifactId": 15250090313,
+      "host": {
+        "load": [
+          0.67,
+          0.23,
+          0.08
+        ],
+        "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+        "parallelism": 4,
+        "freeMemory": 15656906752
+      },
+      "node": "v24.22.3",
+      "v8": "13.6.233.17-node.63",
+      "observations": 36,
+      "verifiedCorpusPasses": 270,
+      "comparisons": {
+        "cold": {
+          "B/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -1.472872696297256,
+                "ms": -1.6695989999999767
+              },
+              {
+                "block": 1,
+                "percent": -1.3785870241751819,
+                "ms": -1.5125860000000273
+              },
+              {
+                "block": 2,
+                "percent": -2.3540306183162385,
+                "ms": -2.6385259999999846
+              },
+              {
+                "block": 3,
+                "percent": 1.3873570021921688,
+                "ms": 1.5267540000000395
+              },
+              {
+                "block": 4,
+                "percent": 0.06778342354618605,
+                "ms": 0.07438300000005427
+              },
+              {
+                "block": 5,
+                "percent": -4.254751442768734,
+                "ms": -4.846638000000041
+              }
+            ],
+            "medianPercent": -1.425729860236219,
+            "medianMs": -1.591092500000002,
+            "faster": 4
+          },
+          "B/C": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": 2.444356468439124,
+                "ms": 2.664889999999957
+              },
+              {
+                "block": 1,
+                "percent": -2.3369724841869166,
+                "ms": -2.5892889999999653
+              },
+              {
+                "block": 2,
+                "percent": -3.869943568801515,
+                "ms": -4.4060460000000035
+              },
+              {
+                "block": 3,
+                "percent": -1.0679336492099956,
+                "ms": -1.204402999999985
+              },
+              {
+                "block": 4,
+                "percent": -1.2133085547327505,
+                "ms": -1.348706000000007
+              },
+              {
+                "block": 5,
+                "percent": -1.3011300186961838,
+                "ms": -1.4377790000000203
+              }
+            ],
+            "medianPercent": -1.2572192867144671,
+            "medianMs": -1.3932425000000137,
+            "faster": 5
+          },
+          "C/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -3.8237627720792866,
+                "ms": -4.334488999999934
+              },
+              {
+                "block": 1,
+                "percent": 0.9813186058117651,
+                "ms": 1.076702999999938
+              },
+              {
+                "block": 2,
+                "percent": 1.5769396240500777,
+                "ms": 1.7675200000000189
+              },
+              {
+                "block": 3,
+                "percent": 2.4817945707272138,
+                "ms": 2.7311570000000245
+              },
+              {
+                "block": 4,
+                "percent": 1.2968264849610112,
+                "ms": 1.4230890000000613
+              },
+              {
+                "block": 5,
+                "percent": -2.9925585010568523,
+                "ms": -3.408859000000021
+              }
+            ],
+            "medianPercent": 1.1390725453863881,
+            "medianMs": 1.2498959999999997,
+            "faster": 2
+          }
+        },
+        "warm": {
+          "B/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -0.4676701378849013,
+                "ms": -0.4714046999995105
+              },
+              {
+                "block": 1,
+                "percent": -1.0919084481260666,
+                "ms": -1.1266434000002619
+              },
+              {
+                "block": 2,
+                "percent": -2.2428091014149887,
+                "ms": -2.243874899999639
+              },
+              {
+                "block": 3,
+                "percent": 0.015800940183230416,
+                "ms": 0.015573199999906251
+              },
+              {
+                "block": 4,
+                "percent": -1.8195729349818723,
+                "ms": -1.825560599999875
+              },
+              {
+                "block": 5,
+                "percent": -0.7932742205359111,
+                "ms": -0.7915687000003402
+              }
+            ],
+            "medianPercent": -0.9425913343309889,
+            "medianMs": -0.959106050000301,
+            "faster": 5
+          },
+          "B/C": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -0.8005341210403971,
+                "ms": -0.8096343999996662
+              },
+              {
+                "block": 1,
+                "percent": -1.7943371266987973,
+                "ms": -1.8646597000000753
+              },
+              {
+                "block": 2,
+                "percent": -2.663684539100153,
+                "ms": -2.676473399999807
+              },
+              {
+                "block": 3,
+                "percent": -0.916220539651158,
+                "ms": -0.9115091000000319
+              },
+              {
+                "block": 4,
+                "percent": -0.40458926259294703,
+                "ms": -0.40015359999993905
+              },
+              {
+                "block": 5,
+                "percent": -0.2688292991464114,
+                "ms": -0.2668407000003299
+              }
+            ],
+            "medianPercent": -0.8583773303457776,
+            "medianMs": -0.8605717499998491,
+            "faster": 6
+          },
+          "C/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": 0.3355501768141034,
+                "ms": 0.33822970000015573
+              },
+              {
+                "block": 1,
+                "percent": 0.7152629064567817,
+                "ms": 0.7380162999998134
+              },
+              {
+                "block": 2,
+                "percent": 0.4323930238085083,
+                "ms": 0.432598500000168
+              },
+              {
+                "block": 3,
+                "percent": 0.9406398150237916,
+                "ms": 0.9270822999999382
+              },
+              {
+                "block": 4,
+                "percent": -1.420731800704822,
+                "ms": -1.425406999999936
+              },
+              {
+                "block": 5,
+                "percent": -0.5258585833335716,
+                "ms": -0.5247280000000103
+              }
+            ],
+            "medianPercent": 0.38397160031130584,
+            "medianMs": 0.38541410000016185,
+            "faster": 2
+          }
+        }
+      },
+      "armMediansMs": {
+        "cold": {
+          "A": 111.06656199999998,
+          "B": 109.628792,
+          "C": 110.97804199999999
+        },
+        "warm": {
+          "A": 100.18829524999992,
+          "B": 98.78384954999987,
+          "C": 99.98294684999996
+        }
+      },
+      "auditSha256": "eb7861a11a3c1d3e4edd89735a89b7e65e4e866e07157438663f7b3bff9b7b25"
+    },
+    "BA": {
+      "artifactId": 15249129886,
+      "host": {
+        "load": [
+          1.26,
+          0.39,
+          0.14
+        ],
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "parallelism": 4,
+        "freeMemory": 15615057920
+      },
+      "node": "v24.22.3",
+      "v8": "13.6.233.17-node.63",
+      "observations": 36,
+      "verifiedCorpusPasses": 270,
+      "comparisons": {
+        "cold": {
+          "B/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": 3.4222474787129142,
+                "ms": 5.3156239999999855
+              },
+              {
+                "block": 1,
+                "percent": 4.604376757984219,
+                "ms": 6.972891000000004
+              },
+              {
+                "block": 2,
+                "percent": -1.941899489344534,
+                "ms": -2.97228199999995
+              },
+              {
+                "block": 3,
+                "percent": 7.415809752118796,
+                "ms": 11.28392199999999
+              },
+              {
+                "block": 4,
+                "percent": 2.7504153227307704,
+                "ms": 4.187250000000006
+              },
+              {
+                "block": 5,
+                "percent": -0.4881737544240039,
+                "ms": -0.7426640000000475
+              }
+            ],
+            "medianPercent": 3.0863314007218423,
+            "medianMs": 4.751436999999996,
+            "faster": 2
+          },
+          "B/C": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -0.8254566927466622,
+                "ms": -1.3370599999999513
+              },
+              {
+                "block": 1,
+                "percent": 4.444160602450542,
+                "ms": 6.740583000000015
+              },
+              {
+                "block": 2,
+                "percent": -2.4907701370417756,
+                "ms": -3.833845999999994
+              },
+              {
+                "block": 3,
+                "percent": 1.0597542413921746,
+                "ms": 1.713943999999941
+              },
+              {
+                "block": 4,
+                "percent": 3.15105084594296,
+                "ms": 4.778547999999972
+              },
+              {
+                "block": 5,
+                "percent": -3.682333745181199,
+                "ms": -5.787751000000014
+              }
+            ],
+            "medianPercent": 0.11714877432275617,
+            "medianMs": 0.1884419999999949,
+            "faster": 3
+          },
+          "C/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": 4.283058968368247,
+                "ms": 6.652683999999937
+              },
+              {
+                "block": 1,
+                "percent": 0.15339886366985134,
+                "ms": 0.23230799999998908
+              },
+              {
+                "block": 2,
+                "percent": 0.5628909678280003,
+                "ms": 0.861564000000044
+              },
+              {
+                "block": 3,
+                "percent": 6.28940329257528,
+                "ms": 9.569978000000049
+              },
+              {
+                "block": 4,
+                "percent": -0.3883969382052599,
+                "ms": -0.5912979999999664
+              },
+              {
+                "block": 5,
+                "percent": 3.3162763540249163,
+                "ms": 5.045086999999967
+              }
+            ],
+            "medianPercent": 1.9395836609264583,
+            "medianMs": 2.9533255000000054,
+            "faster": 1
+          }
+        },
+        "warm": {
+          "B/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -1.3122000181335247,
+                "ms": -1.8560960999997178
+              },
+              {
+                "block": 1,
+                "percent": 0.6674096906584381,
+                "ms": 0.9381064000002084
+              },
+              {
+                "block": 2,
+                "percent": -0.7509908298804935,
+                "ms": -1.0526864000000842
+              },
+              {
+                "block": 3,
+                "percent": -1.0890500284796212,
+                "ms": -1.5250632000003463
+              },
+              {
+                "block": 4,
+                "percent": -0.8939564986156556,
+                "ms": -1.2490263999999058
+              },
+              {
+                "block": 5,
+                "percent": -0.774401606433095,
+                "ms": -1.082477100000233
+              }
+            ],
+            "medianPercent": -0.8341790525243753,
+            "medianMs": -1.1657517500000694,
+            "faster": 5
+          },
+          "B/C": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -0.32240445957010255,
+                "ms": -0.45151000000021213
+              },
+              {
+                "block": 1,
+                "percent": 0.9285460088362063,
+                "ms": 1.3017808999999545
+              },
+              {
+                "block": 2,
+                "percent": -0.6721438319827633,
+                "ms": -0.9414162999998155
+              },
+              {
+                "block": 3,
+                "percent": -0.9413881065296836,
+                "ms": -1.3163181000003021
+              },
+              {
+                "block": 4,
+                "percent": -1.2069172514863946,
+                "ms": -1.6916337000002954
+              },
+              {
+                "block": 5,
+                "percent": -0.9908160538885546,
+                "ms": -1.3880137000001582
+              }
+            ],
+            "medianPercent": -0.8067659692562235,
+            "medianMs": -1.1288672000000588,
+            "faster": 5
+          },
+          "C/A": {
+            "pairs": [
+              {
+                "block": 0,
+                "percent": -0.9929970252562481,
+                "ms": -1.4045860999995057
+              },
+              {
+                "block": 1,
+                "percent": -0.25873385529097126,
+                "ms": -0.3636744999997461
+              },
+              {
+                "block": 2,
+                "percent": -0.07938054936406091,
+                "ms": -0.11127010000026871
+              },
+              {
+                "block": 3,
+                "percent": -0.14906520405185697,
+                "ms": -0.2087451000000442
+              },
+              {
+                "block": 4,
+                "percent": 0.31678407451605217,
+                "ms": 0.4426073000003896
+              },
+              {
+                "block": 5,
+                "percent": 0.2185801749191807,
+                "ms": 0.30553659999992533
+              }
+            ],
+            "medianPercent": -0.11422287670795894,
+            "medianMs": -0.16000760000015646,
+            "faster": 4
+          }
+        }
+      },
+      "armMediansMs": {
+        "cold": {
+          "A": 152.20049649999999,
+          "B": 157.4206405,
+          "C": 155.54913900000003
+        },
+        "warm": {
+          "A": 140.1045522000001,
+          "B": 138.91011654999988,
+          "C": 140.07483154999986
+        }
+      },
+      "auditSha256": "ad3049284b91f4d8c157a1e3ee0b46675f8a8b431dbd24c2ee567d417959e27f"
+    }
+  },
+  "localEvidence": {
+    "commit": "d602e1b003811b0ebac63e9ef2c8019f430aea21",
+    "path": "dev/perf/import-investigation-9d6/evidence/inflater-local.tar.gz",
+    "archiveSha256": "b7312cb75461cfa89afee5522e5074e93a82302b2be4e1efea34799db0a7522c",
+    "auditSha256": "e1bbebb166eeca9116757062f4b9e733d2d7cdd9bc3c8a1e5439463f0d50adc7",
+    "comparisons": {
+      "cold": {
+        "B/A": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": 126.49394825565933,
+              "ms": 243.24056000000016
+            },
+            {
+              "block": 1,
+              "percent": 8.428418782642066,
+              "ms": 14.89611199999996
+            },
+            {
+              "block": 2,
+              "percent": -1.8016057596408008,
+              "ms": -3.3442089999998927
+            },
+            {
+              "block": 3,
+              "percent": -20.51666329059252,
+              "ms": -38.99660499999993
+            },
+            {
+              "block": 4,
+              "percent": 45.506625588432726,
+              "ms": 80.34605899999991
+            },
+            {
+              "block": 5,
+              "percent": -34.68494961599345,
+              "ms": -97.30285700000002
+            }
+          ],
+          "medianPercent": 3.3134065115006326,
+          "medianMs": 5.775951500000033,
+          "faster": 3
+        },
+        "B/C": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": 102.78983136273685,
+              "ms": 220.76327500000016
+            },
+            {
+              "block": 1,
+              "percent": -15.74181605677818,
+              "ms": -35.802445000000034
+            },
+            {
+              "block": 2,
+              "percent": 3.0953801955045934,
+              "ms": 5.472841000000102
+            },
+            {
+              "block": 3,
+              "percent": -35.52404661299053,
+              "ms": -83.23784299999997
+            },
+            {
+              "block": 4,
+              "percent": 31.98332735823921,
+              "ms": 62.25543699999983
+            },
+            {
+              "block": 5,
+              "percent": 13.850771835001785,
+              "ms": 22.291320000000013
+            }
+          ],
+          "medianPercent": 8.47307601525319,
+          "medianMs": 13.882080500000058,
+          "faster": 2
+        },
+        "C/A": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": 11.689006659570689,
+              "ms": 22.477284999999995
+            },
+            {
+              "block": 1,
+              "percent": 28.68591952528623,
+              "ms": 50.698556999999994
+            },
+            {
+              "block": 2,
+              "percent": -4.749956735072914,
+              "ms": -8.817049999999995
+            },
+            {
+              "block": 3,
+              "percent": 23.27593860042354,
+              "ms": 44.24123800000004
+            },
+            {
+              "block": 4,
+              "percent": 10.246217079743381,
+              "ms": 18.09062200000008
+            },
+            {
+              "block": 5,
+              "percent": -42.63099904262013,
+              "ms": -119.59417700000003
+            }
+          ],
+          "medianPercent": 10.967611869657034,
+          "medianMs": 20.283953500000038,
+          "faster": 2
+        }
+      },
+      "warm": {
+        "B/A": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": -2.368660916420995,
+              "ms": -4.059981400000453
+            },
+            {
+              "block": 1,
+              "percent": 0.07587310973797834,
+              "ms": 0.14146800000014537
+            },
+            {
+              "block": 2,
+              "percent": -20.81157446866474,
+              "ms": -43.98579860000021
+            },
+            {
+              "block": 3,
+              "percent": 23.372729866762487,
+              "ms": 39.8653838999997
+            },
+            {
+              "block": 4,
+              "percent": -4.81287415757331,
+              "ms": -7.769596299999847
+            },
+            {
+              "block": 5,
+              "percent": 9.018571914360042,
+              "ms": 14.64938960000029
+            }
+          ],
+          "medianPercent": -1.1463939033415083,
+          "medianMs": -1.9592567000001537,
+          "faster": 3
+        },
+        "B/C": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": 0.6084341813106686,
+              "ms": 1.012021200000163
+            },
+            {
+              "block": 1,
+              "percent": -8.014394870540764,
+              "ms": -16.257381000000095
+            },
+            {
+              "block": 2,
+              "percent": -13.576417536099806,
+              "ms": -26.29191220000061
+            },
+            {
+              "block": 3,
+              "percent": 10.228408105549946,
+              "ms": 19.52631079999975
+            },
+            {
+              "block": 4,
+              "percent": -9.806700776405785,
+              "ms": -16.707859400000075
+            },
+            {
+              "block": 5,
+              "percent": 10.205221703525869,
+              "ms": 16.398439300000007
+            }
+          ],
+          "medianPercent": -3.7029803446150478,
+          "medianMs": -7.622679899999966,
+          "faster": 3
+        },
+        "C/A": {
+          "pairs": [
+            {
+              "block": 0,
+              "percent": -2.9590909767729046,
+              "ms": -5.072002600000616
+            },
+            {
+              "block": 1,
+              "percent": 8.795145684906469,
+              "ms": 16.39884900000024
+            },
+            {
+              "block": 2,
+              "percent": -8.371739201608685,
+              "ms": -17.6938863999996
+            },
+            {
+              "block": 3,
+              "percent": 11.924622687670606,
+              "ms": 20.33907309999995
+            },
+            {
+              "block": 4,
+              "percent": 5.53680446532121,
+              "ms": 8.938263100000228
+            },
+            {
+              "block": 5,
+              "percent": -1.0767636694730909,
+              "ms": -1.7490496999997163
+            }
+          ],
+          "medianPercent": 2.2300203979240596,
+          "medianMs": 3.5946067000002557,
+          "faster": 3
+        }
+      }
+    },
+    "note": "Original noisy local cohort remains unchanged in the previously published archive; no local rerun or observation replacement."
+  },
+  "originalArtifacts": [
+    {
+      "artifactId": 15250090313,
+      "name": "import-inflater-copy-AB-9d6-46106878218-1",
+      "runId": 46106878218,
+      "runAttempt": 1,
+      "headSha": "bc22226a2299b58ddb26b23d928b1b99c28422eb",
+      "zipBytes": 194511,
+      "zipSha256": "4910d770c8678631424f3b491888bdd0aa6bcfd766cb0e04f724160c3b9da7ab"
+    },
+    {
+      "artifactId": 15249129886,
+      "name": "import-inflater-copy-BA-9d6-46106878218-1",
+      "runId": 46106878218,
+      "runAttempt": 1,
+      "headSha": "bc22226a2299b58ddb26b23d928b1b99c28422eb",
+      "zipBytes": 193553,
+      "zipSha256": "0a606c725074b888ac3cefa736f4497ef7246fb32e4d41c67be7f4d94e815b9b"
+    }
+  ]
+}
