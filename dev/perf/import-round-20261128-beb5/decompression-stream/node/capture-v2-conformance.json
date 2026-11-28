@@ -1,0 +1,3525 @@
+{
+  "scope": "Standalone format conformance plus exact-source native inflater acceptance and bytes. Failures are independently rerun through native code after the DS attempt to preserve and check original-source error classification.",
+  "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "cases": [
+    {
+      "name": "empty-array/default/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0000.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 2,
+        "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    {
+      "name": "empty-array/default/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 223132458,
+          "filename": "conformance-0001.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 3,
+          "signature": 223132457,
+          "filename": "conformance-0002.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0003.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0004.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 3,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0005.bin",
+          "byteLength": 3,
+          "sha256": "849c350ee8718ca24eea1af3870553c3b171ecf5a8a8abddbd12c03ce15daf30"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 2,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0006.bin",
+          "byteLength": 2,
+          "sha256": "eca2fdcb8fb09ec55fe68d9824c1f844940970d9124ea28ae22143cb9f728b67"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 5,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0007.bin",
+          "byteLength": 5,
+          "sha256": "172ba56aa26c10d3d05bdf3e904f5793e5626bf435c82fc707dd16d69d7ccc61"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0008.bin",
+          "byteLength": 6,
+          "sha256": "aa325e7a5d4ca8e27bbaecdf93261bfa53d59fd9d78104e1cfe56f488cae8c7b"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 8,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0009.bin",
+          "byteLength": 8,
+          "sha256": "5afda22540d1a9601b2f80dfe89e0b72c04758375f1ee0eda3733a25f7ee0b0c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 24,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0010.bin",
+          "byteLength": 24,
+          "sha256": "8e8d58b8e979e9404fa9d4360396ab426217e829d00f856b61feb4047fdd39bc"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/default/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0011.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0012.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 2,
+        "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    {
+      "name": "empty-array/fixed/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 223132458,
+          "filename": "conformance-0013.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 3,
+          "signature": 223132457,
+          "filename": "conformance-0014.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0015.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0016.bin",
+          "byteLength": 4,
+          "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 3,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0017.bin",
+          "byteLength": 3,
+          "sha256": "849c350ee8718ca24eea1af3870553c3b171ecf5a8a8abddbd12c03ce15daf30"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 2,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0018.bin",
+          "byteLength": 2,
+          "sha256": "eca2fdcb8fb09ec55fe68d9824c1f844940970d9124ea28ae22143cb9f728b67"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 5,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0019.bin",
+          "byteLength": 5,
+          "sha256": "172ba56aa26c10d3d05bdf3e904f5793e5626bf435c82fc707dd16d69d7ccc61"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0020.bin",
+          "byteLength": 6,
+          "sha256": "aa325e7a5d4ca8e27bbaecdf93261bfa53d59fd9d78104e1cfe56f488cae8c7b"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 8,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0021.bin",
+          "byteLength": 8,
+          "sha256": "5afda22540d1a9601b2f80dfe89e0b72c04758375f1ee0eda3733a25f7ee0b0c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 24,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0022.bin",
+          "byteLength": 24,
+          "sha256": "8e8d58b8e979e9404fa9d4360396ab426217e829d00f856b61feb4047fdd39bc"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/fixed/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0023.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0024.bin",
+          "byteLength": 7,
+          "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 2,
+        "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 2,
+          "signature": 223132458,
+          "filename": "conformance-0025.bin",
+          "byteLength": 7,
+          "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 3,
+          "signature": 223132457,
+          "filename": "conformance-0026.bin",
+          "byteLength": 7,
+          "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0027.bin",
+          "byteLength": 7,
+          "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 1,
+          "signature": 223132457,
+          "filename": "conformance-0028.bin",
+          "byteLength": 7,
+          "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0029.bin",
+          "byteLength": 6,
+          "sha256": "2b7ab2e1353a7dab49ae73d8798d3a8b9f38882687d83fcf0ed427decd83f638"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 3,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0030.bin",
+          "byteLength": 3,
+          "sha256": "d7b3d4012540102c40a23acdeee417e06a42a74a5d66c7efe59f4e4aa0537c5c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 8,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0031.bin",
+          "byteLength": 8,
+          "sha256": "7179a54a6233666c220c7a9705cac33ad89144d9de2dfb8d85f1eacd84e3a85a"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 9,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0032.bin",
+          "byteLength": 9,
+          "sha256": "5187947beeaec573571d82dc1ba8bbc0bdc64cc3556160b2e4a30acb3c2e13a3"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0033.bin",
+          "byteLength": 14,
+          "sha256": "4aab9cbed4debe694d22f2c2ef9d4b3584822a3dc567f15d7c679215ebd0f64b"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 27,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0034.bin",
+          "byteLength": 27,
+          "sha256": "71a7e7b641058bea7efa4ba915de184a4c84ed514ada72ad53110f4fd38055b4"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "empty-array/stored-blocks/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 2,
+          "signature": 223132457,
+          "filename": "conformance-0035.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0036.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 80,
+        "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81"
+      }
+    },
+    {
+      "name": "utf8-row/default/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 80,
+          "signature": 2217991996,
+          "filename": "conformance-0037.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 81,
+          "signature": 2217991995,
+          "filename": "conformance-0038.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 79,
+          "signature": 2217991995,
+          "filename": "conformance-0039.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 1,
+          "signature": 2217991995,
+          "filename": "conformance-0040.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 72,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0041.bin",
+          "byteLength": 72,
+          "sha256": "afd375fc0f4abc84f09c002e255de706ef02d0570f6aab87cdff8b33e916fec4"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 36,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0042.bin",
+          "byteLength": 36,
+          "sha256": "f36e9fc4c802d8e9991927b34b007914f5751a299bf3bb49a30f409c45608d80"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 74,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0043.bin",
+          "byteLength": 74,
+          "sha256": "5b3b2b83356e714a458ae7f752d77c189d41a8e19583c4a28c13e4ec28c18814"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 75,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0044.bin",
+          "byteLength": 75,
+          "sha256": "6e6fefcb8ddc83e3d4cc6b57a4fdc4ce49e0b1b12f0ba9337a0bcc8dc9444ce5"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 146,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0045.bin",
+          "byteLength": 146,
+          "sha256": "886b6d0b1b80dc04d064229f336c826090a0e7a136eed8cc80bd974017c84b22"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 93,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0046.bin",
+          "byteLength": 93,
+          "sha256": "01643dac3081c2c2dfe8dd5b908b01c99848d2bdac8de01a081f235bd8019f85"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/default/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0047.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0048.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 80,
+        "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81"
+      }
+    },
+    {
+      "name": "utf8-row/fixed/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 80,
+          "signature": 2217991996,
+          "filename": "conformance-0049.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 81,
+          "signature": 2217991995,
+          "filename": "conformance-0050.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 79,
+          "signature": 2217991995,
+          "filename": "conformance-0051.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 73,
+          "uncompressedSize": 1,
+          "signature": 2217991995,
+          "filename": "conformance-0052.bin",
+          "byteLength": 73,
+          "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 72,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0053.bin",
+          "byteLength": 72,
+          "sha256": "afd375fc0f4abc84f09c002e255de706ef02d0570f6aab87cdff8b33e916fec4"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 36,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0054.bin",
+          "byteLength": 36,
+          "sha256": "f36e9fc4c802d8e9991927b34b007914f5751a299bf3bb49a30f409c45608d80"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 74,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0055.bin",
+          "byteLength": 74,
+          "sha256": "5b3b2b83356e714a458ae7f752d77c189d41a8e19583c4a28c13e4ec28c18814"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 75,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0056.bin",
+          "byteLength": 75,
+          "sha256": "6e6fefcb8ddc83e3d4cc6b57a4fdc4ce49e0b1b12f0ba9337a0bcc8dc9444ce5"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 146,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0057.bin",
+          "byteLength": 146,
+          "sha256": "886b6d0b1b80dc04d064229f336c826090a0e7a136eed8cc80bd974017c84b22"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 93,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0058.bin",
+          "byteLength": 93,
+          "sha256": "01643dac3081c2c2dfe8dd5b908b01c99848d2bdac8de01a081f235bd8019f85"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/fixed/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0059.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 85,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0060.bin",
+          "byteLength": 85,
+          "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 80,
+        "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81"
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 85,
+          "uncompressedSize": 80,
+          "signature": 2217991996,
+          "filename": "conformance-0061.bin",
+          "byteLength": 85,
+          "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 85,
+          "uncompressedSize": 81,
+          "signature": 2217991995,
+          "filename": "conformance-0062.bin",
+          "byteLength": 85,
+          "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 85,
+          "uncompressedSize": 79,
+          "signature": 2217991995,
+          "filename": "conformance-0063.bin",
+          "byteLength": 85,
+          "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 85,
+          "uncompressedSize": 1,
+          "signature": 2217991995,
+          "filename": "conformance-0064.bin",
+          "byteLength": 85,
+          "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 84,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0065.bin",
+          "byteLength": 84,
+          "sha256": "07797d0967a35bdb4630ce5115a35a0f35d44584c07bf584af9d3511c8a297b1"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 42,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0066.bin",
+          "byteLength": 42,
+          "sha256": "f6d8d8d65de2bf72732e4a45df5d60894c5834b51614e5afc96da653d6bd1627"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 86,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0067.bin",
+          "byteLength": 86,
+          "sha256": "d62ed35651262fb891923cc79f5088e3c2be0bf2bbf47b8b9670f7d2edcad1cd"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 87,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0068.bin",
+          "byteLength": 87,
+          "sha256": "8735120e5e05ee8b0e3fc3b423482d9a5ee2200d16e5d97173e8f1d198f73b3c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 170,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0069.bin",
+          "byteLength": 170,
+          "sha256": "95413a289147fa0487531b6cdc75615c4189a8ff6dccedf7d3609efc3b833efc"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 105,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0070.bin",
+          "byteLength": 105,
+          "sha256": "19c59f236d6a8834ba331b4b7969d17d93e62ecfd1f72b07ec759e9d00aac384"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "utf8-row/stored-blocks/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 80,
+          "signature": 2217991995,
+          "filename": "conformance-0071.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0072.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 12,
+        "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1"
+      }
+    },
+    {
+      "name": "whitespace-array/default/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 12,
+          "signature": 3689702225,
+          "filename": "conformance-0073.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 13,
+          "signature": 3689702224,
+          "filename": "conformance-0074.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 11,
+          "signature": 3689702224,
+          "filename": "conformance-0075.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 1,
+          "signature": 3689702224,
+          "filename": "conformance-0076.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 13,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0077.bin",
+          "byteLength": 13,
+          "sha256": "5540df98cb8469962686f16dbef7f4f083fa2d8b97731cc56e298295a828e7b9"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0078.bin",
+          "byteLength": 7,
+          "sha256": "092e1775c119c6c9664c3c87b0e83bff02b51d87b1d964155d40f991fde29dda"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 15,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0079.bin",
+          "byteLength": 15,
+          "sha256": "3c4dcbb53c143be5630819c08f7a2f13c6ed4dd1568ec4489dbbbe0b3efa99b5"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 16,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0080.bin",
+          "byteLength": 16,
+          "sha256": "3056c0375642a1f9b9c89ec3b8f5a433e8ec8c9d75be2e280815c8a0a0f45afd"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 28,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0081.bin",
+          "byteLength": 28,
+          "sha256": "0d0f5784f0c381e58c0e59188088f800a0f8437cbaa7f158d2d582dba5371ce6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 34,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0082.bin",
+          "byteLength": 34,
+          "sha256": "e664d2b17e49f0319f3b965d0cc5431d7879a4574fbf879304337f73dcc1fb0c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/default/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0083.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0084.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 12,
+        "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1"
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 12,
+          "signature": 3689702225,
+          "filename": "conformance-0085.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 13,
+          "signature": 3689702224,
+          "filename": "conformance-0086.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 11,
+          "signature": 3689702224,
+          "filename": "conformance-0087.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 14,
+          "uncompressedSize": 1,
+          "signature": 3689702224,
+          "filename": "conformance-0088.bin",
+          "byteLength": 14,
+          "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 13,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0089.bin",
+          "byteLength": 13,
+          "sha256": "5540df98cb8469962686f16dbef7f4f083fa2d8b97731cc56e298295a828e7b9"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0090.bin",
+          "byteLength": 7,
+          "sha256": "092e1775c119c6c9664c3c87b0e83bff02b51d87b1d964155d40f991fde29dda"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 15,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0091.bin",
+          "byteLength": 15,
+          "sha256": "3c4dcbb53c143be5630819c08f7a2f13c6ed4dd1568ec4489dbbbe0b3efa99b5"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 16,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0092.bin",
+          "byteLength": 16,
+          "sha256": "3056c0375642a1f9b9c89ec3b8f5a433e8ec8c9d75be2e280815c8a0a0f45afd"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 28,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0093.bin",
+          "byteLength": 28,
+          "sha256": "0d0f5784f0c381e58c0e59188088f800a0f8437cbaa7f158d2d582dba5371ce6"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 34,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0094.bin",
+          "byteLength": 34,
+          "sha256": "e664d2b17e49f0319f3b965d0cc5431d7879a4574fbf879304337f73dcc1fb0c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/fixed/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0095.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 17,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0096.bin",
+          "byteLength": 17,
+          "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 12,
+        "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1"
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 17,
+          "uncompressedSize": 12,
+          "signature": 3689702225,
+          "filename": "conformance-0097.bin",
+          "byteLength": 17,
+          "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 17,
+          "uncompressedSize": 13,
+          "signature": 3689702224,
+          "filename": "conformance-0098.bin",
+          "byteLength": 17,
+          "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 17,
+          "uncompressedSize": 11,
+          "signature": 3689702224,
+          "filename": "conformance-0099.bin",
+          "byteLength": 17,
+          "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 17,
+          "uncompressedSize": 1,
+          "signature": 3689702224,
+          "filename": "conformance-0100.bin",
+          "byteLength": 17,
+          "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 16,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0101.bin",
+          "byteLength": 16,
+          "sha256": "0521609f246284f3996dc1b0e2ce62b700d63c1da73fb229bd713918f6ed7f41"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 8,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0102.bin",
+          "byteLength": 8,
+          "sha256": "1b5f5d792e9d559b3df36db77c4099e1dd431173a3ff46aadb17492ce70c0ad2"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 18,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0103.bin",
+          "byteLength": 18,
+          "sha256": "a219531e7a986a6e608dab6534ced576489a75205b75239fc25eb04e8ee6d546"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 19,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0104.bin",
+          "byteLength": 19,
+          "sha256": "16f4224ae3bad1c691b0095fe72aba5a96f22e5ba8fe39b87778f5a91dcceb8a"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 34,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0105.bin",
+          "byteLength": 34,
+          "sha256": "0ecd8eb2280c2d477426d9f786a595f796e4abf759bb9a7e04aa6477784b65cd"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 37,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0106.bin",
+          "byteLength": 37,
+          "sha256": "6b860f109c584f106a0b3dedf3345c55a57f05dc355b73802eb776cf19c4282e"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "whitespace-array/stored-blocks/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 12,
+          "signature": 3689702224,
+          "filename": "conformance-0107.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6378,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0108.bin",
+          "byteLength": 6378,
+          "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 359339,
+        "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f"
+      }
+    },
+    {
+      "name": "large-repetitive/default/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6378,
+          "uncompressedSize": 359339,
+          "signature": 2099869192,
+          "filename": "conformance-0109.bin",
+          "byteLength": 6378,
+          "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6378,
+          "uncompressedSize": 359340,
+          "signature": 2099869191,
+          "filename": "conformance-0110.bin",
+          "byteLength": 6378,
+          "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6378,
+          "uncompressedSize": 359338,
+          "signature": 2099869191,
+          "filename": "conformance-0111.bin",
+          "byteLength": 6378,
+          "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6378,
+          "uncompressedSize": 1,
+          "signature": 2099869191,
+          "filename": "conformance-0112.bin",
+          "byteLength": 6378,
+          "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6377,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0113.bin",
+          "byteLength": 6377,
+          "sha256": "f0e2711a3efe29ecb5089eb7fb5f912ccab3b1ae6b14b80acd80b8a30cbd71af"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 3189,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0114.bin",
+          "byteLength": 3189,
+          "sha256": "dbf212465205a932882e8b8b760fe20d3322d72e11b141baa37c582ff00884bd"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6379,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0115.bin",
+          "byteLength": 6379,
+          "sha256": "1dc8e5ba9b4b9c7a25bba61d9c7a3c5cda92a0a5a8885fed84d982162781c392"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6380,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0116.bin",
+          "byteLength": 6380,
+          "sha256": "b893ebee2c0a385076c828b8856689b778becfd3b59b3518b64fa6c723531fce"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 12756,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0117.bin",
+          "byteLength": 12756,
+          "sha256": "705b7448cd2be5d75914cd2a2cc243d766628e0c74454555b6725661de3d20fa"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6398,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0118.bin",
+          "byteLength": 6398,
+          "sha256": "17bab76db980ea3e649f8423e7f3cba8bafa11300a1d8d5c0b255d36a10e3e17"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/default/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0119.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10108,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0120.bin",
+          "byteLength": 10108,
+          "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 359339,
+        "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f"
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10108,
+          "uncompressedSize": 359339,
+          "signature": 2099869192,
+          "filename": "conformance-0121.bin",
+          "byteLength": 10108,
+          "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10108,
+          "uncompressedSize": 359340,
+          "signature": 2099869191,
+          "filename": "conformance-0122.bin",
+          "byteLength": 10108,
+          "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10108,
+          "uncompressedSize": 359338,
+          "signature": 2099869191,
+          "filename": "conformance-0123.bin",
+          "byteLength": 10108,
+          "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10108,
+          "uncompressedSize": 1,
+          "signature": 2099869191,
+          "filename": "conformance-0124.bin",
+          "byteLength": 10108,
+          "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10107,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0125.bin",
+          "byteLength": 10107,
+          "sha256": "9d7e88dc6bc70f3b95d5e975cfcc1684197e2e5332673c85af6286bb63f4fc02"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 5054,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0126.bin",
+          "byteLength": 5054,
+          "sha256": "bfc920ff27b9d2e08d608c5145d80ab314d8d14ebe9b981c445ac8184001addf"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10109,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0127.bin",
+          "byteLength": 10109,
+          "sha256": "75dd44207a98db2443d115476331afaf20dd98b95bb04263f4aaf941c3a62fd7"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10110,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0128.bin",
+          "byteLength": 10110,
+          "sha256": "551e062375ae0281a3c0814764bc1fccb3921cbf472533317f1738e01ca51618"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 20216,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0129.bin",
+          "byteLength": 20216,
+          "sha256": "6eb50be417cc2f751a38ee073dd32ea9e2d7dbf41a253f4ed0937f80f9613f2b"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 10128,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0130.bin",
+          "byteLength": 10128,
+          "sha256": "8690b161432c182b45549dceea0ca9f0b18d40e10b2039999cd530ea43690577"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/fixed/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0131.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/valid",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359389,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0132.bin",
+          "byteLength": 359389,
+          "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 359339,
+        "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f"
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359389,
+          "uncompressedSize": 359339,
+          "signature": 2099869192,
+          "filename": "conformance-0133.bin",
+          "byteLength": 359389,
+          "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/size-too-large",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359389,
+          "uncompressedSize": 359340,
+          "signature": 2099869191,
+          "filename": "conformance-0134.bin",
+          "byteLength": 359389,
+          "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/size-too-small",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359389,
+          "uncompressedSize": 359338,
+          "signature": 2099869191,
+          "filename": "conformance-0135.bin",
+          "byteLength": 359389,
+          "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/dishonest-tiny-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359389,
+          "uncompressedSize": 1,
+          "signature": 2099869191,
+          "filename": "conformance-0136.bin",
+          "byteLength": 359389,
+          "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/truncated-one-byte",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359388,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0137.bin",
+          "byteLength": 359388,
+          "sha256": "864457182d5a0570989db1cf88ac5a92fdf09d3c2f182b61a1cb232b83c5669b"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/truncated-half",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 179694,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0138.bin",
+          "byteLength": 179694,
+          "sha256": "57caae7b2855c1d65628da9f827e3d6b76fb141a98c61100b0c9313760d2b1ea"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/trailing-zero",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359390,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0139.bin",
+          "byteLength": 359390,
+          "sha256": "079e9771ef2cfe71b8a46a91b525f0b557323772efc444b613ebad05b2a31862"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/trailing-garbage",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359391,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0140.bin",
+          "byteLength": 359391,
+          "sha256": "17cb076698b0809d998fa17a44cc61c62416be9d1bd4ba993c10e7686e5eb876"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/concatenated-raw",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 718778,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0141.bin",
+          "byteLength": 718778,
+          "sha256": "ddc22e9df4fd98fae614fa17e1834e77b7c3f683198268c9bd51c03bf6ed18fe"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE payload has trailing bytes"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/hidden-second-gzip-member",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 359409,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0142.bin",
+          "byteLength": 359409,
+          "sha256": "31f5200d752ef1ce8506059ec13af7925659bcb22fd8c5674ae365f317abda02"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "large-repetitive/stored-blocks/invalid-block-type",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 359339,
+          "signature": 2099869191,
+          "filename": "conformance-0143.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "object-wrapper",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 2745614147,
+          "filename": "conformance-0144.bin",
+          "byteLength": 4,
+          "sha256": "300099f6d348411bf80b08bcfc365abc6649651cf0abaab5729075e6f27b6f47"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "Error",
+          "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+        }
+      }
+    },
+    {
+      "name": "BOM-wrapper",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 5,
+          "signature": 608337523,
+          "filename": "conformance-0145.bin",
+          "byteLength": 7,
+          "sha256": "8ea7bc5df8b678dc138daebde527ab3f72c557bdcda3b712f2a776f929f97d8a"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "Error",
+          "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+        }
+      }
+    },
+    {
+      "name": "non-json-bracketed-inflater-only",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 12,
+          "uncompressedSize": 10,
+          "signature": 3951192445,
+          "filename": "conformance-0146.bin",
+          "byteLength": 12,
+          "sha256": "4e1bd4111be33dd831f28c67fd01b4adfcfeee934d57f9572aa83a4222cc6d02"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 10,
+        "decodedSha256": "63b5940e0d656d4a3bd741c99b2592ad324f932e0cfd2807ea39d6362fb0ad67"
+      }
+    },
+    {
+      "name": "stored-valid",
+      "sources": [
+        {
+          "compressionMethod": 0,
+          "compressedSize": 4,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0147.bin",
+          "byteLength": 4,
+          "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 4,
+        "decodedSha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+      }
+    },
+    {
+      "name": "stored-wrong-crc",
+      "sources": [
+        {
+          "compressionMethod": 0,
+          "compressedSize": 4,
+          "uncompressedSize": 4,
+          "signature": 1198430399,
+          "filename": "conformance-0148.bin",
+          "byteLength": 4,
+          "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "stored-wrong-length",
+      "sources": [
+        {
+          "compressionMethod": 0,
+          "compressedSize": 4,
+          "uncompressedSize": 5,
+          "signature": 1198430398,
+          "filename": "conformance-0149.bin",
+          "byteLength": 4,
+          "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated size does not match ZIP metadata"
+        }
+      }
+    },
+    {
+      "name": "mixed-stored-deflate-valid",
+      "sources": [
+        {
+          "compressionMethod": 0,
+          "compressedSize": 4,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0150.bin",
+          "byteLength": 4,
+          "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+        },
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0151.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": true,
+        "decodedBytes": 8,
+        "decodedSha256": "2c274bdd451705ff6dc7eee157ac0ebddc947124a67ca1a341ede49869dd0c27"
+      }
+    },
+    {
+      "name": "CRC-before-later-deflate-failure",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 4,
+          "signature": 1198430399,
+          "filename": "conformance-0152.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        },
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0153.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+        }
+      }
+    },
+    {
+      "name": "deflate-before-later-CRC-failure",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 1,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0154.bin",
+          "byteLength": 1,
+          "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+        },
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 4,
+          "signature": 1198430399,
+          "filename": "conformance-0155.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "DictionarySourceIntegrityError",
+          "message": "Compressed term-bank source failed validation: raw DEFLATE decoding failed"
+        }
+      }
+    },
+    {
+      "name": "wrapper-before-later-CRC-failure",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 4,
+          "uncompressedSize": 2,
+          "signature": 2745614147,
+          "filename": "conformance-0156.bin",
+          "byteLength": 4,
+          "sha256": "300099f6d348411bf80b08bcfc365abc6649651cf0abaab5729075e6f27b6f47"
+        },
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": 4,
+          "signature": 1198430399,
+          "filename": "conformance-0157.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "Error",
+          "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+        }
+      }
+    },
+    {
+      "name": "metadata-compressed-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 7,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0158.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Compressed term-bank source 1 metadata is invalid"
+        }
+      }
+    },
+    {
+      "name": "metadata-negative-size",
+      "sources": [
+        {
+          "compressionMethod": 8,
+          "compressedSize": 6,
+          "uncompressedSize": -1,
+          "signature": 1198430398,
+          "filename": "conformance-0159.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Compressed term-bank source 1 metadata is invalid"
+        }
+      }
+    },
+    {
+      "name": "metadata-method",
+      "sources": [
+        {
+          "compressionMethod": 12,
+          "compressedSize": 6,
+          "uncompressedSize": 4,
+          "signature": 1198430398,
+          "filename": "conformance-0160.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Compressed term-bank source 1 metadata is invalid"
+        }
+      }
+    }
+  ],
+  "formats": [
+    {
+      "name": "deflate-raw/zero/same-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0161.bin",
+          "byteLength": 7,
+          "sha256": "706f1fd36f8ba9b68e0e6049db11e054eb3c0400811678f38a1cf4ef6404d6d7"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/zero/later-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0162.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        },
+        {
+          "filename": "conformance-0163.bin",
+          "byteLength": 1,
+          "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/garbage/same-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0164.bin",
+          "byteLength": 8,
+          "sha256": "ab9a2ba71adec51b0ca2a1302321b8994d5fd64725de711bfb8f71a25ba70a2e"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/garbage/later-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0165.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        },
+        {
+          "filename": "conformance-0166.bin",
+          "byteLength": 2,
+          "sha256": "59ca84fb79f2a7447b9e82c7412df58c688910cba202b7d4e9bf329ce07f931c"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/empty-member/same-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0167.bin",
+          "byteLength": 8,
+          "sha256": "55be257f14f29270c9504dff681cc7bcf882fcbd91958b10405c3c489da3e7a5"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/empty-member/later-chunk",
+      "format": "deflate-raw",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0168.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        },
+        {
+          "filename": "conformance-0169.bin",
+          "byteLength": 2,
+          "sha256": "9b4fb24edd6d1d8830e272398263cdbf026b97392cc35387b991dc0248a628f9"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "deflate-raw/valid",
+      "format": "deflate-raw",
+      "expectedAccepted": true,
+      "parts": [
+        {
+          "filename": "conformance-0170.bin",
+          "byteLength": 6,
+          "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+        }
+      ],
+      "maxDecodedBytes": 16,
+      "expectedSha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    },
+    {
+      "name": "gzip/zero/same-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0171.bin",
+          "byteLength": 25,
+          "sha256": "6e055263bcf63e77ad9120beafced0812d829a197365e5d91e3e8fc4174d4fc4"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/zero/later-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0172.bin",
+          "byteLength": 24,
+          "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+        },
+        {
+          "filename": "conformance-0173.bin",
+          "byteLength": 1,
+          "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/garbage/same-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0174.bin",
+          "byteLength": 26,
+          "sha256": "02efdcc74b76f3f5d0c03b06a1829b06d1d3e8ab0676d9c47c16f687bcf3cc45"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/garbage/later-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0175.bin",
+          "byteLength": 24,
+          "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+        },
+        {
+          "filename": "conformance-0176.bin",
+          "byteLength": 2,
+          "sha256": "59ca84fb79f2a7447b9e82c7412df58c688910cba202b7d4e9bf329ce07f931c"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/empty-member/same-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0177.bin",
+          "byteLength": 44,
+          "sha256": "57b263a5147557bc04fd3e1e2b62ec7ede0f233645f935bb569491d4b51d3ab2"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/empty-member/later-chunk",
+      "format": "gzip",
+      "expectedAccepted": false,
+      "parts": [
+        {
+          "filename": "conformance-0178.bin",
+          "byteLength": 24,
+          "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+        },
+        {
+          "filename": "conformance-0179.bin",
+          "byteLength": 20,
+          "sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+        }
+      ],
+      "maxDecodedBytes": 16
+    },
+    {
+      "name": "gzip/valid",
+      "format": "gzip",
+      "expectedAccepted": true,
+      "parts": [
+        {
+          "filename": "conformance-0180.bin",
+          "byteLength": 24,
+          "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+        }
+      ],
+      "maxDecodedBytes": 16,
+      "expectedSha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    }
+  ]
+}

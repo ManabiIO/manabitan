@@ -1,0 +1,30 @@
+)]}'
+{
+  "commit": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+  "tree": "f3b8516f22967cf75d95541bf324421ed6c0be4a",
+  "parents": [
+    "d89fda312f65ac183aa2e1b4a31152181a935220"
+  ],
+  "author": {
+    "name": "chrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com",
+    "email": "chrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com",
+    "time": "Tue Aug 25 20:20:53 2026"
+  },
+  "committer": {
+    "name": "chrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com",
+    "email": "chrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com",
+    "time": "Tue Aug 25 20:20:53 2026"
+  },
+  "message": "Incrementing VERSION to 153.0.8010.12\n\nMerge-Approval-Bypass: Chrome release infra\nChange-Id: Ibcd345194c7ef1b80143860a067ac9fafeb9ba66\nReviewed-on: https://chromium-review.googlesource.com/c/chromium/src/+/8282624\nBot-Commit: chrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com \u003cchrome-official-brancher@chops-service-accounts.iam.gserviceaccount.com\u003e\nCr-Commit-Position: refs/branch-heads/8010@{#343}\nCr-Branched-From: 86cee6df69e0463a839c0cc8435c9d4c259434d3-refs/heads/main@{#1681091}\n",
+  "tree_diff": [
+    {
+      "type": "modify",
+      "old_id": "dc4dcd5eb630b341fc9bdcbe1a58ecdd7eabc5db",
+      "old_mode": 33188,
+      "old_path": "chrome/VERSION",
+      "new_id": "547f2c8b508d47b693b77642036cae270309dfcf",
+      "new_mode": 33188,
+      "new_path": "chrome/VERSION"
+    }
+  ]
+}

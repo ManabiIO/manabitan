@@ -1,0 +1,146 @@
+{
+  "chrome": "153.0.8010.12",
+  "commit": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+  "files": [
+    {
+      "path": "third_party/blink/renderer/modules/compression/inflate_transformer.cc",
+      "bytes": 6805,
+      "sha256": "729b42c1bb9246cd16026a7e001b6c86e34b33df2de0ee75dd6166a33a1600f2",
+      "gitBlob": "5986fda88d19a2e76f6ceb346d601093bf16966e",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/modules/compression/inflate_transformer.cc?format=TEXT"
+    },
+    {
+      "path": "third_party/blink/renderer/modules/compression/inflate_transformer.h",
+      "bytes": 2280,
+      "sha256": "3b90a98982ecdbec60bbe0cd0df7675e0b8621e5b2ebdcb867c5d09c4fcab246",
+      "gitBlob": "43fe27069830fd43397295aeb2e9753297ec0eb9",
+      "sameAsMain": true,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/modules/compression/inflate_transformer.h?format=TEXT"
+    },
+    {
+      "path": "third_party/blink/renderer/modules/compression/decompression_stream.cc",
+      "bytes": 1795,
+      "sha256": "0d076f51d01cb9f528d33eb52eac52f961396a2c8b2eeacd314c7902dc9a0a67",
+      "gitBlob": "b850a2d9b8520cf46cb6fdaca3ef969a8739ba57",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/modules/compression/decompression_stream.cc?format=TEXT"
+    },
+    {
+      "path": "third_party/blink/renderer/core/streams/transform_stream.cc",
+      "bytes": 34864,
+      "sha256": "bd86b1369a8d91500237c31723adeeab9ea3266fe0f9896db0f7dc31e72aef72",
+      "gitBlob": "c66b63b5dc83e0952c914c797d0bb78c34197fa7",
+      "sameAsMain": true,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/streams/transform_stream.cc?format=TEXT"
+    },
+    {
+      "path": "third_party/blink/renderer/core/typed_arrays/dom_typed_array.h",
+      "bytes": 7341,
+      "sha256": "47e203178643386020d6470da1da7b0f7cea0d807ea0cfb7652ebd06cc884ef7",
+      "gitBlob": "545ea6f0b32fed48b7476d522e2ab06129965ac7",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/typed_arrays/dom_typed_array.h?format=TEXT"
+    },
+    {
+      "path": "third_party/blink/renderer/core/typed_arrays/dom_array_buffer.cc",
+      "bytes": 12263,
+      "sha256": "297276842b4a8560b54e78a4f7c1b2d61180899995b068f96e3a56ec3608cdf4",
+      "gitBlob": "907a9f68fe263d259aeb73ddc19b01618e0d4f4a",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/typed_arrays/dom_array_buffer.cc?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/inflate.h",
+      "bytes": 6683,
+      "sha256": "e6a43bd0e24ab2cf5fa1dca630859e9a2f6a721f033f75faf179f5c0299e4fe2",
+      "gitBlob": "f758e0dcc18dc1dcfd875d3df98d71aa5743d349",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/inflate.h?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/inflate.c",
+      "bytes": 52387,
+      "sha256": "ea50d23cb98397ccfe4d84ef2ba7b47b71826cc76beb02fa12a80d577c80b5c3",
+      "gitBlob": "0742ce10ed94a640c563f14ea6a59308b37d84f6",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/inflate.c?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/contrib/optimizations/inffast_chunk.c",
+      "bytes": 15864,
+      "sha256": "c5e6594f8eb21d72a10915dd854757ffd03982fd8726b5cbbd2ebbeb51d5dbd0",
+      "gitBlob": "3c93da05114d35d3e2c059937984003764613a36",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/contrib/optimizations/inffast_chunk.c?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/contrib/optimizations/inffast_chunk.h",
+      "bytes": 1720,
+      "sha256": "670f8d05461dbad596e81355f6e218deb8d9e2e6595259465cfb8d2fad6a2315",
+      "gitBlob": "e75ee5e915e13646ba9c3a66dce8aba147c8e3af",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/contrib/optimizations/inffast_chunk.h?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/inftrees.c",
+      "bytes": 16674,
+      "sha256": "64fc6aeea744510253a22f8b0611fcefa970458224a41a1649f5e0db340af8fe",
+      "gitBlob": "99d8d773075055c735d5db55f5a739becab95063",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/inftrees.c?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/inftrees.h",
+      "bytes": 3008,
+      "sha256": "0b60ee1386f860ececdd442cb869a4b8a0920cb1003b7fca853cdb6a91cf390e",
+      "gitBlob": "c572f49d555fd96ad81cb82038b0bee3e6b493b4",
+      "sameAsMain": false,
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/inftrees.h?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/BUILD.gn",
+      "file": "zlib-BUILD.gn",
+      "bytes": 12848,
+      "sha256": "e40d08770ba695a47a7ebb5fabf7574716453ddfdd4d6185b88491a8b7f35dd0",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/BUILD.gn?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/contrib/optimizations/",
+      "file": "optimizations-tree.json",
+      "bytes": 789,
+      "sha256": "13f852e9c14494ac6f662b180e49ec17e956e83081341a7ff955a2c53e4ef5ee",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/contrib/optimizations/?format=JSON"
+    },
+    {
+      "path": "third_party/zlib/zutil.h",
+      "file": "zutil.h",
+      "bytes": 9092,
+      "sha256": "84fa29c4a8097324a3b747e077507ba6f8de86cd593bf198219478858baf16f4",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/zutil.h?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/inffast.h",
+      "file": "inffast.h",
+      "bytes": 1114,
+      "sha256": "8fd2fe697f951e8508b98e8e4017faa0027e47e340cc62b9e4ae1a672af5cd04",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/inffast.h?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/contrib/optimizations/inflate.c",
+      "file": "inflate-optimized.c",
+      "bytes": 57500,
+      "sha256": "f47ff3fedab199d4bf59a018808dcaa1b206ce0d6dea06f09f217d375d713366",
+      "gitBlob": "3268320e9120490ac0514fcf7b6a489e605c8ee2",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/contrib/optimizations/inflate.c?format=TEXT"
+    },
+    {
+      "path": "third_party/zlib/contrib/optimizations/chunkcopy.h",
+      "file": "chunkcopy.h",
+      "bytes": 17560,
+      "sha256": "f43452bb0710645d1360f552a49359d322326fc7b2fbc607b1574fa203cce65e",
+      "gitBlob": "97efff3a42496d6f456cb11adda65b1c42009f31",
+      "url": "https://chromium.googlesource.com/chromium/src/+/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/zlib/contrib/optimizations/chunkcopy.h?format=TEXT"
+    }
+  ]
+}

@@ -1,0 +1,605 @@
+{
+  "artifactSha256": "b49c57e37e181d19541de6e9da21a30e267363df928dd6b99d00bca345c15591",
+  "files": [
+    {
+      "path": "jmdict/campaign/01-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-control-candidate.json",
+      "bytes": 9574,
+      "sha256": "7dcf3147a9c3eef2ae2089aeff4fca9191bc3cc374b5111a29b75e8d7e00a9e7"
+    },
+    {
+      "path": "jmdict/campaign/01-control-baseline.json",
+      "bytes": 9563,
+      "sha256": "173f83ceb768d940709014a526fd8e7920bc0aeb07f4131b54ec3fcca6da03d2"
+    },
+    {
+      "path": "jmdict/campaign/01-control-baseline.observations.jsonl",
+      "bytes": 6927,
+      "sha256": "a4d694d82ad7ad80298766da43d62da432b46247680809836c649694e7f4ac83"
+    },
+    {
+      "path": "jmdict/campaign/01-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-control-candidate.observations.jsonl",
+      "bytes": 6929,
+      "sha256": "fc5d561cafd62353df0ec88b9f68799c52ff36df46cb767225f930b8e66acf1e"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-baseline.json",
+      "bytes": 9568,
+      "sha256": "39125e070426256d5fe8fc7d50ed167a1c2b10c2ddf221eba2bef84162154ab2"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-baseline.observations.jsonl",
+      "bytes": 6929,
+      "sha256": "a5c66e686f6ff31a8e4d671188d8c22c0a6bec729fcee79ae2e0fa072ef647e6"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-candidate.json",
+      "bytes": 9612,
+      "sha256": "2bc49390bbc9db5e49af2f6a77405bd50a9f6794f9046fd33b29e9982708a0ce"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip1k-candidate.observations.jsonl",
+      "bytes": 6959,
+      "sha256": "8b61be021999ead5f949f54582d6dad13cada7d09732dc012329e70616312d30"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-baseline.json",
+      "bytes": 9598,
+      "sha256": "425063b1f7c14f3f58de5ef567ded005965acf329ba2332be5d85600da7ed61a"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-baseline.observations.jsonl",
+      "bytes": 6945,
+      "sha256": "de05f5f58eb0b0162f81c53cbf60bf24b5a6bf369ecedcbc16ad67422c5a44e7"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-candidate.json",
+      "bytes": 9572,
+      "sha256": "1717965913714ac1960ebd51f3fbf36ee79c9d4b80644424cb84e799c3a94a33"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/01-gzip64-candidate.observations.jsonl",
+      "bytes": 6931,
+      "sha256": "091113724fb60c36d51d29d363e93651dc709e725b91639f6bf7e63b4d5b597c"
+    },
+    {
+      "path": "jmdict/campaign/02-control-baseline.json",
+      "bytes": 9586,
+      "sha256": "0b8f6de15b6791b8344f40df4bf016934665125ce6e7d4b1e998f29431e78a11"
+    },
+    {
+      "path": "jmdict/campaign/02-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-control-baseline.observations.jsonl",
+      "bytes": 6932,
+      "sha256": "448ed3b1aa629e79405ef72383494d86a0bacbc532e18423b76cb249656dc214"
+    },
+    {
+      "path": "jmdict/campaign/02-control-candidate.json",
+      "bytes": 9593,
+      "sha256": "cab8a0914707eae232aa59903dab01f31d917918c83b5027d41ce92bc9eb8761"
+    },
+    {
+      "path": "jmdict/campaign/02-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-control-candidate.observations.jsonl",
+      "bytes": 6943,
+      "sha256": "cf7acf807fa8d7ab5a4147100d211dfdd7733e17fbfd40fe9238bd28b3e75b6d"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-baseline.json",
+      "bytes": 9571,
+      "sha256": "3cb108e73c618a9bbbe818de57b79ad1f73e994145ab77b904cac376ce128758"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-baseline.observations.jsonl",
+      "bytes": 6916,
+      "sha256": "4811ac9130aa1920d8eb213bd7f8480d9f8d1da4791dfac155e38e88a71f78d5"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-candidate.json",
+      "bytes": 9613,
+      "sha256": "9cd759073306867a75b0ae6ff6941a6ec60688472a4ff3e350aeba6e2103d27b"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip1k-candidate.observations.jsonl",
+      "bytes": 6960,
+      "sha256": "654c86172a224b8f5ccb1fe340f37c1b67f270c1192881ff57d89feb39fb5bdb"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-baseline.json",
+      "bytes": 9583,
+      "sha256": "0050e5eb02cffb45d7cfff375308cbd9fb304ea4890af3ea119f158288bbb174"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-baseline.observations.jsonl",
+      "bytes": 6931,
+      "sha256": "5ef1e875b408356fc128cd5b3e155afeeb05a0958bbb81213d325da2ad03b2f2"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-candidate.json",
+      "bytes": 9593,
+      "sha256": "44bcce33ab62f74417becc877ff854a6aee653e184b8c730b02502bacdba7df6"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/02-gzip64-candidate.observations.jsonl",
+      "bytes": 6940,
+      "sha256": "2d5b1a6354bc00c8cd64f503967c3acd9465a251074b2bd4fc1cb02a33a5dc43"
+    },
+    {
+      "path": "jmdict/campaign/03-control-baseline.json",
+      "bytes": 9584,
+      "sha256": "77412c2706852df417d9e6c4ab0059115bc31c0d058ebcb34ee2019c8b4c3f4d"
+    },
+    {
+      "path": "jmdict/campaign/03-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-control-baseline.observations.jsonl",
+      "bytes": 6931,
+      "sha256": "57a771f235d609851013919adab35ee9315213c739f2b82cc209bfa3594fc8a5"
+    },
+    {
+      "path": "jmdict/campaign/03-control-candidate.json",
+      "bytes": 9596,
+      "sha256": "6fa4e482bf364b49e082b5fb1428016dc0979341338a2a87dac961d9fc7e1dca"
+    },
+    {
+      "path": "jmdict/campaign/03-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-control-candidate.observations.jsonl",
+      "bytes": 6944,
+      "sha256": "6f73a8568615df41d01d402de8124ea1cd7684cdf6ae9d1208604c641446c429"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-baseline.json",
+      "bytes": 9580,
+      "sha256": "6f3d68795de0272e38bff16c28a92ffad91eecb3260b7eed1039918ff4e719d4"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-baseline.observations.jsonl",
+      "bytes": 6930,
+      "sha256": "307661fa00482ff0c97b9927c8add8f1ca9efd171ed449ffd04b324682bd39d3"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-candidate.json",
+      "bytes": 9617,
+      "sha256": "0116f0fb47498795693b047b9a3e7ff02532ee16be89fc1f1508a8c3c93c8f46"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip1k-candidate.observations.jsonl",
+      "bytes": 6966,
+      "sha256": "022c5b4699361d9542597f47c8a660e8949d3cbddf2fb6cfe25f5d9699c2ca0e"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-baseline.json",
+      "bytes": 9598,
+      "sha256": "0fdd7437696be5f4305ac1433ad5d72cce70dbaa3484503111fba4c3af81e45c"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-baseline.observations.jsonl",
+      "bytes": 6944,
+      "sha256": "471a3ec13de8abb460f93f4e5f5eeec149581e8646d89249b459d141e91db4e5"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-candidate.json",
+      "bytes": 9578,
+      "sha256": "db35b36d0da8077fb9b5cb5f2af1c5e726b12599e9a69d20374160af802398f6"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/03-gzip64-candidate.observations.jsonl",
+      "bytes": 6926,
+      "sha256": "b232be923f65579c2dbcef29213615809c3fec831487a84d3fa53f0b60d75e79"
+    },
+    {
+      "path": "jmdict/campaign/04-control-baseline.json",
+      "bytes": 9578,
+      "sha256": "39e9fe46f4f0917740ef415bd261bcc0860ba89ff106d5cd3e024930f60af4ff"
+    },
+    {
+      "path": "jmdict/campaign/04-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/04-control-baseline.observations.jsonl",
+      "bytes": 6941,
+      "sha256": "74b93d5ee0aad6e3a9aa14a29e728604b9badcc59035316705931c833ea1a3c0"
+    },
+    {
+      "path": "jmdict/campaign/04-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/04-control-candidate.json",
+      "bytes": 9580,
+      "sha256": "97a466e104f7b791ecd3b6d4ac2d80cfb21473d2be95697e2c8a44a1688bc706"
+    },
+    {
+      "path": "jmdict/campaign/04-control-candidate.observations.jsonl",
+      "bytes": 6926,
+      "sha256": "ba223acf7186758a768aaaf6fa5c6f18f9759c0734babb5ea98b5e79d0a4af0e"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-baseline.json",
+      "bytes": 9570,
+      "sha256": "b074e8e2c29b99c954234a5f64f412718442196b238c11cff3fb792c05e3e21a"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-baseline.observations.jsonl",
+      "bytes": 6915,
+      "sha256": "408bd81dec202ccbdc0359ad57d5ed229a12a1a984c1f7d9ba19ac86e3e773db"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-candidate.json",
+      "bytes": 9604,
+      "sha256": "fdfac11c53f92aed235eb976dc701c865ca5e34a897e124667cbb64a7342162e"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip1k-candidate.observations.jsonl",
+      "bytes": 6950,
+      "sha256": "d98e3d85aab4d608c36d9ac3e0865e1e1f60d438055822676b2a11e33d94a8ab"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-baseline.json",
+      "bytes": 9581,
+      "sha256": "7e8c3df4831128f16b8397c2e1595be207504a29a5dcf1efac5fdf7aa525d8f4"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-baseline.observations.jsonl",
+      "bytes": 6928,
+      "sha256": "0857eccbf46599f839ef35119a9f07a5945f5ba0b1ed48ca715038330d18d1bf"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-candidate.json",
+      "bytes": 9582,
+      "sha256": "f634667fd8ecf6adab8d5d7699d12e9e154f7ff1d3409cb584e682d7490ff87a"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-candidate.observations.jsonl",
+      "bytes": 6930,
+      "sha256": "3278febca03faae6d4609dd1d4645a9c751d335d84325663cb99fef0bc4d9fa0"
+    },
+    {
+      "path": "jmdict/campaign/04-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-control-baseline.json",
+      "bytes": 9575,
+      "sha256": "2d72b36451dbb6c42e51f719961b90d100dd5ef460a58a19ee8e97c8d8a3bad1"
+    },
+    {
+      "path": "jmdict/campaign/05-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-control-baseline.observations.jsonl",
+      "bytes": 6928,
+      "sha256": "12aa7ed0767066778416f717aa18465ab40547229c542c3dd2086b7c71d08904"
+    },
+    {
+      "path": "jmdict/campaign/05-control-candidate.json",
+      "bytes": 9592,
+      "sha256": "328736f712116ab0d663793c01a8f59ae9969992ca8c8bb7b9f621fa03d5fa10"
+    },
+    {
+      "path": "jmdict/campaign/05-control-candidate.observations.jsonl",
+      "bytes": 6939,
+      "sha256": "a4aa85fbb3e2e225fcb4a36353f3acdc11b8483baf981d9888f27a0937a29f42"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-baseline.json",
+      "bytes": 9586,
+      "sha256": "bd2fa89f3e54a537fcd38fbce174c3c8fd421a92dfd9da335dd9c33f2c8c02cb"
+    },
+    {
+      "path": "jmdict/campaign/05-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-baseline.observations.jsonl",
+      "bytes": 6933,
+      "sha256": "47f5d4036fd7855197c9836c6dd1f40adab23cd55ade8e6f6d2b6939809c6a7e"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-candidate.json",
+      "bytes": 9612,
+      "sha256": "f075e4964b385a50af8205d2f4158f0e099f9e6d3c06fdea33a41dee782010cd"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip1k-candidate.observations.jsonl",
+      "bytes": 6962,
+      "sha256": "221f3ae237f71379dad5391fdc37c0be1acf98d3f8aa6f0a9177a1565ed0d75a"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-baseline.json",
+      "bytes": 9581,
+      "sha256": "7e93f221cd43cce38aacc9104d440c68195e9264ad543e3982e0e6421bcf2b4f"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-baseline.observations.jsonl",
+      "bytes": 6929,
+      "sha256": "34a9553c596d2f9861d94822fa2a0cb201c782a8a0bbb4556bd6cfe74d225ed1"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-candidate.json",
+      "bytes": 9594,
+      "sha256": "b502f2c94452fb882ee7396bc6d7f77ab2b8cedc6df6dbb995c2178fa13135ca"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/05-gzip64-candidate.observations.jsonl",
+      "bytes": 6941,
+      "sha256": "b5ca0be9eafb147bcd9bc4b619a6dbfdaf65aa75fe7c5e6280edb3136fb8c5b9"
+    },
+    {
+      "path": "jmdict/campaign/06-control-baseline.json",
+      "bytes": 9599,
+      "sha256": "e0d2360d4296739b08e2c25daf0412fc8cf9bf5a54765e4d370c3a3ccbcc1090"
+    },
+    {
+      "path": "jmdict/campaign/06-control-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-control-baseline.observations.jsonl",
+      "bytes": 6946,
+      "sha256": "c1af6e1d9abb9aa4ece2fb945b1d153b3f2d9ae819c61f406d21fe316ac4a2c4"
+    },
+    {
+      "path": "jmdict/campaign/06-control-candidate.json",
+      "bytes": 9595,
+      "sha256": "6b04c0d7d0729e8b4f5e2696d72a9e3a23d05194a1ca08fc24178885f7953a39"
+    },
+    {
+      "path": "jmdict/campaign/06-control-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-control-candidate.observations.jsonl",
+      "bytes": 6944,
+      "sha256": "463ea589508639677ff2f97032cbe73ef4809a421fbe5dd17984d7290e964828"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-baseline.json",
+      "bytes": 9584,
+      "sha256": "602f1f31e73e4b27de53862e644517ef61813ea644b89bfbe3920271dbd4c220"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-baseline.observations.jsonl",
+      "bytes": 6930,
+      "sha256": "de1df0b2edd0f3c22f072b846402e748d8134767536005061e21c71c8d110b42"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-candidate.json",
+      "bytes": 9619,
+      "sha256": "302103362d2ea79a5af0524cf2fa90b1b29c7510f9dc6ecb3470da1a116e6e72"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip1k-candidate.observations.jsonl",
+      "bytes": 6966,
+      "sha256": "74e73c0203616db584c3ff2c713431fe4598e08442038f8c428dfbb78c04da69"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-baseline.json",
+      "bytes": 9584,
+      "sha256": "24bd669711640c286945a973dbdc1405e625eb4162084d6d5a369513a8fd1dc7"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-baseline.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-baseline.observations.jsonl",
+      "bytes": 6929,
+      "sha256": "6be7c7a8f73560956491b4f4702215a62e6aeb11144493795afeb4a7472d2340"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-candidate.json",
+      "bytes": 9583,
+      "sha256": "6cddd04c4dee3a6e54a28ff6190742e93d11a768954c1a1520f40372cbe6f083"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-candidate.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/06-gzip64-candidate.observations.jsonl",
+      "bytes": 6931,
+      "sha256": "1caec34085ce63d65b4a81ae58078d2e8ed692963ebee10de6491b1b94ef9d20"
+    },
+    {
+      "path": "jmdict/campaign/campaign.json",
+      "bytes": 627795,
+      "sha256": "cd627b4cd2c4a169f450d048935d4d7f37d4abab660541ccef6e26dd62b1d0b4"
+    },
+    {
+      "path": "jmdict/campaign/conformance.json",
+      "bytes": 135957,
+      "sha256": "489b89bbfc6de49c95b279dc55332d56846b4bc18f8aa0914b7c183f687e6239"
+    },
+    {
+      "path": "jmdict/campaign/conformance.log",
+      "bytes": 86,
+      "sha256": "b60011588ee5338ad1044d566d5300bde16d299d27c21899baef8e3906237192"
+    },
+    {
+      "path": "jmdict/campaign/conformance.observations.jsonl",
+      "bytes": 87611,
+      "sha256": "ab71fc3ea58510a12dcf69dcd88fc7c1b06574bd551eff5c6151de66c64f33a4"
+    },
+    {
+      "path": "jmdict/campaign/registration.json",
+      "bytes": 43863,
+      "sha256": "59a12af79509c38f496ebf93d1962b44bde15dcd8726ec19b024cc189d2e4662"
+    },
+    {
+      "path": "jmdict/campaign.log",
+      "bytes": 4338,
+      "sha256": "9064df1155af4aa1f46aa13852f7a4306b3deb14ec74d4e2a867c1ad3aad3e31"
+    },
+    {
+      "path": "jmdict/capture-manifest.json",
+      "bytes": 29656,
+      "sha256": "a8704cafa7f0c7e967a71d49b7f3f43058d6cb152eba6846a2198c7ddfe0fc30"
+    },
+    {
+      "path": "jmdict/capture.log",
+      "bytes": 136,
+      "sha256": "e7c7d84aad3508d1dd09e8eb06441e1cfa5471fc923b6ed70eb06c98fa707d72"
+    },
+    {
+      "path": "jmdict/conformance-manifest.json",
+      "bytes": 109210,
+      "sha256": "d2c012fef05752d68705c1ef90a5124fac017d3898804d5ab6491186db434459"
+    },
+    {
+      "path": "jmdict/host.json",
+      "bytes": 497,
+      "sha256": "40efd11749fa044050501396e710d284e7a1be8157be2444082ffcffbf7a1112"
+    },
+    {
+      "path": "jmdict/source-sha.txt",
+      "bytes": 41,
+      "sha256": "9b655703ff320b28681ebb6d273fd67e1719511b32114a6f8bfa66ec4bb3cc49"
+    },
+    {
+      "path": "jmdict/source-tree.txt",
+      "bytes": 41,
+      "sha256": "cce9134ed160b7741f70ae571cf97fb9b77f2bdaa78f7a340719b259f3b0cf27"
+    }
+  ]
+}

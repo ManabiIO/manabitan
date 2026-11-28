@@ -1,0 +1,11 @@
+{
+  "originalSha256": "320a96809e55d8f4652b8a5d4cb4e3495ee4821002c3006f8927704f82f8e760",
+  "portableSha256": "2d91c5c7b175c3d24189e4e46c962179674b778e37a30375ca8e6bb1e89ad03e",
+  "changes": [
+    "Explicit --source-repo/--artifact/--original-audit/--out arguments replace scratch-root assumptions.",
+    "Require clean frozen research tree before reading source.",
+    "Verify original artifact SHA/size and all120 extracted members.",
+    "Require complete derived audit equality with original, except extraction directory path."
+  ],
+  "timingOraclesAndCalculationsChanged": false
+}

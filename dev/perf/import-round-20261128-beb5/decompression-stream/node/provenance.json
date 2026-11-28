@@ -1,0 +1,93 @@
+{
+  "scope": "Correctness/feasibility only. No timing results. Every report and runner retained verbatim.",
+  "finalHelperResearchCommit": "70f3cda48ba768979a117f58a3901334d402f700",
+  "finalHelperPath": "dev/perf/decompression-stream-chromium/gzip-inflater.mjs",
+  "preliminaryHelperSourceRetained": false,
+  "preliminaryHelperLimitation": "Earlier prototype records its original helper SHA8ce33c...; the helper source itself is not included. Final exact-helper reports cover both fixed slices and all157 source cases and are the authoritative Node limitation.",
+  "reports": [
+    {
+      "report": "decompression-stream-node-conformance.json",
+      "reportSha256": "99549272584ab3e99c4f63b1b54abd8d6d4d14e703663853d3ce885f5b4d659d",
+      "runner": "original-runners/conformance-v1.mjs",
+      "runnerSha256": "19508800b9bbec8e43a8c9a8f4b48ecfd9a4e34cc3bb784d514df09d66e75704",
+      "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "summary": {
+        "sourceComparisons": 480,
+        "sourceAcceptanceMismatches": 72,
+        "gzipSourceAcceptanceMismatches": 0,
+        "formatCases": 12,
+        "acceptedForbiddenTrailingCases": 8
+      }
+    },
+    {
+      "report": "decompression-stream-node-conformance-v2.json",
+      "reportSha256": "ea3090cf3eea919f57de7c650ced9d3ffe4590751a2f69c6fcb3fc3f9a09ec5a",
+      "runner": "original-runners/conformance.mjs",
+      "runnerSha256": "835af62f8840a9feff992f61c7398734dd2911a6ba5f7748409e16b521051edc",
+      "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "summary": {
+        "sourceComparisons": 528,
+        "sourceAcceptanceMismatches": 96,
+        "gzipSourceAcceptanceMismatches": 24,
+        "formatCases": 12,
+        "acceptedForbiddenTrailingCases": 8
+      }
+    },
+    {
+      "report": "decompression-stream-prototype-node-correctness.json",
+      "reportSha256": "1364f9cb33768bd59642730493c37dce8cf0837a36fdad58564515c3cc944b53",
+      "runner": "original-runners/verify-prototype-node-v1.mjs",
+      "runnerSha256": "3cc9e6bf3faf83f07e9cd11ed12b1dd865a4c80f29a87ae0fbb0124b2dcdb7db",
+      "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "summary": {
+        "groups": 12,
+        "banks": 53,
+        "rows": 528299,
+        "sourceConformanceCases": 157,
+        "sourceAcceptanceMismatches": 12,
+        "eligibleForProduction": false
+      },
+      "helperSha256": "8ce33cbf052c9609d619ab69fab58b2cfb445a8cbe3b2bb420b8a71148aec672",
+      "usesFinalFrozenHelper": false,
+      "captureManifest": "capture-v1-manifest.json"
+    },
+    {
+      "report": "decompression-stream-prototype-node-correctness-1024.json",
+      "reportSha256": "2294df15e05913f2cbc33e2b576d4827973c07ee8123312546c0dfd9cf9c5ad1",
+      "runner": "original-runners/verify-prototype-node.mjs",
+      "runnerSha256": "e1ddcba7f6461998b0174f81802e53dce66fc23740e20245a829189b1167dd0d",
+      "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "summary": {
+        "inputChunkBytes": 1024,
+        "groups": 12,
+        "banks": 53,
+        "rows": 528299,
+        "sourceConformanceCases": 157,
+        "sourceAcceptanceMismatches": 12,
+        "eligibleForProduction": false
+      },
+      "helperSha256": "76f2b7dd8c41da7296592552aa8736c90743c4e3c0e1d688515ba30ebbbf6c79",
+      "usesFinalFrozenHelper": true,
+      "captureManifest": "capture-v2-manifest.json"
+    },
+    {
+      "report": "decompression-stream-prototype-node-correctness-65536.json",
+      "reportSha256": "eb871c84e6d88a3eb3ce1609498a1d152cbde3c98ef70734fb41c8eee468b8a5",
+      "runner": "original-runners/verify-prototype-node.mjs",
+      "runnerSha256": "e1ddcba7f6461998b0174f81802e53dce66fc23740e20245a829189b1167dd0d",
+      "nativeWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "summary": {
+        "inputChunkBytes": 65536,
+        "groups": 12,
+        "banks": 53,
+        "rows": 528299,
+        "sourceConformanceCases": 157,
+        "sourceAcceptanceMismatches": 12,
+        "eligibleForProduction": false
+      },
+      "helperSha256": "76f2b7dd8c41da7296592552aa8736c90743c4e3c0e1d688515ba30ebbbf6c79",
+      "usesFinalFrozenHelper": true,
+      "captureManifest": "capture-v2-manifest.json"
+    }
+  ]
+}

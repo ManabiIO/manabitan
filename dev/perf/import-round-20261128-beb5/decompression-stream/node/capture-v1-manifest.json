@@ -1,0 +1,726 @@
+{
+  "format": 1,
+  "dictionary": "jmdict",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "archiveBytes": 15645766,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "captureSha256": "1aa04aa7cb210efdb7e3f46492867273f72d1a4d8007fe409a28c7903b8e9f7b",
+  "oracle": "Node zlib raw inflate with consumed-input count, exact ZIP size, native Node CRC32, complete decoded SHA-256, and independent JSON row count; no browser algorithm prewarming",
+  "scope": "Every pinned JMdict source bank, in all 12 unchanged ordinary three-worker byte-balanced groups; one-group-at-a-time component execution",
+  "grouping": {
+    "parserWorkers": 3,
+    "groupsPerWorker": 4,
+    "targetBytes": 25165824,
+    "executionConcurrency": 1
+  },
+  "totalRows": 528299,
+  "compressedBytes": 15632849,
+  "decodedBytes": 171617523,
+  "groups": [
+    {
+      "groupIndex": 0,
+      "rows": 50000,
+      "compressedBytes": 1100565,
+      "decodedBytes": 14543374,
+      "crcReuseEligible": false,
+      "decodedSha256": "89765f273fd1566b01c0b7124e9e83accc61d79dbfe3032069b1781db5885adf",
+      "banks": [
+        {
+          "filename": "term_bank_1.json.deflate",
+          "zipFilename": "term_bank_1.json",
+          "compressionMethod": 8,
+          "compressedSize": 232927,
+          "uncompressedSize": 3224558,
+          "signature": 404261040,
+          "compressedSha256": "e4e6b0e2ac98fc6595084536535129e4d8254e1c192b6742794165bc0cb225fb",
+          "decodedSha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_2.json.deflate",
+          "zipFilename": "term_bank_2.json",
+          "compressionMethod": 8,
+          "compressedSize": 201497,
+          "uncompressedSize": 2724994,
+          "signature": 2951125037,
+          "compressedSha256": "0487a30506b3b6dc3e3837e211e9c524c7ed0b8a0a163f0183a5f853dc68b013",
+          "decodedSha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_3.json.deflate",
+          "zipFilename": "term_bank_3.json",
+          "compressionMethod": 8,
+          "compressedSize": 204746,
+          "uncompressedSize": 2716299,
+          "signature": 1513352965,
+          "compressedSha256": "312a041d34b9106cc282e5b815a33f7bd53dd9f05bdfcfb1c5bef0b4978f74e5",
+          "decodedSha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_4.json.deflate",
+          "zipFilename": "term_bank_4.json",
+          "compressionMethod": 8,
+          "compressedSize": 200041,
+          "uncompressedSize": 2672529,
+          "signature": 2955013720,
+          "compressedSha256": "7f7104982e3e365613949e36e4b329c6e5f02c7c7be00791ed12a98df12cca3c",
+          "decodedSha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_5.json.deflate",
+          "zipFilename": "term_bank_5.json",
+          "compressionMethod": 8,
+          "compressedSize": 261354,
+          "uncompressedSize": 3204994,
+          "signature": 4038780609,
+          "compressedSha256": "155858025793de51445df5ba67172bd5a852c36efb9055ba7c99df6b2c61c55e",
+          "decodedSha256": "ad3e78760766f7e6b0be7ef1b2eee2d7beecf17240f3def174cc005967d0d4cc",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 1,
+      "rows": 40000,
+      "compressedBytes": 1154201,
+      "decodedBytes": 13240716,
+      "crcReuseEligible": false,
+      "decodedSha256": "ba7a1c7d5e576717e91df49d9b6515abb27fd96c5658d421dc1f39525bf5bcb2",
+      "banks": [
+        {
+          "filename": "term_bank_6.json.deflate",
+          "zipFilename": "term_bank_6.json",
+          "compressionMethod": 8,
+          "compressedSize": 285667,
+          "uncompressedSize": 3327080,
+          "signature": 3822282561,
+          "compressedSha256": "993886b67dc22f84dcc2029c80707538a727668934fbea73fa814f21ca3faa45",
+          "decodedSha256": "b952c58c4b1a2767a8844069976ba8cb932b0cb53888cf93d9998d0b9f994822",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_7.json.deflate",
+          "zipFilename": "term_bank_7.json",
+          "compressionMethod": 8,
+          "compressedSize": 290985,
+          "uncompressedSize": 3283936,
+          "signature": 3662505012,
+          "compressedSha256": "075555b06f56a64a49b0814a4aaf0a5e32b1a36452a6eab642db5173b383aab6",
+          "decodedSha256": "9b91d450b8744d8e88f063a3803b9a284fd128e700b97561cff29834573f9440",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_8.json.deflate",
+          "zipFilename": "term_bank_8.json",
+          "compressionMethod": 8,
+          "compressedSize": 286576,
+          "uncompressedSize": 3271454,
+          "signature": 2237496174,
+          "compressedSha256": "9d1a25ffe6782b35d96e86baec813356f107285b0a75d66e85f1789e01862869",
+          "decodedSha256": "396564a2e0320f74d3099afdf88d4349fe648ecfe6af22463fca672b1ab0fd28",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_9.json.deflate",
+          "zipFilename": "term_bank_9.json",
+          "compressionMethod": 8,
+          "compressedSize": 290973,
+          "uncompressedSize": 3358246,
+          "signature": 1409343149,
+          "compressedSha256": "d33d8af6e4e77a2edd298c1c0b465097ba5a6b615149464487f82da2d6b00931",
+          "decodedSha256": "5cc34afb52511d9dd465bea3dadd0d19be8a04f68ae1ef3ed427f6d9975ba4bb",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 2,
+      "rows": 40000,
+      "compressedBytes": 1161307,
+      "decodedBytes": 13257737,
+      "crcReuseEligible": false,
+      "decodedSha256": "9eeccb7dfe8741fd982494abc358fa1b180f942bbc0075196aacacca8def1953",
+      "banks": [
+        {
+          "filename": "term_bank_10.json.deflate",
+          "zipFilename": "term_bank_10.json",
+          "compressionMethod": 8,
+          "compressedSize": 285278,
+          "uncompressedSize": 3347561,
+          "signature": 1082013653,
+          "compressedSha256": "95c27d6a08db1a4e653633db119463891914d3fa1d2158f38c548c8045914307",
+          "decodedSha256": "8f7c925190b05a4f53b73dee0acf2cb1f7d59a5c6ec1942e003ee8a0721f2a6f",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_11.json.deflate",
+          "zipFilename": "term_bank_11.json",
+          "compressionMethod": 8,
+          "compressedSize": 294349,
+          "uncompressedSize": 3314411,
+          "signature": 3219201253,
+          "compressedSha256": "cea8620264d17ce43a2eab59d6b5fc7a3da560e19939e82e33e629a6f359ce45",
+          "decodedSha256": "0a61845cb9c988cadd11eef5d19e24bdb9c7af6104c0fee1af33517e5d6e96ae",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_12.json.deflate",
+          "zipFilename": "term_bank_12.json",
+          "compressionMethod": 8,
+          "compressedSize": 288324,
+          "uncompressedSize": 3353842,
+          "signature": 4107334087,
+          "compressedSha256": "75e51c972c186d25559f6ac6d857a7ca5d321134a6070412b1f83ccd399d0deb",
+          "decodedSha256": "e6b055f94937bc5db09d367ffc45dc5e45fd2ba637699e93e4b4bee72d058f34",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_13.json.deflate",
+          "zipFilename": "term_bank_13.json",
+          "compressionMethod": 8,
+          "compressedSize": 293356,
+          "uncompressedSize": 3241923,
+          "signature": 1907558867,
+          "compressedSha256": "c147e9680713abf40266247f58a4e7ee2e2189be1d6551c0f902e4b94af83fb1",
+          "decodedSha256": "117c80bccd5d005fe2e5801ab261a416fb30ccb6f2850e149720e3f19a409f04",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 3,
+      "rows": 40000,
+      "compressedBytes": 1022712,
+      "decodedBytes": 14088207,
+      "crcReuseEligible": false,
+      "decodedSha256": "9b3116d45c3cdb6793ce23494b6ec324d0f40bceec65a7779979f28612c40c57",
+      "banks": [
+        {
+          "filename": "term_bank_14.json.deflate",
+          "zipFilename": "term_bank_14.json",
+          "compressionMethod": 8,
+          "compressedSize": 294296,
+          "uncompressedSize": 3311150,
+          "signature": 2073046293,
+          "compressedSha256": "a07894cf3cba6ff3a21646b3686fe533f7bedc21f69d029eeb061a4f15fc0b49",
+          "decodedSha256": "6a71b15c248d4456782c8d90b312ee7f406bd2111ee6b8adad1c49d8c2341278",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_15.json.deflate",
+          "zipFilename": "term_bank_15.json",
+          "compressionMethod": 8,
+          "compressedSize": 249827,
+          "uncompressedSize": 4312211,
+          "signature": 2422392884,
+          "compressedSha256": "fd6a3f38b5e8ef684eb62f5cddf7caad3b88ad1ac8df4db2fbecaf65bdd78b77",
+          "decodedSha256": "5150a28f810a5ac92fade631bcc5c05df9e4306610934575c7a092ee635277cf",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_16.json.deflate",
+          "zipFilename": "term_bank_16.json",
+          "compressionMethod": 8,
+          "compressedSize": 219292,
+          "uncompressedSize": 3257972,
+          "signature": 990240016,
+          "compressedSha256": "d1894fa0726a82dfac64247feb1a161af83f77695dbd39f5968545555f24ab4c",
+          "decodedSha256": "04c256e40ce76f0651c49d92d985e15fbc97a4a466932e3cec66c292f4b85951",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_17.json.deflate",
+          "zipFilename": "term_bank_17.json",
+          "compressionMethod": 8,
+          "compressedSize": 259297,
+          "uncompressedSize": 3206874,
+          "signature": 1474525502,
+          "compressedSha256": "e51ed573cb8f03483e5c8a719a039f3e78bd57359c73271d1c6ab7f29435d052",
+          "decodedSha256": "ab26d54184dd15c0eb21393be82abbe384e88c1599c5c87cd39560dcae97fbbd",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 4,
+      "rows": 50000,
+      "compressedBytes": 1385907,
+      "decodedBytes": 15138615,
+      "crcReuseEligible": false,
+      "decodedSha256": "b45954d0f08196df3e066c74bee379d456fead4a50974ba4d4d42e0cb213380e",
+      "banks": [
+        {
+          "filename": "term_bank_18.json.deflate",
+          "zipFilename": "term_bank_18.json",
+          "compressionMethod": 8,
+          "compressedSize": 283040,
+          "uncompressedSize": 3408913,
+          "signature": 2537180659,
+          "compressedSha256": "0f7a99eaf8d1290449246caafba657285e2e758c9ffa2fe1188a28781e6207e3",
+          "decodedSha256": "1163e5686590707e1390d3edf4e4ed35f96a81f588726d6d161e0a8f687386bc",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_19.json.deflate",
+          "zipFilename": "term_bank_19.json",
+          "compressionMethod": 8,
+          "compressedSize": 278583,
+          "uncompressedSize": 2944326,
+          "signature": 812214837,
+          "compressedSha256": "ae6eae926677a8c842a10117662ef7e4f27d1b1799cdc570546a942d9386dff6",
+          "decodedSha256": "6589a04a9e47a232d6e674551dc5b23eb10ddd98bf630eb0210cf42054abf117",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_20.json.deflate",
+          "zipFilename": "term_bank_20.json",
+          "compressionMethod": 8,
+          "compressedSize": 286687,
+          "uncompressedSize": 2991158,
+          "signature": 419208196,
+          "compressedSha256": "a9a888b38fd7d4d64135a4bd271aa2c87e1519c1e6bf57e198000fa38cefd42a",
+          "decodedSha256": "4b94052e3b3706587e39ee13b7c507614d02b3c3ecb2880b4ccf4e9386e0ab83",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_21.json.deflate",
+          "zipFilename": "term_bank_21.json",
+          "compressionMethod": 8,
+          "compressedSize": 280559,
+          "uncompressedSize": 2912871,
+          "signature": 3099569980,
+          "compressedSha256": "8d85864d50b95e2bd7e270e2eeabdd394f9dcfc8967da6304bcdcc8a98d05489",
+          "decodedSha256": "f4060d60cdcbd95252dfe225bb55f6b370e1145b29a82d10ea99cf69dfda253b",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_22.json.deflate",
+          "zipFilename": "term_bank_22.json",
+          "compressionMethod": 8,
+          "compressedSize": 257038,
+          "uncompressedSize": 2881347,
+          "signature": 1543581021,
+          "compressedSha256": "cae074aef2c92b12bb22b51edfb937f749dd982fd7b8ea85628f03d14f0b02d4",
+          "decodedSha256": "89783ca3716f121816d8b79a52fc73dee5fea19b8d043d8c233328f2e15e503b",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 5,
+      "rows": 50000,
+      "compressedBytes": 1584174,
+      "decodedBytes": 15955653,
+      "crcReuseEligible": false,
+      "decodedSha256": "35b70d96c8f575cf0641d027bda8210256536008fff4ebb7b5c5326753f28ca7",
+      "banks": [
+        {
+          "filename": "term_bank_23.json.deflate",
+          "zipFilename": "term_bank_23.json",
+          "compressionMethod": 8,
+          "compressedSize": 310787,
+          "uncompressedSize": 3130796,
+          "signature": 597792161,
+          "compressedSha256": "761d9878cbd4bf5dbc94eba079ba1472bc16a5f3fe12cc2a065e269c0829e137",
+          "decodedSha256": "6bb2ab2953013e724277618a59e2a032848c8151368c02c3595f43614bbd9680",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_24.json.deflate",
+          "zipFilename": "term_bank_24.json",
+          "compressionMethod": 8,
+          "compressedSize": 308587,
+          "uncompressedSize": 2924205,
+          "signature": 2002282153,
+          "compressedSha256": "ff6e20232a38853af2773f9b6f185327b174c80203a66a496f4a7d24112eff98",
+          "decodedSha256": "d499e5ddfffde1fdeca2fae842715006c4fa7b19b680b4a1cef94e69de45e4c2",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_25.json.deflate",
+          "zipFilename": "term_bank_25.json",
+          "compressionMethod": 8,
+          "compressedSize": 303992,
+          "uncompressedSize": 3148618,
+          "signature": 795742897,
+          "compressedSha256": "c223280065ab182c088fbe089d105e5333e09921e110ba37a2ec9be2b505abb3",
+          "decodedSha256": "637343928a8ff879c830eaa31e208dc31ac6e0aed84c0ac27f2b7a610c6040e1",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_26.json.deflate",
+          "zipFilename": "term_bank_26.json",
+          "compressionMethod": 8,
+          "compressedSize": 333406,
+          "uncompressedSize": 3377060,
+          "signature": 4212135652,
+          "compressedSha256": "9bd3a45e795ad77b519110ad7e9aee399889764df70494e304e20ac4964991b6",
+          "decodedSha256": "6b31f06728fec4b7ef892100afd7d048597a87ca3ebcd2ea404a3c203124a30c",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_27.json.deflate",
+          "zipFilename": "term_bank_27.json",
+          "compressionMethod": 8,
+          "compressedSize": 327402,
+          "uncompressedSize": 3374974,
+          "signature": 4091031990,
+          "compressedSha256": "7701b3afe9b881740cecd8f7f5af1e16a736c43e5ba4404b5ced6d68663510ac",
+          "decodedSha256": "45d9111bd312f2a3dd5c748edaa8322ca962d731621ecb0b26202ca684305b36",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 6,
+      "rows": 40000,
+      "compressedBytes": 1185652,
+      "decodedBytes": 13702906,
+      "crcReuseEligible": false,
+      "decodedSha256": "015c3eb81143b1a67adc1bc35d91da74dc576edd140d9787709c338deb5d7757",
+      "banks": [
+        {
+          "filename": "term_bank_28.json.deflate",
+          "zipFilename": "term_bank_28.json",
+          "compressionMethod": 8,
+          "compressedSize": 319120,
+          "uncompressedSize": 3326587,
+          "signature": 3290278121,
+          "compressedSha256": "bee0570fb17529f794eee27f594f892decc12a3ee9b550aad327c583eea8c456",
+          "decodedSha256": "5621d982d7b9d9ba3f2f2440c21a597852fe5e0fc23b43a02e8211a54bd75782",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_29.json.deflate",
+          "zipFilename": "term_bank_29.json",
+          "compressionMethod": 8,
+          "compressedSize": 293949,
+          "uncompressedSize": 3411990,
+          "signature": 1362719526,
+          "compressedSha256": "2899441a8735e71710ad9ab449bc0ce789a800e84f51bbe489f9bd631dbdace1",
+          "decodedSha256": "a5efa8d50811c1954a770bc14aae9704a80961ca6b94935719fe2f03eecfa1dd",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_30.json.deflate",
+          "zipFilename": "term_bank_30.json",
+          "compressionMethod": 8,
+          "compressedSize": 303907,
+          "uncompressedSize": 3706971,
+          "signature": 4142274620,
+          "compressedSha256": "07f617f4439bed39e355dd79a637e06930323cab3d7b9502ddd166afbbf1646b",
+          "decodedSha256": "640c00d882979e4b620daddaf2db12a1ed99f4afd902d4ba9e851eb935499388",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_31.json.deflate",
+          "zipFilename": "term_bank_31.json",
+          "compressionMethod": 8,
+          "compressedSize": 268676,
+          "uncompressedSize": 3257358,
+          "signature": 3980454135,
+          "compressedSha256": "6ae782d14454688fc47eb07c6c68115cc508c117c96f197d8213c032b69114e1",
+          "decodedSha256": "ea612b8561a53e662de2c02eb2c0050d83b4ffd480fd4df6c384e0789f381ef4",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 7,
+      "rows": 50000,
+      "compressedBytes": 1307152,
+      "decodedBytes": 14307906,
+      "crcReuseEligible": false,
+      "decodedSha256": "06fca3db8b511179080548cf11f525ed2a90c34e58d464e868f102ab418f7351",
+      "banks": [
+        {
+          "filename": "term_bank_32.json.deflate",
+          "zipFilename": "term_bank_32.json",
+          "compressionMethod": 8,
+          "compressedSize": 195735,
+          "uncompressedSize": 2530607,
+          "signature": 3200937347,
+          "compressedSha256": "178b2eb2061029356f44c5543a5f8bf69b086fc5311d5f069ecb5599e2095d21",
+          "decodedSha256": "b7f56d4e646f695d2619b35a07843e947e967ba275fd6a57e6d5ec4a8cd1a4e8",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_33.json.deflate",
+          "zipFilename": "term_bank_33.json",
+          "compressionMethod": 8,
+          "compressedSize": 337549,
+          "uncompressedSize": 3140246,
+          "signature": 4037553909,
+          "compressedSha256": "82fe89195014e7d287d4fdc55f410627461a6e148662f1ace4ace232901d8dc1",
+          "decodedSha256": "5521f93cfeb63d3c78cb7e3af8374cd2a3b25739ddcf86b6e08707bff43280f1",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_34.json.deflate",
+          "zipFilename": "term_bank_34.json",
+          "compressionMethod": 8,
+          "compressedSize": 284530,
+          "uncompressedSize": 3038748,
+          "signature": 2394675142,
+          "compressedSha256": "0ae52d495901da876e58a1db0e1ece3a98ba8a083adbd96854a2b4f9c41eff68",
+          "decodedSha256": "315dabdbb053102a221a5e4bf6f5b937894ad1a7730fab8853d190b9e3930581",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_35.json.deflate",
+          "zipFilename": "term_bank_35.json",
+          "compressionMethod": 8,
+          "compressedSize": 185671,
+          "uncompressedSize": 2430169,
+          "signature": 3445960956,
+          "compressedSha256": "72904b4e1719c818f99715a4df964e9b9c6b15cb55c75ee6e763897f2253c79d",
+          "decodedSha256": "10d038a7290d0ed2949c8491955279817cad65a64c98ae0533c9a722020e136e",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_36.json.deflate",
+          "zipFilename": "term_bank_36.json",
+          "compressionMethod": 8,
+          "compressedSize": 303667,
+          "uncompressedSize": 3168136,
+          "signature": 3402545765,
+          "compressedSha256": "8ad198bd87ac97ae08b6faa0a38ac6f168acc46322baadfe3928c38238fb575e",
+          "decodedSha256": "1c579f595f99ad7053c569dc82e14670e9b05248585a8c50479820a8babef3aa",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 8,
+      "rows": 40000,
+      "compressedBytes": 1331640,
+      "decodedBytes": 14119170,
+      "crcReuseEligible": false,
+      "decodedSha256": "b621ddef9c5b4860c5fbb12ddd9ff66caecc4e1d93516a2a95f5a7174cb1bd51",
+      "banks": [
+        {
+          "filename": "term_bank_37.json.deflate",
+          "zipFilename": "term_bank_37.json",
+          "compressionMethod": 8,
+          "compressedSize": 336653,
+          "uncompressedSize": 3943952,
+          "signature": 3506376422,
+          "compressedSha256": "25f5ac28aaa6fea294ad944b3bfb5d2907bd067fd1c704770cabf5150c047d5a",
+          "decodedSha256": "3c4e05ac19a48d88de1319013062f719de9b646955841af618fe89c5efe923ea",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_38.json.deflate",
+          "zipFilename": "term_bank_38.json",
+          "compressionMethod": 8,
+          "compressedSize": 325795,
+          "uncompressedSize": 3323025,
+          "signature": 3376386423,
+          "compressedSha256": "c80390404bc3f34445542b4d62cf996265dbbd633f94a8ebd789f48512fd5569",
+          "decodedSha256": "e7d8940830e123156b998e6b792b62c58eeccbc1cd7bd153fed1ed9929ca54d9",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_39.json.deflate",
+          "zipFilename": "term_bank_39.json",
+          "compressionMethod": 8,
+          "compressedSize": 341827,
+          "uncompressedSize": 3401356,
+          "signature": 2917308995,
+          "compressedSha256": "d602b1427f73c11875a0d3c50c573194e58efb78f228a3f5d268b25779487ff5",
+          "decodedSha256": "a2a7a0056729a29be6e48acf20dff9556b39dcccd2c5a61c69ba22bf94fbf53d",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_40.json.deflate",
+          "zipFilename": "term_bank_40.json",
+          "compressionMethod": 8,
+          "compressedSize": 327365,
+          "uncompressedSize": 3450837,
+          "signature": 3430702340,
+          "compressedSha256": "675982476fb1f0b523c5834659516b934578d96c512646f2558b5cf1b4c19076",
+          "decodedSha256": "ae55b1d39795173aec65ce79f7566d4662239f486be653d1f9d275ce0f33ebe1",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 9,
+      "rows": 40000,
+      "compressedBytes": 1339761,
+      "decodedBytes": 13775196,
+      "crcReuseEligible": false,
+      "decodedSha256": "3438eb1ce8d9228e0c0b7303ea4ef8e312ba8bd17fc94eacede8bba47c93a25a",
+      "banks": [
+        {
+          "filename": "term_bank_41.json.deflate",
+          "zipFilename": "term_bank_41.json",
+          "compressionMethod": 8,
+          "compressedSize": 327770,
+          "uncompressedSize": 3426893,
+          "signature": 1959284467,
+          "compressedSha256": "1b84a9aa505ca9f38319b508041897fc4f0faf917964fb5d120b638686ab80d8",
+          "decodedSha256": "f722810790b62cbc72e57129367622abb6382e78aee84c82a7ad7f088e787563",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_42.json.deflate",
+          "zipFilename": "term_bank_42.json",
+          "compressionMethod": 8,
+          "compressedSize": 343507,
+          "uncompressedSize": 3505865,
+          "signature": 1303868956,
+          "compressedSha256": "b72485ba26e407422b24b8a31576954326b3e2bfb7c261a960cb2b35266a551f",
+          "decodedSha256": "6aea96d384524f8fd8eb04618677865cb7ea836681a3dae0b4ff45e5d8b51e99",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_43.json.deflate",
+          "zipFilename": "term_bank_43.json",
+          "compressionMethod": 8,
+          "compressedSize": 328238,
+          "uncompressedSize": 3414653,
+          "signature": 3325356598,
+          "compressedSha256": "37add84fc773e9fa95fa5e92441610fd972abcd601fa86751c30d15b7c0ab8dd",
+          "decodedSha256": "b40fd67648580d280b0394f28175df9c76fdf2a9eaba4a4984b45ed1a0f6646b",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_44.json.deflate",
+          "zipFilename": "term_bank_44.json",
+          "compressionMethod": 8,
+          "compressedSize": 340246,
+          "uncompressedSize": 3427785,
+          "signature": 2046005072,
+          "compressedSha256": "d7a09b4da992610fe4471385686e480870c293dcbeb416ce790f66ba5309b32a",
+          "decodedSha256": "6cdd63a41b07ec9fdad8f2a612018a4a462c0234eb0ee04c877eadba0b239c14",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 10,
+      "rows": 40000,
+      "compressedBytes": 1389897,
+      "decodedBytes": 13936647,
+      "crcReuseEligible": false,
+      "decodedSha256": "eaf0d35b41f93538b4f728133b8b3803fa04b96e8a2079bb823038db3e5289e7",
+      "banks": [
+        {
+          "filename": "term_bank_45.json.deflate",
+          "zipFilename": "term_bank_45.json",
+          "compressionMethod": 8,
+          "compressedSize": 339568,
+          "uncompressedSize": 3478013,
+          "signature": 2951714289,
+          "compressedSha256": "d9bf75cac25fc2b97cb730a8ebc67c44b267a2eabc8474469ff16510ad777570",
+          "decodedSha256": "de032d7410203ea5d95164232ceac863a429f0bb4560b5cd7c38d95414c8f6d0",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_46.json.deflate",
+          "zipFilename": "term_bank_46.json",
+          "compressionMethod": 8,
+          "compressedSize": 345914,
+          "uncompressedSize": 3653990,
+          "signature": 3189450436,
+          "compressedSha256": "f9d0b527e5eb35495daba3fe59dc6ceeadc07e52daa9de105dc524c021381825",
+          "decodedSha256": "64b0212e0104f43d08d22ab13a8289a4e174a9e2403595cef6e4e0f50f2725e8",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_47.json.deflate",
+          "zipFilename": "term_bank_47.json",
+          "compressionMethod": 8,
+          "compressedSize": 353697,
+          "uncompressedSize": 3481019,
+          "signature": 458598335,
+          "compressedSha256": "548c90c2ee42330fe7b45ae4ab5e355fb6df339f198dd35a8f095bb0c9e9c1b7",
+          "decodedSha256": "5448759be94ad56b62ccc14ba4f9d5ae4a06ff6dece65f2d3d9dfdde395490ba",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_48.json.deflate",
+          "zipFilename": "term_bank_48.json",
+          "compressionMethod": 8,
+          "compressedSize": 350718,
+          "uncompressedSize": 3323625,
+          "signature": 458947805,
+          "compressedSha256": "76ac47540cf66727d62cdde1c9c92b1e35b18e415c54fdf25c397ab6a3e89f46",
+          "decodedSha256": "385d33b9fd754d59643fe101f159d5d7cc29cfc5e0e607e1c8ed5c63da76fbe7",
+          "rows": 10000
+        }
+      ]
+    },
+    {
+      "groupIndex": 11,
+      "rows": 48299,
+      "compressedBytes": 1669881,
+      "decodedBytes": 15551396,
+      "crcReuseEligible": false,
+      "decodedSha256": "fbce1abd71ccfe242a44e1aa8f378173ccb13bfb395853f4a4e64c2f4c926ab4",
+      "banks": [
+        {
+          "filename": "term_bank_49.json.deflate",
+          "zipFilename": "term_bank_49.json",
+          "compressionMethod": 8,
+          "compressedSize": 343674,
+          "uncompressedSize": 3291469,
+          "signature": 1365134473,
+          "compressedSha256": "c1067a23fa85ef57388ffbe0590694f207ecf01d6afe9fb27cc8e6ad3334d81c",
+          "decodedSha256": "d1b597da0285da08e98083b7f4b5f81aaa28e70c4565fe1ee7fcfcaccb3fe7bc",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_50.json.deflate",
+          "zipFilename": "term_bank_50.json",
+          "compressionMethod": 8,
+          "compressedSize": 330347,
+          "uncompressedSize": 3231984,
+          "signature": 551614071,
+          "compressedSha256": "188b12a8fff5297dc244e7a8984fed79e2d6d4325a906496c727cd80e2ba6831",
+          "decodedSha256": "3967400c60866210250a3b6496ea8c62469aa7832e63969fd7f1233501aa6b8a",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_51.json.deflate",
+          "zipFilename": "term_bank_51.json",
+          "compressionMethod": 8,
+          "compressedSize": 337477,
+          "uncompressedSize": 3194840,
+          "signature": 3418542503,
+          "compressedSha256": "e8e3910d91bb0cd23f25bf1e5275632fc21bedf9af2bd0eb639f7a27c84580f5",
+          "decodedSha256": "1e3499825ad8a3857f7d2722a026b3bf27939e9057619c49aaefe1f4cf6cc908",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_52.json.deflate",
+          "zipFilename": "term_bank_52.json",
+          "compressionMethod": 8,
+          "compressedSize": 366750,
+          "uncompressedSize": 3474021,
+          "signature": 1451819622,
+          "compressedSha256": "461ee41888219603982f2873bc241e41ca63c99cf4716fe5fb7a72fc10f66812",
+          "decodedSha256": "01df61fd06b7fdc3f8e972358c90c593f5547327bf433765ec1efeaa7537a853",
+          "rows": 10000
+        },
+        {
+          "filename": "term_bank_53.json.deflate",
+          "zipFilename": "term_bank_53.json",
+          "compressionMethod": 8,
+          "compressedSize": 291633,
+          "uncompressedSize": 2359082,
+          "signature": 3871091921,
+          "compressedSha256": "7960eddd90d41572493076ab032d535787a14823bc9c8ec0fa7d84455a39e79d",
+          "decodedSha256": "34a29b0645204a2882b9813673071d99849505711bd9744d0965e710a129feb9",
+          "rows": 8299
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "complete": true,
+  "scope": "Read-only evidence recheck; no browser or timing execution.",
+  "sourceResearchTree": "17ff7a2b17c9130f43c347791567a6a9b0e631a0",
+  "originalAuditorSha256": "320a96809e55d8f4652b8a5d4cb4e3495ee4821002c3006f8927704f82f8e760",
+  "portableAuditorSha256": "2d91c5c7b175c3d24189e4e46c962179674b778e37a30375ca8e6bb1e89ad03e",
+  "originalAuditSha256": "ef1c892cbc601fae5e36a60a749bbd331535b1067089712ca4dfe9b3e4e1aa7b",
+  "artifactSha256": "b49c57e37e181d19541de6e9da21a30e267363df928dd6b99d00bca345c15591",
+  "allOriginalArtifactMembersExact": 120,
+  "sourceFilesVerified": 329,
+  "completedArms": 36,
+  "conformanceRecords": 171,
+  "derivedAuditExactlyMatchesExceptExtractionPath": true,
+  "allOriginalAuditFunctionsAstIdenticalAfterRemovingTwoNewCleanTreePreconditions": true
+}

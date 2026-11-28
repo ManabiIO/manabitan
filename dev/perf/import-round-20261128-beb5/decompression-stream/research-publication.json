@@ -1,0 +1,227 @@
+{
+  "verifiedAt": "2026-11-28 04:41:50 UTC",
+  "repository": "ManabiIO/manabitan",
+  "branch": "perf/decompression-stream-chromium-20261128-beb5",
+  "localCommit": "90e0dc86e6f9d0102d632843b45242b15348768c",
+  "remoteCommit": "70f3cda48ba768979a117f58a3901334d402f700",
+  "tree": "17ff7a2b17c9130f43c347791567a6a9b0e631a0",
+  "parents": [
+    "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  ],
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/decompression-stream-chromium-beb5.yml",
+      "gitBlob": "23ecb22d5a657a167563f997262640d42afa188c"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/README.md",
+      "gitBlob": "21605fc79b35d2c28de1bb210fa956bd226c6230"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/campaign.mjs",
+      "gitBlob": "aa195914694e4374c1c5679c7434a2f0a052d9a9"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/capture.mjs",
+      "gitBlob": "990a576a60e10e63c526dfaba6c1766103c6109e"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/fixtures.mjs",
+      "gitBlob": "2d5dee5839f6d499219d6907ffc96754375f7d81"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/gzip-inflater.mjs",
+      "gitBlob": "2ce91eceb601d07a3800b297efe86804c81f8ed2"
+    },
+    {
+      "path": "dev/perf/decompression-stream-chromium/worker.mjs",
+      "gitBlob": "56542c8c3170a50824c6c09c3db5ad4d46d60d60"
+    }
+  ],
+  "runs": [
+    {
+      "id": 46108692453,
+      "name": "Gzip-framed inflation Chromium screen 20261128 beb5",
+      "headSha": "70f3cda48ba768979a117f58a3901334d402f700",
+      "status": "queued",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46108692453"
+    },
+    {
+      "id": 46108692415,
+      "name": "Lint GitHub Actions workflows",
+      "headSha": "70f3cda48ba768979a117f58a3901334d402f700",
+      "status": "queued",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46108692415"
+    }
+  ],
+  "registration": {
+    "treatmentPairsPerSlice": 6,
+    "slices": [
+      65536,
+      1024
+    ],
+    "controlPairs": 6,
+    "freshMeasuredBrowsers": 36,
+    "freshWorkersPerArm": 3,
+    "groupsPerWorker": 4,
+    "sourceGroups": 12,
+    "sourceBanks": 53,
+    "rows": 528299,
+    "compressedBytes": 15632849,
+    "decodedBytes": 171617523,
+    "schedule": [
+      {
+        "pair": 0,
+        "scenario": "gzip64",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 0,
+        "scenario": "gzip1k",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 0,
+        "scenario": "control",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 1,
+        "scenario": "gzip64",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 1,
+        "scenario": "control",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 1,
+        "scenario": "gzip1k",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 2,
+        "scenario": "control",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 2,
+        "scenario": "gzip64",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 2,
+        "scenario": "gzip1k",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 3,
+        "scenario": "control",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 3,
+        "scenario": "gzip1k",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 3,
+        "scenario": "gzip64",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 4,
+        "scenario": "gzip1k",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 4,
+        "scenario": "control",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 4,
+        "scenario": "gzip64",
+        "order": [
+          "baseline",
+          "candidate"
+        ]
+      },
+      {
+        "pair": 5,
+        "scenario": "gzip1k",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 5,
+        "scenario": "gzip64",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      },
+      {
+        "pair": 5,
+        "scenario": "control",
+        "order": [
+          "candidate",
+          "baseline"
+        ]
+      }
+    ],
+    "conformance": {
+      "standaloneFormatCases": 14,
+      "sourceCases": 157,
+      "variantsPerSource": 2,
+      "separateFreshBrowser": true
+    },
+    "resourceProof": "Both slice prototypes remain unqualified for the native declared-output hard-cap contract"
+  },
+  "publishedPullRequest": false
+}

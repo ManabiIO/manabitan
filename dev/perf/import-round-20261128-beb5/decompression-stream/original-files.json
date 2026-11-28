@@ -1,0 +1,185 @@
+{
+  "scope": "Every listed file is copied verbatim; portable auditor, README, reproduction guide and archive member inventory are additional derived files. Original absolute scratch paths are provenance only.",
+  "files": [
+    {
+      "file": "artifact.zip",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/artifact.zip",
+      "bytes": 220443,
+      "sha256": "b49c57e37e181d19541de6e9da21a30e267363df928dd6b99d00bca345c15591"
+    },
+    {
+      "file": "artifact-receipt.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/artifact-receipt.json",
+      "bytes": 807,
+      "sha256": "8fbf2c5911fd2dbd80fca803b78dd8e36949ef02407b8baeefd7d45ef4a21989"
+    },
+    {
+      "file": "job.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/job.log",
+      "bytes": 57351,
+      "sha256": "c51743879bf57be476f68e14e627c3738d505a00f084b199538dfee608fb5fef"
+    },
+    {
+      "file": "independent-audit.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/independent-audit.json",
+      "bytes": 4938,
+      "sha256": "ef1c892cbc601fae5e36a60a749bbd331535b1067089712ca4dfe9b3e4e1aa7b"
+    },
+    {
+      "file": "independent-audit.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/audit.log",
+      "bytes": 4938,
+      "sha256": "ef1c892cbc601fae5e36a60a749bbd331535b1067089712ca4dfe9b3e4e1aa7b"
+    },
+    {
+      "file": "browser-decision-original.md",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-chromium-hosted-jmdict/decision.md",
+      "bytes": 5493,
+      "sha256": "669e25654b4694c0a93d042651d26af64182fb24dd5dd7aa48e64aeec8164d8d"
+    },
+    {
+      "file": "audit-original.py",
+      "originalPath": "/workspace/scratch/beb5caac0497/audit-decompression-stream-browser.py",
+      "bytes": 14132,
+      "sha256": "320a96809e55d8f4652b8a5d4cb4e3495ee4821002c3006f8927704f82f8e760"
+    },
+    {
+      "file": "research-publication.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-publication.json",
+      "bytes": 5130,
+      "sha256": "190b6d0f42a7ca16755bd44df52252facd0b9ecbf9fccf76ef455870840493d6"
+    },
+    {
+      "file": "resource/output-bound-review.md",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/ds-output-bound-review.md",
+      "bytes": 11633,
+      "sha256": "421daf62ad50c44aa11eca012872cb749c914129be35680cc62c4b79912c1bfd"
+    },
+    {
+      "file": "resource/ds-bounds-sources/chrome153/manifest.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/ds-bounds-sources/chrome153/manifest.json",
+      "bytes": 7686,
+      "sha256": "d01b1c8e84e3d90ad53968bdc491c0ef140f3b7a81bce0e637089d4faa0ae0be"
+    },
+    {
+      "file": "resource/ds-bounds-sources/chrome153-tag.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/ds-bounds-sources/chrome153-tag.json",
+      "bytes": 1497,
+      "sha256": "0d65fb9095287294d610cc95f58b9aeb1f25d72a535645b68f5073dcdaa6fb08"
+    },
+    {
+      "file": "resource/production-outline.md",
+      "originalPath": "/workspace/scratch/beb5caac0497/decompression-stream-production-outline.md",
+      "bytes": 10982,
+      "sha256": "9593fd9ce19c8f12dfdca64377b6fea8577c2f63303415e24a9da06cf9eeac1c"
+    },
+    {
+      "file": "node/decompression-stream-node-conformance-v2.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-node-conformance-v2.json",
+      "bytes": 316367,
+      "sha256": "ea3090cf3eea919f57de7c650ced9d3ffe4590751a2f69c6fcb3fc3f9a09ec5a"
+    },
+    {
+      "file": "node/decompression-stream-node-conformance.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-node-conformance.json",
+      "bytes": 285342,
+      "sha256": "99549272584ab3e99c4f63b1b54abd8d6d4d14e703663853d3ce885f5b4d659d"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness-1024.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness-1024.json",
+      "bytes": 43693,
+      "sha256": "2294df15e05913f2cbc33e2b576d4827973c07ee8123312546c0dfd9cf9c5ad1"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness-65536.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness-65536.json",
+      "bytes": 43659,
+      "sha256": "eb871c84e6d88a3eb3ce1609498a1d152cbde3c98ef70734fb41c8eee468b8a5"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness.json",
+      "bytes": 43601,
+      "sha256": "1364f9cb33768bd59642730493c37dce8cf0837a36fdad58564515c3cc944b53"
+    },
+    {
+      "file": "node/decompression-stream-node-conformance-v2.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-node-conformance-v2.log",
+      "bytes": 320,
+      "sha256": "91bdf3b5d73dfa0313b1bfd160ffb8d85127590067f5ed3493d4a79d2d6f6ccf"
+    },
+    {
+      "file": "node/decompression-stream-node-conformance.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-node-conformance.log",
+      "bytes": 319,
+      "sha256": "dd94e4807d6a94aa6200c1d049a310e941160e69851a34614a5411fa52e473f9"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness-1024.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness-1024.log",
+      "bytes": 327,
+      "sha256": "4ba039185563ffbf03b86e6bb1ba1f2a1fadc842f046a2972f53ed7ce4ba4c35"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness-65536.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness-65536.log",
+      "bytes": 328,
+      "sha256": "b55f4fd9d001ce191b46fbb697aca96ade7aac0a434a22176d0c9b484f3e75f0"
+    },
+    {
+      "file": "node/decompression-stream-prototype-node-correctness.log",
+      "originalPath": "/workspace/scratch/beb5caac0497/results/decompression-stream-prototype-node-correctness.log",
+      "bytes": 304,
+      "sha256": "766e22c26b83f19c1e759c257457aeddbfc0b03234e7b375329bf2fdd33c340f"
+    },
+    {
+      "file": "node/original-runners/conformance-v1.mjs",
+      "originalPath": "/workspace/scratch/beb5caac0497/decompression-stream-research/conformance-v1.mjs",
+      "bytes": 8366,
+      "sha256": "19508800b9bbec8e43a8c9a8f4b48ecfd9a4e34cc3bb784d514df09d66e75704"
+    },
+    {
+      "file": "node/original-runners/conformance.mjs",
+      "originalPath": "/workspace/scratch/beb5caac0497/decompression-stream-research/conformance.mjs",
+      "bytes": 8603,
+      "sha256": "835af62f8840a9feff992f61c7398734dd2911a6ba5f7748409e16b521051edc"
+    },
+    {
+      "file": "node/original-runners/verify-prototype-node-v1.mjs",
+      "originalPath": "/workspace/scratch/beb5caac0497/decompression-stream-research/verify-prototype-node-v1.mjs",
+      "bytes": 4382,
+      "sha256": "3cc9e6bf3faf83f07e9cd11ed12b1dd865a4c80f29a87ae0fbb0124b2dcdb7db"
+    },
+    {
+      "file": "node/original-runners/verify-prototype-node.mjs",
+      "originalPath": "/workspace/scratch/beb5caac0497/decompression-stream-research/verify-prototype-node.mjs",
+      "bytes": 4551,
+      "sha256": "e1ddcba7f6461998b0174f81802e53dce66fc23740e20245a829189b1167dd0d"
+    },
+    {
+      "file": "node/capture-v1-manifest.json",
+      "originalPath": "/tmp/beb5-decompression-stream-jmdict-inputs/manifest.json",
+      "bytes": 29656,
+      "sha256": "db55434027aaf20a36744828a4764c9485bc1dac288a76d06d49c5e6200ce55a"
+    },
+    {
+      "file": "node/capture-v1-conformance.json",
+      "originalPath": "/tmp/beb5-decompression-stream-jmdict-inputs/conformance.json",
+      "bytes": 109210,
+      "sha256": "d2c012fef05752d68705c1ef90a5124fac017d3898804d5ab6491186db434459"
+    },
+    {
+      "file": "node/capture-v2-manifest.json",
+      "originalPath": "/tmp/beb5-decompression-stream-jmdict-inputs-v2/manifest.json",
+      "bytes": 29656,
+      "sha256": "a8704cafa7f0c7e967a71d49b7f3f43058d6cb152eba6846a2198c7ddfe0fc30"
+    },
+    {
+      "file": "node/capture-v2-conformance.json",
+      "originalPath": "/tmp/beb5-decompression-stream-jmdict-inputs-v2/conformance.json",
+      "bytes": 109210,
+      "sha256": "d2c012fef05752d68705c1ef90a5124fac017d3898804d5ab6491186db434459"
+    }
+  ]
+}

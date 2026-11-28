@@ -1,0 +1,1658 @@
+{
+  "scope": "Correctness only, no clocks or performance claim. All ordinary JMdict bytes/spans match; Node remains ineligible because the exact helper accepts hidden second gzip members.",
+  "node": "v22.22.0",
+  "manifestSha256": "a8704cafa7f0c7e967a71d49b7f3f43058d6cb152eba6846a2198c7ddfe0fc30",
+  "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "helperSha256": "76f2b7dd8c41da7296592552aa8736c90743c4e3c0e1d688515ba30ebbbf6c79",
+  "runnerSha256": "e1ddcba7f6461998b0174f81802e53dce66fc23740e20245a829189b1167dd0d",
+  "inputChunkBytes": 65536,
+  "groups": [
+    {
+      "groupIndex": 0,
+      "banks": 5,
+      "rows": 50000,
+      "decodedBytes": 14543374,
+      "decodedSha256": "89765f273fd1566b01c0b7124e9e83accc61d79dbfe3032069b1781db5885adf",
+      "inputChunks": 30,
+      "decodedChunks": 905,
+      "outputCopiedBytes": 14543374
+    },
+    {
+      "groupIndex": 1,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 13240716,
+      "decodedSha256": "ba7a1c7d5e576717e91df49d9b6515abb27fd96c5658d421dc1f39525bf5bcb2",
+      "inputChunks": 28,
+      "decodedChunks": 826,
+      "outputCopiedBytes": 13240716
+    },
+    {
+      "groupIndex": 2,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 13257737,
+      "decodedSha256": "9eeccb7dfe8741fd982494abc358fa1b180f942bbc0075196aacacca8def1953",
+      "inputChunks": 28,
+      "decodedChunks": 827,
+      "outputCopiedBytes": 13257737
+    },
+    {
+      "groupIndex": 3,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 14088207,
+      "decodedSha256": "9b3116d45c3cdb6793ce23494b6ec324d0f40bceec65a7779979f28612c40c57",
+      "inputChunks": 25,
+      "decodedChunks": 875,
+      "outputCopiedBytes": 14088207
+    },
+    {
+      "groupIndex": 4,
+      "banks": 5,
+      "rows": 50000,
+      "decodedBytes": 15138615,
+      "decodedSha256": "b45954d0f08196df3e066c74bee379d456fead4a50974ba4d4d42e0cb213380e",
+      "inputChunks": 34,
+      "decodedChunks": 945,
+      "outputCopiedBytes": 15138615
+    },
+    {
+      "groupIndex": 5,
+      "banks": 5,
+      "rows": 50000,
+      "decodedBytes": 15955653,
+      "decodedSha256": "35b70d96c8f575cf0641d027bda8210256536008fff4ebb7b5c5326753f28ca7",
+      "inputChunks": 36,
+      "decodedChunks": 998,
+      "outputCopiedBytes": 15955653
+    },
+    {
+      "groupIndex": 6,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 13702906,
+      "decodedSha256": "015c3eb81143b1a67adc1bc35d91da74dc576edd140d9787709c338deb5d7757",
+      "inputChunks": 28,
+      "decodedChunks": 855,
+      "outputCopiedBytes": 13702906
+    },
+    {
+      "groupIndex": 7,
+      "banks": 5,
+      "rows": 50000,
+      "decodedBytes": 14307906,
+      "decodedSha256": "06fca3db8b511179080548cf11f525ed2a90c34e58d464e868f102ab418f7351",
+      "inputChunks": 32,
+      "decodedChunks": 893,
+      "outputCopiedBytes": 14307906
+    },
+    {
+      "groupIndex": 8,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 14119170,
+      "decodedSha256": "b621ddef9c5b4860c5fbb12ddd9ff66caecc4e1d93516a2a95f5a7174cb1bd51",
+      "inputChunks": 30,
+      "decodedChunks": 881,
+      "outputCopiedBytes": 14119170
+    },
+    {
+      "groupIndex": 9,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 13775196,
+      "decodedSha256": "3438eb1ce8d9228e0c0b7303ea4ef8e312ba8bd17fc94eacede8bba47c93a25a",
+      "inputChunks": 32,
+      "decodedChunks": 863,
+      "outputCopiedBytes": 13775196
+    },
+    {
+      "groupIndex": 10,
+      "banks": 4,
+      "rows": 40000,
+      "decodedBytes": 13936647,
+      "decodedSha256": "eaf0d35b41f93538b4f728133b8b3803fa04b96e8a2079bb823038db3e5289e7",
+      "inputChunks": 32,
+      "decodedChunks": 873,
+      "outputCopiedBytes": 13936647
+    },
+    {
+      "groupIndex": 11,
+      "banks": 5,
+      "rows": 48299,
+      "decodedBytes": 15551396,
+      "decodedSha256": "fbce1abd71ccfe242a44e1aa8f378173ccb13bfb395853f4a4e64c2f4c926ab4",
+      "inputChunks": 39,
+      "decodedChunks": 975,
+      "outputCopiedBytes": 15551396
+    }
+  ],
+  "cases": [
+    {
+      "name": "empty-array/default/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/default/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "empty-array/default/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/fixed/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "empty-array/fixed/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "empty-array/stored-blocks/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 2,
+      "decodedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "empty-array/stored-blocks/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/default/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "utf8-row/default/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/fixed/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "utf8-row/fixed/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "utf8-row/stored-blocks/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 80,
+      "decodedSha256": "121c4c6fc69bfa9b8e372a676f220127a2507031ea556e76f66ec1abb9961a81",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "utf8-row/stored-blocks/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/default/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "whitespace-array/default/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/fixed/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "whitespace-array/fixed/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "whitespace-array/stored-blocks/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 12,
+      "decodedSha256": "765392de609e8b366eda8bf016addbef0a31e4cd3921d1231ab1b777ee130be1",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "whitespace-array/stored-blocks/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/default/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "large-repetitive/default/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/fixed/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "large-repetitive/fixed/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/size-too-large",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/size-too-small",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/dishonest-tiny-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Inflated source exceeds ZIP size"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/truncated-one-byte",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/truncated-half",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/trailing-zero",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/trailing-garbage",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/concatenated-raw",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "large-repetitive/stored-blocks/hidden-second-gzip-member",
+      "nativeAccepted": false,
+      "accepted": true,
+      "decodedBytes": 359339,
+      "decodedSha256": "19712a451a6c1ec3337719ea8126811ee53c0666dc8de09fe8cfbc9e6631080f",
+      "acceptanceMatches": false
+    },
+    {
+      "name": "large-repetitive/stored-blocks/invalid-block-type",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "object-wrapper",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "BOM-wrapper",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "non-json-bracketed-inflater-only",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 10,
+      "decodedSha256": "63b5940e0d656d4a3bd741c99b2592ad324f932e0cfd2807ea39d6362fb0ad67",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "stored-valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 4,
+      "decodedSha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "stored-wrong-crc",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Stored source CRC32 mismatch"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "stored-wrong-length",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Stored source size mismatch"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "mixed-stored-deflate-valid",
+      "nativeAccepted": true,
+      "accepted": true,
+      "decodedBytes": 8,
+      "decodedSha256": "2c274bdd451705ff6dc7eee157ac0ebddc947124a67ca1a341ede49869dd0c27",
+      "acceptanceMatches": true
+    },
+    {
+      "name": "CRC-before-later-deflate-failure",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "deflate-before-later-CRC-failure",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": ""
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "wrapper-before-later-CRC-failure",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "metadata-compressed-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": "Compressed term-bank source 1 metadata is invalid"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "metadata-negative-size",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": "Compressed term-bank source 1 metadata is invalid"
+      },
+      "acceptanceMatches": true
+    },
+    {
+      "name": "metadata-method",
+      "nativeAccepted": false,
+      "accepted": false,
+      "error": {
+        "name": "TypeError",
+        "message": "Compressed term-bank source 1 metadata is invalid"
+      },
+      "acceptanceMatches": true
+    }
+  ],
+  "summary": {
+    "inputChunkBytes": 65536,
+    "groups": 12,
+    "banks": 53,
+    "rows": 528299,
+    "sourceConformanceCases": 157,
+    "sourceAcceptanceMismatches": 12,
+    "eligibleForProduction": false
+  }
+}
