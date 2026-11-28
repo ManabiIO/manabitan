@@ -1,0 +1,99 @@
+name: Frozen import qualification 511a8
+
+on:
+  push:
+    branches: ["perf/import-qualification-511a8-20261128"]
+    paths:
+      - ".github/workflows/import-qualification-511a8.yml"
+      - "dev/perf/import-qualification-511a8.py"
+      - "dev/perf/test_import_qualification_511a8.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-qualification-511a8-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      baseline: ${{ steps.plan.outputs.baseline }}
+      mode: ${{ steps.plan.outputs.mode }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Check prospective policy contracts
+        run: python3 -m unittest discover -s dev/perf -p 'test_import_qualification_511a8.py'
+      - id: plan
+        name: Freeze source selection and cohort matrix
+        run: python3 dev/perf/import-qualification-511a8.py plan >> "$GITHUB_OUTPUT"
+
+  acquire:
+    needs: plan
+    name: ${{ needs.plan.outputs.mode }} (${{ matrix.dictionary }}, ${{ matrix.initialOrder }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PERF_TOOLING_SHA: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.initialOrder }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.plan.outputs.baseline }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup evidence and exact measurement source
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/import-511a8-$PERF_DICTIONARY-$PERF_ORDER"
+          echo "PERF_OUTPUT=$output" >> "$GITHUB_ENV"
+          mkdir -p "$output-setup"
+          git show "$PERF_TOOLING_SHA:dev/perf/import-qualification-511a8.py" > "$RUNNER_TEMP/import-qualification-511a8.py"
+          git show "$PERF_TOOLING_SHA:.github/workflows/import-qualification-511a8.yml" > "$output-setup/workflow.yml"
+          sha256sum "$RUNNER_TEMP/import-qualification-511a8.py" > "$output-setup/driver.sha256"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.22.0"
+          cache: npm
+      - name: Install locked dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_OUTPUT-setup/npm-ci.log"
+      - name: Install the dependency-pinned Chromium
+        run: |
+          set -euo pipefail
+          node node_modules/playwright/cli.js install --with-deps chromium 2>&1 | tee "$PERF_OUTPUT-setup/chromium.log"
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-511a8-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Acquire the fixed source-bound observations
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/import-qualification-511a8.py" run \
+            --root "$GITHUB_WORKSPACE" --evidence "$PERF_OUTPUT" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_ORDER" \
+            --tooling-sha "$PERF_TOOLING_SHA" \
+            2>&1 | tee "$PERF_OUTPUT-setup/acquisition.log"
+      - name: Preserve raw results, manifests and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-511a8-${{ needs.plan.outputs.mode }}-${{ matrix.dictionary }}-${{ matrix.initialOrder }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.PERF_OUTPUT }}-setup
+            ${{ env.PERF_OUTPUT }}/*.json
+            ${{ env.PERF_OUTPUT }}/*.log
+            ${{ env.PERF_OUTPUT }}/measurement-source
+            ${{ env.PERF_OUTPUT }}/baseline-policy
+            ${{ env.PERF_OUTPUT }}/diagnostic
+          if-no-files-found: error
+          retention-days: 14
