@@ -10366,6 +10366,7 @@ null :
      * receipts inside the import transaction so cleanup adds no durable commit.
      * A failed publication rolls this pruning back with its summary and receipt.
      * @param {string} sessionId
+     * @throws {Error} If pruning rolls back the import transaction.
      */
     _pruneImportPublicationMarkersBestEffort(sessionId) {
         const db = this._requireDb();
