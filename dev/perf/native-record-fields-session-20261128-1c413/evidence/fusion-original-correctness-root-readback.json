@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-complete-fusion-correctness-archive-readback",
+  "passed": true,
+  "run": 46149981540,
+  "attempt": 1,
+  "archive": {
+    "bytes": 4760073,
+    "sha256": "52cc6c09c352696ba526eddaa2898b372a985a54b18970a2fe4e832a16ffc96c",
+    "gitBlob": "777b53f1d1cad5eaeeb22965af7e327124d59524"
+  },
+  "originalLedger": {
+    "bytes": 88947,
+    "sha256": "de6e2e711fcb872fe7217d40001187d3afa8860c43cceedb53e7dff8f39d87dd",
+    "gitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550"
+  },
+  "originalPayloadsVerified": 277,
+  "allMembersVerified": 279,
+  "memberSha256Aggregate": "5d4a85559253b3d31de3f77ef3051de4b998f3d070ad8411df0177802cfe25b2",
+  "everyMemberComparedToOriginalLedger": true,
+  "allRegularNoLinks": true,
+  "noExecutionOrNewObservations": true,
+  "scope": "All original payload bytes preserved in the remotely published archive; individual ledger Git hashes are identities, not separate remote publication claims."
+}

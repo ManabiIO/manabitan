@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "kind": "local-object-versus-remote-visibility-clarification",
+  "repository": "ManabiIO/manabitan",
+  "originalCreationMethod": "local git hash-object -w in /workspace/scratch/1c4137568bc6/manabitan",
+  "originalRemoteCreateBlobCalls": 0,
+  "originalObjectVisibility": "The initial 277-entry ledger describes complete local Git objects. Except for already-existing source blobs, those entries were not individually published to GitHub.",
+  "rootReportedFailure": {
+    "action": "fetch_blob",
+    "objects": [
+      "87bd5a769b996610683b1aeefa5622e062b99883",
+      "fb018d784e7e5722606f3cb42c3230de2792d550"
+    ],
+    "result": "GitHub 404 NOT_FOUND"
+  },
+  "independentlyReproducedBeforePublication": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/git/blobs#get-a-blob\",\"status\":\"404\"}"
+          }
+        ],
+        "structuredContent": {
+          "error": "GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/git/blobs#get-a-blob\",\"status\":\"404\"}",
+          "error_code": "NOT_FOUND",
+          "error_data": {
+            "message": "Not Found",
+            "documentation_url": "https://docs.github.com/rest/git/blobs#get-a-blob",
+            "status": "404"
+          }
+        },
+        "isError": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/git/blobs#get-a-blob\",\"status\":\"404\"}"
+          }
+        ],
+        "structuredContent": {
+          "error": "GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/git/blobs#get-a-blob\",\"status\":\"404\"}",
+          "error_code": "NOT_FOUND",
+          "error_data": {
+            "message": "Not Found",
+            "documentation_url": "https://docs.github.com/rest/git/blobs#get-a-blob",
+            "status": "404"
+          }
+        },
+        "isError": true
+      }
+    }
+  ],
+  "correction": "Publish a deterministic link-safe archive containing every original ledger payload, the unchanged ledger and this clarification. Individual local Git-object SHAs remain byte-identity witnesses rather than a claim of separate remote visibility. Parent will anchor the remote archive and text receipts without rerunning work.",
+  "reviewAndLedgerPublication": [
+    {
+      "gitBlob": "87bd5a769b996610683b1aeefa5622e062b99883",
+      "returnedCreateBlobSha": "87bd5a769b996610683b1aeefa5622e062b99883",
+      "remoteFetchBlobSuccessful": true,
+      "readbackTextByteEquivalent": true,
+      "textCharacters": 17104
+    },
+    {
+      "gitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550",
+      "returnedCreateBlobSha": "fb018d784e7e5722606f3cb42c3230de2792d550",
+      "remoteFetchBlobSuccessful": true,
+      "readbackTextByteEquivalent": true,
+      "textCharacters": 88947
+    }
+  ],
+  "refsCreated": false,
+  "importsOrTimingsAcquired": false
+}

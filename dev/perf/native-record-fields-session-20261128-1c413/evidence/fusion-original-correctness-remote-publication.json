@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "kind": "remote-publication-readback-receipt",
+  "repository": "ManabiIO/manabitan",
+  "archive": {
+    "name": "fusion-original-evidence-46149981540-attempt1.tar.gz",
+    "gitBlob": "777b53f1d1cad5eaeeb22965af7e327124d59524",
+    "bytes": 4760073,
+    "sha256": "52cc6c09c352696ba526eddaa2898b372a985a54b18970a2fe4e832a16ffc96c",
+    "remoteCreateReturnedExactSha": true,
+    "binaryReadback": "Not decoded as text; remote create_blob returned the independently computed exact Git blob SHA. Complete local archive member readback is separately published."
+  },
+  "textObjects": [
+    {
+      "name": "REVIEW.md",
+      "gitBlob": "87bd5a769b996610683b1aeefa5622e062b99883",
+      "remoteCreateReturnedExactSha": true,
+      "remoteFetchByteEquivalent": true,
+      "characters": 17104
+    },
+    {
+      "name": "git-blob-ledger.json",
+      "gitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550",
+      "remoteCreateReturnedExactSha": true,
+      "remoteFetchByteEquivalent": true,
+      "characters": 88947
+    },
+    {
+      "name": "archive-member-readback.json",
+      "gitBlob": "1ec752fae8d1d90391b68dd97d362599f0162384",
+      "remoteCreateReturnedExactSha": true,
+      "remoteFetchByteEquivalent": true,
+      "characters": 94194
+    },
+    {
+      "name": "independent-receipt-audit.json",
+      "gitBlob": "8ed92efb67ae29138a783b101dbb37dc6887c790",
+      "remoteCreateReturnedExactSha": true,
+      "remoteFetchByteEquivalent": true,
+      "characters": 29724
+    },
+    {
+      "name": "publication-clarification.json",
+      "gitBlob": "b986de5d38259d35656f29f4e81a6c68cabd2073",
+      "remoteCreateReturnedExactSha": true,
+      "remoteFetchByteEquivalent": true,
+      "characters": 3249
+    }
+  ],
+  "original404Clarification": "b986de5d38259d35656f29f4e81a6c68cabd2073",
+  "archiveMemberCount": 279,
+  "originalLedgerPayloadCount": 277,
+  "reachability": "No ref created by this reviewer. Parent must anchor the remote archive/text blobs. All original payload bytes will be reachable through the archive; individual ledger SHAs are identity witnesses, not separately published remote objects.",
+  "refsCreated": false,
+  "productExecution": false,
+  "newImports": false,
+  "timingsAcquired": false
+}

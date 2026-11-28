@@ -84,6 +84,15 @@
     "fusion-current-correctness-prevalidation.tar.gz": "53094af1b4af20aee70b2cf3f55521526f4ae041",
     "fusion-current-correctness-prevalidation-receipt.json": "b39a30b21cbc51a08c2521d7ee9e3bc4ac8de255",
     "fusion-current-correctness-root-publication.json": "64aa6fba32dd08973ebddda8414b0c37c78c08f1",
-    "fusion-current-correctness-terminal-api.json": "e4573865f0e99dd80de6895e6af088354e40fcd4"
+    "fusion-current-correctness-terminal-api.json": "e4573865f0e99dd80de6895e6af088354e40fcd4",
+    "fusion-original-correctness-review.md": "87bd5a769b996610683b1aeefa5622e062b99883",
+    "fusion-original-correctness-ledger.json": "fb018d784e7e5722606f3cb42c3230de2792d550",
+    "fusion-original-correctness-receipt-audit.json": "8ed92efb67ae29138a783b101dbb37dc6887c790",
+    "fusion-original-correctness-complete.tar.gz": "777b53f1d1cad5eaeeb22965af7e327124d59524",
+    "fusion-original-correctness-archive-readback.json": "1ec752fae8d1d90391b68dd97d362599f0162384",
+    "fusion-original-correctness-publication-clarification.json": "b986de5d38259d35656f29f4e81a6c68cabd2073",
+    "fusion-original-correctness-remote-publication.json": "486076d032d2a0fc4061eeff79208e245b4e8477",
+    "fusion-original-correctness-root-readback.json": "a14377cb240c860e6b12459e0b8fbaaeafdedb20",
+    "fusion-original-correctness-root-reader.py": "d46819c8e8ed960a67a1e9674a0e86dca07e7fb4"
   }
 }

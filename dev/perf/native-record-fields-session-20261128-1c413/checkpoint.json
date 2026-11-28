@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 13:40:33 UTC",
+  "observedAt": "2026-11-28 13:57:36 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -1365,7 +1365,7 @@
       "nativeIndependentReview": "403df36b26811cf6b562f1e5c27d5654ac45c26f"
     },
     "runPlannerPrototype": {
-      "status": "Frozen bounded implementation; independent source/focused review GO for fresh complete correctness only",
+      "status": "Final product frozen; original fresh complete validation and full original term-correctness artifact audit passed; performance remains unmeasured",
       "baseProduct": "663df294f40e1832ad3e3349d0e061681fed77cb",
       "baseUpstream": "a300da36d00df8e353c5679b1528b50a1299b75f",
       "implementationOwner": "native_host_review (completed)",
@@ -1374,7 +1374,7 @@
       "noPerformanceRef": true,
       "noPr": true,
       "originalStudyUnchanged": true,
-      "allowedValidation": "Fresh exact-source complete correctness and all3actualcorpus parity kit preparation authorized; publication pending root exact-source review; no performance execution",
+      "allowedValidation": "Original fresh correctness run completed. Disabled concrete actual-import CPU harness source preparation and review authorized. Comparative performance acquisition remains unauthorized pending exact final bindings and root publication review.",
       "sourceRequirements": [
         "Whole compact unsplit chunks only; min/max in existing C first pass with same input/output copies",
         "Owned result bytes and offset base; persisted format, existing append awaits and session ownership unchanged",
@@ -1387,24 +1387,27 @@
       "stopIf": "Safe admission requires broad provenance/transport/lifecycle redesign, copying payloads, another row scan or native run splitting",
       "performanceNomination": false,
       "localPath": "/tmp/manabitan-native-fields-fusion-1c413-20261128",
-      "pending": "Fresh complete correctness/source-bound actual whole-path activation; disabled full Node CPU screen harness source review",
+      "pending": "Finish offline work/output/runtime bindings and final independent disabled CPU harness review, then root source seal",
       "harness": {
         "owner": "whole_owner_benchmark",
-        "status": "Specialized replay declined in favor of complete actual Node-import boundary; source-only adaptation design authorized",
+        "status": "Concrete complete Node importer, boundary and post-interval adapter implemented and reviewed; source/runtime/workflow/output bindings being finalized; acquisition disabled",
         "noActualCapture": true,
         "noImports": true,
         "noTimings": true,
         "noPublicRef": true,
         "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
-        "candidate": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+        "candidate": "01eb863506012136e417167f445b2708d9136293",
         "control": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
         "design": "Reuse full actual source-bound import with real3workers, producer/receiver ownership, append and retirement. Start before first arm-specific import; move old field-counter hook to owner/directtotals because fused work precedes field wrapper. Defer output hashes until after CPU interval.",
         "draftScreen": "Selected prospectively: each2replications12ABCblocks,20ms AND1% B improvement vsbothA/C,10/12faster vsboth, C/Aabsolute pairedmedian+summedCPU<=3%;2warmupcycles6importseach. Noabsolute-mscontrolgate. Harness/order/workmanifest stillunsealed, no acquisition.",
-        "correctnessOwner": "pipeline_audit",
-        "correctnessScope": "Fresh full native/lint/unit/options/types/all-target builds and all3current actual corpus A/B field/finaltermbyte parity, explicit wholeNativeCalls/Rows/Attempts; source-only kit prep pending finalproductbindings androotpublicationreview",
+        "correctnessOwner": "fusion_corpus_audit",
+        "correctnessScope": "Original fresh run 46149981540 attempt 1 and complete independent audit passed within the declared term boundary",
         "numericPolicy": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
         "numericPolicySealedBeforeObservations": true,
-        "independentReviewer": "fusion_harness_review"
+        "independentReviewer": "fusion_harness_review",
+        "sourceOnlyPolicySupplement": "347dcb71b389207afc2ecb9dd5eb1ef1622d266b",
+        "originalFixedWarmupsAreIntegrationGate": true,
+        "additionalProductImportPreflight": false
       },
       "candidate": {
         "head": "01eb863506012136e417167f445b2708d9136293",
@@ -1453,7 +1456,7 @@
         "rootCompleteReadback": "2ec084deea36f62f2ac2d4438ba78962591b24af",
         "allAttemptsRetained": true
       },
-      "sourceRetention": "Candidate and inactive-control commits are additional parents of this evidence checkpoint. No dedicated product or performance ref, PR or acquisition.",
+      "sourceRetention": "Original product and inactive-control commits are reachable through the evidence checkpoint. Final annotation-only child and fresh correctness kit are reachable through the original correctness branch and checkpoint. No performance acquisition ref or PR exists.",
       "annotationCorrection": {
         "proof": "4e6c729062d7cef33d967286d2320984eaa1c600",
         "archive": "0330b2a89b2bfbf4012b5f0171c92f62a276658c",
@@ -1478,7 +1481,7 @@
         "correctnessBranch": "test/native-record-fields-fusion-20261128-1c413",
         "correctnessRun": 46149981540,
         "correctnessAttempt": 1,
-        "correctnessStatus": "Original run and both jobs succeeded; independent complete artifact audit in progress",
+        "correctnessStatus": "Original run and both jobs succeeded; complete independent original term-correctness audit passed",
         "comparativePerformanceObservations": 0,
         "acquisitionAuthorized": false,
         "prsOpened": 0,
@@ -1508,8 +1511,255 @@
           "nativeModules": 3,
           "sourceManifestFiles": 36
         },
-        "independentArtifactAuditCompleted": false,
-        "corpusLimitations": "Real memory SQLite plus disk OPFS and three real workers; successful final sinks retired only after complete hashes. Not browser, restart, full-media or performance evidence."
+        "independentArtifactAuditCompleted": true,
+        "corpusLimitations": "Real memory SQLite plus disk OPFS and three real workers; successful final sinks retired only after complete hashes. Not browser, restart, full-media or performance evidence.",
+        "independentAudit": {
+          "review": "87bd5a769b996610683b1aeefa5622e062b99883",
+          "ledger": "fb018d784e7e5722606f3cb42c3230de2792d550",
+          "receiptAudit": "8ed92efb67ae29138a783b101dbb37dc6887c790",
+          "archive": "777b53f1d1cad5eaeeb22965af7e327124d59524",
+          "archiveBytes": 4760073,
+          "archiveSha256": "52cc6c09c352696ba526eddaa2898b372a985a54b18970a2fe4e832a16ffc96c",
+          "archiveMembers": 279,
+          "originalPayloads": 277,
+          "completeMemberReadback": "1ec752fae8d1d90391b68dd97d362599f0162384",
+          "rootIndependentReadback": "a14377cb240c860e6b12459e0b8fbaaeafdedb20",
+          "rootReader": "d46819c8e8ed960a67a1e9674a0e86dca07e7fb4",
+          "publicationClarification": "b986de5d38259d35656f29f4e81a6c68cabd2073",
+          "remotePublicationReadback": "486076d032d2a0fc4061eeff79208e245b4e8477",
+          "reachability": "All original payload bytes are in the published complete archive. Individual ledger Git SHAs are identities, not separately published remote objects.",
+          "rawSinks": "Successful sinks were retired only after second complete raw hashes; retained hashes are not raw sink archives.",
+          "media": "VNDB non-term media container is outside the declared byte oracle and has different original raw hashes; no cause or equality inferred."
+        },
+        "corpusResults": {
+          "jmdict": {
+            "passed": true,
+            "rows": 528299,
+            "banks": 53,
+            "parserGroups": 12,
+            "owners": 12,
+            "fields": 12,
+            "wholeNativeCalls": 12,
+            "wholeNativeRows": 528299,
+            "ordinaryNativeCalls": 0,
+            "ordinaryNativeRows": 0,
+            "javascriptCalls": 0,
+            "readinessFallbacks": 0,
+            "nativeMetrics": {
+              "nativeCalls": 12,
+              "nativeRows": 528299,
+              "nativeAttempts": 12,
+              "wholeNativeCalls": 12,
+              "wholeNativeRows": 528299,
+              "wholeNativeAttempts": 12,
+              "inputCopiedBytes": 8618752,
+              "outputCopiedBytes": 4240056,
+              "tableBytesRequested": 6291456,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            },
+            "completeTermFileBytes": 43315677,
+            "fieldBytes": 4239960,
+            "fieldOutputWitnessSha256": "ea62dfe8f99607275c55fed1ab687c079f4d22fca943112a74ee9df5189488f2",
+            "ownerPartitionSha256": "f7592b1cdcd93f336d2394a1d56b4a9ca3086f2a74efcfa7b6324b8ca011996e",
+            "sourceGroupsIncludingRowsSha256": "146d3c8ceb24353b9b4fa90048e76b09039a946fbcd28660909a58699f56f9ec",
+            "allProductCounterDifferences": [
+              {
+                "path": "/1/details/parserParallelPeakQueuedOwnedContentBytes",
+                "A": 58114957,
+                "B": 45111679
+              },
+              {
+                "path": "/2/details/fastPathParserParallelPeakQueuedOwnedContentBytes",
+                "A": 58114957,
+                "B": 45111679
+              },
+              {
+                "path": "/4/details/termContentFlushFinalGroupCount",
+                "A": 2,
+                "B": 3
+              },
+              {
+                "path": "/4/details/termContentMaxMergedGroupChunkCount",
+                "A": 85,
+                "B": 56
+              },
+              {
+                "path": "/4/details/termContentMaxWriteBytes",
+                "A": 14617938,
+                "B": 9507564
+              },
+              {
+                "path": "/4/details/termContentMergedWriteCount",
+                "A": 2,
+                "B": 3
+              },
+              {
+                "path": "/4/details/termContentWriteCallCount",
+                "A": 2,
+                "B": 3
+              },
+              {
+                "path": "/4/details/termRecordFields",
+                "A": null,
+                "B": {
+                  "calls": 12,
+                  "javascriptCalls": 0,
+                  "native": {
+                    "nativeCalls": 12,
+                    "nativeRows": 528299,
+                    "nativeAttempts": 12,
+                    "wholeNativeCalls": 12,
+                    "wholeNativeRows": 528299,
+                    "wholeNativeAttempts": 12,
+                    "inputCopiedBytes": 8618752,
+                    "outputCopiedBytes": 4240056,
+                    "tableBytesRequested": 6291456,
+                    "memoryGrowthBytes": 2293760,
+                    "maximumLinearMemoryBytes": 2424832,
+                    "maximumScratchBytes": 824288,
+                    "declines": {},
+                    "wholeAdmissionDeclines": {},
+                    "wholeCopiedDeclines": {}
+                  }
+                },
+                "missing": "A"
+              }
+            ]
+          },
+          "jitendex": {
+            "passed": true,
+            "rows": 436555,
+            "banks": 219,
+            "parserGroups": 22,
+            "owners": 22,
+            "fields": 22,
+            "wholeNativeCalls": 22,
+            "wholeNativeRows": 436555,
+            "ordinaryNativeCalls": 0,
+            "ordinaryNativeRows": 0,
+            "javascriptCalls": 0,
+            "readinessFallbacks": 0,
+            "nativeMetrics": {
+              "nativeCalls": 22,
+              "nativeRows": 436555,
+              "nativeAttempts": 22,
+              "wholeNativeCalls": 22,
+              "wholeNativeRows": 436555,
+              "wholeNativeAttempts": 22,
+              "inputCopiedBytes": 7851764,
+              "outputCopiedBytes": 3497972,
+              "tableBytesRequested": 4980736,
+              "memoryGrowthBytes": 1179648,
+              "maximumLinearMemoryBytes": 1310720,
+              "maximumScratchBytes": 406144,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            },
+            "completeTermFileBytes": 61977692,
+            "fieldBytes": 3497796,
+            "fieldOutputWitnessSha256": "d62fe55297e80d49aadd808414cfc5cab9a5f332609e88f9afa3b0c5a0f89c8e",
+            "ownerPartitionSha256": "9c23c3d69621b7b8980fd613d20173bafc45256764b85520374619e8966ed2c9",
+            "sourceGroupsIncludingRowsSha256": "39f4dc078d11c23d5ef8a419e9b4f02879af370cb6c6e87642e55be52d368edc",
+            "allProductCounterDifferences": [
+              {
+                "path": "/4/details/termRecordFields",
+                "A": null,
+                "B": {
+                  "calls": 22,
+                  "javascriptCalls": 0,
+                  "native": {
+                    "nativeCalls": 22,
+                    "nativeRows": 436555,
+                    "nativeAttempts": 22,
+                    "wholeNativeCalls": 22,
+                    "wholeNativeRows": 436555,
+                    "wholeNativeAttempts": 22,
+                    "inputCopiedBytes": 7851764,
+                    "outputCopiedBytes": 3497972,
+                    "tableBytesRequested": 4980736,
+                    "memoryGrowthBytes": 1179648,
+                    "maximumLinearMemoryBytes": 1310720,
+                    "maximumScratchBytes": 406144,
+                    "declines": {},
+                    "wholeAdmissionDeclines": {},
+                    "wholeCopiedDeclines": {}
+                  }
+                },
+                "missing": "A"
+              }
+            ]
+          },
+          "vndb": {
+            "passed": true,
+            "rows": 6648310,
+            "banks": 665,
+            "parserGroups": 170,
+            "owners": 189,
+            "fields": 192,
+            "wholeNativeCalls": 162,
+            "wholeNativeRows": 6328310,
+            "ordinaryNativeCalls": 30,
+            "ordinaryNativeRows": 320000,
+            "javascriptCalls": 0,
+            "readinessFallbacks": 0,
+            "nativeMetrics": {
+              "nativeCalls": 192,
+              "nativeRows": 6648310,
+              "nativeAttempts": 192,
+              "wholeNativeCalls": 162,
+              "wholeNativeRows": 6328310,
+              "wholeNativeAttempts": 162,
+              "inputCopiedBytes": 55332860,
+              "outputCopiedBytes": 53193072,
+              "tableBytesRequested": 84559232,
+              "memoryGrowthBytes": 1638400,
+              "maximumLinearMemoryBytes": 1769472,
+              "maximumScratchBytes": 764288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            },
+            "completeTermFileBytes": 409433345,
+            "fieldBytes": 53191776,
+            "fieldOutputWitnessSha256": "db05087053f32b43eea453dd3e690cdfcbe759ff88dba7f532c0b0b92ca1768a",
+            "ownerPartitionSha256": "5fd3b670474d3d66aec2827c521b883b3478ef18815955857275fafbcc6a02db",
+            "sourceGroupsIncludingRowsSha256": "35c23ec19038d06ae9e7b6e3f7577c7662174408253b964c4db23d5a94b87911",
+            "allProductCounterDifferences": [
+              {
+                "path": "/4/details/termRecordFields",
+                "A": null,
+                "B": {
+                  "calls": 192,
+                  "javascriptCalls": 0,
+                  "native": {
+                    "nativeCalls": 192,
+                    "nativeRows": 6648310,
+                    "nativeAttempts": 192,
+                    "wholeNativeCalls": 162,
+                    "wholeNativeRows": 6328310,
+                    "wholeNativeAttempts": 162,
+                    "inputCopiedBytes": 55332860,
+                    "outputCopiedBytes": 53193072,
+                    "tableBytesRequested": 84559232,
+                    "memoryGrowthBytes": 1638400,
+                    "maximumLinearMemoryBytes": 1769472,
+                    "maximumScratchBytes": 764288,
+                    "declines": {},
+                    "wholeAdmissionDeclines": {},
+                    "wholeCopiedDeclines": {}
+                  }
+                },
+                "missing": "A"
+              }
+            ]
+          }
+        }
       }
     },
     "originalJmdictPhaseCensus": {
@@ -1537,7 +1787,7 @@
     }
   },
   "next": [
-    "Finish independent audit of all original fusion correctness logs and artifacts; preserve every failure and original receipt",
+    "Preserve completed original fusion correctness audit and all original payload bytes; no rerun",
     "Complete and independently review disabled actual-import CPU driver, output and lifecycle receipts, preparation workflow, and exact plan bindings",
     "Seal exact source, runtime, work, output, arm order and numeric policy before any distinct comparative CPU acquisition",
     "Acquire only the original two full replications; no retry, replacement, pooling, control subtraction or post-result rule changes",
@@ -1630,12 +1880,13 @@
     "correctnessBranch": "test/native-record-fields-fusion-20261128-1c413",
     "correctnessRun": 46149981540,
     "correctnessAttempt": 1,
-    "correctnessStatus": "Original run and both jobs succeeded; independent complete artifact audit in progress",
+    "correctnessStatus": "Original run and both jobs succeeded; complete independent original term-correctness audit passed",
     "comparativePerformanceObservations": 0,
     "acquisitionAuthorized": false,
     "prsOpened": 0,
     "numericPolicy": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
     "sourceOnlyPolicySupplement": "347dcb71b389207afc2ecb9dd5eb1ef1622d266b",
-    "timingHarnessStatus": "Concrete disabled full actual Node import driver under independent review; numerical rules already selected before any new observations"
+    "timingHarnessStatus": "Concrete disabled full actual Node import driver under independent review; numerical rules already selected before any new observations",
+    "correctnessAuditCompleted": true
   }
 }

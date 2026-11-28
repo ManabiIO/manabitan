@@ -1,0 +1,1992 @@
+{
+  "schema": 1,
+  "kind": "complete-deterministic-evidence-archive-member-readback",
+  "passed": true,
+  "repository": "ManabiIO/manabitan",
+  "runId": 46149981540,
+  "attempt": 1,
+  "archiveName": "fusion-original-evidence-46149981540-attempt1.tar.gz",
+  "archiveIdentity": {
+    "bytes": 4760073,
+    "sha256": "52cc6c09c352696ba526eddaa2898b372a985a54b18970a2fe4e832a16ffc96c",
+    "gitBlob": "777b53f1d1cad5eaeeb22965af7e327124d59524"
+  },
+  "originalLedgerIdentity": {
+    "bytes": 88947,
+    "sha256": "de6e2e711fcb872fe7217d40001187d3afa8860c43cceedb53e7dff8f39d87dd",
+    "gitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550"
+  },
+  "memberCount": 279,
+  "originalLedgerPayloadCount": 277,
+  "everyOriginalLedgerPayloadByteVerified": true,
+  "allMembersRegularFiles": true,
+  "linksFollowedOrMaterialized": false,
+  "deterministicMetadata": {
+    "tarFormat": "PAX",
+    "memberOrder": "lexicographic relative path",
+    "mode": "0644",
+    "uid": 0,
+    "gid": 0,
+    "uname": "",
+    "gname": "",
+    "mtime": 0,
+    "gzipFilename": "",
+    "gzipMtime": 0
+  },
+  "members": {
+    "REVIEW.md": {
+      "bytes": 17124,
+      "sha256": "2772c67ef3f2bd6c0d439cd880d5d6fe166048c5c7b49a624d9f847a25643935",
+      "gitBlob": "87bd5a769b996610683b1aeefa5622e062b99883",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "all-receipt-differences.json": {
+      "bytes": 1263756,
+      "sha256": "0d8477919ab1a2a3885d784ac41f3af32b745d34188cb1592c4282e907eeb4a2",
+      "gitBlob": "09d5cc70de0ee1b0eccdb64d079a73cbc00b93d0",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "artifact-15265171488-original.zip": {
+      "bytes": 1171200,
+      "sha256": "c3923ee6d8a1ddfc06a136ee33f2da18ef64420b9f95498212e3148964218559",
+      "gitBlob": "b53ad75db7e1be64ae293a76ac5cf2d670c0a695",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "artifact-15265507175-original.zip": {
+      "bytes": 437013,
+      "sha256": "d5719dd7ca0b34c4b31663dc9ca7b8feb47caedb65a5c70693f8dc9e7f9b31b6",
+      "gitBlob": "243d8fd8641315c5272cc995d2436c6a3aa37a14",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/.github/workflows/native-record-fields-fusion-correctness-1c413.yml": {
+      "bytes": 16056,
+      "sha256": "49d22264a3a8593d76ea9ea5cf114734f7b798977a8da37ea604fc07e381c839",
+      "gitBlob": "0544c5cab2a62ff4dde4e95b51805451ce822097",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition.log": {
+      "bytes": 764747,
+      "sha256": "3c81f9c7167d745f75260fc5fe1d2a69f7cbc770a141f8a781cdf51530dcc55a",
+      "gitBlob": "1028f2476db46075cd95780fb68e189d018db9ac",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/README.md": {
+      "bytes": 6397,
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048",
+      "gitBlob": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0",
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c",
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4",
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/node-runtime.mjs": {
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/owner-observer.mjs": {
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03",
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/run-all.py": {
+      "bytes": 33763,
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d",
+      "gitBlob": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/run.mjs": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/source-binding.json": {
+      "bytes": 6846,
+      "sha256": "b592d8a0d051b920825add65054cc04c4cba502767cc651ca5c82064eec951da",
+      "gitBlob": "33fa89711c00e6242bebb0c6cf959fc4cc0827d4",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/test-opfs.mjs": {
+      "bytes": 11798,
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/test-owner-observer.mjs": {
+      "bytes": 8539,
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2",
+      "gitBlob": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/harness-source/test-run-all.py": {
+      "bytes": 18038,
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587",
+      "gitBlob": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A.log": {
+      "bytes": 341,
+      "sha256": "27c4b9700593fac762d7ce3f2b59d774384603cb476e99cbab25f074d575e21f",
+      "gitBlob": "bae8ddea51128e2ca32ebc09786e5f9cc6972f39",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A.process.json": {
+      "bytes": 634,
+      "sha256": "cfc50ea544030b6b5e73d4b94dcfd21b8544dbf75555676c34cc24a151923239",
+      "gitBlob": "7fd2cfdb7785506efeaf7977861fe905c4f1aba0",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/assets.json": {
+      "bytes": 781,
+      "sha256": "73545d8a497dde926f59eb04f6506ebf0380413646013c44b42c7a8c8821475a",
+      "gitBlob": "4ecb007990fe23c9b15a13c80ff88ddeb99aa20a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/field-calls.json": {
+      "bytes": 7705,
+      "sha256": "380c807a778764c58d5febacfe3090061aa57d855de8538604c0f840c5eb0f49",
+      "gitBlob": "682db1e9fb76969cb47f4d2a206f64818e40d566",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/files.json": {
+      "bytes": 1160,
+      "sha256": "fbb2aa6b836ce71e7f1e13aa89bad22f4d6d2e34e5044bfe0117344f646c4be0",
+      "gitBlob": "957ed04efd061d7ba23703ca507fc48f780880a3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/final-content-state.json": {
+      "bytes": 156,
+      "sha256": "0fa94879c5ab818d2e1f467d32c6f1e1f385eb7de3f5ffc2f569cb94c14cd356",
+      "gitBlob": "f6a0dcb8484bac9c579b4c91f150855d59586cb3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/final-store-counts.json": {
+      "bytes": 483,
+      "sha256": "784d3c22e530ac606529162010ec0c8e26fcfe99964dda24b192ce1594b184d9",
+      "gitBlob": "3c988801ccc97ee9499a411cf4f385c41de35de1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/fixture-and-host.json": {
+      "bytes": 1472,
+      "sha256": "96de686244ede7927069ab41666b2b88fb8974ea8e2bf09706e0285e40f91c58",
+      "gitBlob": "f46e4135255c898b39d5e2a2d742ce7604dca6e1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/owner-calls.json": {
+      "bytes": 6616,
+      "sha256": "4d5dd939f2c0ce49aa12478f6a40483927d9cdbaa0fd3884cbfd15c6da87a76d",
+      "gitBlob": "7ce2459098dc85955b978b3771613c5f7b599514",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/product-work-counts.json": {
+      "bytes": 11297,
+      "sha256": "7720d9cbc4feea72821a63a7e00a43d0abe69045b07572ac5d576e00000040a9",
+      "gitBlob": "6124a8dcfb730b0b74fb91f5418310aafe3151b6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/report.json": {
+      "bytes": 108161,
+      "sha256": "b64be997598dfdb71354721f90cf3ca25e859efcc6d54ec84dc938f743be50f3",
+      "gitBlob": "2a908c61fb7b7398b37606323a859494784624eb",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/retired-disk.json": {
+      "bytes": 991,
+      "sha256": "27289fc84c9b728ce98b60b8d1f0eebbfbc5e60ddb727229df9b915f500842cd",
+      "gitBlob": "3338dcc7d30cfbea6c653543dea033aaefbbe87d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/semantic.json": {
+      "bytes": 4201,
+      "sha256": "4619302df06f5b40837e773ff0790f49beb9280f76285ae0cddc19b1d715427b",
+      "gitBlob": "bb273b59413d8fe3c48e8567665a48817a1d579f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/source-after.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/source-before.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/A/workers.json": {
+      "bytes": 60056,
+      "sha256": "e13b92cb4b82d1f0d2f536f63d9a1e9d2399abeff498159562c0ca1ddd2204f4",
+      "gitBlob": "b745194b6a2c38c3e3f107fc7def9db059a9c2b5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B.log": {
+      "bytes": 348,
+      "sha256": "c34ace4917188eeeca4d3a4cce4de4f12389514fbf5505e2e4794170cb9a0365",
+      "gitBlob": "fd21398b3bd590b31d48ce203836d16280d466f5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B.process.json": {
+      "bytes": 618,
+      "sha256": "9229b5037cd7884e616699d63acbb9f80274998655ac0bd3bcc50f520c27e77a",
+      "gitBlob": "fb3a543adf039bd0f5605979ca711214f3ca8d7b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/assets.json": {
+      "bytes": 937,
+      "sha256": "b03e59750e1109d12b5fbf270b6e2d59b4ccb98f5eff3a247a8c40ed3f3b74de",
+      "gitBlob": "794552e2958ff6b71dd7674e2a9c83d8c75c1a47",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/field-calls.json": {
+      "bytes": 36852,
+      "sha256": "c421205a2166ade97032d98e19d329248ee023d49c04f1b27a34b04856577bda",
+      "gitBlob": "bb21511823ea3896fa064c1b86b2ee42c245cc2a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/files.json": {
+      "bytes": 1160,
+      "sha256": "b67a8466d8c3ce573163e0f71f2d217f7946fb555a39763a8319afce03104a4b",
+      "gitBlob": "602f1d71f40e8642a7bd14a44f133ab985a6a5d9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/final-content-state.json": {
+      "bytes": 156,
+      "sha256": "0fa94879c5ab818d2e1f467d32c6f1e1f385eb7de3f5ffc2f569cb94c14cd356",
+      "gitBlob": "f6a0dcb8484bac9c579b4c91f150855d59586cb3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/final-store-counts.json": {
+      "bytes": 1065,
+      "sha256": "167223260a61b4ac39d8c0062e74258546330852684a42887659137254c3e534",
+      "gitBlob": "a6e4e6e2d7a2d9ba3c77fb6ce8799c6d5a99ba48",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/fixture-and-host.json": {
+      "bytes": 1472,
+      "sha256": "e675fa6ac111aa4b9832f8c086abd5b76851c123bb905061c2b282287a1e9f2c",
+      "gitBlob": "cb082ef263d603d6af3447dc8cc96407919c495c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/owner-calls.json": {
+      "bytes": 34780,
+      "sha256": "dd6dc9b8949d1174c8acc727270ad5392ffeb91bc95f465d7239e1425e6ffb82",
+      "gitBlob": "b547a99b3becf62dfa245890eb1ee8682c0aa032",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/product-work-counts.json": {
+      "bytes": 11967,
+      "sha256": "8d25a02d661bea719e6aa472d76918e7619236cbe4460c376cfdf222ed97caa5",
+      "gitBlob": "f0ed9a1f75e7f3fd50b61dea0e95f6829bf56d30",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/report.json": {
+      "bytes": 110596,
+      "sha256": "a69078fd5049b10ebf06759cf6a3d2aa4b971bfdc8fd49920c810940c6c2beea",
+      "gitBlob": "2735ca89fbbc937402e6ddfaa7461da44219b8e6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/retired-disk.json": {
+      "bytes": 991,
+      "sha256": "1bdd569eaaf51004c3406df50c50a927918d3582b23b93047f98a672bad96884",
+      "gitBlob": "828a8f25ed8dd2092062561f5e389415a1a45a19",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/semantic.json": {
+      "bytes": 4201,
+      "sha256": "4619302df06f5b40837e773ff0790f49beb9280f76285ae0cddc19b1d715427b",
+      "gitBlob": "bb273b59413d8fe3c48e8567665a48817a1d579f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/source-after.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/source-before.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/B/workers.json": {
+      "bytes": 60056,
+      "sha256": "7c39e50282438e01434c9fb82ffb666a2748d5fe7e05dad31e4f149fa32101a5",
+      "gitBlob": "3b187e3403b63acadadfa8650e3b4a7c777f80af",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jitendex/comparison.json": {
+      "bytes": 16521,
+      "sha256": "005dd77c5345c075fdb5d410cee41f2b960a1556f0ec44d795ddc5a98843a6f8",
+      "gitBlob": "5d1093a19eb3136d0fea94baa927952f84a84aed",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A.log": {
+      "bytes": 339,
+      "sha256": "53e84218f522aa4c457a100999af71f6fb0f0bf13215e04e33aef3a2c69f4502",
+      "gitBlob": "3b1d941ccfc8e312ef13217edf7d7d63c55698f6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A.process.json": {
+      "bytes": 620,
+      "sha256": "16d8b3a72e9d56e52aeeaf4aa33448013394c447047cd339690ba279ecaa8fae",
+      "gitBlob": "d80d02d9c10a57807992bad89af791970ec5c810",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/assets.json": {
+      "bytes": 781,
+      "sha256": "e036a1ad98025283f61aec7bccbe05740d4afa5982652ba83f3eb45a904cf72b",
+      "gitBlob": "1b725db0f91f980580a0ecd32afb02e0cc49fa97",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/field-calls.json": {
+      "bytes": 4164,
+      "sha256": "1679a70a5ff493cd7a01e686d35a377d21f7736e927b8b7330020801a68c35f5",
+      "gitBlob": "2f1a1818a7aa9aa33eb650d3dc73ab97d8e762c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/files.json": {
+      "bytes": 1148,
+      "sha256": "9dfc6bcd6ef036dde38917e49332a8b1eaad6a3a12ac90c972f9c38867cbbfe5",
+      "gitBlob": "2b5b08a59627eb5f5b227f5aecb69b16ef409a94",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/final-content-state.json": {
+      "bytes": 156,
+      "sha256": "63ce02d851568a57cda187abead212c469a7b0eb86afb000f82a907fcb8a8687",
+      "gitBlob": "a94ea26ba73a2ab48cf3b4ded5743252b7b928c7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/final-store-counts.json": {
+      "bytes": 483,
+      "sha256": "2b0ba164c05128085d215e6ed7f46210144b7affaacf6343abfd54cd30901c07",
+      "gitBlob": "a1329ebf7ccbe6efa50dd3dff12763c85a7475a0",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/fixture-and-host.json": {
+      "bytes": 918,
+      "sha256": "abc60a8d1b16f6e838325fd868bb54fafaee2dbe41ae7c60e08e45c2118d6e8f",
+      "gitBlob": "6ccabcc6919fbc4fffb08b18cfde9bb829be3e8a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/owner-calls.json": {
+      "bytes": 3700,
+      "sha256": "8c72532b8b2276a9ac2cb01872bf61dd0a13d274de249b3ebd0086d3affa388d",
+      "gitBlob": "ae0693137040a73eefd0618e3032580403658918",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/product-work-counts.json": {
+      "bytes": 11321,
+      "sha256": "dbc10e636c51fc44b081ee862f03ea4695a73ea4bcdc232fd92da39a16813adf",
+      "gitBlob": "dbd52ef6d11330077dd108efdbf7f0c13ba530ef",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/report.json": {
+      "bytes": 108068,
+      "sha256": "1398d3a9be92118492a4f62ec5f9be06840d236cc3a80118c0485d16f6a8ffef",
+      "gitBlob": "8514ece46adfc30e0ecceb077d8e7ac39612e248",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/retired-disk.json": {
+      "bytes": 979,
+      "sha256": "b06e1717e186a0c1d53686323337a2f79198fc24c2bc850127485e7beeca0326",
+      "gitBlob": "ff537ddb303ab15b47664e8a013d136b65e36e56",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/semantic.json": {
+      "bytes": 4128,
+      "sha256": "de57ba4e0cc77f7f305e09c76209cf9adb522b988f5d75e03407f7c0afc5226c",
+      "gitBlob": "7731fc6176c6d0e5e99c809d688bc6b1b15d8615",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/source-after.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/source-before.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/workers.json": {
+      "bytes": 18682,
+      "sha256": "2a5a7f7d4a1d41110fa629a684c61354622aada41f71deb34cb68e629ad1395a",
+      "gitBlob": "6f6b6cb82643e6cf0e15d43a300d5651e727fbbb",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B.log": {
+      "bytes": 346,
+      "sha256": "05349933ea084c7d2678f1a40b7c4463d9b9ee59fef698d133e3e7526a437966",
+      "gitBlob": "5876b180691c2ad2a9eb58eca030fa9e11349428",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B.process.json": {
+      "bytes": 604,
+      "sha256": "754d4851f2e3021f3a25a37bdec6ab91011b7a6baeb3ce4471de7c6756820126",
+      "gitBlob": "2e707bdb1ef7436a2f25679019a0aab7d9d3fccc",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/assets.json": {
+      "bytes": 937,
+      "sha256": "8a6cf0c29e9b9d507e77995ea9525af0b9e8827508aaf151f751b0374d7f50b8",
+      "gitBlob": "e3d933cb9281209234b5fc95d719174f18c25fee",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/field-calls.json": {
+      "bytes": 20010,
+      "sha256": "fa44867da543c35bc1a46eb2e426c860586a306c697ab4c29dc863a3d755a901",
+      "gitBlob": "2aa8043a555045d8db555d5933c0dcd414525e9b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/files.json": {
+      "bytes": 1148,
+      "sha256": "157600d6a4ab268fb4520a7964dc0769ddc81cd70d4abd49b943cb3c3ece877f",
+      "gitBlob": "e59e302443c46d9a3a3a2bbfce4cca7751240e85",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/final-content-state.json": {
+      "bytes": 156,
+      "sha256": "63ce02d851568a57cda187abead212c469a7b0eb86afb000f82a907fcb8a8687",
+      "gitBlob": "a94ea26ba73a2ab48cf3b4ded5743252b7b928c7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/final-store-counts.json": {
+      "bytes": 1065,
+      "sha256": "096843e2219ea1e0e0177dbd5a7a09fdb2dcbe2b3eef71da4ad4565d9f19ad76",
+      "gitBlob": "8c1dde3c84861ed973b4eacceec4ab0637ebd5fc",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/fixture-and-host.json": {
+      "bytes": 918,
+      "sha256": "00c2173a4f168a80d6d2b07b2e36dbd3a3f22f3b6c46596b68521289b2d2f3c0",
+      "gitBlob": "2196be015642faa70361f8557e1c0be19dc0bdad",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/owner-calls.json": {
+      "bytes": 19156,
+      "sha256": "4ea375cc5aab8636c66c97b2b5440de9aa01ad73b047f8fef32a49ad9954721a",
+      "gitBlob": "ae89392dc7cabf87ed2ee92076d8f70c2650c659",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/product-work-counts.json": {
+      "bytes": 11990,
+      "sha256": "9f0962f3be16ab4fd11e602bb07edfe1d285cb9c9db16a574770f5a878da9873",
+      "gitBlob": "6845bbc24ce399024d28449901d83420d8cf6981",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/report.json": {
+      "bytes": 110503,
+      "sha256": "3f7008939014542b603f4d2d6579d49ceb3c51975546c0cf8a9725346e62f00b",
+      "gitBlob": "df11ffdac7a76d192d26ccc33853fba4f54be7c7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/retired-disk.json": {
+      "bytes": 979,
+      "sha256": "0827ce915a7cb4ca1de57f03952c57d6ec14ebf157a3b1556cb9f3490fd971fa",
+      "gitBlob": "cb75c88ba0f2d9bd008ebfc70f430a618d94f54c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/semantic.json": {
+      "bytes": 4128,
+      "sha256": "de57ba4e0cc77f7f305e09c76209cf9adb522b988f5d75e03407f7c0afc5226c",
+      "gitBlob": "7731fc6176c6d0e5e99c809d688bc6b1b15d8615",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/source-after.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/source-before.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/workers.json": {
+      "bytes": 18682,
+      "sha256": "890da62e0b70fcb0c0b4d853e2739b33dc0b72ec71a8916e63067a4783ace723",
+      "gitBlob": "7ce48a216f8ffeee145d761cded55d3d94270a92",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/comparison.json": {
+      "bytes": 14279,
+      "sha256": "e1724aa698d99632f2d7b86a0a5e535655b9cbb70317baabf21ed1e89d49fa52",
+      "gitBlob": "63470457e6af7a22b7c87d134d8d6c807a5e01aa",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/plan.json": {
+      "bytes": 2477,
+      "sha256": "8bb7f5c5d455dc8bbfe38ac5793ee1532aa801079e2b8c9a3d81197be6b03cf6",
+      "gitBlob": "fdc56be5a878fdff8fe06097531f226235174c99",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/prepared-source-A.json": {
+      "bytes": 91092,
+      "sha256": "5f9497bf74a02441e1fa4f1fe248055d41cb925a67b1324db5f8f71a7e00f6d1",
+      "gitBlob": "9a7cec8bfe21a160b57e16e6e8937d2e9dbc70cf",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/prepared-source-B.json": {
+      "bytes": 91722,
+      "sha256": "8af8fb24b0ad4c584d179e69abdacb2e280baa9bf8f15c558bd8ba686d88d689",
+      "gitBlob": "1238a37abdb43e51373dd5c7c6e11ae06473b597",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/report.json": {
+      "bytes": 98831,
+      "sha256": "a5f7a552d3a3ec636924cc875caf009a257c3aed764eea716729d2a59b51ef8c",
+      "gitBlob": "3fe32bd85b4c707e05508e22fddd263db2464753",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/runtime-delta.json": {
+      "bytes": 2609,
+      "sha256": "35c995c8a734f1412b644bc5d2b9c482dd11db94076e5cf25895ba91fee27865",
+      "gitBlob": "61d0c0c2382739c818b6eb23262976f673d27751",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/runtime-preflight.json": {
+      "bytes": 3301,
+      "sha256": "f4d985f6ceba4a4fcbc50763c8ed9292c42feeb61a37ee77ad695d5da78ee6df",
+      "gitBlob": "8dd8316cbaab2775ba4c180923cf30790199c20f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-A.log": {
+      "bytes": 50,
+      "sha256": "e9217ccf32b2baf1aeda13eb0804b1ca3e80a61fc67fbb00d8a76ed1da19f957",
+      "gitBlob": "fdee4688378932c8d7ee51c64d26ee28d7334459",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-A.process.json": {
+      "bytes": 469,
+      "sha256": "36fb53f5b96f1b201156389dc7acc88f384f901a6cbdfc7dedb07fba5a7f2120",
+      "gitBlob": "541f5a0aa5fb1ffc099b10315b5d55572fe45ba7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-A/disk/root/test/bytes": {
+      "bytes": 3,
+      "sha256": "530cacbb08ae6468563532e0a9418af11b3a5f3f4c6f7c0d30bdca85b4308508",
+      "gitBlob": "eb954a8bdca9ba381a93d5e58885b60a14a1940a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-A/disk/root/test/index": {
+      "bytes": 3,
+      "sha256": "ed41b829a0cfc32c04c6169b6004ec9d5cc9f13dc75bcb179943c8a68d9031c1",
+      "gitBlob": "2efa6c382f94658cb9fde9c70f6cb87e24043591",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-A/report.json": {
+      "bytes": 1005,
+      "sha256": "ad1682b4895efe86425559549263f5bc4320f6390332a951a58cd06d8875c734",
+      "gitBlob": "2b20438858bf977bfaac73d9a68dd0912a16b68a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-B.log": {
+      "bytes": 50,
+      "sha256": "e9217ccf32b2baf1aeda13eb0804b1ca3e80a61fc67fbb00d8a76ed1da19f957",
+      "gitBlob": "fdee4688378932c8d7ee51c64d26ee28d7334459",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-B.process.json": {
+      "bytes": 453,
+      "sha256": "a12cc610eed9d9346652359e5943c53b04ecb7cbb94af70a36ea2f6d76083155",
+      "gitBlob": "21be7b293366bf641384ee7df38eca06fc5b2f5e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-B/disk/root/test/bytes": {
+      "bytes": 3,
+      "sha256": "530cacbb08ae6468563532e0a9418af11b3a5f3f4c6f7c0d30bdca85b4308508",
+      "gitBlob": "eb954a8bdca9ba381a93d5e58885b60a14a1940a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-B/disk/root/test/index": {
+      "bytes": 3,
+      "sha256": "ed41b829a0cfc32c04c6169b6004ec9d5cc9f13dc75bcb179943c8a68d9031c1",
+      "gitBlob": "2efa6c382f94658cb9fde9c70f6cb87e24043591",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/smoke-B/report.json": {
+      "bytes": 1005,
+      "sha256": "ad1682b4895efe86425559549263f5bc4320f6390332a951a58cd06d8875c734",
+      "gitBlob": "2b20438858bf977bfaac73d9a68dd0912a16b68a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A.log": {
+      "bytes": 340,
+      "sha256": "a1beb59752dd3f033dc709c9d840aa092939f7856dcf6265c8e6e2eee3b5eeb6",
+      "gitBlob": "c965637630e881637e6f52da84f24eedfec02b58",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A.process.json": {
+      "bytes": 632,
+      "sha256": "df0fcfdfabea454c4d2f8ec8b4363dde472d8538a7660d4e8b9ba5bdc267f39a",
+      "gitBlob": "fc48c960c0edafc58430d377515ab955837af431",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/assets.json": {
+      "bytes": 781,
+      "sha256": "73545d8a497dde926f59eb04f6506ebf0380413646013c44b42c7a8c8821475a",
+      "gitBlob": "4ecb007990fe23c9b15a13c80ff88ddeb99aa20a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/field-calls.json": {
+      "bytes": 67016,
+      "sha256": "4ee8d6ff15634413529d39af85b28fd51997b80aacb6f40b0a460772f7e0fabf",
+      "gitBlob": "aad9f5f06cf3f28308b59f5275cb5619c3654149",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/files.json": {
+      "bytes": 2302,
+      "sha256": "0480a947756d72025835bc6d2f52f497af65ac055337aebeca113fbf308bba15",
+      "gitBlob": "c2dd9226a29822de973f89a3496f86ef3f7a3c32",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/final-content-state.json": {
+      "bytes": 155,
+      "sha256": "fb57afd60c342bab052992e12655ab3536e97cee2db5c165d4434fe638bd93db",
+      "gitBlob": "d234296e2221a9f0235e347670c1244a37356af7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/final-store-counts.json": {
+      "bytes": 486,
+      "sha256": "1475f0eeeecde607aec998b6935eeb80b11c12197bbf43b439a2cb95f36c910c",
+      "gitBlob": "d6b5bebea49ab2345155793624ffb987f3dbabbc",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/fixture-and-host.json": {
+      "bytes": 1001,
+      "sha256": "dd411b9c92267cb5c5624e13c384551a0d200f11c24228e962ae44f75c730936",
+      "gitBlob": "bcbbdf6f4f25560b90067aa76b3c64928bfb3f3b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/owner-calls.json": {
+      "bytes": 54065,
+      "sha256": "98b9c6472ce33e15903128a951517305b925159baf1b60fdd03dcdbb7b202a7d",
+      "gitBlob": "7794c6da3bfb76cb3f3a3475a85baa95fa2b6148",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/product-work-counts.json": {
+      "bytes": 11456,
+      "sha256": "f3601ff7ef1852e2884e83e7e70033b3c6f05a0e1d46db26bf27ccfb48d5b6d7",
+      "gitBlob": "77cf6af7d995cfbbf5d8897dd6efa026ad86bdd2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/report.json": {
+      "bytes": 109656,
+      "sha256": "67230d1d8f8d3f3e7e01e981be18c3aab71d7faa46f1ae13acf15cf48b5e69e4",
+      "gitBlob": "a48e0437236300478734baeeed72ef9a235319f5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/retired-disk.json": {
+      "bytes": 1551,
+      "sha256": "9fc471c417085774cbda211e1a5782c253d5815be8b7589cc327c13dc91e5dfa",
+      "gitBlob": "860b22f24209842629a25f25ab5ddf96785191d6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/semantic.json": {
+      "bytes": 4483,
+      "sha256": "9d20747a01e03953f832df4f81706dc42a45fa1ba6da0951fcac41ba4ab9a21a",
+      "gitBlob": "c85d741e62a47095f0a6390b94118823230bc4d7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/source-after.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/source-before.json": {
+      "bytes": 95551,
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/A/workers.json": {
+      "bytes": 191996,
+      "sha256": "00161d44a0062aa7d2b5eec715f1f477d36bcaaca317e3700389ca7bf83f1234",
+      "gitBlob": "c94711ee0f12bd59220dfff11977749bdd09d016",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B.log": {
+      "bytes": 350,
+      "sha256": "e0d47193956f8a6994d6639d193b6deaa98c38f6186f29b72573fe7003155f55",
+      "gitBlob": "a4da97b77483bea390ada375e4205b991852e300",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B.process.json": {
+      "bytes": 616,
+      "sha256": "c3132e3d4bfe1a94e078db38a837cb728c883384880e2449918affe028d102eb",
+      "gitBlob": "feb5ddd2886a9ee24e16edd6cf7d468e2aedc9f6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/assets.json": {
+      "bytes": 937,
+      "sha256": "8a6cf0c29e9b9d507e77995ea9525af0b9e8827508aaf151f751b0374d7f50b8",
+      "gitBlob": "e3d933cb9281209234b5fc95d719174f18c25fee",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/cleanup.json": {
+      "bytes": 47,
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/field-calls.json": {
+      "bytes": 320927,
+      "sha256": "96e609ba3b103df01e463b111259533c2c0024607d689424405d8b996d17ef16",
+      "gitBlob": "ea3ac342b70eebbece1d137497774ec990436765",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/files.json": {
+      "bytes": 2302,
+      "sha256": "999d4ef6c61de51a5ba13bcbfb0bf4f2c3f94584f7776ab50fe44f7751f46259",
+      "gitBlob": "31dbbe520d32247f4e2363504770d65d46aedf20",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/final-content-state.json": {
+      "bytes": 155,
+      "sha256": "fb57afd60c342bab052992e12655ab3536e97cee2db5c165d4434fe638bd93db",
+      "gitBlob": "d234296e2221a9f0235e347670c1244a37356af7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/final-store-counts.json": {
+      "bytes": 1078,
+      "sha256": "38550093efcaefa6ff6f2a77473929d615fceaeb944b258332e6b11a9bf41076",
+      "gitBlob": "2578cc246d87ee4ade2dcfa05ce6543aa8232e10",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/fixture-and-host.json": {
+      "bytes": 1001,
+      "sha256": "f7c144a56912480b933e9de973602aa8abfbd76fcb42a2eb575a961272ebd6f5",
+      "gitBlob": "34063efa6e1223f1f03b32bc085343422ae64d1f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/import-flags.json": {
+      "bytes": 156,
+      "sha256": "7717ec79473cf26761ed683fdd9fa4c03871b380864a14b7ad676d41697d41a3",
+      "gitBlob": "ca7ea64ea03abecf2da206ef8468c877e222d344",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/initial-content-state.json": {
+      "bytes": 149,
+      "sha256": "8b53061b57c83ed536d7f16bf1d49af226b2f5fbfd4c606e438c747bd299e3cb",
+      "gitBlob": "e7b63cb8d63ff1866157a4139b1bb4b4ed2b18f1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/owner-calls.json": {
+      "bytes": 297828,
+      "sha256": "9f569c65763c77c2e09992b84613bdde490c54c6feb9815ba40cd212bf724324",
+      "gitBlob": "8b89368027192b18eb48ac5f96b8c3cefded47e6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/product-work-counts.json": {
+      "bytes": 12136,
+      "sha256": "039fdacb0f2d8aef201c8f0e4e12a87ffaeeb66626519d5668ff727a5432a066",
+      "gitBlob": "1af7418435da68b03f807e5c2559e22566a1ab86",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/report.json": {
+      "bytes": 112119,
+      "sha256": "0a49043b923892f7ee7dd19ee0ef5482d58c87ab6d4d11d5626a876181416f5f",
+      "gitBlob": "860b7fa50f75315ade5b93d6f18cb9ba3644caae",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/retired-disk.json": {
+      "bytes": 1551,
+      "sha256": "0b44b90bc584376a65a92b3c674eaa949ee535b980bbe7f73bb903668a1ca0c9",
+      "gitBlob": "c4b9fe10aa3366bb9cff753accdb4a445b9d452f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/semantic.json": {
+      "bytes": 4483,
+      "sha256": "9d20747a01e03953f832df4f81706dc42a45fa1ba6da0951fcac41ba4ab9a21a",
+      "gitBlob": "c85d741e62a47095f0a6390b94118823230bc4d7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/source-after.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/source-before.json": {
+      "bytes": 96717,
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/sqlite-adapter.json": {
+      "bytes": 618,
+      "sha256": "d4f1e0b46cbe365d54f9d5b18cdd1bfcb0de783115cbb01c5dd600c6088af532",
+      "gitBlob": "c3e666a8dbbe53be69a60bd607b1704006107e3e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/B/workers.json": {
+      "bytes": 191996,
+      "sha256": "bd59dfb78bef3584102b14b7eab48e83d79370275e6dffa0fe6b941d90cab90b",
+      "gitBlob": "d7ac7da4797c6f691d93d924a25207568c1496c0",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/vndb/comparison.json": {
+      "bytes": 53022,
+      "sha256": "dfd4c32560289cd5800f6a577588df5e28eebfe6401595f57d8ac1900f6333c3",
+      "gitBlob": "b12898f80a2c8a226057f938d57b8acd8a069ff4",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/archive-tests.log": {
+      "bytes": 107,
+      "sha256": "542478c5e228cffe15731b293460e1c4bc97eab58d811a31f3775a96f09a3ee3",
+      "gitBlob": "104488e4d69653e7cf21cacab87293116c4d7c27",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-libs.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "gitBlob": "c521b2b1f1add55f80af3ebe6e68c0da5b631baf",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-license.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd",
+      "gitBlob": "5f03a09abd909b08874ab16bd66ebcf2143cbd73",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-npm-ci.log": {
+      "bytes": 421,
+      "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c",
+      "gitBlob": "793018041b66655bbf4f11bfd9c2f35d76b5d4c6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/comparator-tests.log": {
+      "bytes": 24811,
+      "sha256": "178398077b24563cc96d9e60f39ac2d659090114d639745f116afa03acb2f452",
+      "gitBlob": "58fde0a5bdb3c622702d62cdcfcedd477ac9541c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/fixtures.log": {
+      "bytes": 497,
+      "sha256": "0bed376e66ec642ce55e389d5e2b9eb4bbcca3c18bb064a8bf4019e8e1b86c5e",
+      "gitBlob": "e3cc7bdd65be87a4302565f9cc918674aedd7cc5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/owner-observer-tests.log": {
+      "bytes": 897,
+      "sha256": "d1f427fa0ba55d9144a260395a2fa2fb4654d5098f23ce40337b65c876dd4c16",
+      "gitBlob": "bb5a87000ebaeae382de309a691c9cdab1681235",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight.log": {
+      "bytes": 4824,
+      "sha256": "1a7115f029e32f8a48cea1b7e6ad2adfdd9b8ce4dfc3dddd81cf99f7899e46d4",
+      "gitBlob": "75299448ec0362e5954978ede9eb742b4c3dbd4e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/README.md": {
+      "bytes": 6397,
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048",
+      "gitBlob": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0",
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c",
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4",
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/node-runtime.mjs": {
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/owner-observer.mjs": {
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03",
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/run-all.py": {
+      "bytes": 33763,
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d",
+      "gitBlob": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/run.mjs": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/source-binding.json": {
+      "bytes": 6846,
+      "sha256": "b592d8a0d051b920825add65054cc04c4cba502767cc651ca5c82064eec951da",
+      "gitBlob": "33fa89711c00e6242bebb0c6cf959fc4cc0827d4",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/test-opfs.mjs": {
+      "bytes": 11798,
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/test-owner-observer.mjs": {
+      "bytes": 8539,
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2",
+      "gitBlob": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/harness-source/test-run-all.py": {
+      "bytes": 18038,
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587",
+      "gitBlob": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/plan.json": {
+      "bytes": 2476,
+      "sha256": "7ba10dab594501011c9d721a6703b519b5a81b64e0aff26bc4ecabaf1f025243",
+      "gitBlob": "11243cc9bfe94e9b4bff2fb4f222d3e2a646fb7b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/prepared-source-A.json": {
+      "bytes": 91092,
+      "sha256": "5f9497bf74a02441e1fa4f1fe248055d41cb925a67b1324db5f8f71a7e00f6d1",
+      "gitBlob": "9a7cec8bfe21a160b57e16e6e8937d2e9dbc70cf",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/prepared-source-B.json": {
+      "bytes": 91722,
+      "sha256": "8af8fb24b0ad4c584d179e69abdacb2e280baa9bf8f15c558bd8ba686d88d689",
+      "gitBlob": "1238a37abdb43e51373dd5c7c6e11ae06473b597",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/report.json": {
+      "bytes": 2695,
+      "sha256": "84f3fae5caecd6951903979b8aa05cc824e6e02698e23ed4ab2aaeeb3e8998f2",
+      "gitBlob": "b392cd59b2c4c256c82dc0a06b16e5a2f78ed606",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/runtime-delta.json": {
+      "bytes": 2609,
+      "sha256": "35c995c8a734f1412b644bc5d2b9c482dd11db94076e5cf25895ba91fee27865",
+      "gitBlob": "61d0c0c2382739c818b6eb23262976f673d27751",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight/runtime-preflight.json": {
+      "bytes": 3301,
+      "sha256": "f4d985f6ceba4a4fcbc50763c8ed9292c42feeb61a37ee77ad695d5da78ee6df",
+      "gitBlob": "8dd8316cbaab2775ba4c180923cf30790199c20f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/source-after-setup.json": {
+      "bytes": 19016,
+      "sha256": "91494119055287ce6122e3f5c8b95f5d0bc01b2a74a08294dba5e6b27fa4d4ec",
+      "gitBlob": "292614b5b6789a4e8707385cf0045b84f9a6b61f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/source-before-setup.json": {
+      "bytes": 18547,
+      "sha256": "9c45b6f0ba73fb2188cf6ef217c985c01b0aa18fc4496f56e6427342ee7ec5c8",
+      "gitBlob": "ce801b8c38ae85e3cf4ffa34560fd4ae85f0b646",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/README.md": {
+      "bytes": 6013,
+      "sha256": "5a07138d312bd36bbb9c9562b164b3aecf03aa44707c2925eaa1eebc402a711d",
+      "gitBlob": "a4484f79b4e6bb847cf54f1aa3e06a9a6be257b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py": {
+      "bytes": 7634,
+      "sha256": "a4a97de2f5f63fc194c289a502f74d4065db4bfa1dd6b8f9b00c2d5b23d03928",
+      "gitBlob": "82913f3e5a0091affdfa870c630c748dd20b150a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/README.md": {
+      "bytes": 6397,
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048",
+      "gitBlob": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0",
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c",
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4",
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-runtime.mjs": {
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/owner-observer.mjs": {
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03",
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py": {
+      "bytes": 33763,
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d",
+      "gitBlob": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run.mjs": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/source-binding.json": {
+      "bytes": 6846,
+      "sha256": "b592d8a0d051b920825add65054cc04c4cba502767cc651ca5c82064eec951da",
+      "gitBlob": "33fa89711c00e6242bebb0c6cf959fc4cc0827d4",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-opfs.mjs": {
+      "bytes": 11798,
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs": {
+      "bytes": 8539,
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2",
+      "gitBlob": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py": {
+      "bytes": 18038,
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587",
+      "gitBlob": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/recovery.json": {
+      "bytes": 6748,
+      "sha256": "1fa106a5ea7a060d1e39b66aa1bf0467cb5729c3e10acb323cfffa6590b21943",
+      "gitBlob": "112b8b8cc31b6532eca7a37a9883df72404498c9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/source.json": {
+      "bytes": 9937,
+      "sha256": "28b0894c47adaadae564e50ef89a391fc6b323d6de5db4b4d6c0d9bdbd0be86b",
+      "gitBlob": "75c7b527113a83126acb0b1e935d85427f89d2ce",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py": {
+      "bytes": 6910,
+      "sha256": "2b2ea1e53daeadb38f7143e859bdb3898ec0578ad52fc44d094c9e0ed5e1c3ed",
+      "gitBlob": "42f5543f35b0bd06c792487dba7d63759aa078bd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-full/dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py": {
+      "bytes": 11331,
+      "sha256": "b0527361fd9bdc1d16aa93210a4fc999adff0ccac6be9c6288e20ae771bafeb3",
+      "gitBlob": "58e31a1fb9686bbccb166dadc3ee6f2bcdafc8f5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus-independent-archive-verification.json": {
+      "bytes": 1188,
+      "sha256": "f13528b95ba5eaf24cbd952564a7e7b6aa41758f23ca4be0a39555e0bb24656b",
+      "gitBlob": "1b1a45a2671b2a2bd4368e30aeaa6d1c11d9cfce",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus/native-record-fields-fusion-corpus-evidence.json": {
+      "bytes": 52987,
+      "sha256": "749a7024a17d2589566c384e04391e19124587d9419e2c07c044d6604de36742",
+      "gitBlob": "947a92c4ffd9aecc480acc63e5c44cab0468233f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "corpus/native-record-fields-fusion-corpus-evidence.tar.gz": {
+      "bytes": 1167889,
+      "sha256": "4ceb96fc3026c39bce4df6a8a21360a77a2a8188830d86d5a35a814e0ba8276b",
+      "gitBlob": "7369219337450308bd51db820aa57128e436343c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "final-artifacts.json": {
+      "bytes": 1816,
+      "sha256": "181888d8a3aebadfde6acd7bc224d476b75f5a1afa9c9aa284da7f1f699b26a6",
+      "gitBlob": "b42de3d589685568c7992e586058dde5075be69c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "final-jobs.json": {
+      "bytes": 13489,
+      "sha256": "376b1887b3400a814c9abb4992550e9d76bdb75d8bfc184f2cc5320888ffccb7",
+      "gitBlob": "be982e28bbdb6a2e9e6642dc108af1b1744fbeeb",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "final-run.json": {
+      "bytes": 14215,
+      "sha256": "056e61454172741878ff3fcbd48fa5bf2366977f6a7202fed3aa2fd133131f29",
+      "gitBlob": "aeefd5c31566ad91c5909d8bc2bad0ee2411021f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "git-blob-ledger.json": {
+      "bytes": 88947,
+      "sha256": "de6e2e711fcb872fe7217d40001187d3afa8860c43cceedb53e7dff8f39d87dd",
+      "gitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550",
+      "kind": "file",
+      "originalLedgerBound": false
+    },
+    "independent-receipt-audit.json": {
+      "bytes": 29724,
+      "sha256": "aac83f599c5a28f604c271562536794e1817211650f008caaca245350852270d",
+      "gitBlob": "8ed92efb67ae29138a783b101dbb37dc6887c790",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "independent-receipt-audit.py": {
+      "bytes": 21324,
+      "sha256": "84dc0bd6cb8cdac08bc6a4709db3d7b8efc53214e7279c2ab8894d45ae59774b",
+      "gitBlob": "da5f89a7f2582671c946594a2bc07f3340722ef6",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "independent-source-audit.json": {
+      "bytes": 12515,
+      "sha256": "c55e573292dab686d588e80eb9cd3c94d782e0e60597876aace553e3de60e423",
+      "gitBlob": "022ad374eeb079cf972d6e89fe4c21343794a073",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "independent-validation-audit.json": {
+      "bytes": 16436,
+      "sha256": "bde5e24fe75db8622bf83c072baab96b8128f6ca21a2d89f2088764b70ccd7bb",
+      "gitBlob": "aeb3f7db6338e74a29ea26c97a9ad7a6ff58e04f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "initial-metadata-0.json": {
+      "bytes": 14212,
+      "sha256": "713b8235e825962495b901ac3069a5d294ca9d25cee7666eade5db30f82f132f",
+      "gitBlob": "e13826820e532a78d9ad4174ba39ab3eb5e13a55",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "initial-metadata-1.json": {
+      "bytes": 12816,
+      "sha256": "3b90744aa46202ffa0a7f5cd8deac71fdaf020373310cf70039c1ec5c45c4c49",
+      "gitBlob": "cdca34d3708550514f18e057c6069699fe07de08",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "initial-metadata-2.json": {
+      "bytes": 918,
+      "sha256": "8d5e5b06399f9156b1aca1727528af489a2b98673deb1a816b9c43030e08ec6c",
+      "gitBlob": "a5f5ac95191feacb196a2cdb08dc0801b93f75af",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "job-140994295297-complete.log": {
+      "bytes": 1155161,
+      "sha256": "0fcb7ab7bc75e73f5660151095ec04132a98f06a2f93565ff05bc9c8be064eb7",
+      "gitBlob": "b423ce907afc9b79591f4eafca0ed4a542094cb9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "job-140994295588-complete.log": {
+      "bytes": 1138726,
+      "sha256": "e18acd11a9da1ecab4e1b74b34242a158355a16ac14891e1de252d69a0f3717b",
+      "gitBlob": "531e7afa616b831bfc22d78d35e31174dae5172d",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "producer-commit.json": {
+      "bytes": 2014,
+      "sha256": "56a0cc419500def082bedac40a93eaac219947e00399ec90e9f08ffab8e4f0bc",
+      "gitBlob": "bac1ef5f76a6c1fae5bc280d6e54241c28b7b5a0",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "publication-clarification.json": {
+      "bytes": 3249,
+      "sha256": "b22c97d10f917ab277bfffb84e974704fc4b5c51c27da192f850e5de71f7b2cc",
+      "gitBlob": "b986de5d38259d35656f29f4e81a6c68cabd2073",
+      "kind": "file",
+      "originalLedgerBound": false
+    },
+    "validation/.github/workflows/native-record-fields-fusion-correctness-1c413.yml": {
+      "bytes": 16056,
+      "sha256": "49d22264a3a8593d76ea9ea5cf114734f7b798977a8da37ea604fc07e381c839",
+      "gitBlob": "0544c5cab2a62ff4dde4e95b51805451ce822097",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/apt-install.log": {
+      "bytes": 288,
+      "sha256": "df9998f7854472344d065f09a729a48816b97b75b581946883c5b7da23578867",
+      "gitBlob": "fc9854b3fae9e76674a29756bbebba205d063440",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/apt-update.log": {
+      "bytes": 1855,
+      "sha256": "c658b590a5bdae8d1fd09cf59620307886d3c92debb650af17d75202d0ea2a80",
+      "gitBlob": "85325354931cf6bab9b7992d34aa09eeb8db5132",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/dry-build.log": {
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda",
+      "gitBlob": "6e307e31bf5c0bf0b72ef52d1625810c6f2a52fb",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/lint.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "gitBlob": "1c8d6aa1d2f7a2da2a48dd0c8b2d76fffade740a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/native-build.log": {
+      "bytes": 637,
+      "sha256": "2ee5415e3527e0c572365d3d0f34d27c270eced6b636c7637caf7a3ebfdfc551",
+      "gitBlob": "a1841b053455109701868179931feb22f2999bd9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/source-after-setup.json": {
+      "bytes": 19016,
+      "sha256": "91494119055287ce6122e3f5c8b95f5d0bc01b2a74a08294dba5e6b27fa4d4ec",
+      "gitBlob": "292614b5b6789a4e8707385cf0045b84f9a6b61f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/source-before-setup.json": {
+      "bytes": 18547,
+      "sha256": "9c45b6f0ba73fb2188cf6ef217c985c01b0aa18fc4496f56e6427342ee7ec5c8",
+      "gitBlob": "ce801b8c38ae85e3cf4ffa34560fd4ae85f0b646",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/step-outcomes.json": {
+      "bytes": 1276,
+      "sha256": "7b4c9efe8ac081422a68cb6ffae7a9e817fcb79d15866712fd58fc6071689608",
+      "gitBlob": "3f4765b9c626e4e0847a6deaed1d2b4aa5e66e8c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/types-dev.log": {
+      "bytes": 77,
+      "sha256": "047c0566795a525d19b65fa77920e0fae28094b964f69d68a5da0c4dc03d706a",
+      "gitBlob": "ff39b2d3d94c2596d5b2ba35e0eab8491bea3890",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/types-main.log": {
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d",
+      "gitBlob": "442cbadd9f9609797b75ebb15ea8a7902b7cf5cd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/types-test.log": {
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c",
+      "gitBlob": "09f1029485dfe598ff0d4fc01bc9664af6595ef7",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/unit-options.log": {
+      "bytes": 575,
+      "sha256": "48f5efdd8d4c836f5a36fc863f6a4b8f32fb76f57ca8e6720ca1007148f017b3",
+      "gitBlob": "cd85e66083f32bd7718dac80679f2b62e180b023",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/builds/perf/native-record-fields-fusion-correctness/unit.log": {
+      "bytes": 607986,
+      "sha256": "3212d3d2ab5a7634adb68114753ca3a4b72b0094ee47d8f0216d73797371457d",
+      "gitBlob": "ad71aa5e4db2c0b724f293d4e899f6ad5c0e498e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/bin/audit-release-packages.js": {
+      "bytes": 4520,
+      "sha256": "16bf135e8d6555f52e2ece51d2807daa9e69b4d8ccc8ebfae04ac70a67c4fa31",
+      "gitBlob": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/data/dictionary-wasm/manifest.json": {
+      "bytes": 3159,
+      "sha256": "604d2a05972b2f267fc4bf7bb5f3eadceaedacf9b356c1336021e136ae53e7da",
+      "gitBlob": "7d620f3f4b0b9e68d453afcc154769bd78b5fab3",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "bytes": 1860,
+      "sha256": "1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9",
+      "gitBlob": "65df6fb046036fc710a621665d72084809055c07",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/dictionary-wasm.js": {
+      "bytes": 7244,
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/README.md": {
+      "bytes": 6013,
+      "sha256": "5a07138d312bd36bbb9c9562b164b3aecf03aa44707c2925eaa1eebc402a711d",
+      "gitBlob": "a4484f79b4e6bb847cf54f1aa3e06a9a6be257b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py": {
+      "bytes": 7634,
+      "sha256": "a4a97de2f5f63fc194c289a502f74d4065db4bfa1dd6b8f9b00c2d5b23d03928",
+      "gitBlob": "82913f3e5a0091affdfa870c630c748dd20b150a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/README.md": {
+      "bytes": 6397,
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048",
+      "gitBlob": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0",
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c",
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4",
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-runtime.mjs": {
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/owner-observer.mjs": {
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03",
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py": {
+      "bytes": 33763,
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d",
+      "gitBlob": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run.mjs": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/source-binding.json": {
+      "bytes": 6846,
+      "sha256": "b592d8a0d051b920825add65054cc04c4cba502767cc651ca5c82064eec951da",
+      "gitBlob": "33fa89711c00e6242bebb0c6cf959fc4cc0827d4",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-opfs.mjs": {
+      "bytes": 11798,
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs": {
+      "bytes": 8539,
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2",
+      "gitBlob": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py": {
+      "bytes": 18038,
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587",
+      "gitBlob": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/recovery.json": {
+      "bytes": 6748,
+      "sha256": "1fa106a5ea7a060d1e39b66aa1bf0467cb5729c3e10acb323cfffa6590b21943",
+      "gitBlob": "112b8b8cc31b6532eca7a37a9883df72404498c9",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/source.json": {
+      "bytes": 9937,
+      "sha256": "28b0894c47adaadae564e50ef89a391fc6b323d6de5db4b4d6c0d9bdbd0be86b",
+      "gitBlob": "75c7b527113a83126acb0b1e935d85427f89d2ce",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py": {
+      "bytes": 6910,
+      "sha256": "2b2ea1e53daeadb38f7143e859bdb3898ec0578ad52fc44d094c9e0ed5e1c3ed",
+      "gitBlob": "42f5543f35b0bd06c792487dba7d63759aa078bd",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py": {
+      "bytes": 11331,
+      "sha256": "b0527361fd9bdc1d16aa93210a4fc999adff0ccac6be9c6288e20ae771bafeb3",
+      "gitBlob": "58e31a1fb9686bbccb166dadc3ee6f2bcdafc8f5",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/eslint.config.js": {
+      "bytes": 41188,
+      "sha256": "9142cb7986949a7257979d81448f7755fca0c1ab828322f9f74931646cfc852e",
+      "gitBlob": "d0ced0b6cb1ced0ffef0e2f924a327724c76b719",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/dictionary-database.js": {
+      "bytes": 796663,
+      "sha256": "3df99986f532b999e2c86a9d492ffc99268cc5a1440ee4339c4456e60cff3306",
+      "gitBlob": "09bd411663a0183230e1436b99cac043f1db307a",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/term-bank-wasm-parser.js": {
+      "bytes": 216058,
+      "sha256": "5bf828411612b3e81284de88332868b2ffa367be045baa41ee6df6fec1ddb315",
+      "gitBlob": "f77d7e39ec534b612921933480bbc63b78358e9f",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/term-record-fields.js": {
+      "bytes": 22694,
+      "sha256": "f2db0af75f57e5a3cbd763c26901229cd8312f84c305efdab33a90362ee595cc",
+      "gitBlob": "1dc674f2a1c2d08353a43a74ff83a06a25228a49",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/term-record-opfs-store.js": {
+      "bytes": 399335,
+      "sha256": "363abaafc0bc0428479c65367bd01d8aceb1db4217c8b04d467123f03d7f2417",
+      "gitBlob": "c4df83f6c6a9d305a3bf5ba74c9bb12b8712f471",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/term-record-prepared-fields.js": {
+      "bytes": 9782,
+      "sha256": "63363069a4d2575600cd40de77f4ab955c465a5a76aae644e40902a8c4fff2b9",
+      "gitBlob": "8ab3c644d918d9dd2a659f81f422cbff5b44560c",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/ext/js/dictionary/wasm/term-record-fields.c": {
+      "bytes": 8765,
+      "sha256": "4cfe27aa54d537d8173d142a7b7c62964d020ec323861c270e80e1e486ffe591",
+      "gitBlob": "db1f2c716e25a404dc2474daa1adddd81a75e0e8",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/test/dictionary-wasm-build.test.js": {
+      "bytes": 7552,
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+      "gitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/test/release-package-native-assets.test.js": {
+      "bytes": 6904,
+      "sha256": "b778ba93aa4eba6c148f89b124acde64fcab7e6292b8275bdf17dcf1f06cd151",
+      "gitBlob": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/test/term-record-fields-fusion.test.js": {
+      "bytes": 32209,
+      "sha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb",
+      "gitBlob": "4cffcc890bd923445b74cd32329117bdb96720c1",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/test/term-record-fields-native.test.js": {
+      "bytes": 40453,
+      "sha256": "23ea7f5f5fdb60a1bf07d8430fc09d43cd7618464eae578a3cfdebc651e8a3e6",
+      "gitBlob": "7e58d6af3aa0011be8e0704ad79a8a9ce320a2bc",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "validation/test/term-record-import-fields.test.js": {
+      "bytes": 20572,
+      "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323",
+      "gitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "verified-dictionaries.lock.json": {
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "kind": "file",
+      "originalLedgerBound": true
+    },
+    "write-audit-review.py": {
+      "bytes": 16883,
+      "sha256": "73cc0d96b5e55c378f0834a8a782c4a05059af1f25a3ab2fe6952036f5d6c568",
+      "gitBlob": "f7e4f47b0b9a6fc040138d3243581f17dc2a606b",
+      "kind": "file",
+      "originalLedgerBound": true
+    }
+  },
+  "reachabilityBoundary": "Original payload bytes are retained in this archive. Individual ledger Git SHAs are identity witnesses; they are not all separately published remote blobs."
+}
