@@ -18,7 +18,7 @@ permissions:
 
 concurrency:
   group: import-lookahead-bda85f3c7e15-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validation:

@@ -374,138 +374,147 @@ describe('term-bank WASM parser', () => {
         await expect(inflateCompressedZipMediaBatchWasm(Array.from({length: 1025}, () => empty))).rejects.toThrow('source count budget');
     });
 
-    maybeTest.each(['success', 'sink-failure', 'unready-cancel', 'borrowed'])(
-        'bounds owned content lookahead and preserves terminal sink order: %s', async (outcome) => {
-            /** @type {() => void} */
-            let releaseLaterResults = () => {};
-            const laterResults = new Promise((done) => { releaseLaterResults = () => { done(null); }; });
-            /** @type {() => void} */
-            let releaseFirstSink = () => {};
-            const firstSinkGate = new Promise((done) => { releaseFirstSink = () => { done(null); }; });
-            /** @type {() => void} */
-            let releaseDiscard = () => {};
-            const discardGate = new Promise((done) => { releaseDiscard = () => { done(null); }; });
-            /** @type {() => void} */
-            let firstSinkStarted = () => {};
-            const firstSinkStart = new Promise((done) => { firstSinkStarted = () => { done(null); }; });
-            /** @type {() => void} */
-            let unopenedGateDiscarded = () => {};
-            const unopenedGateDiscard = new Promise((done) => { unopenedGateDiscarded = () => { done(null); }; });
-            let workerIndex = 0;
-            /** @implements {WorkerMock} */
-            class OwnedWorker {
-                constructor() {
-                    this.index = workerIndex++;
-                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
-                    this.listeners = new Map();
-                }
+    maybeTest.each(['success', 'sink-failure', 'unready-cancel', 'borrowed'])('bounds owned content lookahead and preserves terminal sink order: %s', async (outcome) => {
+        /** @type {() => void} */
+        let releaseLaterResults = () => {};
+        const laterResults = new Promise((done) => {
+            releaseLaterResults = () => { done(null); };
+        });
+        /** @type {() => void} */
+        let releaseFirstSink = () => {};
+        const firstSinkGate = new Promise((done) => {
+            releaseFirstSink = () => { done(null); };
+        });
+        /** @type {() => void} */
+        let releaseDiscard = () => {};
+        const discardGate = new Promise((done) => {
+            releaseDiscard = () => { done(null); };
+        });
+        /** @type {() => void} */
+        let firstSinkStarted = () => {};
+        const firstSinkStart = new Promise((done) => {
+            firstSinkStarted = () => { done(null); };
+        });
+        /** @type {() => void} */
+        let unopenedGateDiscarded = () => {};
+        const unopenedGateDiscard = new Promise((done) => {
+            unopenedGateDiscarded = () => { done(null); };
+        });
+        let workerIndex = 0;
+        /** @implements {WorkerMock} */
+        class OwnedWorker {
+            constructor() {
+                this.index = workerIndex;
+                ++workerIndex;
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
 
-                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
-                    addWorkerListener(this.listeners, type, listener);
-                }
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                addWorkerListener(this.listeners, type, listener);
+            }
 
-                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
-                    this.listeners.get(type)?.delete(listener);
-                }
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
 
-                postMessage(/** @type {WorkerMessage} */ message, /** @type {Transferable[]} */ transfer = []) {
-                    // A private prepare callback must never enter worker options.
-                    const dispatched = structuredClone(message, {transfer});
-                    queueMicrotask(() => {
-                        if (dispatched.type === 'initialize') {
-                            emitWorkerMessage(this.listeners, {type: 'ready'});
-                            return;
-                        }
-                        const respond = () => emitWorkerMessage(this.listeners, {
-                            type: 'result',
-                            id: dispatched.id,
-                            rowCount: 1,
-                            resultSentEpochMs: Date.now(),
-                            ownsContentBytes: outcome !== 'borrowed',
-                            borrowsWorkerMemory: outcome === 'borrowed',
-                            chunk: {rowCount: 1, contentBytesBuffer: new Uint8Array(new SharedArrayBuffer(1))},
-                            profile: {chunkDispatchMs: 0},
-                        });
-                        if (outcome === 'unready-cancel' && this.index !== 0) {
-                            void laterResults.then(respond);
-                        } else {
-                            respond();
-                        }
+            postMessage(/** @type {WorkerMessage} */ message, /** @type {Transferable[]} */ transfer = []) {
+                // A private prepare callback must never enter worker options.
+                const dispatched = structuredClone(message, {transfer});
+                queueMicrotask(() => {
+                    if (dispatched.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    const respond = () => emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: dispatched.id,
+                        rowCount: 1,
+                        resultSentEpochMs: Date.now(),
+                        ownsContentBytes: outcome !== 'borrowed',
+                        borrowsWorkerMemory: outcome === 'borrowed',
+                        chunk: {rowCount: 1, contentBytesBuffer: new Uint8Array(new SharedArrayBuffer(1))},
+                        profile: {chunkDispatchMs: 0},
                     });
-                }
-
-                terminate() {}
+                    if (outcome === 'unready-cancel' && this.index !== 0) {
+                        void laterResults.then(respond);
+                    } else {
+                        respond();
+                    }
+                });
             }
 
-            const discard = vi.fn(async () => {
-                if (outcome === 'sink-failure') { await discardGate; }
-            });
-            const prepare = vi.fn(async (
-                /** @type {TermBankColumnChunk} */ _chunk,
-                /** @type {TermBankParseProgress} */ _progress,
-            ) => ({discard}));
-            /** @type {TermBankParseProgress[]} */
-            const progressValues = [];
-            let settled = false;
-            vi.stubGlobal('Worker', OwnedWorker);
-            try {
-                const parsing = parseTermBankWithWasmColumnChunksParallel(
-                    Array.from({length: 4}, () => textEncoder.encode('[]')),
-                    3,
-                    async (chunk, progress) => {
-                        progressValues.push(progress);
-                        if (progress.chunkIndex !== 1) { return; }
-                        const lookahead = startTermContentLookahead(chunk);
-                        expect(lookahead === null).toBe(outcome === 'borrowed');
-                        firstSinkStarted();
-                        if (outcome === 'unready-cancel') {
-                            await lookahead?.discard();
-                            unopenedGateDiscarded();
-                        }
-                        await firstSinkGate;
-                        if (outcome === 'sink-failure' || outcome === 'unready-cancel') {
-                            throw new Error('first sink failed');
-                        }
-                    },
-                    {emitContentSlab: true, prepareTermContentLookahead: prepare},
-                ).finally(() => { settled = true; });
-                void parsing.catch(() => {});
-                await firstSinkStart;
-                if (outcome === 'unready-cancel') {
-                    await unopenedGateDiscard;
-                    expect(prepare).not.toHaveBeenCalled();
-                    releaseLaterResults();
-                } else if (outcome !== 'borrowed') {
-                    await vi.waitFor(() => expect(prepare).toHaveBeenCalledOnce());
-                    expect(prepare.mock.calls[0][1]).toEqual({processedRows: 2, totalRows: 4, chunkIndex: 2, chunkCount: 4});
-                }
-                expect(progressValues.map(({chunkIndex}) => chunkIndex)).toEqual([1]);
-                expect(settled).toBe(false);
-                releaseFirstSink();
-                if (outcome === 'sink-failure') {
-                    await vi.waitFor(() => expect(discard).toHaveBeenCalledOnce());
-                    expect(settled).toBe(false);
-                    expect(progressValues).toHaveLength(1);
-                    releaseDiscard();
-                    await expect(parsing).rejects.toThrow('first sink failed');
-                } else if (outcome === 'unready-cancel') {
-                    await expect(parsing).rejects.toThrow('first sink failed');
-                    expect(discard).not.toHaveBeenCalled();
-                } else {
-                    await expect(parsing).resolves.toBe(true);
-                    expect(progressValues.map(({chunkIndex}) => chunkIndex)).toEqual([1, 2, 3, 4]);
-                    expect(prepare).toHaveBeenCalledTimes(outcome === 'borrowed' ? 0 : 1);
-                    expect(discard).toHaveBeenCalledTimes(outcome === 'borrowed' ? 0 : 1);
-                }
-            } finally {
-                releaseFirstSink();
+            terminate() {}
+        }
+
+        const discard = vi.fn(async () => {
+            if (outcome === 'sink-failure') { await discardGate; }
+        });
+        const prepare = vi.fn(async (
+            /** @type {TermBankColumnChunk} */ _chunk,
+            /** @type {TermBankParseProgress} */ _progress,
+        ) => ({discard}));
+        /** @type {TermBankParseProgress[]} */
+        const progressValues = [];
+        let settled = false;
+        vi.stubGlobal('Worker', OwnedWorker);
+        try {
+            const parsing = parseTermBankWithWasmColumnChunksParallel(
+                Array.from({length: 4}, () => textEncoder.encode('[]')),
+                3,
+                async (chunk, progress) => {
+                    progressValues.push(progress);
+                    if (progress.chunkIndex !== 1) { return; }
+                    const lookahead = startTermContentLookahead(chunk);
+                    expect(lookahead === null).toBe(outcome === 'borrowed');
+                    firstSinkStarted();
+                    if (outcome === 'unready-cancel') {
+                        await lookahead?.discard();
+                        unopenedGateDiscarded();
+                    }
+                    await firstSinkGate;
+                    if (outcome === 'sink-failure' || outcome === 'unready-cancel') {
+                        throw new Error('first sink failed');
+                    }
+                },
+                {emitContentSlab: true, prepareTermContentLookahead: prepare},
+            ).finally(() => { settled = true; });
+            void parsing.catch(() => {});
+            await firstSinkStart;
+            if (outcome === 'unready-cancel') {
+                await unopenedGateDiscard;
+                expect(prepare).not.toHaveBeenCalled();
                 releaseLaterResults();
-                releaseDiscard();
-                await disposeParallelTermBankParser();
-                vi.stubGlobal('Worker', void 0);
+            } else if (outcome !== 'borrowed') {
+                await vi.waitFor(() => expect(prepare).toHaveBeenCalledOnce());
+                expect(prepare.mock.calls[0][1]).toEqual({processedRows: 2, totalRows: 4, chunkIndex: 2, chunkCount: 4});
             }
-        },
-    );
+            expect(progressValues.map(({chunkIndex}) => chunkIndex)).toEqual([1]);
+            expect(settled).toBe(false);
+            releaseFirstSink();
+            if (outcome === 'sink-failure') {
+                await vi.waitFor(() => expect(discard).toHaveBeenCalledOnce());
+                expect(settled).toBe(false);
+                expect(progressValues).toHaveLength(1);
+                releaseDiscard();
+                await expect(parsing).rejects.toThrow('first sink failed');
+            } else if (outcome === 'unready-cancel') {
+                await expect(parsing).rejects.toThrow('first sink failed');
+                expect(discard).not.toHaveBeenCalled();
+            } else {
+                await expect(parsing).resolves.toBe(true);
+                expect(progressValues.map(({chunkIndex}) => chunkIndex)).toEqual([1, 2, 3, 4]);
+                expect(prepare).toHaveBeenCalledTimes(outcome === 'borrowed' ? 0 : 1);
+                expect(discard).toHaveBeenCalledTimes(outcome === 'borrowed' ? 0 : 1);
+            }
+        } finally {
+            releaseFirstSink();
+            releaseLaterResults();
+            releaseDiscard();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
 
     maybeTest.each([
         {

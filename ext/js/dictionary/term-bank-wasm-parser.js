@@ -3109,7 +3109,9 @@ class ParallelTermBankPipelineRun {
         ) { return null; }
         let cancel = () => {};
         /** @type {Promise<null>} */
-        const cancelled = new Promise((resolve) => { cancel = () => { resolve(null); }; });
+        const cancelled = new Promise((resolve) => {
+            cancel = () => { resolve(null); };
+        });
         /** @type {NonNullable<ParallelTermBankPipelineRun['_pendingContentLookahead']>} */
         const pending = {groupIndex, cancelled: false, cancel, promise: Promise.resolve(null)};
         pending.promise = (async () => {

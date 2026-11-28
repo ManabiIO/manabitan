@@ -399,7 +399,9 @@ describe('unpublished owned term-content lookahead', () => {
         );
         /** @type {() => void} */
         let releaseResolution = () => {};
-        const resolutionGate = new Promise((done) => { releaseResolution = () => { done(null); }; });
+        const resolutionGate = new Promise((done) => {
+            releaseResolution = () => { done(null); };
+        });
         const resolving = vi.spyOn(first.database, '_resolveArtifactTermContentDedup').mockImplementation(async (chunk, reserve) => {
             if (chunk === second.chunk) { await resolutionGate; }
             return await resolve(chunk, reserve);
@@ -419,9 +421,9 @@ describe('unpublished owned term-content lookahead', () => {
         const current = await resolving.mock.results[0].value;
         const arena = Reflect.get(first.database, '_termContentMetadataArena');
         if (arena === null) { throw new Error('Expected native metadata arena'); }
-        const indexes = current.stagedContentMetadata.indexes.slice();
-        const offsets = first.plan.resolvedOffsets.slice();
-        const lengths = first.plan.resolvedLengths.slice();
+        const indexes = new Int32Array(current.stagedContentMetadata.indexes);
+        const offsets = new Float64Array(first.plan.resolvedOffsets);
+        const lengths = new Uint32Array(first.plan.resolvedLengths);
         expect(current.stagedContentMetadata.indexes.buffer).not.toBe(arena.memory.buffer);
         expect(first.appendRecords).toHaveBeenCalledOnce();
         expect(scanner.stats.calls).toBe(1);
