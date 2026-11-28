@@ -20,9 +20,10 @@ const wasm = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0);
  * @param {'missing'|'corrupt'|'valid'} scanner
  * @param {string} [variant]
  * @param {(manifest: import('dev/manifest').Manifest) => void} [mutate]
+ * @param {'missing'|'corrupt'|'valid'} [indexHash]
  * @returns {Promise<string>}
  */
-async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {
+async function packageFixture(scanner, variant = 'chrome', mutate = () => {}, indexHash = 'valid') {
     const directory = await mkdtemp(join(tmpdir(), 'manabitan-package-audit-'));
     const zip = new JSZip();
     const manifest = new ManifestUtil().getManifest(variant);
@@ -32,6 +33,8 @@ async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {
     zip.file('lib/term-bank-parser.wasm', wasm);
     zip.file('lib/zstd.wasm', wasm);
     if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v1.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }
+    // eslint-disable-next-line @stylistic/semi
+    if (indexHash !== 'missing') { zip.file('lib/term-index-hash-v1.wasm', indexHash === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm) }
     const path = join(directory, `manabitan-${variant}.zip`);
     await writeFile(path, await zip.generateAsync({type: 'nodebuffer'}));
     return path;
@@ -42,12 +45,22 @@ test.each(['missing', 'corrupt'])('release package audit rejects a %s canonical 
     await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u);
 });
 
-test('release package audit validates and records the canonical scanner alongside parser and codec', async () => {
+/* eslint-disable @stylistic/semi */
+test.each(['missing', 'corrupt'])('release package audit rejects a %s index checksum module', async (state) => {
+    const path = await packageFixture('valid', 'chrome', () => {}, /** @type {'missing'|'corrupt'} */ (state))
+    await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u)
+})
+/* eslint-enable @stylistic/semi */
+
+test('release package audit validates and records all required native modules', async () => {
     const path = await packageFixture('valid');
     const {stdout} = await run(process.execPath, ['dev/bin/audit-release-packages.js', version, path]);
     const report = JSON.parse(stdout);
     expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u);
-    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(3);
+    /* eslint-disable @stylistic/semi */
+    expect(report.packages[0].nativeAssets['lib/term-index-hash-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u)
+    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(4)
+    /* eslint-enable @stylistic/semi */
 });
 
 test.each(['chrome', 'chrome-dev', 'chrome-playwright', 'edge', 'firefox', 'firefox-dev', 'firefox-android'])('release audit accepts the canonical %s package', async (variant) => {
