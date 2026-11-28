@@ -1,0 +1,76 @@
+name: Format metadata experiment handoff 4d9f
+
+on:
+  push:
+    branches: [experiment/format-metadata-handoff-20261128-4d9f]
+    paths: [.github/workflows/format-metadata-handoff-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: bc558871d2427ce8d4d2e68a4eb9f5088a65fb36
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Format only the changed experiment handoff
+        run: |
+          npx prettier dev/perf/import-experiments-20260914.md --write
+          npx prettier dev/perf/import-experiments-20260914.md --check
+      - name: Prepare a reviewed documentation-only commit without moving any branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, urllib.request
+          repository = 'ManabiIO/manabitan'
+          expected_head = 'bc558871d2427ce8d4d2e68a4eb9f5088a65fb36'
+          expected_tree = '1246f1ecf3bcc081b0e537125455d047b3b68b63'
+          target = 'dev/perf/import-experiments-20260914.md'
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          assert git('rev-parse', 'HEAD') == expected_head
+          assert git('rev-parse', 'HEAD^{tree}') == expected_tree
+          assert git('diff', '--name-only').splitlines() == [target]
+          assert not git('diff', '--cached', '--name-only')
+          original = subprocess.check_output(['git', 'show', 'HEAD:' + target])
+          formatted = pathlib.Path(target).read_bytes()
+          assert b'## 2026-11-28: implicit import metadata columns (4d9f)' in formatted
+          def api(path, payload):
+              request = urllib.request.Request('https://api.github.com/repos/' + repository + path,
+                  data=json.dumps(payload).encode(), method='POST',
+                  headers={'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'],
+                           'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
+                           'Content-Type': 'application/json'})
+              with urllib.request.urlopen(request) as response:
+                  return json.load(response)
+          blob = api('/git/blobs', {'content': formatted.decode(), 'encoding': 'utf-8'})['sha']
+          tree = api('/git/trees', {'base_tree': expected_tree, 'tree': [
+              {'path': target, 'mode': '100644', 'type': 'blob', 'sha': blob}]})['sha']
+          commit = api('/git/commits', {'message': 'docs: format import experiment handoff',
+                                      'tree': tree, 'parents': [expected_head]})['sha']
+          result = {'source': expected_head, 'parentTree': expected_tree, 'commit': commit, 'tree': tree,
+                    'path': target, 'blob': blob, 'originalSha256': hashlib.sha256(original).hexdigest(),
+                    'formattedSha256': hashlib.sha256(formatted).hexdigest(),
+                    'branchUpdated': False, 'scope': 'Locked Prettier formatting of one Markdown file'}
+          out = pathlib.Path('builds/perf/formatted-handoff-4d9f')
+          out.mkdir(parents=True, exist_ok=False)
+          (out / 'receipt.json').write_text(json.dumps(result, indent=2) + '\n')
+          (out / 'format.patch').write_bytes(subprocess.check_output(['git', 'diff', '--', target]))
+          print(json.dumps(result))
+          PY
+      - name: Retain formatter receipt and exact patch
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: formatted-metadata-handoff-4d9f
+          path: builds/perf/formatted-handoff-4d9f
+          if-no-files-found: error
