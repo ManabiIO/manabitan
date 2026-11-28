@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_AFTER_IMPORT_ISOLATION_FIX",
+  "reviewer": "profile independent final preservation review",
+  "scope": "Read-only preservation/source/receipt/package/memory/handoff audit. No browser import, native parser, benchmark or new qualification was acquired.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "2cdcc90241fa19221b7fc4e5d793eb70896c3258",
+  "runId": 46104027586,
+  "reviewedFiles": {
+    "dev/perf/composite-window-5a86/hosted/hosted-evidence.json.txt": {
+      "path": "/home/agent/manabitan-composite-evidence-5a86/dev/perf/composite-window-5a86/hosted/hosted-evidence.json.txt",
+      "bytes": 3008016,
+      "sha256": "c9d0860348f52f235a7cb104d6bee1f87c9d39187c624c7ff86571230d674e2a"
+    },
+    "dev/perf/composite-window-5a86/hosted/manifest.json.txt": {
+      "path": "/home/agent/manabitan-composite-evidence-5a86/dev/perf/composite-window-5a86/hosted/manifest.json.txt",
+      "bytes": 505440,
+      "sha256": "a9b9b4ff9e8d824f02f1b2c7e4354678bbf292241de8ae90d5f8ba0c49c8ac1b"
+    },
+    "dev/perf/verify-composite-window-hosted-5a86.py": {
+      "path": "/home/agent/manabitan-composite-evidence-5a86/dev/perf/verify-composite-window-hosted-5a86.py",
+      "bytes": 32546,
+      "sha256": "d9283117b0760291295cc1c88fca986e29d1aa63b89d343307ab5304f8561b8f"
+    },
+    "dev/perf/import-experiments-20260914.md": {
+      "path": "/home/agent/manabitan-composite-evidence-5a86/dev/perf/import-experiments-20260914.md",
+      "bytes": 100683,
+      "sha256": "eac0d2a103b3efa5a0dd2e7a4b0907c889c4e6b91cb1f6b05b95e3171f802019"
+    }
+  },
+  "archive": {
+    "bytes": 2255892,
+    "sha256": "06aebc252b4011c4f4c1a0746c55350d224fd7eea5ac4fdf3932093a48c0a954",
+    "members": 1484,
+    "uncompressedBytes": 136367544,
+    "originalNonPackageHostMembers": 1206,
+    "gitObjects": 58,
+    "preservationOnlyAdditions": 34,
+    "all1450PreCorrectionMembersByteIdentical": true
+  },
+  "executableChecks": {
+    "compact": "PASS after fresh extraction",
+    "optionalOriginalArtifactMode": "PASS after fresh extraction and original ZIP/package byte checks",
+    "resultsIdenticalExceptExplicitOriginalPackageRecheckBoolean": true,
+    "unexpectedArchivedHelper": "Rejected before helper import; historical harmless marker content and mtime unchanged",
+    "optimizedPython": "Rejected before auditing"
+  },
+  "sourceAndPackageReview": [
+    "Raw Git object hashes and tree traversal bind the frozen baseline/candidate commits, exact seven candidate paths and allowlisted source-hash keys without executing Git commands from archive fields.",
+    "The two packaged changes are parser C and parser WASM. All six original artifact ZIPs and both 554-entry packages per cell were rechecked in optional-original mode, including retained native payload equality to source.",
+    "No product, acquisition workflow, timing protocol, defaults, worker policy, memory gate or observation was changed by this preservation update."
+  ],
+  "sourceGate": {
+    "unitPassed": 15139,
+    "unitSkipped": 47,
+    "unitFilesPassed": 669,
+    "receiptObserverTests": 32,
+    "nativeCompiler": "21.1.8",
+    "nativeLinker": "21.1.8",
+    "buildTargets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "sourceLint": "Changed test source only",
+    "typescript": "No TypeScript validation command in this source gate"
+  },
+  "observations": {
+    "imports": 156,
+    "rawMemoryScans": 2157,
+    "sixCells": {
+      "jmdict-AB": {
+        "imports": 26,
+        "scans": 261,
+        "artifactId": 15250088984,
+        "artifactSha256": "fbd4ac439d2c33ea7043bba9ed6f800971cf89889a2bc27b9076d48666c7442c",
+        "policy": [
+          3,
+          12
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -4.909357178039797,
+              4.8694627957381
+            ],
+            "equalWorkChangePercent": -0.27543891078570804,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.5598884772136437,
+            "ratios": [
+              1.0091082109842067,
+              0.9796940194715206,
+              0.9542285939760402,
+              1.0120384147165764,
+              1.0853508411981858,
+              0.9475842624631639
+            ],
+            "worstPairChangePercent": 8.535084119818581
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -6.504164625184494,
+              5.110179802621029
+            ],
+            "equalWorkChangePercent": -0.9832272990178859,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.6969924112817383,
+            "ratios": [
+              1.0511017980262103,
+              0.9349583537481551
+            ],
+            "worstPairChangePercent": 5.110179802621029
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      },
+      "jmdict-BA": {
+        "imports": 26,
+        "scans": 270,
+        "artifactId": 15252265564,
+        "artifactSha256": "5382160a3e69ecd466046a1d9f27c9eda19ee406fb709e0665bb48ac0d5a366d",
+        "policy": [
+          3,
+          12
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -1.7084257552225868,
+              11.280835283572399
+            ],
+            "equalWorkChangePercent": 3.5245512769818577,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 1.3236103642608965,
+            "ratios": [
+              1.1987343312644347,
+              0.9906410856340665,
+              0.9751903992614818,
+              1.0268823744070132,
+              1.0208111623506875,
+              1.0056610449345305
+            ],
+            "worstPairChangePercent": 19.873433126443473
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -0.9523809523816373,
+              0.0941065756955961
+            ],
+            "equalWorkChangePercent": -0.4292602610853513,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.4291371883430206,
+            "ratios": [
+              1.000941065756956,
+              0.9904761904761836
+            ],
+            "worstPairChangePercent": 0.0941065756955961
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      },
+      "jitendex-AB": {
+        "imports": 26,
+        "scans": 332,
+        "artifactId": 15251625052,
+        "artifactSha256": "e6b8344fb93714437f907f68866f30571ee5648a74dbf98811365fcc54468ef9",
+        "policy": [
+          3,
+          22
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -2.574478403453262,
+              0.7733322695780309
+            ],
+            "equalWorkChangePercent": -0.7198212056997666,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.29663639915178397,
+            "ratios": [
+              1.0031880977683367,
+              0.9904281239122866,
+              0.9966727957272049,
+              0.9973944762897595,
+              1.012278547623224,
+              0.958082308018648
+            ],
+            "worstPairChangePercent": 1.227854762322389
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.3776050865449085,
+              0.7811128664204192
+            ],
+            "equalWorkChangePercent": -0.2949203274954071,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.2982461100622391,
+            "ratios": [
+              1.0078111286642042,
+              0.9862239491345509
+            ],
+            "worstPairChangePercent": 0.7811128664204192
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      },
+      "jitendex-BA": {
+        "imports": 26,
+        "scans": 275,
+        "artifactId": 15251695051,
+        "artifactSha256": "cb7e4229d8f62a2edfdd4285ede09230b7a4ec641e9ff8d7b4159c10f34cdf45",
+        "policy": [
+          3,
+          22
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -7.0619355695315855,
+              4.469429651894341
+            ],
+            "equalWorkChangePercent": -1.384140061792194,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.6774941243977928,
+            "ratios": [
+              0.9778866691795381,
+              0.9975074775673162,
+              1.0707593526829389,
+              0.8808746194298303,
+              0.9889426399447279,
+              1.0186292403549477
+            ],
+            "worstPairChangePercent": 7.075935268293887
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -2.2309389556277592,
+              0.68058076225046
+            ],
+            "equalWorkChangePercent": -0.8159022177426589,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.7751790966886496,
+            "ratios": [
+              1.0068058076225046,
+              0.9776906104437224
+            ],
+            "worstPairChangePercent": 0.68058076225046
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      },
+      "vndb-AB": {
+        "imports": 26,
+        "scans": 605,
+        "artifactId": 15250349480,
+        "artifactSha256": "9c77364dfbbeef17542701f993c975b653639d1d15b39df24a7de200ae40db99",
+        "policy": [
+          3,
+          170
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -1.3193732846373596,
+              2.536339758194317
+            ],
+            "equalWorkChangePercent": 0.5035268719253638,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 0.3202358422179197,
+            "ratios": [
+              1.0057004001242416,
+              0.9798781510256553,
+              1.0305141713401,
+              0.9937343832815975,
+              1.0007043167201168,
+              1.0202126238237863
+            ],
+            "worstPairChangePercent": 3.051417134010004
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.0115740313438093,
+              -0.4153294317538192
+            ],
+            "equalWorkChangePercent": -0.7167990442678351,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": -0.7134517315488198,
+            "ratios": [
+              0.9898842596865619,
+              0.9958467056824618
+            ],
+            "worstPairChangePercent": -0.4153294317538192
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      },
+      "vndb-BA": {
+        "imports": 26,
+        "scans": 414,
+        "artifactId": 15252125526,
+        "artifactSha256": "3f7c973ff10d226707fb07b0892f1936b56ad3616dd7c943f9766ed20c764ef3",
+        "policy": [
+          3,
+          170
+        ],
+        "analysis": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -5.957037706274249,
+              1.3249275483599998
+            ],
+            "equalWorkChangePercent": -1.828535454701219,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.49916152816693593,
+            "ratios": [
+              1.0065336579726372,
+              1.019964892994563,
+              0.9200490828831485,
+              1.0006545197240322,
+              0.9608101629913666,
+              0.989362249712629
+            ],
+            "worstPairChangePercent": 1.9964892994563055
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.249935526022894,
+              1.6836383530682397
+            ],
+            "equalWorkChangePercent": 0.19769041854489355,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.21685141352267845,
+            "ratios": [
+              1.0168363835306824,
+              0.9875006447397711
+            ],
+            "worstPairChangePercent": 1.6836383530682397
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": false,
+          "status": "memory-or-semantics-failed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        }
+      }
+    }
+  },
+  "failedQualificationPreserved": {
+    "cell": "vndb-BA",
+    "memoryPassed": false,
+    "scope": "The three covered-gap failures and absence of a qualified paired memory comparison remain failures; successful evidence verification does not promote the qualification."
+  },
+  "handoffReview": [
+    "No replicated latency gain is claimed; every candidate interval includes zero, opposite-order hosts and controls stay separate, and tails are retained.",
+    "The source gate correctly discloses changed-test ESLint and no broad TypeScript validation command.",
+    "Lexical sampling in browser receipts remains distinct from the separately archived full-corpus proof.",
+    "The compact package omission limit is emitted from fixed checker text and the exact twelve omitted product ZIP paths remain explicit.",
+    "No PR or unchanged acquisition repeat is proposed."
+  ],
+  "preparationFix": {
+    "oldVerifierSha256": "3f1a5a40a26410344eb1cfbefee32cda65a1b15e87c817b2bcf0271ef3df557b",
+    "reviewedVerifierSha256": "d9283117b0760291295cc1c88fca986e29d1aa63b89d343307ab5304f8561b8f",
+    "description": "The earlier checker imported helpers from the extracted archive. A rebound extra subprocess.py wrote a harmless fixed marker and deliberately stopped. The final checker rejects unexpected retained helper entries, constructs only four Git-proven modules in a fresh external directory and removes its import-path entry after loading.",
+    "oldEvidenceCommit": "f0f8f829066eb0aedcfd6e43f7addf37d72703dd",
+    "oldEvidenceTree": "b717e164a3e26ecf23a07a593f8fc706307e0ecd",
+    "oldWrapperBlob": "a5ff1c75f490d869bddb92434da882c9401254a5",
+    "oldArchiveSha256": "70e44cfb1e1219ace101c5865db6f152b10f26c2bc12fe90dff850eaebdf931f"
+  },
+  "reviewEvidence": {
+    "preparation-review.json": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/preparation-review.json",
+      "bytes": 1682,
+      "sha256": "7219c6eb4e74e91cada70b278e8f83e2ab558a970c03d52fa373f99f2584d72f"
+    },
+    "isolated-support-checks.json": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/isolated-support-checks.json",
+      "bytes": 529,
+      "sha256": "9722e44b3cdb83b90dc141e1d358cb374daf7ee0f9caf1321056b1670e24a1a8"
+    },
+    "final-run-receipts.json": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/final-run-receipts.json",
+      "bytes": 1357,
+      "sha256": "0f0b7e32a4c0bfb2c17498d5bd1521604a9dcb6205a102081b064988ce1feba8"
+    },
+    "final-compact.stdout": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/final-compact.stdout",
+      "bytes": 15998,
+      "sha256": "88211303b86f5561aa243496905e146493dd5b20981ff0ce3cb63651c859c7dd"
+    },
+    "final-compact.stderr": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/final-compact.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-full.stdout": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/final-full.stdout",
+      "bytes": 15997,
+      "sha256": "04e5c8191757cbd7a2c72ab90d77cc4a40b34687cbb509f69e5a081577872c27"
+    },
+    "final-full.stderr": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/final-full.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pack-member-delta.json": {
+      "path": "/home/agent/manabitan-composite-final-review-profile-5a86/pack-member-delta.json",
+      "bytes": 2614,
+      "sha256": "c64336877d82646f0aad8f62f581b654f33764c34d9ca1b1053281090db4b33e"
+    }
+  },
+  "limits": [
+    "Per-host descriptive bootstrap intervals; AB/BA hosts and same-code controls remain separate.",
+    "Lexical receipts sample terms; complete-corpus parity is preserved by a separate study.",
+    "Memory maxima are sampled and must pass the unchanged prospective gate.",
+    "The compact archive cannot reconstruct or rehash the omitted original product ZIP payloads. Supply the original six host artifact ZIPs to repeat that byte-level package audit.",
+    "The prior fourteen semantic negatives and earlier independent core review are retained; this final review reran only the concrete import-boundary/-O checks and both complete preservation modes.",
+    "This is not an exhaustive hostile-input audit or a new performance qualification."
+  ]
+}

@@ -769,7 +769,7 @@ The [compact evidence](composite-window-5a86/hosted/hosted-evidence.json.txt) an
 
 The only omitted members of the six browser artifacts are their twelve original product package ZIP payloads. They were fully verified before omission, and their archive hashes and complete entry inventories are retained. **The compact pack cannot reconstruct or independently rehash those omitted original ZIP bytes.** Supply the original artifact ZIPs to repeat that part of verification. The compact pack still independently rechecks every retained byte, all canonical receipts against raw reports, exact source/runtime/fixture/default-flag identities, registered schedules, post-UI timers, all raw memory scans, separate controls and complete-pair statistics. Its passing result means the retained evidence verifies, including the failed VNDB BA memory qualification.
 
-The [portable auditor](verify-composite-window-hosted-5a86.py) needs only Python's standard library. It extracts about 135 MB, so select an existing temporary directory with sufficient free space:
+The [portable auditor](verify-composite-window-hosted-5a86.py) needs only Python's standard library. It extracts about 137 MB, so select an existing temporary directory with sufficient free space:
 
 ```sh
 TMPDIR=/path/to/scratch python3 dev/perf/verify-composite-window-hosted-5a86.py
@@ -784,3 +784,5 @@ TMPDIR=/path/to/scratch python3 dev/perf/verify-composite-window-hosted-5a86.py 
 
 Both modes pass after fresh extraction. Preparation history retains the initial regular-file-mode and fixture-subset assumptions, their corrections, and the earlier portable checker that incorrectly required every memory gate to pass. The final checker restores the original conditional status/exit rule and verifies failed qualifications without promoting them. Fourteen semantic rejection checks and the independent review's additional source/memory mutations reject; optimized Python is also rejected. These are preservation checks, with no new import or timing acquisition.
 
+
+The final independent review also reproduced an import-isolation defect in the preparation auditor: an extra module in the extracted helper directory could run before rejection. The corrected auditor generates only the four Git-verified helpers in a fresh temporary directory outside the extracted data, removes that import-path entry after loading, and rejects unexpected retained helper entries. The harmless marker, exact old checker, reproducer, input hashes and rejection receipts remain in the preparation history. The original pre-fix compact wrapper remains reachable in the preceding evidence-only commit (tree `b717e164a3e26ecf23a07a593f8fc706307e0ecd`, wrapper Git blob `a5ff1c75f490d869bddb92434da882c9401254a5`), so the large synthetic mutation need not be duplicated. This correction changes no browser observation or candidate product byte.

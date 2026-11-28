@@ -449,7 +449,7 @@ def extract_retained(evidence, manifest, target):
             path.write_bytes(content)
 
 
-def audit_all(root, manifest, originals=None):
+def audit_all_with_support(root, manifest, originals, support_directory):
     assert manifest['baseline'] == BASELINE and manifest['candidate'] == CANDIDATE and manifest['runId'] == RUN
     assert set(manifest['originalArtifacts']) == set(CELLS) | {'validation'}
     assert manifest['acquisitionRerun'] is False and manifest['pairsPerCell'] == PAIRS
@@ -460,8 +460,12 @@ def audit_all(root, manifest, originals=None):
         if arm == 'B':
             assert parents == [BASELINE]
     assert proof.changed(TREES['A'], TREES['B']) == CHANGED_PATHS
-    support_directory = root / 'audit-support'
-    support_directory.mkdir(exist_ok=True)
+    support_names = {Path(path).name for path in FROZEN if path.startswith(SUPPORT)}
+    retained_support = root / 'audit-support'
+    if retained_support.exists():
+        assert {path.name for path in retained_support.iterdir()} == support_names
+        assert all(path.is_file() and not path.is_symlink() for path in retained_support.iterdir())
+    assert not list(support_directory.iterdir())
     for path, expected in FROZEN.items():
         revision = CANDIDATE if path in CHANGED_PATHS else BASELINE
         data = proof.source(revision, path)
@@ -470,10 +474,14 @@ def audit_all(root, manifest, originals=None):
             assert data == proof.source(CANDIDATE, path)
         if path.startswith(SUPPORT):
             (support_directory / Path(path).name).write_bytes(data)
+    assert {path.name for path in support_directory.iterdir()} == support_names
     sys.path.insert(0, str(support_directory))
-    from qualification_receipts import validate_import_summary, require_matching_receipts
-    from audit_memory import audit_cell
-    from protocol import schedule, memory_overlay
+    try:
+        from qualification_receipts import validate_import_summary, require_matching_receipts
+        from audit_memory import audit_cell
+        from protocol import schedule, memory_overlay
+    finally:
+        sys.path.remove(str(support_directory))
     helpers = (validate_import_summary, require_matching_receipts, audit_cell, schedule, memory_overlay)
     cells = {cell: audit_host(root, cell, manifest['originalArtifacts'][cell], proof, helpers, originals) for cell in CELLS}
     jobs = read(root / 'preservation/final-jobs.json')['jobs']
@@ -500,6 +508,12 @@ def audit_all(root, manifest, originals=None):
                        'Memory maxima are sampled and must pass the unchanged prospective gate.',
                        'The compact archive cannot reconstruct or rehash the omitted original product ZIP payloads. '
                        'Supply the original six host artifact ZIPs to repeat that byte-level package audit.']}
+
+
+def audit_all(root, manifest, originals=None):
+    # Never put an extracted archive directory on Python's import search path.
+    with tempfile.TemporaryDirectory(prefix='composite-frozen-helpers-') as directory:
+        return audit_all_with_support(root, manifest, originals, Path(directory))
 
 
 def main():
