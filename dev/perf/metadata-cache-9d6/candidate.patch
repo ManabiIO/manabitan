@@ -1,0 +1,96 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 6414e12c51..541d88e917 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -6783,6 +6783,35 @@ void 0 :
+     }
+ 
+     /* eslint-disable @stylistic/semi */
++    /**
++     * Keep the repeated span validation separate from cache ownership and mutation.
++     * @param {{indexes: Int32Array}} staged
++     * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}} spans
++     * @param {number} sourceStart
++     * @param {number} sourceEnd
++     * @returns {{minimumOffset: number, maximumEnd: number, publishedCount: number, publishedContentBytes: number, lastPublishedSource: number}|null}
++     */
++    _scanPublishedTermContentSourceRange(staged, spans, sourceStart, sourceEnd) {
++        let minimumOffset = Infinity
++        let maximumEnd = 0
++        let publishedCount = 0
++        let publishedContentBytes = 0
++        let lastPublishedSource = -1
++        for (let i = sourceStart; i < sourceEnd; ++i) {
++            const index = staged.indexes[i]
++            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue }
++            const offset = spans.offsets[i]
++            const length = spans.lengths[i]
++            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return null }
++            minimumOffset = Math.min(minimumOffset, offset)
++            maximumEnd = Math.max(maximumEnd, offset + length)
++            ++publishedCount
++            publishedContentBytes += length
++            lastPublishedSource = i
++        }
++        return {minimumOffset, maximumEnd, publishedCount, publishedContentBytes, lastPublishedSource}
++    }
++
+     /**
+      * Retains bounded owned bytes so the next parser groups can verify exact
+      * duplicates without reading recently written OPFS blocks. Immutable parser
+@@ -6843,23 +6872,10 @@ void 0 :
+             if (sourceStart < 0) { return 0 }
+             sourceEnd = sourceStart + 1
+         }
+-        let minimumOffset = Infinity;
+-        let maximumEnd = 0;
+-        let publishedCount = 0;
+-        let publishedContentBytes = 0;
+-        let lastPublishedSource = -1
+-        for (let i = sourceStart; i < sourceEnd; ++i) {
+-            const index = staged.indexes[i];
+-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+-            const offset = spans.offsets[i];
+-            const length = spans.lengths[i];
+-            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
+-            minimumOffset = Math.min(minimumOffset, offset);
+-            maximumEnd = Math.max(maximumEnd, offset + length);
+-            ++publishedCount;
+-            publishedContentBytes += length;
+-            lastPublishedSource = i
+-        }
++        const range = this._scanPublishedTermContentSourceRange(staged, spans, sourceStart, sourceEnd)
++        if (range === null) { return 0 }
++        let {minimumOffset, maximumEnd, publishedCount} = range
++        const {publishedContentBytes, lastPublishedSource} = range
+         if (!retainBoundaryOnly && publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
+             retainBoundaryOnly = true
+             sourceStart = lastPublishedSource
+diff --git a/test/dictionary-database-content-dedup.test.js b/test/dictionary-database-content-dedup.test.js
+index 9ab7d6d4bc..41d7639c71 100644
+--- a/test/dictionary-database-content-dedup.test.js
++++ b/test/dictionary-database-content-dedup.test.js
+@@ -560,6 +560,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
+         const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
+         const cacheRecent = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
+         const owner = {
++            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
+             _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
+             _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
+             _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),
+@@ -3286,6 +3287,7 @@ describe('recent-source cache metadata mapping', () => {
+         const batchIds = new Uint32Array(8).fill(99);
+         const offsets = new Uint32Array(8).fill(77);
+         const owner = {
++            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
+             _termEntryContentMetaStateTable: states,
+             _termEntryContentMetaRecentSourceBatchIdTable: batchIds,
+             _termEntryContentMetaRecentSourceOffsetTable: offsets,
+@@ -3330,6 +3332,7 @@ describe('recent-source cache metadata mapping', () => {
+         const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
+         const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
+         const owner = {
++            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
+             _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
+             _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
+             _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),

@@ -1,0 +1,16 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineSourceSha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+  "candidateSourceSha256": "c396d98c0e820c3de4fea12a8164aa9291a1dd9bc97d43641aa7182673a99357",
+  "patchSha256": "b017318bfaebc5783126e2773a3210f6483f336dd4cdcabc0d1da802bbda6ead",
+  "runtimePaths": [
+    "ext/js/dictionary/dictionary-database.js"
+  ],
+  "changedPaths": [
+    "ext/js/dictionary/dictionary-database.js",
+    "test/dictionary-database-content-dedup.test.js"
+  ],
+  "testPath": "test/dictionary-database-content-dedup.test.js",
+  "baselineTestSha256": "a1e3c39d86c53934e1e63d98896bd84cb8d3d435bae231148a16193fa626bebf",
+  "candidateTestSha256": "d5059123b38ed515e8d881924a9120b3ad8aea09bd4d678c0c8202dc9b60813a"
+}
