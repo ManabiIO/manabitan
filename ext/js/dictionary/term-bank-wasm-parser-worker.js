@@ -18,7 +18,7 @@
 import {buildTermLookupFilter} from './term-lookup-route.js';
 import {
     consumeLastTermBankWasmParseProfile,
-    copyWasmBackedColumnChunk,
+    copyWasmBackedWorkerColumnChunk,
     inflateCompressedTermBankSourcesWasm,
     initializeTermBankWasmParser,
     parseTermBankWithWasmColumnChunks,
@@ -118,7 +118,7 @@ async function parse(data) {
                 };
             }), experiments, data.version === 3 && options.validateGlossaryTypes === true);
         }
-        /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
+        /** @type {ReturnType<typeof copyWasmBackedWorkerColumnChunk>|null} */
         let resultChunk = null;
         let resultRowCount = 0;
         let resultCopyMs = 0;
@@ -159,7 +159,7 @@ async function parse(data) {
                 )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
                 /* eslint-enable @stylistic/semi */
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
+                resultChunk = copyWasmBackedWorkerColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -189,7 +189,7 @@ async function parse(data) {
         if (resultChunk === null && profile?.rowCount !== 0) {
             throw new Error('Parallel term-bank parser did not emit a chunk');
         }
-        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */ (resultChunk);
+        const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedWorkerColumnChunk>|null} */ (resultChunk);
         if (profile !== null) {
             profile.resultCopyMs = resultCopyMs;
             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
@@ -243,7 +243,7 @@ async function parse(data) {
 }
 
 /**
- * @param {ReturnType<typeof copyWasmBackedColumnChunk>} chunk
+ * @param {ReturnType<typeof copyWasmBackedWorkerColumnChunk>} chunk
  * @returns {Transferable[]}
  */
 function collectChunkTransferables(chunk) {
@@ -260,6 +260,10 @@ function collectChunkTransferables(chunk) {
     for (const bytes of chunk.contentBytesList) { addView(bytes); }
     addView(chunk.readingEqualsExpressionList);
     addView(chunk.scoreList);
+    /* eslint-disable @stylistic/semi */
+    addView(chunk.scorePlan?.values)
+    addView(chunk.scorePlan?.keys)
+    /* eslint-enable @stylistic/semi */
     addView(chunk.sequenceList);
     addView(chunk.contentHash1List);
     addView(chunk.contentHash2List);

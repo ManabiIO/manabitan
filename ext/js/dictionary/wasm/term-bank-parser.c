@@ -2840,6 +2840,75 @@ static uint32_t term_lookup_sequence_hash(uint32_t value) {
     return hash;
 }
 
+/**
+ * Intern scores into retired lookup scratch after its persisted output has
+ * been copied. Original score bytes are never overwritten, including when
+ * cardinality exceeds the outbound raw-column byte budget. No allocation or
+ * memory growth is permitted here.
+ */
+__attribute__((visibility("default")))
+int32_t build_term_score_plan(
+    uint32_t scores_ptr,
+    uint32_t row_count,
+    uint32_t values_ptr,
+    uint32_t keys_ptr,
+    uint32_t slots_ptr,
+    uint32_t slot_count
+) {
+    if (
+        scores_ptr == 0u || values_ptr == 0u || keys_ptr == 0u || slots_ptr == 0u ||
+        (scores_ptr & 3u) != 0u || (values_ptr & 3u) != 0u ||
+        (keys_ptr & 1u) != 0u || (slots_ptr & 1u) != 0u ||
+        row_count < 2u || row_count >= TERM_LOOKUP_U16_NULL ||
+        slot_count < row_count || slot_count > 0x10000u ||
+        (slot_count & (slot_count - 1u)) != 0u
+    ) { return 0; }
+    // 2*N row-key bytes + 4*U dictionary bytes must fit the old 4*N column.
+    const uint32_t maximum_values = row_count / 2u;
+    const uint32_t pointers[4] = {scores_ptr, values_ptr, keys_ptr, slots_ptr};
+    const uint32_t lengths[4] = {
+        row_count * 4u, maximum_values * 4u, row_count * 2u, slot_count * 2u
+    };
+    const uint64_t memory_bytes = (uint64_t)__builtin_wasm_memory_size(0) * WASM_PAGE_SIZE;
+    for (uint32_t i = 0u; i < 4u; ++i) {
+        if ((uint64_t)pointers[i] + lengths[i] > memory_bytes) { return 0; }
+        for (uint32_t j = 0u; j < i; ++j) {
+            if ((uint64_t)pointers[i] < (uint64_t)pointers[j] + lengths[j] &&
+                (uint64_t)pointers[j] < (uint64_t)pointers[i] + lengths[i]) { return 0; }
+        }
+    }
+    const int32_t* scores = (const int32_t*)(uintptr_t)scores_ptr;
+    int32_t* values = (int32_t*)(uintptr_t)values_ptr;
+    uint16_t* keys = (uint16_t*)(uintptr_t)keys_ptr;
+    uint16_t* slots = (uint16_t*)(uintptr_t)slots_ptr;
+    const uint32_t slot_mask = slot_count - 1u;
+    uint32_t unique_count = 0u;
+    memset(slots, 0, slot_count * sizeof(uint16_t));
+    for (uint32_t row = 0u; row < row_count; ++row) {
+        const int32_t score = scores[row];
+        uint32_t slot = term_lookup_sequence_hash((uint32_t)score) & slot_mask;
+        uint32_t probes = 0u;
+        for (; probes < slot_count; ++probes) {
+            const uint16_t entry = slots[slot];
+            if (entry == 0u) {
+                if (unique_count >= maximum_values || unique_count >= TERM_LOOKUP_U16_NULL - 1u) { return 0; }
+                values[unique_count] = score;
+                keys[row] = (uint16_t)unique_count;
+                slots[slot] = (uint16_t)(++unique_count);
+                break;
+            }
+            const uint32_t key = (uint32_t)entry - 1u;
+            if (values[key] == score) {
+                keys[row] = (uint16_t)key;
+                break;
+            }
+            slot = (slot + 1u) & slot_mask;
+        }
+        if (probes == slot_count) { return 0; }
+    }
+    return (int32_t)unique_count;
+}
+
 static void term_lookup_insert_hash(
     uint16_t* heads,
     uint16_t* next,

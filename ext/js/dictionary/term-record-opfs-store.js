@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+// eslint-disable-next-line @stylistic/semi
+import {getSynchronousTermScorePlan, isCanonicalTermScorePlan, readTermScore, sliceTermScoreSource} from './term-score-plan.js'
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -114,6 +116,9 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
+/** @type {WeakMap<object, import('./term-score-plan.js').TermScorePlan>} */
+// eslint-disable-next-line @stylistic/semi
+const termScoreSourceOrigins = new WeakMap()
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
@@ -353,6 +358,8 @@ function hasResolvedContentReferences(chunk, count) {
 export function createArtifactTermRecordChunkWithResolvedContent(chunk, uniqueIndexList, offsets, lengths, preparedLookupIndexes = null) {
     const references = {uniqueIndexList, offsets, lengths};
     const result = {...chunk, ...(preparedLookupIndexes === null ? {} : {preparedLookupIndexes}), resolvedContentReferences: references};
+    // eslint-disable-next-line @stylistic/semi
+    initializeFreshTermScoreSource(result)
     resolvedContentReferenceOrigins.set(result, references);
     return result;
 }
@@ -412,17 +419,56 @@ function getSynchronousResolvedContentReferences(chunk, count) {
 
 /* eslint-disable @stylistic/semi */
 /**
+ * Called only with an ordinary source freshly allocated by this module, before
+ * it is exposed to caller code. Capture incoming views into a new ordinary plan
+ * that input descriptor traps cannot reach. This records container origin only;
+ * every encoder invocation still validates the current views and their values.
+ * @param {object} source
+ * @throws {TypeError} If compact score columns are invalid.
+ */
+function initializeFreshTermScoreSource(source) {
+    if (Object.getOwnPropertyDescriptor(source, 'scoreList')?.value !== null) { return }
+    const scoreSource = /** @type {import('./term-score-plan.js').TermScoreSource} */ (source)
+    const captured = getSynchronousTermScorePlan(scoreSource)
+    if (captured === null) { throw new TypeError('Compact term score columns are invalid') }
+    const plan = {values: captured.values, keys: captured.keys}
+    scoreSource.scorePlan = plan
+    termScoreSourceOrigins.set(source, plan)
+}
+
+/**
+ * A proven compact parent must still have its original ordinary containers when
+ * a later run is sliced. Otherwise slicing could hide a replacement Proxy in a
+ * newly proven child. Raw sources gain no property reads from this origin check.
+ * @param {import('./term-score-plan.js').TermScoreSource} source
+ * @param {number} start
+ * @param {number} end
+ * @returns {import('./term-score-plan.js').TermScoreSource}
+ * @throws {TypeError} If a proven compact source changed representation.
+ */
+function sliceArtifactTermScoreSource(source, start, end) {
+    const origin = termScoreSourceOrigins.get(source)
+    if (typeof origin !== 'undefined' && (
+        Object.getOwnPropertyDescriptor(source, 'scoreList')?.value !== null ||
+        Object.getOwnPropertyDescriptor(source, 'scorePlan')?.value !== origin
+    )) { throw new TypeError('Term score source changed during capture') }
+    return sliceTermScoreSource(source, start, end)
+}
+
+/**
  * Selects columns that stay stable across the synchronous score and field passes.
  * Reuse the existing factory-origin proof; shared or accessor-backed inputs keep
  * their original per-row reads and staged columns.
- * @param {{scoreList: number[]|Int32Array|Float64Array, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {{scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} count
+ * @param {import('./term-score-plan.js').TermScorePlan|null} [scorePlan=null] Captured before content descriptors are checked.
  * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|null}
  */
-function getSynchronousRecordFieldReferences(chunk, count) {
+function getSynchronousRecordFieldReferences(chunk, count, scorePlan = null) {
     const references = getSynchronousResolvedContentReferences(chunk, count)
     if (references === null) { return null }
     const scores = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value)
+    if (scores === null && scorePlan !== null) { return references }
     if (
         typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function' ||
         !(scores instanceof Int32Array) || !ArrayBuffer.isView(scores) ||
@@ -434,6 +480,52 @@ function getSynchronousRecordFieldReferences(chunk, count) {
         ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(scores.buffer)
     } catch { return null }
     return references
+}
+
+/**
+ * Read a captured private score view without repeating descriptor checks for
+ * every row. The caller captures again for every synchronous run.
+ * @param {import('./term-score-plan.js').TermScoreSource} source
+ * @param {import('./term-score-plan.js').TermScorePlan|null} plan
+ * @param {number} index
+ * @returns {number}
+ * @throws {TypeError|RangeError} If the score source changed or its key is invalid.
+ */
+function readCapturedTermScore(source, plan, index) {
+    if (plan === null) {
+        const {scoreList} = source
+        if (scoreList === null) { throw new TypeError('Term score source changed during content access') }
+        return scoreList[index] ?? 0
+    }
+    const key = plan.keys[index]
+    if (typeof key !== 'number' || key >= plan.values.length) {
+        throw new RangeError('Compact term score key is out of bounds')
+    }
+    return plan.values[key]
+}
+
+/**
+ * Generic content accessors can replace a compact source while fields are read.
+ * Reject that transition before using captured views. Both container identities
+ * have actual factory origins, so these descriptor reads cannot invoke Proxy
+ * traps. Factory content references need no per-row identity check.
+ * @param {import('./term-score-plan.js').TermScoreSource} source
+ * @param {unknown} sourcePlan
+ * @param {import('./term-score-plan.js').TermScorePlan} captured
+ * @throws {TypeError} If compact score containers changed during content access.
+ */
+function assertUnchangedTermScorePlan(source, sourcePlan, captured) {
+    if (typeof sourcePlan !== 'object' || sourcePlan === null || termScoreSourceOrigins.get(source) !== sourcePlan) {
+        throw new TypeError('Term score source changed during content access')
+    }
+    const scores = Object.getOwnPropertyDescriptor(source, 'scoreList')
+    const plan = Object.getOwnPropertyDescriptor(source, 'scorePlan')
+    const values = Object.getOwnPropertyDescriptor(sourcePlan, 'values')
+    const keys = Object.getOwnPropertyDescriptor(sourcePlan, 'keys')
+    if (
+        scores?.value !== null || plan?.value !== sourcePlan ||
+        values?.value !== captured.values || keys?.value !== captured.keys
+    ) { throw new TypeError('Term score source changed during content access') }
 }
 /* eslint-enable @stylistic/semi */
 
@@ -2156,7 +2248,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, preparedLookupIndexes?: Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {string | (string|null)[]} contentDictNames
@@ -2259,7 +2351,7 @@ export class TermRecordOpfsStore {
                     entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
                     entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
                     entryContentDictName,
-                    score: chunk.scoreList[i] ?? 0,
+                    score: readTermScore(chunk, i),
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
                 this._cacheAppendedRecord(record);
@@ -2340,20 +2432,22 @@ export class TermRecordOpfsStore {
                 runStart = runEnd;
                 continue;
             }
-            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+            /** @type {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkSlice = {
                 dictionary: chunk.dictionary,
                 rowCount: runCount,
                 expressionBytesList: chunk.expressionBytesList.slice(runStart, runEnd),
                 readingBytesList: chunk.readingBytesList.slice(runStart, runEnd),
                 readingEqualsExpressionList: chunk.readingEqualsExpressionList.slice(runStart, runEnd),
-                scoreList: chunk.scoreList.slice(runStart, runEnd),
+                ...sliceArtifactTermScoreSource(chunk, runStart, runEnd),
                 sequenceList: chunk.sequenceList.slice(runStart, runEnd),
                 termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
                 resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
             };
             // eslint-disable-next-line @stylistic/semi
             inheritSlicedContentReferenceOrigin(chunk, chunkSlice, runStart, count)
+            // eslint-disable-next-line @stylistic/semi
+            initializeFreshTermScoreSource(chunkSlice)
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
                 chunkSlice,
@@ -2444,7 +2538,7 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {TermRecordShardState} state
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number} firstId
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
@@ -2524,7 +2618,7 @@ export class TermRecordOpfsStore {
                     expressionBytesList: chunk.expressionBytesList.slice(runStart, runEnd),
                     readingBytesList: chunk.readingBytesList.slice(runStart, runEnd),
                     readingEqualsExpressionList: chunk.readingEqualsExpressionList.slice(runStart, runEnd),
-                    scoreList: chunk.scoreList.slice(runStart, runEnd),
+                    ...sliceArtifactTermScoreSource(chunk, runStart, runEnd),
                     sequenceList: chunk.sequenceList.slice(runStart, runEnd),
                     fixedContentOffsetBase: (
                         typeof chunk.fixedContentOffsetBase === 'number' && typeof chunk.fixedContentLength === 'number' ?
@@ -2534,8 +2628,12 @@ export class TermRecordOpfsStore {
                     fixedContentLength: chunk.fixedContentLength,
                     resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
                 };
-            // eslint-disable-next-line @stylistic/semi
-            if (!isWholeChunk) { inheritSlicedContentReferenceOrigin(chunk, runChunk, runStart, count) }
+            /* eslint-disable @stylistic/semi */
+            if (!isWholeChunk) {
+                inheritSlicedContentReferenceOrigin(chunk, runChunk, runStart, count)
+                initializeFreshTermScoreSource(runChunk)
+            }
+            /* eslint-enable @stylistic/semi */
             const runUsesContentReferences = hasResolvedContentReferences(runChunk, runCount);
             const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentOffsets : contentOffsets.slice(runStart, runEnd);
             const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentLengths : contentLengths.slice(runStart, runEnd);
@@ -2555,6 +2653,7 @@ export class TermRecordOpfsStore {
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
                 runContentOffsetBase,
+                true,
             );
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += runValidationMs + encodedChunk.validationMs;
@@ -5831,16 +5930,36 @@ view.chunks :
      * Encodes the hot artifact path as columnar random-access fields. Content
      * lengths use u16 and repeated scores use per-chunk u16 dictionary keys;
      * unusual chunks fall back to the legacy fixed-width rows.
-     * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
+     * @param {boolean} [normalizeCompactSource=false] Allows append ingress to create a fresh compact snapshot, not to skip validation.
      * @returns {Uint8Array}
+     * @throws {TypeError|RangeError} If score columns or content references are invalid.
      */
-    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase, normalizeCompactSource = false) {
         const count = chunk.rowCount;
-        const useFixedContentSpan = hasFixedContentSpan(chunk, count);
-        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
+        let useFixedContentSpan = hasFixedContentSpan(chunk, count);
+        /* eslint-disable @stylistic/semi */
+        const initialScoreList = chunk.scoreList
+        const hasCompactScoreSource = initialScoreList === null
+        if (hasCompactScoreSource && !termScoreSourceOrigins.has(chunk)) {
+            if (!normalizeCompactSource) { throw new TypeError('Compact term score source has no record-store origin') }
+            // This is the private compact append transport's snapshot boundary.
+            // It is reached only after the existing score read selected compact
+            // input, so raw sources gain no descriptor or ordinary getter reads.
+            // Bind the row count to this invocation rather than a later getter.
+            chunk = {...chunk, rowCount: count}
+            if (Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value !== null) {
+                throw new TypeError('Term score source changed during capture')
+            }
+            initializeFreshTermScoreSource(chunk)
+            useFixedContentSpan = hasFixedContentSpan(chunk, count)
+        }
+        const useFloat64Scores = !hasCompactScoreSource && !(initialScoreList instanceof Int32Array) &&
+        /** @type {number[]|Float64Array} */ (chunk.scoreList).some((score) => !isLosslessInt32Score(score ?? 0))
+        /* eslint-enable @stylistic/semi */
         if (useFloat64Scores) {
             const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES);
             const view = new DataView(output.buffer);
@@ -5850,30 +5969,60 @@ view.chunks :
                 const contentLength = getArtifactContentLength(chunk, contentLengths, i);
                 view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
-                view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
+                view.setFloat64(fieldOffset + 8, readCapturedTermScore(chunk, null, i), true);
             }
             return output;
         }
         /* eslint-disable @stylistic/semi */
-        const directReferences = getSynchronousRecordFieldReferences(chunk, count)
+        // Source and plan origins prove ordinary container identity. Check the
+        // current own fields before inspecting the plan, so a replaced Proxy is
+        // rejected without executing any of its descriptor traps.
+        const sourceScorePlan = hasCompactScoreSource ? termScoreSourceOrigins.get(chunk) : void 0
+        if (hasCompactScoreSource && (
+            typeof sourceScorePlan === 'undefined' ||
+            Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value !== null ||
+            Object.getOwnPropertyDescriptor(chunk, 'scorePlan')?.value !== sourceScorePlan
+        )) { throw new TypeError('Term score source changed during capture') }
+        const scorePlan = hasCompactScoreSource ? getSynchronousTermScorePlan(chunk, count) : null
+        if (hasCompactScoreSource && scorePlan === null) { throw new TypeError('Compact term score columns are invalid') }
+        const directReferences = getSynchronousRecordFieldReferences(chunk, count, scorePlan)
+        const canonicalScorePlan = directReferences !== null && scorePlan !== null && isCanonicalTermScorePlan(scorePlan) ? scorePlan : null
+        const directScoreReferences = scorePlan !== null ? directReferences : null
+        let lastValidatedScoreReference = -1
         const offsets = directReferences === null ? new Uint32Array(count) : null
         const lengths = directReferences === null ? new Uint16Array(count) : null
         /* eslint-enable @stylistic/semi */
-        const scoreKeys = new Uint16Array(count);
+        const scoreKeys = canonicalScorePlan?.keys ?? new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
         /** @type {Map<number, number>} */
         const scoreIndexes = new Map();
         // Common integer scores use a bounded table. Store the key plus one
         // so zero can mark an unseen score without initializing the table.
-        const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+        const inlineScoreIndexes = scorePlan === null && chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            /* eslint-disable-next-line @stylistic/semi */
-            const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            /* eslint-disable @stylistic/semi */
+            const unique = directScoreReferences === null ? -1 : directScoreReferences.uniqueIndexList[i]
+            if (directScoreReferences !== null && unique >= directScoreReferences.offsets.length) {
+                throw new RangeError(`Invalid resolved term content reference index: ${unique}`)
+            }
+            const contentOffset = directScoreReferences !== null ?
+                directScoreReferences.offsets[unique] :
+                (directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0)
+            const contentLength = directScoreReferences !== null ? directScoreReferences.lengths[unique] : getArtifactContentLength(chunk, contentLengths, i)
+            if (scorePlan !== null && directScoreReferences === null) {
+                assertUnchangedTermScorePlan(chunk, sourceScorePlan, scorePlan)
+            }
+            if (scorePlan !== null && (directScoreReferences === null || unique !== lastValidatedScoreReference)) {
+                validateContentOffset(contentOffset)
+                validateContentLength(contentLength)
+                getContentOffsetDelta(contentOffset, contentOffsetBase)
+                lastValidatedScoreReference = unique
+            }
+            /* eslint-enable @stylistic/semi */
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;
@@ -5884,7 +6033,8 @@ view.chunks :
                 lengths[i] = contentLength < 0 ? U16_NULL : contentLength
             }
             /* eslint-enable @stylistic/semi */
-            const score = chunk.scoreList[i] ?? 0;
+            if (canonicalScorePlan !== null) { continue; }
+            const score = readCapturedTermScore(chunk, scorePlan, i);
             const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
             const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
             let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
@@ -5903,14 +6053,16 @@ view.chunks :
             }
             scoreKeys[i] = scoreIndex;
         }
+        // eslint-disable-next-line @stylistic/semi
+        const scoreValues = canonicalScorePlan?.values ?? scores
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
-        (scores.length * 4) +
+        (scoreValues.length * 4) +
         (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
         if (
             !compact ||
-            scores.length === 0 ||
+            scoreValues.length === 0 ||
             // The reader reserves this score count even though the last key fits u16.
-            scores.length >= U16_NULL ||
+            scoreValues.length >= U16_NULL ||
             compactByteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES
         ) {
             const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
@@ -5918,11 +6070,26 @@ view.chunks :
             const legacyI32 = new Int32Array(legacy.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * 3;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                /* eslint-disable @stylistic/semi */
+                const unique = directScoreReferences === null ? -1 : directScoreReferences.uniqueIndexList[i]
+                if (directScoreReferences !== null && unique >= directScoreReferences.offsets.length) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${unique}`)
+                }
+                const contentOffset = directScoreReferences !== null ? directScoreReferences.offsets[unique] : getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan)
+                const contentLength = directScoreReferences !== null ? directScoreReferences.lengths[unique] : getArtifactContentLength(chunk, contentLengths, i)
+                if (scorePlan !== null && directScoreReferences === null) {
+                    assertUnchangedTermScorePlan(chunk, sourceScorePlan, scorePlan)
+                }
+                if (scorePlan !== null && (directScoreReferences === null || unique !== lastValidatedScoreReference)) {
+                    validateContentOffset(contentOffset)
+                    validateContentLength(contentLength)
+                    getContentOffsetDelta(contentOffset, contentOffsetBase)
+                    lastValidatedScoreReference = unique
+                }
+                /* eslint-enable @stylistic/semi */
                 legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
-                legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
+                legacyI32[fieldOffset + 2] = readCapturedTermScore(chunk, scorePlan, i);
             }
             return legacy;
         }
@@ -5930,11 +6097,11 @@ view.chunks :
         const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
         header[0] = COMPACT_RECORD_FIELDS_MAGIC;
         header[1] = count;
-        header[2] = scores.length;
+        header[2] = scoreValues.length;
         header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
         let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
-        new Int32Array(output.buffer, cursor, scores.length).set(scores);
-        cursor += scores.length * 4;
+        new Int32Array(output.buffer, cursor, scoreValues.length).set(scoreValues);
+        cursor += scoreValues.length * 4;
         /* eslint-disable @stylistic/semi */
         const outputOffsets = new Uint32Array(output.buffer, cursor, count)
         cursor += count * 4
@@ -5961,15 +6128,16 @@ view.chunks :
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
      * @param {number|null} [validatedContentOffsetBase=null]
+     * @param {boolean} [normalizeCompactSource=false] Normalizes unproven compact append inputs after the encoder selects that representation.
      * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
+    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null, normalizeCompactSource = false) {
         if (chunk.rowCount === 0) {
             return {
                 contentOffsetBase: 0,
@@ -6006,6 +6174,7 @@ view.chunks :
             contentOffsets,
             contentLengths,
             contentOffsetBase,
+            normalizeCompactSource,
         );
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes

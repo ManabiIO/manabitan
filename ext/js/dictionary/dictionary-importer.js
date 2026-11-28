@@ -170,7 +170,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   expressionBytesList: Uint8Array[],
  *   readingBytesList: Uint8Array[],
  *   readingEqualsExpressionList: boolean[]|Uint8Array,
- *   scoreList: number[]|Int32Array|Float64Array,
+ *   scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan,
  *   sequenceList: (number|undefined)[]|Int32Array|Float64Array,
  *   contentBytesList: Uint8Array[],
  *   contentHash1List?: number[]|Uint32Array,
@@ -2113,6 +2113,8 @@ export class DictionaryImporter {
                     directArtifactChunk.readingBytesList = [];
                     directArtifactChunk.readingEqualsExpressionList = new Uint8Array(0);
                     directArtifactChunk.scoreList = new Int32Array(0);
+                    // eslint-disable-next-line @stylistic/semi
+                    delete directArtifactChunk.scorePlan
                     directArtifactChunk.sequenceList = new Int32Array(0);
                     directArtifactChunk.contentBytesList = [];
                     directArtifactChunk.contentHash1List = new Uint32Array(0);
@@ -2441,6 +2443,10 @@ export class DictionaryImporter {
                             parserSourceUncompressedBytes: parserProfile.sourceUncompressedBytes ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
                             parserCompactContentMetadataGroups: parserProfile.compactContentMetadataGroups ?? 0,
+                            parserNativeScorePlanGroups: parserProfile.nativeScorePlanGroups ?? 0,
+                            parserNativeScorePlanRows: parserProfile.nativeScorePlanRows ?? 0,
+                            parserNativeScorePlanBytesAvoided: parserProfile.nativeScorePlanBytesAvoided ?? 0,
+                            parserNativeScorePlanMs: parserProfile.nativeScorePlanMs ?? 0,
                             parserCompactContentMetadataBytesAvoided: parserProfile.compactContentMetadataBytesAvoided ?? 0,
                             parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
                             parserOrderedSinkWaitMs: parserProfile.orderedSinkWaitMs ?? null,
@@ -2831,6 +2837,10 @@ export class DictionaryImporter {
                 fastPathParserSourceUncompressedBytes: fastPathProfile?.sourceUncompressedBytes ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
                 fastPathParserCompactContentMetadataGroups: fastPathProfile?.compactContentMetadataGroups ?? 0,
+                fastPathParserNativeScorePlanGroups: fastPathProfile?.nativeScorePlanGroups ?? 0,
+                fastPathParserNativeScorePlanRows: fastPathProfile?.nativeScorePlanRows ?? 0,
+                fastPathParserNativeScorePlanBytesAvoided: fastPathProfile?.nativeScorePlanBytesAvoided ?? 0,
+                fastPathParserNativeScorePlanMs: fastPathProfile?.nativeScorePlanMs ?? 0,
                 fastPathParserCompactContentMetadataBytesAvoided: fastPathProfile?.compactContentMetadataBytesAvoided ?? 0,
                 fastPathParserResultDeliveryMs: fastPathProfile?.resultDeliveryMs ?? null,
                 fastPathParserOrderedSinkWaitMs: fastPathProfile?.orderedSinkWaitMs ?? null,
@@ -5450,6 +5460,11 @@ export class DictionaryImporter {
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;
             let usedParallelParser = false;
             if (useDirectArtifactChunkImport && (!useMediaPipeline || useMediaDirectArtifactChunkImport)) {
+                // Only the private worker transport replaces raw score columns.
+                // Sequential/public callbacks retain their original shape.
+                /** @type {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions & {prepareWorkerScorePlan: true}} */
+                // eslint-disable-next-line @stylistic/semi
+                const workerParserOptions = {...parserOptions, prepareWorkerScorePlan: true}
                 if (lazySourceBatch !== null) {
                     usedParallelParser = lazySourceBatch.compressed === true ?
                         await parseTermBankWithWasmColumnChunksParallelCompressedLazy(
@@ -5457,7 +5472,7 @@ export class DictionaryImporter {
                             lazySourceBatch.estimatedByteLengths,
                             version,
                             handleParsedChunk,
-                            parserOptions,
+                            workerParserOptions,
                             () => this._isCancelled(),
                         ) :
                         await parseTermBankWithWasmColumnChunksParallelLazy(
@@ -5465,7 +5480,7 @@ export class DictionaryImporter {
                             lazySourceBatch.estimatedByteLengths,
                             version,
                             handleParsedChunk,
-                            parserOptions,
+                            workerParserOptions,
                             () => this._isCancelled(),
                         );
                 } else if (deferredSourceBatch !== null) {
@@ -5474,7 +5489,7 @@ export class DictionaryImporter {
                         deferredSourceBatch.estimatedByteLengths,
                         version,
                         handleParsedChunk,
-                        parserOptions,
+                        workerParserOptions,
                         () => this._isCancelled(),
                     );
                 } else if (Array.isArray(bytes)) {
@@ -5482,7 +5497,7 @@ export class DictionaryImporter {
                         bytes,
                         version,
                         handleParsedChunk,
-                        parserOptions,
+                        workerParserOptions,
                         () => this._isCancelled(),
                     );
                 }
@@ -5997,7 +6012,7 @@ null;
                         );
                     ++chunkIndex;
                     const tChunkSinkStart = Date.now();
-                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+                    /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
                     const chunkPayload = directArtifactChunkImport ?
                         createDirectArtifactChunkPayload(streamedRowCount, termRecordPreinternedPlan) :
                         termList;
@@ -6007,7 +6022,7 @@ null;
                         }
                         setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
                     }
-                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                         processedRows: i + 1,
                         totalRows: rowCount,
                         chunkIndex,
@@ -6073,7 +6088,7 @@ null;
                 );
             ++chunkIndex;
             const tChunkSinkStart = Date.now();
-            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
+            /** @type {import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} */
             const chunkPayload = directArtifactChunkImport ?
                 createDirectArtifactChunkPayload(streamedRowCount, termRecordPreinternedPlan) :
                 termList;
@@ -6083,7 +6098,7 @@ null;
                 }
                 setTermRecordPreinternedPlan(termList, termRecordPreinternedPlan);
             }
-            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
+            await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[]|{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(chunkPayload, null, {
                 processedRows: rowCount,
                 totalRows: rowCount,
                 chunkIndex,
