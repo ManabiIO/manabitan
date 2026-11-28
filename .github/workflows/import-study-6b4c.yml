@@ -1,0 +1,73 @@
+name: Import investigation 20261127 6b4c
+
+on:
+  push:
+    branches: ['perf/import-study-20261127-6b4c']
+    paths:
+      - '.github/workflows/import-study-6b4c.yml'
+      - 'dev/perf/import-study-6b4c.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-study-6b4c-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    name: Baseline profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare unchanged baseline product
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline_sha=$(node -p "JSON.parse(require('node:fs').readFileSync('dev/perf/import-study-6b4c.json')).baseline")
+          [[ "$baseline_sha" =~ ^[a-f0-9]{40}$ ]]
+          git diff --exit-code "$baseline_sha" HEAD -- ext dev/data dev/bin package.json package-lock.json
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
+          npm run build -- --target chrome
+          evidence="builds/perf/import-study-6b4c/$PERF_DICTIONARY"
+          mkdir -p "$evidence"
+          cp dev/perf/import-study-6b4c.json "$evidence/study.json"
+          git rev-parse HEAD > "$evidence/tooling-sha.txt"
+          git status --porcelain > "$evidence/source-status.txt"
+          sha256sum builds/manabitan-chrome.zip test/perf/dictionaries.lock.json > "$evidence/identities.sha256"
+      - name: Record five independent ordinary imports
+        run: >-
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY"
+          --runs 5 --no-build --build-target chrome --media-check sample
+          --output "builds/perf/import-study-6b4c/$PERF_DICTIONARY/ordinary"
+      - name: Capture separate diagnostic trace
+        run: >-
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY"
+          --runs 1 --trace --no-build --build-target chrome --media-check sample
+          --output "builds/perf/import-study-6b4c/$PERF_DICTIONARY/profile"
+      - name: Retain all observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-6b4c-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: builds/perf/import-study-6b4c/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14

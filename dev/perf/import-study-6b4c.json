@@ -1,0 +1,10 @@
+{
+    "schemaVersion": 1,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "purpose": "Locate remaining import critical-path work after the November 26 integrations",
+    "productionDefaults": true,
+    "ordinaryRuns": 5,
+    "traceRuns": 1,
+    "mediaCheck": "sample",
+    "performanceClaim": null
+}
