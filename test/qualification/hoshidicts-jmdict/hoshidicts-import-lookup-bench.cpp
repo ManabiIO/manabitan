@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 #include "hoshidicts/deconjugator.hpp"
@@ -63,11 +64,14 @@ double elapsed_ms(Clock::time_point start, Clock::time_point end) {
 void record_import_memory_marker(const char* event) {
   const char* marker_path = std::getenv("MANABITAN_IMPORT_MEMORY_MARKERS");
   if (marker_path == nullptr || marker_path[0] == '\0') return;
+  if (std::string_view(event) == "start") std::this_thread::sleep_for(std::chrono::milliseconds(200));
   const auto monotonic_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
       Clock::now().time_since_epoch()).count();
   std::ofstream stream(marker_path, std::ios::app);
   if (!stream) throw std::runtime_error("could not write import memory marker");
   stream << "{\"event\":\"" << event << "\",\"monotonicNs\":\"" << monotonic_ns << "\"}\n";
+  stream.close();
+  if (std::string_view(event) == "end") std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 }  // namespace
 
