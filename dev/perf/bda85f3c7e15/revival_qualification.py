@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 
@@ -216,6 +217,43 @@ def capture(command, cwd, log):
         return subprocess.run(command, cwd=cwd, stdout=output, stderr=subprocess.STDOUT).returncode
 
 
+def record_git_status(work, output, receipt, phase):
+    command = ['git', 'status', '--porcelain']
+    result = subprocess.run(command, cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    streams = {}
+    for stream in ['stdout', 'stderr']:
+        name = f'git-status-{phase}.{stream}.log'
+        (output / name).write_bytes(getattr(result, stream))
+        streams[stream] = name
+    receipt.setdefault('gitStatus', {})[phase] = {
+        'command': command, 'exitCode': result.returncode, **streams}
+    return result
+
+
+def check_source_cleanliness(work, output, receipt, dependency_target, created_link):
+    link = work / 'node_modules'
+    expected_identity = (created_link.st_dev, created_link.st_ino, created_link.st_ctime_ns)
+    receipt['dependencySymlink'] = {
+        'path': str(link), 'target': str(dependency_target),
+        'expectedIdentity': list(expected_identity), 'removed': False}
+    before = record_git_status(work, output, receipt, 'before-cleanup')
+    try:
+        before.check_returncode()
+        observed = link.lstat()
+        identity = (observed.st_dev, observed.st_ino, observed.st_ctime_ns)
+        if not stat.S_ISLNK(observed.st_mode) or identity != expected_identity:
+            raise ValueError('Wrapper-owned dependency symlink was replaced')
+        if os.readlink(link) != str(dependency_target):
+            raise ValueError('Wrapper-owned dependency symlink target changed')
+        link.unlink()
+        receipt['dependencySymlink']['removed'] = True
+    finally:
+        after = record_git_status(work, output, receipt, 'after-cleanup')
+    after.check_returncode()
+    if after.stdout:
+        raise ValueError('Source gate left unexpected tracked or untracked changes')
+
+
 def validate_source(plan, repo, output, work):
     output.mkdir(parents=True, exist_ok=True)
     receipt = {'status': 'failed', 'commands': [], 'candidate': plan['candidate'], 'acquisitionLaunched': False}
@@ -234,7 +272,10 @@ def validate_source(plan, repo, output, work):
         receipt['observedSource'] = observed
         if (work / 'package-lock.json').read_bytes() != (repo / 'package-lock.json').read_bytes():
             raise ValueError('Dependency lock differs')
-        (work / 'node_modules').symlink_to(repo / 'node_modules', target_is_directory=True)
+        dependency_link = work / 'node_modules'
+        dependency_target = repo / 'node_modules'
+        dependency_link.symlink_to(dependency_target, target_is_directory=True)
+        created_link = dependency_link.lstat()
         commands = [(['npm', 'run', 'build:libs'], 'build-libs'),
                     (['npm', 'run', 'license-report:html'], 'license'),
                     (['npx', 'eslint', *plan['candidate']['lintPaths']], 'scoped-lint'),
@@ -245,8 +286,7 @@ def validate_source(plan, repo, output, work):
                     (['npm', 'run', 'test:build'], 'all-target-dry-build')]
         for command, name in commands:
             run(command, work, name)
-        if subprocess.check_output(['git', 'status', '--porcelain'], cwd=work, text=True):
-            raise ValueError('Source gate left unexpected tracked or untracked changes')
+        check_source_cleanliness(work, output, receipt, dependency_target, created_link)
         receipt['status'] = 'passed'
     except Exception as error:
         receipt['error'] = str(error)
