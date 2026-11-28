@@ -84,6 +84,24 @@ The immutable addendum archive, member manifest and checksum are stored here as
 `browser-results-addendum-20261128-1b47.*`. Archive SHA-256:
 `76b1ae9451052684192902916b5cdeb1e812ff806b064d0773e6d2bdf242ec98`.
 
+## Complete checkpoint and pipeline data through 06:58:33 UTC
+
+The [completed-browser raw-data addendum](completed-browser-raw-addendum-README.md)
+adds pipeline JMdict and supplies the original raw members missing from the
+earlier compact pipeline Jitendex and checkpoint VNDB audits. Together with the
+preceding browser archive, it preserves all 156 reports, 156 canonical receipts
+and 2,077 memory scan rows across the six completed cohorts.
+
+The targeted JMdict pipeline route executed, but whole-import timing remained
+flat. Its separate source-lifetime audit found no lost early-consumption signal;
+route counters do not establish a useful overlap duration. Both the pipeline
+and checkpoint experiments are closed without a product PR. Memory-coverage
+failures remain visible and no failed observation was replaced.
+
+The archive, member manifest and checksum are stored here as
+`completed-browser-raw-addendum-20261128-1b47.*`. Archive SHA-256:
+`f89e9cfcf6c20a65a248555dbf13150838404db326aaf389d517850fac7a9c30`.
+
 ## Why JMdict gains stayed small
 
 The [technical assessment](jmdict-technical-assessment.md) explains the measured
