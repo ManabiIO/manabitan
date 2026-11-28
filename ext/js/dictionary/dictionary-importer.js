@@ -5424,7 +5424,7 @@ export class DictionaryImporter {
                 lazyGlossaryDecode: useLazyGlossaryDecode,
                 mediaHintFastScan: useMediaHintFastScan,
                 projectImagePaths: useMediaDirectArtifactChunkImport && allowNativeImageProjection,
-                allowOwnedByteHeavyContent: useMediaDirectArtifactChunkImport,
+                allowOwnedByteHeavyContent: useMediaDirectArtifactChunkImport && !allowNativeImageProjection,
                 validateGlossaryTypes: true,
                 computeContentHashes: enableTermEntryContentDedup,
                 emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,

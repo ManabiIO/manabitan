@@ -2982,7 +2982,9 @@ class ParallelTermBankPipelineRun {
     async _runPipeline(workers) {
         this._createSlots();
         this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
-        this._contentByteBudget = workers.length * TERM_CONTENT_OWNED_RESULT_MAX_BYTES;
+        this._contentByteBudget = this._options.allowOwnedByteHeavyContent === true ?
+            workers.length * TERM_CONTENT_OWNED_RESULT_MAX_BYTES :
+            0;
         if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
             this._nextSourceActivationGroupIndex = 0;
         }
@@ -3198,10 +3200,13 @@ class ParallelTermBankPipelineRun {
      * @returns {Promise<number>}
      */
     async _waitForLead(groupIndex) {
-        const sourceBytes = this._groups[groupIndex].reduce((sum, source) => sum + source.estimatedBytes, 0);
+        const hasByteBudget = this._contentByteBudget > 0;
+        const sourceBytes = hasByteBudget ? this._groups[groupIndex].reduce((sum, source) => sum + source.estimatedBytes, 0) : 0;
         let recordedByteWait = false;
         while (true) {
             this._throwIfStopped();
+            const withinWindow = groupIndex < this._nextSinkGroupIndex + this._maxLeadGroups;
+            if (!hasByteBudget && withinWindow) { return 0; }
             const chargedBytes = this._queuedOwnedContentBytes + this._reservedSourceBytes;
             // An indivisible group larger than the budget may run alone so
             // progress cannot deadlock. Its realized output blocks admission
@@ -3211,7 +3216,7 @@ class ParallelTermBankPipelineRun {
             );
             if (
                 groupIndex === this._nextAdmittedGroupIndex &&
-                groupIndex < this._nextSinkGroupIndex + this._maxLeadGroups &&
+                hasByteBudget && withinWindow &&
                 fitsByteBudget
             ) {
                 this._reservedSourceBytes += sourceBytes;
@@ -3220,7 +3225,7 @@ class ParallelTermBankPipelineRun {
                 this._wakeLeadWaiters();
                 return sourceBytes;
             }
-            if (groupIndex === this._nextAdmittedGroupIndex && !fitsByteBudget && !recordedByteWait) {
+            if (hasByteBudget && groupIndex === this._nextAdmittedGroupIndex && !fitsByteBudget && !recordedByteWait) {
                 ++this._byteBackpressureWaitCount;
                 recordedByteWait = true;
             }

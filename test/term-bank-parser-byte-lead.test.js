@@ -19,7 +19,7 @@ const byteBudget = 3 * targetBytes
 const emptyBank = new TextEncoder().encode('[]')
 /** @typedef {{type: string, id?: number, sourceBuffers?: ArrayBuffer[]}} WorkerRequest */
 /** @typedef {{id: number, worker: ControlledWorker, responded: boolean, sourceCount: number}} Job */
-/** @typedef {{heldSinks?: number[], delayedSource?: number, sinkFailure?: boolean, groupCount?: number}} HarnessOptions */
+/** @typedef {{heldSinks?: number[], delayedSource?: number, sinkFailure?: boolean, groupCount?: number, byteBudgetEnabled?: boolean}} HarnessOptions */
 /** @type {(() => Promise<void>)|null} */
 let cleanupRun = null
 /** @type {Job[]} */
@@ -163,7 +163,7 @@ function startRun(estimates, options = {}) {
             expect(bytes[bytes.length - 1]).toBe(progress.chunkIndex)
             if (options.sinkFailure === true && progress.chunkIndex === 1) { throw new Error('controlled sink failure') }
         },
-        {emitContentSlab: true},
+        {emitContentSlab: true, allowOwnedByteHeavyContent: options.byteBudgetEnabled !== false},
         () => cancelled,
     )
     const outcome = parsing.then(
@@ -195,6 +195,14 @@ function startRun(estimates, options = {}) {
 }
 
 describe('byte-aware ordered parser admission', () => {
+    test('keeps the ordinary worker window when byte admission is disabled', async () => {
+        const run = startRun(Array.from({length: 6}, () => 32 * 1024 * 1024), {byteBudgetEnabled: false})
+        await waitForJob(3)
+        expect(workers).toHaveLength(3)
+        expect(await run.finish()).toBe(true)
+        expect(consumeLastTermBankWasmParseProfile()?.parallelContentByteBudget).toBe(0)
+    })
+
     test.each([
         {sourceCount: 8, sourcesPerGroup: 1, groupCount: 8},
         {sourceCount: 24, sourcesPerGroup: 2, groupCount: 12},

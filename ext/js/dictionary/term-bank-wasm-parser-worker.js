@@ -158,8 +158,12 @@ async function parse(data) {
                     )
                 )
                 const borrowProjectedContent = usesProjectedBorrowing && byteHeavyShared
-                const ownByteHeavyContent = byteHeavyShared && typeof contentBytesLength === 'number' &&
-                contentBytesLength <= TERM_CONTENT_OWNED_RESULT_MAX_BYTES
+                const ownByteHeavyContent = (
+                    options.allowOwnedByteHeavyContent === true &&
+                    byteHeavyShared &&
+                    typeof contentBytesLength === 'number' &&
+                    contentBytesLength <= TERM_CONTENT_OWNED_RESULT_MAX_BYTES
+                )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent || ownByteHeavyContent
                 /* eslint-enable @stylistic/semi */
                 resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource, true);

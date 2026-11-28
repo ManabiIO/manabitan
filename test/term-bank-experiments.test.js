@@ -639,7 +639,7 @@ describe('actual parser worker flag propagation', () => {
                         projectImagePaths,
                         validateGlossaryTypes: true,
                         ownContentBytes: projectImagePaths,
-                        allowOwnedByteHeavyContent: !projectImagePaths,
+                        allowOwnedByteHeavyContent: true,
                         prepareLookupIndexes: true,
                         prepareLookupRoute}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
