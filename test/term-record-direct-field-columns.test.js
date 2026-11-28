@@ -82,6 +82,57 @@ describe('direct resolved record-field columns', () => {
         expect(actual?.buffer.byteLength).toBe(actual?.byteLength)
     })
 
+    test('preserves first-use score order across exact cache-slot collisions', () => {
+        const chunk = fixture()
+        // 0 and 233 select the same multiplicative-cache slot. Alternating
+        // them must compare the full codebook value before reusing its key.
+        const values = [0, 233, -1, -2147483648, 2147483647, 1, 233, 0]
+        chunk.scoreList = Int32Array.from({length: chunk.rowCount}, (_, i) => values[i % values.length])
+        const expected = encodeGeneric(chunk)
+        const actual = encodeDirect(chunk)
+        expect(actual).toEqual(expected)
+        const header = new Uint32Array(actual.buffer, 0, 4)
+        expect(header[2]).toBe(6)
+        expect([...new Int32Array(actual.buffer, 16, header[2])]).toEqual(values.slice(0, 6))
+        const keys = new Uint16Array(actual.buffer, 16 + header[2] * 4 + chunk.rowCount * 6, chunk.rowCount)
+        expect([...keys.slice(0, 8)]).toEqual([0, 1, 2, 3, 4, 5, 1, 0])
+    })
+
+    test('reuses exact cached keys for repeated integer scores outside the inline range', () => {
+        const chunk = fixture()
+        chunk.scoreList.fill(999800)
+        const expected = encodeGeneric(chunk)
+        const get = vi.spyOn(Map.prototype, 'get')
+        expect(encodeDirect(chunk)).toEqual(expected)
+        expect(get).toHaveBeenCalledWith(999800)
+        expect(get.mock.calls.filter(([score]) => score === 999800)).toHaveLength(1)
+    })
+
+    test.each([32, 64, 128])('keeps ordinary, accessor, shared and array score inputs equivalent at %i rows', (count) => {
+        const values = [999800, -10200, 0, 233, 2147483647, -2147483648]
+        const makeScores = () => Int32Array.from({length: count}, (_, i) => values[i % values.length])
+        for (const kind of ['ordinary', 'accessor', 'shared', 'array']) {
+            const chunk = fixture(count)
+            const scores = makeScores()
+            switch (kind) {
+                case 'accessor':
+                    Object.defineProperty(chunk, 'scoreList', {get: () => scores})
+                    break
+                case 'shared':
+                    chunk.scoreList = new Int32Array(new SharedArrayBuffer(count * 4))
+                    chunk.scoreList.set(scores)
+                    break
+                case 'array':
+                    Object.assign(chunk, {scoreList: [...scores]})
+                    break
+                default:
+                    chunk.scoreList = scores
+                    break
+            }
+            expect(encodeDirect(chunk)).toEqual(encodeGeneric(chunk))
+        }
+    })
+
     test.each([65535, 65536, 0xffffffff])('preserves legacy fallback for content length %i', (length) => {
         const chunk = fixture()
         chunk.resolvedContentReferences.lengths[0] = length
