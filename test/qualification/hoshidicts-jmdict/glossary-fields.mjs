@@ -5,7 +5,17 @@ import {createHash} from 'node:crypto'
 function canonical(value) {
     if (Array.isArray(value)) return value.map(canonical)
     if (value === null || typeof value !== 'object') return value
-    const entries=Object.keys(value).sort().map(k=>[k,canonical(value[k])])
+    const normalized = {...value}
+    // Import resolves authored image sizes into preferred sizes and intrinsic
+    // media dimensions. Compare the authored preference on both sides; the
+    // separately attested media probe checks that the referenced bytes persist.
+    if (value.tag === 'img') {
+        if (typeof value.preferredWidth === 'number') normalized.width = value.preferredWidth
+        if (typeof value.preferredHeight === 'number') normalized.height = value.preferredHeight
+        delete normalized.preferredWidth
+        delete normalized.preferredHeight
+    }
+    const entries=Object.keys(normalized).sort().map(k=>[k,canonical(normalized[k])])
     return Object.fromEntries(entries)
 }
 
