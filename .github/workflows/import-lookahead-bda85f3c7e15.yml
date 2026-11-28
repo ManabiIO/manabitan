@@ -79,29 +79,33 @@ jobs:
         run: |
           set -euo pipefail
           node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex "$IMPORT_LAB_DICTIONARY"
-          import_baseline="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-baseline"
+          import_baseline="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-A"
+          import_candidate="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-B"
           git fetch --no-tags --depth=1 origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
           git worktree add --detach "$import_baseline" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-          cmp package-lock.json "$import_baseline/package-lock.json"
-          cmp test/perf/dictionaries.lock.json "$import_baseline/test/perf/dictionaries.lock.json"
-          ln -s "$GITHUB_WORKSPACE/node_modules" "$import_baseline/node_modules"
-          mkdir -p "$import_baseline/builds"
-          ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$import_baseline/builds/e2e-dictionary-cache"
-          (
-            cd "$import_baseline"
-            npm run build:libs
-            npm run license-report:html
-            npm run build -- --target chrome
-          )
-          npm run build -- --target chrome
+          git worktree add --detach "$import_candidate" "$GITHUB_SHA"
+          # Both builds see the same relative dependency paths in generated bundles.
+          for import_root in "$import_baseline" "$import_candidate"; do
+            cmp package-lock.json "$import_root/package-lock.json"
+            cmp test/perf/dictionaries.lock.json "$import_root/test/perf/dictionaries.lock.json"
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$import_root/node_modules"
+            mkdir -p "$import_root/builds"
+            ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$import_root/builds/e2e-dictionary-cache"
+            (
+              cd "$import_root"
+              npm run build:libs
+              npm run license-report:html
+              npm run build -- --target chrome
+            )
+          done
       - name: Run fixed paired schedule and separate correctness checks
         env:
           IMPORT_LAB_DICTIONARY: ${{ matrix.dictionary }}
           IMPORT_LAB_MODE: ${{ matrix.mode }}
         run: |
           set -euo pipefail
-          import_baseline="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-baseline"
-          import_candidate="$GITHUB_WORKSPACE"
+          import_baseline="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-A"
+          import_candidate="$RUNNER_TEMP/import-lookahead-bda85f3c7e15-B"
           extra_args=()
           if [ "$IMPORT_LAB_MODE" = control ]; then
             import_candidate="$import_baseline"
@@ -118,6 +122,10 @@ jobs:
               extra_args+=(--require-lookahead)
             fi
           fi
+          import_package_evidence="$GITHUB_WORKSPACE/builds/perf/import-lookahead-bda85f3c7e15/packages-$IMPORT_LAB_DICTIONARY-$IMPORT_LAB_MODE"
+          mkdir -p "$import_package_evidence"
+          cp "$import_baseline/builds/manabitan-chrome.zip" "$import_package_evidence/A.zip"
+          cp "$import_candidate/builds/manabitan-chrome.zip" "$import_package_evidence/B.zip"
           python3 dev/perf/import-lookahead-bda85f3c7e15.py "$IMPORT_LAB_DICTIONARY" \
             --baseline-root "$import_baseline" \
             --candidate-root "$import_candidate" \
