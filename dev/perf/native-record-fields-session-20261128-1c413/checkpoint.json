@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28T10:35:22Z",
+  "observedAt": "2026-11-28 10:41:01 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -152,7 +152,7 @@
     }
   },
   "browser": {
-    "status": "Enabled source sealed; awaiting final root publication, no whole-browser native-field observations acquired",
+    "status": "First browser launcher failed closed before setup/imports on all six cells; separate zero-acquisition artifact audit and narrow fixture-selection guard repair pending",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -206,7 +206,7 @@
       "tree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
       "parent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
       "branch": "perf/native-record-fields-browser-20261128-1c413",
-      "published": false,
+      "published": true,
       "source": "71108341a50c71f340252153eb18080c9753b55c",
       "sourceDigest": "0c9aa2674e74a98d711b7a78c09906db046bd1051835049bc8e14fc973cfb02c",
       "study": "292b25e1d99f3e0f857254f0bd8a64c3e1913e5b",
@@ -215,7 +215,9 @@
       "readme": "089e2ea317712094235955cefca8a39f6a7aa02b",
       "rootReview": "26f62f1a8d67fc3f61ee1c359467c6c5a394cd6d",
       "nativeReview": "2f3b94c66e0f65a5963ea12fa5a5a8b567db12d8",
-      "inventoryReview": "793ab1cc701e6c693d2685dc9682439545cb9a65"
+      "inventoryReview": "793ab1cc701e6c693d2685dc9682439545cb9a65",
+      "pipelineReview": "4d8fe32fa995159e70012410ff4113cdcd7e1812",
+      "disposition": "Failed source launcher; retained immutable. No observed timing cohort."
     },
     "reader": {
       "commit": "2443419f919ff0ca6d578d681484cf43cb07a866",
@@ -262,7 +264,92 @@
         "maximumReadyStateDeclines": 0,
         "sourceGroupFieldPlanSha256": "2b5e8da9c69f9bd4ccb3b6879cb6ebdf109b0f87734714c57a8d6b8cb12556af"
       }
-    ]
+    ],
+    "originalRun": {
+      "id": 46136060186,
+      "attempt": 1,
+      "head": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "createdAt": "2026-11-28T10:37:31Z",
+      "jobs": [
+        {
+          "id": 140951508293,
+          "name": "Complete import (vndb, BA)"
+        },
+        {
+          "id": 140951508493,
+          "name": "Complete import (jitendex, BA)"
+        },
+        {
+          "id": 140951508501,
+          "name": "Complete import (jitendex, AB)"
+        },
+        {
+          "id": 140951508519,
+          "name": "Complete import (jmdict, AB)"
+        },
+        {
+          "id": 140951508552,
+          "name": "Complete import (vndb, AB)"
+        },
+        {
+          "id": 140951508568,
+          "name": "Complete import (jmdict, BA)"
+        }
+      ],
+      "publicationSnapshot": "6b8585e05dc4b7f93f4782b8226d41c0f80bfdec",
+      "conclusion": "failure",
+      "allAcquisitionStepsSkipped": true,
+      "failure": "Pinned fixture metadata changed: full four-entry lock compared to exact three-corpus study",
+      "artifacts": [
+        {
+          "id": 15260230004,
+          "name": "native-record-fields-browser-jitendex-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51742,
+          "sha256": "4373503f8ae23908cfad24909016e775bff8325917c6c6709b8f0a72ac1c0cc2"
+        },
+        {
+          "id": 15260185274,
+          "name": "native-record-fields-browser-vndb-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51739,
+          "sha256": "aebb424159cb28948686a226378e5addd581566d420324d4b7ac803d9733fc5b"
+        },
+        {
+          "id": 15260155296,
+          "name": "native-record-fields-browser-jitendex-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51742,
+          "sha256": "484c8c389794b6bbfac768ef96e16e1b5ca68c3e5369986ef74e3e9b19602092"
+        },
+        {
+          "id": 15260140331,
+          "name": "native-record-fields-browser-vndb-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51739,
+          "sha256": "59160a78aae561ce7921a3ecdaaa7b36300011ea9d2f191043f2db8c7262d757"
+        },
+        {
+          "id": 15259713287,
+          "name": "native-record-fields-browser-jmdict-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51739,
+          "sha256": "15b5d3164f01cb98cef5efeef097d551afac0d828317dfa3ab3c4e4b78e9b821"
+        },
+        {
+          "id": 15259179765,
+          "name": "native-record-fields-browser-jmdict-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "bytes": 51739,
+          "sha256": "80bbd2183699ec8ef7f050f6263528a6debef8fa6a4656eb6f06acf22f5c7907"
+        }
+      ]
+    },
+    "repair": {
+      "cause": "JMnedict is an unrelated fourth entry in the full source-bound lock. All three selected dictionary metadata objects match exactly.",
+      "scope": "Pure fixture projection helper and focused tests; preserve complete lock hash, exact selected key set, all product/control bytes and numeric/schedule/activation policies.",
+      "acquisitionBranch": "perf/native-record-fields-browser-fixtures-20261128-1c413",
+      "preflight": "Separate source-only one-job CI runs exact corrected source launch+generated guards and pure tests, no Chromium/imports, before any new acquisition ref.",
+      "originalFailedSourceRetained": true,
+      "noObservedTimingsReplaced": true,
+      "native": "Own corrected producer source",
+      "pipeline": "Own separate source-only preflight",
+      "inventory": "Own six original failure logs/archive zero-acquisition auditor and then74-report reader"
+    }
   },
   "historicalCorrectness": {
     "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
@@ -459,9 +546,10 @@
     "totalRows": 7613164
   },
   "next": [
-    "Publish exact final producer7d003d51 after independent reviews",
-    "Wait original six cells; no rerun or new thresholds",
-    "Bind exact original artifacts into reviewed74-report reader and audit once",
-    "Open clean product PR only if complete original frozen qualification passes"
+    "Complete six-artifact zero-acquisition audit for failed46136060186",
+    "Review corrected guard and full source; publish unique testsource ref",
+    "Run separate source-only preflight exact corrected source",
+    "Publish new original6-cell cohort only afterpreflight; preservefailedsource andallgates",
+    "Readall74reports/cell and decidePRonlyifqualified gain"
   ]
 }
