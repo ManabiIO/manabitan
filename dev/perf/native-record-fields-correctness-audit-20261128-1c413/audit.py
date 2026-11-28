@@ -346,14 +346,12 @@ def bind_runtime(value, commit, tree, api, kit_hashes):
     same(legal["generated"], value["runtimeFiles"]["legal-npm.html"], "Generated license runtime differs")
     require(type(legal["listedTrackedDelta"]) is bool, "Invalid license dirty-state receipt")
     for path, recorded in value["sources"].items():
-        if path.startswith("ext/lib/") and path.endswith(".wasm"):
-            target = "dev/data/dictionary-wasm/" + Path(path).name
-            data = api.source(commit, target)
-        elif path not in api.tree(commit):
+        target = ("dev/data/dictionary-wasm/" + Path(path).name
+                  if path.startswith("ext/lib/") and path.endswith(".wasm") else path)
+        if target not in api.tree(commit):
             require(recorded is None, "Untracked optional source unexpectedly present: " + path)
             continue
-        else:
-            data = api.source(commit, path)
+        data = api.source(commit, target)
         same(recorded, {"bytes": len(data), "sha256": digest(data)}, "Actual critical source differs: " + path)
     for path, item in value["runtimeFiles"].items():
         require(str(safe_name(path)) == path and set(item) == {"bytes", "sha256"},

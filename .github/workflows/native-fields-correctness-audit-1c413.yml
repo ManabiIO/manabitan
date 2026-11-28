@@ -46,12 +46,13 @@ jobs:
           source_path = prefix + '/source.json'
           source = json.loads(Path(source_path).read_text())
           baseline = 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'
+          prior_reader = '56408685baab2d9469cdb7dc68e394cb7616523a'
           head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
           if head != os.environ['GITHUB_SHA'] or os.environ['GITHUB_RUN_ATTEMPT'] != '1':
               raise RuntimeError('Unexpected reader source or attempt')
           ancestry = subprocess.check_output(['git', 'rev-list', '--parents', '-n', '1', head], text=True).split()
-          if ancestry != [head, baseline]:
-              raise RuntimeError('Reader must have the exact baseline as sole parent')
+          if ancestry != [head, prior_reader]:
+              raise RuntimeError('Reader repair must have the exact first reader as sole parent')
           changed = set(subprocess.check_output(['git', 'diff', '--name-only', '--no-renames', baseline, head], text=True).splitlines())
           if changed != set(source['files']) | {source_path}:
               raise RuntimeError('Unexpected read-only source boundary')
@@ -78,7 +79,7 @@ jobs:
               target = output / 'source-snapshot' / name
               target.parent.mkdir(parents=True, exist_ok=True)
               shutil.copyfile(name, target)
-          receipt = {'passed': True, 'headSha': head, 'parent': baseline, 'files': verified,
+          receipt = {'passed': True, 'headSha': head, 'parent': prior_reader, 'baseline': baseline, 'files': verified,
                      'sourceBindingSha256': hashlib.sha256(Path(source_path).read_bytes()).hexdigest(),
                      'performanceMeasurements': False}
           (output / 'reader-source.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')

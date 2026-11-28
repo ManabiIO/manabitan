@@ -18,7 +18,7 @@ Recorded parser requests are joined to their terminal row counts. Ordered contig
 
 The optional helper must become ready through the actual production lifecycle. The reader never starts it. Before/after counters reconcile every encoder entry, native attempt, owned input/output copy, decline, natural pre-readiness JavaScript call, table allocation and bounded private page growth. Exact native layout and compact score-table sizes are recomputed from original counters and buffer sizes. Unknown or failed/disabled native paths cannot pass.
 
-The separate original validation outcomes must match the job API and include every required gate and all ten workflow-produced logs. No unit/type/build command is rerun by the reader. The reader's own 30 synthetic regression cases cover archive, provenance, counter/layout, source-group, partial-failure and prerequisite boundaries.
+The separate original validation outcomes must match the job API and include every required gate and all ten workflow-produced logs. No unit/type/build command is rerun by the reader. The reader's own 31 synthetic regression cases cover archive, provenance, counter/layout, source-group, partial-failure and prerequisite boundaries.
 
 ## Limits of the evidence
 
@@ -43,3 +43,30 @@ The default transport owns its own fresh output/API snapshots. The verified sour
 The workflow uses pinned checkout, setup-python and upload-artifact actions on macos-15/arm64 with officially available Python3.12.10. It snapshots source before setup, verifies the exact source inventory, runs only the synthetic reader tests, then audits the exact two completed original artifacts. All original archives, API snapshots, member manifests, partial failures, source snapshots and results are uploaded even if a reader step fails. It never installs browser/npm dependencies.
 
 A reader defect may be repaired in a separately identified reader revision over these same original bytes; such a repair is not a new import observation. No source edit, rerun or replacement of the original correctness jobs is authorized by this kit.
+
+## Preserved original reader failure and optional-source repair
+
+The first records-only audit ran at source 56408685baab2d9469cdb7dc68e394cb7616523a, run46133246828,
+job140942854198. Its source/setup guards and all 30 original synthetic tests
+passed. The artifact audit stopped in bind_runtime when it tried to fetch the
+new fields WASM from the baseline, where that optional asset is correctly absent.
+The baseline receipt records null; the reader had checked mapped-WASM paths
+before its optional-absence branch.
+
+The complete decoded original job log is Git blob
+67225cabe4cff944f9c9aa7a02c6a7d522da2a08, 299206 UTF-8 bytes, SHA256
+eab5ec1b6a7905c3ac94113719183541996cd5110787cdb1344fdf6e45458a65.
+Original reader artifact15257888534 retains its downloaded archives, partial
+receipts and failure: 5828059 bytes, SHA256
+f687f006aa83c568921ec30b1fbc7e089bd2c7145661c79e36001e016b499875.
+The source/log diagnosis is separately preserved as Git blob 7e58e2fe3a4e51a2d4c957e92b39ed45d851d10a.
+This failure is not a product correctness or performance result.
+
+This reader-only child revision derives the tracked target path first, then
+checks its existence in the exact arm's Git tree. Only an absent mapped target
+may have a null receipt. Every present target still requires its exact bytes.
+The new synthetic case verifies baseline absence without fetching it and rejects
+nonnull absent assets, null required parser assets, and null or altered candidate
+fields assets. The original two-artifact manifest, transport, source identities,
+archive checks, corpus comparisons, native counters and original import results
+are unchanged. No import is rerun or replaced.

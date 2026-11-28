@@ -437,6 +437,70 @@ class CorrectnessBoundaryCases(unittest.TestCase):
         with self.assertRaisesRegex(AUDIT.AuditError, "critical source"):
             AUDIT.bind_runtime(bad, "a" * 40, "b" * 40, StaticApi(), {})
 
+    def test_generated_optional_wasm_checks_mapped_arm_source_before_fetch(self):
+        baseline = "a" * 40
+        candidate = "c" * 40
+        legal = b"legal"
+        parser = b"parser"
+        fields = b"fields"
+        native_path = "dev/data/dictionary-wasm/"
+        data = {
+            baseline: {"ext/legal-npm.html": legal,
+                       native_path + "term-bank-parser.wasm": parser},
+            candidate: {"ext/legal-npm.html": legal,
+                        native_path + "term-bank-parser.wasm": parser,
+                        native_path + "term-record-fields.wasm": fields},
+        }
+        fetched = []
+        class StaticApi:
+            def source(self, commit, path):
+                fetched.append((commit, path))
+                return data[commit][path]
+            def tree(self, commit):
+                return {name: {"mode": "100644"} for name in data[commit]}
+        def receipt(commit):
+            return {
+                "commit": commit, "tree": "b" * 40, "kit": {},
+                "setupGeneratedLicense": {
+                    "path": "ext/legal-npm.html",
+                    "committed": {"bytes": len(legal), "sha256": AUDIT.digest(legal)},
+                    "generated": {"bytes": len(legal), "sha256": AUDIT.digest(legal)},
+                    "listedTrackedDelta": False,
+                },
+                "sources": {
+                    "ext/lib/term-bank-parser.wasm": {"bytes": len(parser), "sha256": AUDIT.digest(parser)},
+                    "ext/lib/term-record-fields.wasm": (
+                        None if commit == baseline else
+                        {"bytes": len(fields), "sha256": AUDIT.digest(fields)}
+                    ),
+                },
+                "runtimeFiles": {"legal-npm.html": {"bytes": len(legal), "sha256": AUDIT.digest(legal)}},
+            }
+        # The actual baseline records null for the absent optional generated asset.
+        a = receipt(baseline)
+        AUDIT.bind_runtime(a, baseline, "b" * 40, StaticApi(), {})
+        self.assertNotIn((baseline, native_path + "term-record-fields.wasm"), fetched)
+        self.assertIn((baseline, native_path + "term-bank-parser.wasm"), fetched)
+
+        # Absence in Git cannot justify nonnull bytes, or waive a required tracked asset.
+        forged_a = deepcopy(a)
+        forged_a["sources"]["ext/lib/term-record-fields.wasm"] = {"bytes": len(fields), "sha256": AUDIT.digest(fields)}
+        with self.assertRaisesRegex(AUDIT.AuditError, "Untracked optional source"):
+            AUDIT.bind_runtime(forged_a, baseline, "b" * 40, StaticApi(), {})
+        missing_parser = deepcopy(a)
+        missing_parser["sources"]["ext/lib/term-bank-parser.wasm"] = None
+        with self.assertRaisesRegex(AUDIT.AuditError, "critical source"):
+            AUDIT.bind_runtime(missing_parser, baseline, "b" * 40, StaticApi(), {})
+
+        b = receipt(candidate)
+        AUDIT.bind_runtime(b, candidate, "b" * 40, StaticApi(), {})
+        self.assertIn((candidate, native_path + "term-record-fields.wasm"), fetched)
+        for changed in (None, {"bytes": len(fields), "sha256": "0" * 64}):
+            bad_b = deepcopy(b)
+            bad_b["sources"]["ext/lib/term-record-fields.wasm"] = changed
+            with self.subTest(recorded=changed), self.assertRaisesRegex(AUDIT.AuditError, "critical source"):
+                AUDIT.bind_runtime(bad_b, candidate, "b" * 40, StaticApi(), {})
+
     def test_retirement_failure_and_digest_mismatch_remain_failure(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
