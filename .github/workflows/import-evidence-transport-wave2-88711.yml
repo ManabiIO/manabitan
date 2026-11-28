@@ -1,0 +1,74 @@
+name: Transport frozen import evidence wave 2 88711
+
+on:
+  push:
+    branches: [perf/import-evidence-transport-wave2-20261128-88711]
+    paths:
+      - .github/workflows/import-evidence-transport-wave2-88711.yml
+      - dev/perf/transport-import-evidence-20261128-88711.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: import-evidence-transport-wave2-88711-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  transport:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Preserve original ${{ matrix.host }} evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: jmdict-AB
+            artifact: 15251696994
+            bytes: 561502028
+            sha256: bc5e80cb24135993a2b4a1832087b9e25d316dafa4cea6e7ca8f4996cd07e76b
+          - host: jitendex-BA
+            artifact: 15251321893
+            bytes: 561734692
+            sha256: 26483f63ff6ab31584132410bc24af38caf3e97ad9d13a3ddf5a0c8343a5d289
+          - host: vndb-AB
+            artifact: 15250419716
+            bytes: 1106928057
+            sha256: 440ddae2ab137fb1fb3be46b1de2715f5c38768d25fba16fe35c29f320c75424
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PERF_TRANSPORT_HOST: ${{ matrix.host }}
+      PERF_ARTIFACT_ID: ${{ matrix.artifact }}
+      PERF_ARTIFACT_BYTES: ${{ matrix.bytes }}
+      PERF_ARTIFACT_SHA256: ${{ matrix.sha256 }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify and transport the existing artifact without rerunning imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/transport-import-evidence-20261128-88711.py \
+            --repository ManabiIO/manabitan \
+            --run-id 46107163023 \
+            --artifact-id "$PERF_ARTIFACT_ID" \
+            --artifact-name "import-qualification-88711ca9-$PERF_TRANSPORT_HOST" \
+            --host "$PERF_TRANSPORT_HOST" \
+            --expected-run-head 48217bf7b18baad77c6a4388d45fef82f3fed6d2 \
+            --expected-run-attempt 1 \
+            --expected-size "$PERF_ARTIFACT_BYTES" \
+            --expected-sha256 "$PERF_ARTIFACT_SHA256" \
+            --output "builds/perf/import-evidence-transport-wave2-88711/$PERF_TRANSPORT_HOST/transport" \
+            --work "builds/perf/import-evidence-transport-wave2-88711/$PERF_TRANSPORT_HOST/original"
+      - name: Preserve the complete transport or its acquisition failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: original-import-qualification-88711-${{ matrix.host }}-${{ matrix.artifact }}
+          path: builds/perf/import-evidence-transport-wave2-88711/${{ matrix.host }}/transport
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
