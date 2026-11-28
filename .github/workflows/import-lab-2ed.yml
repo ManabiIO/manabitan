@@ -32,23 +32,50 @@ jobs:
           source = file.read_text()
           marker = '        let i = 0\n        if (canCopyRuns) {'
           assert source.count(marker) == 1
-          observation = '''        console.log('[import-lab-publication]', JSON.stringify({
-              count, canCopyRuns, pendingStart,
-              pendingIndexes: pendingIndexes.constructor.name,
-              pendingOffsets: pendingOffsets.constructor.name,
-              pendingLengths: pendingLengths.constructor.name,
-              namesArray: Array.isArray(plan.resolvedDictNames),
-              resolvedUniformDictName: plan.resolvedUniformDictName,
-              pendingDictNames: typeof pendingDictNames === 'string' ? pendingDictNames : '<array>',
-              sameOutputBuffers: [offsetBuffer === lengthBuffer, offsetBuffer === flagBuffer, lengthBuffer === flagBuffer],
-              aliasedInputs: [pendingOffsets.buffer, pendingLengths.buffer, pendingIndexes.buffer].map((b) => [offsetBuffer, lengthBuffer, flagBuffer].includes(b))
-          }))
+          observation = '''        Reflect.get(this, '__importLabPublicationPhases')?.push({
+              phase: 'import-lab-publication',
+              elapsedMs: 0,
+              details: {
+                  count, canCopyRuns, pendingStart,
+                  pendingIndexesConstructor: pendingIndexes.constructor.name,
+                  pendingOffsetsConstructor: pendingOffsets.constructor.name,
+                  pendingLengthsConstructor: pendingLengths.constructor.name,
+                  resolvedOffsetsConstructor: resolvedOffsets.constructor.name,
+                  resolvedLengthsConstructor: resolvedLengths.constructor.name,
+                  resolvedFlagsConstructor: resolvedFlags.constructor.name,
+                  pendingNamesAreString: typeof pendingDictNames === 'string',
+                  namesArray: Array.isArray(plan.resolvedDictNames),
+                  resolvedUniformDictName: plan.resolvedUniformDictName ?? null,
+                  pendingDictNames: typeof pendingDictNames === 'string' ? pendingDictNames : '<array>',
+                  codecCompatible: typeof plan.resolvedUniformDictName !== 'string' || plan.resolvedUniformDictName === pendingDictNames,
+                  hasCompatibleIndexes,
+                  pendingOffsetsAreFloat64: pendingOffsets instanceof Float64Array,
+                  pendingLengthsAreUint32: pendingLengths instanceof Uint32Array,
+                  pendingOffsetsHaveCount: pendingOffsets.length >= count,
+                  pendingLengthsHaveCount: pendingLengths.length >= count,
+                  resolvedOffsetsAreFloat64: resolvedOffsets instanceof Float64Array,
+                  resolvedLengthsAreUint32: resolvedLengths instanceof Uint32Array,
+                  resolvedFlagsAreUint8: resolvedFlags instanceof Uint8Array,
+                  outputBuffersDistinct: offsetBuffer !== lengthBuffer && offsetBuffer !== flagBuffer && lengthBuffer !== flagBuffer,
+                  pendingOffsetsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingOffsets.buffer),
+                  pendingLengthsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingLengths.buffer),
+                  pendingIndexesAliasOutput: pendingStart === null && [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingIndexes.buffer)
+              }
+          })
           '''
           file.write_text(source.replace(marker, observation + marker))
+
+          importer = Path('ext/js/dictionary/dictionary-importer.js')
+          source = importer.read_text()
+          marker = '        const phaseTimings = [];'
+          assert source.count(marker) == 1
+          source = source.replace(marker, marker + "\n        Reflect.set(dictionaryDatabase, '__importLabPublicationPhases', phaseTimings);")
+          importer.write_text(source)
+
           Path('builds/perf/lab-2ed').mkdir(parents=True, exist_ok=True)
-          Path('builds/perf/lab-2ed/BOUNDARY.txt').write_text('Temporary logging diagnoses route eligibility. All timing is diagnostic and must not be compared as a speed measurement.\n')
+          Path('builds/perf/lab-2ed/BOUNDARY.txt').write_text('Temporary observations use the existing importer phase-debug transport. All timing is diagnostic and must not be compared as a speed measurement. No per-row counters are added.\n')
           PY
-          git diff -- ext/js/dictionary/dictionary-database.js > builds/perf/lab-2ed/diagnostic-only.patch
+          git diff -- ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js > builds/perf/lab-2ed/diagnostic-only.patch
       - name: Build diagnostic release package
         run: node dev/bin/build.js --target chrome
       - name: Record source and runtime
@@ -57,9 +84,27 @@ jobs:
           node dev/perf/host-environment.js > builds/perf/lab-2ed/host-before.json
       - name: Collect routing observations with full correctness checks
         run: node dev/perf/import-benchmark.js jmdict --build-target chrome --no-build --runs 1 --trace --output builds/perf/lab-2ed/routing
+      - name: Verify captured publication routing
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          directory = Path('builds/perf/lab-2ed')
+          summary = json.loads((directory / 'routing/summary.json').read_text())
+          observations = [
+              phase['details']
+              for run in summary['runs']
+              for phase in run['importDebug']['importerPhaseTimings']
+              if phase['phase'] == 'import-lab-publication'
+          ]
+          assert observations, 'The importer report did not capture publication routing'
+          result = {'headSha': summary['gitSha'], 'invocations': len(observations), 'observations': observations}
+          (directory / 'publication-routing-observations.json').write_text(json.dumps(result, indent=2) + '\n')
+          print(json.dumps(result))
+          PY
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
-          name: import-lab-2ed-publication-routing
+          name: import-lab-2ed-publication-routing-report
           path: builds/perf/lab-2ed
           retention-days: 14
