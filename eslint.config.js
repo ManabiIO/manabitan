@@ -62,6 +62,7 @@ const manabitanHeaderFiles = [
     'ext/js/data/dictionary-replacement.js',
     'ext/js/dictionary/term-entry-content-hash.js',
     'ext/js/dictionary/term-key-hash.js',
+    'ext/js/dictionary/term-lookup-index-hasher.js',
     'ext/js/dictionary/term-lookup-route.js',
     'types/ext/dictionary-import-journal.d.ts',
     'types/dev/dictionary-wasm.d.ts',

@@ -61,6 +61,23 @@ SOURCE_HASH_FIELDS = (
 )
 
 
+def require_expected_package_entries(baseline, candidate, expected_changed, expected_added=()):
+    """Require the prospectively named release changes; never accept removals."""
+    baseline_paths = set(baseline)
+    candidate_paths = set(candidate)
+    removed = baseline_paths - candidate_paths
+    added = candidate_paths - baseline_paths
+    if removed or added != set(expected_added):
+        raise ValueError(f'Unexpected package membership changes: added={sorted(added)}, removed={sorted(removed)}')
+    changed = sorted(path for path in baseline_paths | candidate_paths
+                     if baseline.get(path) != candidate.get(path))
+    if not changed:
+        raise ValueError('Candidate has no changed runtime package bytes')
+    if set(changed) != set(expected_changed):
+        raise ValueError(f'Unexpected packaged changes: {changed}')
+    return changed
+
+
 def _record(value, label):
     if type(value) is not dict:
         raise ValueError(f'{label} must be an object')

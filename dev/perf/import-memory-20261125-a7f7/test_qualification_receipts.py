@@ -13,7 +13,8 @@ import unittest
 from qualification_receipts import (
     EMPTY_SHA256, EXPECTED_PRODUCT_PATHS, LOOKUP_BOUNDARY,
     SOURCE_HASH_FIELDS, STORAGE_KIND, TIMING_BOUNDARY, canonicalize_storage,
-    require_matching_receipts, validate_import_summary, validate_vndb_sah_allocation_units,
+    require_expected_package_entries, require_matching_receipts,
+    validate_import_summary, validate_vndb_sah_allocation_units,
 )
 
 
@@ -355,6 +356,38 @@ class QualificationReceiptWitness(unittest.TestCase):
         change_validation(summary, report, lambda value: value['media'].__setitem__('bytes', value['media']['bytes'] - 1))
         with self.assertRaises(ValueError):
             validate(summary, report, media_check='all')
+
+
+class PackageEntryTests(unittest.TestCase):
+    def test_existing_changed_entry_contract_is_preserved(self):
+        self.assertEqual(require_expected_package_entries(
+            {'stable': 'a', 'changed': 'b'}, {'stable': 'a', 'changed': 'c'}, ['changed']), ['changed'])
+
+    def test_one_declared_addition_must_also_be_a_declared_change(self):
+        self.assertEqual(require_expected_package_entries(
+            {'stable': 'a'}, {'stable': 'a', 'new': 'b'}, ['new'], ['new']), ['new'])
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'stable': 'a'}, {'stable': 'a', 'new': 'b'}, [], ['new'])
+
+    def test_unregistered_addition_is_rejected(self):
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'stable': 'a'}, {'stable': 'a', 'new': 'b'}, ['new'])
+
+    def test_removal_is_rejected_even_with_a_registered_replacement(self):
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'old': 'a'}, {'new': 'b'}, ['old', 'new'], ['new'])
+
+    def test_extra_modification_is_rejected(self):
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'stable': 'a'}, {'stable': 'c', 'new': 'b'}, ['new'], ['new'])
+
+    def test_missing_declared_addition_is_rejected(self):
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'changed': 'a'}, {'changed': 'b'}, ['changed'], ['new'])
+
+    def test_unchanged_runtime_is_rejected(self):
+        with self.assertRaises(ValueError):
+            require_expected_package_entries({'stable': 'a'}, {'stable': 'a'}, [])
 
 
 if __name__ == '__main__':

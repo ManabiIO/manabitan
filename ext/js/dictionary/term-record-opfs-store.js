@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {createImportLookupIndexHasher} from './term-lookup-index-hasher.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -905,6 +906,10 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {import('./term-lookup-index-hasher.js').ImportLookupIndexHasher|null} */
+        this._importLookupIndexHasher = null;
+        /** @type {Promise<import('./term-lookup-index-hasher.js').ImportLookupIndexHasher|null>|null} */
+        this._importLookupIndexHasherPromise = null;
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1185,6 +1190,7 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _prepare() {
+        this._releaseImportLookupIndexHasher();
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1267,7 +1273,22 @@ export class TermRecordOpfsStore {
                 state.lookupIndexWritePromise = null;
                 state.lookupIndexWriteError = null;
             }
+            // Compile alongside the remaining import setup and parser work.
+            // A stale completion cannot acquire a later session's memory owner.
+            const promise = createImportLookupIndexHasher();
+            this._importLookupIndexHasherPromise = promise;
+            void promise.then((hasher) => {
+                if (this._importLookupIndexHasherPromise === promise) {
+                    this._importLookupIndexHasher = hasher;
+                }
+            });
         }, true);
+    }
+
+    /** @returns {void} */
+    _releaseImportLookupIndexHasher() {
+        this._importLookupIndexHasher = null;
+        this._importLookupIndexHasherPromise = null;
     }
 
     /**
@@ -1405,6 +1426,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _abandonImportWritesForRollback() {
+        this._releaseImportLookupIndexHasher();
         this._importSessionActive = false;
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
@@ -1487,6 +1509,7 @@ export class TermRecordOpfsStore {
         try {
             await this._endImportSession();
         } finally {
+            this._releaseImportLookupIndexHasher();
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
         }
@@ -6270,9 +6293,10 @@ view.chunks :
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        const hash = this._importLookupIndexHasher?.hash ?? hashLookupIndexBytes;
+        view.setUint32(24, hash(base), true);
+        view.setUint32(28, hash(derived), true);
+        view.setUint32(32, hash(recordFields), true);
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);

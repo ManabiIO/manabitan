@@ -157,3 +157,102 @@ int32_t scan_canonical(void) {
     }
     return 0;
 }
+
+// Lookup-sidecar integrity hashing uses this compiled module in a separate,
+// fixed three-page instance. Refuse the canonical scanner's larger live arena:
+// its metadata may remain borrowed across an exact-content resolution await.
+#define LOOKUP_HASH_DATA 131072u
+#define LOOKUP_HASH_STATE (LOOKUP_HASH_DATA - 32u)
+#define LOOKUP_HASH_SEED 0x811c9dc5u
+#define LOOKUP_HASH_PRIME1 0x9e3779b1u
+#define LOOKUP_HASH_PRIME2 0x85ebca77u
+#define LOOKUP_HASH_PRIME3 0xc2b2ae3du
+#define LOOKUP_HASH_PRIME4 0x27d4eb2fu
+#define LOOKUP_HASH_PRIME5 0x165667b1u
+#define LOOKUP_HASH_ACTIVE 0x48415348u
+
+static void lookup_hash_require_source(uint32_t length) {
+    if (__builtin_wasm_memory_size(0) != 3u || length > 65536u) {
+        __builtin_trap();
+    }
+}
+
+static uint32_t lookup_hash_read_u32(const uint8_t *p) {
+    return (uint32_t)p[0] | (uint32_t)p[1] << 8u |
+           (uint32_t)p[2] << 16u | (uint32_t)p[3] << 24u;
+}
+
+static uint32_t lookup_hash_rotate(uint32_t value, uint32_t amount) {
+    return (value << amount) | (value >> (32u - amount));
+}
+
+static uint32_t lookup_hash_round(uint32_t accumulator, uint32_t value) {
+    return lookup_hash_rotate(accumulator + value * LOOKUP_HASH_PRIME2, 13u) * LOOKUP_HASH_PRIME1;
+}
+
+__attribute__((export_name("lookup_hash_abi_version")))
+uint32_t lookup_hash_abi_version(void) { return 1u; }
+
+__attribute__((export_name("lookup_hash_begin")))
+void lookup_hash_begin(uint32_t total) {
+    lookup_hash_require_source(0);
+    uint32_t *state = U32(LOOKUP_HASH_STATE);
+    state[0] = LOOKUP_HASH_SEED + LOOKUP_HASH_PRIME1 + LOOKUP_HASH_PRIME2;
+    state[1] = LOOKUP_HASH_SEED + LOOKUP_HASH_PRIME2;
+    state[2] = LOOKUP_HASH_SEED;
+    state[3] = LOOKUP_HASH_SEED - LOOKUP_HASH_PRIME1;
+    state[4] = total;
+    state[5] = 0;
+    state[6] = LOOKUP_HASH_ACTIVE;
+}
+
+__attribute__((export_name("lookup_hash_update")))
+void lookup_hash_update(uint32_t length) {
+    lookup_hash_require_source(length);
+    uint32_t *state = U32(LOOKUP_HASH_STATE);
+    if (state[6] != LOOKUP_HASH_ACTIVE || (length & 15u) != 0 ||
+        state[5] > state[4] || length > state[4] - state[5]) {
+        __builtin_trap();
+    }
+    const uint8_t *source = U8(LOOKUP_HASH_DATA);
+    uint32_t v1 = state[0], v2 = state[1], v3 = state[2], v4 = state[3];
+    for (uint32_t cursor = 0; cursor < length; cursor += 16u) {
+        v1 = lookup_hash_round(v1, lookup_hash_read_u32(source + cursor));
+        v2 = lookup_hash_round(v2, lookup_hash_read_u32(source + cursor + 4u));
+        v3 = lookup_hash_round(v3, lookup_hash_read_u32(source + cursor + 8u));
+        v4 = lookup_hash_round(v4, lookup_hash_read_u32(source + cursor + 12u));
+    }
+    state[0] = v1; state[1] = v2; state[2] = v3; state[3] = v4;
+    state[5] += length;
+}
+
+__attribute__((export_name("lookup_hash_finish")))
+uint32_t lookup_hash_finish(uint32_t length) {
+    lookup_hash_require_source(length);
+    uint32_t *state = U32(LOOKUP_HASH_STATE);
+    if (state[5] > state[4] || length != state[4] - state[5]) { __builtin_trap(); }
+    const uint32_t full = length & ~15u;
+    lookup_hash_update(full);
+    uint32_t hash = state[4] >= 16u ?
+        lookup_hash_rotate(state[0], 1u) + lookup_hash_rotate(state[1], 7u) +
+        lookup_hash_rotate(state[2], 12u) + lookup_hash_rotate(state[3], 18u) :
+        LOOKUP_HASH_SEED + LOOKUP_HASH_PRIME5;
+    hash += state[4];
+    const uint8_t *source = U8(LOOKUP_HASH_DATA);
+    uint32_t cursor = full;
+    while (cursor + 4u <= length) {
+        hash = lookup_hash_rotate(hash + lookup_hash_read_u32(source + cursor) * LOOKUP_HASH_PRIME3, 17u) * LOOKUP_HASH_PRIME4;
+        cursor += 4u;
+    }
+    while (cursor < length) {
+        hash = lookup_hash_rotate(hash + source[cursor] * LOOKUP_HASH_PRIME5, 11u) * LOOKUP_HASH_PRIME1;
+        ++cursor;
+    }
+    hash ^= hash >> 15u;
+    hash *= LOOKUP_HASH_PRIME2;
+    hash ^= hash >> 13u;
+    hash *= LOOKUP_HASH_PRIME3;
+    hash ^= hash >> 16u;
+    state[6] = 0;
+    return hash;
+}
