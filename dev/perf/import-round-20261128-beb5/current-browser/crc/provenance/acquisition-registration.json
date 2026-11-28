@@ -1,0 +1,19 @@
+{
+  "scope": "Acquisition and analysis of original fixed CRC browser observations only; no measurement, runtime or frozen-auditor changes.",
+  "runId": 46127721419,
+  "runAttempt": 1,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "studyTree": "f4b08d4dfc6f2493336a5318c20c4f2b64b90593",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+  "frozenAuditorSha256": "b9fa8c952d63e712cad908a58a5d1e0d71d0b25d5ffd0927203255e71d306cf5",
+  "acquisitionHelperSha256": "d4c9d2201ac0e5fc4ebe57d381ebe3caf9c34488711798a4303e7d52d5b27ff4",
+  "adaptedFromReviewedCanonicalAcquisitionHelperSha256": "cf201c2ad61387dbcec5c161c9d86e15c6ff9f1efe1b6575923432e29b6c41fb",
+  "dictionaryJobs": {
+    "jmdict": 140927875480,
+    "jitendex": 140927875471,
+    "vndb": 140927875789
+  },
+  "artifactSelection": "Exactly one non-expired artifact with name crc-no-unroll-browser-beb5-{dictionary}-AB from the fixed run/head/attempt; ID/size/SHA are resolved prospectively named from the authenticated API, recorded and verified before extraction.",
+  "outputPolicy": "Keep every outer ZIP and original member unchanged. Local frozen auditor uses local-independent-audit.json and separate stdout/stderr. Every failure is retained; no replacement, trimming, pooling or control subtraction."
+}

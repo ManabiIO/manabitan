@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "sourceTree": "f4b08d4dfc6f2493336a5318c20c4f2b64b90593",
+  "equivalentReviewedLocal": "bff4cdbe5939d795e28e96124aa5ce0a9b1c81de",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+  "frozenAuditorSha256": "b9fa8c952d63e712cad908a58a5d1e0d71d0b25d5ffd0927203255e71d306cf5",
+  "trackedSourceClean": true,
+  "sparsePaths": [
+    "/AGENTS.md",
+    "/package-lock.json",
+    "/test/perf/dictionaries.lock.json",
+    "/dev/perf/crc-no-unroll-browser-20261128-beb5/",
+    "/dev/perf/crc-no-unroll-current-20261128-beb5/",
+    "/dev/perf/import-memory-20261125-a7f7/",
+    "/dev/perf/import-qualification-20261128-beb5.py",
+    "/.github/workflows/crc-no-unroll-browser-beb5.yml"
+  ],
+  "noBenchmarkRun": true
+}

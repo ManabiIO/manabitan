@@ -1,0 +1,42 @@
+{
+  "runId": 46127721419,
+  "runAttempt": 1,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "source": "GitHub fetch_workflow_job_logs decoded complete content, encoded as UTF-8 without filtering or normalization. Original HTTP transfer bytes are not claimed.",
+  "records": [
+    {
+      "dictionary": "jmdict",
+      "jobId": 140927875480,
+      "toolDecodedUtf16Length": 310348,
+      "bytes": 312990,
+      "sha256": "5b63387e5a94025a9291517aea99ec80011dadf18b58d308e09aedc3a3ea73c7",
+      "jobConclusion": "failure",
+      "originalJobLogApi": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140927875480/logs",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-job.log",
+      "verbatimDecodedToolContent": true
+    },
+    {
+      "dictionary": "jitendex",
+      "jobId": 140927875471,
+      "toolDecodedUtf16Length": 309068,
+      "bytes": 311710,
+      "sha256": "29bbba14ce0c915e260309864d8f2c5b17983a5cdc7b02832cb3863b7587d224",
+      "jobConclusion": "success",
+      "originalJobLogApi": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140927875471/logs",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-job.log",
+      "verbatimDecodedToolContent": true
+    },
+    {
+      "dictionary": "vndb",
+      "jobId": 140927875789,
+      "toolDecodedUtf16Length": 309448,
+      "bytes": 312090,
+      "sha256": "7a20ee2a198be766af05d313ff8f6306f960c7882097517b150a492e41ae368f",
+      "jobConclusion": "success",
+      "originalJobLogApi": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140927875789/logs",
+      "localPath": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-job.log",
+      "verbatimDecodedToolContent": true
+    }
+  ],
+  "setupFailureRetainedInConversation": "First Jitendex log-save process creation exceeded the OS argument limit before writing any file; sequential bounded writes then saved the complete original decoded string. This did not execute or replace any benchmark observation."
+}

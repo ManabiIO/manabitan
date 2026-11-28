@@ -1,0 +1,51 @@
+{
+  "complete": true,
+  "scope": "Re-hash original fixed bytes only; no observation execution.",
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "retainedMemberCount": 315,
+      "retainedArchiveSha256": "4a6d92da3c110586c20a1b43d257e5cd7858f100d3a5f7dcd5011a88c43bfd44",
+      "originalOuterSha256": "afb379a900cf690d0834f68289b99d274fbc10f0913eb3d52c6a10cd0da8db42",
+      "originalOuterBytes": 35617879,
+      "originalCiAuditSha256": "d0f879aa41483004700266c2e2776d79f6c8b5262c022fe5b342e67b9d63e912",
+      "localAuditSha256": "d0f879aa41483004700266c2e2776d79f6c8b5262c022fe5b342e67b9d63e912",
+      "originalAndLocalAuditBytesEqual": true,
+      "allRetainedMemberBytesEqualOriginalCensus": true,
+      "exactOmissions": [
+        "package-A.zip",
+        "package-B.zip"
+      ]
+    },
+    {
+      "dictionary": "jitendex",
+      "retainedMemberCount": 314,
+      "retainedArchiveSha256": "a39675b6b4adb6fe4bb1e66368ee36c1143ac088a756b0c1ca9ba6b59ab006fc",
+      "originalOuterSha256": "a4fcdd00e44cd00cf7d11a6a094514e2fbdcd57f137e55a1ce292dca0c9c15db",
+      "originalOuterBytes": 35685151,
+      "originalCiAuditSha256": "3030015638eef210815be2f722378ead46495cb708733090c6b1e27c1063781f",
+      "localAuditSha256": "3030015638eef210815be2f722378ead46495cb708733090c6b1e27c1063781f",
+      "originalAndLocalAuditBytesEqual": true,
+      "allRetainedMemberBytesEqualOriginalCensus": true,
+      "exactOmissions": [
+        "package-A.zip",
+        "package-B.zip"
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "retainedMemberCount": 314,
+      "retainedArchiveSha256": "8e60681e17b935d9ab29308d6551282859686c2d8c175e0a0ac63e41f6c6cb8a",
+      "originalOuterSha256": "2a63e90d69ddad3f416b0ae1ba86c42d055f204573214498a4980a275a4b8141",
+      "originalOuterBytes": 35935518,
+      "originalCiAuditSha256": "8d51778ddf196030792233aecc951157a44c58c99899833204aeb848086e7ff2",
+      "localAuditSha256": "8d51778ddf196030792233aecc951157a44c58c99899833204aeb848086e7ff2",
+      "originalAndLocalAuditBytesEqual": true,
+      "allRetainedMemberBytesEqualOriginalCensus": true,
+      "exactOmissions": [
+        "package-A.zip",
+        "package-B.zip"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,560 @@
+{
+  "dictionary": "jmdict",
+  "runId": 46127721419,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "artifactId": 15256463198,
+  "jobId": 140927875480,
+  "originalArchiveSha256": "afb379a900cf690d0834f68289b99d274fbc10f0913eb3d52c6a10cd0da8db42",
+  "censusSha256": "3451251fbae4ed0be853f19fe78421a3c587a2ddfc4be05f8ab28a521ab3db49",
+  "independentAuditSha256": "d0f879aa41483004700266c2e2776d79f6c8b5262c022fe5b342e67b9d63e912",
+  "candidate": {
+    "relative": {
+      "count": 12,
+      "ratios": [
+        1.0251119117807614,
+        1.0020349148547785,
+        1.0332175423360557,
+        1.0232148751237498,
+        0.9865960436710548,
+        1.0318834228115423,
+        0.9944317065182045,
+        1.033366589070052,
+        1.0122826086955763,
+        0.8218663326474144,
+        1.0202784171873276,
+        0.9950722733247002
+      ],
+      "medianPairedChangePercent": 1.6280512941452052,
+      "equalWorkChangePercent": -0.49559323849881487,
+      "worstPairChangePercent": 3.3366589070052077,
+      "descriptiveBootstrap95Percent": [
+        -0.5248010078547694,
+        2.8497667296151885
+      ],
+      "fasterPairs": 4
+    },
+    "absolute": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 915.9000000000233,
+          "otherMs": 938.9000000000233,
+          "differenceMs": 23.0
+        },
+        {
+          "pair": 2,
+          "baselineMs": 933.7000000000698,
+          "otherMs": 935.5999999999767,
+          "differenceMs": 1.8999999999068677
+        },
+        {
+          "pair": 3,
+          "baselineMs": 921.2000000000698,
+          "otherMs": 951.8000000000466,
+          "differenceMs": 30.599999999976717
+        },
+        {
+          "pair": 4,
+          "baselineMs": 908.9000000000233,
+          "otherMs": 930,
+          "differenceMs": 21.099999999976717
+        },
+        {
+          "pair": 5,
+          "baselineMs": 925.0999999999767,
+          "otherMs": 912.7000000000698,
+          "differenceMs": -12.399999999906868
+        },
+        {
+          "pair": 6,
+          "baselineMs": 912.6999999999534,
+          "otherMs": 941.8000000000466,
+          "differenceMs": 29.100000000093132
+        },
+        {
+          "pair": 7,
+          "baselineMs": 915.9000000000233,
+          "otherMs": 910.8000000000466,
+          "differenceMs": -5.099999999976717
+        },
+        {
+          "pair": 8,
+          "baselineMs": 902.0999999999767,
+          "otherMs": 932.2000000000698,
+          "differenceMs": 30.100000000093132
+        },
+        {
+          "pair": 9,
+          "baselineMs": 920,
+          "otherMs": 931.2999999999302,
+          "differenceMs": 11.29999999993015
+        },
+        {
+          "pair": 10,
+          "baselineMs": 1117.6999999999534,
+          "otherMs": 918.5999999999767,
+          "differenceMs": -199.09999999997672
+        },
+        {
+          "pair": 11,
+          "baselineMs": 912.3000000000466,
+          "otherMs": 930.8000000000466,
+          "differenceMs": 18.5
+        },
+        {
+          "pair": 12,
+          "baselineMs": 913.1999999999534,
+          "otherMs": 908.7000000000698,
+          "differenceMs": -4.499999999883585
+        }
+      ],
+      "medianPairedDifferenceMs": 14.899999999965075,
+      "meanPairedDifferenceMs": -4.624999999980598,
+      "sumDifferenceMs": -55.49999999976717,
+      "minimumDifferenceMs": -199.09999999997672,
+      "maximumDifferenceMs": 30.599999999976717,
+      "fasterPairs": 4
+    }
+  },
+  "control": {
+    "relative": {
+      "count": 4,
+      "ratios": [
+        1.0039297019975733,
+        0.9912903225805451,
+        1.0291422894359488,
+        1.00572197913158
+      ],
+      "medianPairedChangePercent": 0.4825840564576467,
+      "equalWorkChangePercent": 0.7410863777313148,
+      "worstPairChangePercent": 2.9142289435948765,
+      "descriptiveBootstrap95Percent": [
+        -0.8709677419454942,
+        2.9142289435948765
+      ],
+      "fasterPairs": 1
+    },
+    "absolute": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 916.0999999999767,
+          "otherMs": 919.6999999999534,
+          "differenceMs": 3.599999999976717
+        },
+        {
+          "pair": 2,
+          "baselineMs": 930,
+          "otherMs": 921.8999999999069,
+          "differenceMs": -8.100000000093132
+        },
+        {
+          "pair": 3,
+          "baselineMs": 905.8999999999069,
+          "otherMs": 932.2999999999302,
+          "differenceMs": 26.400000000023283
+        },
+        {
+          "pair": 4,
+          "baselineMs": 891.2999999999302,
+          "otherMs": 896.3999999999069,
+          "differenceMs": 5.099999999976717
+        }
+      ],
+      "medianPairedDifferenceMs": 4.349999999976717,
+      "meanPairedDifferenceMs": 6.749999999970896,
+      "sumDifferenceMs": 26.999999999883585,
+      "minimumDifferenceMs": -8.100000000093132,
+      "maximumDifferenceMs": 26.400000000023283,
+      "fasterPairs": 1
+    }
+  },
+  "sourceInflate": {
+    "candidate": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 407.5,
+          "otherMs": 363.70000000006985,
+          "differenceMs": -43.79999999993015
+        },
+        {
+          "pair": 2,
+          "baselineMs": 409.1999999994878,
+          "otherMs": 396.60000000009313,
+          "differenceMs": -12.59999999939464
+        },
+        {
+          "pair": 3,
+          "baselineMs": 351.89999999967404,
+          "otherMs": 436.50000000023283,
+          "differenceMs": 84.6000000005588
+        },
+        {
+          "pair": 4,
+          "baselineMs": 393.9000000000233,
+          "otherMs": 428.89999999990687,
+          "differenceMs": 34.999999999883585
+        },
+        {
+          "pair": 5,
+          "baselineMs": 349.5999999997439,
+          "otherMs": 389.4000000000233,
+          "differenceMs": 39.8000000002794
+        },
+        {
+          "pair": 6,
+          "baselineMs": 344.10000000009313,
+          "otherMs": 401.89999999990687,
+          "differenceMs": 57.799999999813735
+        },
+        {
+          "pair": 7,
+          "baselineMs": 361.79999999993015,
+          "otherMs": 448.20000000006985,
+          "differenceMs": 86.4000000001397
+        },
+        {
+          "pair": 8,
+          "baselineMs": 441.30000000004657,
+          "otherMs": 442.4999999998836,
+          "differenceMs": 1.1999999998370185
+        },
+        {
+          "pair": 9,
+          "baselineMs": 368.5999999999767,
+          "otherMs": 421.80000000004657,
+          "differenceMs": 53.20000000006985
+        },
+        {
+          "pair": 10,
+          "baselineMs": 446.9999999998836,
+          "otherMs": 408.30000000004657,
+          "differenceMs": -38.69999999983702
+        },
+        {
+          "pair": 11,
+          "baselineMs": 404.29999999993015,
+          "otherMs": 384.99999999965075,
+          "differenceMs": -19.300000000279397
+        },
+        {
+          "pair": 12,
+          "baselineMs": 400.800000000163,
+          "otherMs": 447.70000000018626,
+          "differenceMs": 46.90000000002328
+        }
+      ],
+      "medianPairedDifferenceMs": 37.40000000008149,
+      "meanPairedDifferenceMs": 24.208333333430346,
+      "sumDifferenceMs": 290.50000000116415,
+      "minimumDifferenceMs": -43.79999999993015,
+      "maximumDifferenceMs": 86.4000000001397,
+      "fasterPairs": 4
+    },
+    "control": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 369.79999999981374,
+          "otherMs": 381.2999999996973,
+          "differenceMs": 11.499999999883585
+        },
+        {
+          "pair": 2,
+          "baselineMs": 392.29999999993015,
+          "otherMs": 366.20000000006985,
+          "differenceMs": -26.0999999998603
+        },
+        {
+          "pair": 3,
+          "baselineMs": 371.39999999967404,
+          "otherMs": 394.29999999993015,
+          "differenceMs": 22.900000000256114
+        },
+        {
+          "pair": 4,
+          "baselineMs": 369.80000000004657,
+          "otherMs": 453.5000000001164,
+          "differenceMs": 83.70000000006985
+        }
+      ],
+      "medianPairedDifferenceMs": 17.20000000006985,
+      "meanPairedDifferenceMs": 23.00000000008731,
+      "sumDifferenceMs": 92.00000000034925,
+      "minimumDifferenceMs": -26.0999999998603,
+      "maximumDifferenceMs": 83.70000000006985,
+      "fasterPairs": 1
+    },
+    "scope": "Inflation plus immediate whole-bank CRC; aggregated worker duration, not a complete-import timer."
+  },
+  "deferredSourceCrc": {
+    "candidate": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 2,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 3,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 4,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 5,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 6,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 7,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 8,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 9,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 10,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 11,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 12,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        }
+      ],
+      "medianPairedDifferenceMs": 0.0,
+      "meanPairedDifferenceMs": 0,
+      "sumDifferenceMs": 0,
+      "minimumDifferenceMs": 0,
+      "maximumDifferenceMs": 0,
+      "fasterPairs": 0
+    },
+    "control": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 2,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 3,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        },
+        {
+          "pair": 4,
+          "baselineMs": 0,
+          "otherMs": 0,
+          "differenceMs": 0
+        }
+      ],
+      "medianPairedDifferenceMs": 0.0,
+      "meanPairedDifferenceMs": 0,
+      "sumDifferenceMs": 0,
+      "minimumDifferenceMs": 0,
+      "maximumDifferenceMs": 0,
+      "fasterPairs": 0
+    },
+    "scope": "Deferred verification inside parsing; separate from immediate CRC within inflation. Do not add overlapping phases."
+  },
+  "termParse": {
+    "candidate": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 269,
+          "otherMs": 267,
+          "differenceMs": -2
+        },
+        {
+          "pair": 2,
+          "baselineMs": 268,
+          "otherMs": 273,
+          "differenceMs": 5
+        },
+        {
+          "pair": 3,
+          "baselineMs": 252,
+          "otherMs": 277,
+          "differenceMs": 25
+        },
+        {
+          "pair": 4,
+          "baselineMs": 259,
+          "otherMs": 290,
+          "differenceMs": 31
+        },
+        {
+          "pair": 5,
+          "baselineMs": 256,
+          "otherMs": 286,
+          "differenceMs": 30
+        },
+        {
+          "pair": 6,
+          "baselineMs": 272,
+          "otherMs": 270,
+          "differenceMs": -2
+        },
+        {
+          "pair": 7,
+          "baselineMs": 258,
+          "otherMs": 228,
+          "differenceMs": -30
+        },
+        {
+          "pair": 8,
+          "baselineMs": 258,
+          "otherMs": 262,
+          "differenceMs": 4
+        },
+        {
+          "pair": 9,
+          "baselineMs": 276,
+          "otherMs": 283,
+          "differenceMs": 7
+        },
+        {
+          "pair": 10,
+          "baselineMs": 288,
+          "otherMs": 262,
+          "differenceMs": -26
+        },
+        {
+          "pair": 11,
+          "baselineMs": 262,
+          "otherMs": 278,
+          "differenceMs": 16
+        },
+        {
+          "pair": 12,
+          "baselineMs": 248,
+          "otherMs": 277,
+          "differenceMs": 29
+        }
+      ],
+      "medianPairedDifferenceMs": 6.0,
+      "meanPairedDifferenceMs": 7.25,
+      "sumDifferenceMs": 87,
+      "minimumDifferenceMs": -30,
+      "maximumDifferenceMs": 31,
+      "fasterPairs": 4
+    },
+    "control": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 257,
+          "otherMs": 277,
+          "differenceMs": 20
+        },
+        {
+          "pair": 2,
+          "baselineMs": 257,
+          "otherMs": 261,
+          "differenceMs": 4
+        },
+        {
+          "pair": 3,
+          "baselineMs": 255,
+          "otherMs": 257,
+          "differenceMs": 2
+        },
+        {
+          "pair": 4,
+          "baselineMs": 274,
+          "otherMs": 248,
+          "differenceMs": -26
+        }
+      ],
+      "medianPairedDifferenceMs": 3.0,
+      "meanPairedDifferenceMs": 0,
+      "sumDifferenceMs": 0,
+      "minimumDifferenceMs": -26,
+      "maximumDifferenceMs": 20,
+      "fasterPairs": 1
+    },
+    "scope": "Parser-phase diagnostic; complete-import elapsed time remains primary."
+  },
+  "memoryPassed": false,
+  "memoryAudit": {
+    "schemaVersion": 1,
+    "observations": 4,
+    "rawScanCount": 293,
+    "everyObservationQualified": false,
+    "passesProspectiveMemoryScreen": false,
+    "metrics": {
+      "maxSampledPssKiB": {
+        "medianPairedChangePercent": null,
+        "maximumPairedChangePercent": null
+      },
+      "maxSampledPrivateKiB": {
+        "medianPairedChangePercent": null,
+        "maximumPairedChangePercent": null
+      }
+    }
+  },
+  "memoryReceiptFailures": [],
+  "validatedObservationCount": 42,
+  "noPooling": true,
+  "noControlSubtraction": true,
+  "noTrimmingOrReplacement": true
+}

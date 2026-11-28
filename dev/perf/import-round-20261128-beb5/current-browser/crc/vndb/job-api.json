@@ -1,0 +1,124 @@
+{
+  "id": 140927875789,
+  "run_id": 46127721419,
+  "workflow_name": "Current-base CRC no-unroll browser qualification 20261128 beb5",
+  "head_branch": "test/crc-no-unroll-browser-20261128-beb5",
+  "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46127721419",
+  "run_attempt": 1,
+  "node_id": "CR_kwDORX5CfM8AAAAgz_S6zQ",
+  "head_sha": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140927875789",
+  "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46127721419/job/140927875789",
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-11-28T08:59:45Z",
+  "started_at": "2026-11-28T09:08:08Z",
+  "completed_at": "2026-11-28T09:35:55Z",
+  "name": "Frozen CRC imports (vndb, 12 pairs)",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-11-28T09:08:08Z",
+      "completed_at": "2026-11-28T09:08:09Z"
+    },
+    {
+      "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-11-28T09:08:09Z",
+      "completed_at": "2026-11-28T09:08:26Z"
+    },
+    {
+      "name": "Run ./.github/actions/setup",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-11-28T09:08:26Z",
+      "completed_at": "2026-11-28T09:08:39Z"
+    },
+    {
+      "name": "Install pinned Chromium",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-11-28T09:08:39Z",
+      "completed_at": "2026-11-28T09:09:05Z"
+    },
+    {
+      "name": "Restore pinned dictionary archives",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-11-28T09:09:05Z",
+      "completed_at": "2026-11-28T09:09:07Z"
+    },
+    {
+      "name": "Execute the unchanged 42-observation protocol",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-11-28T09:09:07Z",
+      "completed_at": "2026-11-28T09:35:47Z"
+    },
+    {
+      "name": "Independently audit original complete or partial receipts",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-11-28T09:35:47Z",
+      "completed_at": "2026-11-28T09:35:48Z"
+    },
+    {
+      "name": "Retain every original package, observation and failure",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-11-28T09:35:48Z",
+      "completed_at": "2026-11-28T09:35:51Z"
+    },
+    {
+      "name": "Post Restore pinned dictionary archives",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14,
+      "started_at": "2026-11-28T09:35:51Z",
+      "completed_at": "2026-11-28T09:35:51Z"
+    },
+    {
+      "name": "Post Run ./.github/actions/setup",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15,
+      "started_at": "2026-11-28T09:35:51Z",
+      "completed_at": "2026-11-28T09:35:51Z"
+    },
+    {
+      "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 16,
+      "started_at": "2026-11-28T09:35:51Z",
+      "completed_at": "2026-11-28T09:35:52Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 17,
+      "started_at": "2026-11-28T09:35:52Z",
+      "completed_at": "2026-11-28T09:35:52Z"
+    }
+  ],
+  "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140927875789",
+  "labels": [
+    "ubuntu-26.04"
+  ],
+  "runner_id": 1000092840,
+  "runner_name": "GitHub Actions 1000092840",
+  "runner_group_id": 0,
+  "runner_group_name": "GitHub Actions"
+}

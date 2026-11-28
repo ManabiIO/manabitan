@@ -1,0 +1,38 @@
+{
+  "runId": 46127721419,
+  "runAttempt": 1,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "dictionary": "jitendex",
+  "artifactId": 15257251272,
+  "jobId": 140927875471,
+  "originalOuterSha256": "a4fcdd00e44cd00cf7d11a6a094514e2fbdcd57f137e55a1ce292dca0c9c15db",
+  "originalOuterBytes": 35685151,
+  "originalOuterPath": "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex.zip",
+  "completeOriginalCensusSha256": "370fc74df93e2643995d717e2e876df896dbeb94a5d1a450359b2b2be9950710",
+  "independentAuditSha256": "3030015638eef210815be2f722378ead46495cb708733090c6b1e27c1063781f",
+  "retentionHelperSha256": "55ef10d701b4117e7bdd8260d20a24639ff4e278aceac7a790c80e44f9f1cd51",
+  "mode": "all-original-member-bytes-except-listed-reproducible-package-zips",
+  "byteAuditComplete": true,
+  "memoryPassed": true,
+  "retainedPath": "/tmp/manabitan-beb5/current-crc-durable/jitendex/original-without-packages.zip",
+  "retainedArchiveSha256": "a39675b6b4adb6fe4bb1e66368ee36c1143ac088a756b0c1ca9ba6b59ab006fc",
+  "retainedArchiveBytes": 2260673,
+  "retainedMemberCount": 314,
+  "omittedOriginalMembers": [
+    {
+      "name": "package-A.zip",
+      "bytes": 16806965,
+      "sha256": "426f786ba4e205cac9abedb8d194c0a3b7721689a40266a0da4fb2a219522559",
+      "compressedBytes": 16730591,
+      "zipCrc32": 573990133
+    },
+    {
+      "name": "package-B.zip",
+      "bytes": 16807039,
+      "sha256": "cffeabe0e87651e803a2c255c6b1936e7398774db4177643666a3eb35ceed38e",
+      "compressedBytes": 16730654,
+      "zipCrc32": 194647003
+    }
+  ],
+  "limitations": "This is a reconstructed ZIP, not the original outer archive. Every original member byte except exact package-A.zip and package-B.zip is retained, including the original CI audit; ZIP container metadata is normalized. The complete original census and outer SHA256/size are retained separately. The full frozen byte audit completed before omission, independently of the memory gate. A complete package/byte re-audit requires the original package ZIPs; the full original artifact and packages remain locally available. Local audit and derived analysis outputs are separate, not substituted for original members."
+}

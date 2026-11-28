@@ -1,0 +1,17 @@
+{
+  "scope": "CRC acquisition-only retention of already audited fixed observations; no timing or frozen-auditor changes.",
+  "helperSha256": "55ef10d701b4117e7bdd8260d20a24639ff4e278aceac7a790c80e44f9f1cd51",
+  "reviewedParentHelperSha256": "2fd6e13344a30988abf6437ef3c5f86fc224de45c4bf0075fe9924334a51a89d",
+  "policySource": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb retain_archive omission policy; this is a separately recorded wrapper, not byte-identical source.",
+  "changesFromParent": "Fixed CRC run/head/candidate identities and docstring only.",
+  "runId": 46127721419,
+  "studyCommit": "477fb271ef25fac533fb1faf737a5dab898190e3",
+  "candidate": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+  "fullOriginalZipsRemainLocal": true,
+  "onlyOmittedMembers": [
+    "package-A.zip",
+    "package-B.zip"
+  ],
+  "omissionRequiresCompleteOriginalByteAudit": true,
+  "incompleteAuditPolicy": "Retain verbatim original ZIP; no reduced-byte claim."
+}

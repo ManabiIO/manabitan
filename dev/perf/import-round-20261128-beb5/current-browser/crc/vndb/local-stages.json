@@ -1,0 +1,68 @@
+{
+  "dictionary": "vndb",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "launcherSha256": "a2b551a4e292b276128f35c103dad14132abfcde80ad345309ee2ce97d024785",
+  "scope": "Analysis of original fixed observations only; frozen auditor is unchanged.",
+  "results": [
+    {
+      "stage": "extract",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/verify-extract-and-summarize.py",
+        "extract",
+        "vndb",
+        "--zip",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb.zip",
+        "--metadata",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-artifact-api.json",
+        "--run",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-run-api.json",
+        "--job",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-job-api.json",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb",
+        "--census",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-census.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-extract.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-extract.stderr",
+      "stdoutSha256": "43cfbdb96cd7e860fe7af00c645d8a0ff7b27b3fc02d9580c464c633b8b5bfee",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "frozen-audit",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/crc-current-audit-source/dev/perf/crc-no-unroll-browser-20261128-beb5/audit-browser.py",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb/local-independent-audit.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-frozen-audit.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-frozen-audit.stderr",
+      "stdoutSha256": "42721ae34aeee3e4545570e68cceec7e8543b8a7c29a604b4b1047236a110ebb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "absolute-summary",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/verify-extract-and-summarize.py",
+        "summarize",
+        "--audit",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-vndb/local-independent-audit.json",
+        "--census",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-census.json",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-absolute-summary.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-absolute-summary.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/vndb-absolute-summary.stderr",
+      "stdoutSha256": "c6621a7dfb43c4bb0489c3c1a2a237ecfa9f6da931b5d92b6aba9ae309115552",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

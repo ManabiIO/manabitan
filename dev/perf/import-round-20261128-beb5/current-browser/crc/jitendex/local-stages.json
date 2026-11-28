@@ -1,0 +1,68 @@
+{
+  "dictionary": "jitendex",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "launcherSha256": "a2b551a4e292b276128f35c103dad14132abfcde80ad345309ee2ce97d024785",
+  "scope": "Analysis of original fixed observations only; frozen auditor is unchanged.",
+  "results": [
+    {
+      "stage": "extract",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/verify-extract-and-summarize.py",
+        "extract",
+        "jitendex",
+        "--zip",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex.zip",
+        "--metadata",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-artifact-api.json",
+        "--run",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-run-api.json",
+        "--job",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-job-api.json",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex",
+        "--census",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-census.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-extract.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-extract.stderr",
+      "stdoutSha256": "b65081f534f4b63951004bb71cfc509be60d50c593280be8662dcdedfeb0ee8d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "frozen-audit",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/crc-current-audit-source/dev/perf/crc-no-unroll-browser-20261128-beb5/audit-browser.py",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex/local-independent-audit.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-frozen-audit.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-frozen-audit.stderr",
+      "stdoutSha256": "3bda4ab3807481d3595fba3a83f535bb4061927ff2ba9e036347d493334fe0cf",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "absolute-summary",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/verify-extract-and-summarize.py",
+        "summarize",
+        "--audit",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex/local-independent-audit.json",
+        "--census",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-census.json",
+        "--out",
+        "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-absolute-summary.json"
+      ],
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-absolute-summary.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-absolute-summary.stderr",
+      "stdoutSha256": "9b8e1647ac8de91760d83bd74fd6384ce2461b043c67ae3820c8fb82a58d256f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

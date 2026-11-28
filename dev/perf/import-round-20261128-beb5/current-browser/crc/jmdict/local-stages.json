@@ -1,0 +1,30 @@
+{
+  "dictionary": "jmdict",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "results": [
+    {
+      "stage": "extract",
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-extract.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-extract.stderr",
+      "stdoutSha256": "75366a8aca68f412b3c9bc007fd70a8d1df32ed52d957191386f3badb009ae79",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "frozen-audit",
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-frozen-audit.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-frozen-audit.stderr",
+      "stdoutSha256": "fd1f829998c4de17aa5d25b60ac2662d0c49427c990d114e7d5419d3071f8a68",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "absolute-summary",
+      "exitCode": 0,
+      "stdout": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-absolute-summary.stdout",
+      "stderr": "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jmdict-absolute-summary.stderr",
+      "stdoutSha256": "7b03fba3fee2ef2bd6e035152ca94282c79780ae70670edba1fa2edef256ff13",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

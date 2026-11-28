@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/retain-original-members.py",
+    "--census",
+    "/tmp/manabitan-beb5/current-browser-artifacts/crc-receipts/jitendex-census.json",
+    "--audit",
+    "/tmp/manabitan-beb5/current-browser-artifacts/crc-jitendex/local-independent-audit.json",
+    "--out",
+    "/tmp/manabitan-beb5/current-crc-durable/jitendex/original-without-packages.zip",
+    "--receipt",
+    "/tmp/manabitan-beb5/current-crc-durable/jitendex/retention.json"
+  ],
+  "exitCode": 0
+}

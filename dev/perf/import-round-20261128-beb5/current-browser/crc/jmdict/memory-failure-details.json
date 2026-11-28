@@ -1,0 +1,101 @@
+{
+  "source": "crc-jmdict/memory/B1/memory.json",
+  "sourceSha256": "be7564d60723debbd24dfa5bd05cbc29173124b776a6060e3a708e6f172e6f5e",
+  "scope": "Recomputed the unchanged covered-midpoint gap from retained raw scans; no observations replaced or thresholds changed.",
+  "allObservedSamples": 72,
+  "insideSampleCount": 8,
+  "coveredInsideCount": 7,
+  "maximumCoveredGap": {
+    "from": {
+      "kind": "scan-midpoint",
+      "sampleIndex": 64,
+      "ns": 1039094343165
+    },
+    "to": {
+      "kind": "scan-midpoint",
+      "sampleIndex": 66,
+      "ns": 1039443391254
+    },
+    "ms": 349.048089
+  },
+  "invalidInsideSamples": [
+    {
+      "sampleIndex": 65,
+      "startRelativeMs": 634.78958,
+      "endRelativeMs": 770.952548,
+      "qualificationFailures": [
+        "process-tree-changed-during-scan",
+        "unreadable-discovered-process-smaps"
+      ],
+      "unreadableAddressSpaces": [
+        {
+          "pid": 18440,
+          "parentPid": 18218,
+          "startTimeTicks": 103628,
+          "state": "Z",
+          "threadCount": 1,
+          "executable": null,
+          "comm": "chrome",
+          "argv": [
+            ""
+          ],
+          "metadataReadErrors": [
+            {
+              "pid": 18440,
+              "field": "executable",
+              "error": "FileNotFoundError",
+              "errno": 2,
+              "message": "[Errno 2] No such file or directory: '/proc/18440/exe'"
+            }
+          ],
+          "browserSeedMatch": null,
+          "role": "descendant-unknown",
+          "smapsReadError": {
+            "pid": 18440,
+            "field": "smaps_rollup",
+            "error": "FileNotFoundError",
+            "errno": 2,
+            "message": "[Errno 2] No such file or directory: '/proc/18440/smaps_rollup'"
+          }
+        }
+      ],
+      "unavailableProcesses": [
+        {
+          "pid": 18440,
+          "parentPid": 18218,
+          "startTimeTicks": 103628,
+          "state": "Z",
+          "threadCount": 1,
+          "executable": null,
+          "comm": "chrome",
+          "argv": [
+            ""
+          ],
+          "metadataReadErrors": [
+            {
+              "pid": 18440,
+              "field": "executable",
+              "error": "FileNotFoundError",
+              "errno": 2,
+              "message": "[Errno 2] No such file or directory: '/proc/18440/exe'"
+            }
+          ],
+          "browserSeedMatch": null,
+          "role": "descendant-unknown",
+          "smapsReadError": {
+            "pid": 18440,
+            "field": "smaps_rollup",
+            "error": "FileNotFoundError",
+            "errno": 2,
+            "message": "[Errno 2] No such file or directory: '/proc/18440/smaps_rollup'"
+          }
+        }
+      ]
+    }
+  ],
+  "qualificationFailures": [
+    "covered-import-scan-gap-over-250ms"
+  ],
+  "memoryPair2RemainsQualified": true,
+  "aggregateMemoryGatePassed": false
+}
