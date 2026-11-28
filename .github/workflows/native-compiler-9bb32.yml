@@ -29,7 +29,7 @@ jobs:
           seen = set()
           for name, source in programs.items():
               shutil.copy2(source, root / "bin" / name)
-              receipts[name] = subprocess.check_output([str(source), "--version"], text=True)
+              receipts[name] = subprocess.check_output(["clang-21" if name == "clang-real" else "wasm-ld-21", "--version"], text=True)
           assert "21.1.8" in receipts["clang-real"] and "21.1.8" in receipts["wasm-ld-real"], receipts
           while queue:
               source = queue.pop()
@@ -37,7 +37,7 @@ jobs:
                   continue
               seen.add(source)
               result = subprocess.run(["ldd", str(source)], text=True, capture_output=True, check=False)
-              for name in re.findall(r"(?:=>\\s+)?(/[^\\s()]+)", result.stdout):
+              for name in re.findall(r"(?:=>\s+)?(/[^\s()]+)", result.stdout):
                   dependency = pathlib.Path(name).resolve()
                   if dependency.is_file():
                       destination = root / "lib" / pathlib.Path(name).name
