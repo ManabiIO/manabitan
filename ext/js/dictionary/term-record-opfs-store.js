@@ -5869,6 +5869,11 @@ view.chunks :
         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
+        /* eslint-disable @stylistic/semi */
+        // Private integer columns can reuse this same table for arbitrary
+        // scores. The codebook value proves cache hits; collisions use Map.
+        const useScoreCache = directReferences !== null && inlineScoreIndexes !== null
+        /* eslint-enable @stylistic/semi */
         let compact = true;
         for (let i = 0; i < count; ++i) {
             /* eslint-disable-next-line @stylistic/semi */
@@ -5885,22 +5890,36 @@ view.chunks :
             }
             /* eslint-enable @stylistic/semi */
             const score = chunk.scoreList[i] ?? 0;
-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+            /* eslint-disable @stylistic/semi */
+            // Multiplicative hashing selects one of the existing 512 slots.
+            const inlineScore = useScoreCache ? Math.imul(score, 0x9e3779b1) >>> 23 : score + COMPACT_SCORE_TABLE_RADIUS
+            /* eslint-enable @stylistic/semi */
             const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+            /* eslint-disable @stylistic/semi */
+            const tableScoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : -1
+            let scoreIndex = useInlineScore ? tableScoreIndex : (scoreIndexes.get(score) ?? -1)
+            if (useScoreCache && (scoreIndex < 0 || scores[scoreIndex] !== score)) {
+                scoreIndex = scoreIndexes.get(score) ?? -1
+            }
+            /* eslint-enable @stylistic/semi */
             if (scoreIndex < 0) {
                 scoreIndex = scores.length;
                 if (scoreIndex >= U16_NULL) {
                     compact = false;
                     break;
                 }
-                if (useInlineScore) {
+                if (useInlineScore && !useScoreCache) {
                     inlineScoreIndexes[inlineScore] = scoreIndex + 1;
                 } else {
                     scoreIndexes.set(score, scoreIndex);
                 }
                 scores.push(score);
             }
+            /* eslint-disable @stylistic/semi */
+            if (useScoreCache && inlineScoreIndexes !== null && tableScoreIndex !== scoreIndex) {
+                inlineScoreIndexes[inlineScore] = scoreIndex + 1
+            }
+            /* eslint-enable @stylistic/semi */
             scoreKeys[i] = scoreIndex;
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
