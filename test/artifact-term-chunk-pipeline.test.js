@@ -32,6 +32,7 @@ test('only explicit immutable producer tickets can transfer one completion', asy
     }
     expect(takeArtifactTermChunkSinkCompletion(ticket)).toBe(completion);
     expect(() => takeArtifactTermChunkSinkCompletion(ticket)).toThrow('already claimed');
+    // eslint-disable-next-line unicorn/no-thenable -- Deliberately malformed producer input must be rejected.
     for (const value of [null, 12, {}, {completion}, {then: 12}]) {
         expect(() => createArtifactTermChunkSinkCompletion(/** @type {Promise<void>} */ (/** @type {unknown} */ (value)))).toThrow(TypeError);
     }
@@ -41,7 +42,9 @@ test('only explicit immutable producer tickets can transfer one completion', asy
 test('the actual published sink factory retains genuine work until completion', async () => {
     /** @type {() => void} */
     let release = () => {};
-    const gate = new Promise((resolve) => { release = () => { resolve(void 0); }; });
+    const gate = new Promise((resolve) => {
+        release = () => { resolve(void 0); };
+    });
     /** @type {string[]} */
     const events = [];
     const ticket = await beginArtifactTermChunkSink(async (published) => {

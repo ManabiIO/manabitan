@@ -89,9 +89,7 @@ describe('importer completion-ticket adapters', () => {
             expect(takeArtifactTermChunkSinkCompletion(result)).toBeNull();
             return true;
         });
-        await expect(importer._readTermBankFileFast(
-            file, 3, 'Legacy callback result', false, false, true, 'raw-bytes', () => value, [source],
-        )).resolves.toEqual({termList: [], requirements: null});
+        await expect(importer._readTermBankFileFast(file, 3, 'Legacy callback result', false, false, true, 'raw-bytes', () => value, [source])).resolves.toEqual({termList: [], requirements: null});
         expect(parallel).toHaveBeenCalledTimes(1);
     });
 

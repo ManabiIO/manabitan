@@ -23,17 +23,20 @@ test('public parallel callbacks retain their legacy result assignability', async
     const numericCallback = () => 12;
     /** @type {() => void} */
     const ordinaryVoidCallback = numericCallback;
-    const callbacks = /** @satisfies {{
-     * eager: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallel>[2],
-     * deferred: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelDeferred>[3],
-     * lazy: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelLazy>[3],
-     * compressed: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelCompressedLazy>[3],
-     * }} */ ({
+    /**
+     * @satisfies {{
+     *     eager: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallel>[2],
+     *     deferred: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelDeferred>[3],
+     *     lazy: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelLazy>[3],
+     *     compressed: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelCompressedLazy>[3],
+     * }}
+     */
+    const callbacks = {
         eager: ordinaryVoidCallback,
         deferred: () => ({completed: true}),
         lazy: () => Promise.resolve({completion: 12}),
         compressed: async () => 12,
-    });
+    };
     expect(callbacks.eager()).toBe(12);
     expect(callbacks.deferred()).toEqual({completed: true});
     await expect(callbacks.lazy()).resolves.toEqual({completion: 12});
