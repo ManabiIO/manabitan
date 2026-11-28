@@ -288,13 +288,13 @@ describe('term content zstd initialization', () => {
     test.each(['unwrapped', 'wrapped', 'spans'])('a late failed %s batch cannot clear a replacement pool startup', async (mode) => {
         /** @type {RecoveryWorker[]} */
         const instances = [];
+        /** @type {Array<{worker: RecoveryWorker, id: number}>} */
+        const dispatches = [];
         class RecoveryWorker {
             constructor() {
                 this.generation = Math.floor(instances.length / 4);
                 /** @type {Map<string, Set<(event: unknown) => void>>} */
                 this.listeners = new Map();
-                /** @type {Array<{id: number}>} */
-                this.calls = [];
                 this.terminated = false;
                 instances.push(this);
                 if (this.generation === 0) {
@@ -329,7 +329,8 @@ describe('term content zstd initialization', () => {
              * @param {Transferable[]} [transfer]
              */
             postMessage(message, transfer = []) {
-                this.calls.push(structuredClone(message, {transfer}));
+                const {id} = structuredClone(message, {transfer});
+                dispatches.push({worker: this, id});
                 if (this.generation > 0) {
                     queueMicrotask(() => this.emit('message', {
                         data: {id: message.id, compressed: Uint8Array.of(9).buffer},
@@ -368,19 +369,26 @@ describe('term content zstd initialization', () => {
         };
         /** @type {Promise<unknown>[]} */
         const pending = [];
+        let cleaningUp = false;
         try {
             await initializeTermContentZstd();
             await flush();
             const first = begin();
             const peer = begin();
-            const retry = first.completion.catch(() => begin().completion);
+            const retry = first.completion.catch((error) => {
+                if (cleaningUp) { throw error; }
+                return begin().completion;
+            });
             pending.push(first.sourceConsumed, peer.sourceConsumed, peer.completion, retry);
             for (const promise of pending) { void promise.catch(() => {}); }
             await flush();
             expect(instances).toHaveLength(4);
-            expect(instances[0].calls).toHaveLength(2);
-            instances[0].emit('message', {data: {id: instances[0].calls[0].id, error: 'first batch failed'}});
-            instances[1].emit('message', {data: {id: instances[1].calls[0].id, compressed: Uint8Array.of(8).buffer}});
+            expect(dispatches).toHaveLength(4);
+            // Target the first batch's jobs; later shared batches can start
+            // on different workers without changing startup ownership.
+            const [failedJob, completedJob] = dispatches;
+            failedJob.worker.emit('message', {data: {id: failedJob.id, error: 'first batch failed'}});
+            completedJob.worker.emit('message', {data: {id: completedJob.id, compressed: Uint8Array.of(8).buffer}});
             await expect(peer.completion).rejects.toThrow();
             await flush();
             expect(instances).toHaveLength(8);
@@ -398,11 +406,16 @@ describe('term content zstd initialization', () => {
             await expect(retry).resolves.toMatchObject({chunks: [Uint8Array.of(9), Uint8Array.of(9)]});
             await expect(other.completion).resolves.toMatchObject({chunks: [Uint8Array.of(9), Uint8Array.of(9)]});
         } finally {
+            cleaningUp = true;
+            const workerCount = instances.length;
             for (const worker of instances) {
                 worker.emit('error', {message: 'test cleanup'});
                 worker.terminate();
             }
             await Promise.allSettled(pending);
+            await flush();
+            expect(instances).toHaveLength(workerCount);
+            expect(instances.every((worker) => worker.terminated)).toBe(true);
         }
     });
 });

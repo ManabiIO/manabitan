@@ -16,7 +16,68 @@
  */
 
 import {expect, test} from 'vitest';
-import {ArtifactTermChunkPipeline} from '../ext/js/dictionary/artifact-term-chunk-pipeline.js';
+import {
+    ArtifactTermChunkPipeline,
+    beginArtifactTermChunkSink,
+} from '../ext/js/dictionary/artifact-term-chunk-pipeline.js';
+import {createArtifactTermChunkSinkCompletion, takeArtifactTermChunkSinkCompletion} from '../ext/js/dictionary/term-content-ownership.js';
+
+test('only explicit immutable producer tickets can transfer one completion', async () => {
+    const completion = Promise.resolve();
+    const ticket = createArtifactTermChunkSinkCompletion(completion);
+    expect(Object.isFrozen(ticket)).toBe(true);
+    const ordinary = Object.defineProperty({}, 'completion', {get: () => { throw new Error('Ordinary callback property was read'); }});
+    for (const value of [undefined, null, 12, 'done', ordinary, {...ticket}, Object.create(ticket), new Proxy(ticket, {})]) {
+        expect(takeArtifactTermChunkSinkCompletion(value)).toBeNull();
+    }
+    expect(takeArtifactTermChunkSinkCompletion(ticket)).toBe(completion);
+    expect(() => takeArtifactTermChunkSinkCompletion(ticket)).toThrow('already claimed');
+    for (const value of [null, 12, {}, {completion}, {then: 12}]) {
+        expect(() => createArtifactTermChunkSinkCompletion(/** @type {Promise<void>} */ (/** @type {unknown} */ (value)))).toThrow(TypeError);
+    }
+    await completion;
+});
+
+test('the actual published sink factory retains genuine work until completion', async () => {
+    /** @type {() => void} */
+    let release = () => {};
+    const gate = new Promise((resolve) => { release = () => { resolve(void 0); }; });
+    /** @type {string[]} */
+    const events = [];
+    const ticket = await beginArtifactTermChunkSink(async (published) => {
+        events.push('started');
+        published();
+        await gate;
+        events.push('completed');
+    });
+    const completion = takeArtifactTermChunkSinkCompletion(ticket);
+    expect(completion).not.toBeNull();
+    let settled = false;
+    void completion?.then(() => { settled = true; });
+    await Promise.resolve();
+    expect(events).toEqual(['started']);
+    expect(settled).toBe(false);
+    release();
+    await completion;
+    expect(events).toEqual(['started', 'completed']);
+    expect(settled).toBe(true);
+});
+
+test('published and unpublished sink failures preserve the original rejection', async () => {
+    const early = new Error('Before publication');
+    await expect(beginArtifactTermChunkSink(async () => { throw early; })).rejects.toBe(early);
+    /** @type {(error: Error) => void} */
+    let reject = () => {};
+    const gate = new Promise((_, onReject) => { reject = onReject; });
+    const late = new Error('After publication');
+    const ticket = await beginArtifactTermChunkSink(async (published) => {
+        published();
+        await gate;
+    });
+    const completion = takeArtifactTermChunkSinkCompletion(ticket);
+    reject(late);
+    await expect(completion).rejects.toBe(late);
+});
 
 // These deterministic dependency-injected cases exercise the actual coordinator.
 // Persistence and native metadata mutation require separate integration tests.

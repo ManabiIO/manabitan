@@ -17,13 +17,34 @@
 
 import {readFileSync} from 'node:fs';
 import {expect, test} from 'vitest';
+import {createArtifactTermChunkSinkCompletion, takeArtifactTermChunkSinkCompletion} from '../ext/js/dictionary/term-content-ownership.js';
+
+test('public parallel callbacks retain their legacy result assignability', async () => {
+    /** @type {() => void} */
+    const ordinaryVoidCallback = () => 12;
+    const callbacks = /** @satisfies {{
+     * eager: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallel>[2],
+     * deferred: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelDeferred>[2],
+     * lazy: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelLazy>[2],
+     * compressed: Parameters<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunksParallelCompressedLazy>[2],
+     * }} */ ({
+        eager: ordinaryVoidCallback,
+        deferred: () => ({completed: true}),
+        lazy: () => Promise.resolve({completion: 12}),
+        compressed: async () => 12,
+    });
+    expect(callbacks.eager()).toBe(12);
+    expect(callbacks.deferred()).toEqual({completed: true});
+    await expect(callbacks.lazy()).resolves.toEqual({completion: 12});
+    await expect(callbacks.compressed()).resolves.toBe(12);
+});
 
 // The class is intentionally private. Extract its current production text so
 // the checks use its real run, worker-loop, lead-budget, failure, and disposal
 // logic with deterministic worker transport. No parser or codec timings are
 // measured here. Hosted Node uses native SharedArrayBuffer for the owned input.
 const fixtureSource = String.raw`
-function createParserFixture(ClassSource, HelperSource, specifications, onChunk) {
+function createParserFixture(ClassSource, HelperSource, specifications, onChunk, takeCompletion) {
  const owned = new WeakSet();
  const events = [], loaded = [], parsed = [], releases = [];
  const timers = new Map();let nextTimer=0,clock=0,cancelled=false;
@@ -62,6 +83,7 @@ function createParserFixture(ClassSource, HelperSource, specifications, onChunk)
   },
   createParallelParserCancellationError:cancellationError,
   hasOwnedTermContent:source=>source instanceof Uint8Array&&owned.has(source.buffer),
+  takeArtifactTermChunkSinkCompletion:takeCompletion,
   SharedArrayBuffer:SharedArrayBufferStandIn,
   setTimeout:callback=>{const id=++nextTimer;timers.set(id,callback);return id;},
   clearTimeout:id=>{timers.delete(id);},
@@ -88,7 +110,7 @@ function createParserFixture(ClassSource, HelperSource, specifications, onChunk)
 `;
 
 const checksSource = String.raw`
-async function runParserChecks(ClassSource, HelperSource, FactorySource) {
+async function runParserChecks(ClassSource, HelperSource, FactorySource, createCompletion, takeCompletion) {
  const createFixture=new Function(FactorySource+'\nreturn createParserFixture;')();
  const results=[];
  const assert=(condition,message)=>{if(!condition)throw new Error(message);};
@@ -99,12 +121,13 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
  const finished=async(state,label)=>{await flush();assert(state.status!=='pending',label+' deadlocked');return state;};
  const spec=(extra={})=>({owned:true,...extra});
  const run=async(name,body)=>{try{results.push({name,status:'passed',detail:await body()});}catch(error){results.push({name,status:'failed',error:String(error),stack:error?.stack});}};
- const fixture=(specs,sink)=>createFixture(ClassSource,HelperSource,specs,sink);
+ const fixture=(specs,sink)=>createFixture(ClassSource,HelperSource,specs,sink,takeCompletion);
+ const ticket=completion=>createCompletion(completion);
 
  await run('one owned lookahead preserves source lead and byte budget until completion',async()=>{
   const gates=Array.from({length:6},gate),calls=[];
   const h=fixture(Array.from({length:6},()=>spec()),(chunk,_progress,{owned})=>{
-   calls.push(chunk.id);owned.delete(chunk.contentBytesBuffer.buffer);return {completion:gates[chunk.id].promise};
+   calls.push(chunk.id);owned.delete(chunk.contentBytesBuffer.buffer);return ticket(gates[chunk.id].promise);
   });
   const state=observe(h.start());await flush();
   equal(calls.join(','),'0,1','initial sink admission');
@@ -130,7 +153,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
  await run('borrowed next result waits predecessor and its own ticket blocks later callbacks',async()=>{
   const first=gate(),borrowed=gate(),last=gate(),calls=[];
   const h=fixture([spec(),spec({owned:false,borrowed:true}),spec()],chunk=>{
-   calls.push(chunk.id);return {completion:[first,borrowed,last][chunk.id].promise};
+   calls.push(chunk.id);return ticket([first,borrowed,last][chunk.id].promise);
   });
   const state=observe(h.start());await flush();
   equal(calls.join(','),'0','borrowed callback admitted before predecessor completion');
@@ -145,7 +168,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
  await run('unwitnessed and private results never overlap pending storage',async()=>{
   for(const variant of [{owned:false},{owned:true,private:true}]){
    const first=gate(),second=gate(),calls=[];
-   const h=fixture([spec(),spec(variant)],chunk=>{calls.push(chunk.id);return {completion:(chunk.id===0?first:second).promise};});
+   const h=fixture([spec(),spec(variant)],chunk=>{calls.push(chunk.id);return ticket((chunk.id===0?first:second).promise);});
    const state=observe(h.start());await flush();equal(calls.join(','),'0','unowned callback overlapped predecessor');
    first.resolve();await flush();equal(calls.join(','),'0,1','unowned callback did not resume');
    equal(h.run._nextSinkGroupIndex,1,'unowned ticket advanced sink early');second.resolve();
@@ -156,7 +179,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('peer failure retains active borrowed ticket lease until storage completion',async()=>{
   const borrowed=gate(),parsePeer=gate(),error=new Error('peer parser failure');
-  const h=fixture([spec({owned:false,borrowed:true}),spec({parseGate:parsePeer})],()=>({completion:borrowed.promise}));
+  const h=fixture([spec({owned:false,borrowed:true}),spec({parseGate:parsePeer})],()=>(ticket(borrowed.promise)));
   const state=observe(h.start());await flush();
   equal(h.run._pendingResultConsumers.size,0,'active borrowed lease not shielded');
   parsePeer.reject(error);await flush();equal(state.status,'pending','run released storage early');
@@ -179,7 +202,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('callback exception drains admitted predecessor before pool release',async()=>{
   const first=gate(),error=new Error('successor callback failed');
-  const h=fixture([spec(),spec()],chunk=>{if(chunk.id===1)throw error;return {completion:first.promise};});
+  const h=fixture([spec(),spec()],chunk=>{if(chunk.id===1)throw error;return ticket(first.promise);});
   const state=observe(h.start());await flush();equal(state.status,'pending','failed callback abandoned predecessor');
   equal(h.releases.length,0,'pool released with prior storage pending');equal(h.run._queuedOwnedContentBytes,16,'failed callback released active owners early');
   first.resolve();await finished(state,'callback exception drain');
@@ -188,7 +211,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('ticket rejection wakes a wait for the next parser result',async()=>{
   const first=gate(),nextParse=gate(),error=new Error('storage failed while next parser pending');
-  const h=fixture([spec(),spec({parseGate:nextParse})],()=>({completion:first.promise}));
+  const h=fixture([spec(),spec({parseGate:nextParse})],()=>(ticket(first.promise)));
   const state=observe(h.start());await flush();first.reject(error);
   await finished(state,'storage failure waiting result');equal(state.reason,error,'storage rejection identity');
   equal(h.releases.join(','),'false','failure waiting result lease');return h.events;
@@ -196,7 +219,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('parser failure waiting next result drains earlier storage ticket',async()=>{
   const first=gate(),nextParse=gate(),error=new Error('next parser result failed');
-  const h=fixture([spec(),spec({parseGate:nextParse})],()=>({completion:first.promise}));
+  const h=fixture([spec(),spec({parseGate:nextParse})],()=>(ticket(first.promise)));
   const state=observe(h.start());await flush();nextParse.reject(error);await flush();
   equal(state.status,'pending','parser failure abandoned storage owner');equal(h.releases.length,0,'parser failure released pool early');
   first.resolve();await finished(state,'parser failure drain');equal(state.reason,error,'parser error identity');return h.events;
@@ -205,8 +228,8 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
  await run('late successor ticket remains owned after predecessor failure during callback',async()=>{
   const first=gate(),callback=gate(),second=gate(),error=new Error('predecessor failed during callback');
   const h=fixture([spec(),spec()],async chunk=>{
-   if(chunk.id===0)return {completion:first.promise};
-   await callback.promise;return {completion:second.promise};
+   if(chunk.id===0)return ticket(first.promise);
+   await callback.promise;return ticket(second.promise);
   });
   const state=observe(h.start());await flush();first.reject(error);await flush();equal(h.releases.length,0,'pool released while callback active');
   callback.resolve();await flush();equal(state.status,'pending','late successor completion was lost');
@@ -216,7 +239,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('cancellation during final ticket cannot report successful parse',async()=>{
   const first=gate(),last=gate();
-  const h=fixture([spec(),spec()],chunk=>({completion:(chunk.id===0?first:last).promise}));
+  const h=fixture([spec(),spec()],chunk=>(ticket((chunk.id===0?first:last).promise)));
   const state=observe(h.start());await flush();first.resolve();await flush();
   equal(h.run._nextSinkGroupIndex,1,'pre-final completion index');h.cancel();last.resolve();
   await finished(state,'final ticket cancellation');equal(state.status,'rejected','cancel status');equal(state.reason.name,'AbortError','cancel error');
@@ -225,7 +248,7 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
 
  await run('empty result cannot jump an outstanding ticket or invent sink work',async()=>{
   const first=gate(),calls=[];
-  const h=fixture([spec(),spec({empty:true})],chunk=>{calls.push(chunk.id);return {completion:first.promise};});
+  const h=fixture([spec(),spec({empty:true})],chunk=>{calls.push(chunk.id);return ticket(first.promise);});
   const state=observe(h.start());await flush();equal(h.run._nextSinkGroupIndex,0,'empty group skipped prior completion');equal(calls.join(','),'0','empty callback invented');
   first.resolve();await finished(state,'empty group drain');equal(state.status,'fulfilled','empty success');
   equal(h.profile().rowCount,1,'empty profile rows');equal(h.run._nextSinkGroupIndex,2,'empty group retirement');return h.events;
@@ -239,12 +262,54 @@ async function runParserChecks(ClassSource, HelperSource, FactorySource) {
   await finished(state,'legacy void callbacks');equal(calls.join(','),'0,1,2','legacy order');equal(state.status,'fulfilled','legacy status');return h.events;
  });
 
- await run('invalid ticket still drains prior admitted completion',async()=>{
+ await run('invalid internal ticket construction still drains prior admitted completion',async()=>{
   const first=gate();
-  const h=fixture([spec(),spec()],chunk=>chunk.id===0?{completion:first.promise}:{completion:123});
+  const h=fixture([spec(),spec()],chunk=>chunk.id===0?ticket(first.promise):ticket(123));
   const state=observe(h.start());await flush();equal(state.status,'pending','invalid ticket abandoned prior completion');
   first.resolve();await finished(state,'invalid ticket drain');assert(state.reason instanceof TypeError,'invalid ticket did not reject type');
   equal(h.releases.join(','),'false','invalid ticket pool lease');return h.events;
+ });
+
+ await run('ordinary values and incidental completion properties retain legacy void behavior',async()=>{
+  const unused=gate(),first=gate(),calls=[];
+  const getter=Object.defineProperty({},'completion',{get(){throw new Error('ordinary completion getter was read');}});
+  const values=[12,{done:true},null,{completion:unused.promise},getter];
+  const h=fixture(values.map(()=>spec()),async chunk=>{
+   calls.push(chunk.id);if(chunk.id===0)await first.promise;return values[chunk.id];
+  });
+  const state=observe(h.start());await flush();equal(calls.join(','),'0','ordinary promise returned before fulfillment');
+  first.resolve();await finished(state,'ordinary incidental return values');
+  equal(state.status,'fulfilled','ordinary return values rejected');equal(calls.join(','),'0,1,2,3,4','ordinary order');
+  equal(h.run._queuedOwnedContentBytes,0,'ordinary values retained content');equal(h.releases.join(','),'true','ordinary pool lease');return h.events;
+ });
+
+ await run('ordinary thenables are awaited and their resolved values are ignored',async()=>{
+  const first=gate(),unused=gate(),calls=[];let thenCalls=0;
+  const h=fixture([spec(),spec()],chunk=>{
+   calls.push(chunk.id);return {then(resolve){thenCalls++;void first.promise.then(()=>resolve({completion:unused.promise}));}};
+  });
+  const state=observe(h.start());await flush();equal(calls.join(','),'0','thenable bypassed ordinary callback join');
+  equal(thenCalls,1,'first thenable was not awaited once');first.resolve();await finished(state,'ordinary thenable completion');
+  equal(state.status,'fulfilled','resolved incidental completion was treated as a ticket');equal(thenCalls,2,'thenable count');
+  equal(calls.join(','),'0,1','thenable callback order');return h.events;
+ });
+
+ await run('copied inherited and proxied ticket shapes cannot claim a producer completion',async()=>{
+  const pending=gate(),calls=[],original=ticket(pending.promise);
+  const values=[{...original},Object.create(original),new Proxy(original,{}),original];
+  const h=fixture(values.map(()=>spec()),chunk=>{calls.push(chunk.id);return values[chunk.id];});
+  const state=observe(h.start());await flush();equal(calls.join(','),'0,1,2,3','borrowed ticket shape acquired completion');
+  equal(state.status,'pending','genuine completion was not joined');pending.resolve();await finished(state,'genuine ticket after borrowed shapes');
+  equal(state.status,'fulfilled','borrowed shapes consumed genuine owner');return h.events;
+ });
+
+ await run('authentic ticket reuse fails only after its previously admitted work drains',async()=>{
+  const pending=gate(),original=ticket(pending.promise),calls=[];
+  const h=fixture([spec(),spec()],chunk=>{calls.push(chunk.id);return original;});
+  const state=observe(h.start());await flush();equal(calls.join(','),'0,1','reuse schedule');
+  equal(state.status,'pending','reuse abandoned the first completion');pending.resolve();await finished(state,'reused completion drain');
+  assert(state.reason instanceof TypeError,'authentic ticket reuse was not rejected');
+  assert(/already claimed/.test(String(state.reason)),'reuse failure lost its cause');equal(h.releases.join(','),'false','reused ticket worker lease');return h.events;
  });
 
  return {kind:'actual extracted ParallelTermBankPipelineRun control-flow component; fake worker transport; native SharedArrayBuffer when available, stand-in otherwise; no browser/native parser/DB execution',total:results.length,passed:results.filter(x=>x.status==='passed').length,failed:results.filter(x=>x.status==='failed').length,results};
@@ -262,16 +327,18 @@ test('retains parser budgets and source leases until admitted sink tickets compl
     expect(helperStart).toBeGreaterThanOrEqual(0);
     expect(classStart).toBeGreaterThan(helperStart);
     expect(classEnd).toBeGreaterThan(classStart);
-    const runChecks = /** @type {(classSource: string, helperSource: string, fixture: string) => Promise<CheckReport>} */ (
+    const runChecks = /** @type {(classSource: string, helperSource: string, fixture: string, createCompletion: typeof createArtifactTermChunkSinkCompletion, takeCompletion: typeof takeArtifactTermChunkSinkCompletion) => Promise<CheckReport>} */ (
         new Function(checksSource + '\nreturn runParserChecks;')()
     );
     const report = await runChecks(
         source.slice(classStart, classEnd),
         source.slice(helperStart, classStart),
         fixtureSource,
+        createArtifactTermChunkSinkCompletion,
+        takeArtifactTermChunkSinkCompletion,
     );
-    expect(report.total).toBe(13);
+    expect(report.total).toBe(17);
     expect(report.results.filter(({status}) => status !== 'passed')).toEqual([]);
-    expect(report.passed).toBe(13);
+    expect(report.passed).toBe(17);
     expect(report.failed).toBe(0);
 });
