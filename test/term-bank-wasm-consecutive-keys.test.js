@@ -35,9 +35,10 @@ afterAll(() => { vi.unstubAllGlobals() })
  * @param {Uint8Array[]} sources
  * @param {boolean} fused
  * @param {boolean} [nativeEscapedKeys]
+ * @param {boolean} [strict]
  * @returns {Promise<{result: KeySnapshot, profile: ReturnType<typeof consumeLastTermBankWasmParseProfile>}>}
  */
-async function snapshot(sources, fused, nativeEscapedKeys = false) {
+async function snapshot(sources, fused, nativeEscapedKeys = false, strict = false) {
     /** @type {KeySnapshot|null} */
     let result = null
     await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
@@ -71,6 +72,7 @@ async function snapshot(sources, fused, nativeEscapedKeys = false) {
         useNativeStringPlan: fused,
         experimentalSkipFusedParse: !fused,
         experimentalNativeEscapedKeys: nativeEscapedKeys,
+        validateGlossaryTypes: strict,
     })
     const profile = consumeLastTermBankWasmParseProfile()
     if (result === null) { throw new Error('Expected parser output') }
@@ -216,5 +218,111 @@ describe('fused parser consecutive key reuse', () => {
         expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(spelling === 'escaped' && !nativeEscapedKeys ? 1 : 0)
         expect(fused.result).toStrictEqual(established.result)
         expect(fused.result.equality).toStrictEqual([0, 0, 0, 1, 0, 1, 0, 0])
+    })
+})
+
+describe('strict expression validation witnesses', () => {
+    maybeTest('keeps readings independent across repeated expressions and empty banks', async () => {
+        const rows = [
+            ['日本語', 'にほんご', '', '', 0, ['first'], 0, ''],
+            ['日本語', 'にっぽんご', '', '', 1, ['second'], 1, ''],
+            ['日本語', '', '', '', 2, ['empty reading'], 2, ''],
+            ['日本語', '日本語', '', '', 3, ['equal reading'], 3, ''],
+            ['日本語', 'different', '', '', 4, ['changed reading'], 4, ''],
+            ['different', '日本語', '', '', 5, ['changed expression'], 5, ''],
+        ]
+        const sources = [
+            encoder.encode(JSON.stringify(rows.slice(0, 2))),
+            encoder.encode('[]'),
+            encoder.encode(JSON.stringify(rows.slice(2))),
+        ]
+        const fused = await snapshot(sources, true, false, true)
+        expect(fused.profile?.fusedParseAttempts).toBe(1)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false, false, true)).result)
+        expect(fused.result.equality).toStrictEqual([0, 0, 1, 1, 0, 0])
+    })
+
+    maybeTest.each([31, 32, 33])('preserves full %i-byte expression bodies and same-prefix misses', async (length) => {
+        const prefix = '日'.repeat(Math.floor((length - 1) / 3)) + 'x'.repeat((length - 1) % 3)
+        const expressions = [prefix + 'a', prefix + 'a', prefix + 'b', prefix, prefix + 'b', prefix + 'b']
+        const rows = expressions.map((expression, i) => [expression, 'reading', '', '', i, [`definition ${i}`], i, ''])
+        const sources = [encoder.encode(JSON.stringify(rows.slice(0, 2))), encoder.encode(JSON.stringify(rows.slice(2)))]
+        const fused = await snapshot(sources, true, false, true)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false, false, true)).result)
+        expect(fused.result.expressions).toStrictEqual(expressions)
+    })
+
+    maybeTest('carries escape facts only from the exact previous expression', async () => {
+        const sources = [
+            encoder.encode(String.raw`[["\u0061","a","","",0,["escaped"],0,""],["\u0061","\u0061","","",1,["same raw"],1,""]]`),
+            encoder.encode(String.raw`[["a","\u0061","","",2,["literal"],2,""],["a","a","","",3,["same literal"],3,""],["\u0061","a","","",4,["escaped again"],4,""],["\u0061","","","",5,["empty reading"],5,""]]`),
+        ]
+        const fused = await snapshot(sources, true, true, true)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false, false, true)).result)
+        expect(fused.result.equality).toStrictEqual([0, 1, 0, 1, 0, 1])
+    })
+
+    maybeTest.each(['x', '0', '"', '\u0000'])('rejects a malformed separator after an equal expression: %j', async (suffix) => {
+        const sources = [
+            encoder.encode('[["same","reading","","",0,["valid"],0,""]]'),
+            encoder.encode(`[["same"${suffix},"reading","","",1,["invalid"],1,""]]`),
+        ]
+        await expect(snapshot(sources, true, false, true)).rejects.toThrow()
+        await expect(snapshot(sources, false, false, true)).rejects.toThrow()
+    })
+
+    maybeTest.each(['[["sam', '[["same', '[["same"'])('keeps repeated-token reads inside each bank: %j', async (truncated) => {
+        const sources = [
+            encoder.encode('[["same","reading","","",0,["valid"],0,""]]'),
+            encoder.encode(truncated),
+            encoder.encode('[["same","reading","","",1,["later"],1,""]]'),
+        ]
+        await expect(snapshot(sources, true, false, true)).rejects.toThrow()
+        await expect(snapshot(sources, false, false, true)).rejects.toThrow()
+    })
+
+    maybeTest('rejects a late malformed escape after a repeated valid escape', async () => {
+        const sources = [
+            encoder.encode(String.raw`[["same\n","reading","","",0,["first"],0,""],["same\n","reading","","",1,["second"],1,""]]`),
+            encoder.encode(String.raw`[["same\q","reading","","",2,["invalid"],2,""]]`),
+        ]
+        await expect(snapshot(sources, true, true, true)).rejects.toThrow()
+        await expect(snapshot(sources, false, false, true)).rejects.toThrow()
+    })
+
+    maybeTest('retains malformed UTF-8 fallback instead of accepting an equal prefix', async () => {
+        const sources = [
+            encoder.encode('[["sameX","reading","","",0,["valid"],0,""]]'),
+            encoder.encode('[["sameX","reading","","",1,["invalid utf8"],1,""]]'),
+        ]
+        const invalid = sources[1].indexOf(0x58)
+        expect(invalid).toBeGreaterThan(0)
+        sources[1][invalid] = 0xff
+        const fused = await snapshot(sources, true, false, true)
+        expect(fused.profile?.fusedParseFallbacks).toBe(1)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false, false, true)).result)
+        expect(fused.result.expressions).toStrictEqual(['sameX', 'same\ufffd'])
+    })
+
+    maybeTest('resets witnesses after fallback and independent heap reuse', async () => {
+        const failed = [
+            encoder.encode(String.raw`[["\u0061","reading","","",0,["first"],0,""],["\u0061","reading","","",1,["second"],1,""]]`),
+            encoder.encode(String.raw`[["\u0061","reading","","",-0,["fallback"],2,""]]`),
+        ]
+        const fallback = await snapshot(failed, true, true, true)
+        expect(fallback.profile?.fusedParseFallbacks).toBe(1)
+        expect(fallback.result).toStrictEqual((await snapshot(failed, false, false, true)).result)
+        expect(Object.is(fallback.result.scores[2], -0)).toBe(true)
+
+        const fresh = [
+            encoder.encode('[["fresh","first","","",0,["first"],0,""]]'),
+            encoder.encode('[["fresh","second","","",1,["second"],1,""]]'),
+        ]
+        const fused = await snapshot(fresh, true, false, true)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(fresh, false, false, true)).result)
     })
 })
