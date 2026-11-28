@@ -2887,8 +2887,9 @@ class ParallelTermBankPipelineRun {
      * @param {() => boolean} shouldCancel
      * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} poolLease
      * @param {number} pipelineGroupsPerWorker
+     * @param {number} startupSourceGroups
      */
-    constructor(sources, groups, totalBytes, version, onChunk, options, shouldCancel, poolLease, pipelineGroupsPerWorker) {
+    constructor(sources, groups, totalBytes, version, onChunk, options, shouldCancel, poolLease, pipelineGroupsPerWorker, startupSourceGroups) {
         /** @type {ParallelTermBankSource[]} */
         this._sources = sources;
         /** @type {ParallelTermBankSource[][]} */
@@ -2913,6 +2914,10 @@ class ParallelTermBankPipelineRun {
         this._poolLease = poolLease;
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
+        /* eslint-disable @stylistic/semi */
+        /** @type {number} */
+        this._startupSourceGroups = startupSourceGroups
+        /* eslint-enable @stylistic/semi */
         /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
         this._resultSlots = [];
         /** @type {Set<() => void>} */
@@ -2948,7 +2953,18 @@ class ParallelTermBankPipelineRun {
     /** @returns {Promise<boolean>} */
     async run() {
         try {
-            const [{workers}] = await waitForParallelWork([this._poolLease.getWorkers()], this._shouldCancel);
+            /* eslint-disable @stylistic/semi */
+            if (this._startupSourceGroups > 0) { this._throwIfStopped() }
+            const workersReady = this._poolLease.getWorkers()
+            if (this._startupSourceGroups > 0) {
+                // Raw ZIP reads share the established initial lead budget.
+                // Start that window while workers initialize, before their
+                // first parse would otherwise wait for the archive and copies.
+                this._maxLeadGroups = this._startupSourceGroups
+                this._activateLeadSources()
+            }
+            /* eslint-enable @stylistic/semi */
+            const [{workers}] = await waitForParallelWork([workersReady], this._shouldCancel);
             this._throwIfStopped();
             await this._runPipeline(workers);
             this._keepWorkers = true;
@@ -3324,7 +3340,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
         estimatedBytes: estimatedByteLengths[index],
         resolvedAt: 0,
     }));
-    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true, true);
 }
 
 /**
@@ -3334,9 +3350,10 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
+ * @param {boolean} [prefetchCompressedStartup=false]
  * @returns {Promise<boolean>}
  */
-async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, lazy = false) {
+async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, lazy = false, prefetchCompressedStartup = false) {
     lastParallelParserSkipReason = null;
     if (sources.length < 4) {
         lastParallelParserSkipReason = 'source-count';
@@ -3402,6 +3419,7 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
         shouldCancel,
         poolLease,
         pipelineGroupsPerWorker,
+        prefetchCompressedStartup ? workerCount * pipelineGroupsPerWorker : 0,
     );
     return await run.run();
 }
