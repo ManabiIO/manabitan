@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "study": "whole-glossary-recent-first-screen-20261128-beb5",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCommit": "1a935bddf29c4d87606d2facd4b168af7e1a40f1",
+  "candidateTree": "99563392c65e4b1655de3e504982b9a0fc496c13",
+  "localRuntimeCommit": "bf62b1a78d242e5847ffeb7496d03c1e6f156797",
+  "candidateBranch": "perf/whole-glossary-recent-first-20261128-beb5",
+  "researchBranch": "test/whole-glossary-recent-first-screen-20261128-beb5",
+  "priorStudy": {
+    "commit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+    "tree": "023368b2731c17c91f16cd740d868ae2ebafa27b",
+    "moduleSha256": "9972fb2df890f77fe43b3401b464c0ff1c36c4b89784b47268e3888bd7979d23",
+    "poolingAllowed": false,
+    "decision": "Hold original prefix-first candidate; one recent-first/prior-long admission follow-up only."
+  },
+  "sourceSha256": {
+    "ext/js/dictionary/wasm/term-bank-parser.c": "fef2b139853034926e288cf7edeee9bc90a1c86c0c02650c855608442279f9c5",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "9fa76a9037b5874ecebeb59adea2e96f6603266a0dc4d12409175b1da5f697d3",
+    "dev/data/dictionary-wasm/manifest.json": "2c890d63e96001b8e8d25acce62cccb1d6fcff17ab174164a2f7079a7de2e9e3",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "harnessSha256": {
+    "dev/perf/whole-glossary-prefix-followup-20261128/README.md": "1d51000a645abbd622a881c3811910a7ee7934107b5019fe943d56858e95b421",
+    "dev/perf/whole-glossary-prefix-followup-20261128/coverage.mjs": "794f6f8b128810dfc71d02fe94100dc6ca0079c9ba58af6e25d37f9fe29daf65",
+    "dev/perf/whole-glossary-prefix-followup-20261128/negative-fixtures.mjs": "041bcf65a0a34e5bc33984f2080f4f0afa51b8c36a77a2b72c743ff53a178f5a",
+    "dev/perf/whole-glossary-prefix-followup-20261128/replay.mjs": "3e529c41120d06edb5226cd1e8f1b82f8c0d638c03c6e157bc8c79488e0a3c35",
+    "dev/perf/whole-glossary-prefix-followup-20261128/verify-identities.py": "67688929b8ee286030e99f760badc9971dd33025a5ac0d6e9e711a5b20ab168c",
+    "dev/perf/whole-glossary-prefix-followup-20261128/verify.mjs": "e94b72ba50c47bdf1743ec96634553daab619d3bf6d4de74db5981dd2b0edc83"
+  },
+  "workflow": ".github/workflows/whole-glossary-recent-first-screen-beb5.yml",
+  "workflowSha256": "03c692701d9deaed395dc081b1fb713826993264f801522b929a0ac43d33ab8a",
+  "moduleBytes": 68394,
+  "baselineModuleSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "allGroups": true,
+  "pairsPerGroup": 6,
+  "sameCodePairsPerGroup": 6,
+  "verificationArmsPerGroup": 3,
+  "disabledPairs": 3,
+  "disabledSameCodePairs": 3,
+  "disabledGroups": 1,
+  "parserWorkers": 3,
+  "groupExecutionConcurrency": 1,
+  "targetGroupBytes": 25165824,
+  "mediaGroupsPerWorker": 3,
+  "mediaFreeGroupsPerWorker": 4,
+  "syntheticCases": [
+    "unique-prefixes",
+    "common-prefix-unique-middles",
+    "short-unique",
+    "nonlocal-reuse"
+  ],
+  "syntheticRowsPerCase": 10000,
+  "syntheticPairs": 6,
+  "syntheticSameCodePairs": 6,
+  "syntheticHost": "jmdict",
+  "runtimeChangedFiles": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm",
+    "ext/js/dictionary/wasm/term-bank-parser.c"
+  ],
+  "packageChangedEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "environment": {
+    "runner": "ubuntu-26.04",
+    "nodeMajor": 22,
+    "clang": "21.1.8",
+    "lld": "21.1.8",
+    "dependencyStaging": "shutil.copytree(copy_function=os.link, symlinks=True)"
+  },
+  "timerIncludes": [
+    "native compressed-payload inflation",
+    "CRC validation",
+    "parser validation and canonical content",
+    "lookup construction",
+    "private owned output copy"
+  ],
+  "timerExcludes": [
+    "archive directory and payload reads",
+    "WASM compilation",
+    "output digests",
+    "worker transport and shared-content copy options",
+    "image projection and native escaped-key worker flags",
+    "lookup route construction",
+    "compression and storage",
+    "media payload import",
+    "browser scheduling",
+    "first hover"
+  ],
+  "scope": "Sequential group-by-group warm synchronous replay. VNDB synchronous parser-option fallback and score-type counts are not production worker activation counts. Group-summed work is not complete import wall time.",
+  "retention": "Append each completed verification/timed arm before checks, retain caught failures and CI logs/artifacts. No trimming, observation replacement, control subtraction, or cross-study host pooling. First invocation is marked but shares the Node VM and is not an independent cold-start measurement.",
+  "promotion": "No full browser qualification or product PR authorized by this component study alone.",
+  "preTimingEvidence": {
+    "oracle": {
+      "sha256": "53dc1ec6e69261d9b54cc084ff7046e98b26a88fb86b871625ce12c7de55fa0c",
+      "comparisons": 242,
+      "successfulOutputs": 175,
+      "exactErrors": 67
+    },
+    "jmdictCoverage": {
+      "sha256": "e943a8af24807f0789c0211c30a03496e248ff6b73e955043ab36968659d4d5a",
+      "groups": 12,
+      "rows": 528299,
+      "baselineWitnesses": 54641,
+      "prefixFirstWitnesses": 200168,
+      "recentFirstWitnesses": 143409,
+      "fusedFallbacks": 0,
+      "maxHeapBytes": 43384832
+    },
+    "negativeCoverage": {
+      "sha256": "34daef120e23f82e10b5f97ebf8277dc181f769e1969c859064a5a234e502448",
+      "cases": 4,
+      "rowsPerCase": 10000,
+      "recentFirstPositiveWitnesses": 9964,
+      "negativeWitnesses": 0
+    }
+  }
+}

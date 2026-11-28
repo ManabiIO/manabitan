@@ -1,0 +1,124 @@
+name: Recent-first glossary witness screen 20261128 beb5
+
+on:
+  push:
+    branches: ['test/whole-glossary-recent-first-screen-20261128-beb5']
+    paths:
+      - '.github/workflows/whole-glossary-recent-first-screen-beb5.yml'
+      - 'dev/perf/whole-glossary-prefix-followup-20261128/**'
+      - 'ext/js/dictionary/wasm/term-bank-parser.c'
+      - 'dev/data/dictionary-wasm/**'
+
+permissions:
+  contents: read
+
+env:
+  BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_COMMIT: 1a935bddf29c4d87606d2facd4b168af7e1a40f1
+  MANABITAN_CLANG: /usr/bin/clang-21
+  MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+
+jobs:
+  screen:
+    name: Recent-first witness (${{ matrix.dictionary }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned native compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify frozen builds and every release package entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/whole-glossary-recent-first-screen-beb5/$PERF_DICTIONARY"
+          baseline="$RUNNER_TEMP/prefix-baseline"
+          mkdir -p "$evidence"
+          cp dev/perf/whole-glossary-prefix-followup-20261128/registration.json "$evidence/registration.json"
+          git rev-parse HEAD > "$evidence/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
+          node dev/perf/host-environment.js > "$evidence/host-before.json"
+          git worktree add --detach "$baseline" "$BASELINE_COMMIT"
+          python - "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules" <<'PY'
+          import os, shutil, sys
+          shutil.copytree(sys.argv[1], sys.argv[2], copy_function=os.link, symlinks=True)
+          PY
+          for arm in baseline candidate; do
+            source="$GITHUB_WORKSPACE"
+            if [ "$arm" = baseline ]; then source="$baseline"; fi
+            (
+              cd "$source"
+              node --input-type=module -e 'import {main} from "./dev/bin/build-dictionary-wasm.js"; main(["--check"])'
+              npm run build:libs
+              npm run license-report:html
+              npm run build -- --target chrome
+            ) 2>&1 | tee "$evidence/build-$arm.log"
+          done
+          python dev/perf/whole-glossary-prefix-followup-20261128/verify-identities.py \
+            "$baseline" "$GITHUB_WORKSPACE" "$evidence/identities.json"
+      - name: Verify malformed input, witness bounds, output ownership and deferred CRC
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/whole-glossary-recent-first-screen-beb5/$PERF_DICTIONARY"
+          node --max-old-space-size=2048 dev/perf/whole-glossary-prefix-followup-20261128/verify.mjs \
+            "$RUNNER_TEMP/prefix-baseline" "$GITHUB_WORKSPACE" "$evidence/oracle.json" \
+            2>&1 | tee "$evidence/oracle.log"
+          npx vitest run test/term-bank-wasm-parser.test.js test/term-bank-glossary-semantics.test.js \
+            test/term-bank-source-crc-reuse.test.js test/term-bank-join-boundaries.test.js test/term-bank-experiments.test.js \
+            2>&1 | tee "$evidence/unit.log"
+      - name: Screen all current-policy groups with six treatment and six identical-source pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/whole-glossary-recent-first-screen-beb5/$PERF_DICTIONARY"
+          node --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", [process.env.PERF_DICTIONARY])'
+          node --expose-gc --max-old-space-size=2048 dev/perf/whole-glossary-prefix-followup-20261128/replay.mjs \
+            --baseline-root "$RUNNER_TEMP/prefix-baseline" --candidate-root "$GITHUB_WORKSPACE" \
+            --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --parser-workers 3 --pairs 6 \
+            --out "$evidence/screen.json" "$PERF_DICTIONARY" \
+            2>&1 | tee "$evidence/screen.log"
+      - name: Bound flag-disabled source overhead on one unchanged production group
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/whole-glossary-recent-first-screen-beb5/$PERF_DICTIONARY"
+          node --expose-gc --max-old-space-size=2048 dev/perf/whole-glossary-prefix-followup-20261128/replay.mjs \
+            --baseline-root "$RUNNER_TEMP/prefix-baseline" --candidate-root "$GITHUB_WORKSPACE" \
+            --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --parser-workers 3 --pairs 3 \
+            --max-groups 1 --disable-glossary-reuse --out "$evidence/reuse-disabled.json" "$PERF_DICTIONARY" \
+            2>&1 | tee "$evidence/reuse-disabled.log"
+          node dev/perf/host-environment.js > "$evidence/host-after.json"
+      - name: Measure enabled-probe negatives and nonlocal-reuse positive control
+        if: matrix.dictionary == 'jmdict'
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/whole-glossary-recent-first-screen-beb5/$PERF_DICTIONARY"
+          node --expose-gc --max-old-space-size=2048 dev/perf/whole-glossary-prefix-followup-20261128/replay.mjs \
+            --baseline-root "$RUNNER_TEMP/prefix-baseline" --candidate-root "$GITHUB_WORKSPACE" \
+            --negative-fixtures --pairs 6 --out "$evidence/enabled-probe-negatives.json" \
+            2>&1 | tee "$evidence/enabled-probe-negatives.log"
+      - name: Retain every observation, source identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: whole-glossary-recent-first-screen-beb5-${{ matrix.dictionary }}
+          path: builds/perf/whole-glossary-recent-first-screen-beb5/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
