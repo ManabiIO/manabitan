@@ -10,6 +10,7 @@ import re
 import stat
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -42,12 +43,24 @@ def file_sha(path):
 def git(root, *args):
     return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
 
-def redact(error):
-    message = str(error)
+def redact_text(value):
+    message = str(value)
     token = os.environ.get("GITHUB_TOKEN", "")
     if token:
         message = message.replace(token, "<token-redacted>")
-    return re.sub(r"https?://\S+", "<url-redacted>", message)[:2000]
+    return re.sub(r"https?://\S+", "<url-redacted>", message)
+
+def redact(error):
+    return redact_text(error)[:2000]
+
+def print_diagnostic(entry, stage, stderr, stdout=""):
+    # Redact the complete text before selecting its bounded tail.
+    safe = redact_text(stderr if stderr else stdout)
+    tail = "\n".join(safe.splitlines()[-30:])[-4096:]
+    print("FROZEN_AUDIT_DIAGNOSTIC " + encoded({
+        "entry": entry, "stage": stage, "sanitizedTail": tail,
+        "fullLogsRetained": True,
+    }), flush=True)
 
 def api(path, body=None):
     assert path.startswith("/") and not path.startswith("//")
@@ -59,6 +72,7 @@ def api(path, body=None):
     }
     data = None
     if body is not None:
+        assert path == "/git/blobs", "Only unreferenced Git blob creation is permitted"
         data = encoded(body).encode()
         headers["Content-Type"] = "application/json"
     request = urllib.request.Request(API + path, data=data, headers=headers)
@@ -141,7 +155,7 @@ def extract_and_census(archive_path, destination):
             members.append(row)
     return members
 
-def bind_sources(source, study, location, known_root):
+def bind_sources(source, study, location, known_root, reference_root=None):
     assert git(source, "rev-parse", "HEAD") == study["sourceCommit"]
     assert git(source, "rev-parse", "HEAD^{tree}") == study["sourceTree"]
     if study["kind"] == "canonical":
@@ -165,13 +179,28 @@ def bind_sources(source, study, location, known_root):
         return auditor
     assert study["kind"] == "prefix"
     proof = study.get("knownAnswer")
-    assert proof and known_root is not None, "Recent-first audit requires the matching completed known-answer proof"
-    assert git(known_root, "rev-parse", "HEAD") == proof["evidenceCommit"]
-    proof_path = known_root / proof["reportPath"]
-    assert file_sha(proof_path) == proof["reportSha256"]
+    assert proof and proof["mode"] == "same-job-required"
+    assert known_root is not None, "Recent-first audit requires this job's successful known-answer proof"
+    proof_path = known_root / "known-answer.json"
     known = read(proof_path)
-    assert known["complete"] is True and known["exactJournalEntries"] == 5661
+    assert known["complete"] is True and known["knownAnswerOnly"] is True
+    assert known["noNewMeasurements"] is True and known["exactJournalEntries"] == 5661
+    assert known["retainedEvidenceCommit"] == proof["evidenceCommit"]
+    assert known["sourceCommit"] == proof["sourceCommit"] and known["sourceTree"] == proof["sourceTree"]
+    assert known["originalIndependentAuditGitBlob"] == proof["originalIndependentAuditGitBlob"]
     assert known["newAuditorSha256"] == file_sha(HERE / "audit-recent-first.py")
+    assert [case["dictionary"] for case in known["cases"]] == ["jmdict", "jitendex", "vndb"]
+    assert all(case["complete"] is True and case["oracleComparisons"] == 242 for case in known["cases"])
+    assert known["derivedArithmeticTolerance"] == verify_registration()["knownAnswerDerivedTolerances"]
+    assert reference_root is not None
+    assert git(reference_root, "rev-parse", "HEAD") == proof["sourceCommit"]
+    assert git(reference_root, "rev-parse", "HEAD^{tree}") == proof["sourceTree"]
+    assert set(known["referenceOracles"]) == {"jmdict", "jitendex", "vndb"}
+    reference = known["referenceOracles"]["jmdict"]
+    assert reference["path"] == "jmdict/original-members/oracle.json"
+    assert file_sha(known_root / reference["path"]) == reference["sha256"]
+    assert all(item["baselineProjectionSha256"] == known["baselineOracleProjectionSha256"]
+               for item in known["referenceOracles"].values())
     return HERE / "audit-recent-first.py"
 
 def compact_report(report, kind):
@@ -205,96 +234,201 @@ def verify_registration():
         assert file_sha(HERE / name) == expected, f"Audit implementation changed: {name}"
     return registration
 
-def audit_entry(entry_key, source, baseline, output, known_root=None):
+def resolve_original(entry, study, acquisition, output, deadline, poll_seconds):
+    # IDs already known at registration remain exact constraints. Unknown future
+    # IDs may resolve only from one exact run/head/attempt/name selection.
+    commit = api("/git/commits/" + study["sourceCommit"])
+    assert commit["sha"] == study["sourceCommit"] and commit["tree"]["sha"] == study["sourceTree"]
+    acquisition["sourceGitObject"] = {"sha": commit["sha"], "tree": commit["tree"]["sha"]}
+    previous = None
+    while True:
+        run = api(f"/actions/runs/{study['runId']}")
+        job = api(f"/actions/jobs/{entry['jobId']}")
+        listing = api(f"/actions/runs/{study['runId']}/artifacts?per_page=100&name=" +
+                      urllib.parse.quote(entry["artifactName"], safe=""))
+        acquisition["run"] = {key: run.get(key) for key in (
+            "id", "head_sha", "head_branch", "event", "path", "run_attempt", "status",
+            "conclusion", "created_at", "updated_at")}
+        acquisition["job"] = {key: job.get(key) for key in (
+            "id", "run_id", "head_sha", "name", "status", "conclusion", "started_at", "completed_at")}
+        assert run["id"] == study["runId"] and run["head_sha"] == study["sourceCommit"]
+        assert run["run_attempt"] == study["runAttempt"] == 1 and run["event"] == "push"
+        assert run["path"] == study["workflowPath"]
+        assert job["id"] == entry["jobId"] and job["run_id"] == study["runId"]
+        assert job["head_sha"] == study["sourceCommit"] and job["name"] == entry["jobName"]
+        assert listing["total_count"] <= 100, "Artifact listing exceeds the registered bounded page"
+        matches = [item for item in listing["artifacts"] if item["name"] == entry["artifactName"]]
+        assert len(matches) <= 1, "Registered artifact name is ambiguous; never select a latest replacement"
+        artifact = matches[0] if matches else None
+        state = {
+            "runStatus": run["status"], "runConclusion": run["conclusion"],
+            "jobStatus": job["status"], "jobConclusion": job["conclusion"],
+            "matchingArtifacts": len(matches),
+            "artifactId": artifact["id"] if artifact else None,
+        }
+        if state != previous:
+            with (output / "resolution-polls.jsonl").open("a") as stream:
+                stream.write(encoded({"observedAtUnixSeconds": time.time(), **state}) + "\n")
+            print("FROZEN_ARTIFACT_RESOLUTION " + encoded({
+                "entry": acquisition["entry"], **state,
+            }), flush=True)
+            previous = state
+        if artifact is not None:
+            acquisition["artifact"] = artifact
+            assert not artifact["expired"]
+            assert artifact["workflow_run"]["id"] == study["runId"]
+            assert artifact["workflow_run"]["head_sha"] == study["sourceCommit"]
+            assert type(artifact["id"]) is int and artifact["id"] > 0
+            assert type(artifact["size_in_bytes"]) is int and 0 < artifact["size_in_bytes"] <= entry["maxArtifactBytes"]
+            assert re.fullmatch(r"sha256:[0-9a-f]{64}", artifact.get("digest") or ""), "Artifact API digest is absent"
+            for field, actual in (
+                ("artifactId", artifact["id"]), ("artifactBytes", artifact["size_in_bytes"]),
+                ("artifactSha256", artifact["digest"][7:]),
+            ):
+                if field in entry:
+                    assert entry[field] == actual, f"Previously registered {field} differs"
+            if job["status"] == "completed":
+                acquisition["resolvedIdentity"] = {
+                    "runId": study["runId"], "sourceCommit": study["sourceCommit"],
+                    "runAttempt": 1, "jobId": entry["jobId"], "artifactName": entry["artifactName"],
+                    "artifactId": artifact["id"], "artifactBytes": artifact["size_in_bytes"],
+                    "artifactSha256": artifact["digest"][7:],
+                    "selection": "Unique exact artifact name under the locked run/head/attempt; any prelocked ID/digest also matched.",
+                }
+                return artifact
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("Registered original artifact did not become available within the fixed shared wait deadline")
+        time.sleep(min(poll_seconds, remaining))
+
+def run_auditor(command, output, entry_key, timeout_seconds):
+    try:
+        completed = subprocess.run(command, capture_output=True, text=True, check=False, timeout=timeout_seconds)
+        stdout, stderr = completed.stdout, completed.stderr
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout or ""
+        stderr = error.stderr or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        (output / "audit.stdout.log").write_text(stdout)
+        (output / "audit.stderr.log").write_text(stderr)
+        print_diagnostic(entry_key, "auditor-timeout", stderr, stdout)
+        raise
+    (output / "audit.stdout.log").write_text(stdout)
+    (output / "audit.stderr.log").write_text(stderr)
+    if completed.returncode != 0:
+        print_diagnostic(entry_key, "auditor-exit-" + str(completed.returncode), stderr, stdout)
+    return completed
+
+def audit_entry(entry_key, source, baseline, output, known_root=None, deadline=None, reference_root=None):
     registration = verify_registration()
     entry = registration["entries"][entry_key]
     study = registration["studies"][entry["study"]]
     output.mkdir(parents=True)
+    if deadline is None:
+        deadline = time.monotonic() + registration["acquisition"]["maximumSharedWaitSeconds"]
     acquisition = {
         "entry": entry_key, "expected": entry, "study": study,
         "auditCommit": os.environ["GITHUB_SHA"],
         "auditRegistrationSha256": file_sha(HERE / "registration.json"),
         "auditFileSha256": registration["auditFileSha256"],
         "complete": False, "originalArchiveVerified": False,
+        "sourceBindingsVerified": False, "independentAuditPerformed": False,
         "noTimingOrParserReexecution": True,
     }
-    summary = {"entry": entry_key, "auditPassed": False, "requiredGatesPassed": False}
+    summary = {"entry": entry_key, "acquisitionComplete": False, "auditPassed": False,
+               "requiredGatesPassed": False, "required": entry["required"]}
+    stage = "resolve-original"
     try:
-        run = api(f"/actions/runs/{study['runId']}")
-        job = api(f"/actions/jobs/{entry['jobId']}")
-        artifact = api(f"/actions/artifacts/{entry['artifactId']}")
-        acquisition["run"] = {key: run.get(key) for key in (
-            "id", "head_sha", "head_branch", "event", "run_attempt", "status", "conclusion", "created_at", "updated_at")}
-        acquisition["job"] = {key: job.get(key) for key in (
-            "id", "run_id", "head_sha", "name", "status", "conclusion", "started_at", "completed_at")}
-        acquisition["artifact"] = artifact
-        assert run["id"] == study["runId"] and run["head_sha"] == study["sourceCommit"]
-        assert run["run_attempt"] == 1 and run["event"] == "push"
-        assert job["id"] == entry["jobId"] and job["run_id"] == study["runId"]
-        assert job["head_sha"] == study["sourceCommit"] and job["status"] == "completed"
-        assert job["name"] == entry["jobName"]
-        assert artifact["id"] == entry["artifactId"] and artifact["name"] == entry["artifactName"]
-        assert not artifact["expired"]
-        assert artifact["size_in_bytes"] == entry["artifactBytes"]
-        assert artifact["digest"] == "sha256:" + entry["artifactSha256"]
-        assert artifact["workflow_run"]["id"] == study["runId"]
-        assert artifact["workflow_run"]["head_sha"] == study["sourceCommit"]
+        artifact = resolve_original(entry, study, acquisition, output, deadline,
+                                    registration["acquisition"]["pollSeconds"])
         archive = output / "original-artifact.zip"
-        download_original(entry["artifactId"], archive, entry["artifactBytes"], entry["artifactSha256"])
+        stage = "download-original"
+        download_original(artifact["id"], archive, artifact["size_in_bytes"], artifact["digest"][7:])
         acquisition["originalArchiveVerified"] = True
         location = output / "original-members"
+        stage = "extract-and-census"
         members = extract_and_census(archive, location)
         write(output / "archive-members.json", {
-            "complete": True, "artifactId": entry["artifactId"],
-            "outerSha256": entry["artifactSha256"], "outerBytes": entry["artifactBytes"],
+            "complete": True, "artifactId": artifact["id"],
+            "outerSha256": artifact["digest"][7:], "outerBytes": artifact["size_in_bytes"],
             "memberCount": len(members), "members": members,
         })
-        auditor = bind_sources(source, study, location, known_root)
-        command = [sys.executable, str(auditor), str(location), "--out", str(output / "independent-audit.json")]
-        if study["kind"] == "prefix":
-            command += ["--source-root", str(source), "--baseline-root", str(baseline),
-                        "--dictionary", entry["dictionary"]]
-        completed = subprocess.run(command, capture_output=True, text=True, check=False)
-        (output / "audit.stdout.log").write_text(completed.stdout)
-        (output / "audit.stderr.log").write_text(completed.stderr)
-        acquisition["auditorSha256"] = file_sha(auditor)
-        acquisition["auditorReturncode"] = completed.returncode
-        report = read(output / "independent-audit.json")
-        assert report.get("dictionary", entry["dictionary"]) == entry["dictionary"]
-        audit_passed = completed.returncode == 0 and report.get("complete") is True
-        memory_passed = report.get("memoryPassed") if study["kind"] == "canonical" else None
         acquisition["complete"] = True
-        summary = {
-            "entry": entry_key, "artifactId": entry["artifactId"], "artifactSha256": entry["artifactSha256"],
-            "auditPassed": audit_passed, "memoryPassed": memory_passed,
-            "requiredGatesPassed": audit_passed and memory_passed is not False,
-            "performancePromotionDecision": "not automatic",
-            "report": compact_report(report, study["kind"]),
-        }
+        if study["kind"] == "preserve-only":
+            report = {
+                "complete": False, "auditNotPerformed": True, "dictionary": entry["dictionary"],
+                "scope": "Preservation only: exact API-bound original outer ZIP and full member census. No independent correctness, timing, or qualification audit.",
+            }
+            write(output / "independent-audit.json", report)
+            summary = {
+                "entry": entry_key, "artifactId": artifact["id"], "artifactSha256": artifact["digest"][7:],
+                "acquisitionComplete": True, "auditPassed": None, "memoryPassed": None,
+                "requiredGatesPassed": None, "required": entry["required"],
+                "preserveOnly": True, "report": report,
+            }
+        else:
+            stage = "source-and-known-answer-binding"
+            auditor = bind_sources(source, study, location, known_root, reference_root)
+            acquisition["sourceBindingsVerified"] = True
+            if study["kind"] == "prefix":
+                acquisition["knownAnswerProofSha256"] = file_sha(known_root / "known-answer.json")
+                acquisition["referenceOracleSha256"] = file_sha(known_root / "jmdict/original-members/oracle.json")
+                acquisition["referenceSourceCommit"] = git(reference_root, "rev-parse", "HEAD")
+            command = [sys.executable, str(auditor), str(location), "--out", str(output / "independent-audit.json")]
+            if study["kind"] == "prefix":
+                assert reference_root is not None
+                command += ["--source-root", str(source), "--baseline-root", str(baseline),
+                            "--dictionary", entry["dictionary"],
+                            "--reference-oracle", str(known_root / "jmdict/original-members/oracle.json"),
+                            "--reference-source-root", str(reference_root)]
+            stage = "independent-audit"
+            completed = run_auditor(command, output, entry_key, registration["acquisition"]["auditorTimeoutSeconds"])
+            acquisition["independentAuditPerformed"] = True
+            acquisition["auditorSha256"] = file_sha(auditor)
+            acquisition["auditorReturncode"] = completed.returncode
+            report = read(output / "independent-audit.json")
+            assert report.get("dictionary", entry["dictionary"]) == entry["dictionary"]
+            audit_passed = completed.returncode == 0 and report.get("complete") is True
+            memory_passed = report.get("memoryPassed") if study["kind"] == "canonical" else None
+            summary = {
+                "entry": entry_key, "artifactId": artifact["id"], "artifactSha256": artifact["digest"][7:],
+                "acquisitionComplete": True, "auditPassed": audit_passed, "memoryPassed": memory_passed,
+                "requiredGatesPassed": audit_passed and memory_passed is not False, "required": entry["required"],
+                "performancePromotionDecision": "not automatic",
+                "report": compact_report(report, study["kind"]),
+            }
     except Exception as error:
-        acquisition["failure"] = {"type": type(error).__name__, "error": redact(error)}
+        acquisition["failure"] = {"stage": stage, "type": type(error).__name__, "error": redact(error)}
         summary["failure"] = acquisition["failure"]
+        summary["acquisitionComplete"] = acquisition["complete"]
+        print_diagnostic(entry_key, stage, redact(error))
         if not (output / "independent-audit.json").exists():
             write(output / "independent-audit.json", {
-                "complete": False, "dictionary": entry["dictionary"], "acquisitionFailedBeforeAudit": True,
+                "complete": False, "dictionary": entry["dictionary"], "auditNotPerformed": True,
                 **acquisition["failure"],
             })
     write(output / "acquisition.json", acquisition)
     write(output / "summary.json", summary)
-    # Print only structured summaries; full raw reports and auditor logs remain
-    # in the evidence. Never print a token, request header or signed URL.
     console = encoded(summary)
     if len(console.encode()) > 24000:
         console = encoded({key: summary.get(key) for key in (
-            "entry", "artifactId", "artifactSha256", "auditPassed", "memoryPassed", "requiredGatesPassed", "failure")})
+            "entry", "artifactId", "artifactSha256", "acquisitionComplete", "auditPassed",
+            "memoryPassed", "requiredGatesPassed", "preserveOnly", "failure")})
     print("FROZEN_AUDIT_SUMMARY " + console, flush=True)
-    return 0 if summary["requiredGatesPassed"] else 1
+    return summary
 
 def retain_archive(output, kind):
     original = output / "original-artifact.zip"
     if not original.exists():
         return None
-    if kind == "prefix" or not (output / "archive-members.json").exists():
+    # Omitting packaged archives is allowed only after the full original-byte
+    # auditor completed. A memory-gate failure does not invalidate that audit.
+    report_path = output / "independent-audit.json"
+    byte_audit_complete = report_path.exists() and read(report_path).get("complete") is True
+    if kind != "canonical" or not byte_audit_complete or not (output / "archive-members.json").exists():
         write(output / "retention.json", {
             "mode": "verbatim-original-artifact", "sha256": file_sha(original),
             "bytes": original.stat().st_size, "omittedOriginalMembers": [],
@@ -305,7 +439,7 @@ def retain_archive(output, kind):
     excluded = {"package-A.zip", "package-B.zip"}
     retained = output / "evidence-without-reproducible-packages.zip"
     omitted = []
-    with zipfile.ZipFile(retained, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as target:
+    with zipfile.ZipFile(retained, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as target:
         for member in census["members"]:
             if member["directory"]:
                 continue
@@ -319,34 +453,51 @@ def retain_archive(output, kind):
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             target.writestr(info, path.read_bytes())
+    assert {row["path"] for row in omitted} == excluded, "Exact two package archives must be the only omissions"
     write(output / "retention.json", {
         "mode": "all-original-member-bytes-except-listed-reproducible-package-zips",
         "originalOuterSha256": census["outerSha256"], "originalOuterBytes": census["outerBytes"],
         "retainedArchiveSha256": file_sha(retained), "retainedArchiveBytes": retained.stat().st_size,
         "omittedOriginalMembers": omitted,
-        "limitations": "The retained archive is not the original outer ZIP. Complete original-member census and original outer digest are retained. Only exact package-A.zip/package-B.zip members are omitted; original observations remain byte-identical. Original package bytes were available to the audit before omission; consult its pass/failure report.",
+        "limitations": "The retained archive is not the original outer ZIP. Complete original-member census and original outer digest are retained. Only exact package-A.zip/package-B.zip members are omitted; original observations remain byte-identical. The full byte audit completed before omission; memory gates remain separate. A later full package/byte audit cannot be repeated from this reduced archive alone without the original package ZIPs.",
     })
     return retained
 
 def publish_entry(entry_key, output):
     if entry_key == "prefix-known-answer":
-        publish_known(output)
-        return
+        return publish_known(output)
     registration = verify_registration()
     entry = registration["entries"][entry_key]
     kind = registration["studies"][entry["study"]]["kind"]
-    assert (output / "acquisition.json").exists(), "No audit/acquisition receipt to retain"
-    archive = retain_archive(output, kind)
+    assert (output / "acquisition.json").exists(), "No acquisition receipt to retain"
+    acquisition = read(output / "acquisition.json")
+    try:
+        archive = retain_archive(output, kind)
+    except Exception as error:
+        # A failed reduced-archive preparation must never suppress the original.
+        original = output / "original-artifact.zip"
+        archive = original if original.exists() else None
+        write(output / "retention.json", {
+            "mode": "verbatim-original-after-retention-preparation-failure" if archive else "no-complete-original",
+            "failure": {"type": type(error).__name__, "error": redact(error)},
+            "sha256": file_sha(original) if archive else None,
+            "bytes": original.stat().st_size if archive else None, "omittedOriginalMembers": [],
+        })
+        print_diagnostic(entry_key, "retention-preparation", redact(error))
     names = ["acquisition.json", "archive-members.json", "independent-audit.json",
-             "summary.json", "audit.stdout.log", "audit.stderr.log", "retention.json"]
+             "summary.json", "audit.stdout.log", "audit.stderr.log", "retention.json",
+             "resolution-polls.jsonl"]
     if archive:
         names.append(archive.name)
     elif (output / "download-incomplete.bin").exists():
         names.append("download-incomplete.bin")
-    publish_files(output, entry_key, names, {
+    resolved = acquisition.get("resolvedIdentity", {})
+    return publish_files(output, entry_key, names, {
         "originalRunId": registration["studies"][entry["study"]]["runId"],
-        "originalArtifactId": entry["artifactId"],
-        "originalArtifactSha256": entry["artifactSha256"],
+        "originalArtifactId": resolved.get("artifactId"),
+        "originalArtifactSha256": resolved.get("artifactSha256"),
+        "originalArchiveVerified": acquisition["originalArchiveVerified"],
+        "acquisitionComplete": acquisition["complete"],
     })
 
 def publish_known(output):
@@ -355,8 +506,9 @@ def publish_known(output):
     names = ["known-answer.json"]
     for dictionary in ("jmdict", "jitendex", "vndb"):
         names += [dictionary + "/" + name for name in (
-            "reconstructed-audit.json", "archive-members.json", "audit.stdout.log", "audit.stderr.log")]
-    publish_files(output, "prefix-known-answer", names, {
+            "reconstructed-audit.json", "archive-members.json", "audit.stdout.log", "audit.stderr.log",
+            "original-members/oracle.json")]
+    return publish_files(output, "prefix-known-answer", names, {
         "knownAnswerOnly": True,
         "originalEvidenceCommit": "a355146b6c511f8ccdea3fd7fa60af9c450d904f",
         "originalIndependentAuditGitBlob": "03a0efff5529523183fe92997b0946ff98e7d622",
@@ -364,25 +516,32 @@ def publish_known(output):
 
 def publish_files(output, entry_key, names, provenance):
     files = []
+    failures = []
     for name in names:
         path = output / name
         if not path.exists():
             continue
-        assert path.resolve().is_relative_to(output.resolve()) and path.is_file() and not path.is_symlink()
-        size = path.stat().st_size
-        assert size <= MAX_BLOB_BYTES, f"Retained file exceeds bounded Git-blob upload: {name}"
-        data = path.read_bytes()
-        expected_git = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
-        response = api("/git/blobs", {"encoding": "base64", "content": base64.b64encode(data).decode()})
-        assert response["sha"] == expected_git, f"Git blob identity differs: {name}"
-        row = {"path": f"dev/perf/import-round-20261128-beb5/hosted-audit/{entry_key}/{name}",
-               "bytes": len(data), "gitBlobSha": expected_git, "sha256": sha(data)}
-        files.append(row)
-        print("DURABLE_EVIDENCE_BLOB " + encoded(row), flush=True)
+        try:
+            assert path.resolve().is_relative_to(output.resolve()) and path.is_file() and not path.is_symlink()
+            size = path.stat().st_size
+            assert size <= MAX_BLOB_BYTES, f"Retained file exceeds bounded Git-blob upload: {name}"
+            data = path.read_bytes()
+            expected_git = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+            response = api("/git/blobs", {"encoding": "base64", "content": base64.b64encode(data).decode()})
+            assert response["sha"] == expected_git, f"Git blob identity differs: {name}"
+            row = {"path": f"dev/perf/import-round-20261128-beb5/hosted-audit/{entry_key}/{name}",
+                   "bytes": len(data), "gitBlobSha": expected_git, "sha256": sha(data)}
+            files.append(row)
+            print("DURABLE_EVIDENCE_BLOB " + encoded(row), flush=True)
+        except Exception as error:
+            failure = {"name": name, "type": type(error).__name__, "error": redact(error)}
+            failures.append(failure)
+            print("DURABLE_EVIDENCE_FAILURE " + encoded({"entry": entry_key, **failure}), flush=True)
     manifest = {
-        "complete": True, "entry": entry_key, "auditCommit": os.environ["GITHUB_SHA"],
+        "complete": not failures, "entry": entry_key, "auditCommit": os.environ["GITHUB_SHA"],
         **provenance,
-        "unreferencedBlobsOnly": True, "noRefOrBranchOrPullRequestWrite": True, "files": files,
+        "unreferencedBlobsOnly": True, "noRefOrBranchOrPullRequestWrite": True,
+        "files": files, "failures": failures,
     }
     write(output / "durable-manifest.json", manifest)
     data = (output / "durable-manifest.json").read_bytes()
@@ -393,19 +552,108 @@ def publish_files(output, entry_key, names, provenance):
         "path": f"dev/perf/import-round-20261128-beb5/hosted-audit/{entry_key}/durable-manifest.json",
         "gitBlobSha": expected_git, "sha256": sha(data), "bytes": len(data),
     }), flush=True)
+    return manifest
+
+def batch(canonical, prefix, baseline, output, known_root, reference_root):
+    registration = verify_registration()
+    output.mkdir(parents=True, exist_ok=True)
+    assert not (output / "batch-summary.json").exists()
+    order = registration["entryOrder"]
+    assert len(order) == len(set(order)) and set(order) == set(registration["entries"])
+    deadline = time.monotonic() + registration["acquisition"]["maximumSharedWaitSeconds"]
+    write(output / "batch-plan.json", {
+        "auditCommit": os.environ["GITHUB_SHA"], "entryOrder": order,
+        "registrationSha256": file_sha(HERE / "registration.json"),
+        "acquisition": registration["acquisition"], "noTimingOrParserReexecution": True,
+    })
+    known_status = {"complete": False, "retentionComplete": False}
+    try:
+        known = read(known_root / "known-answer.json")
+        known_status["complete"] = known.get("complete") is True
+        known_status["reportSha256"] = file_sha(known_root / "known-answer.json")
+        retained = publish_known(known_root)
+        known_status["retentionComplete"] = retained["complete"]
+    except Exception as error:
+        known_status["failure"] = {"type": type(error).__name__, "error": redact(error)}
+        print_diagnostic("prefix-known-answer", "known-answer-retention", redact(error))
+    observations = []
+    sources = {"canonical": canonical, "prefix": prefix, "crc": None}
+    for entry_key in order:
+        entry = registration["entries"][entry_key]
+        row = {"entry": entry_key, "required": entry["required"], "retentionComplete": False}
+        folder = output / entry_key
+        try:
+            entry_deadline = deadline
+            if not entry["required"]:
+                entry_deadline = min(deadline, time.monotonic() + registration["acquisition"]["optionalPreserveWaitSeconds"])
+            summary = audit_entry(entry_key, sources[entry["study"]], baseline, folder,
+                                  known_root, entry_deadline, reference_root)
+            row["summary"] = summary
+        except Exception as error:
+            row["failure"] = {"type": type(error).__name__, "error": redact(error)}
+            print_diagnostic(entry_key, "entry-wrapper", redact(error))
+        try:
+            retained = publish_entry(entry_key, folder)
+            row["retentionComplete"] = retained["complete"]
+        except Exception as error:
+            row["retentionFailure"] = {"type": type(error).__name__, "error": redact(error)}
+            print_diagnostic(entry_key, "entry-retention", redact(error))
+        observations.append(row)
+        with (output / "batch-journal.jsonl").open("a") as journal:
+            journal.write(encoded(row) + "\n")
+    required_gates = all(
+        row.get("summary", {}).get("requiredGatesPassed") is True
+        for row in observations if row["required"]
+    )
+    required_retention = all(row["retentionComplete"] for row in observations if row["required"])
+    result = {
+        "complete": True, "auditCommit": os.environ["GITHUB_SHA"],
+        "noTimingOrParserReexecution": True, "knownAnswer": known_status,
+        "requiredGatesPassed": known_status["complete"] and required_gates,
+        "requiredRetentionComplete": known_status["retentionComplete"] and required_retention,
+        "entries": observations, "optionalPreserveOnlyEntry": "crc-no-unroll-jmdict",
+        "performancePromotionDecision": "not automatic",
+        "limits": "A complete batch means every registered entry was attempted, including failures. Optional CRC preservation is never an independent efficacy or correctness audit.",
+    }
+    write(output / "batch-summary.json", result)
+    print("FROZEN_AUDIT_BATCH " + encoded({
+        "complete": True, "requiredGatesPassed": result["requiredGatesPassed"],
+        "requiredRetentionComplete": result["requiredRetentionComplete"],
+        "entries": [{"entry": row["entry"], "retentionComplete": row["retentionComplete"],
+                     "acquisitionComplete": row.get("summary", {}).get("acquisitionComplete"),
+                     "auditPassed": row.get("summary", {}).get("auditPassed"),
+                     "requiredGatesPassed": row.get("summary", {}).get("requiredGatesPassed")}
+                    for row in observations],
+    }), flush=True)
+    publish_files(output, "combined", ["batch-plan.json", "batch-journal.jsonl", "batch-summary.json"], {
+        "originalRunIds": [registration["studies"][key]["runId"] for key in ("canonical", "prefix", "crc")],
+        "noTimingOrParserReexecution": True,
+    })
+    return result["requiredGatesPassed"] and result["requiredRetentionComplete"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("operation", choices=("audit", "publish"))
-    parser.add_argument("--entry", required=True)
+    parser.add_argument("operation", choices=("audit", "publish", "batch"))
+    parser.add_argument("--entry")
     parser.add_argument("--source-root", type=Path)
+    parser.add_argument("--canonical-root", type=Path)
+    parser.add_argument("--prefix-root", type=Path)
+    parser.add_argument("--reference-source-root", type=Path)
     parser.add_argument("--baseline-root", type=Path)
     parser.add_argument("--known-answer-root", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    if args.operation == "batch":
+        assert args.canonical_root and args.prefix_root and args.baseline_root and args.known_answer_root and args.reference_source_root
+        sys.exit(0 if batch(args.canonical_root.resolve(), args.prefix_root.resolve(),
+                             args.baseline_root.resolve(), args.out.resolve(),
+                             args.known_answer_root.resolve(), args.reference_source_root.resolve()) else 1)
+    assert args.entry
     if args.operation == "audit":
-        assert args.source_root is not None
-        sys.exit(audit_entry(args.entry, args.source_root.resolve(),
-                             args.baseline_root.resolve() if args.baseline_root else None, args.out.resolve(),
-                             args.known_answer_root.resolve() if args.known_answer_root else None))
-    publish_entry(args.entry, args.out.resolve())
+        summary = audit_entry(args.entry, args.source_root.resolve() if args.source_root else None,
+                              args.baseline_root.resolve() if args.baseline_root else None, args.out.resolve(),
+                              args.known_answer_root.resolve() if args.known_answer_root else None,
+                              reference_root=args.reference_source_root.resolve() if args.reference_source_root else None)
+        sys.exit(0 if summary["requiredGatesPassed"] is True or summary.get("preserveOnly") else 1)
+    manifest = publish_entry(args.entry, args.out.resolve())
+    sys.exit(0 if manifest["complete"] else 1)

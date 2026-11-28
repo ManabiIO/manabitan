@@ -1,14 +1,14 @@
 {
-  "schema": 1,
+  "schema": 2,
   "purpose": "Audit and retain ORIGINAL fixed observations only; no parser/import/timing replay.",
   "workflow": ".github/workflows/frozen-import-artifact-audit-beb5.yml",
-  "workflowSha256": "62ae5ba895f123d22d54ff10ff818a9c5da39de6aa8491926f353b608203e963",
+  "workflowSha256": "f300370a907bf76844f81d8b13811c9188cf138d29c3151f09d5165e94dc46ad",
   "auditFileSha256": {
-    "acquire-and-audit.py": "4f990783228a32509de5fd1a9f2225c2367a8076175c213ea6a5923888dd3301",
+    "acquire-and-audit.py": "389a5f23447a72b85f334cb9b598ed2499795052d2c6347585c3fb4d8720ff97",
     "audit-recent-first.py": "be9161739f695316b5e26a2815642718e20439b0df9ad8f8a760a2893c2d34f6",
     "verify-prefix-known-answer.py": "62dbe1176f7c577f156419a82b0a8dc7a42f4eafd2f2d02c70e74f012d49532f",
     "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
-    "README.md": "ae9781859723505f086648f0fee97116faf09aab6f949a7e66d8368f087d5a76"
+    "README.md": "09d844a75441254cd119da8aa41641f1052d0f2e6ef4f399208cc186ba7cbd23"
   },
   "studies": {
     "canonical": {
@@ -18,7 +18,9 @@
       "sourceTree": "002e46ab6976eeb6b366b04ce67ef57c467bb47d",
       "auditorPath": "dev/perf/canonical-sidecar-acquisition-20261128-beb5/audit-canonical-sidecar-browser.py",
       "auditorSha256": "8422368e7e720d5ba0165b47054612cf20ca01c766377a97d8321bab0f33a656",
-      "runtimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a"
+      "runtimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a",
+      "runAttempt": 1,
+      "workflowPath": ".github/workflows/canonical-sidecar-browser-beb5.yml"
     },
     "prefix": {
       "kind": "prefix",
@@ -26,8 +28,28 @@
       "sourceCommit": "633761548509a77b43b414b83a80033e17ed7399",
       "sourceTree": "db21a53519b602b29234cb535cc59cead5118494",
       "runtimeCommit": "1a935bddf29c4d87606d2facd4b168af7e1a40f1",
-      "scope": "New reconstructed auditor; must pass the separate original-prefix known-answer check before a recent-first result is accepted. No recent-first artifact is registered before it exists.",
-      "knownAnswer": null
+      "scope": "New reconstructed auditor; recent-first data is accepted only after this same job's successful original-prefix known-answer reconstruction and exact baseline oracle projection binding.",
+      "knownAnswer": {
+        "mode": "same-job-required",
+        "evidenceCommit": "a355146b6c511f8ccdea3fd7fa60af9c450d904f",
+        "sourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+        "sourceTree": "023368b2731c17c91f16cd740d868ae2ebafa27b",
+        "originalIndependentAuditGitBlob": "03a0efff5529523183fe92997b0946ff98e7d622",
+        "exactJournalEntries": 5661,
+        "rawReceiptValues": "exact",
+        "referenceOracle": "same-job prefix-known-answer/jmdict/original-members/oracle.json"
+      },
+      "runAttempt": 1,
+      "workflowPath": ".github/workflows/whole-glossary-recent-first-screen-beb5.yml"
+    },
+    "crc": {
+      "kind": "preserve-only",
+      "runId": 46120623371,
+      "runAttempt": 1,
+      "sourceCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+      "sourceTree": "2dc2cfa2a858ca7cea7ee8317abc2c14fd3f34af",
+      "workflowPath": ".github/workflows/crc-no-unroll-screen-beb5.yml",
+      "scope": "Optional verbatim original outer ZIP, API provenance and member census only. No independent correctness, timing or efficacy audit."
     }
   },
   "entries": {
@@ -39,7 +61,9 @@
       "artifactBytes": 35634582,
       "artifactSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
       "jobId": 140877908946,
-      "jobName": "Canonical checksum imports (jmdict, 12 pairs)"
+      "jobName": "Canonical checksum imports (jmdict, 12 pairs)",
+      "required": true,
+      "maxArtifactBytes": 67108864
     },
     "canonical-jitendex": {
       "study": "canonical",
@@ -49,7 +73,63 @@
       "artifactBytes": 35784231,
       "artifactSha256": "3283503cb9b05e7b67ca5df7f07bf50e6c2f066e78b1067195c75cee7275f19e",
       "jobId": 140877908866,
-      "jobName": "Canonical checksum imports (jitendex, 12 pairs)"
+      "jobName": "Canonical checksum imports (jitendex, 12 pairs)",
+      "required": true,
+      "maxArtifactBytes": 67108864
+    },
+    "canonical-vndb": {
+      "study": "canonical",
+      "dictionary": "vndb",
+      "required": true,
+      "maxArtifactBytes": 67108864,
+      "artifactName": "canonical-sidecar-browser-beb5-vndb-AB",
+      "jobId": 140877908947,
+      "jobName": "Canonical checksum imports (vndb, 12 pairs)"
+    },
+    "prefix-jmdict": {
+      "study": "prefix",
+      "dictionary": "jmdict",
+      "required": true,
+      "maxArtifactBytes": 8388608,
+      "artifactName": "whole-glossary-recent-first-screen-beb5-jmdict",
+      "jobId": 140884941261,
+      "jobName": "Recent-first witness (jmdict)",
+      "artifactId": 15252998358,
+      "artifactBytes": 175190,
+      "artifactSha256": "207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae"
+    },
+    "prefix-jitendex": {
+      "study": "prefix",
+      "dictionary": "jitendex",
+      "required": true,
+      "maxArtifactBytes": 8388608,
+      "artifactName": "whole-glossary-recent-first-screen-beb5-jitendex",
+      "jobId": 140884941267,
+      "jobName": "Recent-first witness (jitendex)",
+      "artifactId": 15254136620,
+      "artifactBytes": 201105,
+      "artifactSha256": "f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a"
+    },
+    "prefix-vndb": {
+      "study": "prefix",
+      "dictionary": "vndb",
+      "required": true,
+      "maxArtifactBytes": 8388608,
+      "artifactName": "whole-glossary-recent-first-screen-beb5-vndb",
+      "jobId": 140884941068,
+      "jobName": "Recent-first witness (vndb)",
+      "artifactId": 15254106199,
+      "artifactBytes": 1145989,
+      "artifactSha256": "db0cb3a7ae4209e326fcb539965be563b81626cb33f087f52e4613020583c6f8"
+    },
+    "crc-no-unroll-jmdict": {
+      "study": "crc",
+      "dictionary": "jmdict",
+      "required": false,
+      "maxArtifactBytes": 67108864,
+      "artifactName": "crc-no-unroll-screen-beb5-jmdict",
+      "jobId": 140904102572,
+      "jobName": "Single fixed CRC candidate (JMdict)"
     }
   },
   "permissions": {
@@ -57,11 +137,30 @@
     "contents": "write",
     "writeBoundary": "POST /repos/ManabiIO/manabitan/git/blobs only; no branch, ref, commit, PR, workflow or original artifact mutation."
   },
-  "retention": "Full original downloaded ZIPs remain in this audit's Actions artifact. Durable Git blobs retain prefix ZIPs verbatim. Canonical durable archives omit only exact package-A.zip/package-B.zip bytes, retaining complete original-member census, original outer digest, original observation bytes, audit reports, and an explicit omission manifest.",
-  "execution": "Ubuntu24.04 standard-library Python analysis only. Fixed-source auditors and artifact checksums bind inputs. Matrix fail-fast is false; failed memory or qualification gates do not stop other artifact audits. New code has not been locally executed while the executor is unavailable.",
+  "retention": "Full original downloaded ZIPs remain in the audit Actions artifact. Prefix and optional CRC Git blobs retain verbatim outer ZIPs. Canonical Git archives may omit only exact package-A.zip/package-B.zip members after the complete original-byte audit; retain every observation, member census, package hash/size, original outer digest, audit/failure report and an explicit limitation. If the byte audit is incomplete, retain the original ZIP verbatim.",
+  "execution": "One Ubuntu24.04 standard-library Python analysis job only; no parser/browser/native benchmark execution. Known-answer failure blocks prefix acceptance but not acquisition, canonical audits or evidence retention. A memory/qualification failure does not stop other corpora. New code has not been locally executed while the executor is unavailable.",
   "knownAnswerDerivedTolerances": {
     "milliseconds": 1e-9,
     "percentagePoints": 1e-10,
     "rawReceiptValues": "exact"
+  },
+  "entryOrder": [
+    "canonical-jmdict",
+    "canonical-jitendex",
+    "prefix-jmdict",
+    "prefix-jitendex",
+    "prefix-vndb",
+    "canonical-vndb",
+    "crc-no-unroll-jmdict"
+  ],
+  "acquisition": {
+    "maximumSharedWaitSeconds": 3600,
+    "optionalPreserveWaitSeconds": 600,
+    "pollSeconds": 45,
+    "auditorTimeoutSeconds": 600,
+    "futureIdentityRule": "One exact artifact name under the registered run/head/attempt 1 and completed registered job. Resolve and retain its API ID/size/digest; reject ambiguity, expiry or any mismatch with prelocked identities.",
+    "retriesOfMeasurements": 0,
+    "continueOtherEntriesAfterFailure": true,
+    "completeBatchMeaning": "Every registered entry attempted. Acquisition, independent audit, memory/protocol gates and retention are separate results."
   }
 }

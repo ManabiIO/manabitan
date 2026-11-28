@@ -12,10 +12,10 @@ permissions:
   contents: write
 
 jobs:
-  prefix-known-answer:
-    name: Check reconstructed prefix auditor against original fixed receipts
+  audit-originals:
+    name: Audit six frozen corpora and preserve the registered CRC screen
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -47,86 +47,53 @@ jobs:
           path: original-evidence
           persist-credentials: false
           sparse-checkout: dev/perf/import-round-20261128-beb5/prefix-component
-      - name: Check audit syntax and reproduce independently retained known results
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m py_compile audit/dev/perf/frozen-import-audit-20261128-beb5/*.py
-          python audit/dev/perf/frozen-import-audit-20261128-beb5/verify-prefix-known-answer.py \
-            --source-root original-source --baseline-root baseline \
-            --evidence-root original-evidence --out evidence/prefix-known-answer
-      - name: Preserve known-answer audit reports as unreferenced Git blobs
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          python audit/dev/perf/frozen-import-audit-20261128-beb5/acquire-and-audit.py \
-            publish --entry prefix-known-answer --out evidence/prefix-known-answer
-      - name: Retain known-answer reports and every failure
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: frozen-import-audit-beb5-prefix-known-answer
-          path: evidence/prefix-known-answer
-          if-no-files-found: error
-          retention-days: 14
-
-  original-artifact-audit:
-    name: Audit original ${{ matrix.key }} artifact
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - key: canonical-jmdict
-            kind: canonical
-            source: 55113f0d9f85faf4a867a311d1d78dd9d2e80609
-          - key: canonical-jitendex
-            kind: canonical
-            source: 55113f0d9f85faf4a867a311d1d78dd9d2e80609
-    steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          path: audit
+          ref: 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+          path: canonical-source
           persist-credentials: false
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ matrix.source }}
-          path: frozen-source
-          persist-credentials: false
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        if: matrix.kind == 'prefix'
-        with:
-          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-          path: baseline
+          ref: 633761548509a77b43b414b83a80033e17ed7399
+          path: recent-source
           persist-credentials: false
           sparse-checkout: |
             ext/js
             dev/data/dictionary-wasm
+            dev/perf/whole-glossary-prefix-20261128
             test/perf
-      - name: Acquire original bytes and run the exact registered auditor
+            .github/workflows
+      - name: Check audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python -m py_compile audit/dev/perf/frozen-import-audit-20261128-beb5/*.py
+      - name: Reconstruct the independently retained prefix known answer
+        id: known_answer
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python audit/dev/perf/frozen-import-audit-20261128-beb5/verify-prefix-known-answer.py \
+            --source-root original-source --baseline-root baseline \
+            --evidence-root original-evidence --out evidence/prefix-known-answer
+      - name: Acquire, audit and retain every registered original artifact
+        if: always()
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile audit/dev/perf/frozen-import-audit-20261128-beb5/*.py
           python audit/dev/perf/frozen-import-audit-20261128-beb5/acquire-and-audit.py \
-            audit --entry '${{ matrix.key }}' --source-root frozen-source \
-            --baseline-root baseline --out 'evidence/${{ matrix.key }}'
-      - name: Preserve audit evidence as unreferenced Git blobs
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          python audit/dev/perf/frozen-import-audit-20261128-beb5/acquire-and-audit.py \
-            publish --entry '${{ matrix.key }}' --out 'evidence/${{ matrix.key }}'
-      - name: Retain complete original bytes, audit reports and failures
+            batch --canonical-root canonical-source --prefix-root recent-source \
+            --baseline-root baseline --reference-source-root original-source \
+            --known-answer-root evidence/prefix-known-answer --out evidence
+      - name: Retain full original ZIPs, reports and every failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: frozen-import-audit-beb5-${{ matrix.key }}
-          path: evidence/${{ matrix.key }}
+          name: frozen-import-audit-beb5-combined
+          path: evidence
           if-no-files-found: error
           retention-days: 14
