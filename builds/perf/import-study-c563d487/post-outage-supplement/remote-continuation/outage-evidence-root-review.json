@@ -1,0 +1,13 @@
+{
+  "parent": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+  "parentTree": "ce3c6523d81fd79c6ed9224ad8f7dad6a2ec7e56",
+  "pureInsertion": true,
+  "onlyPrecisionClauseChanged": true,
+  "exact40Paths": true,
+  "exact20RecoveredProofs": true,
+  "all38IndexEvidenceFilesMatchManifest": true,
+  "files": 40,
+  "totalBytes": 6329900,
+  "canonicalSha256": "2579e29641e7ca406d1d6fa756d4e91176d347570ae0b640e636bc76996f3881",
+  "indexSha256": "92a59535e12823f5baa6a5a13c56b585ba08c9092c391f34660d25ed3e2ed5e6"
+}

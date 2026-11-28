@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "reviewedAtUtc": "2026-11-28 09:20:38 UTC",
+  "reviewer": "row_suffix_experiment",
+  "verdict": "PASS: no source/protocol blocker found; Python/YAML runtime preflight remains an explicit required dependency before acquisition",
+  "scope": "Independent remote read-only review while local executor unavailable; no local compilation, native execution, tests, benchmark or source mutation",
+  "identities": {
+    "workflowGitBlob": "b70bcddfec6db7fe4dbf2dfb622d5a2a135fc2af",
+    "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+    "verifierGitBlob": "c289da6f67c980792daf3720dc2c72f191a6a77e",
+    "verifierSha256": "de63b509951892b9d83f6a0087fb77e20f9e224d4cb5d5ffebc09a9d0c5cf988",
+    "bindingGitBlob": "67981ab38e04810cf397bd1eae45c0a44aa4b84b",
+    "bindingSha256": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+    "archiveHelperGitBlob": "e994ee477e5b996b5453e17626a65785ff2dacaa",
+    "archiveHelperSha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+    "recoveryProofGitBlob": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6",
+    "recoveryProofSha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+    "criteriaSha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee"
+  },
+  "product": {
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "candidateTree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+    "directParentVerifiedViaGitApi": true,
+    "exactSixPathDiffVerifiedViaCompareApi": true,
+    "sixPublishedFileBytesIndependentlyRefetchedAndHashed": [
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "bytes": 164449,
+        "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "gitBlobSha1": "5a9033fda78144bfa1edf038b52f6804eeba23f5"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "bytes": 69998,
+        "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+        "gitBlobSha1": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "bytes": 2588,
+        "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+        "gitBlobSha1": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd"
+      },
+      {
+        "path": "test/term-bank-row-suffix-reuse.test.js",
+        "bytes": 15101,
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+        "bytes": 3037,
+        "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+        "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-ends.test.js",
+        "bytes": 7560,
+        "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+        "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+      }
+    ]
+  },
+  "mechanicalComparisonToOldWorkflow": {
+    "workflowOnlyHelperHashChanged": true,
+    "helperOnlyGitBlobHashAddition": true,
+    "acquisitionSameExceptNamespace": true,
+    "extractorSameExceptTwoNamespaces": true,
+    "oldAcquisitionBlockSha256": "175ceff73fbb53a8b845b4e1d22e14df65c0dc5fe6ed63bff6f9451ed17e22b4",
+    "newAcquisitionBlockSha256": "6cb1300e1f0311199283913bf033cdb6aee68764a02781714d56cb1d91311f33",
+    "oldExtractorSha256": "d886785ff5bd02c2f21c823708fa7a6e6a95cbbdd68f818ff464c3a640489d3b",
+    "newExtractorSha256": "2f98725ea942653a9ee29c22d4584e33569ce462ce7847eafe50505603c51c91"
+  },
+  "reviewedChecks": [
+    "Binding dependency validates all44 original archive members,17 chronological exact commands/exit codes/log hashes,original compiler/test producer and source binding before six cells can acquire.",
+    "New full workflow pins five tooling hashes, compiles Python syntax before validation, fetches exact baseline/product/original build objects at depth2 and keeps required before-merge exact-head repository checks separate.",
+    "Original successful Actions job API includes the exact head_sha/run_attempt and all success step fields required by the verifier.",
+    "Both candidate and baseline trees and every changed regular Git blob/mode are exact; all other product files come from the same dcfc baseline.",
+    "Six cells retain 12 alternating candidate pairs,4 A/A pairs,4 warmups,2 exhaustive-media and4 separate memory observations each:252 total; exact two package entries,flags{},VNDB37+37 SAH,existing observer/memory policy unchanged.",
+    "Acquisition command and entire raw compact JSON extraction block match old workflow after only evidence/workflow path namespace substitution.",
+    "Post-acquisition archive helper excludes only two exact root release packages, keeps all other original regular members, writes siblings to avoid recursion, rejects unsafe/symlink members, hashes and roundtrips ZIP bytes before bounded base64 output.",
+    "Added archive Git blob SHA1 uses the correct blob header and byte stream; no timing or source change accompanies it.",
+    "All prospective criteria/provenance markers and every acquisition failure remain retained; capture and original artifact upload run after acquisition/extraction with always() without replacing observations.",
+    "Nine full harness source hashes independently refetched at dcfc are identical to old expected values; old independent auditor remains byte-identical."
+  ],
+  "limitations": [
+    "This is source/protocol review, not execution of the new Python verifier or archival helper; required CI syntax/read-only binding gates must succeed before any cell.",
+    "No current-base performance or non-regression claim; all original old-base and selector cohorts remain unchanged.",
+    "Final workflow commit and new run ID must be bound in the independent expected file before auditing observations."
+  ]
+}

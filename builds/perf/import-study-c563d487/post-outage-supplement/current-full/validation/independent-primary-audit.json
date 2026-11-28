@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent primary-log reconciliation of the exact-source correctness reuse dependency; no correctness suites/native execution repeated, no performance observations acquired.",
+  "runId": 46130093248,
+  "jobId": 140933118058,
+  "workflowHead": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "result": "pass",
+  "originalJobId": 140922033124,
+  "originalRunId": 46126462448,
+  "originalArtifactId": 15256173851,
+  "originalArtifactSha256": "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+  "rawPrimaryLog": {
+    "bytes": 41375,
+    "sha256": "389ac1458ed3e0150bb8f3905097f8f5c1431e52dda0e5242cf5c10cdd61e77f",
+    "gitBlob": "59e42e62063828500417da110668f29fbb046850"
+  },
+  "taggedRecords": {
+    "bytes": 17079,
+    "sha256": "c4229caae292ee43968cd1f1413142842503d6a129d9ed96fb44d262cd705e69",
+    "gitBlob": "2d6c1e3e640624ffdd81f5a7288e45aad85fdb5e"
+  },
+  "taggedRecordCount": 18,
+  "all17OriginalReceiptBytesAndValuesMatch": true,
+  "originalReceipts": [
+    {
+      "path": "all-dry-build-targets.receipt.json",
+      "bytes": 413,
+      "sha256": "1c2e66c45263973290eb25b487548574d8f102b001df697aa31bd0417102fa51",
+      "gitBlob": "50819abec5b5aa104f9fb7de4605aefd8b0a6066"
+    },
+    {
+      "path": "apply-check.receipt.json",
+      "bytes": 505,
+      "sha256": "7b0e860eb63bc63847a0cb3eae850babe59d9bf8a0de6e6f5ad3804ec6acfb63",
+      "gitBlob": "6bf555f513d2c64edfb179546831a56b4a1dcf1b"
+    },
+    {
+      "path": "apply-patch.receipt.json",
+      "bytes": 490,
+      "sha256": "912e7ec463a4497c82fa58d680d2cbbedb50a30f1ffe47b9f7b2c87081539e58",
+      "gitBlob": "cbd8f05fe71a9ea3b1b76d5963d5e285874da24c"
+    },
+    {
+      "path": "build-candidate-libraries.receipt.json",
+      "bytes": 417,
+      "sha256": "d36ed6e9883b24f7654ba022559a1cd3da3ce3505cabfc87fcdd1e43550d0c61",
+      "gitBlob": "9c2543947adf9d87eac0e19763cbeff04e5b85ba"
+    },
+    {
+      "path": "build-native-candidate.receipt.json",
+      "bytes": 450,
+      "sha256": "87cc84a2144ff15be52f8691a48999a35282a71c10c7de5da998bcebaba65b46",
+      "gitBlob": "2fa8e135669be53701dc2b9d0a19ac7fc6ba4c8b"
+    },
+    {
+      "path": "complete-unit-suite.receipt.json",
+      "bytes": 441,
+      "sha256": "8e09a91cbf00a56286efb71c97128e08ccd3a4e2d8990c4d7e8e75fefe095b90",
+      "gitBlob": "9554cf2a61bf2c29a9c1b6f15c4870581fe24f40"
+    },
+    {
+      "path": "create-baseline.receipt.json",
+      "bytes": 513,
+      "sha256": "f7499c64fb761d310460da5afb1bf8c755c70283f7d495953c9455baff6c2aa1",
+      "gitBlob": "3c2d77cbc7bfb879471484c52aacf823d714678e"
+    },
+    {
+      "path": "create-candidate.receipt.json",
+      "bytes": 515,
+      "sha256": "b181b24ba6a13c46b3e4ff4c7b7a76faf360933c000eeaf5835c73f0fd6a5ea8",
+      "gitBlob": "6860fe084dca04f9b5e2b2c5cb2d31c3cfbd9792"
+    },
+    {
+      "path": "dependencies-baseline.receipt.json",
+      "bytes": 507,
+      "sha256": "c2cc5c153d1720065a0e59821226e97511142665ce99f4cd03d616a6123e784b",
+      "gitBlob": "fb63ba62203ab6ecbd8cc95bc4b261a0620a2f94"
+    },
+    {
+      "path": "dependencies-candidate.receipt.json",
+      "bytes": 510,
+      "sha256": "dd8f822dde125cd2f1e87c7ab30b9a6c06ce0d6e5b99ed3fd222d3df70cf2f0d",
+      "gitBlob": "e223f8d8392ac84321e1507db15a5d019029eafd"
+    },
+    {
+      "path": "fetch-baseline.receipt.json",
+      "bytes": 450,
+      "sha256": "0d009f3c61e7c62e41fc9aa2b3f253288b285fcaa487bad0575805f09b143597",
+      "gitBlob": "5f44a2bdce309f4c3b514de57b62bc1b23cfbaaa"
+    },
+    {
+      "path": "options-unit-suite.receipt.json",
+      "bytes": 449,
+      "sha256": "76fd9bb43b89d14227e9322181e4c5ec4de70aa7687a0a215628c36dbd0a6e47",
+      "gitBlob": "973eafa7ebd3c48f0db3e10de4ec26b3bd50ddb1"
+    },
+    {
+      "path": "reproduce-baseline.receipt.json",
+      "bytes": 444,
+      "sha256": "3c6a6b1164262fccc79eb8a3a1179ca8deda46b951b57a746824a580dcc601ef",
+      "gitBlob": "31740a162cee5605fade8e45e5a2f3cfcb0f55d6"
+    },
+    {
+      "path": "reproduce-candidate.receipt.json",
+      "bytes": 447,
+      "sha256": "65d06016738dbfa837f63a036e0e8dc0e6df08c62e05333e55dcd13cf5a265d6",
+      "gitBlob": "e95cc4c132b662c2e80d3455163eb9e26cb78ac4"
+    },
+    {
+      "path": "scoped-lint.receipt.json",
+      "bytes": 540,
+      "sha256": "cf6e28db332ab1e453527e5154e90c4bd2523688e75d4e71580567a83d708a86",
+      "gitBlob": "c20cd3f58bc41f8bce3a7df045516d5c393cdc43"
+    },
+    {
+      "path": "strict-main-types.receipt.json",
+      "bytes": 411,
+      "sha256": "b3bbf1f66d7154e48449acd5b3b74bfed58f4472ce269fad915339bc1bdc5ced",
+      "gitBlob": "a78c0e20f4bd9d46862351dce728d40fe82c2b61"
+    },
+    {
+      "path": "strict-test-types.receipt.json",
+      "bytes": 411,
+      "sha256": "7a5d56a042a4f3b4e9abf42d20d0c980caab194b4c687dffc735d1982e668015",
+      "gitBlob": "a29501407182620ea7aa2d3df6e64df88cbb628b"
+    }
+  ],
+  "all44OriginalMemberIdentitiesMatch": true,
+  "allSixProductBytesAndModesBound": true,
+  "candidate": {
+    "commit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "parents": [
+      "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+    ],
+    "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7"
+  },
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "nativeSourceDigest": "9bcdbe3bc321293e9d9baa3b96778f031c1289677464259bf98e5cd8a1dd6718",
+  "unitCounts": {
+    "files": 671,
+    "optionsPassed": 32,
+    "passed": 15180,
+    "skipped": 47,
+    "suffixCases": 32,
+    "tokenEndCases": 9,
+    "total": 15227
+  },
+  "criteriaSha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+  "bindingSha256": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+  "correctnessReuseScope": "Correctness reuse by exact six-file source-tree and original artifact proof. The earlier workflow ran on its preparation commit, not on the later product commit.",
+  "newCompilationExecuted": false,
+  "newTestsExecuted": false,
+  "benchmarkExecuted": false,
+  "requiredExactHeadChecksStillRequired": true
+}

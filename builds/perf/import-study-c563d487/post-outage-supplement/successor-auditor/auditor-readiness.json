@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T08:37:04.034082+00:00",
+  "status": "Ready for original primary logs; no actual successor observations audited yet",
+  "runId": 46124542684,
+  "jobId": 140916123863,
+  "toolingCommit": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+  "auditorSha256": "01e3244f0e67fa08d05aed50cd818f8de4ac10bdd5e51b9787a5041b85c58dc5",
+  "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "independentReviewPath": "jmdict-prior-streak-selector-audit-independent-review/independent-final-review.json",
+  "independentReviewSha256": "c6afe487b1ebd2ab78a77dc365951b7a2c810d5bb4c55f72573fce73667fdfcf",
+  "amendmentSha256": "2ab16fa78940e75aa269a748ef7876f4b696cee715559bef6db2da2e7a1fa1af",
+  "originalVersionAndWitnessesPreserved": true,
+  "binaryArtifactBindingRequiredSeparately": true,
+  "noCandidateOrProtocolChanges": true,
+  "offlineReviewOnly": true,
+  "actualObservedCandidateData": false
+}

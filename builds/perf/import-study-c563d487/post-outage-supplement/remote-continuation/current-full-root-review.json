@@ -1,0 +1,20 @@
+{
+  "acquisitionCommandExactAfterPathRename": true,
+  "extractorExactAfterAllowedPathRenames": true,
+  "correctnessVerifierRead": true,
+  "originalJobApiFieldsVerified": true,
+  "manifestNativeFlagsUnchanged": true,
+  "archiveReadOnlyAndGitBlobDigestVerified": true,
+  "reviewer": "root",
+  "reviewedAtUtc": "2026-11-28 09:21:28 UTC",
+  "toolingCommit": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "toolingTree": "452d9238522600be538c8601725681ac86353860",
+  "manifestGitBlob": "b5b096d0c270f4a5f2daf89166d1fb386c13df72",
+  "peerReviewGitBlob": "dae455ff22a60c00396ddb5150ab74e9cac1278a",
+  "productCommit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "productTree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+  "exactSixToolingFiles": true,
+  "noCurrentPerformanceObserved": true,
+  "syntaxChecksRequiredInValidationJob": true,
+  "scope": "Pre-acquisition review. Original full correctness is reused only after exact source-tree/artifact/17-command proof; all 252 browser observations and every prospective source/storage/media/restart/memory gate remain required."
+}

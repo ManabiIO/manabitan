@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS corrected auditor within the reviewed offline/log-only scope",
+  "scope": "Independent source/identity review and artificial offline receipt replay only. No actual successor observations, product imports, native execution, corpus/model work or acquisition/timing.",
+  "originalAuditorSha256": "a933bdef3882c032c2f30a9a1c23fb143029098f34a0243b0236d67f98c8b1d1",
+  "correctedAuditorSha256": "01e3244f0e67fa08d05aed50cd818f8de4ac10bdd5e51b9787a5041b85c58dc5",
+  "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "originalFindings": {
+    "retainedReceipt": "accepted-corruption-witnesses.json",
+    "sha256": "985b514fec89bfb6fb0027bfe215294b483d8269cd73689b0f016c3ee9654be1",
+    "acceptedCorruptions": 5,
+    "sourceImpossibleKeyCostsAccepted": true,
+    "categories": [
+      "Unchained cumulative group diagnostics",
+      "Contradictory raw child dictionary identity",
+      "Contradictory compact observation dictionary identity",
+      "Contradictory compact diagnostic dictionary/rows/digest",
+      "Contradictory final dictionary/rows/digest",
+      "Zero helper comparisons despite non-ineligible helper calls"
+    ]
+  },
+  "correctionsReviewed": [
+    "First diagnostic Before is null for lazy instantiation or exactly zero-filled 48 fields; all subsequent Before snapshots equal previous After.",
+    "Each cumulative After passes the complete mechanics checks, and final totals equal the final group After including a singleton final group.",
+    "Raw, compact observation, compact diagnostic and final dictionary identifiers agree; compact diagnostic/final rows and digest agree with the raw diagnostic.",
+    "keyComparisonCalls >= keyPredicateRows - readingIneligibleRows. Only the reading-ineligible return can avoid all added comparisons; no observed-only native count is invented."
+  ],
+  "bindingReview": {
+    "receipt": "frozen-bindings-review.json",
+    "sha256": "a1f3d35cfb1a4a641d10dbaf1a17aa547d4c294fdf3b6d5820ac094d30cd1eda",
+    "toolingFiles": 27,
+    "baselineSourceFiles": 12,
+    "allThreePinnedArchiveHashesSizesRowsVerified": true,
+    "expectedAndProspectiveProtocolsUnchanged": true
+  },
+  "segmentation": {
+    "cells": [
+      "jmdict",
+      "negative-1",
+      "negative-2",
+      "negative-3",
+      "negative-4",
+      "negative-5",
+      "negative-6",
+      "jitendex",
+      "vndb"
+    ],
+    "measuredChildren": 144,
+    "allRawChildrenIncludingExcludedPreflights": 159,
+    "warmupPasses": 288,
+    "measuredPasses": 1584,
+    "schedule": "Exactly four ABCD/DCBA pairs per cell, A/C/D baseline and B candidate; no pooling or repeated replacements"
+  },
+  "mechanics": {
+    "schemaFields": 48,
+    "exactJmdictPredictedFieldsPerTotalAndGroup": 43,
+    "unpredictedHelperFields": "Five remain observed-only and bounded; synthetic test fixtures use feasible artificial values solely to test the auditor.",
+    "exactNegativeFieldsPerCase": 48,
+    "maxima": "Cumulative, never subtracted as additive counters",
+    "vndbSingleton": "Normal route expected for final one-bank group; no fused diagnostic increments"
+  },
+  "arithmetic": "Negative per-child sums use strict equality to left-to-right JavaScript binary64 reductions of all 16 raw repetition receipts. Pair percentages/medians derive from all four retained pairs; CPU and internal phases remain descriptive.",
+  "prospectiveRules": {
+    "jmdict": "Median enclosing elapsed change <= -1%, all four pairs faster, and effect magnitude strictly exceeds largest absolute same-cell C/D change.",
+    "negativeAndNonTarget": "Median slowdown >3%, all four pairs slower, and slowdown strictly exceeds largest absolute C/D change triggers hold/reject. Non-triggering ambiguity is not equivalence.",
+    "completeImport": "Separate two-host full-browser criteria are preserved and are not inferred from this component auditor.",
+    "currentDevelop": "Frozen9e10 source only; no transfer to dcfc02a0 composition."
+  },
+  "offlineReplay": {
+    "referenceRejectionsPassed": 17,
+    "preservedAcceptedCorruptionsNowRejected": 5,
+    "originalSourceImpossibleCostFixtureRejected": true,
+    "positiveFixturePassed": true,
+    "taggedLogRoundtripPassed": true,
+    "failuresRetainedAndRejected": true,
+    "incompleteCellsRetainedAndRejected": true,
+    "artifactBindingWithoutSeparateOriginalAudit": null,
+    "referenceReceipt": "reference-v2-replay.json",
+    "referenceSha256": "4973c255ffa0b6ca2d7c5d3224c8448605a6785de33a5d93ab174a55edd70542",
+    "independentReceipt": "corrected-replay-review.json",
+    "independentSha256": "1e4e291a87bc6454007fdb6308507447c21e2f05979b90dd17c80cd20878b348"
+  },
+  "limits": [
+    "No actual cohort was analyzed in this review.",
+    "Log checks cannot establish pinned compiled-artifact bytes, compiler reproduction, native17-word oracles, smoke/tests or full semantic correctness. Those require separately bound original artifact audits.",
+    "artifactBindingPass remains null unless an independently audited candidate C/WASM/manifest binding is supplied.",
+    "No product source, fixture, acquisition observer, clock boundary, schedule, threshold or frozen cohort file changed."
+  ],
+  "files": {
+    "accepted-corruption-witnesses.json": "985b514fec89bfb6fb0027bfe215294b483d8269cd73689b0f016c3ee9654be1",
+    "preserve-original-witnesses.mjs": "47ad91c0c22e04f20ea1bc0bf38f32b62dcfb9a0f8a429c4101806a923cbd007",
+    "artificial-original-fixture.json": "b39f67b0538f044c28f793d7da826e4ab4fbac55ce3d48fce8556a72191eae0b",
+    "artificial-feasible-fixture.json": "2e570f9576d722a608ea41b46d4aac04b81146c9e361bb6c5d197ccaa9ca43c8",
+    "corrected-replay-review.json": "1e4e291a87bc6454007fdb6308507447c21e2f05979b90dd17c80cd20878b348",
+    "replay-corrected-witnesses.mjs": "837f67156232d5af374433d9f1d527e723c81fe34dd80fa94dc17eee220c85f8",
+    "corrected-replay-command-receipts.json": "bb519837f2c917ac355b6c7bb6590089b58cb1f9af44420f05da8fa42ed94349",
+    "frozen-bindings-review.json": "a1f3d35cfb1a4a641d10dbaf1a17aa547d4c294fdf3b6d5820ac094d30cd1eda",
+    "reviewed-auditor-corrections.patch": "282c67784d301a6c97ab154ae85ad4b4eeaa8b6ca4be6454f2d8a834e1815194"
+  }
+}

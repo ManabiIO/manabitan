@@ -1,0 +1,1198 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T08:40:01.650258+00:00",
+  "scope": "Complete independent primary-log index of the original fixed six-host cohort. Artifact/raw-scan reconciliation is a separate evidence layer. No new acquisition or rerun.",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46113243549,
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "toolingCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+  "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "independentAuditorSha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+  "plannedAndRetainedObservations": 252,
+  "roleCounts": {
+    "control": 48,
+    "exhaustive-media": 12,
+    "memory": 24,
+    "candidate": 144,
+    "warmup": 24
+  },
+  "allCellsTerminal": true,
+  "allTimingPairsRetained": true,
+  "sameSourcePackageEntryMapsBrowserAndWorkflowAcrossHosts": true,
+  "distinctProvisionerAssignments": true,
+  "provisionerInterpretation": "Six distinct Actions runner assignments; no inference about distinct underlying physical hardware.",
+  "latencyPairing": "Twelve candidate pairs and four identical-baseline control pairs per separate corpus/order host; no host pooling or subtraction.",
+  "memoryGate": {
+    "thresholdUnchangedMs": 250,
+    "observations": 24,
+    "qualifiedObservations": 21,
+    "allQualified": false,
+    "rawScans": 2300,
+    "coverage": [
+      {
+        "cell": "jmdict-AB",
+        "id": "A1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 207.093144,
+        "preImportBracketGapMs": 90.176062,
+        "postImportBracketGapMs": 100.19712,
+        "stableFullyReadImportSampleCount": 7,
+        "allObservedSampleCount": 67
+      },
+      {
+        "cell": "jmdict-AB",
+        "id": "B1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 205.971604,
+        "preImportBracketGapMs": 68.644132,
+        "postImportBracketGapMs": 3.295373,
+        "stableFullyReadImportSampleCount": 7,
+        "allObservedSampleCount": 67
+      },
+      {
+        "cell": "jmdict-AB",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 196.578553,
+        "preImportBracketGapMs": 86.179865,
+        "postImportBracketGapMs": 76.903412,
+        "stableFullyReadImportSampleCount": 7,
+        "allObservedSampleCount": 69
+      },
+      {
+        "cell": "jmdict-AB",
+        "id": "A2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 231.355743,
+        "preImportBracketGapMs": 8.949807,
+        "postImportBracketGapMs": 63.099229,
+        "stableFullyReadImportSampleCount": 7,
+        "allObservedSampleCount": 68
+      },
+      {
+        "cell": "jmdict-BA",
+        "id": "B1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 120.99272,
+        "preImportBracketGapMs": 72.222825,
+        "postImportBracketGapMs": 34.882473,
+        "stableFullyReadImportSampleCount": 12,
+        "allObservedSampleCount": 97
+      },
+      {
+        "cell": "jmdict-BA",
+        "id": "A1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 118.408273,
+        "preImportBracketGapMs": 8.493087,
+        "postImportBracketGapMs": 31.982404,
+        "stableFullyReadImportSampleCount": 13,
+        "allObservedSampleCount": 99
+      },
+      {
+        "cell": "jmdict-BA",
+        "id": "A2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 137.64584,
+        "preImportBracketGapMs": 1.283981,
+        "postImportBracketGapMs": 52.36134,
+        "stableFullyReadImportSampleCount": 12,
+        "allObservedSampleCount": 97
+      },
+      {
+        "cell": "jmdict-BA",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 127.664578,
+        "preImportBracketGapMs": 71.495004,
+        "postImportBracketGapMs": 28.821903,
+        "stableFullyReadImportSampleCount": 12,
+        "allObservedSampleCount": 100
+      },
+      {
+        "cell": "jitendex-AB",
+        "id": "A1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 138.272523,
+        "preImportBracketGapMs": 37.038295,
+        "postImportBracketGapMs": 85.120934,
+        "stableFullyReadImportSampleCount": 11,
+        "allObservedSampleCount": 67
+      },
+      {
+        "cell": "jitendex-AB",
+        "id": "B1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 129.073579,
+        "preImportBracketGapMs": 15.660379,
+        "postImportBracketGapMs": 18.377287,
+        "stableFullyReadImportSampleCount": 12,
+        "allObservedSampleCount": 66
+      },
+      {
+        "cell": "jitendex-AB",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 121.995791,
+        "preImportBracketGapMs": 6.832096,
+        "postImportBracketGapMs": 52.08448,
+        "stableFullyReadImportSampleCount": 12,
+        "allObservedSampleCount": 69
+      },
+      {
+        "cell": "jitendex-AB",
+        "id": "A2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 141.821274,
+        "preImportBracketGapMs": 30.416577,
+        "postImportBracketGapMs": 73.86017,
+        "stableFullyReadImportSampleCount": 11,
+        "allObservedSampleCount": 68
+      },
+      {
+        "cell": "jitendex-BA",
+        "id": "B1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 85.250307,
+        "preImportBracketGapMs": 32.115346,
+        "postImportBracketGapMs": 24.313304,
+        "stableFullyReadImportSampleCount": 18,
+        "allObservedSampleCount": 88
+      },
+      {
+        "cell": "jitendex-BA",
+        "id": "A1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 106.260753,
+        "preImportBracketGapMs": 37.324999,
+        "postImportBracketGapMs": 33.223845,
+        "stableFullyReadImportSampleCount": 15,
+        "allObservedSampleCount": 86
+      },
+      {
+        "cell": "jitendex-BA",
+        "id": "A2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 96.322725,
+        "preImportBracketGapMs": 21.700054,
+        "postImportBracketGapMs": 7.513162,
+        "stableFullyReadImportSampleCount": 17,
+        "allObservedSampleCount": 87
+      },
+      {
+        "cell": "jitendex-BA",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 95.472259,
+        "preImportBracketGapMs": 32.78379,
+        "postImportBracketGapMs": 34.881009,
+        "stableFullyReadImportSampleCount": 16,
+        "allObservedSampleCount": 87
+      },
+      {
+        "cell": "vndb-AB",
+        "id": "A1",
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 255.363403,
+        "preImportBracketGapMs": 74.426228,
+        "postImportBracketGapMs": 12.195244,
+        "stableFullyReadImportSampleCount": 36,
+        "allObservedSampleCount": 102
+      },
+      {
+        "cell": "vndb-AB",
+        "id": "B1",
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 260.966631,
+        "preImportBracketGapMs": 26.217221,
+        "postImportBracketGapMs": 58.924425,
+        "stableFullyReadImportSampleCount": 36,
+        "allObservedSampleCount": 103
+      },
+      {
+        "cell": "vndb-AB",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 229.133288,
+        "preImportBracketGapMs": 43.086415,
+        "postImportBracketGapMs": 93.355171,
+        "stableFullyReadImportSampleCount": 35,
+        "allObservedSampleCount": 103
+      },
+      {
+        "cell": "vndb-AB",
+        "id": "A2",
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 284.148828,
+        "preImportBracketGapMs": 68.843591,
+        "postImportBracketGapMs": 56.957028,
+        "stableFullyReadImportSampleCount": 37,
+        "allObservedSampleCount": 105
+      },
+      {
+        "cell": "vndb-BA",
+        "id": "B1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 150.788407,
+        "preImportBracketGapMs": 51.701056,
+        "postImportBracketGapMs": 64.420107,
+        "stableFullyReadImportSampleCount": 55,
+        "allObservedSampleCount": 151
+      },
+      {
+        "cell": "vndb-BA",
+        "id": "A1",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 177.540981,
+        "preImportBracketGapMs": 50.01074,
+        "postImportBracketGapMs": 15.496938,
+        "stableFullyReadImportSampleCount": 57,
+        "allObservedSampleCount": 153
+      },
+      {
+        "cell": "vndb-BA",
+        "id": "A2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 160.049453,
+        "preImportBracketGapMs": 45.988273,
+        "postImportBracketGapMs": 57.255633,
+        "stableFullyReadImportSampleCount": 57,
+        "allObservedSampleCount": 150
+      },
+      {
+        "cell": "vndb-BA",
+        "id": "B2",
+        "qualified": true,
+        "failures": [],
+        "maximumCoveredSampleGapMs": 170.421551,
+        "preImportBracketGapMs": 63.925677,
+        "postImportBracketGapMs": 35.459129,
+        "stableFullyReadImportSampleCount": 55,
+        "allObservedSampleCount": 151
+      }
+    ],
+    "interpretation": "Three VNDB AB observations lack the required sampling coverage. This establishes neither a memory regression nor acceptable memory behavior for that host; qualification remains failed."
+  },
+  "correctnessGate": {
+    "auditSha256": "6381474357b813112eae4aceedcd8946b68d00d075f72a19dda69c86cb636d42",
+    "jobId": 140881240942,
+    "jobConclusion": "success",
+    "exactSource": true,
+    "nativeArtifactsReproduced": true,
+    "lintPassed": true,
+    "strictMainTypesPassed": true,
+    "strictTestTypesPassed": true,
+    "unit": {
+      "filesPassed": 670,
+      "testsPassed": 15167,
+      "testsSkipped": 47,
+      "testsTotal": 15214
+    },
+    "options": {
+      "filesPassed": 1,
+      "testsPassed": 32
+    },
+    "build": {
+      "command": "npm run test:build",
+      "dryRun": true,
+      "allTargetsPassed": true,
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ]
+    }
+  },
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140903281788,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-28T08:04:16Z",
+      "completedAt": "2026-11-28T08:12:30Z",
+      "runnerId": 1000092570,
+      "runnerName": "GitHub Actions 1000092570",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": true,
+      "errors": [],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          0.9895040131714374,
+          0.9888548057259773,
+          0.9854112778065124,
+          0.9698942229455073,
+          1.007181515403824,
+          1.071420888458604,
+          1.0236146095717262,
+          1.0977590460526687,
+          1.0157519815391498,
+          0.9810911345319399,
+          0.984005854066558,
+          1.0150391866130803
+        ],
+        "baselineMs": [
+          971.8000000000029,
+          978,
+          966.5,
+          983.1999999999825,
+          960.8000000000175,
+          929.7000000000116,
+          952.8000000000466,
+          972.7999999999884,
+          996.6999999999534,
+          967.7999999999884,
+          956.5999999999767,
+          944.1999999999534
+        ],
+        "candidateMs": [
+          961.6000000000058,
+          967.1000000000058,
+          952.3999999999942,
+          953.6000000000058,
+          967.7000000000116,
+          996.0999999999767,
+          975.2999999999884,
+          1067.9000000000233,
+          1012.4000000000233,
+          949.5,
+          941.3000000000466,
+          958.4000000000233
+        ],
+        "baselineMedianMs": 967.1499999999942,
+        "candidateMedianMs": 964.3500000000058,
+        "medianPairedChangeMs": -1.6500000000014552,
+        "medianPairedChangePercent": -0.16572357123693093,
+        "equalWorkChangePercent": 1.0569126751822866,
+        "worstPairChangePercent": 9.775904605266872,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.5291434063464782,
+          1.9683295555438018
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0204124579124518,
+          1.0513604724742378,
+          0.9896136269215393,
+          0.9974866478165618
+        ],
+        "baselineMs": [
+          950.3999999999942,
+          948.1999999999534,
+          962.7999999999884,
+          954.8999999999651
+        ],
+        "candidateMs": [
+          969.7999999999884,
+          996.9000000000233,
+          952.8000000000466,
+          952.5
+        ],
+        "baselineMedianMs": 952.6499999999796,
+        "candidateMedianMs": 961.3000000000175,
+        "medianPairedChangeMs": 8.500000000014552,
+        "medianPairedChangePercent": 0.8949552864506938,
+        "equalWorkChangePercent": 1.459528863039039,
+        "worstPairChangePercent": 5.136047247423781,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.0386373078460687,
+          5.136047247423781
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 5.136047247423781,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 0.03226675364407077,
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -1.8252844333600193,
+          "maximumPairedChangePercent": -0.3674488674940357
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -2.3529594848421707,
+          "maximumPairedChangePercent": -0.34590263518567976
+        }
+      },
+      "memoryRawScanCount": 271,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15255570810,
+        "name": "numeric-suffix-c563d487-jmdict-AB",
+        "sizeBytes": 35566204,
+        "apiDigest": "sha256:404a1ab001d880b783ac55c5e8a658cc51f40c5f82638dbf5bb42873a219c79c",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "jmdict-AB/primary-log-audit.json",
+          "bytes": 21548,
+          "sha256": "7b5e9fb7aa64c508ca99d38dfb41778e35a065b15e13fdc8d92a365b92f936de"
+        },
+        {
+          "path": "jmdict-AB/primary-records.jsonl",
+          "bytes": 362962,
+          "sha256": "07b60acf90675fc8895aa7a25a20690c69db9de2398a2e334daa6e8f263dfa3e"
+        }
+      ]
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140903281805,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-28T08:12:00Z",
+      "completedAt": "2026-11-28T08:19:42Z",
+      "runnerId": 1000092608,
+      "runnerName": "GitHub Actions 1000092608",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": true,
+      "errors": [],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          1.0098284833301043,
+          0.9835590845399291,
+          0.9746645397391389,
+          0.9919856684895343,
+          1.015565317035894,
+          1.022461032045651,
+          1.0774449936996842,
+          1.026827565572976,
+          1.0003854307187947,
+          0.9953734302709629,
+          0.9758509222285935,
+          0.9596758633995859
+        ],
+        "baselineMs": [
+          1037.8000000000175,
+          1070.5,
+          1065.7000000000116,
+          1060.6000000000058,
+          1047.2000000000116,
+          1032.9000000000233,
+          1031.7000000000116,
+          1002.7000000000116,
+          1037.8000000000466,
+          1059.100000000035,
+          1051.7999999999884,
+          1036.5999999999767
+        ],
+        "candidateMs": [
+          1048,
+          1052.8999999999942,
+          1038.7000000000116,
+          1052.1000000000058,
+          1063.5,
+          1056.0999999999767,
+          1111.5999999999767,
+          1029.600000000035,
+          1038.2000000000116,
+          1054.2000000000116,
+          1026.4000000000233,
+          994.7999999999884
+        ],
+        "baselineMedianMs": 1042.500000000029,
+        "candidateMedianMs": 1050.050000000003,
+        "medianPairedChangeMs": -2.250000000029104,
+        "medianPairedChangePercent": -0.21205695051211837,
+        "equalWorkChangePercent": 0.2529040081686862,
+        "worstPairChangePercent": 7.744499369968416,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -2.0294996615738636,
+          1.901317454077267
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0069672924327293,
+          0.988024516737377,
+          1.0148809523809523,
+          0.979544577383239
+        ],
+        "baselineMs": [
+          1033.4000000000233,
+          1060.5,
+          1008,
+          1036.4000000000233
+        ],
+        "candidateMs": [
+          1040.6000000000058,
+          1047.7999999999884,
+          1023,
+          1015.2000000000116
+        ],
+        "baselineMedianMs": 1034.9000000000233,
+        "candidateMedianMs": 1031.800000000003,
+        "medianPairedChangeMs": -2.750000000014552,
+        "medianPairedChangePercent": -0.2504095414946894,
+        "equalWorkChangePercent": -0.282724790373845,
+        "worstPairChangePercent": 1.4880952380952328,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -2.045542261676103,
+          1.4880952380952328
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 2.045542261676103,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 0.10366784127860569,
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.99437609344738,
+          "maximumPairedChangePercent": 2.9772837608220692
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 1.2180101579476244,
+          "maximumPairedChangePercent": 4.04187907575031
+        }
+      },
+      "memoryRawScanCount": 393,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15255527579,
+        "name": "numeric-suffix-c563d487-jmdict-BA",
+        "sizeBytes": 35680155,
+        "apiDigest": "sha256:86b7e9e8905eaf4269b5559f56e9ee3a2172b9995bbe41b685ec557c6a01e80e",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "jmdict-BA/primary-log-audit.json",
+          "bytes": 21453,
+          "sha256": "93cd7ffcb4b17253a4e5730a60701120716f2ece5cce18ff10f227153d1eed31"
+        },
+        {
+          "path": "jmdict-BA/primary-records.jsonl",
+          "bytes": 362865,
+          "sha256": "f961ea4cc6507e1d56ada826059ff9bfa5f3592c1fe167ffe0051a174fd858e8"
+        }
+      ]
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140903281821,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-28T08:12:43Z",
+      "completedAt": "2026-11-28T08:18:19Z",
+      "runnerId": 1000092613,
+      "runnerName": "GitHub Actions 1000092613",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": true,
+      "errors": [],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          1.0267016215166378,
+          1.0135274776890641,
+          1.0019029495718363,
+          0.9717847769028821,
+          0.9540136789057078,
+          0.9936466411286393,
+          1.014424914023697,
+          0.9888639341193869,
+          0.9942779555814236,
+          1.011256319755756,
+          1.0342818296591707,
+          0.9641115303211026
+        ],
+        "baselineMs": [
+          1029.9000000000087,
+          1064.5,
+          1051,
+          1066.8000000000175,
+          1111.1999999999825,
+          1070.3000000000175,
+          1046.7999999999884,
+          1068.6000000000058,
+          1031.1000000000058,
+          1048.3000000000175,
+          1029.6999999999534,
+          1086.7000000000116
+        ],
+        "candidateMs": [
+          1057.3999999999942,
+          1078.9000000000087,
+          1053,
+          1036.7000000000116,
+          1060.1000000000058,
+          1063.5,
+          1061.8999999999942,
+          1056.6999999999825,
+          1025.2000000000116,
+          1060.0999999999767,
+          1065,
+          1047.6999999999534
+        ],
+        "baselineMedianMs": 1057.75,
+        "candidateMedianMs": 1058.7499999999854,
+        "medianPairedChangeMs": -1.9499999999970896,
+        "medianPairedChangePercent": -0.19095474233700171,
+        "equalWorkChangePercent": -0.3046068839587024,
+        "worstPairChangePercent": 3.4281829659170704,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.9675644488865496,
+          1.3976195856380436
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9957770270270271,
+          0.9839597127669657,
+          0.9900971243572432,
+          1.026776220396338
+        ],
+        "baselineMs": [
+          1065.6000000000058,
+          1072.2999999999884,
+          1050.2000000000116,
+          1034.5
+        ],
+        "candidateMs": [
+          1061.1000000000058,
+          1055.1000000000058,
+          1039.7999999999884,
+          1062.2000000000116
+        ],
+        "baselineMedianMs": 1057.9000000000087,
+        "candidateMedianMs": 1058.1000000000058,
+        "medianPairedChangeMs": -7.4500000000116415,
+        "medianPairedChangePercent": -0.7062924307864815,
+        "equalWorkChangePercent": -0.10420120305011382,
+        "worstPairChangePercent": 2.677622039633798,
+        "fasterPairs": 3,
+        "descriptiveBootstrap95Percent": [
+          -1.60402872330343,
+          2.677622039633798
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 2.677622039633798,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 0.07131504727348205,
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 1.8648458248054667,
+          "maximumPairedChangePercent": 3.989211993608577
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 1.8887941723090607,
+          "maximumPairedChangePercent": 4.691188945555624
+        }
+      },
+      "memoryRawScanCount": 270,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15255097791,
+        "name": "numeric-suffix-c563d487-jitendex-AB",
+        "sizeBytes": 35578772,
+        "apiDigest": "sha256:ad933c09311ee43a24d94bde837910000b6e86cc06c0081b629e33053acdd628",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "jitendex-AB/primary-log-audit.json",
+          "bytes": 22000,
+          "sha256": "0cf0cb3dba297d6d31bf21b53c0488c57dfee4f7b0155bcd8ffffada41ab317e"
+        },
+        {
+          "path": "jitendex-AB/primary-records.jsonl",
+          "bytes": 361895,
+          "sha256": "15325a4df4808ce97f6274976581f6ff68f388286da6e873bc6ac9e67f9557cf"
+        }
+      ]
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140903281858,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-28T08:13:30Z",
+      "completedAt": "2026-11-28T08:19:51Z",
+      "runnerId": 1000092614,
+      "runnerName": "GitHub Actions 1000092614",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": true,
+      "errors": [],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          1.0103298296484446,
+          1.0100234784179476,
+          1.0128405026139595,
+          0.9701479237212621,
+          1.0590255220417417,
+          0.9995536909756315,
+          0.9942399423994032,
+          1.007252289003717,
+          0.9909382151030068,
+          0.9778587942379818,
+          1.0228701594532819,
+          0.9602836879432727
+        ],
+        "baselineMs": [
+          1103.5999999999767,
+          1107.399999999965,
+          1090.2999999999884,
+          1122.2000000000116,
+          1077.5,
+          1120.2999999999884,
+          1111.100000000035,
+          1103.0999999999767,
+          1092.5,
+          1124.5999999999767,
+          1097.5,
+          1128
+        ],
+        "candidateMs": [
+          1115,
+          1118.5,
+          1104.2999999999884,
+          1088.7000000000116,
+          1141.0999999999767,
+          1119.7999999999884,
+          1104.7000000000116,
+          1111.0999999999767,
+          1082.600000000035,
+          1099.7000000000116,
+          1122.5999999999767,
+          1083.2000000000116
+        ],
+        "baselineMedianMs": 1105.499999999971,
+        "candidateMedianMs": 1107.8999999999942,
+        "medianPairedChangeMs": 3.75,
+        "medianPairedChangePercent": 0.34029899896741433,
+        "equalWorkChangePercent": 0.09941181343768868,
+        "worstPairChangePercent": 5.902552204174172,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.560149532950561,
+          1.1585166131202085
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9840190711637143,
+          1.0100036049025938,
+          0.9985756253894464,
+          1.017404635224085
+        ],
+        "baselineMs": [
+          1132.5999999999767,
+          1109.600000000035,
+          1123.3000000000466,
+          1108.9000000000233
+        ],
+        "candidateMs": [
+          1114.5,
+          1120.6999999999534,
+          1121.7000000000116,
+          1128.2000000000116
+        ],
+        "baselineMedianMs": 1116.4500000000407,
+        "candidateMedianMs": 1121.1999999999825,
+        "medianPairedChangeMs": 4.749999999941792,
+        "medianPairedChangePercent": 0.42896151460201093,
+        "equalWorkChangePercent": 0.23913820847252243,
+        "worstPairChangePercent": 1.7404635224085085,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.5980928836285657,
+          1.7404635224085085
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 1.7404635224085085,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 0.19552205179025975,
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -0.0037216965410591385,
+          "maximumPairedChangePercent": 0.8471255040654269
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.19198494842516123,
+          "maximumPairedChangePercent": 1.5823751391721652
+        }
+      },
+      "memoryRawScanCount": 348,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15255119565,
+        "name": "numeric-suffix-c563d487-jitendex-BA",
+        "sizeBytes": 35666782,
+        "apiDigest": "sha256:c51e6257ecb7793089f0c8e830270ac62dc8438cb529610fc1ff56f2eca057c9",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "jitendex-BA/primary-log-audit.json",
+          "bytes": 22048,
+          "sha256": "fbaeccdd69b5882addce1ff6d34b329d5ac6d564b5475e1c60b8c2000e032009"
+        },
+        {
+          "path": "jitendex-BA/primary-records.jsonl",
+          "bytes": 362502,
+          "sha256": "7c87a2b4fe183bf12d719ff98ea52f59409289e6694b47e8a9a602362d53d0bf"
+        }
+      ]
+    },
+    {
+      "cell": "vndb-AB",
+      "jobId": 140903281809,
+      "jobConclusion": "failure",
+      "startedAt": "2026-11-28T08:03:58Z",
+      "completedAt": "2026-11-28T08:36:36Z",
+      "runnerId": 1000092567,
+      "runnerName": "GitHub Actions 1000092567",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": false,
+      "errors": [
+        "Original correctness/memory gate did not pass",
+        "Separate memory observations/audit did not qualify",
+        "A1: memory coverage did not qualify",
+        "A1: emitted prospective memory coverage is insufficient",
+        "B1: memory coverage did not qualify",
+        "B1: emitted prospective memory coverage is insufficient",
+        "A2: memory coverage did not qualify",
+        "A2: emitted prospective memory coverage is insufficient"
+      ],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          0.9662020844684275,
+          0.9768825697735732,
+          0.9715368331168946,
+          0.9394881233504648,
+          0.9467923595664258,
+          0.9751752957008167,
+          0.9186831738885691,
+          0.9587109592861287,
+          0.9727324566708834,
+          0.9254948602497663,
+          0.9620191300705401,
+          0.9372245549501964
+        ],
+        "baselineMs": [
+          5689.700000000012,
+          5697,
+          5621.299999999988,
+          5759.199999999953,
+          5664.599999999977,
+          5647.600000000093,
+          6041.800000000047,
+          5737.599999999977,
+          5787.099999999977,
+          5885.5,
+          5729.199999999953,
+          5763.40000000014
+        ],
+        "candidateMs": [
+          5497.400000000023,
+          5565.300000000047,
+          5461.299999999988,
+          5410.699999999953,
+          5363.199999999953,
+          5507.400000000023,
+          5550.5,
+          5500.70000000007,
+          5629.300000000047,
+          5447,
+          5511.600000000093,
+          5401.600000000093
+        ],
+        "baselineMedianMs": 5733.399999999965,
+        "candidateMedianMs": 5499.050000000047,
+        "medianPairedChangeMs": -227.24999999988358,
+        "medianPairedChangePercent": -3.963495532166561,
+        "equalWorkChangePercent": -4.6041956420952435,
+        "worstPairChangePercent": -2.311743022642676,
+        "fasterPairs": 12,
+        "descriptiveBootstrap95Percent": [
+          -6.164366084966932,
+          -2.786535510611099
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0151251646903985,
+          0.9932756289832803,
+          0.9845730895846304,
+          0.9983329281422406
+        ],
+        "baselineMs": [
+          5692.5,
+          5695.699999999953,
+          5710.800000000047,
+          5758.600000000093
+        ],
+        "candidateMs": [
+          5778.600000000093,
+          5657.400000000023,
+          5622.699999999953,
+          5749
+        ],
+        "baselineMedianMs": 5703.25,
+        "candidateMedianMs": 5703.200000000012,
+        "medianPairedChangeMs": -23.95000000001164,
+        "medianPairedChangePercent": -0.41957214372395635,
+        "equalWorkChangePercent": -0.21830813383741932,
+        "worstPairChangePercent": 1.5125164690398485,
+        "fasterPairs": 3,
+        "descriptiveBootstrap95Percent": [
+          -1.5426910415369588,
+          1.5125164690398485
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 1.5426910415369588,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 2.5692088859333704,
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memoryPassed": false,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        }
+      },
+      "memoryRawScanCount": 413,
+      "mechanicalTargetThresholdPass": true,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15255922406,
+        "name": "numeric-suffix-c563d487-vndb-AB",
+        "sizeBytes": 35741094,
+        "apiDigest": "sha256:23c293793610c1a7af920014024a7d1032f7e7f5c7c710b4a3d9c0f8bfd16068",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "vndb-AB/primary-log-audit.json",
+          "bytes": 23069,
+          "sha256": "9ee0174d9256a7c99fef4b881ee545da90f74c00a3ad8ffddbf9fddc23b0ad3f"
+        },
+        {
+          "path": "vndb-AB/primary-records.jsonl",
+          "bytes": 377434,
+          "sha256": "ea04f794d55add66e9c15bf082f9b2209bf81cfee01432dec0a550fb10d43fe0"
+        }
+      ]
+    },
+    {
+      "cell": "vndb-BA",
+      "jobId": 140903281848,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-28T08:05:47Z",
+      "completedAt": "2026-11-28T08:37:40Z",
+      "runnerId": 1000092589,
+      "runnerName": "GitHub Actions 1000092589",
+      "rawObservationCount": 42,
+      "taggedRecordCount": 55,
+      "allEmittedReportChecksPass": true,
+      "errors": [],
+      "latency": {
+        "count": 12,
+        "ratios": [
+          0.9771400195208774,
+          0.9658732936646832,
+          0.9816079043891843,
+          0.9964270324619217,
+          0.9592616614370567,
+          0.9684026056786799,
+          0.9847163503210792,
+          0.9555880487633049,
+          0.9498856605981183,
+          0.9600056880799178,
+          0.9788893418650446,
+          0.967948605121891
+        ],
+        "baselineMs": [
+          5839.900000000023,
+          5714,
+          5698.099999999977,
+          5569.600000000035,
+          5704.700000000012,
+          5649.199999999953,
+          5653.099999999977,
+          5676.400000000023,
+          5641.099999999977,
+          5625.800000000047,
+          5641.699999999953,
+          5681.5
+        ],
+        "candidateMs": [
+          5706.399999999994,
+          5519,
+          5593.299999999988,
+          5549.699999999953,
+          5472.299999999988,
+          5470.699999999953,
+          5566.70000000007,
+          5424.300000000047,
+          5358.400000000023,
+          5400.800000000047,
+          5522.599999999977,
+          5499.400000000023
+        ],
+        "baselineMedianMs": 5664.75,
+        "candidateMedianMs": 5509.200000000012,
+        "medianPairedChangeMs": -180.29999999998836,
+        "medianPairedChangePercent": -3.1824394599714534,
+        "equalWorkChangePercent": -2.9539570394931713,
+        "worstPairChangePercent": -0.3572967538078342,
+        "fasterPairs": 12,
+        "descriptiveBootstrap95Percent": [
+          -4.0366325241512735,
+          -1.9751376872885529
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9862577245592743,
+          0.9921742919389938,
+          0.9888630025768483,
+          1.0085721891915957
+        ],
+        "baselineMs": [
+          5712.300000000047,
+          5737.5,
+          5665.800000000047,
+          5634.5
+        ],
+        "candidateMs": [
+          5633.799999999988,
+          5692.599999999977,
+          5602.699999999953,
+          5682.800000000047
+        ],
+        "baselineMedianMs": 5689.050000000047,
+        "candidateMedianMs": 5658.3000000000175,
+        "medianPairedChangeMs": -54.00000000005821,
+        "medianPairedChangePercent": -0.9481352742078952,
+        "equalWorkChangePercent": -0.6074698572759107,
+        "worstPairChangePercent": 0.8572189191595747,
+        "fasterPairs": 3,
+        "descriptiveBootstrap95Percent": [
+          -1.3742275440725704,
+          0.8572189191595747
+        ]
+      },
+      "largestAbsoluteControlChangePercent": 1.3742275440725704,
+      "absoluteMedianEffectOverLargestAbsoluteControl": 2.31580241110594,
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.007827644534952327,
+          "maximumPairedChangePercent": 1.0322627607347146
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.21963037641080096,
+          "maximumPairedChangePercent": 1.0288777795011805
+        }
+      },
+      "memoryRawScanCount": 605,
+      "mechanicalTargetThresholdPass": true,
+      "mechanicalNonTargetHoldSignal": false,
+      "artifact": {
+        "id": 15256340581,
+        "name": "numeric-suffix-c563d487-vndb-BA",
+        "sizeBytes": 35934413,
+        "apiDigest": "sha256:d4111ebba7aec361c9f705213928e2d2ce37b211b60fe8435d4e867c69bcb89a",
+        "scope": "Original Actions ZIP; independent archive/raw-scan audit is separately retained"
+      },
+      "primaryEvidence": [
+        {
+          "path": "vndb-BA/primary-log-audit.json",
+          "bytes": 22754,
+          "sha256": "66e19415b00a032515adfb827fb1b263f4df20b58b4067de25a3e8b299d2c6be"
+        },
+        {
+          "path": "vndb-BA/primary-records.jsonl",
+          "bytes": 375818,
+          "sha256": "716907665e13176b57392d9a863b149170d6b0fe7280cdbf52bb9660c8562efd"
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "status": "Held; not fully qualified; no performance PR from this cohort",
+    "replicatedVndbLatencyThresholdMet": true,
+    "bothTargetEffectsExceedLargestAbsoluteSameHostControl": true,
+    "nonTargetReplicatedHoldSignal": false,
+    "nonTargetInterpretation": "Neither JMdict nor Jitendex triggers the prospective replicated slowdown gate; their intervals include zero, so these observations do not prove equivalence.",
+    "allCorrectnessStorageMemoryPackageGatesPassed": false,
+    "reason": "VNDB AB sampling gaps255.363403,260.966631 and284.148828ms exceed the frozen250ms coverage gate. All failures and outliers remain included.",
+    "noRetryNoReplacementNoGateRelaxation": true,
+    "currentDevelopLimitation": {
+      "frozenBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "observedDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "noGainTransfer": true,
+      "requirement": "Any current-source follow-up must have separate source identities, prospective protocol and observations; it cannot repair or replace this failed cohort."
+    }
+  },
+  "artifactsMetadataSha256": "c8e747cb04424d0a954af8aaded738d4b52da897b11386ff5ea65281ce705996",
+  "primaryFinalJobMetadataSha256": "7600751f3e579d352d62d4daae14acf92ec4b01670c78ecaf200a0161f2d0bc8"
+}

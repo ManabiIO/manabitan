@@ -1,5 +1,38 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: original archives preserved and selector artifact audit completed
+
+The execution workspace recovered, allowing the larger original evidence to be preserved after the [outage checkpoint `63c2e40049981460f524f6b36695239a265a430b`](https://github.com/ManabiIO/manabitan/commit/63c2e40049981460f524f6b36695239a265a430b). The selector's previously pending original-artifact audit is now complete. **Neither qualification decision changes:** the old numeric candidate remains held by VNDB AB memory coverage, and the prior-streak selector remains unpromoted because its JMdict component screen failed. No import, native parser, correctness suite or benchmark was rerun to produce this preservation supplement.
+
+The [supplement index](../../builds/perf/import-study-c563d487/post-outage-supplement/index.json) binds the exact archives, original audit files, failure histories and source-composition records that were not included in the smaller outage checkpoint. Every earlier canonical byte and published evidence snapshot remains unchanged. The original 54-file local stage also remains intact. Previously published primary records, criteria and shared audit code are referenced instead of copied as standalone files.
+
+### Complete original evidence, with the original failures retained
+
+| Preserved material | Exact compressed bytes | Coverage |
+| --- | ---: | --- |
+| Six original numeric non-package selections | 13,060,454 | All 1,884 members: 252 original reports and 2,300 raw process scans, with logs, markers and receipts. |
+| Whole original prior-streak selector artifact | 2,878,668 | All 560 original members, including generated raw/deflate fixtures, child outputs, native oracles, smoke results and logs. |
+| Whole original current-base numeric build artifact | 136,615 | All 44 original members, including exact product files, command receipts, logs and the binary diff. |
+
+The six numeric selections retain their original recorded hashes. They omit only the two audited release-package ZIP copies per host; complete original ZIP digests, package hashes and all 554-entry maps remain preserved. All 159,075,058 raw bytes in those selections are represented losslessly. Their original artifact audits, the original combined primary index, root VNDB/JMdict reviews, selection producer and the first nullable-phase audit failure are now included. The 21/24 memory-coverage outcome, three failed VNDB AB gaps and null disqualified maxima remain unchanged. No observation or outlier is removed, replaced or reinterpreted.
+
+Three mixed text archives use explicitly new lossless representations to omit primary-record/build-log copies already present in the outage checkpoint. Their manifests retain the original archive identities and point to every omitted file's durable location. They are not assigned the earlier archive hashes. The whole original ZIPs and six original selected ZIPs are preserved byte for byte without extracting duplicated release packages.
+
+### Selector artifact completion is a separate bridge
+
+The new original-artifact audit, SHA-256 `f129f1ab560a6e79a01c7e399a3ee78c0e1facc90673e7bea101e082edbfa061`, reconciles all **560 members / 143,941,712 uncompressed bytes**, **159 raw children / 144 measurements / 495 primary records**, and **1,740 negative pass receipts**. All 387 JMdict total/group checks and 288 negative-case fields match. It also verifies 8,546 native-oracle records, all twelve generated raw/deflate bank identities and CRCs, the six smoke modes, and the already-acquired 803 focused tests across seven suites plus lint/types evidence. Production C `f622f057…`, WASM `e59fc024…` and manifest `68c7a2fe…` match the original compiled artifact; the separate diagnostic identity remains distinct.
+
+The original primary audit `16252ce1…` is unchanged and still records `artifactBindingPass: null`, accurately describing its earlier snapshot. A new completion bridge links it to the complete original-artifact audit and the same exact `98b1ec1f…` primary records. This advances the pending-artifact status only in this later supplement; it does not rewrite the outage checkpoint or change statistics.
+
+All audit-only failures and source versions are retained. Three initial postprocessing assumptions about local source layout and producer fields were corrected to the frozen contracts. Attempt 4 was interrupted when the executor became unavailable; the cause is left unattributed. The successful final audit streams the same exact ordered primary-record comparisons under a 256 MiB address-space limit, with no proof or acceptance condition removed. The earlier offline corruption witnesses and v2/v3 inventory corrections also remain available. Completing artifact integrity does not rescue the failed JMdict promotion screen or prove non-target equivalence.
+
+### Current-base qualification has a separately verified source gate
+
+The current-base experiment is [run 46130093248](https://github.com/ManabiIO/manabitan/actions/runs/46130093248), tooling `faf6d9d9c282b2da46a7c8ee05835f4db0827039`, comparing product `4cd1abfabcb92c09694f107ff8e856add52e07df` with baseline `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`. Its source-binding dependency, job `140933118058`, passed. Independent and root reviews match all 17 original correctness receipts, all 44 original member identities and all six exact product files to the successful original build. That binding step repeated no compilation, tests or timing. Original build reviews `3350ad5d…` and `eec68624…`, previously unavailable during the outage, are now preserved exactly.
+
+This supplement includes the fixed launch identity, expected inputs, independent auditor/reviews and source-binding primary records. It freezes current-run reporting at the **09:26:32 UTC source-gate review** and includes no current performance-cell results; acquisition may continue separately. Source, schedule and prospective criteria remain unchanged. The old `9e10d3b3…` timings cannot establish speed or non-regression for this `dcfc02a0…` composition. The current selector port remains a source-only record, and no product PR or new gain is asserted here.
+
+
 ## November 28, 2026: completed browser results and an outage checkpoint
 
 The old-baseline numeric suffix candidate shows a replicated VNDB import-latency signal, but **full qualification remains held by insufficient memory-sampling coverage**. JMdict and Jitendex remain inconclusive. The separate prior-streak selector completed all 144 component measurements and failed its prospective JMdict promotion rule. No performance PR has qualified. A numeric suffix composition on the newer develop base has passed correctness checks and its exact built files have been recovered and published on an experiment branch; it still has no current-base performance qualification.

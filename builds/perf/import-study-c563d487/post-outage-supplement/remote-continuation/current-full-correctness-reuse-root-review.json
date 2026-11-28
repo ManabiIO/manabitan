@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "reviewer": "root",
+  "reviewedAtUtc": "2026-11-28 09:26:32 UTC",
+  "runId": 46130093248,
+  "jobId": 140933118058,
+  "toolingHead": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "originalBuildRun": 46126462448,
+  "originalBuildJob": 140922033124,
+  "all17ReceiptsEqualOriginalPrimary": true,
+  "all44OriginalMemberHashesEqualRecovery": true,
+  "allSixCurrentProductBytesEqualOriginalBuild": true,
+  "candidate": {
+    "commit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "parents": [
+      "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+    ],
+    "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7"
+  },
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "parents": [
+      "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "32c643f9be41f04a6e824ca40d3a0649da87a050"
+    ],
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "originalUnitCounts": {
+    "files": 671,
+    "optionsPassed": 32,
+    "passed": 15180,
+    "skipped": 47,
+    "suffixCases": 32,
+    "tokenEndCases": 9,
+    "total": 15227
+  },
+  "newCompilationExecuted": false,
+  "newTestsExecuted": false,
+  "benchmarkExecuted": false,
+  "correctnessBindingPassed": true,
+  "performanceConclusion": null
+}

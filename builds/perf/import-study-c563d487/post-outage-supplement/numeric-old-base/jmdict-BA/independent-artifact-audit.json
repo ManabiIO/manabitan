@@ -1,0 +1,530 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T08:47:11.702480+00:00",
+  "scope": "Original ZIP bytes, all raw reports and process-memory scans; no new acquisition, timing or selected reruns",
+  "auditIntegrityPassed": true,
+  "runId": 46113243549,
+  "dictionary": "jmdict",
+  "order": "BA",
+  "artifact": {
+    "id": 15255527579,
+    "name": "numeric-suffix-c563d487-jmdict-BA",
+    "size_in_bytes": 35680155,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255527579",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255527579/zip",
+    "expired": false,
+    "created_at": "2026-11-28T08:19:40Z",
+    "expires_at": "2026-12-12T08:19:38Z",
+    "updated_at": "2026-11-28T08:19:40Z",
+    "digest": "sha256:86b7e9e8905eaf4269b5559f56e9ee3a2172b9995bbe41b685ec557c6a01e80e",
+    "workflow_run": {
+      "id": 46113243549,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+      "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+    }
+  },
+  "zipSha256": "86b7e9e8905eaf4269b5559f56e9ee3a2172b9995bbe41b685ec557c6a01e80e",
+  "zipBytes": 35680155,
+  "memberCount": 316,
+  "memberManifestSha256": "9d02e15a630855106255eabd70b60a63c101f788d30a0f67c651fd75d4f07964",
+  "primaryRecordsSha256": "f961ea4cc6507e1d56ada826059ff9bfa5f3592c1fe167ffe0051a174fd858e8",
+  "frozenObserverSourceHashes": {
+    "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  "auditorSha256": "3b38d328f7c0bc70c993ff19fe41a8f4f7dd14fbed260a401bad43e14d65e092",
+  "all55PrimaryRecordsReconciled": true,
+  "rawReports": 42,
+  "rawFileHashBindings": 126,
+  "allCanonicalReceiptsRecomputedWithUnchangedFrozenValidator": true,
+  "completeCommonSemanticSha256": "83af726560b47ab7ab41548a1e952e802d06b39aec693bf09ce58c04cedcb7ca",
+  "releasePackages": {
+    "A": {
+      "zipSha256": "a4e349ab9e9047ba77e910efda5fb4b9c555a9f64304da7c9ce8fb1f05132fc5",
+      "zipBytes": 16805714,
+      "entries": 554,
+      "entryMapSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+      "changedEntries": {
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "bytes": 158441,
+          "compressedBytes": 28062
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "bytes": 67659,
+          "compressedBytes": 24447
+        }
+      }
+    },
+    "B": {
+      "zipSha256": "a92f8506f804778488b417ecff6156d9b1febf5fa232b38493d7cb1523c730bb",
+      "zipBytes": 16806934,
+      "entries": 554,
+      "entryMapSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+      "changedEntries": {
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+          "bytes": 161377,
+          "compressedBytes": 28919
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a",
+          "bytes": 68522,
+          "compressedBytes": 24810
+        }
+      }
+    }
+  },
+  "onlyChangedReleaseEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "memoryOverlayExact": true,
+  "memory": {
+    "rawAudit": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 393,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.99437609344738,
+          "maximumPairedChangePercent": 2.9772837608220692
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 1.2180101579476244,
+          "maximumPairedChangePercent": 4.04187907575031
+        }
+      }
+    },
+    "observations": [
+      {
+        "name": "B1",
+        "arm": "B",
+        "pair": 1,
+        "rawMemorySha256": "637f4204ac85269f0a27a77f901d56d4dbf2f930aec7ada538b82dd43d3d97f7",
+        "rawMarkersSha256": "de17ff345cb03f887d1858721169ce4d2b59a3b9fe32f1cebadddde426a7bebc",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 14,
+        "stableFullyReadTreeSampleCount": 14,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1217.159961,
+        "preImportBracketGapMs": 72.222825,
+        "postImportBracketGapMs": 34.882473,
+        "maximumCoveredSampleGapMs": 120.99272,
+        "allObservedSampleCount": 97,
+        "overlappingImportSampleCount": 14,
+        "fullyContainedImportSampleCount": 12,
+        "stableFullyReadImportSampleCount": 12,
+        "maxSampledPssKiB": 1003805,
+        "maxSampledPrivateKiB": 772272,
+        "rawProcessReadCount": 615,
+        "maximumGapProof": [
+          {
+            "leftNs": 488065698189,
+            "rightNs": 488186690909,
+            "gapMs": 120.99272
+          }
+        ]
+      },
+      {
+        "name": "A1",
+        "arm": "A",
+        "pair": 1,
+        "rawMemorySha256": "de5580ed01e9df5fa22d116bf08650e8bff5b1836888d7ddfb5ad999119233d4",
+        "rawMarkersSha256": "709cd6c32c1e91bee0d90398446060ea3274dd800045817f9655c41338421a20",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 14,
+        "stableFullyReadTreeSampleCount": 14,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1253.191581,
+        "preImportBracketGapMs": 8.493087,
+        "postImportBracketGapMs": 31.982404,
+        "maximumCoveredSampleGapMs": 118.408273,
+        "allObservedSampleCount": 99,
+        "overlappingImportSampleCount": 14,
+        "fullyContainedImportSampleCount": 13,
+        "stableFullyReadImportSampleCount": 13,
+        "maxSampledPssKiB": 1013827,
+        "maxSampledPrivateKiB": 784876,
+        "rawProcessReadCount": 632,
+        "maximumGapProof": [
+          {
+            "leftNs": 498326508079,
+            "rightNs": 498444916352,
+            "gapMs": 118.408273
+          }
+        ]
+      },
+      {
+        "name": "A2",
+        "arm": "A",
+        "pair": 2,
+        "rawMemorySha256": "3a2d646ef6bc10d5819b245f8f53f50edfef80f48e1ee9d46732acc7c9fcf5b1",
+        "rawMarkersSha256": "38415f364884e832c88f19c836d39e790f7ecb5750cc79a971daa5e51c1dcd8d",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 13,
+        "stableFullyReadTreeSampleCount": 13,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1244.851937,
+        "preImportBracketGapMs": 1.283981,
+        "postImportBracketGapMs": 52.36134,
+        "maximumCoveredSampleGapMs": 137.64584,
+        "allObservedSampleCount": 97,
+        "overlappingImportSampleCount": 13,
+        "fullyContainedImportSampleCount": 12,
+        "stableFullyReadImportSampleCount": 12,
+        "maxSampledPssKiB": 988720,
+        "maxSampledPrivateKiB": 758756,
+        "rawProcessReadCount": 620,
+        "maximumGapProof": [
+          {
+            "leftNs": 508582570316,
+            "rightNs": 508720216156,
+            "gapMs": 137.64584
+          }
+        ]
+      },
+      {
+        "name": "B2",
+        "arm": "B",
+        "pair": 2,
+        "rawMemorySha256": "4d9045d668685c216af9eace29e2a74992e5ad86dd3b48a47813b88a72b465c4",
+        "rawMarkersSha256": "886bc47dc94c51a77be9c84e57ff4580c008743b8d008457306601c72731aba6",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 14,
+        "stableFullyReadTreeSampleCount": 14,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1262.622239,
+        "preImportBracketGapMs": 71.495004,
+        "postImportBracketGapMs": 28.821903,
+        "maximumCoveredSampleGapMs": 127.664578,
+        "allObservedSampleCount": 100,
+        "overlappingImportSampleCount": 14,
+        "fullyContainedImportSampleCount": 12,
+        "stableFullyReadImportSampleCount": 12,
+        "maxSampledPssKiB": 1018157,
+        "maxSampledPrivateKiB": 789424,
+        "rawProcessReadCount": 650,
+        "maximumGapProof": [
+          {
+            "leftNs": 519057608189,
+            "rightNs": 519185272767,
+            "gapMs": 127.664578
+          }
+        ]
+      }
+    ]
+  },
+  "rawMonotonicTimes": [
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1033.4000000000233
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1040.6000000000058
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1060.5
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1047.7999999999884
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1008.0
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1023.0
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1036.4000000000233
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1015.2000000000116
+    },
+    {
+      "id": "exhaustive-media-A",
+      "kind": "exhaustive-media",
+      "arm": "A",
+      "rawMonotonicImportMs": 1025.0
+    },
+    {
+      "id": "exhaustive-media-B",
+      "kind": "exhaustive-media",
+      "arm": "B",
+      "rawMonotonicImportMs": 1001.2999999999884
+    },
+    {
+      "id": "memory/A1",
+      "kind": "memory",
+      "arm": "A",
+      "rawMonotonicImportMs": 1200.0999999999767
+    },
+    {
+      "id": "memory/A2",
+      "kind": "memory",
+      "arm": "A",
+      "rawMonotonicImportMs": 1205.3000000000466
+    },
+    {
+      "id": "memory/B1",
+      "kind": "memory",
+      "arm": "B",
+      "rawMonotonicImportMs": 1162.7000000000116
+    },
+    {
+      "id": "memory/B2",
+      "kind": "memory",
+      "arm": "B",
+      "rawMonotonicImportMs": 1207.5
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1037.8000000000175
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1048.0
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1070.5
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1052.8999999999942
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1065.7000000000116
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1038.7000000000116
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1060.6000000000058
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1052.1000000000058
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1047.2000000000116
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1063.5
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1032.9000000000233
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1056.0999999999767
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1031.7000000000116
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1111.5999999999767
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1002.7000000000116
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1029.600000000035
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1037.8000000000466
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1038.2000000000116
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1059.100000000035
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1054.2000000000116
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1051.7999999999884
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1026.4000000000233
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1036.5999999999767
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 994.7999999999884
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "arm": "A",
+      "rawMonotonicImportMs": 1031.7000000000116
+    },
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "arm": "B",
+      "rawMonotonicImportMs": 1048.699999999997
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "arm": "A",
+      "rawMonotonicImportMs": 1023.0
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "arm": "B",
+      "rawMonotonicImportMs": 1067.1000000000058
+    }
+  ],
+  "limits": [
+    "This independently reconstructs retained sampled process-tree data under the frozen a7f7 policy; it is not an exact peak measurement.",
+    "No missing read is assigned zero; failed coverage gates remain failed and unqualified maxima remain null.",
+    "Primary paired statistics and all exclusions remain unchanged; this artifact audit makes no new performance decision.",
+    "The product source remains bound to9e10; no gain transfers to the later dcfc composition."
+  ]
+}

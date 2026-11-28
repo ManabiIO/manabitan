@@ -1,0 +1,13 @@
+{
+  "branch": "perf/import-study-evidence-20261128-c563d487",
+  "commit": "63c2e40049981460f524f6b36695239a265a430b",
+  "parent": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+  "tree": "f7ee64e0c01f305bae5a26a02cc268afdc7c9241",
+  "publishedAtUtc": "2026-11-28 09:21:57 UTC",
+  "fileCount": 40,
+  "totalBytes": 6329900,
+  "canonicalSha256": "2579e29641e7ca406d1d6fa756d4e91176d347570ae0b640e636bc76996f3881",
+  "indexSha256": "92a59535e12823f5baa6a5a13c56b585ba08c9092c391f34660d25ed3e2ed5e6",
+  "manifestGitBlob": "ee2604ea78125ecbfb580ce440b0d30cf1ed73e3",
+  "scope": "Evidence and canonical documentation only; all prior canonical bytes preserved; no product PR."
+}

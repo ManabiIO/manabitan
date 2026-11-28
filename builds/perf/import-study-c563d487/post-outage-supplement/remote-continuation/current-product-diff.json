@@ -1,0 +1,55 @@
+{
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "head": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+  "exactDirectParent": true,
+  "exactSixFiles": true,
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "sha": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "sha": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "sha": "5a9033fda78144bfa1edf038b52f6804eeba23f5",
+      "status": "modified",
+      "additions": 64,
+      "deletions": 10
+    },
+    {
+      "path": "test/term-bank-row-suffix-reuse.test.js",
+      "sha": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+      "status": "added",
+      "additions": 285,
+      "deletions": 0
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+      "sha": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+      "status": "added",
+      "additions": 58,
+      "deletions": 0
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-ends.test.js",
+      "sha": "8ba263fc060391555a5070d65d6313fdd96607b4",
+      "status": "added",
+      "additions": 170,
+      "deletions": 0
+    }
+  ],
+  "originalBuildRun": 46126462448,
+  "recoveryRun": 46128887478,
+  "noSourceRecomputation": true
+}

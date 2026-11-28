@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Separate original-artifact completion bridge; the original primary audit and immutable outage snapshot remain unchanged.",
+  "previousEvidenceCommit": "63c2e40049981460f524f6b36695239a265a430b",
+  "originalPrimaryAudit": {
+    "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-log-audit.json",
+    "sha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193",
+    "artifactBindingPassRemainsNull": true
+  },
+  "newIndependentArtifactAudit": {
+    "path": "builds/perf/import-study-c563d487/post-outage-supplement/successor/independent-artifact-audit.json",
+    "sha256": "f129f1ab560a6e79a01c7e399a3ee78c0e1facc90673e7bea101e082edbfa061",
+    "bytes": 174950
+  },
+  "completionHistory": {
+    "path": "builds/perf/import-study-c563d487/post-outage-supplement/successor/artifact-audit-completion-history.json",
+    "sha256": "2d1a8b7406804c93f2945e1a51468d21bd2ea2d62bea3a642cbf0abecd9e75ef",
+    "bytes": 7451
+  },
+  "originalArtifactId": 15255629754,
+  "originalArtifactSha256": "e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+  "sameExactPrimaryRecordsSha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+  "originalArtifactAuditComplete": true,
+  "members": 560,
+  "originalUncompressedBytes": 143941712,
+  "rawChildren": 159,
+  "measuredObservations": 144,
+  "primaryRecords": 495,
+  "negativePassReceipts": 1740,
+  "jmdictExpectedChecks": 387,
+  "negativeExpectedChecks": 288,
+  "acquisitionRepeated": false,
+  "statisticsChanged": false,
+  "sourceChanged": false,
+  "promotionDecision": "Unchanged: no full promotion; frozen JMdict component gate failed and adverse negative ambiguity remains."
+}

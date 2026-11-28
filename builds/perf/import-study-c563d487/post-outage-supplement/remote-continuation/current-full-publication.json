@@ -1,0 +1,15 @@
+{
+  "branch": "perf/import-numeric-suffix-972-qualification-20261128-c563d487",
+  "head": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "tree": "452d9238522600be538c8601725681ac86353860",
+  "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "publishedAtUtc": "2026-11-28 09:21:29 UTC",
+  "files": 6,
+  "totalBytes": 78687,
+  "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+  "criteriaSha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+  "rootReviewGitBlob": "687a87cb2ed08d10d220d8518b76a4b10b1e5617",
+  "peerReviewGitBlob": "dae455ff22a60c00396ddb5150ab74e9cac1278a",
+  "product": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "noProductPr": true
+}

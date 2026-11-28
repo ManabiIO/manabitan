@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "runId": 46130093248,
+  "workflowCommit": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "workflowTree": "452d9238522600be538c8601725681ac86353860",
+  "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+  "createdAtUtc": "2026-11-28T09:21:31Z",
+  "correctnessJobId": 140933118058,
+  "correctnessBindingReportedStatus": "completed/success",
+  "comparisonJobs": {
+    "jmdict-AB": 140933489138,
+    "jmdict-BA": 140933489203,
+    "jitendex-AB": 140933489159,
+    "jitendex-BA": 140933489153,
+    "vndb-AB": 140933489168,
+    "vndb-BA": 140933489131
+  },
+  "independentExpectedGitBlob": "3a7dc580bfb8ec273e0fda0c3cc2b8157f9b9c4d",
+  "independentExpectedSha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+  "sourceAndScheduleChangedAfterLaunch": false,
+  "noCurrentPerformanceConclusion": true
+}

@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T09:24:49.162014+00:00",
+  "complete": true,
+  "scope": "Supplemental original artifact audit completion after the immutable outage checkpoint. No acquisition, source, native/parser execution, measurements or conclusions changed.",
+  "originalRun": 46124542684,
+  "originalArtifact": 15255629754,
+  "originalArtifactSha256": "e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+  "finalAuditSha256": "f129f1ab560a6e79a01c7e399a3ee78c0e1facc90673e7bea101e082edbfa061",
+  "auditorSha256": "182e39d478518cc36e2d3dfc28db526953c463f705463b8151f994248569377c",
+  "originalPrimarySha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+  "primaryAuditSnapshotSha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193",
+  "outageCheckpoint": "63c2e40049981460f524f6b36695239a265a430b",
+  "history": [
+    {
+      "attempt": 1,
+      "status": "Audit-only local source-layout mismatch",
+      "correction": "Map frozen ../qualification paths to the implementation-owner directory; exact source hashes unchanged."
+    },
+    {
+      "attempt": 2,
+      "status": "Audit-only stderr phase mismatch",
+      "correction": "Excluded verifier passes use the frozen producer phase untimed-verification."
+    },
+    {
+      "attempt": 3,
+      "status": "Audit-only excluded-field mismatch",
+      "correction": "Only warmup receipts carry excluded:true; copy raw pass fields exactly rather than inventing the field on other phases."
+    },
+    {
+      "attempt": 4,
+      "status": "Executor became unavailable before a terminal receipt was persisted",
+      "cause": "Unattributed; no claim that candidate or source caused the outage.",
+      "correction": "Retain interrupted source and receipt. Stream each primary record during the same exact-value/order comparisons and release completed smoke snapshots."
+    },
+    {
+      "attempt": 5,
+      "status": "Complete PASS",
+      "addressSpaceLimitMiB": 256,
+      "comparisonChange": "No proof or acceptance criterion changed; all495 primary records compared in order while streaming."
+    }
+  ],
+  "preliminaryReadOnlyInspectionCorrections": [
+    "Tagged primary JSONL is tag-space-JSON, not bare JSON; initial inspection parse failed without changes.",
+    "Dictionary receipts use groupReceipts, not groups; initial inspection lookup failed without changes."
+  ],
+  "completedCounts": {
+    "members": 560,
+    "originalUncompressedBytes": 143941712,
+    "rawChildren": 159,
+    "measuredObservations": 144,
+    "primaryRecords": 495,
+    "negativePassReceipts": 1740,
+    "jmExpectedChecks": 387,
+    "negativeExpectedChecks": 288,
+    "nativeOracleRecords": 8546
+  },
+  "retention": "Entire original ZIP retained, including every generated raw/deflate bank, raw child, error/capacity oracle, smoke and log. All earlier audit source versions and postprocessing failures retained separately.",
+  "decision": "No full promotion: frozen JMdict component target criterion failed (3of4 faster, median -2.1224%, maximum absolute A/A7.4818%). No negative formal all4 rule triggered; adverse ambiguity retained, not equivalence proof.",
+  "files": [
+    {
+      "path": "artifact-audit-attempt-1.json",
+      "bytes": 240,
+      "sha256": "e3823f204f23b47a6dc3cabfc562a87ec34f1e9fed0e60bc032a3c86fbce57d4"
+    },
+    {
+      "path": "artifact-audit-attempt-1.stderr.log",
+      "bytes": 912,
+      "sha256": "fc5bc645a247b5c769cd7b5e4c0c002142443d0c8362d27b6b2af489e8434cd2"
+    },
+    {
+      "path": "artifact-audit-attempt-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifact-audit-attempt-2.json",
+      "bytes": 240,
+      "sha256": "9c8e535456e7635083fd87180b56079a2eea3519ced23659a129701396be86e7"
+    },
+    {
+      "path": "artifact-audit-attempt-2.stderr.log",
+      "bytes": 791,
+      "sha256": "9235b40189b6405db9768f5b61640cd35f1ec25a08a3e65b83ad93363899705d"
+    },
+    {
+      "path": "artifact-audit-attempt-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifact-audit-attempt-3.json",
+      "bytes": 240,
+      "sha256": "f836eba405168489cb2aa03f74087d5a385819a70f439c6890499ac92f2ebc55"
+    },
+    {
+      "path": "artifact-audit-attempt-3.stderr.log",
+      "bytes": 791,
+      "sha256": "7b029852b5528d4c11b16c103e1579ceb785d712f426b6bfcd0cdfb229389d88"
+    },
+    {
+      "path": "artifact-audit-attempt-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifact-audit-attempt-4-interrupted.json",
+      "bytes": 410,
+      "sha256": "8a995d9b66f0e360b06e10f5409e6e987e059282016222741f0d0cd15730b8a2"
+    },
+    {
+      "path": "artifact-audit-attempt-5.json",
+      "bytes": 280,
+      "sha256": "31d7447e1e1b58c959826305db7f3c167576eeb1fc660ad5ba7d5c894fe64238"
+    },
+    {
+      "path": "artifact-audit-attempt-5.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifact-audit-attempt-5.stdout.log",
+      "bytes": 1072,
+      "sha256": "c9e62e85e6003b4360a90d6e8cc4489edcc292b58a89d4c51b9a68f6409eb15e"
+    },
+    {
+      "path": "artifact-audit-before-excluded-field.py",
+      "bytes": 29478,
+      "sha256": "805e8932cc2bee7ff5b45715786006bdbdfeb1c393c3de50c796f872112d2532"
+    },
+    {
+      "path": "artifact-audit-before-local-source-map.py",
+      "bytes": 29177,
+      "sha256": "1253220bb6a7302d47ff353909ebbb07becef8de76e07bf4ad701ce9f87aa8a9"
+    },
+    {
+      "path": "artifact-audit-before-pass-phase.py",
+      "bytes": 29351,
+      "sha256": "04d9dd99225dbd6579aefb5d5ea0fcab893f4627f26718e15bd0444571de8f80"
+    },
+    {
+      "path": "artifact-audit-before-streaming-primary.py",
+      "bytes": 29435,
+      "sha256": "9477606738a5849c0abeef01cf029acf950c0302d272c262a2f17632f72b83a4"
+    },
+    {
+      "path": "artifact-audit.py",
+      "bytes": 29599,
+      "sha256": "182e39d478518cc36e2d3dfc28db526953c463f705463b8151f994248569377c"
+    },
+    {
+      "path": "independent-artifact-audit.json",
+      "bytes": 174950,
+      "sha256": "f129f1ab560a6e79a01c7e399a3ee78c0e1facc90673e7bea101e082edbfa061"
+    },
+    {
+      "path": "artifact-download-receipt.json",
+      "bytes": 86286,
+      "sha256": "0b9c5cb51f489b1f083663c33ac1818a7e2bd6682d59995c105670dde1f0649f"
+    },
+    {
+      "path": "original-artifact.zip",
+      "bytes": 2878668,
+      "sha256": "e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0"
+    },
+    {
+      "path": "rebuilt-candidate.diff",
+      "bytes": 12948,
+      "sha256": "e7422dc75e64fefa65ce6f8aeb8be940d44d098362d8bdba7753237d624028b1"
+    },
+    {
+      "path": "compiled-product/dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275"
+    },
+    {
+      "path": "compiled-product/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 69133,
+      "sha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837"
+    },
+    {
+      "path": "compiled-product/ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 161346,
+      "sha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb"
+    }
+  ]
+}

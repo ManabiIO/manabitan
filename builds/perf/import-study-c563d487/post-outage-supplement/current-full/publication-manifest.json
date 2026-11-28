@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "scope": "Unpublished exact-source current-base full-import qualification tooling, ready for independent source review. No current full observations acquired.",
+  "baseCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baseTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "productCommit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "productTree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+  "fileCount": 6,
+  "totalBytes": 78687,
+  "files": [
+    {
+      "path": ".github/workflows/import-numeric-suffix-972-qualification-c563d487.yml",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 20767,
+      "sha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+      "gitBlob": "b70bcddfec6db7fe4dbf2dfb622d5a2a135fc2af"
+    },
+    {
+      "path": "dev/perf/import-numeric-suffix-972-qualification-c563d487/verify-correctness-reuse.py",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 24645,
+      "sha256": "de63b509951892b9d83f6a0087fb77e20f9e224d4cb5d5ffebc09a9d0c5cf988",
+      "gitBlob": "c289da6f67c980792daf3720dc2c72f191a6a77e"
+    },
+    {
+      "path": "dev/perf/import-numeric-suffix-972-qualification-c563d487/archive-evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 6895,
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+      "gitBlob": "e994ee477e5b996b5453e17626a65785ff2dacaa"
+    },
+    {
+      "path": "dev/perf/import-numeric-suffix-972-qualification-c563d487/correctness-reuse-binding.json",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 5735,
+      "sha256": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+      "gitBlob": "67981ab38e04810cf397bd1eae45c0a44aa4b84b"
+    },
+    {
+      "path": "dev/perf/import-numeric-suffix-972-qualification-c563d487/original-correctness-recovery.json",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 17452,
+      "sha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+      "gitBlob": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6"
+    },
+    {
+      "path": "dev/perf/import-numeric-suffix-972-qualification-c563d487/prospective-complete-import-criteria.json",
+      "mode": "100644",
+      "type": "blob",
+      "bytes": 3193,
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "gitBlob": "cce478f3af29580e8d864db426550a601e350747"
+    }
+  ],
+  "checks": {
+    "oldWorkflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167",
+    "newWorkflow": {
+      "bytes": 20767,
+      "sha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+      "gitBlob": "b70bcddfec6db7fe4dbf2dfb622d5a2a135fc2af"
+    },
+    "unchangedAcquisitionCommand": true,
+    "unchangedRawObservationExtractorExceptPaths": true,
+    "criteriaSha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+    "provenanceHashes": {
+      "correctness-reuse-binding.json": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+      "original-correctness-recovery.json": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720"
+    },
+    "noPlaceholdersOrObsoleteCriteria": true,
+    "pythonYamlRuntimeSyntaxCheckPending": true,
+    "postprocessingAmendment": {
+      "previousArchiveSha256": "6c71ea39385b72ec2c14d8de9f237b2f5ddbc6eb8ecedbbcd03a904f70f8fc97",
+      "currentArchiveSha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+      "change": "Add Git blob SHA1 over the same complete ZIP bytes after all observations; no archive contents, observer, schedule, thresholds or source changes"
+    }
+  },
+  "syntaxScope": "Source review only during executor outage. The frozen validation job runs Python compilation before any correctness binding or measurement dependency; no local Python/YAML syntax success is asserted.",
+  "permissionsScope": "Root owns commit/ref/run publication. These are unreferenced Git objects only."
+}

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "scope": "Root independent primary-log clock/source/output and paired-arithmetic review; no acquisition or artifact download, no independent bootstrap resimulation",
+  "runId": 46113243549,
+  "jobId": 140903281788,
+  "primaryLogCharacters": 451044,
+  "taggedRecords": 55,
+  "observations": 42,
+  "all42RawBrowserClocksMatch": true,
+  "allSourcePackageAndBrowserBindingsMatch": true,
+  "memorySourceOverlay": {
+    "count": 4,
+    "dirtyOnlyForMemory": true,
+    "soleDeclaredHashMapDelta": "test/chromium/extension-two-dictionary-import.e2e.js",
+    "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+    "preAcquisitionProof": "experiments/row-suffix-numeric/qualification/independent-auditor-review-checks.json at05:55:36UTC",
+    "allOtherDeclaredHashesAndSameArmPackageBytesEqual": true,
+    "separateMemoryNotUsedForLatency": true
+  },
+  "allRows": 528299,
+  "allStorageBytes": 43520477,
+  "allLookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+  "allReportsSuccess": true,
+  "pairedArithmeticExactlyMatchesOriginal": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9895040131714374,
+        0.9888548057259773,
+        0.9854112778065124,
+        0.9698942229455073,
+        1.007181515403824,
+        1.071420888458604,
+        1.0236146095717262,
+        1.0977590460526687,
+        1.0157519815391498,
+        0.9810911345319399,
+        0.984005854066558,
+        1.0150391866130803
+      ],
+      "medianPairedChangePercent": -0.16572357123693093,
+      "equalWorkChangePercent": 1.0569126751822866,
+      "fasterPairs": 6
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        1.0204124579124518,
+        1.0513604724742378,
+        0.9896136269215393,
+        0.9974866478165618
+      ],
+      "medianPairedChangePercent": 0.8949552864506938,
+      "equalWorkChangePercent": 1.459528863039039,
+      "fasterPairs": 2
+    }
+  },
+  "bootstrapScope": "Original emitted interval verified by separate frozen auditor; root did not simulate it again.",
+  "decision": "No clear JMdict effect on this one old-baseline host. No promotion or nonregression proof; preserve all controls and wait for other fixed cells.",
+  "reviewPreparationFailures": [
+    "Initial read-only inspection treated tagged primary-records.jsonl as plain JSON lines; JSONDecodeError. Corrected by reading explicit MANABITAN_QUALIFICATION_JSON prefix from original primary log.",
+    "Initial source-dirty assertion failed on four separate memory observations. Reconciled exact single harness overlay with pre-acquisition frozen81adaf proof; all other declared source hashes and same-arm packaged bytes equal. No files or measurements changed."
+  ]
+}

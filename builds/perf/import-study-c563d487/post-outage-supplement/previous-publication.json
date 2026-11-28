@@ -1,0 +1,249 @@
+{
+  "branch": "perf/import-study-evidence-20261128-c563d487",
+  "commit": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+  "parent": "c983627bad332015424f0321d481a10bd7be23da",
+  "tree": "ce3c6523d81fd79c6ed9224ad8f7dad6a2ec7e56",
+  "publishedAtUtc": "2026-11-28 08:16:18 UTC",
+  "fileCount": 45,
+  "totalBytes": 1803225,
+  "manifestSha256": "25cab82f068c585ef50472a7dccf9e47bda71fbb88cfceea562e7dc48cf02444",
+  "canonicalSha256": "65298eff9b2d1f7afa215c7951ee97630e5d1eb14276e68f620e72303691aa16",
+  "indexSha256": "410b90173e5cec3f99846a91144386833e2f0c11b4d064c89702a57cb79987d7",
+  "independentReviewSha256": "e8d436154f00b4cf72f16576d70f0a5aca880d79f542a1f5562bb31ff57fd077",
+  "compareAudit": {
+    "parent": "c983627bad332015424f0321d481a10bd7be23da",
+    "commit": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+    "tree": "ce3c6523d81fd79c6ed9224ad8f7dad6a2ec7e56",
+    "all45GitBlobsMatch": true,
+    "files": [
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/develop-972-merge-snapshot.json",
+        "status": "added",
+        "gitBlobSha": "83c13c19b16ad7d2bf74e5850a81cb8b416ca0ff"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/audit.py",
+        "status": "added",
+        "gitBlobSha": "ff8c3599a3da26fcd7c0ad89ea8894ca50d409fe"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/history-review.json",
+        "status": "added",
+        "gitBlobSha": "d58eb3ddb5274a5ba70c2c83fcb56b761b7d09b4"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/independent-result-audit.json",
+        "status": "added",
+        "gitBlobSha": "e1fd53bde7bd36763c3e37e716d5e18c01b9ed6c"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/observer.mjs",
+        "status": "added",
+        "gitBlobSha": "5317d64e11ce80e522b53617e10a7f21babb4686"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/preparation.json",
+        "status": "added",
+        "gitBlobSha": "3c78fa5e5a470dafba3a5440b8662268a954ae4b"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/raw-pass.tar.gz",
+        "status": "added",
+        "gitBlobSha": "7f69a55978228e3f8642bb7ef252fa974a4f9d2e"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/header-order/run-1.child-status.json",
+        "status": "added",
+        "gitBlobSha": "f5ae51dfdfdeb970bd0e0ac1f2a7d66db74e8e96"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/index.json",
+        "status": "added",
+        "gitBlobSha": "69d628910b0984c32f69c966f9c21a9a257d2619"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/component-audit.py",
+        "status": "added",
+        "gitBlobSha": "bc7029ecdddc5ee79fb56d3675f541f72269d4c0"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/jmdict/artifact-download-receipt.json",
+        "status": "added",
+        "gitBlobSha": "574f9914bee809a9065e00f6e9bc62600a33f2fa"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/jmdict/independent-artifact-audit.json",
+        "status": "added",
+        "gitBlobSha": "644d56f1d7d67bd98b45eede42383b56bc4ef279"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/jmdict/primary-artifact-reconciliation.json",
+        "status": "added",
+        "gitBlobSha": "e38491d6051bdad0677749e7301feeba91a846a1"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/jmdict/raw-and-primary-evidence.tar.gz",
+        "status": "added",
+        "gitBlobSha": "42794fdbd0b4a590c6afda36b663f0692d6aa3cf"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/negative-audit.py",
+        "status": "added",
+        "gitBlobSha": "7aff34887f5e372623eed4bf85cc4db4d550dc28"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/negative/artifact-download-receipt.json",
+        "status": "added",
+        "gitBlobSha": "0173a6154d70fecc57082f614b5413297786cef9"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/negative/independent-artifact-audit.json",
+        "status": "added",
+        "gitBlobSha": "b11f122b0107ce56b6da997b2997a017d008db6d"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/negative/primary-artifact-reconciliation.json",
+        "status": "added",
+        "gitBlobSha": "d61c6577bc95a0e579e6a0750d34df3e2f2bc27d"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/negative/raw-and-primary-evidence.tar.gz",
+        "status": "added",
+        "gitBlobSha": "2e67e24ba20229b62ae04603fdefde181013c8da"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/vndb/artifact-download-receipt.json",
+        "status": "added",
+        "gitBlobSha": "378b74c165900cfcb813bac20d7f350ade57b233"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/vndb/independent-artifact-audit.json",
+        "status": "added",
+        "gitBlobSha": "a42e87930c94cf5e9bca00438cde6665cecf61d0"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/vndb/primary-artifact-reconciliation.json",
+        "status": "added",
+        "gitBlobSha": "d48ea1d6a3a45e8cddd8cbafcc44135bb720319d"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/original-prefix/vndb/raw-and-primary-evidence.tar.gz",
+        "status": "added",
+        "gitBlobSha": "fd9622f559c58dc5ea8a86de724bd2f89c3501e1"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/previous-publication.json",
+        "status": "added",
+        "gitBlobSha": "f6d457295fa932515f45365b85f76f9811610cbc"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/candidate.patch",
+        "status": "added",
+        "gitBlobSha": "68371bd4f612a1912a3cecde039a3fd16eb5452c"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/composition-record.json",
+        "status": "added",
+        "gitBlobSha": "ac12fe1a528621e50e97a72f3cf56182d20c81c5"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/frozen-tooling-payload.tar.gz",
+        "status": "added",
+        "gitBlobSha": "94536111f45d7e317f60a5e41ef47a8dbc10ed66"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/implementation.json",
+        "status": "added",
+        "gitBlobSha": "004778ac04fe12ef55a2dd19dbf7e425ef25328e"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/independent-final-review.json",
+        "status": "added",
+        "gitBlobSha": "3bdecb317f82fa2c66177b0abdd68d351c2bef79"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/independent-fixture-review.json",
+        "status": "added",
+        "gitBlobSha": "2da9c3d9b244e3d6b282e0990347ec767e393d85"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/independent-source-review.json",
+        "status": "added",
+        "gitBlobSha": "7de10ca7bcf0e7e47598aac82a0c4628c1b9ddac"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/launch.json",
+        "status": "added",
+        "gitBlobSha": "594ed1878e9c4978e74b3b4e568d72d7ed050087"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/excluded-generation-1.status.json",
+        "status": "added",
+        "gitBlobSha": "d7d4a0187462511b6b1a1a9dede154563fe6888d"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/fixture-manifest.json",
+        "status": "added",
+        "gitBlobSha": "1f6626626d0d9e2a020e396c41191ced203a2743"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/generation-audit.json",
+        "status": "added",
+        "gitBlobSha": "5dbfabfecc13b384da999373537930841597be5a"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/generator-model-and-receipts.tar.gz",
+        "status": "added",
+        "gitBlobSha": "0e7380e8cab02f062bff5346bd13b44d1cebf33c"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/negative-protocol.json",
+        "status": "added",
+        "gitBlobSha": "c39f1e4fd146e4c9e37be403d530061e1bb5d631"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/negative-tooling-manifest.json",
+        "status": "added",
+        "gitBlobSha": "47293b4165d2b1de88206822d40f9e0732fa8c9f"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/negative/preparation-checks.json",
+        "status": "added",
+        "gitBlobSha": "893c69941ae6a0968a022f1d3e8e378e009a0d8d"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/prospective/prospective-complete-import-criteria.json",
+        "status": "added",
+        "gitBlobSha": "392e60c9aa729f2f13b722864c42e8d9c19c0bc5"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/prospective/prospective-component-review.json",
+        "status": "added",
+        "gitBlobSha": "162dab82a08bf2ab39f65e14ad09126eacdf00be"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/publication-manifest.json",
+        "status": "added",
+        "gitBlobSha": "5bbb3e9c46f7a3c12639542d2774825e26a0fec7"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/publication.json",
+        "status": "added",
+        "gitBlobSha": "e9361a90bf58abb441aeed841ec355d0fa984ee9"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prior-streak-followup/successor/source-and-preparation.tar.gz",
+        "status": "added",
+        "gitBlobSha": "f2e2c24e1c56c4df11fa69a911e7d8df61fa0a2d"
+      },
+      {
+        "path": "dev/perf/import-experiments-20260914.md",
+        "status": "modified",
+        "gitBlobSha": "6af42f4e52709d93987d321f2a17c1e0decedbeb"
+      }
+    ],
+    "docPureInsertionBytes": 8101,
+    "independentReviewSha256": "e8d436154f00b4cf72f16576d70f0a5aca880d79f542a1f5562bb31ff57fd077"
+  },
+  "noProductPr": true
+}

@@ -1,0 +1,3388 @@
+{
+  "recordedAt": "2026-11-28T08:51:43.553091+00:00",
+  "artifact": {
+    "id": 15255629754,
+    "name": "jmdict-prior-streak-selector-screen-1",
+    "size_in_bytes": 2878668,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255629754",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255629754/zip",
+    "expired": false,
+    "created_at": "2026-11-28T08:47:09Z",
+    "expires_at": "2026-12-12T08:47:07Z",
+    "updated_at": "2026-11-28T08:47:09Z",
+    "digest": "sha256:e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+    "workflow_run": {
+      "id": 46124542684,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/jmdict-prior-streak-selector-screen-20261128-c563d487",
+      "head_sha": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82"
+    }
+  },
+  "downloadedBytes": 2878668,
+  "downloadedSha256": "e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+  "sizeAndApiShaMatch": true,
+  "retention": "Complete original artifact ZIP retained; members read selectively without whole extraction",
+  "members": [
+    {
+      "name": "diagnostic-source.c",
+      "bytes": 164964,
+      "compressedBytes": 30666,
+      "crc32": 210562964
+    },
+    {
+      "name": "diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "diagnostic-build.json",
+      "bytes": 3758,
+      "compressedBytes": 1403,
+      "crc32": 4075385804
+    },
+    {
+      "name": "focused-tests.log",
+      "bytes": 1752,
+      "compressedBytes": 640,
+      "crc32": 2563653424
+    },
+    {
+      "name": "jitendex/diagnostic.child-status.json",
+      "bytes": 666,
+      "compressedBytes": 306,
+      "crc32": 3183750454
+    },
+    {
+      "name": "jitendex/diagnostic.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/diagnostic.stdout.json",
+      "bytes": 60366,
+      "compressedBytes": 4828,
+      "crc32": 4289340189
+    },
+    {
+      "name": "jitendex/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "jitendex/native-oracle/native-oracle-records.jsonl",
+      "bytes": 1317051,
+      "compressedBytes": 98650,
+      "crc32": 1731838356
+    },
+    {
+      "name": "jitendex/native-oracle/native-oracle.json",
+      "bytes": 1936,
+      "compressedBytes": 1003,
+      "crc32": 1784727650
+    },
+    {
+      "name": "jitendex/pair-0-A.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 284,
+      "crc32": 2823655382
+    },
+    {
+      "name": "jitendex/pair-0-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-0-A.stdout.json",
+      "bytes": 11598,
+      "compressedBytes": 2725,
+      "crc32": 1701844550
+    },
+    {
+      "name": "jitendex/pair-0-B.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 286,
+      "crc32": 1352460470
+    },
+    {
+      "name": "jitendex/pair-0-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-0-B.stdout.json",
+      "bytes": 11748,
+      "compressedBytes": 2755,
+      "crc32": 3405702337
+    },
+    {
+      "name": "jitendex/pair-0-C.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 287,
+      "crc32": 2771040873
+    },
+    {
+      "name": "jitendex/pair-0-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-0-C.stdout.json",
+      "bytes": 11588,
+      "compressedBytes": 2724,
+      "crc32": 1644427794
+    },
+    {
+      "name": "jitendex/pair-0-D.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 286,
+      "crc32": 2730867972
+    },
+    {
+      "name": "jitendex/pair-0-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-0-D.stdout.json",
+      "bytes": 11599,
+      "compressedBytes": 2731,
+      "crc32": 2453220808
+    },
+    {
+      "name": "jitendex/pair-1-A.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 289,
+      "crc32": 4250124211
+    },
+    {
+      "name": "jitendex/pair-1-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-1-A.stdout.json",
+      "bytes": 11609,
+      "compressedBytes": 2734,
+      "crc32": 4223295616
+    },
+    {
+      "name": "jitendex/pair-1-B.child-status.json",
+      "bytes": 533,
+      "compressedBytes": 286,
+      "crc32": 1893863830
+    },
+    {
+      "name": "jitendex/pair-1-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-1-B.stdout.json",
+      "bytes": 11737,
+      "compressedBytes": 2755,
+      "crc32": 933156422
+    },
+    {
+      "name": "jitendex/pair-1-C.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 286,
+      "crc32": 3432624803
+    },
+    {
+      "name": "jitendex/pair-1-C.stdout.json",
+      "bytes": 11600,
+      "compressedBytes": 2729,
+      "crc32": 2768557093
+    },
+    {
+      "name": "jitendex/pair-1-D.child-status.json",
+      "bytes": 531,
+      "compressedBytes": 287,
+      "crc32": 2896119737
+    },
+    {
+      "name": "jitendex/pair-1-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-1-D.stdout.json",
+      "bytes": 11598,
+      "compressedBytes": 2724,
+      "crc32": 1741889457
+    },
+    {
+      "name": "jitendex/pair-1-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-2-A.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 287,
+      "crc32": 3173298118
+    },
+    {
+      "name": "jitendex/pair-2-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-2-A.stdout.json",
+      "bytes": 11599,
+      "compressedBytes": 2727,
+      "crc32": 2440754928
+    },
+    {
+      "name": "jitendex/pair-2-B.child-status.json",
+      "bytes": 533,
+      "compressedBytes": 286,
+      "crc32": 3301366746
+    },
+    {
+      "name": "jitendex/pair-2-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-2-B.stdout.json",
+      "bytes": 11746,
+      "compressedBytes": 2758,
+      "crc32": 642926504
+    },
+    {
+      "name": "jitendex/pair-2-C.child-status.json",
+      "bytes": 531,
+      "compressedBytes": 286,
+      "crc32": 654775914
+    },
+    {
+      "name": "jitendex/pair-2-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-2-C.stdout.json",
+      "bytes": 11599,
+      "compressedBytes": 2725,
+      "crc32": 1180785383
+    },
+    {
+      "name": "jitendex/pair-2-D.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 286,
+      "crc32": 1215701139
+    },
+    {
+      "name": "jitendex/pair-2-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-2-D.stdout.json",
+      "bytes": 11599,
+      "compressedBytes": 2730,
+      "crc32": 438807353
+    },
+    {
+      "name": "jitendex/pair-3-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-3-A.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 287,
+      "crc32": 2959091187
+    },
+    {
+      "name": "jitendex/pair-3-A.stdout.json",
+      "bytes": 11609,
+      "compressedBytes": 2731,
+      "crc32": 2478754019
+    },
+    {
+      "name": "jitendex/pair-3-B.child-status.json",
+      "bytes": 533,
+      "compressedBytes": 287,
+      "crc32": 2280866821
+    },
+    {
+      "name": "jitendex/pair-3-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-3-B.stdout.json",
+      "bytes": 11725,
+      "compressedBytes": 2753,
+      "crc32": 498328340
+    },
+    {
+      "name": "jitendex/pair-3-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-3-C.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 287,
+      "crc32": 814796744
+    },
+    {
+      "name": "jitendex/pair-3-C.stdout.json",
+      "bytes": 11603,
+      "compressedBytes": 2728,
+      "crc32": 1720853487
+    },
+    {
+      "name": "jitendex/pair-3-D.child-status.json",
+      "bytes": 532,
+      "compressedBytes": 287,
+      "crc32": 2679191044
+    },
+    {
+      "name": "jitendex/pair-3-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jitendex/pair-3-D.stdout.json",
+      "bytes": 11588,
+      "compressedBytes": 2723,
+      "crc32": 4199158811
+    },
+    {
+      "name": "jitendex/result.json",
+      "bytes": 429286,
+      "compressedBytes": 23653,
+      "crc32": 3524620660
+    },
+    {
+      "name": "jmdict/diagnostic.child-status.json",
+      "bytes": 662,
+      "compressedBytes": 304,
+      "crc32": 3441162872
+    },
+    {
+      "name": "jmdict/diagnostic.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/diagnostic.stdout.json",
+      "bytes": 25158,
+      "compressedBytes": 4188,
+      "crc32": 127067415
+    },
+    {
+      "name": "jmdict/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "jmdict/native-oracle/native-oracle-records.jsonl",
+      "bytes": 1149623,
+      "compressedBytes": 77682,
+      "crc32": 4244322615
+    },
+    {
+      "name": "jmdict/native-oracle/native-oracle.json",
+      "bytes": 1932,
+      "compressedBytes": 1002,
+      "crc32": 2499518169
+    },
+    {
+      "name": "jmdict/pair-0-A.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 283,
+      "crc32": 488556042
+    },
+    {
+      "name": "jmdict/pair-0-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-0-A.stdout.json",
+      "bytes": 5663,
+      "compressedBytes": 2090,
+      "crc32": 1570882984
+    },
+    {
+      "name": "jmdict/pair-0-B.child-status.json",
+      "bytes": 531,
+      "compressedBytes": 283,
+      "crc32": 3380698647
+    },
+    {
+      "name": "jmdict/pair-0-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-0-B.stdout.json",
+      "bytes": 5797,
+      "compressedBytes": 2109,
+      "crc32": 3753715496
+    },
+    {
+      "name": "jmdict/pair-0-C.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 282,
+      "crc32": 3749714433
+    },
+    {
+      "name": "jmdict/pair-0-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-0-C.stdout.json",
+      "bytes": 5640,
+      "compressedBytes": 2081,
+      "crc32": 3637291982
+    },
+    {
+      "name": "jmdict/pair-0-D.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 282,
+      "crc32": 2550948623
+    },
+    {
+      "name": "jmdict/pair-0-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-0-D.stdout.json",
+      "bytes": 5641,
+      "compressedBytes": 2084,
+      "crc32": 2563935352
+    },
+    {
+      "name": "jmdict/pair-1-A.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 283,
+      "crc32": 4080488004
+    },
+    {
+      "name": "jmdict/pair-1-A.stdout.json",
+      "bytes": 5663,
+      "compressedBytes": 2089,
+      "crc32": 901705795
+    },
+    {
+      "name": "jmdict/pair-1-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-1-B.child-status.json",
+      "bytes": 531,
+      "compressedBytes": 284,
+      "crc32": 3584712018
+    },
+    {
+      "name": "jmdict/pair-1-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-1-B.stdout.json",
+      "bytes": 5785,
+      "compressedBytes": 2105,
+      "crc32": 1557932996
+    },
+    {
+      "name": "jmdict/pair-1-C.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 284,
+      "crc32": 3802754687
+    },
+    {
+      "name": "jmdict/pair-1-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-1-C.stdout.json",
+      "bytes": 5662,
+      "compressedBytes": 2090,
+      "crc32": 972144793
+    },
+    {
+      "name": "jmdict/pair-1-D.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 280,
+      "crc32": 962824341
+    },
+    {
+      "name": "jmdict/pair-1-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-1-D.stdout.json",
+      "bytes": 5654,
+      "compressedBytes": 2087,
+      "crc32": 3033451129
+    },
+    {
+      "name": "jmdict/pair-2-A.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 283,
+      "crc32": 3153752898
+    },
+    {
+      "name": "jmdict/pair-2-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-2-A.stdout.json",
+      "bytes": 5650,
+      "compressedBytes": 2083,
+      "crc32": 3253991281
+    },
+    {
+      "name": "jmdict/pair-2-B.child-status.json",
+      "bytes": 531,
+      "compressedBytes": 283,
+      "crc32": 303338020
+    },
+    {
+      "name": "jmdict/pair-2-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-2-B.stdout.json",
+      "bytes": 5805,
+      "compressedBytes": 2113,
+      "crc32": 2837266158
+    },
+    {
+      "name": "jmdict/pair-2-C.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 281,
+      "crc32": 3877541517
+    },
+    {
+      "name": "jmdict/pair-2-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-2-C.stdout.json",
+      "bytes": 5651,
+      "compressedBytes": 2084,
+      "crc32": 3435390318
+    },
+    {
+      "name": "jmdict/pair-2-D.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 282,
+      "crc32": 642098088
+    },
+    {
+      "name": "jmdict/pair-2-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-3-A.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 284,
+      "crc32": 69780234
+    },
+    {
+      "name": "jmdict/pair-3-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-2-D.stdout.json",
+      "bytes": 5651,
+      "compressedBytes": 2083,
+      "crc32": 2861050710
+    },
+    {
+      "name": "jmdict/pair-3-A.stdout.json",
+      "bytes": 5662,
+      "compressedBytes": 2085,
+      "crc32": 2742968243
+    },
+    {
+      "name": "jmdict/pair-3-B.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 283,
+      "crc32": 3892353110
+    },
+    {
+      "name": "jmdict/pair-3-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-3-B.stdout.json",
+      "bytes": 5796,
+      "compressedBytes": 2109,
+      "crc32": 1846580371
+    },
+    {
+      "name": "jmdict/pair-3-C.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 283,
+      "crc32": 2336911829
+    },
+    {
+      "name": "jmdict/pair-3-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-3-C.stdout.json",
+      "bytes": 5652,
+      "compressedBytes": 2083,
+      "crc32": 2013325695
+    },
+    {
+      "name": "jmdict/pair-3-D.child-status.json",
+      "bytes": 530,
+      "compressedBytes": 283,
+      "crc32": 188127270
+    },
+    {
+      "name": "jmdict/pair-3-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "jmdict/pair-3-D.stdout.json",
+      "bytes": 5662,
+      "compressedBytes": 2088,
+      "crc32": 3035069296
+    },
+    {
+      "name": "jmdict/result.json",
+      "bytes": 203211,
+      "compressedBytes": 18074,
+      "crc32": 4146124730
+    },
+    {
+      "name": "negative-case-1/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-1/negative-case-1-baseline-verification.child-status.json",
+      "bytes": 613,
+      "compressedBytes": 306,
+      "crc32": 3107377106
+    },
+    {
+      "name": "negative-case-1/negative-case-1-baseline-verification.stderr.log",
+      "bytes": 2150,
+      "compressedBytes": 1196,
+      "crc32": 3065525273
+    },
+    {
+      "name": "negative-case-1/negative-case-1-baseline-verification.stdout.json",
+      "bytes": 4066,
+      "compressedBytes": 1981,
+      "crc32": 1197164705
+    },
+    {
+      "name": "negative-case-1/negative-case-1-diagnostic.child-status.json",
+      "bytes": 720,
+      "compressedBytes": 310,
+      "crc32": 3621957017
+    },
+    {
+      "name": "negative-case-1/negative-case-1-diagnostic.stderr.log",
+      "bytes": 2271,
+      "compressedBytes": 1234,
+      "crc32": 3258230056
+    },
+    {
+      "name": "negative-case-1/negative-case-1-diagnostic.stdout.json",
+      "bytes": 5412,
+      "compressedBytes": 2382,
+      "crc32": 1953989400
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 3631077703
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-A.stderr.log",
+      "bytes": 12753,
+      "compressedBytes": 2051,
+      "crc32": 2807511774
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-A.stdout.json",
+      "bytes": 13896,
+      "compressedBytes": 2954,
+      "crc32": 234772065
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 293,
+      "crc32": 3893486337
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-B.stderr.log",
+      "bytes": 12736,
+      "compressedBytes": 2064,
+      "crc32": 2555733371
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-B.stdout.json",
+      "bytes": 14049,
+      "compressedBytes": 2996,
+      "crc32": 2485944203
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 2030783149
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-C.stderr.log",
+      "bytes": 12740,
+      "compressedBytes": 2034,
+      "crc32": 612404236
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-C.stdout.json",
+      "bytes": 13904,
+      "compressedBytes": 2947,
+      "crc32": 676815068
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 1993482386
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-D.stderr.log",
+      "bytes": 12732,
+      "compressedBytes": 2043,
+      "crc32": 2694819499
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-0-D.stdout.json",
+      "bytes": 13909,
+      "compressedBytes": 2955,
+      "crc32": 1384177057
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4174244708
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-A.stderr.log",
+      "bytes": 12722,
+      "compressedBytes": 2028,
+      "crc32": 1235438115
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-A.stdout.json",
+      "bytes": 13867,
+      "compressedBytes": 2931,
+      "crc32": 4125401307
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 289,
+      "crc32": 1826296825
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-B.stderr.log",
+      "bytes": 12751,
+      "compressedBytes": 2040,
+      "crc32": 1742152328
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-B.stdout.json",
+      "bytes": 14064,
+      "compressedBytes": 2971,
+      "crc32": 3008882721
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3485797040
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-C.stderr.log",
+      "bytes": 12721,
+      "compressedBytes": 2037,
+      "crc32": 2236494519
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-C.stdout.json",
+      "bytes": 13879,
+      "compressedBytes": 2949,
+      "crc32": 663090583
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 1718752476
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-D.stderr.log",
+      "bytes": 12730,
+      "compressedBytes": 2039,
+      "crc32": 1961247289
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-1-D.stdout.json",
+      "bytes": 13894,
+      "compressedBytes": 2949,
+      "crc32": 533492703
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 3960370559
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-A.stderr.log",
+      "bytes": 12728,
+      "compressedBytes": 2035,
+      "crc32": 3755965397
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-A.stdout.json",
+      "bytes": 13884,
+      "compressedBytes": 2944,
+      "crc32": 2153747781
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 1574746671
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-B.stderr.log",
+      "bytes": 12748,
+      "compressedBytes": 2056,
+      "crc32": 1718532910
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-B.stdout.json",
+      "bytes": 14061,
+      "compressedBytes": 2986,
+      "crc32": 944372090
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3440142173
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-C.stdout.json",
+      "bytes": 13891,
+      "compressedBytes": 2967,
+      "crc32": 987330842
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-C.stderr.log",
+      "bytes": 12715,
+      "compressedBytes": 2052,
+      "crc32": 4080416111
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 290,
+      "crc32": 1395338773
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-D.stderr.log",
+      "bytes": 12726,
+      "compressedBytes": 2052,
+      "crc32": 1066982241
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-2-D.stdout.json",
+      "bytes": 13881,
+      "compressedBytes": 2960,
+      "crc32": 3109868586
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 1168943475
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-A.stderr.log",
+      "bytes": 12734,
+      "compressedBytes": 2054,
+      "crc32": 979790617
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-A.stdout.json",
+      "bytes": 13909,
+      "compressedBytes": 2965,
+      "crc32": 529707052
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3564629360
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-B.stderr.log",
+      "bytes": 12726,
+      "compressedBytes": 2057,
+      "crc32": 2424618620
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-B.stdout.json",
+      "bytes": 14016,
+      "compressedBytes": 2978,
+      "crc32": 3090220909
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 1941163811
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-C.stderr.log",
+      "bytes": 12724,
+      "compressedBytes": 2028,
+      "crc32": 3874122059
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-C.stdout.json",
+      "bytes": 13888,
+      "compressedBytes": 2941,
+      "crc32": 1004063405
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 12368344
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-D.stderr.log",
+      "bytes": 12735,
+      "compressedBytes": 2050,
+      "crc32": 3134403415
+    },
+    {
+      "name": "negative-case-1/negative-result.json",
+      "bytes": 426548,
+      "compressedBytes": 33225,
+      "crc32": 1188907065
+    },
+    {
+      "name": "negative-case-1/negative-case-1-pair-3-D.stdout.json",
+      "bytes": 13911,
+      "compressedBytes": 2961,
+      "crc32": 478657203
+    },
+    {
+      "name": "negative-case-2/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-2/negative-case-2-baseline-verification.child-status.json",
+      "bytes": 612,
+      "compressedBytes": 305,
+      "crc32": 1190168478
+    },
+    {
+      "name": "negative-case-2/negative-case-2-baseline-verification.stderr.log",
+      "bytes": 2176,
+      "compressedBytes": 1207,
+      "crc32": 710401583
+    },
+    {
+      "name": "negative-case-2/negative-case-2-baseline-verification.stdout.json",
+      "bytes": 4127,
+      "compressedBytes": 2000,
+      "crc32": 1147279001
+    },
+    {
+      "name": "negative-case-2/negative-case-2-diagnostic.child-status.json",
+      "bytes": 720,
+      "compressedBytes": 310,
+      "crc32": 2542565071
+    },
+    {
+      "name": "negative-case-2/negative-case-2-diagnostic.stderr.log",
+      "bytes": 2261,
+      "compressedBytes": 1233,
+      "crc32": 2003961970
+    },
+    {
+      "name": "negative-case-2/negative-case-2-diagnostic.stdout.json",
+      "bytes": 5401,
+      "compressedBytes": 2385,
+      "crc32": 3908189049
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-A.child-status.json",
+      "bytes": 576,
+      "compressedBytes": 290,
+      "crc32": 3898525788
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-A.stderr.log",
+      "bytes": 12683,
+      "compressedBytes": 2050,
+      "crc32": 774269417
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-A.stdout.json",
+      "bytes": 13846,
+      "compressedBytes": 2968,
+      "crc32": 2171484248
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 2486856160
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-B.stderr.log",
+      "bytes": 12691,
+      "compressedBytes": 2058,
+      "crc32": 3113094351
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-B.stdout.json",
+      "bytes": 14002,
+      "compressedBytes": 2994,
+      "crc32": 1962058806
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 1976952234
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-C.stderr.log",
+      "bytes": 12681,
+      "compressedBytes": 2050,
+      "crc32": 262417722
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-C.stdout.json",
+      "bytes": 13864,
+      "compressedBytes": 2970,
+      "crc32": 2703643097
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 2769569021
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-D.stderr.log",
+      "bytes": 12677,
+      "compressedBytes": 2050,
+      "crc32": 3223226125
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-0-D.stdout.json",
+      "bytes": 13853,
+      "compressedBytes": 2967,
+      "crc32": 1844114086
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-A.stderr.log",
+      "bytes": 12709,
+      "compressedBytes": 2053,
+      "crc32": 2051034220
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-A.child-status.json",
+      "bytes": 576,
+      "compressedBytes": 289,
+      "crc32": 4047669280
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-A.stdout.json",
+      "bytes": 13892,
+      "compressedBytes": 2976,
+      "crc32": 2398137855
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4013558820
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-B.stderr.log",
+      "bytes": 12707,
+      "compressedBytes": 2061,
+      "crc32": 230386522
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-B.stdout.json",
+      "bytes": 14007,
+      "compressedBytes": 2988,
+      "crc32": 1978486314
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 3777749534
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-C.stderr.log",
+      "bytes": 12652,
+      "compressedBytes": 2028,
+      "crc32": 3866973133
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-C.stdout.json",
+      "bytes": 13835,
+      "compressedBytes": 2952,
+      "crc32": 2799298900
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 118924552
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-D.stderr.log",
+      "bytes": 12670,
+      "compressedBytes": 2041,
+      "crc32": 455067404
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-1-D.stdout.json",
+      "bytes": 13832,
+      "compressedBytes": 2953,
+      "crc32": 2060912110
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-A.stderr.log",
+      "bytes": 12693,
+      "compressedBytes": 2064,
+      "crc32": 1473971619
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-A.stdout.json",
+      "bytes": 13875,
+      "compressedBytes": 2978,
+      "crc32": 2479653775
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 982894345
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 291,
+      "crc32": 1278361789
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-B.stderr.log",
+      "bytes": 12689,
+      "compressedBytes": 2069,
+      "crc32": 1591380104
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-B.stdout.json",
+      "bytes": 13999,
+      "compressedBytes": 3001,
+      "crc32": 2566470061
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 640247934
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-C.stderr.log",
+      "bytes": 12681,
+      "compressedBytes": 2042,
+      "crc32": 4212244135
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-C.stdout.json",
+      "bytes": 13862,
+      "compressedBytes": 2966,
+      "crc32": 2810989079
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 3411540103
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-D.stdout.json",
+      "bytes": 13868,
+      "compressedBytes": 2986,
+      "crc32": 830876853
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-2-D.stderr.log",
+      "bytes": 12705,
+      "compressedBytes": 2068,
+      "crc32": 3109704455
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-A.stderr.log",
+      "bytes": 12689,
+      "compressedBytes": 2053,
+      "crc32": 166209672
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 293,
+      "crc32": 2501004339
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-A.stdout.json",
+      "bytes": 13850,
+      "compressedBytes": 2968,
+      "crc32": 1916338900
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 290,
+      "crc32": 781091797
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-B.stdout.json",
+      "bytes": 14010,
+      "compressedBytes": 2998,
+      "crc32": 553481308
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-B.stderr.log",
+      "bytes": 12712,
+      "compressedBytes": 2069,
+      "crc32": 3328610172
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-C.stderr.log",
+      "bytes": 12660,
+      "compressedBytes": 2035,
+      "crc32": 4115910991
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 289,
+      "crc32": 1516491104
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-C.stdout.json",
+      "bytes": 13831,
+      "compressedBytes": 2952,
+      "crc32": 3723133910
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 627065506
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-D.stderr.log",
+      "bytes": 12669,
+      "compressedBytes": 2039,
+      "crc32": 2296070646
+    },
+    {
+      "name": "negative-case-2/negative-case-2-pair-3-D.stdout.json",
+      "bytes": 13818,
+      "compressedBytes": 2944,
+      "crc32": 1787495938
+    },
+    {
+      "name": "negative-case-2/negative-result.json",
+      "bytes": 425961,
+      "compressedBytes": 33425,
+      "crc32": 1677108140
+    },
+    {
+      "name": "negative-case-3/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-3/negative-case-3-baseline-verification.child-status.json",
+      "bytes": 613,
+      "compressedBytes": 304,
+      "crc32": 2500273192
+    },
+    {
+      "name": "negative-case-3/negative-case-3-baseline-verification.stdout.json",
+      "bytes": 4098,
+      "compressedBytes": 1998,
+      "crc32": 1127175621
+    },
+    {
+      "name": "negative-case-3/negative-case-3-diagnostic.child-status.json",
+      "bytes": 720,
+      "compressedBytes": 310,
+      "crc32": 2094727779
+    },
+    {
+      "name": "negative-case-3/negative-case-3-baseline-verification.stderr.log",
+      "bytes": 2155,
+      "compressedBytes": 1200,
+      "crc32": 2171476813
+    },
+    {
+      "name": "negative-case-3/negative-case-3-diagnostic.stdout.json",
+      "bytes": 5463,
+      "compressedBytes": 2405,
+      "crc32": 763283965
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 292,
+      "crc32": 1158296136
+    },
+    {
+      "name": "negative-case-3/negative-case-3-diagnostic.stderr.log",
+      "bytes": 2284,
+      "compressedBytes": 1237,
+      "crc32": 1129496558
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-A.stdout.json",
+      "bytes": 13917,
+      "compressedBytes": 2995,
+      "crc32": 1458336264
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-A.stderr.log",
+      "bytes": 12746,
+      "compressedBytes": 2063,
+      "crc32": 2514522782
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-B.stderr.log",
+      "bytes": 12732,
+      "compressedBytes": 2066,
+      "crc32": 1971444851
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 295,
+      "crc32": 2825796870
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-B.stdout.json",
+      "bytes": 14044,
+      "compressedBytes": 3008,
+      "crc32": 2425743440
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 2248424569
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-C.stderr.log",
+      "bytes": 12750,
+      "compressedBytes": 2056,
+      "crc32": 3516204625
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-C.stdout.json",
+      "bytes": 13933,
+      "compressedBytes": 2979,
+      "crc32": 103169075
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 2927949851
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-D.stderr.log",
+      "bytes": 12750,
+      "compressedBytes": 2061,
+      "crc32": 1517411306
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-0-D.stdout.json",
+      "bytes": 13919,
+      "compressedBytes": 2986,
+      "crc32": 2041066297
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-A.stderr.log",
+      "bytes": 12750,
+      "compressedBytes": 2068,
+      "crc32": 1581942177
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 293,
+      "crc32": 592773739
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-A.stdout.json",
+      "bytes": 13941,
+      "compressedBytes": 3005,
+      "crc32": 555122801
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 294,
+      "crc32": 97970322
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-B.stderr.log",
+      "bytes": 12759,
+      "compressedBytes": 2073,
+      "crc32": 2991870860
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-B.stdout.json",
+      "bytes": 14076,
+      "compressedBytes": 3016,
+      "crc32": 1212716089
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 292,
+      "crc32": 2515408129
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-C.stderr.log",
+      "bytes": 12725,
+      "compressedBytes": 2062,
+      "crc32": 4092549742
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-C.stdout.json",
+      "bytes": 13900,
+      "compressedBytes": 2991,
+      "crc32": 1945139480
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 994938859
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-D.stderr.log",
+      "bytes": 12736,
+      "compressedBytes": 2055,
+      "crc32": 3409251952
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-1-D.stdout.json",
+      "bytes": 13907,
+      "compressedBytes": 2981,
+      "crc32": 3251224887
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 589563685
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-A.stderr.log",
+      "bytes": 12725,
+      "compressedBytes": 2068,
+      "crc32": 2134221727
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-A.stdout.json",
+      "bytes": 13906,
+      "compressedBytes": 2995,
+      "crc32": 2121009320
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-B.stderr.log",
+      "bytes": 12725,
+      "compressedBytes": 2047,
+      "crc32": 1838416097
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 293,
+      "crc32": 2160455345
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4246207063
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-B.stdout.json",
+      "bytes": 14033,
+      "compressedBytes": 2989,
+      "crc32": 1515735357
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-C.stderr.log",
+      "bytes": 12754,
+      "compressedBytes": 2058,
+      "crc32": 512043140
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-C.stdout.json",
+      "bytes": 13947,
+      "compressedBytes": 2992,
+      "crc32": 3092490371
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-D.stderr.log",
+      "bytes": 12750,
+      "compressedBytes": 2069,
+      "crc32": 2667786693
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 1532120580
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-2-D.stdout.json",
+      "bytes": 13941,
+      "compressedBytes": 3007,
+      "crc32": 1448953130
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 294,
+      "crc32": 1874484963
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-A.stderr.log",
+      "bytes": 12738,
+      "compressedBytes": 2090,
+      "crc32": 1176205731
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-A.stdout.json",
+      "bytes": 13908,
+      "compressedBytes": 3012,
+      "crc32": 1447065723
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 293,
+      "crc32": 2968582618
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-B.stderr.log",
+      "bytes": 12751,
+      "compressedBytes": 2071,
+      "crc32": 3807968786
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-B.stdout.json",
+      "bytes": 14058,
+      "compressedBytes": 3016,
+      "crc32": 3657521675
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3075641224
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-C.stderr.log",
+      "bytes": 12740,
+      "compressedBytes": 2049,
+      "crc32": 2520985112
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-C.stdout.json",
+      "bytes": 13931,
+      "compressedBytes": 2988,
+      "crc32": 2346946508
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 294,
+      "crc32": 650570675
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-D.stderr.log",
+      "bytes": 12734,
+      "compressedBytes": 2039,
+      "crc32": 2820343013
+    },
+    {
+      "name": "negative-case-3/negative-case-3-pair-3-D.stdout.json",
+      "bytes": 13905,
+      "compressedBytes": 2969,
+      "crc32": 4120518061
+    },
+    {
+      "name": "negative-case-3/negative-result.json",
+      "bytes": 427051,
+      "compressedBytes": 33678,
+      "crc32": 1275152933
+    },
+    {
+      "name": "negative-case-4/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-4/negative-case-4-baseline-verification.child-status.json",
+      "bytes": 613,
+      "compressedBytes": 304,
+      "crc32": 1573953591
+    },
+    {
+      "name": "negative-case-4/negative-case-4-baseline-verification.stderr.log",
+      "bytes": 2170,
+      "compressedBytes": 1212,
+      "crc32": 2150614209
+    },
+    {
+      "name": "negative-case-4/negative-case-4-baseline-verification.stdout.json",
+      "bytes": 4102,
+      "compressedBytes": 1992,
+      "crc32": 3185468301
+    },
+    {
+      "name": "negative-case-4/negative-case-4-diagnostic.stderr.log",
+      "bytes": 2282,
+      "compressedBytes": 1245,
+      "crc32": 1240933759
+    },
+    {
+      "name": "negative-case-4/negative-case-4-diagnostic.child-status.json",
+      "bytes": 720,
+      "compressedBytes": 311,
+      "crc32": 3016809050
+    },
+    {
+      "name": "negative-case-4/negative-case-4-diagnostic.stdout.json",
+      "bytes": 5489,
+      "compressedBytes": 2418,
+      "crc32": 4003854470
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 290,
+      "crc32": 2292855818
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-A.stderr.log",
+      "bytes": 12763,
+      "compressedBytes": 2091,
+      "crc32": 3415767959
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 1383244242
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-A.stdout.json",
+      "bytes": 13923,
+      "compressedBytes": 2990,
+      "crc32": 2426399737
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-B.stderr.log",
+      "bytes": 12737,
+      "compressedBytes": 2071,
+      "crc32": 3719688020
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-B.stdout.json",
+      "bytes": 14013,
+      "compressedBytes": 2981,
+      "crc32": 2854976216
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4034561233
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-C.stderr.log",
+      "bytes": 12764,
+      "compressedBytes": 2064,
+      "crc32": 223276718
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-C.stdout.json",
+      "bytes": 13923,
+      "compressedBytes": 2958,
+      "crc32": 3371103344
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 1995548852
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-D.stderr.log",
+      "bytes": 12741,
+      "compressedBytes": 2076,
+      "crc32": 1195714315
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-0-D.stdout.json",
+      "bytes": 13900,
+      "compressedBytes": 2977,
+      "crc32": 4147066669
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 1990146126
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-A.stderr.log",
+      "bytes": 12745,
+      "compressedBytes": 2063,
+      "crc32": 971397302
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 294,
+      "crc32": 603130509
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-A.stdout.json",
+      "bytes": 13916,
+      "compressedBytes": 2968,
+      "crc32": 2743638142
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-B.stderr.log",
+      "bytes": 12764,
+      "compressedBytes": 2110,
+      "crc32": 3899293133
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-B.stdout.json",
+      "bytes": 14040,
+      "compressedBytes": 3028,
+      "crc32": 1256409595
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 290,
+      "crc32": 3071398505
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-C.stderr.log",
+      "bytes": 12750,
+      "compressedBytes": 2077,
+      "crc32": 2920706416
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-C.stdout.json",
+      "bytes": 13908,
+      "compressedBytes": 2975,
+      "crc32": 1602484043
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4114535515
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-D.stderr.log",
+      "bytes": 12759,
+      "compressedBytes": 2046,
+      "crc32": 635893338
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-1-D.stdout.json",
+      "bytes": 13918,
+      "compressedBytes": 2947,
+      "crc32": 1464158997
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 1570306025
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-A.stdout.json",
+      "bytes": 13915,
+      "compressedBytes": 2947,
+      "crc32": 3250250378
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-A.stderr.log",
+      "bytes": 12768,
+      "compressedBytes": 2044,
+      "crc32": 462299796
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 293,
+      "crc32": 4240114638
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-B.stderr.log",
+      "bytes": 12735,
+      "compressedBytes": 2064,
+      "crc32": 2918599881
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 1052445809
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-B.stdout.json",
+      "bytes": 14028,
+      "compressedBytes": 2991,
+      "crc32": 3281175090
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-C.stderr.log",
+      "bytes": 12740,
+      "compressedBytes": 2057,
+      "crc32": 1659683531
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-C.stdout.json",
+      "bytes": 13889,
+      "compressedBytes": 2961,
+      "crc32": 3018890149
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 803230535
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-D.stderr.log",
+      "bytes": 12745,
+      "compressedBytes": 2070,
+      "crc32": 3527872084
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-2-D.stdout.json",
+      "bytes": 13907,
+      "compressedBytes": 2975,
+      "crc32": 2306667395
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 2768533179
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-A.stderr.log",
+      "bytes": 12758,
+      "compressedBytes": 2054,
+      "crc32": 2208408537
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-A.stdout.json",
+      "bytes": 13908,
+      "compressedBytes": 2956,
+      "crc32": 3661547569
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 290,
+      "crc32": 391648094
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-B.stderr.log",
+      "bytes": 12760,
+      "compressedBytes": 2070,
+      "crc32": 1700475625
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-B.stdout.json",
+      "bytes": 14044,
+      "compressedBytes": 2983,
+      "crc32": 1942487603
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 4050106032
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-C.stderr.log",
+      "bytes": 12751,
+      "compressedBytes": 2048,
+      "crc32": 1708999407
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-C.stdout.json",
+      "bytes": 13921,
+      "compressedBytes": 2959,
+      "crc32": 183048912
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-D.stderr.log",
+      "bytes": 12761,
+      "compressedBytes": 2055,
+      "crc32": 3778206787
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 2291619619
+    },
+    {
+      "name": "negative-case-4/negative-result.json",
+      "bytes": 426845,
+      "compressedBytes": 33553,
+      "crc32": 3391232543
+    },
+    {
+      "name": "negative-case-4/negative-case-4-pair-3-D.stdout.json",
+      "bytes": 13931,
+      "compressedBytes": 2966,
+      "crc32": 2788089840
+    },
+    {
+      "name": "negative-case-5/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-5/negative-case-5-baseline-verification.child-status.json",
+      "bytes": 612,
+      "compressedBytes": 303,
+      "crc32": 2091659213
+    },
+    {
+      "name": "negative-case-5/negative-case-5-baseline-verification.stderr.log",
+      "bytes": 2173,
+      "compressedBytes": 1209,
+      "crc32": 2639673880
+    },
+    {
+      "name": "negative-case-5/negative-case-5-baseline-verification.stdout.json",
+      "bytes": 4122,
+      "compressedBytes": 2001,
+      "crc32": 507097967
+    },
+    {
+      "name": "negative-case-5/negative-case-5-diagnostic.child-status.json",
+      "bytes": 719,
+      "compressedBytes": 309,
+      "crc32": 3672189762
+    },
+    {
+      "name": "negative-case-5/negative-case-5-diagnostic.stderr.log",
+      "bytes": 2286,
+      "compressedBytes": 1238,
+      "crc32": 3049182655
+    },
+    {
+      "name": "negative-case-5/negative-case-5-diagnostic.stdout.json",
+      "bytes": 5534,
+      "compressedBytes": 2426,
+      "crc32": 357346726
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 2965305733
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-A.stderr.log",
+      "bytes": 12772,
+      "compressedBytes": 2051,
+      "crc32": 3950874610
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-A.stdout.json",
+      "bytes": 13948,
+      "compressedBytes": 2975,
+      "crc32": 1703761828
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 292,
+      "crc32": 4184395168
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-B.stderr.log",
+      "bytes": 12786,
+      "compressedBytes": 2065,
+      "crc32": 2066798507
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-B.stdout.json",
+      "bytes": 14105,
+      "compressedBytes": 2997,
+      "crc32": 3007245355
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 1235654818
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-C.stderr.log",
+      "bytes": 12783,
+      "compressedBytes": 2055,
+      "crc32": 1365824933
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-C.stdout.json",
+      "bytes": 13957,
+      "compressedBytes": 2982,
+      "crc32": 537114787
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-D.stderr.log",
+      "bytes": 12777,
+      "compressedBytes": 2050,
+      "crc32": 3183007746
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-D.stdout.json",
+      "bytes": 13948,
+      "compressedBytes": 2967,
+      "crc32": 3848980076
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-0-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 294,
+      "crc32": 1509146744
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 2858056931
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-A.stderr.log",
+      "bytes": 12784,
+      "compressedBytes": 2054,
+      "crc32": 1343267866
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-A.stdout.json",
+      "bytes": 13958,
+      "compressedBytes": 2974,
+      "crc32": 1861619595
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-B.stderr.log",
+      "bytes": 12786,
+      "compressedBytes": 2077,
+      "crc32": 338369110
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 292,
+      "crc32": 1914893730
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-B.stdout.json",
+      "bytes": 14088,
+      "compressedBytes": 3011,
+      "crc32": 521941326
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3465048943
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-C.stderr.log",
+      "bytes": 12788,
+      "compressedBytes": 2078,
+      "crc32": 281186153
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-C.stdout.json",
+      "bytes": 13959,
+      "compressedBytes": 2994,
+      "crc32": 2717514292
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 293,
+      "crc32": 1621129565
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-D.stderr.log",
+      "bytes": 12784,
+      "compressedBytes": 2054,
+      "crc32": 2369041901
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-1-D.stdout.json",
+      "bytes": 13960,
+      "compressedBytes": 2978,
+      "crc32": 4039135029
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 292,
+      "crc32": 3432922948
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-A.stderr.log",
+      "bytes": 12794,
+      "compressedBytes": 2070,
+      "crc32": 3197987697
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-A.stdout.json",
+      "bytes": 13956,
+      "compressedBytes": 2990,
+      "crc32": 845829221
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 4272651764
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-B.stderr.log",
+      "bytes": 12799,
+      "compressedBytes": 2071,
+      "crc32": 359976156
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-B.stdout.json",
+      "bytes": 14091,
+      "compressedBytes": 2999,
+      "crc32": 2456448713
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-C.stderr.log",
+      "bytes": 12804,
+      "compressedBytes": 2050,
+      "crc32": 2501137674
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 3925683408
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 292,
+      "crc32": 1773776746
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-C.stdout.json",
+      "bytes": 13976,
+      "compressedBytes": 2970,
+      "crc32": 3573772421
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-D.stderr.log",
+      "bytes": 12784,
+      "compressedBytes": 2049,
+      "crc32": 337943029
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-2-D.stdout.json",
+      "bytes": 13948,
+      "compressedBytes": 2961,
+      "crc32": 1671200610
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 294,
+      "crc32": 1171801071
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-A.stderr.log",
+      "bytes": 12798,
+      "compressedBytes": 2056,
+      "crc32": 2759172528
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 292,
+      "crc32": 366214776
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-B.stderr.log",
+      "bytes": 12807,
+      "compressedBytes": 2069,
+      "crc32": 3569404012
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-B.stdout.json",
+      "bytes": 14126,
+      "compressedBytes": 3006,
+      "crc32": 202534348
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-A.stdout.json",
+      "bytes": 13970,
+      "compressedBytes": 2979,
+      "crc32": 694398017
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 3382727492
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-C.stderr.log",
+      "bytes": 12807,
+      "compressedBytes": 2057,
+      "crc32": 3855770080
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-C.stdout.json",
+      "bytes": 13962,
+      "compressedBytes": 2966,
+      "crc32": 2494310814
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 3358842833
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-D.stderr.log",
+      "bytes": 12789,
+      "compressedBytes": 2039,
+      "crc32": 2405548373
+    },
+    {
+      "name": "negative-case-5/negative-case-5-pair-3-D.stdout.json",
+      "bytes": 13966,
+      "compressedBytes": 2960,
+      "crc32": 538208427
+    },
+    {
+      "name": "negative-case-5/negative-result.json",
+      "bytes": 427775,
+      "compressedBytes": 33976,
+      "crc32": 145811283
+    },
+    {
+      "name": "negative-case-6/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "negative-case-6/negative-case-6-baseline-verification.child-status.json",
+      "bytes": 613,
+      "compressedBytes": 304,
+      "crc32": 3500769926
+    },
+    {
+      "name": "negative-case-6/negative-case-6-baseline-verification.stderr.log",
+      "bytes": 2179,
+      "compressedBytes": 1210,
+      "crc32": 1518640720
+    },
+    {
+      "name": "negative-case-6/negative-case-6-baseline-verification.stdout.json",
+      "bytes": 4129,
+      "compressedBytes": 1998,
+      "crc32": 3719685682
+    },
+    {
+      "name": "negative-case-6/negative-case-6-diagnostic.stderr.log",
+      "bytes": 2274,
+      "compressedBytes": 1236,
+      "crc32": 1196626381
+    },
+    {
+      "name": "negative-case-6/negative-case-6-diagnostic.stdout.json",
+      "bytes": 5489,
+      "compressedBytes": 2430,
+      "crc32": 3457153441
+    },
+    {
+      "name": "negative-case-6/negative-case-6-diagnostic.child-status.json",
+      "bytes": 719,
+      "compressedBytes": 309,
+      "crc32": 3154209287
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-A.child-status.json",
+      "bytes": 577,
+      "compressedBytes": 292,
+      "crc32": 3366745038
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-A.stderr.log",
+      "bytes": 12740,
+      "compressedBytes": 2081,
+      "crc32": 3824716181
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-A.stdout.json",
+      "bytes": 13904,
+      "compressedBytes": 2999,
+      "crc32": 2031517109
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-B.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 944260122
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-B.stderr.log",
+      "bytes": 12729,
+      "compressedBytes": 2062,
+      "crc32": 1539589128
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-B.stdout.json",
+      "bytes": 14031,
+      "compressedBytes": 2992,
+      "crc32": 617863981
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 289,
+      "crc32": 3433733218
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-C.stderr.log",
+      "bytes": 12737,
+      "compressedBytes": 2051,
+      "crc32": 433848475
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-C.stdout.json",
+      "bytes": 13912,
+      "compressedBytes": 2970,
+      "crc32": 3973507229
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-D.child-status.json",
+      "bytes": 577,
+      "compressedBytes": 291,
+      "crc32": 167320645
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-D.stderr.log",
+      "bytes": 12729,
+      "compressedBytes": 2034,
+      "crc32": 1454309434
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-0-D.stdout.json",
+      "bytes": 13894,
+      "compressedBytes": 2945,
+      "crc32": 889095854
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 290,
+      "crc32": 252502424
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-A.stderr.log",
+      "bytes": 12713,
+      "compressedBytes": 2053,
+      "crc32": 941021352
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-A.stdout.json",
+      "bytes": 13867,
+      "compressedBytes": 2960,
+      "crc32": 2409981864
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 292,
+      "crc32": 4163021674
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-B.stderr.log",
+      "bytes": 12731,
+      "compressedBytes": 2060,
+      "crc32": 3683101536
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-B.stdout.json",
+      "bytes": 14033,
+      "compressedBytes": 2994,
+      "crc32": 4102720609
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-C.child-status.json",
+      "bytes": 576,
+      "compressedBytes": 290,
+      "crc32": 3303169418
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-C.stderr.log",
+      "bytes": 12738,
+      "compressedBytes": 2074,
+      "crc32": 3581034676
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-C.stdout.json",
+      "bytes": 13892,
+      "compressedBytes": 2982,
+      "crc32": 2489451439
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 1217477556
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-D.stdout.json",
+      "bytes": 13882,
+      "compressedBytes": 2936,
+      "crc32": 1105522346
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-1-D.stderr.log",
+      "bytes": 12717,
+      "compressedBytes": 2020,
+      "crc32": 1260758754
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-A.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 293,
+      "crc32": 907574564
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-A.stderr.log",
+      "bytes": 12733,
+      "compressedBytes": 2059,
+      "crc32": 4105350977
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-A.stdout.json",
+      "bytes": 13870,
+      "compressedBytes": 2973,
+      "crc32": 2333327703
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-B.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 290,
+      "crc32": 476583435
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-B.stderr.log",
+      "bytes": 12727,
+      "compressedBytes": 2057,
+      "crc32": 3150907471
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-B.stdout.json",
+      "bytes": 14034,
+      "compressedBytes": 2984,
+      "crc32": 1824086108
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-C.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 2568334055
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-C.stderr.log",
+      "bytes": 12743,
+      "compressedBytes": 2050,
+      "crc32": 792241873
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-D.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 291,
+      "crc32": 305437357
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-C.stdout.json",
+      "bytes": 13889,
+      "compressedBytes": 2960,
+      "crc32": 1840896015
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-D.stderr.log",
+      "bytes": 12738,
+      "compressedBytes": 2052,
+      "crc32": 3561440474
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-2-D.stdout.json",
+      "bytes": 13906,
+      "compressedBytes": 2966,
+      "crc32": 192973442
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-A.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 395227410
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-A.stderr.log",
+      "bytes": 12700,
+      "compressedBytes": 2051,
+      "crc32": 1193571453
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-A.stdout.json",
+      "bytes": 13869,
+      "compressedBytes": 2969,
+      "crc32": 4058539208
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-B.child-status.json",
+      "bytes": 580,
+      "compressedBytes": 291,
+      "crc32": 608318911
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-B.stdout.json",
+      "bytes": 13997,
+      "compressedBytes": 2968,
+      "crc32": 2255540500
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-B.stderr.log",
+      "bytes": 12708,
+      "compressedBytes": 2040,
+      "crc32": 992920343
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-C.child-status.json",
+      "bytes": 578,
+      "compressedBytes": 290,
+      "crc32": 3828732508
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-C.stderr.log",
+      "bytes": 12735,
+      "compressedBytes": 2046,
+      "crc32": 2062556989
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-C.stdout.json",
+      "bytes": 13899,
+      "compressedBytes": 2960,
+      "crc32": 262254407
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-D.child-status.json",
+      "bytes": 579,
+      "compressedBytes": 291,
+      "crc32": 3985470688
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-D.stderr.log",
+      "bytes": 12730,
+      "compressedBytes": 2044,
+      "crc32": 1336030570
+    },
+    {
+      "name": "negative-case-6/negative-case-6-pair-3-D.stdout.json",
+      "bytes": 13888,
+      "compressedBytes": 2964,
+      "crc32": 1696012377
+    },
+    {
+      "name": "negative-case-6/negative-result.json",
+      "bytes": 426552,
+      "compressedBytes": 33488,
+      "crc32": 633680445
+    },
+    {
+      "name": "negative-fixtures/case-1/term_bank_1.json",
+      "bytes": 2710001,
+      "compressedBytes": 61141,
+      "crc32": 3790676514
+    },
+    {
+      "name": "negative-fixtures/case-1/term_bank_2.deflate",
+      "bytes": 61142,
+      "compressedBytes": 2386,
+      "crc32": 2977669684
+    },
+    {
+      "name": "negative-fixtures/case-1/term_bank_2.json",
+      "bytes": 2710001,
+      "compressedBytes": 61142,
+      "crc32": 722769397
+    },
+    {
+      "name": "negative-fixtures/case-1/term_bank_1.deflate",
+      "bytes": 61141,
+      "compressedBytes": 2382,
+      "crc32": 1906115926
+    },
+    {
+      "name": "negative-fixtures/case-2/term_bank_1.deflate",
+      "bytes": 37374,
+      "compressedBytes": 1140,
+      "crc32": 3004044373
+    },
+    {
+      "name": "negative-fixtures/case-2/term_bank_1.json",
+      "bytes": 2700001,
+      "compressedBytes": 37374,
+      "crc32": 558818720
+    },
+    {
+      "name": "negative-fixtures/case-2/term_bank_2.deflate",
+      "bytes": 37396,
+      "compressedBytes": 1101,
+      "crc32": 741682381
+    },
+    {
+      "name": "negative-fixtures/case-2/term_bank_2.json",
+      "bytes": 2700001,
+      "compressedBytes": 37396,
+      "crc32": 270405730
+    },
+    {
+      "name": "negative-fixtures/case-3/term_bank_1.deflate",
+      "bytes": 65785,
+      "compressedBytes": 2444,
+      "crc32": 146417068
+    },
+    {
+      "name": "negative-fixtures/case-3/term_bank_1.json",
+      "bytes": 21980001,
+      "compressedBytes": 65785,
+      "crc32": 3847112808
+    },
+    {
+      "name": "negative-fixtures/case-3/term_bank_2.deflate",
+      "bytes": 65801,
+      "compressedBytes": 2503,
+      "crc32": 336702559
+    },
+    {
+      "name": "negative-fixtures/case-3/term_bank_2.json",
+      "bytes": 21980001,
+      "compressedBytes": 65801,
+      "crc32": 1098449885
+    },
+    {
+      "name": "negative-fixtures/case-4/term_bank_1.deflate",
+      "bytes": 34122,
+      "compressedBytes": 1326,
+      "crc32": 1800554078
+    },
+    {
+      "name": "negative-fixtures/case-4/term_bank_1.json",
+      "bytes": 2800001,
+      "compressedBytes": 34122,
+      "crc32": 3065671376
+    },
+    {
+      "name": "negative-fixtures/case-4/term_bank_2.deflate",
+      "bytes": 34121,
+      "compressedBytes": 1281,
+      "crc32": 2900690290
+    },
+    {
+      "name": "negative-fixtures/case-4/term_bank_2.json",
+      "bytes": 2800001,
+      "compressedBytes": 34121,
+      "crc32": 1615753575
+    },
+    {
+      "name": "negative-fixtures/case-5/term_bank_1.deflate",
+      "bytes": 63874,
+      "compressedBytes": 3682,
+      "crc32": 1118887778
+    },
+    {
+      "name": "negative-fixtures/case-5/term_bank_1.json",
+      "bytes": 20985001,
+      "compressedBytes": 63874,
+      "crc32": 971069418
+    },
+    {
+      "name": "negative-fixtures/case-5/term_bank_2.deflate",
+      "bytes": 63877,
+      "compressedBytes": 3633,
+      "crc32": 1345506263
+    },
+    {
+      "name": "negative-fixtures/case-5/term_bank_2.json",
+      "bytes": 20985001,
+      "compressedBytes": 63877,
+      "crc32": 1220084555
+    },
+    {
+      "name": "negative-fixtures/case-6/term_bank_1.json",
+      "bytes": 1940001,
+      "compressedBytes": 31746,
+      "crc32": 196086442
+    },
+    {
+      "name": "negative-fixtures/case-6/term_bank_2.deflate",
+      "bytes": 31748,
+      "compressedBytes": 1118,
+      "crc32": 4023064662
+    },
+    {
+      "name": "negative-fixtures/case-6/term_bank_1.deflate",
+      "bytes": 31746,
+      "compressedBytes": 1089,
+      "crc32": 3213311079
+    },
+    {
+      "name": "negative-fixtures/manifest.json",
+      "bytes": 23383,
+      "compressedBytes": 3754,
+      "crc32": 3533615841
+    },
+    {
+      "name": "negative-fixtures/preparation-receipt.json",
+      "bytes": 17360,
+      "compressedBytes": 2802,
+      "crc32": 1906357465
+    },
+    {
+      "name": "negative-fixtures/case-6/term_bank_2.json",
+      "bytes": 1940001,
+      "compressedBytes": 31748,
+      "crc32": 3874654210
+    },
+    {
+      "name": "negative-fixtures/source-expected-counts.json",
+      "bytes": 14485,
+      "compressedBytes": 1768,
+      "crc32": 3703747809
+    },
+    {
+      "name": "negative-fixtures/source-fixture-model.mjs",
+      "bytes": 6570,
+      "compressedBytes": 2080,
+      "crc32": 1567620121
+    },
+    {
+      "name": "negative-fixtures/source-diagnostic-fields.json",
+      "bytes": 1116,
+      "compressedBytes": 371,
+      "crc32": 2198146298
+    },
+    {
+      "name": "negative-fixtures/source-negative-fixtures.mjs",
+      "bytes": 5840,
+      "compressedBytes": 2018,
+      "crc32": 3381353956
+    },
+    {
+      "name": "negative-fixtures/source-state-model.mjs",
+      "bytes": 11009,
+      "compressedBytes": 3279,
+      "crc32": 2909057523
+    },
+    {
+      "name": "negative-fixtures/source-legacy-fixture-manifest.json",
+      "bytes": 9311,
+      "compressedBytes": 1924,
+      "crc32": 309164329
+    },
+    {
+      "name": "rebuilt-candidate.diff",
+      "bytes": 12948,
+      "compressedBytes": 7428,
+      "crc32": 2677742717
+    },
+    {
+      "name": "scoped-eslint.json",
+      "bytes": 567,
+      "compressedBytes": 181,
+      "crc32": 2322556995
+    },
+    {
+      "name": "negative-fixtures/state-model-result.json",
+      "bytes": 78117,
+      "compressedBytes": 3198,
+      "crc32": 240117959
+    },
+    {
+      "name": "smoke-baseline.stdout.json",
+      "bytes": 642333,
+      "compressedBytes": 15915,
+      "crc32": 1620288723
+    },
+    {
+      "name": "smoke-baseline.child-status.json",
+      "bytes": 419,
+      "compressedBytes": 239,
+      "crc32": 608217850
+    },
+    {
+      "name": "smoke-baseline.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-candidate.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-candidate.child-status.json",
+      "bytes": 403,
+      "compressedBytes": 235,
+      "crc32": 464020158
+    },
+    {
+      "name": "smoke-diagnostic.child-status.json",
+      "bytes": 501,
+      "compressedBytes": 255,
+      "crc32": 3796965575
+    },
+    {
+      "name": "smoke-diagnostic.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-candidate.stdout.json",
+      "bytes": 642334,
+      "compressedBytes": 15945,
+      "crc32": 1905319406
+    },
+    {
+      "name": "smoke-diagnostic.stdout.json",
+      "bytes": 734300,
+      "compressedBytes": 18001,
+      "crc32": 580174640
+    },
+    {
+      "name": "smoke-disabled-baseline.child-status.json",
+      "bytes": 453,
+      "compressedBytes": 252,
+      "crc32": 1261498326
+    },
+    {
+      "name": "smoke-disabled-baseline.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-disabled-baseline.stdout.json",
+      "bytes": 642332,
+      "compressedBytes": 15896,
+      "crc32": 2926495694
+    },
+    {
+      "name": "smoke-disabled-candidate.child-status.json",
+      "bytes": 435,
+      "compressedBytes": 248,
+      "crc32": 2846382723
+    },
+    {
+      "name": "smoke-disabled-candidate.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-disabled-candidate.stdout.json",
+      "bytes": 642333,
+      "compressedBytes": 15897,
+      "crc32": 1072858886
+    },
+    {
+      "name": "smoke-disabled-diagnostic.child-status.json",
+      "bytes": 535,
+      "compressedBytes": 269,
+      "crc32": 1338962977
+    },
+    {
+      "name": "smoke-disabled-diagnostic.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "smoke-disabled-diagnostic.stdout.json",
+      "bytes": 733541,
+      "compressedBytes": 17192,
+      "crc32": 175922901
+    },
+    {
+      "name": "smoke-report.json",
+      "bytes": 18260350,
+      "compressedBytes": 258850,
+      "crc32": 921764679
+    },
+    {
+      "name": "test-types.log",
+      "bytes": 89,
+      "compressedBytes": 81,
+      "crc32": 1705139753
+    },
+    {
+      "name": "vndb/diagnostic.stdout.json",
+      "bytes": 422594,
+      "compressedBytes": 17710,
+      "crc32": 3612250333
+    },
+    {
+      "name": "vndb/diagnostic.child-status.json",
+      "bytes": 657,
+      "compressedBytes": 305,
+      "crc32": 336418360
+    },
+    {
+      "name": "vndb/diagnostic.wasm",
+      "bytes": 70795,
+      "compressedBytes": 26755,
+      "crc32": 4063877639
+    },
+    {
+      "name": "vndb/diagnostic.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/native-oracle/native-oracle-records.jsonl",
+      "bytes": 1776831,
+      "compressedBytes": 164262,
+      "crc32": 4289253370
+    },
+    {
+      "name": "vndb/native-oracle/native-oracle.json",
+      "bytes": 1934,
+      "compressedBytes": 1000,
+      "crc32": 2250898645
+    },
+    {
+      "name": "vndb/pair-0-A.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 286,
+      "crc32": 226440265
+    },
+    {
+      "name": "vndb/pair-0-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-0-A.stdout.json",
+      "bytes": 47561,
+      "compressedBytes": 5593,
+      "crc32": 3979139465
+    },
+    {
+      "name": "vndb/pair-0-B.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 285,
+      "crc32": 3079809527
+    },
+    {
+      "name": "vndb/pair-0-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-0-B.stdout.json",
+      "bytes": 47696,
+      "compressedBytes": 5626,
+      "crc32": 2176866681
+    },
+    {
+      "name": "vndb/pair-0-C.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 286,
+      "crc32": 1384937058
+    },
+    {
+      "name": "vndb/pair-0-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-0-C.stdout.json",
+      "bytes": 47548,
+      "compressedBytes": 5593,
+      "crc32": 94647706
+    },
+    {
+      "name": "vndb/pair-0-D.child-status.json",
+      "bytes": 527,
+      "compressedBytes": 284,
+      "crc32": 723440992
+    },
+    {
+      "name": "vndb/pair-0-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-0-D.stdout.json",
+      "bytes": 47551,
+      "compressedBytes": 5592,
+      "crc32": 2528994732
+    },
+    {
+      "name": "vndb/pair-1-A.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 286,
+      "crc32": 335174957
+    },
+    {
+      "name": "vndb/pair-1-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-1-A.stdout.json",
+      "bytes": 47561,
+      "compressedBytes": 5592,
+      "crc32": 1011098997
+    },
+    {
+      "name": "vndb/pair-1-B.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 286,
+      "crc32": 3475567174
+    },
+    {
+      "name": "vndb/pair-1-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-1-B.stdout.json",
+      "bytes": 47697,
+      "compressedBytes": 5631,
+      "crc32": 1932478973
+    },
+    {
+      "name": "vndb/pair-1-C.child-status.json",
+      "bytes": 526,
+      "compressedBytes": 283,
+      "crc32": 1941353535
+    },
+    {
+      "name": "vndb/pair-1-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-1-C.stdout.json",
+      "bytes": 47549,
+      "compressedBytes": 5590,
+      "crc32": 2737811610
+    },
+    {
+      "name": "vndb/pair-1-D.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 285,
+      "crc32": 1871301927
+    },
+    {
+      "name": "vndb/pair-1-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-1-D.stdout.json",
+      "bytes": 47561,
+      "compressedBytes": 5596,
+      "crc32": 1576395632
+    },
+    {
+      "name": "vndb/pair-2-A.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 286,
+      "crc32": 1373971367
+    },
+    {
+      "name": "vndb/pair-2-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-2-A.stdout.json",
+      "bytes": 47560,
+      "compressedBytes": 5594,
+      "crc32": 2158877864
+    },
+    {
+      "name": "vndb/pair-2-B.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 286,
+      "crc32": 2803895088
+    },
+    {
+      "name": "vndb/pair-2-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-2-B.stdout.json",
+      "bytes": 47695,
+      "compressedBytes": 5629,
+      "crc32": 4207795005
+    },
+    {
+      "name": "vndb/pair-2-C.child-status.json",
+      "bytes": 527,
+      "compressedBytes": 284,
+      "crc32": 3510810036
+    },
+    {
+      "name": "vndb/pair-2-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-2-C.stdout.json",
+      "bytes": 47549,
+      "compressedBytes": 5593,
+      "crc32": 3811284928
+    },
+    {
+      "name": "vndb/pair-2-D.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 285,
+      "crc32": 768891647
+    },
+    {
+      "name": "vndb/pair-3-A.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 286,
+      "crc32": 2140150614
+    },
+    {
+      "name": "vndb/pair-3-A.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-2-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-2-D.stdout.json",
+      "bytes": 47560,
+      "compressedBytes": 5594,
+      "crc32": 3215901152
+    },
+    {
+      "name": "vndb/pair-3-A.stdout.json",
+      "bytes": 47557,
+      "compressedBytes": 5596,
+      "crc32": 366401536
+    },
+    {
+      "name": "vndb/pair-3-B.child-status.json",
+      "bytes": 529,
+      "compressedBytes": 287,
+      "crc32": 702607099
+    },
+    {
+      "name": "vndb/pair-3-B.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-3-B.stdout.json",
+      "bytes": 47697,
+      "compressedBytes": 5629,
+      "crc32": 1325528935
+    },
+    {
+      "name": "vndb/pair-3-C.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 285,
+      "crc32": 2354980214
+    },
+    {
+      "name": "vndb/pair-3-C.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-3-C.stdout.json",
+      "bytes": 47558,
+      "compressedBytes": 5598,
+      "crc32": 2147291269
+    },
+    {
+      "name": "vndb/pair-3-D.child-status.json",
+      "bytes": 528,
+      "compressedBytes": 285,
+      "crc32": 2980663758
+    },
+    {
+      "name": "vndb/pair-3-D.stderr.log",
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0
+    },
+    {
+      "name": "vndb/pair-3-D.stdout.json",
+      "bytes": 47559,
+      "compressedBytes": 5596,
+      "crc32": 3450996728
+    },
+    {
+      "name": "vndb/result.json",
+      "bytes": 2038654,
+      "compressedBytes": 125873,
+      "crc32": 1101292677
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T08:43:54.599577+00:00",
+  "scope": "Three original ZIP audits only: JMdict AB plus both target VNDB hosts. Remaining non-target artifact archives not independently downloaded by this agent. All six primary audits remain a separate immutable layer.",
+  "runId": 46113243549,
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "artifactId": 15255570810,
+      "originalZipSha256": "404a1ab001d880b783ac55c5e8a658cc51f40c5f82638dbf5bb42873a219c79c",
+      "artifactAuditSha256": "70f43f9a75b066319db95e51a55c6fb55832b33034e3503b3ecf98f1b6ed107e",
+      "downloadReceiptSha256": "5fa9f702def4aed7279af2d5d9e6a57224a380e573c26be803dbb1341551a5a3",
+      "memberManifestSha256": "03ae4cf5618151797bc0f78edb4e5b7d616953d7b0c71ed18c2a623310fefcde",
+      "selectedArchiveSha256": "58d765122bdcb7b9b6d4f23531bc149f2a7e02250097315af9f40943d92361a1",
+      "selectedArchiveBytes": 2058646,
+      "selectedReceiptSha256": "073c3b1936336fa68ca96a965ac12866648fd86466f13105d157b3483b21a6ce",
+      "rawReports": 42,
+      "rawScanCount": 271,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true
+    },
+    {
+      "cell": "vndb-AB",
+      "artifactId": 15255922406,
+      "originalZipSha256": "23c293793610c1a7af920014024a7d1032f7e7f5c7c710b4a3d9c0f8bfd16068",
+      "artifactAuditSha256": "7d61cbebf92e135ce1d9e4ff126fc35ff4f9a7c0f928004a4d08f20cd5a721fa",
+      "downloadReceiptSha256": "be9cc16efd9d17aebfa42323ac768023ae6fd8023890de5ff2a2e1f4223e8d69",
+      "memberManifestSha256": "79b16694d61680e243a131c610d257cd76ba4f1f6925f57c1a8644da70f31e0c",
+      "selectedArchiveSha256": "0d3c3f81c17bf537353cdacd30ce9fe16e4fde364caa7e64f8ba2d0e2be9965f",
+      "selectedArchiveBytes": 2220779,
+      "selectedReceiptSha256": "1852b9ca0ba7b6140b5d4e1dee4d8604dece7fe4c91648feb5df8df9d7ec6401",
+      "rawReports": 42,
+      "rawScanCount": 413,
+      "qualifiedMemoryObservations": 1,
+      "memoryGatePassed": false,
+      "auditIntegrityPassed": true
+    },
+    {
+      "cell": "vndb-BA",
+      "artifactId": 15256340581,
+      "originalZipSha256": "d4111ebba7aec361c9f705213928e2d2ce37b211b60fe8435d4e867c69bcb89a",
+      "artifactAuditSha256": "088724cd1838a616bebcd0a65004eb3d58fd2c5cf5af5c43f395734868ec85d9",
+      "downloadReceiptSha256": "301fcf4526456c7a59b0b13cd2b38b23b1a868eec71975a9ff222209c5891516",
+      "memberManifestSha256": "9a8811d4b744570e64c81fab0f8d6375e55ed7d031c34f1154d04c7ce2a3332a",
+      "selectedArchiveSha256": "d3ee624ea318ef12e7692fa558482262c2f654bcda99fcb45aed8db6bef29b9e",
+      "selectedArchiveBytes": 2396766,
+      "selectedReceiptSha256": "88bc12080a8f6ee1eb75bb3f7ff4194b35758175914fd6f64910d83e038e0c47",
+      "rawReports": 42,
+      "rawScanCount": 605,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true
+    }
+  ],
+  "totals": {
+    "reports": 126,
+    "primaryRecords": 165,
+    "reportByteHashBindings": 378,
+    "rawScans": 1289,
+    "memoryObservations": 12,
+    "qualifiedMemoryObservations": 9
+  },
+  "failedFrozenGate": {
+    "cell": "vndb-AB",
+    "observations": [
+      "A1",
+      "B1",
+      "A2"
+    ],
+    "rule": "covered-import-scan-gap-over-250ms",
+    "maxGapsMs": [
+      255.363403,
+      260.966631,
+      284.148828
+    ],
+    "maximumBytesRemainNull": true,
+    "notEvidenceOfMemoryRegression": true
+  },
+  "decision": "Original full cohort remains held by its unchanged prospective memory coverage rule; no selected rerun, threshold change, pooled result or gain transfer.",
+  "auditorSha256": "3b38d328f7c0bc70c993ff19fe41a8f4f7dd14fbed260a401bad43e14d65e092",
+  "auditorPreparationFailure": {
+    "file": "artifact-audit.before-null-phase.py",
+    "sha256": "79c41afa2f057a1f1d5de4977d13f9bbb3b062e5a35ad3784a5d05fc5be9bd50",
+    "retainedFailureReceipts": [
+      "jmdict-AB/artifact-audit-failure-20261128T084052494969.json"
+    ],
+    "reason": "Nullable file-input phase.data needed the same explicit empty-object read used by the frozen extraction; source version and traceback preserved. Original evidence untouched."
+  }
+}

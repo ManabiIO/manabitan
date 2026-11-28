@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "scope": "Root independent primary-log clock/source/output and paired-arithmetic review; raw process/window replay belongs to separate original-artifact audit",
+  "runId": 46113243549,
+  "jobId": 140903281848,
+  "order": "BA",
+  "primaryLogCharacters": 463705,
+  "taggedRecords": 55,
+  "observations": 42,
+  "all42RawBrowserClocksMatch": true,
+  "allSourcePackageBrowserAndExpectedMemoryOverlayBindingsMatch": true,
+  "rows": 6648310,
+  "storageBytes": 609176779,
+  "lookupSemanticDigests": [
+    "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c"
+  ],
+  "allRawAndSummaryValidationHashesMatch": true,
+  "allReportsSuccess": true,
+  "statistics": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9771400195208774,
+        0.9658732936646832,
+        0.9816079043891843,
+        0.9964270324619217,
+        0.9592616614370567,
+        0.9684026056786799,
+        0.9847163503210792,
+        0.9555880487633049,
+        0.9498856605981183,
+        0.9600056880799178,
+        0.9788893418650446,
+        0.967948605121891
+      ],
+      "medianPairedChangePercent": -3.1824394599714534,
+      "equalWorkChangePercent": -2.9539570394931713,
+      "fasterPairs": 12,
+      "baselineMedianMs": 5664.75,
+      "secondArmMedianMs": 5509.200000000012,
+      "medianPairedSavedMs": 180.29999999998836
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        0.9862577245592743,
+        0.9921742919389938,
+        0.9888630025768483,
+        1.0085721891915957
+      ],
+      "medianPairedChangePercent": -0.9481352742078952,
+      "equalWorkChangePercent": -0.6074698572759107,
+      "fasterPairs": 3,
+      "baselineMedianMs": 5689.050000000047,
+      "secondArmMedianMs": 5658.3000000000175,
+      "medianPairedSavedMs": 54.00000000005821
+    }
+  },
+  "originalDescriptiveIntervals": {
+    "candidate": [
+      -4.0366325241512735,
+      -1.9751376872885529
+    ],
+    "identicalControl": [
+      -1.3742275440725704,
+      0.8572189191595747
+    ]
+  },
+  "bootstrapScope": "Exact original ratios reconstructed; bootstrap reproduction separately performed by frozen independent auditor.",
+  "memory": {
+    "rawScanCount": 605,
+    "everyObservationQualified": true,
+    "passesProspectiveMemoryScreen": true,
+    "observations": [
+      {
+        "name": "B1",
+        "maximumCoveredSampleGapMs": 150.788407,
+        "qualified": true,
+        "failures": [],
+        "maxSampledPssKiB": 1224577,
+        "maxSampledPrivateKiB": 1002168
+      },
+      {
+        "name": "A1",
+        "maximumCoveredSampleGapMs": 177.540981,
+        "qualified": true,
+        "failures": [],
+        "maxSampledPssKiB": 1237154,
+        "maxSampledPrivateKiB": 1008112
+      },
+      {
+        "name": "A2",
+        "maximumCoveredSampleGapMs": 160.049453,
+        "qualified": true,
+        "failures": [],
+        "maxSampledPssKiB": 1236410,
+        "maxSampledPrivateKiB": 1005756
+      },
+      {
+        "name": "B2",
+        "maximumCoveredSampleGapMs": 170.421551,
+        "qualified": true,
+        "failures": [],
+        "maxSampledPssKiB": 1249173,
+        "maxSampledPrivateKiB": 1016104
+      }
+    ]
+  },
+  "decision": "Target latency signal and this host's gates pass; the other host's retained coverage failure prevents full cohort qualification. No current-develop transfer."
+}

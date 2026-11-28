@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T08:50:44.141917+00:00",
+  "scope": "Offline auditor inventory correction, derived from the already frozen source files. No acquisition observer, product, workload, source identities, thresholds, schedules or raw values changed.",
+  "oldAuditorSha256": "01e3244f0e67fa08d05aed50cd818f8de4ac10bdd5e51b9787a5041b85c58dc5",
+  "newAuditorSha256": "f7affda07e6033fee59cc3466de3e86211a1ecc857a6b46c0c17a5f967d849a1",
+  "expectedFileSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "exactCorrection": {
+    "before": "Object.keys(expected.baselineSourceHashes).filter(path=>!negative||![\"ext/js/dictionary/term-bank-source-pipeline.js\",\"ext/js/dictionary/dense-zip-directory.js\"].includes(path))",
+    "after": "Object.keys(expected.baselineSourceHashes).filter(path=>negative?![\"ext/js/dictionary/term-bank-source-pipeline.js\",\"ext/js/dictionary/dense-zip-directory.js\"].includes(path):path!==\"ext/js/dictionary/term-bank-source-crc.js\")"
+  },
+  "frozenDictionaryScreen": {
+    "sha256": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+    "sourceFiles": [
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-bank-experiments.js",
+      "ext/js/dictionary/term-lookup-scratch.js",
+      "ext/js/dictionary/term-lookup-index-preparation.js",
+      "ext/js/dictionary/term-lookup-index.js",
+      "ext/js/dictionary/term-record-preinterned-plan.js",
+      "ext/js/dictionary/wasm/term-bank-parser.c",
+      "ext/js/dictionary/term-bank-source-pipeline.js",
+      "ext/js/dictionary/dense-zip-directory.js",
+      "dev/data/dictionary-wasm/manifest.json",
+      "package-lock.json"
+    ]
+  },
+  "frozenNegativeScreen": {
+    "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+    "sourcePaths": [
+      "ext/js/dictionary/wasm/term-bank-parser.c",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-bank-experiments.js",
+      "ext/js/dictionary/term-bank-source-crc.js",
+      "ext/js/dictionary/term-lookup-scratch.js",
+      "ext/js/dictionary/term-lookup-index-preparation.js",
+      "ext/js/dictionary/term-lookup-index.js",
+      "ext/js/dictionary/term-record-preinterned-plan.js",
+      "dev/data/dictionary-wasm/manifest.json",
+      "package-lock.json"
+    ]
+  },
+  "cause": "Original expectation used the twelve-file union as if the main screen emitted every member. The frozen dictionary screen has eleven; CRC is present only in the ten-file negative inventory.",
+  "firstActualAuditPreserved": {
+    "path": "../jmdict-prior-streak-selector-evidence/primary-audit-initial-01e324.json",
+    "sha256": "eb17df4808894c3ef4cc306c2ae8c5c338366e202e0509f18aa831a512df7fce"
+  },
+  "raw495RecordsPreservedSha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+  "original01eAuditorAndFilesUntouched": true,
+  "reviewPending": true
+}

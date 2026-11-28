@@ -1,0 +1,189 @@
+{
+  "scope": "Artificial offline auditor review only; no actual candidate data, parser/corpus/native execution, or new measurements",
+  "auditorSha256": "a933bdef3882c032c2f30a9a1c23fb143029098f34a0243b0236d67f98c8b1d1",
+  "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "fixtureCodeSha256": "f4ee931e5a2a203e718257a6bfd0e5fa164e45957696cd71fc89f60fb66ac3a6",
+  "originalFixtureSha256": "b39f67b0538f044c28f793d7da826e4ab4fbac55ce3d48fce8556a72191eae0b",
+  "feasibleFixtureSha256": "2e570f9576d722a608ea41b46d4aac04b81146c9e361bb6c5d197ccaa9ca43c8",
+  "originalPositiveAccepted": true,
+  "feasiblePositiveAccepted": true,
+  "sourceImpossibleKeyCostWitness": {
+    "acceptedByOriginalAuditor": true,
+    "keyPredicateRows": 85314,
+    "readingIneligibleRows": 0,
+    "keyComparisonCalls": 0,
+    "admissions": 44466,
+    "requiredLowerBound": "keyComparisonCalls >= keyPredicateRows - readingIneligibleRows"
+  },
+  "acceptedCorruptions": [
+    {
+      "name": "diagnostic cumulative group chain",
+      "inputSha256": "f79a678071df707de40330fd735f2ae5999c523281ab8dc05867debac0236dc7",
+      "edits": [
+        {
+          "path": [
+            "records",
+            2,
+            "value",
+            "result",
+            "groupReceipts",
+            3,
+            "diagnosticBefore",
+            "originalLookbackZeroRows"
+          ],
+          "before": 147645,
+          "after": 147652
+        },
+        {
+          "path": [
+            "records",
+            2,
+            "value",
+            "result",
+            "groupReceipts",
+            3,
+            "diagnosticAfter",
+            "originalLookbackZeroRows"
+          ],
+          "before": 193386,
+          "after": 193393
+        }
+      ],
+      "acceptedByOriginalAuditor": true,
+      "errors": [],
+      "artifactBindingPass": null
+    },
+    {
+      "name": "raw child dictionary identity",
+      "inputSha256": "67e6fea6226abf770a3ed38d2022ebc88870db78dda03db60285b2b97c241985",
+      "edits": [
+        {
+          "path": [
+            "records",
+            5,
+            "value",
+            "result",
+            "dictionary"
+          ],
+          "before": "jmdict",
+          "after": "vndb"
+        }
+      ],
+      "acceptedByOriginalAuditor": true,
+      "errors": [],
+      "artifactBindingPass": null
+    },
+    {
+      "name": "compact observation dictionary identity",
+      "inputSha256": "864c04b0037b1155c2cf9e4efe9a9d02ca1d75675c35f07323ac016e5c17bf5e",
+      "edits": [
+        {
+          "path": [
+            "records",
+            6,
+            "value",
+            "dictionary"
+          ],
+          "before": "jmdict",
+          "after": "vndb"
+        }
+      ],
+      "acceptedByOriginalAuditor": true,
+      "errors": [],
+      "artifactBindingPass": null
+    },
+    {
+      "name": "compact diagnostic identity and output",
+      "inputSha256": "7db882e97614ad60ab68e3950a9884bfee2f3b440e3ff880166ae06c181abefc",
+      "edits": [
+        {
+          "path": [
+            "records",
+            3,
+            "value",
+            "dictionary"
+          ],
+          "before": "jmdict",
+          "after": "vndb"
+        },
+        {
+          "path": [
+            "records",
+            3,
+            "value",
+            "rows"
+          ],
+          "before": 528299,
+          "after": 1
+        },
+        {
+          "path": [
+            "records",
+            3,
+            "value",
+            "digest"
+          ],
+          "before": "3333333333333333333333333333333333333333333333333333333333333333",
+          "after": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ],
+      "acceptedByOriginalAuditor": true,
+      "errors": [],
+      "artifactBindingPass": null
+    },
+    {
+      "name": "final dictionary identity and output",
+      "inputSha256": "ccef22036a7d4cbe26c0cbefae9e30fceeec1480a5c5f43608b9d5b7e255cfbe",
+      "edits": [
+        {
+          "path": [
+            "records",
+            52,
+            "value",
+            "dictionary"
+          ],
+          "before": "jmdict",
+          "after": "vndb"
+        },
+        {
+          "path": [
+            "records",
+            52,
+            "value",
+            "rows"
+          ],
+          "before": 528299,
+          "after": 1
+        },
+        {
+          "path": [
+            "records",
+            52,
+            "value",
+            "digest"
+          ],
+          "before": "3333333333333333333333333333333333333333333333333333333333333333",
+          "after": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ],
+      "acceptedByOriginalAuditor": true,
+      "errors": [],
+      "artifactBindingPass": null
+    }
+  ],
+  "failureRetained": {
+    "allLogChecksPass": false,
+    "failures": [
+      {
+        "dictionary": "jmdict",
+        "error": "ARTIFICIAL retained failure witness"
+      }
+    ]
+  },
+  "incompleteRetained": {
+    "complete": false,
+    "allLogChecksPass": false,
+    "measuredObservationCount": 132
+  },
+  "artifactBindingStillNull": true
+}

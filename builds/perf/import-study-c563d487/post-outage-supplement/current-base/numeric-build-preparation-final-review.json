@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T08:33:31.509002+00:00",
+  "scope": "Independent final read-only build/correctness preparation review; no native build/parser/corpus/test/timing execution",
+  "status": "pass",
+  "bindingSha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05",
+  "reviewedFiles": {
+    "prepare-and-validate.py": {
+      "sha256": "f548831d146b4b7210117756da67e50a73e3d70d761c10e919cb28efc3e96090",
+      "bytes": 7258
+    },
+    "workflow.yml": {
+      "sha256": "92077f770c4b9002c6ac8335e1752db7be113360ae189cb150ec9a00331698d9",
+      "bytes": 1722
+    },
+    "candidate.patch": {
+      "sha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+      "bytes": 7891
+    },
+    "prospective-complete-import-criteria.json": {
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "bytes": 3193
+    },
+    "reviews/root-source-review.json": {
+      "sha256": "9affdad61d5d2a1e8ec8939b1b1ad8fbeb098dcad7dcea08614fb905d518eef6",
+      "bytes": 2552
+    },
+    "reviews/composition-source-receipt.json": {
+      "sha256": "4261aaa7bd61b98b1c129485ca4dd00b04d8b3f7edf9c5f5758a24dd6e60e112",
+      "bytes": 2374
+    },
+    "reviews/static-preflight-receipt.json": {
+      "sha256": "0ac230d439c102cd96ccd54a4f183d3657f255a466dc63056374b145c1ace016",
+      "bytes": 4671
+    },
+    "reviews/independent-token-end-fixture-review.json": {
+      "sha256": "bc0cf3cdf9bb11fa25fc5c7e24223215052cbf6604dcdba0f45eec276a8821c4",
+      "bytes": 2013
+    },
+    "qualification/term-bank-row-suffix-reuse.test.js": {
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "bytes": 15101
+    },
+    "qualification/term-bank-row-suffix-token-end-fixtures.js": {
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "bytes": 3037
+    },
+    "qualification/term-bank-row-suffix-token-ends.test.js": {
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "bytes": 7560
+    }
+  },
+  "candidateCSourceSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "candidatePatchSha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+  },
+  "checks": {
+    "allToolingAndQualificationHashesExact": true,
+    "qualifiedCopiesEqualFinalReviewedSourceFiles": true,
+    "fixedMergedSourceAndNativeArtifactPinned": true,
+    "fixedCandidateSourceAndPatchPinned": true,
+    "pinnedCompilerAndNodeRequired": true,
+    "separateDetachedBaselineAndCandidate": true,
+    "baselineNativeReproductionRequired": true,
+    "candidateNativeBuildAndReproductionRequired": true,
+    "exactThreeTrackedNativeChangesAndRuntimeWasmEqualityRequired": true,
+    "sixExplicitProductFilesExportedAndRecheckedAfterGates": true,
+    "fullMainTestTypesUnitOptionsDryBuildGatesRequired": true,
+    "allCommandLogsAndFailuresPreservedByArtifactStep": true,
+    "noDictionaryAcquisitionOrPerformanceMeasurement": true,
+    "prospectivePerformanceThresholdsRequiredGatesAndFailurePolicyExactFromOldV2": true,
+    "scriptPythonSyntaxValid": true,
+    "newTestFormattingPreservesOriginalReviewedAstsAndFixtureExports": true
+  },
+  "reviewNotes": [
+    "The workflow.yml copy must remain beside the preparation script because toolingFiles verifies that path; the actual .github/workflows file must use the same bytes.",
+    "The existing source review predates formatting completion; the final static receipt0ac230\u2026 and exact AST/export proof3972e97a\u2026 bridge the original60c7 test review to finalcf3b bytes.",
+    "Compiled artifacts and complete correctness gates are pending this separate hosted preparation. Performance remains unqualified on dcfc; no prior-base gain transfer or PR authorization."
+  ],
+  "localStaticPreflightReceiptSha256": "0ac230d439c102cd96ccd54a4f183d3657f255a466dc63056374b145c1ace016",
+  "formattingProofSha256": "3972e97af164741e6cf9c82a9683da096ee74f45e672526dff98b6280467cbf8",
+  "oldCriteriaSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c"
+}

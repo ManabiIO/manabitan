@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "scope": "Root independent primary-log clock/source/output and paired-arithmetic review; raw process/window replay belongs to separate original-artifact audit",
+  "runId": 46113243549,
+  "jobId": 140903281809,
+  "order": "AB",
+  "primaryLogCharacters": 465978,
+  "taggedRecords": 55,
+  "observations": 42,
+  "all42RawBrowserClocksMatch": true,
+  "allSourcePackageBrowserAndExpectedMemoryOverlayBindingsMatch": true,
+  "rows": 6648310,
+  "storageBytes": 609176779,
+  "lookupSemanticDigests": [
+    "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c"
+  ],
+  "allRawAndSummaryValidationHashesMatch": true,
+  "allReportsSuccess": true,
+  "statistics": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9662020844684275,
+        0.9768825697735732,
+        0.9715368331168946,
+        0.9394881233504648,
+        0.9467923595664258,
+        0.9751752957008167,
+        0.9186831738885691,
+        0.9587109592861287,
+        0.9727324566708834,
+        0.9254948602497663,
+        0.9620191300705401,
+        0.9372245549501964
+      ],
+      "medianPairedChangePercent": -3.963495532166561,
+      "equalWorkChangePercent": -4.6041956420952435,
+      "fasterPairs": 12,
+      "baselineMedianMs": 5733.399999999965,
+      "secondArmMedianMs": 5499.050000000047,
+      "medianPairedSavedMs": 227.24999999988358
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        1.0151251646903985,
+        0.9932756289832803,
+        0.9845730895846304,
+        0.9983329281422406
+      ],
+      "medianPairedChangePercent": -0.41957214372395635,
+      "equalWorkChangePercent": -0.21830813383741932,
+      "fasterPairs": 3,
+      "baselineMedianMs": 5703.25,
+      "secondArmMedianMs": 5703.200000000012,
+      "medianPairedSavedMs": 23.95000000001164
+    }
+  },
+  "originalDescriptiveIntervals": {
+    "candidate": [
+      -6.164366084966932,
+      -2.786535510611099
+    ],
+    "identicalControl": [
+      -1.5426910415369588,
+      1.5125164690398485
+    ]
+  },
+  "bootstrapScope": "Exact original ratios reconstructed; bootstrap reproduction separately performed by frozen independent auditor.",
+  "memory": {
+    "rawScanCount": 413,
+    "everyObservationQualified": false,
+    "passesProspectiveMemoryScreen": false,
+    "observations": [
+      {
+        "name": "A1",
+        "maximumCoveredSampleGapMs": 255.363403,
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null
+      },
+      {
+        "name": "B1",
+        "maximumCoveredSampleGapMs": 260.966631,
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null
+      },
+      {
+        "name": "B2",
+        "maximumCoveredSampleGapMs": 229.133288,
+        "qualified": true,
+        "failures": [],
+        "maxSampledPssKiB": 1251039,
+        "maxSampledPrivateKiB": 1021896
+      },
+      {
+        "name": "A2",
+        "maximumCoveredSampleGapMs": 284.148828,
+        "qualified": false,
+        "failures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null
+      }
+    ]
+  },
+  "decision": "Target latency signal meets predeclared threshold; three original memory coverage failures hold this cell. No memory-regression inference, rerun or promotion."
+}

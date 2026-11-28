@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "runId": 46126462448,
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/46126462448",
+  "head": "d28d74f9c1047491670942ec6e0414cc9c823101",
+  "createdAt": "2026-11-28T08:34:34Z",
+  "statusAtRootFetch": "queued",
+  "jobId": 140922033124,
+  "scope": "One build/correctness preparation only. Zero performance observations planned.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateCSourceSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "bindingSha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05"
+}

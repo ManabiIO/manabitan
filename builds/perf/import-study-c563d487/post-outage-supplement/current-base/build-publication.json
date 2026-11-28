@@ -1,0 +1,86 @@
+{
+  "branch": "perf/numeric-suffix-972-build-20261128-c563d487",
+  "commit": "d28d74f9c1047491670942ec6e0414cc9c823101",
+  "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "tree": "169ea236aa1ba9a17583878be0b11d5f5cd795f9",
+  "publishedAtUtc": "2026-11-28 08:34:32 UTC",
+  "files": 13,
+  "bytes": 62200,
+  "bindingSha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05",
+  "independentReviewSha256": "7235a423dd674163101254750ab3b4e0f21553591f9836602749a7a36df621b8",
+  "comparisonAudit": {
+    "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "commit": "d28d74f9c1047491670942ec6e0414cc9c823101",
+    "tree": "169ea236aa1ba9a17583878be0b11d5f5cd795f9",
+    "all13RemoteGitBlobsMatch": true,
+    "noProductFilesChanged": true,
+    "files": [
+      {
+        "path": ".github/workflows/numeric-suffix-972-build-c563d487.yml",
+        "status": "added",
+        "gitBlobSha": "6f10a35517b14774414d5bc077eedc80eef9057e"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/binding.json",
+        "status": "added",
+        "gitBlobSha": "ed233a2245130c3df37c9491847b09a49fcb86c2"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/candidate.patch",
+        "status": "added",
+        "gitBlobSha": "0707b12ac54e33d44ecf9f183ecc3e351688610f"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/prepare-and-validate.py",
+        "status": "added",
+        "gitBlobSha": "07e52ed96037a1cb8d54b87d1a638b503aed85dd"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/prospective-complete-import-criteria.json",
+        "status": "added",
+        "gitBlobSha": "cce478f3af29580e8d864db426550a601e350747"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-reuse.test.js",
+        "status": "added",
+        "gitBlobSha": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-end-fixtures.js",
+        "status": "added",
+        "gitBlobSha": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-ends.test.js",
+        "status": "added",
+        "gitBlobSha": "8ba263fc060391555a5070d65d6313fdd96607b4"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/composition-source-receipt.json",
+        "status": "added",
+        "gitBlobSha": "f08b721db4394e2ecdff7cdbab8af2e7074e4f1b"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/independent-token-end-fixture-review.json",
+        "status": "added",
+        "gitBlobSha": "6ed08435c58fdf597211784dffe7bd46126d31ca"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/root-source-review.json",
+        "status": "added",
+        "gitBlobSha": "fbec82f0e67d9b818558e1452339b49e8d0c9002"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/static-preflight-receipt.json",
+        "status": "added",
+        "gitBlobSha": "d635a67c95ad06dcab0615fa1db42bb7e07e1e39"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-972-build-c563d487/workflow.yml",
+        "status": "added",
+        "gitBlobSha": "6f10a35517b14774414d5bc077eedc80eef9057e"
+      }
+    ]
+  },
+  "scope": "Build and correctness only; no performance acquisition or product PR"
+}

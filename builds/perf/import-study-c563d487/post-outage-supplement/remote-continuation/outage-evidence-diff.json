@@ -1,0 +1,222 @@
+{
+  "parent": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+  "head": "63c2e40049981460f524f6b36695239a265a430b",
+  "tree": "f7ee64e0c01f305bae5a26a02cc268afdc7c9241",
+  "exact40ChangedFiles": true,
+  "files": [
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/artifact-api-metadata.json",
+      "sha": "cedf1afcd9c3145141c23c4c0d15bcd1be5401fb",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/all-dry-build-targets.receipt.json",
+      "sha": "50819abec5b5aa104f9fb7de4605aefd8b0a6066",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/apply-check.receipt.json",
+      "sha": "6bf555f513d2c64edfb179546831a56b4a1dcf1b",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/apply-patch.receipt.json",
+      "sha": "cbd8f05fe71a9ea3b1b76d5963d5e285874da24c",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/build-candidate-libraries.receipt.json",
+      "sha": "9c2543947adf9d87eac0e19763cbeff04e5b85ba",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/build-native-candidate.receipt.json",
+      "sha": "2fa8e135669be53701dc2b9d0a19ac7fc6ba4c8b",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/compiled-source-binding.json",
+      "sha": "dd092b0784c12cdfaa9b1bb7b767071f4044b5c0",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/complete-unit-suite.receipt.json",
+      "sha": "9554cf2a61bf2c29a9c1b6f15c4870581fe24f40",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/create-baseline.receipt.json",
+      "sha": "3c2d77cbc7bfb879471484c52aacf823d714678e",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/create-candidate.receipt.json",
+      "sha": "6860fe084dca04f9b5e2b2c5cb2d31c3cfbd9792",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/dependencies-baseline.receipt.json",
+      "sha": "fb63ba62203ab6ecbd8cc95bc4b261a0620a2f94",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/dependencies-candidate.receipt.json",
+      "sha": "e223f8d8392ac84321e1507db15a5d019029eafd",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/fetch-baseline.receipt.json",
+      "sha": "5f44a2bdce309f4c3b514de57b62bc1b23cfbaaa",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/options-unit-suite.receipt.json",
+      "sha": "973eafa7ebd3c48f0db3e10de4ec26b3bd50ddb1",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/preparation-start.json",
+      "sha": "65d320f6ee9947cdbf38faea580234f6228ddc2a",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/reproduce-baseline.receipt.json",
+      "sha": "31740a162cee5605fade8e45e5a2f3cfcb0f55d6",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/reproduce-candidate.receipt.json",
+      "sha": "e95cc4c132b662c2e80d3455163eb9e26cb78ac4",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/result.json",
+      "sha": "c2ded85301aa967b4f83e5b55b2e28a2b5994070",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/scoped-lint.receipt.json",
+      "sha": "c20cd3f58bc41f8bce3a7df045516d5c393cdc43",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/strict-main-types.receipt.json",
+      "sha": "a78c0e20f4bd9d46862351dce728d40fe82c2b61",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/strict-test-types.receipt.json",
+      "sha": "a29501407182620ea7aa2d3df6e64df88cbb628b",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/composition-source-review.json",
+      "sha": "fbec82f0e67d9b818558e1452339b49e8d0c9002",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-job.log",
+      "sha": "6bb56c86106fb4f2624e2db11144ed1e0c0b25e8",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-records.json",
+      "sha": "73ad52d70186d0d55eb61f0b234c6a051faf0d53",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/prospective-complete-import-criteria.json",
+      "sha": "cce478f3af29580e8d864db426550a601e350747",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/recovery-and-product-review.json",
+      "sha": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/remote-primary-review.json",
+      "sha": "1f5acc3387751ad00de6a544418e13913b894e21",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/index.json",
+      "sha": "d81b07d79612ced1985dcb64451363c4d1832bc0",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-AB/primary-records.jsonl",
+      "sha": "73159afaf9257056e9d23b565e317314d630cd7c",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-BA/primary-records.jsonl",
+      "sha": "664fff3a5c63e879082b04a5b117e0fceaa33cbf",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-AB/primary-records.jsonl",
+      "sha": "70bf97043158f4c2c1dc1aee079d532917c14c58",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-BA/primary-records.jsonl",
+      "sha": "fcbb07de936ce1f3ec4fd3328b04e6f3c0c25aab",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/reconcile-primary-records.mjs",
+      "sha": "e700b72bca214fd3cdae86b4aba062946fa8d1f2",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-preparation-history.json",
+      "sha": "80bd9d94cfb029b236172c672910123b8d82ad51",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-primary-reconciliation.json",
+      "sha": "29554213b34186ff73f092fe37e96594f453b371",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-log-audit.json",
+      "sha": "9d98aa34dbbdb738eb644cd24eeff31fcb7928f1",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-records.jsonl",
+      "sha": "0fea9b09a55d4af04a15e99ef2798ce5c01752a4",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-AB/primary-records.jsonl",
+      "sha": "aaa6fe748fab06b3d6441751d1e84f39ef01e6a9",
+      "status": "added"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-BA/primary-records.jsonl",
+      "sha": "332c506840cc8d164fcca490ebd8e6902007eecb",
+      "status": "added"
+    },
+    {
+      "path": "dev/perf/import-experiments-20260914.md",
+      "sha": "feb460d211185c818be66f0b37e6431a24f95218",
+      "status": "modified"
+    }
+  ],
+  "rootReview": {
+    "parent": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+    "parentTree": "ce3c6523d81fd79c6ed9224ad8f7dad6a2ec7e56",
+    "pureInsertion": true,
+    "onlyPrecisionClauseChanged": true,
+    "exact40Paths": true,
+    "exact20RecoveredProofs": true,
+    "all38IndexEvidenceFilesMatchManifest": true,
+    "files": 40,
+    "totalBytes": 6329900,
+    "canonicalSha256": "2579e29641e7ca406d1d6fa756d4e91176d347570ae0b640e636bc76996f3881",
+    "indexSha256": "92a59535e12823f5baa6a5a13c56b585ba08c9092c391f34660d25ed3e2ed5e6"
+  },
+  "agentVerificationGitBlob": "813d83cf9208cd733f1195f855445473f9186f3f"
+}

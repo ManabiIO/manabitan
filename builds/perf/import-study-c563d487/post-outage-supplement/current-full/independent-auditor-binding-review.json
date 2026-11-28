@@ -1,0 +1,40 @@
+{
+  "scope": "Before current cohort observations; same exact old independently reviewed auditor and unchanged gates",
+  "expected": {
+    "bytes": 6386,
+    "sha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+    "gitBlob": "3a7dc580bfb8ec273e0fda0c3cc2b8157f9b9c4d"
+  },
+  "auditorSha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+  "invariantKeysChecked": [
+    "browser",
+    "nodeVersion",
+    "fixtureLockSha256",
+    "lockSha256",
+    "packageEntries",
+    "packageEntryCount",
+    "sourceHashes",
+    "fixtures",
+    "summaryFixtureHashes",
+    "storageBytes",
+    "targetDictionary",
+    "targetMinimumReductionPercent",
+    "minimumFasterPairs",
+    "nonTargetMinimumSlowdownPercent",
+    "minimumSlowerPairs",
+    "observerSha256",
+    "memoryHarnessSha256",
+    "requireProvenance"
+  ],
+  "runId": 46130093248,
+  "workflowCommit": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "criteriaSha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+  "provenanceHashes": {
+    "correctness-reuse-binding.json": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+    "original-correctness-recovery.json": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720"
+  },
+  "passed": true
+}

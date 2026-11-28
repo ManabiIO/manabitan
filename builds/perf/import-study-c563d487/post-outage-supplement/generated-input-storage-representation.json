@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T08:38:17.953244+00:00",
+  "scope": "Lossless storage change for generated local fixture inputs only; no observations or generation/model/source receipts changed. Exact raw bytes remain recoverable from retained original raw-deflate files.",
+  "manifestSha256": "7291d348f059862bbb51df976902d0cd21cb2115757e49d0020e59ae4483be54",
+  "verifiedBeforeAnyRemoval": true,
+  "rawDuplicateBytesReleased": 106230012,
+  "retainedCompressedBytes": 588127,
+  "restoreMethod": "zlib.decompress(compressedFile.read_bytes(), -15), then verify original rawSha256 and length before use",
+  "files": [
+    {
+      "rawFile": "case-1/term_bank_1.json",
+      "rawSha256": "5bb07c139b5c2176a1ed793ec72c60939787394ec70ffb479b725d966a0017f6",
+      "rawBytes": 2710001,
+      "retainedCompressedFile": "case-1/term_bank_1.deflate",
+      "compressedSha256": "938a017e1a28dc96f0060b3a0dd33cd9a5a143160b79a4df8a1999907bc6993e",
+      "compressedBytes": 61141,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-1/term_bank_2.json",
+      "rawSha256": "caf34ed0882476de6bf32b03db24b489c7fda56bf499448ca3f32e987f048ab4",
+      "rawBytes": 2710001,
+      "retainedCompressedFile": "case-1/term_bank_2.deflate",
+      "compressedSha256": "83d76e11afea3899a86570f314b2611c2070aa4064300aa8d6b4dfa35e718f36",
+      "compressedBytes": 61142,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-2/term_bank_1.json",
+      "rawSha256": "313919eb11461456cc381dfe92c6fa675e4eeba71c86dba5573a7d2309479423",
+      "rawBytes": 2700001,
+      "retainedCompressedFile": "case-2/term_bank_1.deflate",
+      "compressedSha256": "40a8b54dae6d6c61098e1551c287f997a0a52c56122c3c7a719377e3d5cf6bac",
+      "compressedBytes": 37374,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-2/term_bank_2.json",
+      "rawSha256": "8d4ba8b9dc6e4ff467d7865c983708e3bc66d78508776a82bf502008d7bb12e7",
+      "rawBytes": 2700001,
+      "retainedCompressedFile": "case-2/term_bank_2.deflate",
+      "compressedSha256": "cb188ccb8ae24b05a972708e3799ba3a30050f3f16a4d9e42217ae80e2a029eb",
+      "compressedBytes": 37396,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-3/term_bank_1.json",
+      "rawSha256": "fab1eebccac2a8a6bbac425ac4bca0c3d0e3ecea1e6fa26d702786187ff33e1e",
+      "rawBytes": 21980001,
+      "retainedCompressedFile": "case-3/term_bank_1.deflate",
+      "compressedSha256": "675f798e1537e5f668a67d07c6a62f4a401fd0fd4cd25efcce4df023427efade",
+      "compressedBytes": 65785,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-3/term_bank_2.json",
+      "rawSha256": "2f8704bda110c8267995f0bbc830ceb842aebba440d1e2897881bafdc09f6e29",
+      "rawBytes": 21980001,
+      "retainedCompressedFile": "case-3/term_bank_2.deflate",
+      "compressedSha256": "fc586503cc24091cd84eedcd1bbb1feda9916ccd7fdf8ff89c4b8fa04fc20d28",
+      "compressedBytes": 65801,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-4/term_bank_1.json",
+      "rawSha256": "853e8038322dec57d7078f1cd941929d88113ec5944d242ea7594fdb630d2e82",
+      "rawBytes": 2800001,
+      "retainedCompressedFile": "case-4/term_bank_1.deflate",
+      "compressedSha256": "fad6de6e9c279c2a9941abfd7fbc47fd22eb2d39ced78191a07064788fd4e41f",
+      "compressedBytes": 34122,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-4/term_bank_2.json",
+      "rawSha256": "b74c13130ee0eb2dd48cc00078448812d4759871f9c8ebec3329b431aaf4a2e0",
+      "rawBytes": 2800001,
+      "retainedCompressedFile": "case-4/term_bank_2.deflate",
+      "compressedSha256": "6c0fef8ed47409f8d329d712537222956dfe46aa6d2f59a55643fca52d20596e",
+      "compressedBytes": 34121,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-5/term_bank_1.json",
+      "rawSha256": "efc76102589d481f1f71bad7444249487743664460ae6abe39133b59e714d936",
+      "rawBytes": 20985001,
+      "retainedCompressedFile": "case-5/term_bank_1.deflate",
+      "compressedSha256": "913f03c6611f5f1f34a8e27cd3435e3e5a938ec5723356a1ce463a65ff4b3090",
+      "compressedBytes": 63874,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-5/term_bank_2.json",
+      "rawSha256": "a3489df0e7115d7153745fbfa03fc1bd011788c34795849855c9334e979c7385",
+      "rawBytes": 20985001,
+      "retainedCompressedFile": "case-5/term_bank_2.deflate",
+      "compressedSha256": "6bbe2108f07005e4ec7ea4a51b64b755d61dc5fd0df2a2b85146883926afd022",
+      "compressedBytes": 63877,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-6/term_bank_1.json",
+      "rawSha256": "dda9c639328dd609a7c89ca507e4f93982cb84bacbab980e5cfd0bb93a37b1a1",
+      "rawBytes": 1940001,
+      "retainedCompressedFile": "case-6/term_bank_1.deflate",
+      "compressedSha256": "7b6c32bcde7b8cfd24a8adbcaae03e9cd6bd66368671a3bb94c600797e07c20c",
+      "compressedBytes": 31746,
+      "losslessByteIdentityVerified": true
+    },
+    {
+      "rawFile": "case-6/term_bank_2.json",
+      "rawSha256": "05213e4df86ea781f4638864be92c5cf0ad5521312d5450b3ddac86318fe9838",
+      "rawBytes": 1940001,
+      "retainedCompressedFile": "case-6/term_bank_2.deflate",
+      "compressedSha256": "3474b01b986f42bfbaf5cc5b1bcabfe1d6410d1d7b684207aad87f8c697e6705",
+      "compressedBytes": 31748,
+      "losslessByteIdentityVerified": true
+    }
+  ]
+}

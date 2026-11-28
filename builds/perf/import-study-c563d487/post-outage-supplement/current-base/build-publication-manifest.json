@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "branch": "perf/numeric-suffix-972-build-20261128-c563d487",
+  "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baseTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "files": [
+    {
+      "path": ".github/workflows/numeric-suffix-972-build-c563d487.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/.github/workflows/numeric-suffix-972-build-c563d487.yml",
+      "bytes": 1722,
+      "sha256": "92077f770c4b9002c6ac8335e1752db7be113360ae189cb150ec9a00331698d9",
+      "gitBlobSha": "6f10a35517b14774414d5bc077eedc80eef9057e",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/binding.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/binding.json",
+      "bytes": 3106,
+      "sha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05",
+      "gitBlobSha": "ed233a2245130c3df37c9491847b09a49fcb86c2",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/candidate.patch",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/candidate.patch",
+      "bytes": 7891,
+      "sha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+      "gitBlobSha": "0707b12ac54e33d44ecf9f183ecc3e351688610f",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/prepare-and-validate.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/prepare-and-validate.py",
+      "bytes": 7258,
+      "sha256": "f548831d146b4b7210117756da67e50a73e3d70d761c10e919cb28efc3e96090",
+      "gitBlobSha": "07e52ed96037a1cb8d54b87d1a638b503aed85dd",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/prospective-complete-import-criteria.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/prospective-complete-import-criteria.json",
+      "bytes": 3193,
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "gitBlobSha": "cce478f3af29580e8d864db426550a601e350747",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-reuse.test.js",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-end-fixtures.js",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-ends.test.js",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/qualification/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha": "8ba263fc060391555a5070d65d6313fdd96607b4",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/composition-source-receipt.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/reviews/composition-source-receipt.json",
+      "bytes": 2374,
+      "sha256": "4261aaa7bd61b98b1c129485ca4dd00b04d8b3f7edf9c5f5758a24dd6e60e112",
+      "gitBlobSha": "f08b721db4394e2ecdff7cdbab8af2e7074e4f1b",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/independent-token-end-fixture-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/reviews/independent-token-end-fixture-review.json",
+      "bytes": 2013,
+      "sha256": "bc0cf3cdf9bb11fa25fc5c7e24223215052cbf6604dcdba0f45eec276a8821c4",
+      "gitBlobSha": "6ed08435c58fdf597211784dffe7bd46126d31ca",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/root-source-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/reviews/root-source-review.json",
+      "bytes": 2552,
+      "sha256": "9affdad61d5d2a1e8ec8939b1b1ad8fbeb098dcad7dcea08614fb905d518eef6",
+      "gitBlobSha": "fbec82f0e67d9b818558e1452339b49e8d0c9002",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/reviews/static-preflight-receipt.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/reviews/static-preflight-receipt.json",
+      "bytes": 4671,
+      "sha256": "0ac230d439c102cd96ccd54a4f183d3657f255a466dc63056374b145c1ace016",
+      "gitBlobSha": "d635a67c95ad06dcab0615fa1db42bb7e07e1e39",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-972-build-c563d487/workflow.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-publication/tree/dev/perf/numeric-suffix-972-build-c563d487/workflow.yml",
+      "bytes": 1722,
+      "sha256": "92077f770c4b9002c6ac8335e1752db7be113360ae189cb150ec9a00331698d9",
+      "gitBlobSha": "6f10a35517b14774414d5bc077eedc80eef9057e",
+      "encoding": "utf-8"
+    }
+  ],
+  "fileCount": 13,
+  "totalBytes": 62200,
+  "bindingSha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05",
+  "independentReviewSha256": "7235a423dd674163101254750ab3b4e0f21553591f9836602749a7a36df621b8",
+  "scope": "Separate build/correctness preparation; no performance acquisition or product PR"
+}

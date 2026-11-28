@@ -1,0 +1,74 @@
+{
+  "scope": "Bounded source/hash and syntax verification of exact already-published files after executor recovery; no program/native/test/acquisition execution",
+  "fileHashes": [
+    {
+      "path": "tree/.github/workflows/import-numeric-suffix-972-qualification-c563d487.yml",
+      "sha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2"
+    },
+    {
+      "path": "tree/dev/perf/import-numeric-suffix-972-qualification-c563d487/verify-correctness-reuse.py",
+      "sha256": "de63b509951892b9d83f6a0087fb77e20f9e224d4cb5d5ffebc09a9d0c5cf988"
+    },
+    {
+      "path": "tree/dev/perf/import-numeric-suffix-972-qualification-c563d487/archive-evidence.py",
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+    },
+    {
+      "path": "tree/dev/perf/import-numeric-suffix-972-qualification-c563d487/correctness-reuse-binding.json",
+      "sha256": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03"
+    },
+    {
+      "path": "tree/dev/perf/import-numeric-suffix-972-qualification-c563d487/original-correctness-recovery.json",
+      "sha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720"
+    },
+    {
+      "path": "tree/dev/perf/import-numeric-suffix-972-qualification-c563d487/prospective-complete-import-criteria.json",
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee"
+    },
+    {
+      "path": "publication-manifest.json",
+      "sha256": "a368547fb4527466db29f6211e2b1e8bae7b131d76ab1523cf9ab8bf751149bb"
+    },
+    {
+      "path": "independent-complete-import-expected.json",
+      "sha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912"
+    },
+    {
+      "path": "independent-complete-import-audit.js",
+      "sha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656"
+    },
+    {
+      "path": "independent-peer-review.json",
+      "sha256": "5eaf16eff7aa0ec1284fc8f3bb04d52bdcdcfb2daffe74e778580aa25a4fd0eb"
+    },
+    {
+      "path": "independent-auditor-binding-review.json",
+      "sha256": "ca5a1aaec689479cb9e0504fce8d192074c517e98caf5d7fdd8b0ca44a5b310f"
+    }
+  ],
+  "pythonFilesParsed": 2,
+  "inlinePythonBlocksParsed": [
+    {
+      "job": "validate",
+      "step": "Verify frozen qualification tooling and syntax",
+      "index": 0
+    },
+    {
+      "job": "qualify",
+      "step": "Run registered complete-import and separate memory cohorts",
+      "index": 0
+    },
+    {
+      "job": "qualify",
+      "step": "Preserve prospective criteria and exact correctness provenance",
+      "index": 0
+    },
+    {
+      "job": "qualify",
+      "step": "Print every raw observation and final result as compact JSON lines",
+      "index": 0
+    }
+  ],
+  "workflowYamlParsed": true,
+  "performanceObservationsAcquired": 0
+}

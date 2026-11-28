@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T08:47:59.189858+00:00",
+  "scope": "All six original numeric full-import artifact ZIPs independently API-digest checked and audited. Every non-package raw report, process scan, marker, log and receipt remains losslessly available; no observation selected out. Original primary audit layer and three-cell artifact index remain immutable.",
+  "runId": 46113243549,
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCommit": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "toolingCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "artifactId": 15255570810,
+      "originalZipSha256": "404a1ab001d880b783ac55c5e8a658cc51f40c5f82638dbf5bb42873a219c79c",
+      "originalZipBytes": 35566204,
+      "artifactAuditSha256": "70f43f9a75b066319db95e51a55c6fb55832b33034e3503b3ecf98f1b6ed107e",
+      "primaryRecordsSha256": "07b60acf90675fc8895aa7a25a20690c69db9de2398a2e334daa6e8f263dfa3e",
+      "downloadReceiptSha256": "5fa9f702def4aed7279af2d5d9e6a57224a380e573c26be803dbb1341551a5a3",
+      "memberManifestSha256": "03ae4cf5618151797bc0f78edb4e5b7d616953d7b0c71ed18c2a623310fefcde",
+      "selectedArchiveSha256": "58d765122bdcb7b9b6d4f23531bc149f2a7e02250097315af9f40943d92361a1",
+      "selectedArchiveBytes": 2058646,
+      "selectedRawBytes": 22460426,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "073c3b1936336fa68ca96a965ac12866648fd86466f13105d157b3483b21a6ce",
+      "rawReports": 42,
+      "rawScanCount": 271,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Original fullZIP retained in addition to complete selected non-package archive",
+        "originalFullZipLocal": true
+      }
+    },
+    {
+      "cell": "jmdict-BA",
+      "artifactId": 15255527579,
+      "originalZipSha256": "86b7e9e8905eaf4269b5559f56e9ee3a2172b9995bbe41b685ec557c6a01e80e",
+      "originalZipBytes": 35680155,
+      "artifactAuditSha256": "21036998a0a361af6d2664c174dc2218a65a731d86f19a19c49b88bc7cead611",
+      "primaryRecordsSha256": "f961ea4cc6507e1d56ada826059ff9bfa5f3592c1fe167ffe0051a174fd858e8",
+      "downloadReceiptSha256": "568308309e394ebdfc6afd3e4552f757b0e9e51b5a764ab0ac5917b25fcb58a7",
+      "memberManifestSha256": "9d02e15a630855106255eabd70b60a63c101f788d30a0f67c651fd75d4f07964",
+      "selectedArchiveSha256": "5944efd5908097d11c9c7d525d77b575a9459e2d1ee61475616f66caeea4ecad",
+      "selectedArchiveBytes": 2163767,
+      "selectedRawBytes": 26654032,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "351dcee31989d3c6173a7f66de5c019fa13b01622502f802b59ca29142e03524",
+      "rawReports": 42,
+      "rawScanCount": 393,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Every non-package original member retained losslessly; temporary fullZIP retired after all byte/audit checks",
+        "receiptSha256": "6f7c69706d92fef2bff169dacfd0ecf21d2ba3102641229a35009070bf4f7eea",
+        "originalFullZipLocal": false
+      }
+    },
+    {
+      "cell": "jitendex-AB",
+      "artifactId": 15255097791,
+      "originalZipSha256": "ad933c09311ee43a24d94bde837910000b6e86cc06c0081b629e33053acdd628",
+      "originalZipBytes": 35578772,
+      "artifactAuditSha256": "285bd502fbd92b7bdfaa79cc480f1f24a5b58ab6780f3c0593df792fb124eb08",
+      "primaryRecordsSha256": "15325a4df4808ce97f6274976581f6ff68f388286da6e873bc6ac9e67f9557cf",
+      "downloadReceiptSha256": "7464c1c005a4a057d7b74f52470077c423511da2388d02b3eaf976031bf0dc43",
+      "memberManifestSha256": "8f8605a5366d1df80d6e9d5eabffbdd4c70a273f2c3354ad4901845bd35a4a46",
+      "selectedArchiveSha256": "a627aec230c79f1573bb9e9f992db036ba6b014108a9c7db3a3e3e168f813923",
+      "selectedArchiveBytes": 2070148,
+      "selectedRawBytes": 22581679,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "957db15494a20914e1c47582df035033e1f17c641c5c19c64e3ecac9d4b3b159",
+      "rawReports": 42,
+      "rawScanCount": 270,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Every non-package original member retained losslessly; temporary fullZIP retired after all byte/audit checks",
+        "receiptSha256": "8e1afcfd67475f0dbe0d69ba977a89a20b1c41b3bd7fb7a87b77282355f7cb45",
+        "originalFullZipLocal": false
+      }
+    },
+    {
+      "cell": "jitendex-BA",
+      "artifactId": 15255119565,
+      "originalZipSha256": "c51e6257ecb7793089f0c8e830270ac62dc8438cb529610fc1ff56f2eca057c9",
+      "originalZipBytes": 35666782,
+      "artifactAuditSha256": "fa6ef6b73831385d22ad35f0b52f56a710a0a11937b96ab5822dea01bbe158eb",
+      "primaryRecordsSha256": "7c87a2b4fe183bf12d719ff98ea52f59409289e6694b47e8a9a602362d53d0bf",
+      "downloadReceiptSha256": "e3767cee9b2caed0da8de78b4ea3ab3ac56ee08dd21cdebb0af668574f0c256b",
+      "memberManifestSha256": "00bd58ea4c8f166294796fe21c319d987a103084f86fed748866ef06419e25af",
+      "selectedArchiveSha256": "2ae0483446ae4a43714c66671e03aab68cc650ffaa8d1dcce49acd77ccc7b342",
+      "selectedArchiveBytes": 2150348,
+      "selectedRawBytes": 25669953,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "827f71e3fac2c54205c7f6726f387e1b5172d2c4968ba60ea23d2cf5232c7474",
+      "rawReports": 42,
+      "rawScanCount": 348,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Every non-package original member retained losslessly; temporary fullZIP retired after all byte/audit checks",
+        "receiptSha256": "307724b95d0f18adb6ed2a019b6a35d401274cfde049846edb0eff9e802a1a37",
+        "originalFullZipLocal": false
+      }
+    },
+    {
+      "cell": "vndb-AB",
+      "artifactId": 15255922406,
+      "originalZipSha256": "23c293793610c1a7af920014024a7d1032f7e7f5c7c710b4a3d9c0f8bfd16068",
+      "originalZipBytes": 35741094,
+      "artifactAuditSha256": "7d61cbebf92e135ce1d9e4ff126fc35ff4f9a7c0f928004a4d08f20cd5a721fa",
+      "primaryRecordsSha256": "ea04f794d55add66e9c15bf082f9b2209bf81cfee01432dec0a550fb10d43fe0",
+      "downloadReceiptSha256": "be9cc16efd9d17aebfa42323ac768023ae6fd8023890de5ff2a2e1f4223e8d69",
+      "memberManifestSha256": "79b16694d61680e243a131c610d257cd76ba4f1f6925f57c1a8644da70f31e0c",
+      "selectedArchiveSha256": "0d3c3f81c17bf537353cdacd30ce9fe16e4fde364caa7e64f8ba2d0e2be9965f",
+      "selectedArchiveBytes": 2220779,
+      "selectedRawBytes": 27306212,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "1852b9ca0ba7b6140b5d4e1dee4d8604dece7fe4c91648feb5df8df9d7ec6401",
+      "rawReports": 42,
+      "rawScanCount": 413,
+      "qualifiedMemoryObservations": 1,
+      "memoryGatePassed": false,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Original fullZIP retained in addition to complete selected non-package archive",
+        "originalFullZipLocal": true
+      }
+    },
+    {
+      "cell": "vndb-BA",
+      "artifactId": 15256340581,
+      "originalZipSha256": "d4111ebba7aec361c9f705213928e2d2ce37b211b60fe8435d4e867c69bcb89a",
+      "originalZipBytes": 35934413,
+      "artifactAuditSha256": "088724cd1838a616bebcd0a65004eb3d58fd2c5cf5af5c43f395734868ec85d9",
+      "primaryRecordsSha256": "716907665e13176b57392d9a863b149170d6b0fe7280cdbf52bb9660c8562efd",
+      "downloadReceiptSha256": "301fcf4526456c7a59b0b13cd2b38b23b1a868eec71975a9ff222209c5891516",
+      "memberManifestSha256": "9a8811d4b744570e64c81fab0f8d6375e55ed7d031c34f1154d04c7ce2a3332a",
+      "selectedArchiveSha256": "d3ee624ea318ef12e7692fa558482262c2f654bcda99fcb45aed8db6bef29b9e",
+      "selectedArchiveBytes": 2396766,
+      "selectedRawBytes": 34402756,
+      "selectedMemberCount": 314,
+      "selectedReceiptSha256": "88bc12080a8f6ee1eb75bb3f7ff4194b35758175914fd6f64910d83e038e0c47",
+      "rawReports": 42,
+      "rawScanCount": 605,
+      "qualifiedMemoryObservations": 4,
+      "memoryGatePassed": true,
+      "auditIntegrityPassed": true,
+      "retention": {
+        "kind": "Original fullZIP retained in addition to complete selected non-package archive",
+        "originalFullZipLocal": true
+      }
+    }
+  ],
+  "totals": {
+    "reports": 252,
+    "primaryRecords": 330,
+    "reportByteHashBindings": 756,
+    "rawScans": 2300,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 21,
+    "selectedMembers": 1884,
+    "selectedRawBytes": 159075058,
+    "selectedArchiveBytes": 13060454
+  },
+  "priorThreeCellIndexSha256": "63136a93d50946a03dab02bd7d6796daff645aa276b6a533901994aecd504b12",
+  "primaryCombinedIndexSha256": "9e77188166cd10cba625860ea054b09428a731a1a3304e3a6ac3b097a12f0a68",
+  "failedFrozenGate": {
+    "cell": "vndb-AB",
+    "observations": [
+      "A1",
+      "B1",
+      "A2"
+    ],
+    "rule": "covered-import-scan-gap-over-250ms",
+    "maxGapsMs": [
+      255.363403,
+      260.966631,
+      284.148828
+    ],
+    "maxSampledPssAndPrivateKiBRemainNull": true,
+    "notEvidenceOfMemoryRegression": true
+  },
+  "packageRetention": "Every package complete SHA and all554-entry maps are preserved; package bytes were independently checked against those maps before any authorized temporary original ZIP retirement. The six selected archives omit only their two packaged extension ZIP members.",
+  "decision": "Original full cohort remains held by its unchanged prospective memory coverage rule. All artifact-integrity checks pass; no selected rerun, threshold change, pooled timing or old-to-current-source gain transfer.",
+  "auditorSha256": "3b38d328f7c0bc70c993ff19fe41a8f4f7dd14fbed260a401bad43e14d65e092",
+  "selectionProducerSha256": "8e188265029a0aa72e7af622193b5fe5601778fdc827b9f9467fcacb18f039cf",
+  "retainedAuditorPreparationFailure": {
+    "sourceSha256": "79c41afa2f057a1f1d5de4977d13f9bbb3b062e5a35ad3784a5d05fc5be9bd50",
+    "receipts": [
+      {
+        "path": "jmdict-AB/artifact-audit-failure-20261128T084052494969.json",
+        "sha256": "d2e294c2497504d283dd01f67389561eb69ce2cdb318795d37cb25f284c9dc5a"
+      }
+    ],
+    "reason": "Initial audit projection did not allow null file-input phase.data; corrected read-only extraction and preserved source/trace. No original evidence changed."
+  }
+}

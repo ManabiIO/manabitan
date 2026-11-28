@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 08:54:32 UTC",
+  "scope": "Read-only replay of the exact original log plus temporary deliberately corrupted copies; no original observations changed or reacquired",
+  "auditorSha256": "f7affda07e6033fee59cc3466de3e86211a1ecc857a6b46c0c17a5f967d849a1",
+  "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "rootReviewSha256": "ed1e955bc19545bafc64dff11d8671daaf9b5c9f7e80ab1268e418619e06355e",
+  "originalLogAuditPassed": true,
+  "statisticsExactlyUnchangedFromInitialAudit": true,
+  "missingExtraInventoryWitnesses": [
+    {
+      "scope": "dictionary11",
+      "kind": "missing",
+      "rejected": true,
+      "matchingErrors": [
+        "pair-0-A complete exact source hash inventory"
+      ]
+    },
+    {
+      "scope": "dictionary11",
+      "kind": "extra",
+      "rejected": true,
+      "matchingErrors": [
+        "pair-0-A complete exact source hash inventory"
+      ]
+    },
+    {
+      "scope": "negative10",
+      "kind": "missing",
+      "rejected": true,
+      "matchingErrors": [
+        "negative-case-1-pair-0-A complete exact source hash inventory"
+      ]
+    },
+    {
+      "scope": "negative10",
+      "kind": "extra",
+      "rejected": true,
+      "matchingErrors": [
+        "negative-case-1-pair-0-A complete exact source hash inventory"
+      ]
+    }
+  ],
+  "everyMutationRejected": true,
+  "artifactBindingRemainsPending": true
+}
+
