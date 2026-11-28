@@ -19,7 +19,80 @@ env:
   MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
 
 jobs:
+  validate:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Frozen source validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      STARTUP_SOURCE: 1c32ca03a4e0a8e5361ffdb5c90693b657ffad24
+      STARTUP_TREE: 24688d89b0ce95c385fc960b4ca86badf3eb5300
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 1c32ca03a4e0a8e5361ffdb5c90693b657ffad24
+          persist-credentials: false
+      - name: Bind the exact candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/source-startup-static-88711"
+          mkdir -p "$evidence"
+          test "$(git rev-parse HEAD)" = "$STARTUP_SOURCE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$STARTUP_TREE"
+          git rev-parse HEAD > "$evidence/source-commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
+          sha256sum ext/js/dictionary/dictionary-importer.js \
+            ext/js/dictionary/term-bank-source-pipeline.js \
+            ext/js/dictionary/term-bank-wasm-parser.js \
+            test/term-bank-owned-source-startup.test.js \
+            test/term-bank-wasm-startup.test.js > "$evidence/source-files.sha256"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Install pinned dependencies and libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          npm ci
+          npm run build:libs
+      - name: Complete test-project TypeScript gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json \
+            2>&1 | tee "$RUNNER_TEMP/source-startup-static-88711/types-test.log"
+      - name: Complete importer and source-pipeline lint gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node node_modules/eslint/bin/eslint.js \
+            ext/js/dictionary/dictionary-importer.js \
+            ext/js/dictionary/term-bank-source-pipeline.js \
+            2>&1 | tee "$RUNNER_TEMP/source-startup-static-88711/lint.log"
+      - name: Verify source remained frozen
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$STARTUP_SOURCE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$STARTUP_TREE"
+          test -z "$(git status --porcelain)"
+          sha256sum --check "$RUNNER_TEMP/source-startup-static-88711/source-files.sha256"
+      - name: Preserve validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: source-startup-static-88711
+          path: ${{ runner.temp }}/source-startup-static-88711
+          if-no-files-found: error
+          retention-days: 14
+
   screen:
+    needs: validate
     if: github.repository == 'ManabiIO/manabitan'
     name: owned-source-startup / ${{ matrix.order }}
     runs-on: ubuntu-latest
