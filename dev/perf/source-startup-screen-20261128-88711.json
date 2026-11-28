@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "baselineSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "dictionary": "jmdict",
+    "pairs": 6,
+    "controlEvery": 3,
+    "warmupPairs": 2,
+    "initialOrders": [
+        "AB",
+        "BA"
+    ],
+    "expectedParserWorkers": 3,
+    "bootstrapSeed": 88711027,
+    "candidates": [
+        {
+            "id": "owned-source-startup",
+            "sha": "1c32ca03a4e0a8e5361ffdb5c90693b657ffad24",
+            "expectedSourceChanges": [
+                "ext/js/dictionary/dictionary-importer.js",
+                "ext/js/dictionary/term-bank-source-pipeline.js",
+                "ext/js/dictionary/term-bank-wasm-parser.js",
+                "test/term-bank-wasm-startup.test.js",
+                "test/term-bank-owned-source-startup.test.js"
+            ],
+            "expectedPackageChanges": [
+                "js/dictionary/dictionary-importer.js",
+                "js/dictionary/term-bank-source-pipeline.js",
+                "js/dictionary/term-bank-wasm-parser.js"
+            ],
+            "expectedPackageAdditions": []
+        }
+    ]
+}
