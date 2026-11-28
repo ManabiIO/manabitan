@@ -733,3 +733,155 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+<!-- da6c4 evidence checkpoint begin -->
+
+## 2026-11-27: owned content overlap and source-bound screens (da6c4)
+
+This round freezes develop at `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
+Candidate `a20453bc325faff75a7f6a9c7d408a361c8fe981` has tree
+`be4cdfac16b8a6d118c46a23d5750ab50063f142`. These are experiment branches;
+no optimization PR or merge is implied. Hosted whole-import qualification is
+pending at this checkpoint.
+
+### Workload correction and mechanism
+
+The initial codec replay used the block store's standalone **4 MiB** default,
+but the production database uses **1 MiB**. The original 31-block result is
+preserved as diagnostic history and establishes no production-default gain.
+The corrected planner reads the target from frozen DB source and uses the exact
+production span planner: 528,299 JMdict rows, 12 groups, 362,032 globally unique
+pending contents, 100,300,626 input bytes, and **103 blocks**. All four baseline
+compression workers are active.
+
+The candidate admits one complete immutable owned shared group after its
+predecessor publishes metadata. It prepares deduplication/compression while that
+predecessor finishes persistence, but its own metadata and records wait for
+predecessor completion. At most two append owners exist. Producer lead and owned
+byte accounting retire only after completion. A continuing worker rotation
+avoids restarting every partial worker round at worker zero. Worker counts,
+block boundaries, codec settings, group sizes, budgets, caches, and stored formats
+are unchanged.
+
+Borrowed, partial, private, unwitnessed, media, and otherwise ineligible chunks
+remain serial. Failure joins all started persistence and unwinds successors
+before predecessor metadata rollback; abort, finish, close and purge drain
+owners before releasing resources. The legacy append API remains completion-only.
+Jitendex/VNDB full-media callbacks do not enable cross-group overlap. Jitendex
+still sees shared compression-pool rotation; VNDB uses generic compression.
+
+### Component evidence
+
+The corrected Node v24.22.3 codec screen preloads exact spans, uses four real
+codec workers, and excludes parsing, dedup, records, OPFS and UI. Twelve rounds
+balance all six A/B/C order permutations. All 36 observations are retained.
+Combined B/A paired median is **−16.5153%**, equal-work **−17.2931%**, 12/12 faster;
+identical C/A is −1.1922% / −2.3661%. Elapsed medians are 78.6873 ms A,
+78.0943 ms C and 67.5730 ms B. Every compressed block is byte-identical and
+decodes correctly. This is not an import-speed percentage.
+
+A separate prospective five-arm ablation retains 100 observations over 20
+balanced Williams rounds and decodes all 103 blocks separately for every arm.
+
+| Arm | Median elapsed | Paired change vs A | Equal-work change | Faster pairs |
+| --- | ---: | ---: | ---: | ---: |
+| Serial reset A | 80.577 ms | — | — | — |
+| Identical serial C | 85.018 ms | +4.092% | +13.312% | 7/20 |
+| Serial rotation | 78.235 ms | +2.899% | −1.906% | 9/20 |
+| Lookahead, reset assignment | 76.190 ms | −4.887% | −3.293% | 16/20 |
+| Lookahead and rotation | 71.275 ms | −8.581% | −12.539% | 17/20 |
+
+The identical-control variation makes exact ablation magnitudes inconclusive.
+Rotation alone does not establish a reviewable gain. No observations are replaced.
+
+The full actual DB/store component replay matches all 528,299 rows, metadata
+columns, native dedup counters, 103 compressed blocks, and persisted content and
+record files. Each arm reopens 36 source-derived probes and passes shard
+integrity; native fallback is zero. Only validated matching nonzero random
+descriptor/index generation IDs are masked. All 17 exercised source files are
+independently bound to candidate `a20453bc`.
+
+The forced gate proves successor compression before predecessor completion.
+Maximum pending source bytes are 9,631,061 baseline and 18,700,692 candidate.
+Twelve per-group RSS samples have maxima 424,624,128 and 432,545,792 bytes;
+these are diagnostic samples, not peak-memory or browser-memory qualification.
+The replay uses Node worker/OPFS adapters and a bootstrapped active bulk state;
+SQLite setup/journaling/COMMIT and browser producer scheduling are excluded.
+
+Failed attempts remain: an observer expected Uint8Array instead of the worker's
+ArrayBuffer; a probe oracle expected negative source sequences instead of
+production null; two processes exited 137 with an unestablished cause. Harness
+corrections did not change product code. The first isolated baseline had already
+written complete artifacts before its oracle failed. A separate read-only process
+verified those unchanged files/probes, and the final comparison explicitly binds
+the failed original receipt to its successful reopen receipt. Later checkpoints
+use atomic replacement; the interrupted second baseline retains ten groups.
+
+### Rejected screens
+
+Prepared-score encoding ran on two independent hosted machines in
+[run 46103123270](https://github.com/ManabiIO/manabitan/actions/runs/46103123270),
+research source `347856807519a564d259955fe2a17ed34d73fda7`. Both cover all
+528,299 rows, 12 groups/chunks, 19 boundary cases and 75 retained observations,
+with identical encoded field/lookup hashes.
+
+| Replication | Baseline median | Preparation + sink median | Paired total saving | Sink-only saving |
+| --- | ---: | ---: | ---: | ---: |
+| EPYC 9V74 | 10.420 ms | 10.026 ms | 0.380 ms / 3.65% | 6.709 ms |
+| EPYC 9V45 | 7.775 ms | 7.431 ms | 0.314 ms / 4.06% | 5.484 ms |
+
+Preparation costs about 6.005/4.887 ms. The sink ceiling partly overlaps #855's
+direct length access. The five-arm schedule is mildly position-imbalanced.
+Typed score columns remove 1,043,222 cumulative bytes, not measured peak memory.
+Transport, consumer capability validation, persistence and UI are excluded.
+The tiny preparation-inclusive saving does not justify production protocol work
+or a score PR.
+
+VNDB's recent shortcut already hits 6,490,301 of 6,648,310 rows. Only 158,009 rows
+encode beyond it, while 170 complete native group scans contain 157,864 unique
+representatives. A group-local raw-exact cache can remove at most 145 remaining
+canonical encodes, possibly fewer. The further 714 duplicates are cross-group.
+The default-off global exact flag from direct commit `385857d` adds hashing and
+tables after parsing; its old synthetic all-unique regression is not outweighed
+by this small ceiling. No implementation is pursued.
+
+Per-worker compression batching was tried in `3469ffb` and reverted in `acc72e4`;
+no performance reason for that revert was established. Existing 103-job traces
+put idealized critical removal of all queued inter-job gaps near 0.95 ms. This
+excludes some handler work and is not a full upper bound, but does not justify
+another batching implementation.
+
+### Validation, hosted gates, and evidence
+
+Six focused suites pass 79 tests. Main-source TypeScript and the scoped inherited
+test project pass; all seven build targets pass. Local complete test TypeScript
+exhausts 512/768 MiB heaps. Multi-file lint and the single-worker complete unit
+suite exit 137 before source/test diagnostics. These are retained incomplete
+process failures, not passes.
+
+[Qualification run 46105070655](https://github.com/ManabiIO/manabitan/actions/runs/46105070655)
+requires complete lint, runtime/test types, unit tests and builds before six
+independent dictionary × AB/BA cells. Each cell prescribes 12 timing pairs, four
+warmups, interleaved identical-code controls, exhaustive media checks and
+separate process-tree memory observations. The exact package gate permits six
+changed modules and one added coordinator. Existing +5% paired-median/+10%
+per-pair PSS/private bounds remain. Current VNDB active SAH allocation is
+prospectively 37 units. Passing correctness/memory alone is not a speedup claim.
+
+Fresh unchanged-source attribution profiles are
+[run 46105395307](https://github.com/ManabiIO/manabitan/actions/runs/46105395307),
+tooling `7a9fb3c25e97c6aaadc3dd3c5d540f71d4b47f4b`. Each dictionary has one
+ordinary release import with all media checked, no experiment flags or tracing.
+Build occurs before the source/runtime snapshot and import uses `--no-build`,
+avoiding a false generated-manifest identity failure. Single profiles are not
+comparative timing evidence.
+
+Raw evidence is `builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz`,
+with member/archive hashes in `components-v1-index.json`: 72 files including both
+wrong-target/corrected codec studies, all ablation observations, failed/reopen/
+parity receipts, scratch scripts, corpus manifests, both original score
+artifacts/job logs, and validation receipts. Pinned ZIPs, reproducible source
+spools, and Node OPFS output bytes are excluded; their identities and performed
+checks remain recorded. No source optimization is promoted from this checkpoint.
+
+<!-- da6c4 evidence checkpoint end -->

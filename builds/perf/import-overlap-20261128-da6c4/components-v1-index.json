@@ -1,0 +1,383 @@
+{
+  "archive": {
+    "bytes": 1940317,
+    "path": "components-v1.tar.gz",
+    "sha256": "0b10131113eab3c5a627c5a009d1c2cbcaa222abdff2989b7fc306ba6e123bc1"
+  },
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "a20453bc325faff75a7f6a9c7d408a361c8fe981",
+  "candidateTree": "be4cdfac16b8a6d118c46a23d5750ab50063f142",
+  "correction": "The original 4 MiB standalone codec screen is retained as diagnostic history only. Actual DB uses 1 MiB: corrected JMdict receipt has 103 blocks.",
+  "exclusions": [
+    "Reproducible pinned dictionary ZIPs and derived uncompressed source spools are not embedded; fixture and span hashes plus capture/planning scripts are retained.",
+    "Node OPFS output bytes are not embedded; complete per-file hashes, generation masks, source probes and the independent reopen receipt are retained.",
+    "Temporary prose notes are incorporated into the existing project handoff rather than included as additional handoff documents."
+  ],
+  "memberCount": 72,
+  "members": [
+    {
+      "bytes": 430,
+      "path": "analysis/build-candidate.log",
+      "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+    },
+    {
+      "bytes": 905,
+      "path": "analysis/chunk-completion-jsconfig.json",
+      "sha256": "08b3863f4c60a48890085be7b3b06afc0ab1a54ed2314f81e0e31be838cbcdd6"
+    },
+    {
+      "bytes": 9819,
+      "path": "analysis/critical-path-validation-receipts.json",
+      "sha256": "90156bce545e5b6ce3f6f10a3871c00b39e27eab0870410c6fd73369c2b9742c"
+    },
+    {
+      "bytes": 514,
+      "path": "analysis/full-unit-candidate.log",
+      "sha256": "f47bb4b21c308e5830f32bd199d5bef896b95f034b009790a1ef801ed2a43984"
+    },
+    {
+      "bytes": 13209,
+      "path": "profiling/capture-compression-groups.mjs",
+      "sha256": "0856f474db7efbf3a790479d01cabde696c908688e36766a4f0b899a356d22e8"
+    },
+    {
+      "bytes": 6083,
+      "path": "profiling/capture-jitendex-gc.log",
+      "sha256": "0b117512be3d5a9b8d65fb4e5dbaad35e59e9c492a0df03e82e62ca657f03b0d"
+    },
+    {
+      "bytes": 3154,
+      "path": "profiling/capture-jmdict-gc.log",
+      "sha256": "6230906632808553a48a165d8ea394dd095b57b9b9c800ae236344a757ace8d3"
+    },
+    {
+      "bytes": 1658,
+      "path": "profiling/capture-jmdict.log",
+      "sha256": "347b2f8c0631eec158f918aba57242ed27786034dd18e7c84e6e16b2c2dd8e22"
+    },
+    {
+      "bytes": 39540,
+      "path": "profiling/capture-vndb-gc.log",
+      "sha256": "4970648285e0e0b202de696b6126d8a32baf8d9d081a683af3c8a40e8a4b0f24"
+    },
+    {
+      "bytes": 6628,
+      "path": "profiling/compare-full-db-parity.mjs",
+      "sha256": "763ce2667999a2046ed09f9b671ff8121069a8acb63fca71bae2371ef6632ac7"
+    },
+    {
+      "bytes": 13076,
+      "path": "profiling/compression-ablation-db-1m-analysis.json",
+      "sha256": "efcef1a793997a087e9dada6e56fa57ca1943d0850a046979f8a644456245a0a"
+    },
+    {
+      "bytes": 4453,
+      "path": "profiling/compression-ablation-db-1m-plan.json",
+      "sha256": "7525eac49c9ca9ee294fac1b464417e8b742c3bae58229b9673c97fbc18112c3"
+    },
+    {
+      "bytes": 5144892,
+      "path": "profiling/compression-ablation-db-1m.json",
+      "sha256": "4963f37d50c71e49cfc4f018e2c1b9c42ba5c4b561259a1e053e64d58da3382f"
+    },
+    {
+      "bytes": 28316,
+      "path": "profiling/compression-ablation-db-1m.log",
+      "sha256": "a26a1ac3770c3a0f15239613a038f50aba1c95fd1b2629aa789065e53d6d3624"
+    },
+    {
+      "bytes": 11652,
+      "path": "profiling/compression-ablation-db-1m.mjs",
+      "sha256": "ac62e0dc8c31289c7b90c459401fc2a3c3a21ece53c510c70b8ab4dcf8431dc2"
+    },
+    {
+      "bytes": 3997,
+      "path": "profiling/compression-default-correction.json",
+      "sha256": "09c8a9e3222c3cef8df866ed9f8a4c0e7394fe93afc7a67fe9588f93c6c1717a"
+    },
+    {
+      "bytes": 139798,
+      "path": "profiling/compression-groups/jitendex/manifest.json",
+      "sha256": "29eb302789281a71777b5b76f0a4f0cfa33dc50e4b484c89cb59b073f8a97962"
+    },
+    {
+      "bytes": 82573,
+      "path": "profiling/compression-groups/jmdict/manifest-db-1m.json",
+      "sha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e"
+    },
+    {
+      "bytes": 74391,
+      "path": "profiling/compression-groups/jmdict/manifest.json",
+      "sha256": "415f6b46c1b1e5060f0e558fda36bc5ec77c135ce9367a4acacd6d8e93e395b9"
+    },
+    {
+      "bytes": 1014890,
+      "path": "profiling/compression-groups/vndb/manifest.json",
+      "sha256": "df0bba78956b41c2949c5b6baa95853c60ec55c10aa9ea2ff3e2ccbcc3a7862e"
+    },
+    {
+      "bytes": 265380,
+      "path": "profiling/compression-job-batching-trace-screen.json",
+      "sha256": "00855536de85bb6bf88935419ceed74088e7ebd2e5135f5b615a5545a05bc9da"
+    },
+    {
+      "bytes": 10399,
+      "path": "profiling/compression-scheduling-db-1m-replay.mjs",
+      "sha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d"
+    },
+    {
+      "bytes": 1815727,
+      "path": "profiling/compression-scheduling-db-1m-replication.json",
+      "sha256": "434f569b5a8db01fa96c549a6581f0e4bcda9e5cecf6f0e14f012de5f3562ba0"
+    },
+    {
+      "bytes": 10131,
+      "path": "profiling/compression-scheduling-db-1m-replication.log",
+      "sha256": "c4450f5e16e2c93d37bae0b61ea8bdfd143f9b77ef525a0fe3053ce9d21ffb4f"
+    },
+    {
+      "bytes": 10242,
+      "path": "profiling/compression-scheduling-replay.mjs",
+      "sha256": "7cded3af96ba6c88a5247c062c9a57b3fe93646862166dea5a4dcbc496d9f370"
+    },
+    {
+      "bytes": 2901,
+      "path": "profiling/compression-scheduling-replication-analysis.json",
+      "sha256": "6fa28d3870906bb5a5927d458e3e0a97b713859cbbb4b1e53d3b77c4a68c04c5"
+    },
+    {
+      "bytes": 634873,
+      "path": "profiling/compression-scheduling-replication.json",
+      "sha256": "70840b8e6008a995f85702417e4b8099e2dc2a33abfea697e4e09e142c1136e6"
+    },
+    {
+      "bytes": 10459,
+      "path": "profiling/compression-scheduling-replication.log",
+      "sha256": "9098e3c2b6cf4a427db400dfa4bd000e5a88d649646bedf887a769db3c2e3802"
+    },
+    {
+      "bytes": 9650,
+      "path": "profiling/compression-scheduling-screen-script.mjs",
+      "sha256": "fe9f5ce2d4e1918743ff750d8717d51f6c2a8ebe065d65ce8f530b3b0f9eee65"
+    },
+    {
+      "bytes": 245555,
+      "path": "profiling/compression-scheduling-screen.json",
+      "sha256": "17e622d135aed115af47c47b9ed0298702e6420039daa76df71c58562521d83f"
+    },
+    {
+      "bytes": 4774,
+      "path": "profiling/compression-scheduling-screen.log",
+      "sha256": "725488ded6bfd49bdb80ab5e61eec69d50146b41eadda41226281f88f01e29d4"
+    },
+    {
+      "bytes": 63237,
+      "path": "profiling/compression-worker-batching-history.json",
+      "sha256": "c5994f41d206ab84cc5bf33ed575b30f16ff694c8a4aa706ee0a99affc8153e6"
+    },
+    {
+      "bytes": 1143,
+      "path": "profiling/compression-worker-node-bridge.mjs",
+      "sha256": "7b2dcf0346a78bb5070d3b43fa513f3f9ebd150c1c9f0416df45a5b99f1a0315"
+    },
+    {
+      "bytes": 424,
+      "path": "profiling/db-parity-candidate-commit-binding.json",
+      "sha256": "30945cbcff1dbc7560a388c94ac14c16eb8251619026a707cc4fb6ef1f3224d8"
+    },
+    {
+      "bytes": 858,
+      "path": "profiling/db-parity-full-attempt1-process-failure.json",
+      "sha256": "fb30319aeabe0df3e7b1283a68954537724a63f866ec44e54c6134ec3b97e4fb"
+    },
+    {
+      "bytes": 794,
+      "path": "profiling/db-parity-full-baseline-attempt2-process-failure.json",
+      "sha256": "8880b287c899a91f7ff925b83de8284288d51a92fa98bc167f0238d42ae8dfc2"
+    },
+    {
+      "bytes": 130647,
+      "path": "profiling/db-parity-full-baseline-attempt2.json",
+      "sha256": "69810fbbd19bfe6195830f24f657d8caf5576bbb97d0948776bd575b983d2273"
+    },
+    {
+      "bytes": 1917,
+      "path": "profiling/db-parity-full-baseline-attempt2.log",
+      "sha256": "c0bb1ca761c23130f8cd2b533b665e8cd1beb1d46576ee5327d86059f1a898b4"
+    },
+    {
+      "bytes": 9264,
+      "path": "profiling/db-parity-full-baseline-reopen-verification.json",
+      "sha256": "8ef4f38160cec9094fdc79aa4a6a40bb70c85f4351bc3486e63f6d066efb660b"
+    },
+    {
+      "bytes": 496,
+      "path": "profiling/db-parity-full-baseline-reopen-verification.log",
+      "sha256": "7c8793c6fa1d134999852b37adf326d7862b189ca921b23b08ccfac8eb3b0362"
+    },
+    {
+      "bytes": 159116,
+      "path": "profiling/db-parity-full-baseline.json",
+      "sha256": "495504a497125ea96d1d9a07ef96c1a6c5f4b52063b4cb188456ef0e837e9d64"
+    },
+    {
+      "bytes": 2597,
+      "path": "profiling/db-parity-full-baseline.log",
+      "sha256": "5bdb4605dc7b4aa6a1cf7844ab32730b22b67b37526f0216e19e6e2129ed4675"
+    },
+    {
+      "bytes": 160615,
+      "path": "profiling/db-parity-full-candidate.json",
+      "sha256": "2bfe6f78172014d9ad0dcce8aba5a0dcfe0959f0885ffb4aa74187ca37a729d4"
+    },
+    {
+      "bytes": 2755,
+      "path": "profiling/db-parity-full-candidate.log",
+      "sha256": "6f7035cc8cce99ca499ffc5739c1fb3dca6c39e4d83c125379a4ae19b2926010"
+    },
+    {
+      "bytes": 9200,
+      "path": "profiling/db-parity-full-jmdict-comparison.json",
+      "sha256": "18de0412011c29ca742d1ed6330545788f99b26ebd05c8159e7919ebe986dcb1"
+    },
+    {
+      "bytes": 0,
+      "path": "profiling/db-parity-full-jmdict.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "profiling/db-parity-full-jmdict.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6091,
+      "path": "profiling/db-parity-reopen-verifier.mjs",
+      "sha256": "c3c2f6133a6d3c7742e4a7fed647062143a379762eaea9c9736c4e70be0d40ac"
+    },
+    {
+      "bytes": 62245,
+      "path": "profiling/db-parity-three-groups-attempt1.json",
+      "sha256": "58e5e01efd19ce2ff2090a06058b400ad9c910280dd9fafcaa72f7f9503b0ed5"
+    },
+    {
+      "bytes": 1017,
+      "path": "profiling/db-parity-three-groups-attempt1.log",
+      "sha256": "6a2ff9d3fde00398d1e41fa963667255be0d4204db1dbbc1239553837393543e"
+    },
+    {
+      "bytes": 94550,
+      "path": "profiling/db-parity-three-groups-attempt2.json",
+      "sha256": "21f6a53251a0e61df53f6c607af8b477ee45ddf5c2f400bdd045a9a5b2fe438f"
+    },
+    {
+      "bytes": 1291,
+      "path": "profiling/db-parity-three-groups-attempt2.log",
+      "sha256": "9285eaf9b00ffb6ad07a2d82c719741cd27872057f00b8b49137c7823b931ddc"
+    },
+    {
+      "bytes": 22482,
+      "path": "profiling/db-pipeline-parity-attempt1.mjs",
+      "sha256": "158a4ad88952185008cd9dd501075ae9f116456037d9956344f6a85137ceb5f9"
+    },
+    {
+      "bytes": 22500,
+      "path": "profiling/db-pipeline-parity-attempt2.mjs",
+      "sha256": "6127a7bef190404edaa26c1f23db852956235b998ba97e9fc2133e79a59ff6b1"
+    },
+    {
+      "bytes": 23162,
+      "path": "profiling/db-pipeline-parity-attempt3.mjs",
+      "sha256": "01148ce34b09d2e261efa777e4b73551fb25c0a9a2ba487baaad66738eb6a149"
+    },
+    {
+      "bytes": 23259,
+      "path": "profiling/db-pipeline-parity.mjs",
+      "sha256": "7268e9a8a1e05e13a44d977ccf923529578354147de0ad4ed4ac941f2606e8c7"
+    },
+    {
+      "bytes": 1775,
+      "path": "profiling/prepared-score-hosted/artifacts.json",
+      "sha256": "7cc83087a49dbec024017f264ce0dfadb5b4542419d18048404deaf10d557c0b"
+    },
+    {
+      "bytes": 34705,
+      "path": "profiling/prepared-score-hosted/replication-1-artifact/jmdict-1.json",
+      "sha256": "3144040fe3e848f90dc60b87afd5d6a238f8bee0fec02b384c34f85225e98467"
+    },
+    {
+      "bytes": 19838,
+      "path": "profiling/prepared-score-hosted/replication-1-artifact/jmdict-1.log",
+      "sha256": "ca8b93c3397a9e2d8a741e394d2633a771269c40053ed361dadc6cef8591fc6b"
+    },
+    {
+      "bytes": 11706,
+      "path": "profiling/prepared-score-hosted/replication-1.artifact.zip",
+      "sha256": "574d6bee3353f2ee973f3bea4e85794613dd2fc7b65c8c3a3fec294c83681fa1"
+    },
+    {
+      "bytes": 276545,
+      "path": "profiling/prepared-score-hosted/replication-1.job.log",
+      "sha256": "d128f47da8609a58757b5e35697cd1339c9cdc15e3251cd7ce1c479e3919086c"
+    },
+    {
+      "bytes": 27782,
+      "path": "profiling/prepared-score-hosted/replication-1.stdout.json",
+      "sha256": "ab1ba93c970a6798be45e34386bcce3d6a6edce8bee473b6f2e66c7693aca8b4"
+    },
+    {
+      "bytes": 34620,
+      "path": "profiling/prepared-score-hosted/replication-2-artifact/jmdict-2.json",
+      "sha256": "bbaef30f401df5ad3f8ac7a69ae696d268ee1406aba84f15d076e498dc7291ae"
+    },
+    {
+      "bytes": 19757,
+      "path": "profiling/prepared-score-hosted/replication-2-artifact/jmdict-2.log",
+      "sha256": "4d56166c651b258f06502b063f3b0390fd3cfba5ec8b178c589dfedff9f9301a"
+    },
+    {
+      "bytes": 11604,
+      "path": "profiling/prepared-score-hosted/replication-2.artifact.zip",
+      "sha256": "d83258a38ed0d3caffade69b2bc36489cdc34f3dd2e23b510b5359616a0ea9a4"
+    },
+    {
+      "bytes": 278168,
+      "path": "profiling/prepared-score-hosted/replication-2.job.log",
+      "sha256": "7076ef181e4d3f03ee875cb3657db86524c038cd401b600ef58d09c9e1c78f88"
+    },
+    {
+      "bytes": 27701,
+      "path": "profiling/prepared-score-hosted/replication-2.stdout.json",
+      "sha256": "f35f493f23da09a421c7a15e3d91e54df2982d8fffae38d0998db442624646c1"
+    },
+    {
+      "bytes": 3745,
+      "path": "profiling/production-group-loader.mjs",
+      "sha256": "1f4ed0a2c36c8160fac7ae413bc9d73cbc3b0a7fac25395795f287329f1abbe5"
+    },
+    {
+      "bytes": 4943,
+      "path": "profiling/recovered-github-blob-index.json",
+      "sha256": "28f024ddd6271e481b1156f9597918b7a9906e07ed003d638754fcd6c426649b"
+    },
+    {
+      "bytes": 4292,
+      "path": "profiling/replan-production-blocks.mjs",
+      "sha256": "728f64e207cc42cd7891640f109a3def1ba569c2ca08d0dd6165f952fde65da7"
+    },
+    {
+      "bytes": 3614,
+      "path": "profiling/replay-node-opfs.mjs",
+      "sha256": "1216c79349afddc1ddf94604e76f695b08a464c83fe73eefe9298c3d31edaa4b"
+    },
+    {
+      "bytes": 39807,
+      "path": "profiling/vndb-global-exact-reuse-bound.json",
+      "sha256": "6011bedfed60c93be7a35c5b796583eddffa7e57fa8a7a37df73a23fbe052c14"
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "Raw component observations and every retained failed attempt; no whole-import speed or browser-memory claim.",
+  "stage": "component-evidence-v1-before-browser-qualification",
+  "uncompressedBytes": 11220331
+}
