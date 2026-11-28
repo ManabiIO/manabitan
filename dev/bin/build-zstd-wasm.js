@@ -65,6 +65,10 @@ try {
     run('git', ['-C', sourceRoot, 'fetch', '--quiet', '--depth=1', 'origin', ZSTD_COMMIT]);
     run('git', ['-C', sourceRoot, 'checkout', '--quiet', 'FETCH_HEAD']);
 
+    /* eslint-disable @stylistic/semi */
+    applyWasmMatchPatch(sourceRoot)
+    /* eslint-enable @stylistic/semi */
+
     const singleFileRoot = path.join(sourceRoot, 'build/single_file_libs');
     run('./create_single_file_library.sh', [], {cwd: singleFileRoot});
     run('emcc', [
@@ -164,3 +168,21 @@ function moveToTrash(directory) {
         process.stderr.write(`Unable to move temporary build directory to Trash; kept ${directory}: ${String(error)}\n`);
     }
 }
+
+/* eslint-disable @stylistic/semi */
+/**
+ * Keep the wasm32 specialization bound to the reviewed upstream source.
+ * @param {string} directory
+ * @throws {Error} If the pinned header no longer matches the reviewed patch.
+ */
+function applyWasmMatchPatch(directory) {
+    const header = path.join(directory, 'lib/compress/zstd_compress_internal.h')
+    const sourceHash = 'e99de778a2a733bde856172057fe380256c379f082bd3513cac600b005ac2b98'
+    if (digest(header) !== sourceHash) {
+        throw new Error('Pinned Zstd match-counting source differs from the reviewed header')
+    }
+    const patch = path.join(projectRoot, 'dev/data/zstd-wasm-count.patch')
+    run('git', ['-C', directory, 'apply', '--check', patch])
+    run('git', ['-C', directory, 'apply', patch])
+}
+/* eslint-enable @stylistic/semi */
