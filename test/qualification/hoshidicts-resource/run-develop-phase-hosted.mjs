@@ -3,7 +3,7 @@
 import {createHash} from 'node:crypto'
 import {execFile} from 'node:child_process'
 import {promisify} from 'node:util'
-import {mkdir, readFile, writeFile} from 'node:fs/promises'
+import {lstat, mkdir, readFile, realpath, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 
@@ -75,6 +75,145 @@ try {
         }
         observations.push({dataset, receiptPath: `runs/${dataset}-1-${arm}/receipt.json`, receipt})
     }
+    const workerCountScreen = {
+        schemaVersion: 1,
+        mode: 'hosted benchmark-only overlay; four stock versus two Zstd compression workers; parser pool and all other source bytes held constant',
+        productCommit: harnessCommit,
+        archive: 'JMdict_2026-11-22.zip',
+        archiveSha256: '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f',
+        query: '日本語',
+        resultCap: 16,
+        hardwareConcurrency: null,
+        controlWorkerCount: 4,
+        candidateWorkerCount: 2,
+        parserWorkerCounts: [],
+        sourceFile: 'ext/js/dictionary/zstd-term-content.js',
+        overlayOnly: null,
+        controlPackageSha256: packageSha256,
+        candidatePackageSha256: null,
+        pairs: [],
+    }
+    const overlayRelativePath = workerCountScreen.sourceFile
+    const overlayPath = path.resolve(product, overlayRelativePath)
+    const overlayStat = await lstat(overlayPath)
+    if (overlayStat.isSymbolicLink() || await realpath(overlayPath) !== overlayPath) {
+        throw new Error('Zstd compression worker source is not a regular file in the detached source worktree')
+    }
+    const controlSource = await readFile(overlayPath)
+    const controlSourceText = controlSource.toString('utf8')
+    if ((controlSourceText.match(/const COMPRESSION_WORKER_COUNT = 4;/gu) ?? []).length !== 1) {
+        throw new Error('Frozen source does not contain one stock four-worker compression constant')
+    }
+    const candidateSourceText = controlSourceText.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;')
+    await writeFile(overlayPath, candidateSourceText)
+    try {
+        const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
+        if (changedFiles.trim() !== overlayRelativePath) throw new Error(`Unexpected worker-count overlay paths: ${changedFiles.trim()}`)
+        const {stdout: binaryPatch} = await run('git', ['diff', '--binary', '--', overlayRelativePath], {cwd: product})
+        workerCountScreen.overlayOnly = {
+            changedPaths: changedFiles.trim().split('\n'),
+            controlSourceSha256: createHash('sha256').update(controlSource).digest('hex'),
+            candidateSourceSha256: await sha256File(overlayPath),
+            patchSha256: createHash('sha256').update(binaryPatch).digest('hex'),
+            expectedDiff: 'const COMPRESSION_WORKER_COUNT = 4; -> const COMPRESSION_WORKER_COUNT = 2;',
+        }
+        await run(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-dev'], {cwd: product})
+        const candidatePackagePath = path.join(product, 'builds/manabitan-chrome-dev.zip')
+        workerCountScreen.candidatePackageSha256 = await sha256File(candidatePackagePath)
+        const candidateExtensionDir = path.join(process.env.RUNNER_TEMP, 'cross-engine/manabitan-zstd-workers-2')
+        await mkdir(candidateExtensionDir, {recursive: true})
+        await run('unzip', ['-q', candidatePackagePath, '-d', candidateExtensionDir])
+
+        const schedule = [
+            {pair: 1, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 2}, kind: 'treatment'},
+            {pair: 2, first: {arm: 'candidate', workers: 2}, second: {arm: 'control', workers: 4}, kind: 'treatment'},
+            {pair: 3, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 2}, kind: 'treatment'},
+            {pair: 4, first: {arm: 'candidate', workers: 2}, second: {arm: 'control', workers: 4}, kind: 'treatment'},
+            {pair: 5, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 4}, kind: 'same-code-control'},
+            {pair: 6, first: {arm: 'candidate', workers: 4}, second: {arm: 'control', workers: 4}, kind: 'same-code-control'},
+        ]
+        // The stock package has already been extracted into extensionDir, so the overlay package can
+        // replace the temporary worktree build output without changing the control arm.
+        await writeFile(overlayPath, controlSource)
+        for (const item of schedule) {
+            const pairReceipts = []
+            for (const arm of [item.first, item.second]) {
+                const isCandidatePackage = item.kind === 'treatment' && arm.workers === 2
+                const packageDir = isCandidatePackage ? candidateExtensionDir : extensionDir
+                const expectedPackageSha256 = isCandidatePackage ? workerCountScreen.candidatePackageSha256 : workerCountScreen.controlPackageSha256
+                const oracle = path.join(harness, 'test/qualification/hoshidicts-jmdict/fixtures/source-oracle.json')
+                const environment = {
+                    ...process.env,
+                    BENCH_ARM: arm.arm,
+                    BENCH_POSITION: String(item.pair),
+                    BENCH_ARCHIVE: path.join(archiveRoot, 'JMdict_2026-11-22.zip'),
+                    BENCH_COMMIT: harnessCommit,
+                    BENCH_EXTENSION_DIR: packageDir,
+                    BENCH_PACKAGE_SHA256: expectedPackageSha256,
+                    BENCH_RUNNER_SHA256: runnerSha256,
+                    BENCH_HOSHIDICTS_DRIVER: process.env.BENCH_HOSHIDICTS_DRIVER,
+                    BENCH_CAPTURE_IMPORT_PHASES: '1',
+                    BENCH_EXPECTED_ZSTD_WORKERS: String(arm.workers),
+                }
+                await run(process.execPath, [runner, 'manabitan', 'jmdict', String(item.pair), oracle], {env: environment, cwd: harness})
+                const receiptPath = path.join(evidence, 'runs', `jmdict-${item.pair}-${arm.arm}`, 'receipt.json')
+                const receipt = JSON.parse(await readFile(receiptPath, 'utf8'))
+                if (receipt.status !== 'passed' || receipt.commit !== harnessCommit || receipt.archiveSha256 !== workerCountScreen.archiveSha256 ||
+                    receipt.packageSha256 !== expectedPackageSha256 || receipt.resultCount >= workerCountScreen.resultCap) {
+                    throw new Error(`JMdict worker-count run failed identity, parity, or lookup validation: pair ${item.pair} ${arm.arm}`)
+                }
+                pairReceipts.push({arm: arm.arm, workerCount: arm.workers, packageSha256: expectedPackageSha256, receiptPath: `runs/jmdict-${item.pair}-${arm.arm}/receipt.json`, receipt})
+                if (workerCountScreen.hardwareConcurrency === null) workerCountScreen.hardwareConcurrency = receipt.hardwareConcurrency
+                else if (workerCountScreen.hardwareConcurrency !== receipt.hardwareConcurrency) throw new Error('Hosted hardwareConcurrency changed within the cohort')
+                for (const parserWorkerCount of receipt.parserWorkerCounts) {
+                    if (!workerCountScreen.parserWorkerCounts.includes(parserWorkerCount)) workerCountScreen.parserWorkerCounts.push(parserWorkerCount)
+                }
+            }
+            const [first, second] = pairReceipts
+            const equalPairSemantics = first.receipt.resultSha256 === second.receipt.resultSha256 &&
+                first.receipt.resultCount === second.receipt.resultCount &&
+                JSON.stringify(first.receipt.orderedHeadwordPairs) === JSON.stringify(second.receipt.orderedHeadwordPairs) &&
+                JSON.stringify(first.receipt.parserWorkerCounts) === JSON.stringify(second.receipt.parserWorkerCounts) &&
+                first.receipt.hardwareConcurrency === second.receipt.hardwareConcurrency
+            if (!equalPairSemantics) throw new Error(`Pair ${item.pair} results or parser worker configuration differ`)
+            workerCountScreen.pairs.push({pair: item.pair, kind: item.kind, order: pairReceipts.map(({arm, workerCount}) => ({arm, workerCount})),
+                completionMs: pairReceipts.map(({arm, workerCount, receipt}) => ({arm, workerCount, value: receipt.completionMs})),
+                lookupStageMs: pairReceipts.map(({arm, workerCount, receipt}) => ({arm, workerCount, value: receipt.lookupStageMs})),
+                totalMs: pairReceipts.map(({arm, workerCount, receipt}) => ({arm, workerCount, value: receipt.totalMs})),
+                resultSha256: first.receipt.resultSha256, resultCount: first.receipt.resultCount,
+                parserWorkerCounts: first.receipt.parserWorkerCounts, hardwareConcurrency: first.receipt.hardwareConcurrency,
+                warmRestartPasses: pairReceipts.every(({receipt}) => receipt.warm?.equal === true && receipt.afterRestart?.equal === true),
+                samePackageSha256: first.packageSha256 === second.packageSha256})
+        }
+    } finally {
+        await writeFile(overlayPath, controlSource)
+        const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
+        if (changedFiles.trim() !== '') throw new Error(`Temporary worker-count overlay was not restored: ${changedFiles.trim()}`)
+    }
+    const median = (values) => {
+        const sorted = [...values].sort((a, b) => a - b)
+        const middle = Math.floor(sorted.length / 2)
+        return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
+    }
+    const armTime = (pair, workers) => pair.totalMs.find(({workerCount}) => workerCount === workers)?.value
+    const treatmentPairs = workerCountScreen.pairs.filter(({kind}) => kind === 'treatment')
+    const sameCodePairs = workerCountScreen.pairs.filter(({kind}) => kind === 'same-code-control')
+    const pairedDeltas = treatmentPairs.map((pair) => armTime(pair, 2) - armTime(pair, 4))
+    const sameCodeDeltas = sameCodePairs.map((pair) => pair.totalMs[1].value - pair.totalMs[0].value)
+    workerCountScreen.analysis = {
+        endpoint: 'import plus first ordinary hydrated termsFind response',
+        treatmentPairCount: treatmentPairs.length,
+        pairedTotalMsDeltasTwoMinusFour: pairedDeltas,
+        medianPairedTotalMsDeltaTwoMinusFour: median(pairedDeltas),
+        treatmentWinsForTwoWorkers: pairedDeltas.filter((delta) => delta < 0).length,
+        treatmentTies: pairedDeltas.filter((delta) => delta === 0).length,
+        sameCodePairCount: sameCodePairs.length,
+        sameCodeTotalMsDeltasCandidateMinusControl: sameCodeDeltas,
+        medianAbsoluteSameCodeDeltaMs: median(sameCodeDeltas.map(Math.abs)),
+        allTreatmentSemanticParityPassed: treatmentPairs.every(({resultSha256}) => resultSha256 !== null),
+        allSameCodePackageDigestsMatched: sameCodePairs.every(({samePackageSha256}) => samePackageSha256),
+    }
+    await writeFile(path.join(evidence, 'jmdict-worker-count-summary.json'), `${JSON.stringify(workerCountScreen, null, 2)}\n`, {flag: 'wx'})
     const summary = {
         schemaVersion: 1,
         mode: 'diagnostic-only; no timing or memory observer enabled',
