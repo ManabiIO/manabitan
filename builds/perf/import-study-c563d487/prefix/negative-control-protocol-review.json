@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 04:45:41 UTC",
+  "source": {
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineCSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "candidatePatchSha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+    "candidateCSourceFile": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "candidateCommit": null,
+    "bindingRule": "At publication, bind the exact product commit and rebuilt WASM/manifest identities to this frozen C source and patch. A different C source is not qualified by this registration."
+  },
+  "criterionSource": "Root accepted prospective negative-control review before generation or timing.",
+  "scope": "One independent hosted fail-fast risk screen of complete sequential inflate + CRC + strict parse + completed lookup construction; no full-import or equivalence claim.",
+  "topology": {
+    "hosts": 1,
+    "cases": 3,
+    "rowsPerCase": 20000,
+    "banksPerCase": 2,
+    "rowsPerBank": 10000,
+    "grouping": "Both compressed banks form one fused source group",
+    "candidatePairsPerCase": 4,
+    "identicalCodePairsPerCase": 4,
+    "armOrders": [
+      "ABCD",
+      "DCBA"
+    ],
+    "totalMeasuredChildren": 48,
+    "runtime": "Node v22.22.0",
+    "freshProcessPerArm": true,
+    "noOtherTimedWorkOnHost": true
+  },
+  "measurement": {
+    "excludedWarmups": "Two complete corpus passes",
+    "measuredRepetitionsPerChild": 16,
+    "pairedUnit": "The sum of all 16 measured enclosing-component elapsed times from one child",
+    "preservePerRepetition": [
+      "elapsed time",
+      "CPU time",
+      "completed row/index work counters"
+    ],
+    "timedWork": "Fresh native inflate and per-bank CRC, strict grammar parse, and completed lookup indexes on every repetition",
+    "excludedWork": [
+      "input generation/compression",
+      "source loading and WASM compilation",
+      "warmups",
+      "full semantic/dedup/index digests",
+      "untimed diagnostic mechanics"
+    ],
+    "digestPlacement": "After every pass clock stops, before any subsequent parse can overwrite WASM-backed views"
+  },
+  "cases": [
+    {
+      "id": 1,
+      "purpose": "Moved key-comparison and flag overhead without selector admission",
+      "shape": "Unique short expression keys; empty reading alias or unique independent readings; unique equal-length common-prefix approximately 240-byte text glossaries",
+      "assertions": [
+        "Raw keys stay within the current 32-byte key-body comparison bound",
+        "No shared independent reading can admit the selector",
+        "Zero new selector admissions and zero reuse hits"
+      ]
+    },
+    {
+      "id": 2,
+      "purpose": "Repeated admitted short-glossary full comparison misses",
+      "shape": "One short key and one header family; unique equal-length approximately 240-byte text glossaries",
+      "assertions": [
+        "Every non-first row has baseline lookback zero",
+        "Near-all non-first rows select distance 1",
+        "Exact 8-byte tail and middle samples match",
+        "Six-digit global counter lies outside both sample windows at a fixed late raw offset",
+        "Full equality rejects; zero reuse hits"
+      ]
+    },
+    {
+      "id": 3,
+      "purpose": "Older long candidate admitted after a short previous glossary",
+      "shape": "One short key; alternating different prefix-header families and short/4096-byte glossary families; all unique",
+      "assertions": [
+        "Header families differ within their first four raw token bytes, not merely later",
+        "Long-after-short rows select an older raw glossary of at least 512 bytes",
+        "Tail and middle samples pass; full equality rejects at a late unsampled difference",
+        "Old long-previous probes are counted separately from new selector-origin probes",
+        "Zero reuse hits"
+      ]
+    }
+  ],
+  "fixtureInvariants": [
+    "Use a six-digit global row ID across both banks; do not reset uniqueness at the bank boundary",
+    "Fix serialized raw glossary lengths within each family and report exact lengths including delimiters",
+    "Record mutation offsets and exact sample windows in the generator manifest",
+    "Use valid strict format-3 eight-field rows, integer scores and supported sequence values",
+    "Bind generator source, raw bank bytes, compressed bank bytes, compressed/uncompressed lengths, and CRCs with hashes",
+    "Freeze compression settings and generated inputs before acquisition; no adaptive selection"
+  ],
+  "separateMechanics": {
+    "timedDiagnosticBinary": false,
+    "required": [
+      "new-selector admission count",
+      "prefix records inspected and selected distance",
+      "selected raw glossary length distribution",
+      "tail/middle passes and rejections",
+      "new-selector full misses and bytes offered",
+      "zero new full-equality hits",
+      "baseline long-previous/budget probes separately identified",
+      "unchanged adaptive probe budget and match streak"
+    ],
+    "comparison": "Mechanics artifact uses the same frozen fixture/source and is separate from all timing observations"
+  },
+  "rejection": {
+    "metric": "Median paired change of enclosing-component elapsed child sums",
+    "minimumSlowdownPercentExclusive": 3,
+    "allCandidatePairsSlower": true,
+    "controlRule": "Candidate median paired slowdown exceeds the largest absolute identical-code C/D paired change in that same case",
+    "cpuRole": "Descriptive corroboration only",
+    "consequence": "Clear qualifying negative slowdown holds or rejects this exact candidate, with no adaptive cap/admission retuning",
+    "ambiguousPolicy": "Ambiguous negative controls remain a hold or qualification limitation, not an automatic pass",
+    "limit": "Passing this one-host screen does not establish equivalence or nonregression"
+  },
+  "preservation": "Preserve every raw repetition, child, control, outlier, semantic failure, source/fixture/toolchain receipt, and incomplete acquisition. No retries or result-directed replacement.",
+  "reviewLimit": "The alternating two-family case exercises an older selection at distance 2. The four-row window is bounded in source; this is not exhaustive coverage of every prefix-admission pattern."
+}

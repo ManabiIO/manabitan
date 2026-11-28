@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-11-28T05:08:48.638148+00:00",
+  "reviewer": "benchmark_setup independent read-only review",
+  "manifestSha256": "42c33c25a69695ea876f07fb2059011946763cc5f5c2c4b45feab4c7bbca2483",
+  "filesVerified": 22,
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "candidatePatchSha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+  "prospectiveCompleteImportCriteriaSha256": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+  "negativeProtocolReviewSha256": "6eea529265b02787b4e956105dc9a4722a8c56bb7a65777d18d6b58e958e87d5",
+  "decision": "No remaining blocker for this frozen component/negative-control acquisition; product correctness and performance remain unestablished pending hosted gates. Publication belongs to root.",
+  "resolvedIssues": [
+    "Tracked generated artifact expectation corrected to dev/data/dictionary-wasm/term-bank-parser.wasm; runtime ext/lib hash must equal tracked artifact in both arms.",
+    "Negative per-pass receipts synchronously preserved before later failure; parent saves timeout stdout/stderr/status and prints completed-pass failure receipts.",
+    "Full compact source/fixture/group/repetition receipts emitted in job logs outside measured intervals.",
+    "Existing source-CRC reuse focused regression suite included."
+  ],
+  "reviewedProperties": [
+    "Exactly four alternating A/B candidate and C/D identical-baseline pairs per dictionary/case; 48 dictionary and 48 negative measured children.",
+    "Fresh child boundaries, fixed warmups, all measured data retained; no timing-directed reruns, trimming or stopping.",
+    "Negative child sums, not individual repetitions, are paired units; full work and per-pass output digests checked after clocks.",
+    "Fixed short/long glossary geometry, global unique late differences outside samples, exact independent diagnostic expectations.",
+    "Frozen source and patch; baseline reproduction and candidate generated source binding; diagnostic implementation separated from timed artifact.",
+    "Full validation/lookup/output/dedup/index parity and recent-history checks; synthetic exact miss routes.",
+    "Negative >3% all-four-slower and beyond largest absolute same-case control is a one-host fail-fast risk rule; ambiguous negatives remain limitation.",
+    "Component results do not qualify complete-import, memory or production release speed."
+  ],
+  "limitations": [
+    "No reviewer-performed local candidate build, corpus execution or timing.",
+    "Correctness/lint/type/rebuild gates are pending on hosted workflow; prior local lint137 remains explicitly incomplete.",
+    "Intentional candidate worktree overlay is acceptable only for this component screen. Exact product commit, clean package identity and all 252 observations are required for later full-import qualification."
+  ]
+}

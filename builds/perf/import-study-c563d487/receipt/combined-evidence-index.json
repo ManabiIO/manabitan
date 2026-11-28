@@ -1,0 +1,1056 @@
+{
+  "schemaVersion": 1,
+  "decision": "Rejected for a performance PR on all three predeclared corpora; no replicated worthwhile complete-import latency gain.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "eb52c4f58d6ad15690d3f124ac2aba09bd9e7907",
+  "workflowCommit": "50b5de4db7f67b5c96704a016d77dd976d547c0c",
+  "workflowRun": 46102247054,
+  "workflowRunUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46102247054",
+  "workflowOnlyDiff": true,
+  "observations": {
+    "all": 252,
+    "candidate": 144,
+    "excludedWarmup": 24,
+    "identicalCodeControl": 48,
+    "allMedia": 12,
+    "separateMemory": 24,
+    "completeSuccessfulImports": 252,
+    "reruns": 0
+  },
+  "timingBoundary": "Page file-input change event to post-UI import-complete event, reconstructed from each raw report's browser monotonic startedAtMs/completedAtMs.",
+  "inferencePolicy": "Per-host paired ratios; no pooling, control subtraction, outlier removal, or replacement observations. 10,000 paired bootstrap resamples with Python-compatible random seed 897; intervals are descriptive.",
+  "prospectiveCriteria": {
+    "recordedAtUtc": "2026-11-28 03:23:10 UTC",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "eb52c4f58d6ad15690d3f124ac2aba09bd9e7907",
+    "workflowRun": 46102247054,
+    "criterionSource": "Root prospective instruction before results",
+    "reviewCriteria": {
+      "target": "JMdict primary; Jitendex and VNDB are the other predeclared corpora",
+      "minimumReplicatedMedianReductionPercent": 2,
+      "minimumFasterPairsPerIndependentHost": 9,
+      "totalPairsPerHost": 12,
+      "descriptivePairedInterval": "Both endpoints below zero on each independent host",
+      "identicalCodeControls": "Variation materially smaller than candidate effect",
+      "requiredGates": [
+        "correctness",
+        "storage",
+        "package",
+        "memory"
+      ],
+      "forbiddenInference": [
+        "No pooling hosts",
+        "No subtracting controls",
+        "No substituting profiled or component results"
+      ],
+      "scope": "Review threshold for removal of a small redundant transaction; passing does not establish universal speedup",
+      "failurePolicy": "If exact I/O work drops but latency misses the criterion, retain unqualified mechanism evidence and do not open a speed PR"
+    },
+    "observedWorkflowJobsAtRegistration": {
+      "jobs": [
+        {
+          "id": 140847065927,
+          "name": "Exact candidate correctness",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46102247054,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    }
+  },
+  "validation": {
+    "job": 140847065927,
+    "run": 46102247054,
+    "candidate": "eb52c4f58d6ad15690d3f124ac2aba09bd9e7907",
+    "status": "success",
+    "filesPassed": 669,
+    "unitTestsPassed": 15141,
+    "unitTestsSkipped": 47,
+    "optionsTestsPassed": 32,
+    "allTargetDryBuild": true,
+    "strictMainTypes": true,
+    "strictTestTypes": true,
+    "scopedLint": true,
+    "matchingLogLines": [
+      "2026-11-28T03:24:53.2997488Z stderr | test/dictionary-import-publication-cleanup.test.js > committed dictionary cleanup uses real SQLite metadata > does not join or commit a transaction owned by another operation",
+      "2026-11-28T03:24:53.3137767Z  ✓ test/dictionary-import-publication-cleanup.test.js (42 tests) 237ms",
+      "2026-11-28T03:25:03.2292595Z stderr | test/dictionary-import-reopen-recovery.test.js > failed orphan cleanup cannot attach deleted terms to a new import; new worker=false, blocked retry=false",
+      "2026-11-28T03:25:03.2301044Z     at /home/runner/work/manabitan/manabitan/test/dictionary-import-reopen-recovery.test.js:147:5",
+      "2026-11-28T03:25:03.3276493Z stderr | test/dictionary-import-reopen-recovery.test.js > failed orphan cleanup cannot attach deleted terms to a new import; new worker=true, blocked retry=false",
+      "2026-11-28T03:25:03.3283819Z     at /home/runner/work/manabitan/manabitan/test/dictionary-import-reopen-recovery.test.js:147:5",
+      "2026-11-28T03:25:03.3779676Z stderr | test/dictionary-import-reopen-recovery.test.js > failed orphan cleanup cannot attach deleted terms to a new import; new worker=false, blocked retry=true",
+      "2026-11-28T03:25:03.3789490Z     at /home/runner/work/manabitan/manabitan/test/dictionary-import-reopen-recovery.test.js:147:5",
+      "2026-11-28T03:25:03.4312987Z stderr | test/dictionary-import-reopen-recovery.test.js > failed orphan cleanup cannot attach deleted terms to a new import; new worker=true, blocked retry=true",
+      "2026-11-28T03:25:03.4321009Z     at /home/runner/work/manabitan/manabitan/test/dictionary-import-reopen-recovery.test.js:147:5",
+      "2026-11-28T03:25:04.3555041Z  ✓ test/dictionary-import-reopen-recovery.test.js (17 tests) 1309ms",
+      "2026-11-28T03:25:22.1598122Z stderr | test/dictionary-recovery-mutation-admission.test.js > startup defers destructive cleanup while journal deletion fails and keeps healthy lookup available",
+      "2026-11-28T03:25:22.1944082Z  ✓ test/dictionary-recovery-mutation-admission.test.js (10 tests) 189ms",
+      "2026-11-28T03:25:33.3077821Z  ✓ test/dictionary-schema-upgrade.test.js (18 tests) 187ms",
+      "2026-11-28T03:26:15.2861300Z  ✓ test/dictionary-import-journal.test.js (14 tests) 9ms",
+      "2026-11-28T03:27:13.1266729Z  Test Files  669 passed (669)",
+      "2026-11-28T03:27:13.1314584Z       Tests  15141 passed | 47 skipped (15188)",
+      "2026-11-28T03:27:13.1318181Z    Duration  163.20s (transform 7.22s, setup 2.87s, import 63.13s, tests 207.47s, environment 236ms)",
+      "2026-11-28T03:27:13.7326056Z  Test Files  1 passed (1)",
+      "2026-11-28T03:27:13.7327232Z       Tests  32 passed (32)",
+      "2026-11-28T03:27:13.7328613Z    Duration  269ms (transform 85ms, setup 0ms, import 112ms, tests 85ms, environment 0ms)",
+      "2026-11-28T03:27:13.8348848Z > node ./dev/bin/build.js --dryRun --all"
+    ],
+    "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)",
+    "linker": "Ubuntu LLD 21.1.8"
+  },
+  "package": {
+    "expectedChangedEntries": [
+      "js/dictionary/dictionary-database.js"
+    ],
+    "entryCountPerArm": 554,
+    "baselineEntryMapSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+    "candidateEntryMapSha256": "0990ac4d0be23017b56a11f948295ffeb038d20805790820721f1c2d8d8e2ece",
+    "note": "Content-entry maps are identical within each arm across all six hosts. Physical ZIP hashes differ by build and are bound separately in every raw observation."
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e"
+  },
+  "fixtureIdentities": [
+    {
+      "dictionary": "jmdict",
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    {
+      "dictionary": "jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "label": "Jitendex",
+      "mediaBytes": 4992155,
+      "mediaFiles": 236,
+      "release": "2026.10.03.0",
+      "revision": "2026.10.03.0",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ],
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+    },
+    {
+      "dictionary": "vndb",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "expectedTitle": "VNDB Characters by Bee",
+      "label": "VNDB",
+      "mediaBytes": 188131284,
+      "mediaFiles": 146570,
+      "mediaRows": 146570,
+      "optional": true,
+      "release": "1.0.0",
+      "revision": "395525135651",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "termRows": 6648310,
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+    }
+  ],
+  "rows": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140849197228,
+      "jobConclusion": "failure",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9702246033381766,
+          1.005090137857888,
+          1.0347579544261023,
+          0.9994762204064529,
+          0.982993890020414,
+          1.0816435432230522,
+          0.9978582355940491,
+          0.8039808515999208,
+          0.9966230476995003,
+          0.9946480032935247,
+          0.9976917427342844,
+          0.9992583174401849
+        ],
+        "baselineMs": [
+          970.5999999999767,
+          943,
+          952.2999999999884,
+          954.5999999999767,
+          982,
+          937,
+          980.5,
+          1190.6999999999534,
+          947.5999999999767,
+          971.6000000000349,
+          953.0999999999767,
+          943.7999999999302
+        ],
+        "candidateMs": [
+          941.7000000000116,
+          947.7999999999884,
+          985.3999999999651,
+          954.0999999999767,
+          965.3000000000466,
+          1013.5,
+          978.3999999999651,
+          957.2999999999884,
+          944.4000000000233,
+          966.4000000000233,
+          950.9000000000233,
+          943.0999999999767
+        ],
+        "baselineMedianMs": 953.8499999999767,
+        "candidateMedianMs": 955.6999999999825,
+        "medianPairedChangeMs": -2.1499999999941792,
+        "medianPairedChangePercent": -0.22250108358332632,
+        "equalWorkChangePercent": -1.5221543814154637,
+        "worstPairChangePercent": 8.164354322305222,
+        "fasterPairs": 9,
+        "descriptiveBootstrap95Percent": [
+          -1.117905334303071,
+          0.22831791321704653
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0109053497942146,
+          0.9692307692307692,
+          1.0164158686730262,
+          1.0093759766642367
+        ],
+        "baselineMs": [
+          972,
+          975,
+          950.2999999999884,
+          959.8999999999069
+        ],
+        "candidateMs": [
+          982.5999999999767,
+          945,
+          965.8999999999651,
+          968.8999999999069
+        ],
+        "baselineMedianMs": 965.9499999999534,
+        "candidateMedianMs": 967.399999999936,
+        "medianPairedChangeMs": 9.799999999988358,
+        "medianPairedChangePercent": 1.0140663229225577,
+        "equalWorkChangePercent": 0.1348128175866936,
+        "worstPairChangePercent": 1.6415868673026246,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -3.076923076923077,
+          1.6415868673026246
+        ]
+      },
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": false,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "memoryFailures": [
+        {
+          "name": "A2",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 281.451303,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "samplesWithUnavailableSmaps": 0
+        }
+      ],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247310479,
+        "name": "receipt-c563d487-jmdict-AB",
+        "size_in_bytes": 35546482,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247310479",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247310479/zip",
+        "expired": false,
+        "created_at": "2026-11-28T03:47:32Z",
+        "expires_at": "2026-12-12T03:47:30Z",
+        "updated_at": "2026-11-28T03:47:32Z",
+        "digest": "sha256:788d5c4c2e4c3f9cdcab6a7a36827020725f967809ee16e991fd2c214211c034",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-jmdict-AB-records.jsonl",
+        "audit": "receipt-jmdict-AB-audit.json"
+      }
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140849197219,
+      "jobConclusion": "success",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0129815154508006,
+          1.0071912013536464,
+          1.0112562534741198,
+          1.0291071928351372,
+          0.9032837352488128,
+          0.9841781013721812,
+          1.097629796839747,
+          0.9850725639253789,
+          1.001670378619251,
+          0.9797655595869377,
+          0.9645821804094696,
+          1.0238163148888633
+        ],
+        "baselineMs": [
+          708.7000000000116,
+          709.1999999999825,
+          719.6000000000058,
+          714.5999999999767,
+          779.5999999999767,
+          714.2000000000116,
+          708.7999999999884,
+          723.5,
+          718.3999999999651,
+          716.5999999999767,
+          722.7999999999884,
+          701.1999999999534
+        ],
+        "candidateMs": [
+          717.8999999999942,
+          714.2999999999884,
+          727.6999999999825,
+          735.3999999999651,
+          704.1999999999534,
+          702.9000000000233,
+          778,
+          712.7000000000116,
+          719.6000000000349,
+          702.0999999999767,
+          697.1999999999534,
+          717.9000000000233
+        ],
+        "baselineMedianMs": 715.5999999999767,
+        "candidateMedianMs": 716.0999999999913,
+        "medianPairedChangeMs": 3.150000000037835,
+        "medianPairedChangePercent": 0.44307899864486355,
+        "equalWorkChangePercent": -0.08451813087494431,
+        "worstPairChangePercent": 9.762979683974704,
+        "fasterPairs": 5,
+        "descriptiveBootstrap95Percent": [
+          -1.8028169520440507,
+          1.839891516983183
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0259244098786453,
+          1.0474656958834563,
+          0.9782126006105871,
+          1.0404888103651349
+        ],
+        "baselineMs": [
+          732.8999999999651,
+          714.2000000000116,
+          720.6000000000349,
+          679.2000000000116
+        ],
+        "candidateMs": [
+          751.9000000000233,
+          748.0999999999767,
+          704.9000000000233,
+          706.7000000000116
+        ],
+        "baselineMedianMs": 717.4000000000233,
+        "candidateMedianMs": 727.3999999999942,
+        "medianPairedChangeMs": 23.250000000029104,
+        "medianPairedChangePercent": 3.320661012189019,
+        "equalWorkChangePercent": 2.2726474410766473,
+        "worstPairChangePercent": 4.746569588345628,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -2.1787399389412876,
+          4.746569588345628
+        ]
+      },
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 1.2521780991800346,
+          "medianPairedChangePercent": 0.2607721921135009
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 0.4868070276867753,
+          "medianPairedChangePercent": -0.19234815657834248
+        }
+      },
+      "memoryFailures": [],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247216211,
+        "name": "receipt-c563d487-jmdict-BA",
+        "size_in_bytes": 35542810,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247216211",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247216211/zip",
+        "expired": false,
+        "created_at": "2026-11-28T03:51:00Z",
+        "expires_at": "2026-12-12T03:50:59Z",
+        "updated_at": "2026-11-28T03:51:00Z",
+        "digest": "sha256:00f3e857b3e4ca37169f0467587b87dc717fa4920d045adcb713f4a71ed567ed",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-jmdict-BA-records.jsonl",
+        "audit": "receipt-jmdict-BA-audit.json"
+      }
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140849197262,
+      "jobConclusion": "success",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9822328294882198,
+          1.021005385996378,
+          0.9946827057182909,
+          1.0294642857142857,
+          0.9953142958182403,
+          0.9857981940913374,
+          1.0008700948403375,
+          1.0072121805716634,
+          1.0380129974183319,
+          1.018800993260031,
+          1.0242397137745767,
+          1.014363457935619
+        ],
+        "baselineMs": [
+          1131.2999999999884,
+          1114,
+          1147.2000000000116,
+          1120,
+          1131.0999999999767,
+          1140.7000000000116,
+          1149.3000000000466,
+          1123.0999999999767,
+          1123.2999999999884,
+          1127.600000000035,
+          1118,
+          1120.899999999965
+        ],
+        "candidateMs": [
+          1111.2000000000116,
+          1137.399999999965,
+          1141.100000000035,
+          1153,
+          1125.7999999999884,
+          1124.5,
+          1150.3000000000466,
+          1131.2000000000116,
+          1166,
+          1148.8000000000466,
+          1145.0999999999767,
+          1137
+        ],
+        "baselineMedianMs": 1125.4500000000116,
+        "candidateMedianMs": 1139.25,
+        "medianPairedChangeMs": 12.100000000034925,
+        "medianPairedChangePercent": 1.078781925364125,
+        "equalWorkChangePercent": 0.9220093751159508,
+        "worstPairChangePercent": 3.801299741833186,
+        "fasterPairs": 4,
+        "descriptiveBootstrap95Percent": [
+          -0.500149923173443,
+          2.2622549885477294
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9977152899824457,
+          1.005494992466553,
+          0.9807474518686494,
+          1.0289724671584963
+        ],
+        "baselineMs": [
+          1138,
+          1128.2999999999884,
+          1147.899999999965,
+          1111.4000000000233
+        ],
+        "candidateMs": [
+          1135.4000000000233,
+          1134.5,
+          1125.7999999999884,
+          1143.5999999999767
+        ],
+        "baselineMedianMs": 1133.1499999999942,
+        "candidateMedianMs": 1134.9500000000116,
+        "medianPairedChangeMs": 1.8000000000174623,
+        "medianPairedChangePercent": 0.16051412244992846,
+        "equalWorkChangePercent": 0.3027222909671945,
+        "worstPairChangePercent": 2.897246715849633,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.9252548131350578,
+          2.897246715849633
+        ]
+      },
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 2.7744870970393576,
+          "medianPairedChangePercent": 2.3983713562531594
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 2.3872699146774368,
+          "medianPairedChangePercent": 2.0066146866804524
+        }
+      },
+      "memoryFailures": [],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247007341,
+        "name": "receipt-c563d487-jitendex-AB",
+        "size_in_bytes": 35666583,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247007341",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247007341/zip",
+        "expired": false,
+        "created_at": "2026-11-28T03:55:31Z",
+        "expires_at": "2026-12-12T03:55:28Z",
+        "updated_at": "2026-11-28T03:55:31Z",
+        "digest": "sha256:ce277a0b5d025a780038db2faefc4eaf5488ed9d7733fcb1ceeba6dfcf359b3b",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-jitendex-AB-records.jsonl",
+        "audit": "receipt-jitendex-AB-audit.json"
+      }
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140849197208,
+      "jobConclusion": "success",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9887231211038694,
+          1.2571591394785342,
+          1.1066494248962178,
+          1.024259151656031,
+          1.00876499748546,
+          1.0054788516326765,
+          0.7852466418331626,
+          1.1612598882356846,
+          0.9296464823241162,
+          1.0234985091580544,
+          0.9992209079962923,
+          1.0409607548788677
+        ],
+        "baselineMs": [
+          1427.7000000000116,
+          1403.8000000000175,
+          1469.2999999999884,
+          1376.7999999999884,
+          1391.8999999999942,
+          1368.9000000000233,
+          1771.7999999999884,
+          1377.9000000000233,
+          1428.5,
+          1408.5999999999767,
+          1411.9000000000233,
+          1398.899999999965
+        ],
+        "candidateMs": [
+          1411.6000000000058,
+          1764.7999999999884,
+          1626,
+          1410.2000000000116,
+          1404.1000000000058,
+          1376.3999999999942,
+          1391.2999999999884,
+          1600.0999999999767,
+          1328,
+          1441.7000000000116,
+          1410.7999999999884,
+          1456.2000000000116
+        ],
+        "baselineMedianMs": 1406.199999999997,
+        "candidateMedianMs": 1411.199999999997,
+        "medianPairedChangeMs": 22.650000000023283,
+        "medianPairedChangePercent": 1.6131753321757092,
+        "equalWorkChangePercent": 2.234857275469837,
+        "worstPairChangePercent": 25.71591394785342,
+        "fasterPairs": 4,
+        "descriptiveBootstrap95Percent": [
+          -0.6027985449919226,
+          7.380508988754286
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0105390586057235,
+          1.027132342329366,
+          0.981961668545635,
+          0.7841595441595508
+        ],
+        "baselineMs": [
+          1404.2999999999884,
+          1385.7999999999884,
+          1419.2000000000116,
+          1755
+        ],
+        "candidateMs": [
+          1419.1000000000058,
+          1423.4000000000233,
+          1393.5999999999767,
+          1376.2000000000116
+        ],
+        "baselineMedianMs": 1411.75,
+        "candidateMedianMs": 1406.3499999999913,
+        "medianPairedChangeMs": -5.400000000008731,
+        "medianPairedChangePercent": -0.37496364243208014,
+        "equalWorkChangePercent": -5.901782271179712,
+        "worstPairChangePercent": 2.71323423293659,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -21.58404558404492,
+          2.71323423293659
+        ]
+      },
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 0.5925803696226195,
+          "medianPairedChangePercent": 0.5639827989853186
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 0.6140811356633913,
+          "medianPairedChangePercent": 0.40999961364067694
+        }
+      },
+      "memoryFailures": [],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247427415,
+        "name": "receipt-c563d487-jitendex-BA",
+        "size_in_bytes": 35619702,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247427415",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247427415/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:02:23Z",
+        "expires_at": "2026-12-12T04:02:21Z",
+        "updated_at": "2026-11-28T04:02:23Z",
+        "digest": "sha256:bc28014e8a907879e8ff484a54763dc55097b198f60facce37005198dac0defa",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-jitendex-BA-records.jsonl",
+        "audit": "receipt-jitendex-BA-audit.json"
+      }
+    },
+    {
+      "cell": "vndb-AB",
+      "jobId": 140849197313,
+      "jobConclusion": "failure",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9953425303619833,
+          1.4985571587125486,
+          1.0269541778975741,
+          1.009455461378536,
+          1.1500088553043246,
+          1.0290376384060447,
+          0.964005986045504,
+          0.9863581385204041,
+          1.0122993164838703,
+          0.9793260203577244,
+          0.9959185314755521,
+          0.9877589643439942
+        ],
+        "baselineMs": [
+          5088.600000000006,
+          4955.5,
+          4823,
+          5002.400000000023,
+          5081.700000000012,
+          4976.299999999988,
+          5145.300000000047,
+          5043.300000000047,
+          5032.800000000047,
+          5059.5,
+          4973.70000000007,
+          4966.899999999907
+        ],
+        "candidateMs": [
+          5064.899999999994,
+          7426.100000000035,
+          4953,
+          5049.700000000012,
+          5844,
+          5120.799999999988,
+          4960.099999999977,
+          4974.5,
+          5094.70000000007,
+          4954.899999999907,
+          4953.400000000023,
+          4906.100000000093
+        ],
+        "baselineMedianMs": 5017.600000000035,
+        "candidateMedianMs": 5012.100000000006,
+        "medianPairedChangeMs": 13.499999999970896,
+        "medianPairedChangePercent": 0.2686996427044175,
+        "equalWorkChangePercent": 5.242314917953661,
+        "worstPairChangePercent": 49.85571587125486,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.2941448567800773,
+          2.7995908151809523
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9952601955169349,
+          0.9770839356268626,
+          0.9942564021310499,
+          1.0060634229818421
+        ],
+        "baselineMs": [
+          5063.5,
+          5188.5,
+          5049.100000000093,
+          4733.300000000047
+        ],
+        "candidateMs": [
+          5039.5,
+          5069.599999999977,
+          5020.099999999977,
+          4762
+        ],
+        "baselineMedianMs": 5056.300000000047,
+        "candidateMedianMs": 5029.799999999988,
+        "medianPairedChangeMs": -26.500000000058208,
+        "medianPairedChangePercent": -0.5241701176007529,
+        "equalWorkChangePercent": -0.7147705945782512,
+        "worstPairChangePercent": 0.6063422981842148,
+        "fasterPairs": 3,
+        "descriptiveBootstrap95Percent": [
+          -2.2916064373137424,
+          0.6063422981842148
+        ]
+      },
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": false,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "memoryFailures": [
+        {
+          "name": "B1",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 295.765196,
+          "samplesWithUnreadableAddressSpaces": 1,
+          "samplesWithUnavailableSmaps": 8
+        }
+      ],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247793680,
+        "name": "receipt-c563d487-vndb-AB",
+        "size_in_bytes": 35769749,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247793680",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247793680/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:29:25Z",
+        "expires_at": "2026-12-12T04:29:23Z",
+        "updated_at": "2026-11-28T04:29:25Z",
+        "digest": "sha256:f9ad93b85c2007a3cf652f0311d27858d09c1cf027effa273e60f4e161b72d70",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-vndb-AB-records.jsonl",
+        "audit": "receipt-vndb-AB-audit.json"
+      }
+    },
+    {
+      "cell": "vndb-BA",
+      "jobId": 140849197259,
+      "jobConclusion": "success",
+      "observations": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0081993660675275,
+          0.6051018367082838,
+          0.9358907672301625,
+          1.0499218750000068,
+          0.9260111247289482,
+          1.0090172581961478,
+          0.99792091933167,
+          0.9889597738473059,
+          0.9402495194574202,
+          1.0084760832197306,
+          0.9484439873537917,
+          0.9754037409194263
+        ],
+        "baselineMs": [
+          5268.700000000012,
+          8498.899999999965,
+          5383,
+          5120,
+          5303.5,
+          5023.700000000012,
+          5290.79999999993,
+          5235.399999999907,
+          5514.600000000093,
+          5061.300000000047,
+          5250.600000000093,
+          5244.699999999953
+        ],
+        "candidateMs": [
+          5311.899999999994,
+          5142.700000000012,
+          5037.899999999965,
+          5375.600000000035,
+          4911.099999999977,
+          5069,
+          5279.79999999993,
+          5177.600000000093,
+          5185.099999999977,
+          5104.20000000007,
+          4979.899999999907,
+          5115.70000000007
+        ],
+        "baselineMedianMs": 5259.650000000052,
+        "candidateMedianMs": 5129.200000000041,
+        "medianPairedChangeMs": -93.39999999984866,
+        "medianPairedChangePercent": -1.7818242616633895,
+        "equalWorkChangePercent": -6.805176206129726,
+        "worstPairChangePercent": 4.992187500000678,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Percent": [
+          -6.192985665620865,
+          0.8337724643629141
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9299779560231923,
+          1.082826186723039,
+          1.0561298168275495,
+          0.9880790128841199
+        ],
+        "baselineMs": [
+          5398.299999999988,
+          5011.70000000007,
+          5262.79999999993,
+          5502.900000000023
+        ],
+        "candidateMs": [
+          5020.299999999988,
+          5426.79999999993,
+          5558.199999999953,
+          5437.300000000047
+        ],
+        "baselineMedianMs": 5330.549999999959,
+        "candidateMedianMs": 5432.049999999988,
+        "medianPairedChangeMs": 114.90000000002328,
+        "medianPairedChangePercent": 2.2104414855834698,
+        "equalWorkChangePercent": 1.2604069759200698,
+        "worstPairChangePercent": 8.28261867230391,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -7.002204397680767,
+          8.28261867230391
+        ]
+      },
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "sourcePackageSemanticStorageChecksPass": true,
+      "separateMemoryQualified": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.6914382860830792,
+          "medianPairedChangePercent": -0.9081269616447563
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -0.32307794676348367,
+          "medianPairedChangePercent": -0.668470203570698
+        }
+      },
+      "memoryFailures": [],
+      "reviewCriterionPass": false,
+      "artifact": {
+        "id": 15247533881,
+        "name": "receipt-c563d487-vndb-BA",
+        "size_in_bytes": 35779515,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247533881",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247533881/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:24:30Z",
+        "expires_at": "2026-12-12T04:24:28Z",
+        "updated_at": "2026-11-28T04:24:30Z",
+        "digest": "sha256:f6c7bcc7e72be4174d7dda23f286ea4519bb60e828b836d1dd4e5ab5cbc1e78a",
+        "workflow_run": {
+          "id": 46102247054,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-receipt-qualification-20261128-c563d487",
+          "head_sha": "50b5de4db7f67b5c96704a016d77dd976d547c0c"
+        }
+      },
+      "evidence": {
+        "records": "receipt-vndb-BA-records.jsonl",
+        "audit": "receipt-vndb-BA-audit.json"
+      }
+    }
+  ],
+  "memoryInterpretation": "JMdict AB and VNDB AB have incomplete sampling coverage under the frozen 250 ms maximum-gap rule. This is an observer-coverage failure, not evidence of a measured product memory regression. Failed observations remain included.",
+  "productionVndbNativeActivation": {
+    "artifactId": 15247533881,
+    "artifactSha256": "f6c7bcc7e72be4174d7dda23f286ea4519bb60e828b836d1dd4e5ab5cbc1e78a",
+    "artifactBytes": 35779515,
+    "baselineSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineReportCount": 25,
+    "observedDistinctValues": {
+      "parserFusedAttempts": [
+        170
+      ],
+      "parserFusedFallbacks": [
+        0
+      ],
+      "parserEscapedKeyDecodeCount": [
+        1870
+      ],
+      "parserValidatedGlossaryReuseCount": [
+        6490145
+      ],
+      "parserSourceCrcReusedGlossaryCount": [
+        6490145
+      ],
+      "parserRecentContentDedupHitCount": [
+        6490301
+      ],
+      "parserParallelWorkerCount": [
+        3
+      ],
+      "parserParallelGroupCount": [
+        170
+      ],
+      "experimentalNativeEscapedKeys": [
+        true
+      ],
+      "requested_experimentalNativeEscapedKeys": [
+        false
+      ],
+      "effective_experimentalNativeEscapedKeys": [
+        true
+      ],
+      "experimentalValidatedGlossaryReuse": [
+        true
+      ],
+      "requested_experimentalValidatedGlossaryReuse": [
+        true
+      ],
+      "effective_experimentalValidatedGlossaryReuse": [
+        true
+      ]
+    },
+    "maxRssKiB": 54148
+  },
+  "evidenceNotes": [
+    "Every raw observation is preserved in the cell JSONL files, including warmups, controls, all-media, memory, failed qualifications, and timing outliers.",
+    "Each cell audit independently reconstructs the schedule, source/package/fixture identities, raw timing endpoints, all pair/control statistics, validation coverage/digests, and OPFS sizes.",
+    "Full originals remain in GitHub Actions artifacts with recorded artifact SHA256 digests and expiry dates. The compact log evidence does not substitute for unlogged detailed traces or original memory scan arrays.",
+    "No PR was opened for this candidate; the mechanism removes one terminal receipt transaction, but the frozen latency review criterion was not met."
+  ]
+}

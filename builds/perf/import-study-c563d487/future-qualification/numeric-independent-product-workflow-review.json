@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-11-28T05:37:49.814821+00:00",
+  "scope": "Independent exact product/blob reconstruction and future full-workflow packaging/provenance review; no compilation, test execution or timing",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "product": {
+    "commit": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07",
+    "parents": [
+      "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+    ],
+    "apiUrl": "https://api.github.com/repos/ManabiIO/manabitan/commits/399feae29fea358560af27af68f03dfb6d8b6f58",
+    "changedFileSetExact": true,
+    "files": {
+      "ext/js/dictionary/wasm/term-bank-parser.c": {
+        "gitBlob": "ecfc5d4c7d55fa8a65332f1d3d266641c57bc61d",
+        "sha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+        "bytes": 161377
+      },
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+        "gitBlob": "b7df4aabf2f1167ed6cabf2d870664670ea539c5",
+        "sha256": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a",
+        "bytes": 68522
+      },
+      "dev/data/dictionary-wasm/manifest.json": {
+        "gitBlob": "098a2c90ddf1582553035d1ce8b8c6a0b011ed84",
+        "sha256": "6cf200239142277f2ea63612339ca86a50a25ea74f4c29fb9432ac980cc0bdd4",
+        "bytes": 2588
+      },
+      "test/term-bank-row-suffix-reuse.test.js": {
+        "gitBlob": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "bytes": 15101
+      }
+    },
+    "bindingMethod": "GitHub commit file-list blob IDs compared to independently reconstructed original hosted binary patch plus exact production test file; both SHA-1 Git blob identities and SHA-256 file hashes match."
+  },
+  "workflow": {
+    "path": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric/qualification/bound-publication/import-numeric-suffix-qualification-c563d487.yml",
+    "templateSha256": "f064a65e38f4e894484ed73e682a56ce07a38140b2a441789ce49184cfa47d53",
+    "boundSha256": "05772e849cd1e4bf8136c927c767bc1f9bd90f808fe528ca911ea535b698cf4e",
+    "onlyChange": "Single candidate commit placeholder replaced by frozen product commit",
+    "published": false,
+    "fullQualificationObservations": 0,
+    "reviewStatus": "Launch approval pending unresolved shallow-checkout ancestry gate",
+    "ancestryGateIssue": {
+      "status": "unresolved",
+      "reportedBy": "root before any full qualification observation",
+      "issue": "Candidate checkout uses default fetch-depth1; fetching baseline separately may preserve the candidate shallow boundary and make merge-base --is-ancestor reject a valid direct parent. Setup/history behavior must be checked before launch.",
+      "nextStep": "benchmark_setup owns a tiny Git history reproduction; if confirmed, change only explicit history acquisition, preserve the prospective amendment, rebind and review the final workflow hash."
+    }
+  },
+  "sourceReview": [
+    "Numeric admission reads only already produced prior score/sequence pairs after row_count>=2 and existing content-match streak. It changes admission, while complete bounded raw suffix equality remains the reuse proof.",
+    "Current expression/reading are validated separately. Closing bracket is part of equality; source bounds, outer delimiter checks, null-sequence sentinel, glossary hints and per-invocation CRC witness remain preserved.",
+    "Generic and nonfused callers explicitly disable suffix reuse. Disabling validated reuse keeps the admission streak at zero.",
+    "Exact corrected candidate C/WASM/manifest identities match all three independently audited component cells; old original-suffix bytes cannot pass the new workflow source guard."
+  ],
+  "workflowReview": [
+    "Candidate HEAD and exact four-file changed set/hashes are checked before native reproduction or tests; baseline must be its ancestor and cannot equal candidate.",
+    "Explicit bash preserves pipefail for tee pipelines. Pinned native reproduction checks both product sources; scoped test lint, both strict type checks, complete unit/options suites and build checks precede every qualification matrix cell.",
+    "Six separately provisioned AB/BA corpus jobs depend on validation; fail-fast false, twelve alternating pairs, unmodified observer/default flags, exhaustive media and separate memory remain unchanged.",
+    "Expected changed package entries are exactly shipped native C and parser WASM. Manifest and tests are source review inputs, not additional permitted release-package differences.",
+    "Original criteria, v2 and timestamped package amendment are hash-checked before acquisition and retained with always-run evidence/log extraction. Their one-field pre-acquisition amendment does not change performance thresholds.",
+    "Unchanged observer and receipt-comparison helper allow legitimate internal reuse-counter changes while preserving cross-arm semantic/workload/storage equality."
+  ],
+  "qualificationDecision": "Exact frozen product bytes and package/provenance bindings have no identified blocker. Full-browser workflow launch approval is withheld pending the shallow-checkout ancestry gate review. All48 component observations are complete; Jitendex remains a non-target concern. Apply unchanged full-import hold thresholds; no performance PR.",
+  "pending": [
+    "Resolve and prospectively record the shallow-checkout ancestry gate; review and bind any corrected workflow before launch",
+    "Publish reviewed product/tooling refs and record run identity",
+    "Hosted exact-source correctness/reproduction gates",
+    "All252 full-import, control, warmup, media and separate memory observations",
+    "Final per-host semantic/storage/memory and target/non-target review"
+  ],
+  "baselineClean": true,
+  "testsOrBenchmarksRun": false
+}

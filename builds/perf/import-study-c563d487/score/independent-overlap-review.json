@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "sourceUrls": {
+    "ourCommit": "https://github.com/ManabiIO/manabitan/commit/1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+    "otherCommit": "https://github.com/ManabiIO/manabitan/commit/7e488d809ba18ce120f5766651bdfdf622561fab",
+    "otherWorkflow": "https://github.com/ManabiIO/manabitan/blob/9aa3bbd66b34fc31d90a35c79401f65d9161f8bb/.github/workflows/indexed-validation-screen-2ed.yml",
+    "otherJmdictJob": "https://github.com/ManabiIO/manabitan/actions/runs/46104264150/job/140853370412",
+    "otherJitendexJob": "https://github.com/ManabiIO/manabitan/actions/runs/46104264150/job/140853370671",
+    "secondComponentScript": "https://github.com/ManabiIO/manabitan/blob/347856807519a564d259955fe2a17ed34d73fda7/dev/perf/prepared-score-screen.mjs"
+  },
+  "observedAtUtc": "2026-11-28 04:47:39 UTC",
+  "scope": "Bounded read-only overlap check of other public experiment branches; independent evidence kept separate.",
+  "ourCandidate": "1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+  "otherCandidate": "7e488d809ba18ce120f5766651bdfdf622561fab",
+  "commonParent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "identicalWholeGitTree": true,
+  "gitTree": "4ecebc3a54f8ae865ae3f98943695fa9cbb8341d",
+  "productBlob": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+  "productPatch": "@@ -204,8 +204,8 @@ function parseCompactRecordFields(bytes, count) {\n     const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);\n     cursor += count * 2;\n     const scoreKeys = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);\n-    for (const scoreKey of scoreKeys) {\n-        if (scoreKey >= scoreCount) {\n+    for (let i = 0; i < scoreKeys.length; ++i) {\n+        if (scoreKeys[i] >= scoreCount) {\n             throw new Error('Compact term-record score key is invalid');\n         }\n     }",
+  "otherWorkflow": {
+    "runId": 46104264150,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104264150",
+    "head": "9aa3bbd66b34fc31d90a35c79401f65d9161f8bb",
+    "path": ".github/workflows/indexed-validation-screen-2ed.yml",
+    "branch": "perf/indexed-validation-screen-20261127-2ed",
+    "sourceDiffFromBaseline": [
+      {
+        "filename": ".github/workflows/indexed-validation-screen-2ed.yml",
+        "status": "added",
+        "additions": 74,
+        "deletions": 0,
+        "changes": 74,
+        "previous_filename": null
+      },
+      {
+        "filename": "ext/js/dictionary/term-record-opfs-store.js",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "changes": 4,
+        "previous_filename": null
+      }
+    ],
+    "protocol": "Unchanged a7f7 observer, one AB host per corpus, six candidate pairs and two identical-code pairs; full file-input-change to post-UI completion; separate memory; expected changed package entry js/dictionary/term-record-opfs-store.js; VNDB 37/37 SAH units.",
+    "jobs": [
+      {
+        "dictionary": "jmdict",
+        "jobId": 140853370412,
+        "conclusion": "success"
+      },
+      {
+        "dictionary": "jitendex",
+        "jobId": 140853370671,
+        "conclusion": "success"
+      },
+      {
+        "dictionary": "vndb",
+        "jobId": 140853370720,
+        "conclusion": null
+      }
+    ],
+    "reportedAnalysis": {
+      "jmdict": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "descriptiveBootstrap95Percent": [
+            -2.9845074168513452,
+            0.6716647501505246
+          ],
+          "equalWorkChangePercent": -1.070440809911899,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": -0.8245644372892214,
+          "ratios": [
+            1.0118824265166582,
+            1.0015508684863523,
+            0.9866268902376895,
+            0.9709413782665836,
+            0.9968818210165262,
+            0.9693684733963897
+          ],
+          "worstPairChangePercent": 1.1882426516658162
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "descriptiveBootstrap95Percent": [
+            -3.057119871281433,
+            2.549842602307284
+          ],
+          "equalWorkChangePercent": -0.3132381637072412,
+          "fasterPairs": 1,
+          "medianPairedChangePercent": -0.25363863448707447,
+          "ratios": [
+            1.0254984260230728,
+            0.9694288012871857
+          ],
+          "worstPairChangePercent": 2.549842602307284
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "jitendex": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "descriptiveBootstrap95Percent": [
+            -10.991076977710378,
+            0.6697961556396681
+          ],
+          "equalWorkChangePercent": -4.850151853761442,
+          "fasterPairs": 5,
+          "medianPairedChangePercent": -2.4426597416241314,
+          "ratios": [
+            0.80674935102394,
+            0.9956242707118065,
+            0.9734291094218523,
+            0.9764722657921004,
+            0.9746745393754169,
+            1.0177716524009868
+          ],
+          "worstPairChangePercent": 1.777165240098677
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "descriptiveBootstrap95Percent": [
+            -0.8281126233126046,
+            -0.014442518776114355
+          ],
+          "equalWorkChangePercent": -0.42184964845695117,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.4212775710443539,
+          "ratios": [
+            0.9998555748122389,
+            0.991718873766874
+          ],
+          "worstPairChangePercent": -0.014442518776114355
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      }
+    },
+    "artifacts": [
+      {
+        "id": 15248215845,
+        "name": "indexed-validation-screen-2ed-jmdict",
+        "size_in_bytes": 34922878,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248215845",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248215845/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:20:29Z",
+        "expires_at": "2026-12-12T04:20:27Z",
+        "updated_at": "2026-11-28T04:20:29Z",
+        "digest": "sha256:0a488cb117cbe7459875d3936ea3bd3bab42e7eaad60ed113e3b21e7ed73021c",
+        "workflow_run": {
+          "id": 46104264150,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/indexed-validation-screen-20261127-2ed",
+          "head_sha": "9aa3bbd66b34fc31d90a35c79401f65d9161f8bb"
+        }
+      },
+      {
+        "id": 15247594410,
+        "name": "indexed-validation-screen-2ed-jitendex",
+        "size_in_bytes": 34969291,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247594410",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247594410/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:31:13Z",
+        "expires_at": "2026-12-12T04:31:11Z",
+        "updated_at": "2026-11-28T04:31:13Z",
+        "digest": "sha256:e0dd9c00db7546b921a32069d210eab5412e815b54467b40bfbaaed9766e5e4d",
+        "workflow_run": {
+          "id": 46104264150,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/indexed-validation-screen-20261127-2ed",
+          "head_sha": "9aa3bbd66b34fc31d90a35c79401f65d9161f8bb"
+        }
+      }
+    ],
+    "rawEndpointAuditPerformed": false,
+    "associatedPullRequestsAtCheck": [],
+    "interpretation": "Reported JMdict and Jitendex intervals cross zero. These are independent one-host six-pair screens, not qualified replicated gains and not our 192-observation component cohort."
+  },
+  "secondBranch": {
+    "branch": "perf/prepared-score-screen-20261128-da6c4",
+    "completedRunId": 46103123270,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103123270",
+    "head": "347856807519a564d259955fe2a17ed34d73fda7",
+    "jobs": [
+      140849845792,
+      140849846070
+    ],
+    "classification": "Different proposal: benchmark-only private prepared score representation and record-field encoder replacement on untouched 9e10d3b3 product source. It times preparation and the sink, not the indexed parseCompactRecordFields validator loop.",
+    "productDuplicate": false,
+    "performanceResultsNotReused": true
+  },
+  "decision": "Preserve our fixed component cohort; avoid a duplicate product PR if either identical-tree branch is promoted. Do not pool hosts, borrow source-unequal observations, or treat another screen as our registered qualification."
+}

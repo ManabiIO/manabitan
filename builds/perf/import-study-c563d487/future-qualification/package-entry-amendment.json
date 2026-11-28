@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 05:23:26 UTC",
+  "phase": "Prospective correction before any numeric or prefix full-import qualification observation",
+  "authorization": "Root independently verified baseline package entries and approved exact two-entry package allowance before full acquisition",
+  "reason": "The frozen baseline Chrome release package already ships native C source beside compiled WASM; the former WASM-only assumption would reject either native candidate before timing.",
+  "allowedChangedPackageEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "numericCriteria": {
+    "originalFile": "prospective-review-criteria.json",
+    "originalSha256": "46af7d3fa175aae01fb47b4e96a1f367b50273728fcff55aa87a1c83a9f9a17b",
+    "revisedFile": "prospective-review-criteria-v2.json",
+    "revisedSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+    "onlyChangedJsonPath": "requiredGates.package",
+    "originalValue": "Only lib/term-bank-parser.wasm may differ in the release package; record exact compressed/uncompressed size changes and source-bound binary hashes for review",
+    "revisedValue": "Only js/dictionary/wasm/term-bank-parser.c and lib/term-bank-parser.wasm may differ in the release package; record exact compressed/uncompressed size changes and source-bound binary hashes for review",
+    "originalPreservedByteForByte": true,
+    "allOtherFieldsUnchanged": true,
+    "originalRecordedAtUtcPreserved": "2026-11-28 04:13:36 UTC",
+    "dateInterpretation": "Original policy timestamp remains unchanged; this separate amendment timestamp records when only the package-entry fact was corrected."
+  },
+  "prefixCriteria": {
+    "sha256": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+    "unchangedByteForByte": true,
+    "reason": "Its source/package gates do not contain a WASM-only clause."
+  },
+  "baselineEvidence": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "artifact": {
+      "runId": 46105388810,
+      "jobId": 140856876628,
+      "artifactId": 15248970912,
+      "artifactSha256": "cfa56814d23e85daa1ad9c61dc3b7ded41a7db79ae75d8ade6b7aa7bbd3cfaad",
+      "packageZipSha256": "ff1704be8eef0f2546a2fa5e0e0ea438d93a9d4c2222d020c2f94d9dee6ab7b9",
+      "entryMapPath": "experiments/repeated-jmdict-diagnostic/hosted/observation-1/package-entries.json",
+      "entryMapSha256": "82f8985967b9abc626102e79d7e5936b89900a4724972382911746c3490868b7"
+    },
+    "existingEntries": {
+      "js/dictionary/wasm/term-bank-parser.c": {
+        "sizeBytes": 158441,
+        "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+      },
+      "lib/term-bank-parser.wasm": {
+        "sizeBytes": 67659,
+        "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+      }
+    },
+    "sourceEvidence": [
+      {
+        "path": "dev/bin/build.js",
+        "function": "getPackageFiles",
+        "behavior": "getAllFiles(ext) then only configured exclusions"
+      },
+      {
+        "path": "dev/data/manifest-variants.json",
+        "variant": "chrome",
+        "excludeFiles": [
+          "background.html"
+        ]
+      },
+      {
+        "path": "dev/perf/import-qualification-20261125-a7f7.py",
+        "behavior": "Checks exact set of all changed ZIP entry hashes against every --expected-package-entry argument, before timing"
+      }
+    ]
+  },
+  "acquisitionState": {
+    "numericFullImportObservations": 0,
+    "prefixFullImportObservations": 0,
+    "numericWorkflowUnpublished": true,
+    "prefixWorkflowUnpublished": true,
+    "frozenComponentCohortsUnchanged": true
+  },
+  "unchanged": [
+    "Performance thresholds and target/non-target policies",
+    "Candidate and baseline product sources",
+    "Build behavior and artifact reproduction",
+    "Unmodified a7f7 observer",
+    "Fresh-profile complete-import timing boundary and flags",
+    "Twelve candidate pairs per independent host, A/A controls, warmups, exhaustive media and separate memory cohorts",
+    "Correctness/storage/memory gates including VNDB37/37",
+    "No pooling, selected reruns, trimming, or timing-directed retuning"
+  ],
+  "scope": "Only the explicit allowed package-entry set and corresponding source-binding receipt declarations change. Both changed entries remain exact-source-bound and all other package bytes must match."
+}

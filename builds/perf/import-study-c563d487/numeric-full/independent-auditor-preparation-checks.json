@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 05:43:11 UTC",
+  "scope": "Read-only numeric full-qualification auditor compatibility against already-acquired receipt JSON; no product, fixture or timing execution",
+  "auditorPath": "independent-complete-import-audit.js",
+  "auditorSha256": "376b33b120c8c65ce2aa30706a48606a76cb3574e7570fa9530e4ca8638e393f",
+  "expectedIdentitiesPath": "independent-complete-import-expected.json",
+  "expectedIdentitiesSha256": "a96042f0b09b04f37c876a3063be4565c06e32f9666344e396daf07e77c02c59",
+  "checks": [
+    {
+      "jobId": 140849197228,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": [
+        "Original correctness/memory gate did not pass",
+        "Separate memory observations/audit did not qualify"
+      ]
+    },
+    {
+      "jobId": 140849197219,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": []
+    },
+    {
+      "jobId": 140849197262,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": []
+    },
+    {
+      "jobId": 140849197208,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": []
+    },
+    {
+      "jobId": 140849197313,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": [
+        "Original correctness/memory gate did not pass",
+        "Separate memory observations/audit did not qualify"
+      ]
+    },
+    {
+      "jobId": 140849197259,
+      "timingAndControlStatsExactlyMatchPriorIndependentAudit": true,
+      "errors": []
+    }
+  ],
+  "existingRawLogParser": {
+    "jobId": 140849197219,
+    "taggedRecords": 55,
+    "recordsExactlyMatchPriorExtraction": true,
+    "parseErrors": 0
+  },
+  "malformedTaggedJSONRetained": true,
+  "caveat": "Previous receipt observations validate only extraction/statistics/invariant code compatibility; they are never numeric-candidate performance evidence."
+}

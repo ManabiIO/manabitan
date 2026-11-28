@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 04:45:41 UTC",
+  "reviewStartedAtUtc": "2026-11-28 04:44:04 UTC",
+  "source": {
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineCSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "candidatePatchSha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+    "candidateCSourceFile": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "candidateCommit": null,
+    "bindingRule": "At publication, bind the exact product commit and rebuilt WASM/manifest identities to this frozen C source and patch. A different C source is not qualified by this registration."
+  },
+  "criterionSource": "Root explicit prospective instruction before any prefix-selector component timing; independently reviewed by benchmark_setup.",
+  "timingDataObservedForThisCandidate": false,
+  "rationale": "JMdict priority motivates a candidate-specific 1% review threshold. This was chosen before runtime observations; untimed opportunity counts are not a prediction of elapsed-time benefit.",
+  "target": "jmdict",
+  "nonTargets": [
+    "jitendex",
+    "vndb"
+  ],
+  "protocol": {
+    "observer": "dev/perf/import-qualification-20261125-a7f7.py",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "independentHostsPerCorpus": 2,
+    "candidatePairsPerHost": 12,
+    "initialOrders": [
+      "AB",
+      "BA"
+    ],
+    "orderWithinHost": "Alternating paired order under unchanged observer",
+    "identicalCodeControlPairsPerHost": 4,
+    "productionFlags": {},
+    "timingBoundary": "Page file-input change event to post-UI import-complete event; raw browser monotonic clock",
+    "pairChangeDefinition": "100 * (candidate elapsed / baseline elapsed - 1), summarized by median within each host",
+    "prospectiveVndbSahUnits": [
+      37,
+      37
+    ]
+  },
+  "promotionReview": {
+    "minimumMedianReductionPercentOnEachTargetHost": 1,
+    "minimumFasterPairsOnEachTargetHost": 9,
+    "totalPairsPerHost": 12,
+    "descriptivePaired95Interval": "Both endpoints strictly below zero on each independent target host",
+    "identicalCodeControls": "Variation materially smaller than candidate effect, explicitly assessed per host; no subtraction",
+    "requiredUnchangedGates": [
+      "exact source and package identities",
+      "fixture integrity",
+      "correctness and semantic parity",
+      "restart/lookup/media validation",
+      "storage allocation and byte parity",
+      "separate whole-tree memory qualification"
+    ]
+  },
+  "nonTargetRejection": {
+    "minimumMedianSlowdownPercentOnEachHost": 1,
+    "minimumSlowerPairsOnEachHost": 9,
+    "totalPairsPerHost": 12,
+    "descriptivePaired95Interval": "Both endpoints strictly above zero on each independent host",
+    "identicalCodeControls": "Variation smaller than the regression effect",
+    "consequence": "A qualifying replicated slowdown on either non-target corpus rejects or holds this exact candidate",
+    "inconclusivePolicy": "Report uncertainty explicitly; an inconclusive non-target cohort does not prove nonregression"
+  },
+  "inferenceLimits": [
+    "No pooling hosts or dictionaries",
+    "No subtracting controls",
+    "No timing-directed removal, replacement, or retries",
+    "No substitution of profiled/component results for complete-import evidence",
+    "Descriptive intervals are not a universal-speedup guarantee"
+  ],
+  "earlierRegistrations": "Receipt and numeric-suffix criteria remain unchanged.",
+  "publicationStatus": "Review registration only; no workflow or product publication by this reviewer."
+}

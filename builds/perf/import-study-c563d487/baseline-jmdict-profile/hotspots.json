@@ -1,0 +1,418 @@
+{
+  "wasmNoncustomSectionsEqual": true,
+  "names": {
+    "0": "__wasm_init_memory",
+    "1": "inflate_and_join_term_banks",
+    "2": "crc32_bytes",
+    "3": "inflate_zip_media_batch",
+    "4": "verify_term_bank_source_crcs",
+    "5": "crc32_update_gap",
+    "6": "wasm_reset_heap",
+    "7": "wasm_alloc",
+    "8": "wasm_get_last_parse_capacity",
+    "9": "wasm_get_last_content_capacity",
+    "10": "project_single_glossary_image_path",
+    "11": "project_glossary_image_value",
+    "12": "parse_value_span",
+    "13": "parse_composite_span_impl",
+    "14": "json_string_matches_ascii_escaped",
+    "15": "parse_term_bank",
+    "16": "parse_term_bank_impl",
+    "17": "next_term_bank",
+    "18": "parse_row_single_pass",
+    "19": "next_term_row",
+    "20": "parse_term_bank_with_media_hints",
+    "21": "encode_term_content",
+    "22": "encode_term_content_impl",
+    "23": "write_normalized_glossary_value",
+    "24": "hash_content_xxh32_pair",
+    "25": "encode_term_content_no_hash",
+    "26": "encode_term_content_token_binary",
+    "27": "encode_term_content_token_binary_row",
+    "28": "build_term_string_plan",
+    "29": "decode_escaped_key",
+    "30": "hash_content_xxh32",
+    "31": "copy_valid_utf8",
+    "32": "content_bytes_equal",
+    "33": "key_hex4",
+    "34": "encode_term_lookup_index",
+    "35": "encode_term_content_token_binary_dedup",
+    "36": "parse_and_encode_term_bank_token_binary_dedup",
+    "37": "scan_scalar_span",
+    "38": "parse_int32_token",
+    "39": "raw_term_content_hash",
+    "40": "raw_term_content_tokens_equal",
+    "41": "raw_term_content_quick_signature",
+    "42": "reuse_validated_glossary",
+    "43": "is_valid_json_number",
+    "44": "next_format3_field",
+    "45": "parse_value_span_with_glossary_hints",
+    "46": "compact_term_lookup_keys",
+    "47": "parse_scalar_span",
+    "48": "libdeflate_deflate_decompress_ex",
+    "49": "build_decode_table",
+    "50": "term_bank_inflate"
+  },
+  "hotspots": [
+    {
+      "function": "(idle)",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 1458.371
+    },
+    {
+      "function": "parse_composite_span_impl",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 796.068
+    },
+    {
+      "function": "parse_and_encode_term_bank_token_binary_dedup",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 602.799
+    },
+    {
+      "function": "parseTermBankWasmBuffersUnchecked",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 867,
+      "selfSampleMs": 564.3
+    },
+    {
+      "function": "transform",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/node_modules/@zip.js/zip.js/lib/core/streams/crc32-stream.js",
+      "line": 39,
+      "selfSampleMs": 376.509
+    },
+    {
+      "function": "(garbage collector)",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 267.737
+    },
+    {
+      "function": "update",
+      "url": "node:internal/crypto/hash",
+      "line": 131,
+      "selfSampleMs": 256.546
+    },
+    {
+      "function": "encode_term_content_token_binary_row",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 250.057
+    },
+    {
+      "function": "append",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/node_modules/@zip.js/zip.js/lib/core/streams/codecs/crc32.js",
+      "line": 47,
+      "selfSampleMs": 232.839
+    },
+    {
+      "function": "writeUint8Array",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/node_modules/@zip.js/zip.js/lib/core/io.js",
+      "line": 530,
+      "selfSampleMs": 215.532
+    },
+    {
+      "function": "processCallback",
+      "url": "node:zlib",
+      "line": 510,
+      "selfSampleMs": 205.782
+    },
+    {
+      "function": "parse_row_single_pass",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 173.816
+    },
+    {
+      "function": "hash_content_xxh32_pair",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 153.579
+    },
+    {
+      "function": "execute",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/dev/perf/import-lookup-screen.js",
+      "line": 129,
+      "selfSampleMs": 118.185
+    },
+    {
+      "function": "onData",
+      "url": "node:internal/webstreams/adapters",
+      "line": 463,
+      "selfSampleMs": 106.826
+    },
+    {
+      "function": "compileForInternalLoader",
+      "url": "node:internal/bootstrap/realm",
+      "line": 384,
+      "selfSampleMs": 93.238
+    },
+    {
+      "function": "encodeNativeTermLookupIndex",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 1595,
+      "selfSampleMs": 86.822
+    },
+    {
+      "function": "scan_scalar_span",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 81.242
+    },
+    {
+      "function": "(program)",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 78.955
+    },
+    {
+      "function": "compact_term_lookup_keys",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 45.615
+    },
+    {
+      "function": "encode_term_lookup_index",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 42.487
+    },
+    {
+      "function": "updateView",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/dev/perf/import-lookup-screen.js",
+      "line": 54,
+      "selfSampleMs": 41.178
+    },
+    {
+      "function": "parseTermBankWithWasmColumnChunks",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 2119,
+      "selfSampleMs": 39.97
+    },
+    {
+      "function": "createUnsafeBuffer",
+      "url": "node:internal/buffer",
+      "line": 1081,
+      "selfSampleMs": 39.143
+    },
+    {
+      "function": "reuse_validated_glossary",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 38.707
+    },
+    {
+      "function": "copy_valid_utf8",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 35.971
+    },
+    {
+      "function": "next_format3_field",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 32.818
+    },
+    {
+      "function": "is_valid_json_number",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 32.171
+    },
+    {
+      "function": "parse_int32_token",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 31.642
+    },
+    {
+      "function": "read",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 30.35
+    },
+    {
+      "function": "runMicrotasks",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 28.89
+    },
+    {
+      "function": "measure",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/dev/perf/import-lookup-screen.js",
+      "line": 81,
+      "selfSampleMs": 27.078
+    },
+    {
+      "function": "compileSourceTextModule",
+      "url": "node:internal/modules/esm/utils",
+      "line": 343,
+      "selfSampleMs": 23.667
+    },
+    {
+      "function": "raw_term_content_tokens_equal",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 22.852
+    },
+    {
+      "function": "hash_content_xxh32",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 21.099
+    },
+    {
+      "function": "js-to-wasm",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 16.531
+    },
+    {
+      "function": "step",
+      "url": "node:internal/webstreams/readablestream",
+      "line": 1506,
+      "selfSampleMs": 14.65
+    },
+    {
+      "function": "hasCompletePreparedTermRecordPreinternedPlan",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-record-preinterned-plan.js",
+      "line": 567,
+      "selfSampleMs": 12.92
+    },
+    {
+      "function": "getNativeSegmentKeyBytesCapacity",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 1537,
+      "selfSampleMs": 12.85
+    },
+    {
+      "function": "writableStreamDefaultControllerWrite",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 1101,
+      "selfSampleMs": 12.667
+    },
+    {
+      "function": "nextTick",
+      "url": "node:internal/process/task_queues",
+      "line": 112,
+      "selfSampleMs": 12.224
+    },
+    {
+      "function": "readUint8Array",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/node_modules/@zip.js/zip.js/lib/core/io.js",
+      "line": 515,
+      "selfSampleMs": 12.157
+    },
+    {
+      "function": "encodeNativeTermLookupSegments",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 1682,
+      "selfSampleMs": 11.979
+    },
+    {
+      "function": "raw_term_content_quick_signature",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 11.621
+    },
+    {
+      "function": "buildContentUniqueRowIndexes",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "line": 547,
+      "selfSampleMs": 11.476
+    },
+    {
+      "function": "__require",
+      "url": "node:internal/deps/undici/undici",
+      "line": 4,
+      "selfSampleMs": 10.983
+    },
+    {
+      "function": "get buffer",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 10.496
+    },
+    {
+      "function": "writableStreamAddWriteRequest",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 956,
+      "selfSampleMs": 10.023
+    },
+    {
+      "function": "__wasm_init_memory",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 9.98
+    },
+    {
+      "function": "",
+      "url": "node:internal/webstreams/readablestream",
+      "line": 1585,
+      "selfSampleMs": 9.887
+    },
+    {
+      "function": "readableStreamDefaultControllerEnqueue",
+      "url": "node:internal/webstreams/readablestream",
+      "line": 2301,
+      "selfSampleMs": 9.706
+    },
+    {
+      "function": "parse_value_span_with_glossary_hints",
+      "url": "wasm://wasm/0004212e",
+      "line": 0,
+      "selfSampleMs": 8.887
+    },
+    {
+      "function": "writableStreamDefaultWriterWrite",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 974,
+      "selfSampleMs": 8.861
+    },
+    {
+      "function": "createUnsafeArrayBuffer",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 8.008
+    },
+    {
+      "function": "writableStreamUpdateBackpressure",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 725,
+      "selfSampleMs": 7.744
+    },
+    {
+      "function": "writableStreamDefaultControllerAdvanceQueueIfNeeded",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 1233,
+      "selfSampleMs": 7.682
+    },
+    {
+      "function": "init",
+      "url": "file:///workspace/scratch/c563d487c718/manabitan/node_modules/@zip.js/zip.js/lib/core/io.js",
+      "line": 522,
+      "selfSampleMs": 7.423
+    },
+    {
+      "function": "writableStreamMarkFirstWriteRequestInFlight",
+      "url": "node:internal/webstreams/writablestream",
+      "line": 784,
+      "selfSampleMs": 7.304
+    },
+    {
+      "function": "compileFunction",
+      "url": "",
+      "line": -1,
+      "selfSampleMs": 7.035
+    },
+    {
+      "function": "transformStreamDefaultControllerPerformTransform",
+      "url": "node:internal/webstreams/transformstream",
+      "line": 524,
+      "selfSampleMs": 6.608
+    }
+  ]
+}

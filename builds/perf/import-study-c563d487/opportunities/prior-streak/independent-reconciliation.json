@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "scope": "One prospective predicate only: ORIGINAL prior recent_content_match_streak != 0, conditional on ORIGINAL lookback0; unchanged run-3 selector/proof, no hypothetical state updates. Untimed opportunity count, not a performance or product qualification.",
+  "semanticInteraction": {
+    "source": "/workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/wasm/term-bank-parser.c",
+    "admissionConstantLine": 33,
+    "existingAdmissionMatches": 4,
+    "streakUpdateLines": [
+      3598,
+      3603
+    ],
+    "lookbackLines": [
+      3370,
+      3378
+    ],
+    "interpretation": "The prior streak can be 1, 2 or 3 at original lookback0. A prior match reaching 4 refreshes the original budget, so the next row has original lookback4. No numeric threshold was changed."
+  },
+  "command": [
+    "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+    "--max-old-space-size=256",
+    "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/observer-prior-streak.mjs",
+    "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/JMdict.zip",
+    "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/run-4-prior-streak"
+  ],
+  "identities": {
+    "observerSourceSha256": "f21076ad64cc8624afdd4af502a2f1730c9def0cac53e0f07cf1f24f42ee32c7",
+    "observerPatchSha256": "b9784ed38b9998f44dda090acc4c1aa27eba5e0f8502f1ddeba575809c659da5",
+    "resultSha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31",
+    "parentObserverSha256": "548b43bb6f16301aa279bd35dd2f559298f4e69a246770cf24731c3853ad3dad",
+    "parentResultSha256": "adfe631bc36931eef394075c456b75bd0252001f0613171ebcc2a009fa5cb362",
+    "baselineCSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "frozenPrefixCandidateCUnchangedSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "metadataDigest": "d6965c13c73fbe3312802d1e4800b0acd8942f317b3ed065d7c8edd25c1c0809"
+  },
+  "reconciliation": {
+    "legacyScalarBankAndGroupFieldsExact": true,
+    "bankCount": 53,
+    "groupCount": 8,
+    "rows": 528299,
+    "splitCounterAndMaximaChecks": 30810,
+    "partitionBankAndGroupSumsExact": true,
+    "nativeMetadataDigestUnchanged": true,
+    "allParentResultAndSourceHashesUnchanged": true,
+    "noProductChangeOrTimedRun": true
+  },
+  "retention": {
+    "zeroLookbackRows": {
+      "original": 353880,
+      "retained": 85314,
+      "excluded": 268566,
+      "retainedPercent": 24.108172
+    },
+    "admissions": {
+      "original": 153260,
+      "retained": 44466,
+      "excluded": 108794,
+      "retainedPercent": 29.013441
+    },
+    "candidateRecordsInspected": {
+      "original": 451418,
+      "retained": 100878,
+      "excluded": 350540,
+      "retainedPercent": 22.346916
+    },
+    "selected": {
+      "original": 100360,
+      "retained": 44181,
+      "excluded": 56179,
+      "retainedPercent": 44.022519
+    },
+    "selectedBytes": {
+      "original": 20532360,
+      "retained": 8070191,
+      "excluded": 12462169,
+      "retainedPercent": 39.304741
+    },
+    "hits": {
+      "original": 80102,
+      "retained": 44102,
+      "excluded": 36000,
+      "retainedPercent": 55.057302
+    },
+    "hitBytes": {
+      "original": 18252047,
+      "retained": 8059365,
+      "excluded": 10192682,
+      "retainedPercent": 44.155951
+    },
+    "fullContentHits": {
+      "original": 59680,
+      "retained": 43068,
+      "excluded": 16612,
+      "retainedPercent": 72.164879
+    },
+    "fullContentHitBytes": {
+      "original": 12856179,
+      "retained": 7650826,
+      "excluded": 5205353,
+      "retainedPercent": 59.510886
+    },
+    "tailRejected": {
+      "original": 19898,
+      "retained": 75,
+      "excluded": 19823,
+      "retainedPercent": 0.376922
+    },
+    "middleRejected": {
+      "original": 201,
+      "retained": 3,
+      "excluded": 198,
+      "retainedPercent": 1.492537
+    },
+    "fullRejected": {
+      "original": 158,
+      "retained": 1,
+      "excluded": 157,
+      "retainedPercent": 0.632911
+    },
+    "failedFullBytesOffered": {
+      "original": 44240,
+      "retained": 31,
+      "excluded": 44209,
+      "retainedPercent": 0.070072
+    },
+    "failedFullLogicalBytesCompared": {
+      "original": 6934,
+      "retained": 8,
+      "excluded": 6926,
+      "retainedPercent": 0.115374
+    },
+    "currentSignatureBytesRead": {
+      "original": 958768,
+      "retained": 276124,
+      "excluded": 682644,
+      "retainedPercent": 28.799877
+    },
+    "candidateSignatureBytesRead": {
+      "original": 860770,
+      "retained": 301435,
+      "excluded": 559335,
+      "retainedPercent": 35.019227
+    }
+  },
+  "retainedMaxima": {
+    "selectedLength": 4522,
+    "hitLength": 4522,
+    "failedLength": 750,
+    "fullComparisonLength": 4522,
+    "failedFullComparisonLength": 31
+  },
+  "retainedBySelectedLength": {
+    "atLeast512": {
+      "counters": {
+        "zeroLookbackRows": 0,
+        "keyRejected": 0,
+        "admissions": 6837,
+        "candidateRecordsInspected": 15506,
+        "definitionLengthRejected": 7887,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 782,
+        "rulesSignatureRejected": 0,
+        "currentSignatureBytesRead": 41675,
+        "candidateSignatureBytesRead": 44803,
+        "noPrefixCandidate": 0,
+        "selected": 6837,
+        "selectedBytes": 4991626,
+        "selectedAtLeast512": 6837,
+        "selectedAtLeast512Bytes": 4991626,
+        "selectedExactPrefix": 6837,
+        "selectedSignatureCollision": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 6,
+        "middleRejected": 0,
+        "fullRejected": 0,
+        "tailBytesOffered": 54696,
+        "tailLogicalBytesCompared": 54654,
+        "middleBytesOffered": 54648,
+        "middleLogicalBytesCompared": 54648,
+        "fullBytesOffered": 4988013,
+        "fullLogicalBytesCompared": 4988013,
+        "failedFullBytesOffered": 0,
+        "failedFullLogicalBytesCompared": 0,
+        "hits": 6831,
+        "hitBytes": 4988013,
+        "fullContentHits": 6537,
+        "fullContentHitBytes": 4739057,
+        "crossBankSelected": 0,
+        "crossBankHits": 0,
+        "oraclePrefixCandidates": 9678,
+        "oracleAmbiguousPrefixRows": 2841,
+        "oracleLaterPrefixCandidates": 2841,
+        "oracleFailedBlocksLaterPrefixGlossary": 0,
+        "oracleFailedBlocksLaterPrefixGlossaryBytes": 0,
+        "oracleFailedBlocksLaterPrefixContent": 0,
+        "oracleFailedBlocksLaterPrefixContentBytes": 0,
+        "oracleFailedBlocksLaterAnyGlossary": 0,
+        "oracleFailedBlocksLaterAnyGlossaryBytes": 0
+      },
+      "maxima": {
+        "selectedLength": 4522,
+        "hitLength": 4522,
+        "failedLength": 750,
+        "fullComparisonLength": 4522,
+        "failedFullComparisonLength": 0
+      }
+    },
+    "below512": {
+      "counters": {
+        "zeroLookbackRows": 0,
+        "keyRejected": 0,
+        "admissions": 37344,
+        "candidateRecordsInspected": 84232,
+        "definitionLengthRejected": 41125,
+        "rulesLengthRejected": 6,
+        "definitionSignatureRejected": 5757,
+        "rulesSignatureRejected": 0,
+        "currentSignatureBytesRead": 232724,
+        "candidateSignatureBytesRead": 255752,
+        "noPrefixCandidate": 0,
+        "selected": 37344,
+        "selectedBytes": 3078565,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "selectedExactPrefix": 37344,
+        "selectedSignatureCollision": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 69,
+        "middleRejected": 3,
+        "fullRejected": 1,
+        "tailBytesOffered": 298752,
+        "tailLogicalBytesCompared": 298313,
+        "middleBytesOffered": 298200,
+        "middleLogicalBytesCompared": 298198,
+        "fullBytesOffered": 3071383,
+        "fullLogicalBytesCompared": 3071360,
+        "failedFullBytesOffered": 31,
+        "failedFullLogicalBytesCompared": 8,
+        "hits": 37271,
+        "hitBytes": 3071352,
+        "fullContentHits": 36531,
+        "fullContentHitBytes": 2911769,
+        "crossBankSelected": 4,
+        "crossBankHits": 4,
+        "oraclePrefixCandidates": 51098,
+        "oracleAmbiguousPrefixRows": 13749,
+        "oracleLaterPrefixCandidates": 13754,
+        "oracleFailedBlocksLaterPrefixGlossary": 0,
+        "oracleFailedBlocksLaterPrefixGlossaryBytes": 0,
+        "oracleFailedBlocksLaterPrefixContent": 0,
+        "oracleFailedBlocksLaterPrefixContentBytes": 0,
+        "oracleFailedBlocksLaterAnyGlossary": 0,
+        "oracleFailedBlocksLaterAnyGlossaryBytes": 0
+      },
+      "maxima": {
+        "selectedLength": 510,
+        "hitLength": 510,
+        "failedLength": 388,
+        "fullComparisonLength": 510,
+        "failedFullComparisonLength": 31
+      }
+    }
+  },
+  "conclusion": "Meaningful opportunity remains: 44,102 extra proofs and 8,059,365 reusable bytes. Gate reduces selector work and drops all-zero-streak unique negative streams. A future implementation would require a separate frozen qualification; do not change the current queued cohort."
+}

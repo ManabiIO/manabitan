@@ -1,0 +1,696 @@
+{
+  "jobId": 140859683797,
+  "runId": 46104113507,
+  "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104113507/job/140859683797",
+  "logAudit": {
+    "dictionary": "jmdict",
+    "replicate": 0,
+    "complete": true,
+    "errors": [],
+    "allChecksPass": true,
+    "observations": 32,
+    "source": {
+      "baseline": {
+        "root": "/home/runner/work/manabitan/score-baseline",
+        "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "trackedChanges": "",
+        "storeSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "candidate": {
+        "root": "/home/runner/work/manabitan/score-candidate",
+        "head": "1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+        "tree": "4ecebc3a54f8ae865ae3f98943695fa9cbb8341d",
+        "trackedChanges": "",
+        "storeSha256": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769",
+        "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      }
+    },
+    "scripts": {
+      "common.mjs": "f5a1cac21c3a31af9bc6ae6d19ce1c0bde2db939fc9077bada271371df272a90",
+      "prepare.mjs": "5be408444357261b39172d572ae4bc8845aae328f069f031aca46ca5c84684d4",
+      "measure.mjs": "f13fdc36a21beccfd788d93ad1db434133fa729273b4d5db35e0c53d7288e97f",
+      "run.py": "26fce061325233eaa5ba45fcfd5ed659425cbb12e73b4b24e6bc5ea99eff8bfe"
+    },
+    "toolingHead": "93e4b8081d24eb3b368523211b2cf4f40b95fa17",
+    "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "inputSha256": "5ed8ae7b075b11eafa6af609c96f0d60d157dbd88e26ae05e06ea66492470622",
+    "manifestSha256": "541fb2b45d4d13b3d2b9d9ba5e7c982681abcce1c87f382ba7e04c00c24c1fdc",
+    "node": "v22.22.0",
+    "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+    "prepared": {
+      "dictionary": "jmdict",
+      "complete": true,
+      "rows": 528299,
+      "compactRows": 528299,
+      "banks": 53,
+      "runs": 53,
+      "inputBytes": 23867156,
+      "inputSha256": "5ed8ae7b075b11eafa6af609c96f0d60d157dbd88e26ae05e06ea66492470622",
+      "sidecarDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+    },
+    "rawChecks": {
+      "available": true,
+      "passed": true
+    },
+    "statistics": {
+      "validator.candidate.elapsedMs": {
+        "firstValues": [
+          76.33399600000001,
+          77.40648900000002,
+          76.59162799999996,
+          76.06875600000001
+        ],
+        "secondValues": [
+          21.795956999999987,
+          24.52920800000001,
+          21.896585000000016,
+          21.804575
+        ],
+        "pairedChangesPercent": [
+          -71.44659241997499,
+          -68.31117349864557,
+          -71.41125528758832,
+          -71.33570187476184
+        ],
+        "medianPairedChangePercent": -71.37347858117508,
+        "equalWorkChangePercent": -70.6181234753613,
+        "fasterPairs": 4,
+        "minimumChangePercent": -71.44659241997499,
+        "maximumChangePercent": -68.31117349864557,
+        "maxAbsoluteChangePercent": 71.44659241997499
+      },
+      "validator.identicalControl.elapsedMs": {
+        "firstValues": [
+          76.187884,
+          76.21684800000003,
+          77.030936,
+          76.22169200000002
+        ],
+        "secondValues": [
+          76.09958900000004,
+          76.08721600000001,
+          76.066598,
+          76.200221
+        ],
+        "pairedChangesPercent": [
+          -0.1158911304059318,
+          -0.17008312912653034,
+          -1.251884048247831,
+          -0.028169146389478428
+        ],
+        "medianPairedChangePercent": -0.14298712976623107,
+        "equalWorkChangePercent": -0.3938187518206626,
+        "fasterPairs": 4,
+        "minimumChangePercent": -1.251884048247831,
+        "maximumChangePercent": -0.028169146389478428,
+        "maxAbsoluteChangePercent": 1.251884048247831
+      },
+      "validator.candidate.cpuMs": {
+        "firstValues": [
+          77.428,
+          77.471,
+          76.654,
+          76.129
+        ],
+        "secondValues": [
+          21.84,
+          24.597,
+          21.945,
+          21.853
+        ],
+        "pairedChangesPercent": [
+          -71.79314976494291,
+          -68.25005485923765,
+          -71.37135700680982,
+          -71.2947759723627
+        ],
+        "medianPairedChangePercent": -71.33306648958626,
+        "equalWorkChangePercent": -70.67264253352488,
+        "fasterPairs": 4,
+        "minimumChangePercent": -71.79314976494291,
+        "maximumChangePercent": -68.25005485923765,
+        "maxAbsoluteChangePercent": 71.79314976494291
+      },
+      "validator.identicalControl.cpuMs": {
+        "firstValues": [
+          76.248,
+          76.29,
+          77.101,
+          76.27
+        ],
+        "secondValues": [
+          76.169,
+          76.137,
+          76.111,
+          76.239
+        ],
+        "pairedChangesPercent": [
+          -0.10360927499738493,
+          -0.20055053086905916,
+          -1.2840300385208891,
+          -0.04064507670118456
+        ],
+        "medianPairedChangePercent": -0.15207990293322204,
+        "equalWorkChangePercent": -0.4095989330160421,
+        "fasterPairs": 4,
+        "minimumChangePercent": -1.2840300385208891,
+        "maximumChangePercent": -0.04064507670118456,
+        "maxAbsoluteChangePercent": 1.2840300385208891
+      },
+      "sidecar.candidate.elapsedMs": {
+        "firstValues": [
+          61.40779999999998,
+          61.30383599999999,
+          60.589042999999975,
+          62.10509499999998
+        ],
+        "secondValues": [
+          67.27553900000004,
+          52.83376200000001,
+          54.305758,
+          66.39462600000002
+        ],
+        "pairedChangesPercent": [
+          9.555364302254855,
+          -13.816548119435767,
+          -10.37033214074693,
+          6.906890650437036
+        ],
+        "medianPairedChangePercent": -1.7317207451549468,
+        "equalWorkChangePercent": -1.8728528367877195,
+        "fasterPairs": 2,
+        "minimumChangePercent": -13.816548119435767,
+        "maximumChangePercent": 9.555364302254855,
+        "maxAbsoluteChangePercent": 13.816548119435767
+      },
+      "sidecar.identicalControl.elapsedMs": {
+        "firstValues": [
+          72.969763,
+          73.060102,
+          72.88711999999998,
+          49.128172999999975
+        ],
+        "secondValues": [
+          73.56861199999997,
+          73.796988,
+          72.27297099999998,
+          72.577245
+        ],
+        "pairedChangesPercent": [
+          0.8206810264684172,
+          1.0086024790931791,
+          -0.8426029180464201,
+          47.73039697608954
+        ],
+        "medianPairedChangePercent": 0.9146417527807982,
+        "equalWorkChangePercent": 9.017382809802509,
+        "fasterPairs": 1,
+        "minimumChangePercent": -0.8426029180464201,
+        "maximumChangePercent": 47.73039697608954,
+        "maxAbsoluteChangePercent": 47.73039697608954
+      },
+      "sidecar.candidate.cpuMs": {
+        "firstValues": [
+          64.773,
+          63.63,
+          62.15,
+          63.153
+        ],
+        "secondValues": [
+          68.118,
+          55.14,
+          56.512,
+          69.16
+        ],
+        "pairedChangesPercent": [
+          5.164188782363022,
+          -13.342762847713342,
+          -9.071600965406269,
+          9.51182049942203
+        ],
+        "medianPairedChangePercent": -1.9537060915216236,
+        "equalWorkChangePercent": -1.8824939102740967,
+        "fasterPairs": 2,
+        "minimumChangePercent": -13.342762847713342,
+        "maximumChangePercent": 9.51182049942203,
+        "maxAbsoluteChangePercent": 13.342762847713342
+      },
+      "sidecar.identicalControl.cpuMs": {
+        "firstValues": [
+          75.312,
+          75.599,
+          75.037,
+          50.088
+        ],
+        "secondValues": [
+          73.801,
+          74.02,
+          75.63,
+          73.039
+        ],
+        "pairedChangesPercent": [
+          -2.0063203739111857,
+          -2.0886519662958625,
+          0.7902767967802315,
+          45.821354416227436
+        ],
+        "medianPairedChangePercent": -0.6080217885654771,
+        "equalWorkChangePercent": 7.409903056123124,
+        "fasterPairs": 2,
+        "minimumChangePercent": -2.0886519662958625,
+        "maximumChangePercent": 45.821354416227436,
+        "maxAbsoluteChangePercent": 45.821354416227436
+      }
+    },
+    "boundariesAudit": {
+      "validator": {
+        "allFourCandidatePairsFaster": true,
+        "medianReductionLargerThanLargestAbsoluteControl": true,
+        "everyCandidatePairFasterThanEveryControl": true,
+        "medianPairedMsPerCorpusPass": -1.7000346875000005,
+        "controlMedianPairedMsPerCorpusPass": -0.003405109374999604
+      },
+      "sidecar": {
+        "allFourCandidatePairsFaster": false,
+        "medianReductionLargerThanLargestAbsoluteControl": false,
+        "everyCandidatePairFasterThanEveryControl": false,
+        "medianPairedMsPerCorpusPass": -0.24921924999999234,
+        "controlMedianPairedMsPerCorpusPass": 0.1669668749999964
+      }
+    },
+    "rawTimes": [
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 76.33399600000001,
+        "cpuMs": 77.428,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 21.795956999999987,
+        "cpuMs": 21.84,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 76.187884,
+        "cpuMs": 76.248,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 76.09958900000004,
+        "cpuMs": 76.169,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 76.08721600000001,
+        "cpuMs": 76.137,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 76.21684800000003,
+        "cpuMs": 76.29,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 24.52920800000001,
+        "cpuMs": 24.597,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 77.40648900000002,
+        "cpuMs": 77.471,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 76.59162799999996,
+        "cpuMs": 76.654,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 21.896585000000016,
+        "cpuMs": 21.945,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 77.030936,
+        "cpuMs": 77.101,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 76.066598,
+        "cpuMs": 76.111,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 76.200221,
+        "cpuMs": 76.239,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 76.22169200000002,
+        "cpuMs": 76.27,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 21.804575,
+        "cpuMs": 21.853,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 76.06875600000001,
+        "cpuMs": 76.129,
+        "sink": 2492904416,
+        "outputDigest": "4f27c5f3e36705fd1b2d2c6118857e55f91221945a0ca838cf9dcee16f963695"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 61.40779999999998,
+        "cpuMs": 64.773,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 67.27553900000004,
+        "cpuMs": 68.118,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 72.969763,
+        "cpuMs": 75.312,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 73.56861199999997,
+        "cpuMs": 73.801,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 73.796988,
+        "cpuMs": 74.02,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 73.060102,
+        "cpuMs": 75.599,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 52.83376200000001,
+        "cpuMs": 55.14,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 61.30383599999999,
+        "cpuMs": 63.63,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 60.589042999999975,
+        "cpuMs": 62.15,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 54.305758,
+        "cpuMs": 56.512,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 72.88711999999998,
+        "cpuMs": 75.037,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 72.27297099999998,
+        "cpuMs": 75.63,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "D",
+        "rows": 528299,
+        "elapsedMs": 72.577245,
+        "cpuMs": 73.039,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "C",
+        "rows": 528299,
+        "elapsedMs": 49.128172999999975,
+        "cpuMs": 50.088,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "B",
+        "rows": 528299,
+        "elapsedMs": 66.39462600000002,
+        "cpuMs": 69.16,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      },
+      {
+        "dictionary": "jmdict",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "A",
+        "rows": 528299,
+        "elapsedMs": 62.10509499999998,
+        "cpuMs": 63.153,
+        "sink": 95579220,
+        "outputDigest": "80e0aeffa1eb184643490b952eb493e817644a166bf65fb4c0f821eaf677e3f7"
+      }
+    ],
+    "interpretation": "Warm component replay only. Validator-only gains are insufficient. Review enclosing sidecar across both independent hosts, identical-code controls, all semantics, and non-target regressions; do not pool hosts or dictionaries."
+  },
+  "artifact": {
+    "id": 15249811031,
+    "name": "compact-score-jmdict-0-1",
+    "size_in_bytes": 66756,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249811031",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249811031/zip",
+    "expired": false,
+    "created_at": "2026-11-28T05:10:00Z",
+    "expires_at": "2026-12-12T05:09:59Z",
+    "updated_at": "2026-11-28T05:10:00Z",
+    "digest": "sha256:94c07b0cb849922b16a73278f60d705a870ffdd1ef0327aa1942cf0c4327a5dc",
+    "workflow_run": {
+      "id": 46104113507,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/compact-score-screen-20261128-c563d487",
+      "head_sha": "93e4b8081d24eb3b368523211b2cf4f40b95fa17"
+    }
+  },
+  "rawArtifactAudit": "Passed: all 32 original stdout receipts match logs/result, source/fixtures/hashes/digests/work parity verified against original artifact",
+  "decision": "Validator gain alone insufficient; enclosing sidecar inconclusive on this host with 2/4 faster pairs and wide controls. Retain all data and await complete planned cohort."
+}

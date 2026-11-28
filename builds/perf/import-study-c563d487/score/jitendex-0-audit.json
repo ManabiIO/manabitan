@@ -1,0 +1,696 @@
+{
+  "jobId": 140859683789,
+  "runId": 46104113507,
+  "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104113507/job/140859683789",
+  "logAudit": {
+    "dictionary": "jitendex",
+    "replicate": 0,
+    "complete": true,
+    "errors": [],
+    "allChecksPass": true,
+    "observations": 32,
+    "source": {
+      "baseline": {
+        "root": "/home/runner/work/manabitan/score-baseline",
+        "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "trackedChanges": "",
+        "storeSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "candidate": {
+        "root": "/home/runner/work/manabitan/score-candidate",
+        "head": "1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+        "tree": "4ecebc3a54f8ae865ae3f98943695fa9cbb8341d",
+        "trackedChanges": "",
+        "storeSha256": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769",
+        "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      }
+    },
+    "scripts": {
+      "common.mjs": "f5a1cac21c3a31af9bc6ae6d19ce1c0bde2db939fc9077bada271371df272a90",
+      "prepare.mjs": "5be408444357261b39172d572ae4bc8845aae328f069f031aca46ca5c84684d4",
+      "measure.mjs": "f13fdc36a21beccfd788d93ad1db434133fa729273b4d5db35e0c53d7288e97f",
+      "run.py": "26fce061325233eaa5ba45fcfd5ed659425cbb12e73b4b24e6bc5ea99eff8bfe"
+    },
+    "toolingHead": "93e4b8081d24eb3b368523211b2cf4f40b95fa17",
+    "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "inputSha256": "0d57ad651f6ff71a121f1bf7a0d8dfd77ce0eaae9f8ff36c3321e38cf7535697",
+    "manifestSha256": "82ab1a927584610dbf90f4b583f448c247f156bd7d7ecb45cfa9106124afa0c1",
+    "node": "v22.22.0",
+    "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+    "prepared": {
+      "dictionary": "jitendex",
+      "complete": true,
+      "rows": 436555,
+      "compactRows": 436555,
+      "banks": 219,
+      "runs": 219,
+      "inputBytes": 23714664,
+      "inputSha256": "0d57ad651f6ff71a121f1bf7a0d8dfd77ce0eaae9f8ff36c3321e38cf7535697",
+      "sidecarDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+    },
+    "rawChecks": {
+      "available": true,
+      "passed": true
+    },
+    "statistics": {
+      "validator.candidate.elapsedMs": {
+        "firstValues": [
+          65.28261199999997,
+          64.83000799999996,
+          64.93158800000003,
+          64.930566
+        ],
+        "secondValues": [
+          20.126780000000025,
+          23.634151000000003,
+          20.067830999999984,
+          20.249077999999997
+        ],
+        "pairedChangesPercent": [
+          -69.16976912627204,
+          -63.54442683394391,
+          -69.0938853982749,
+          -68.81425921961007
+        ],
+        "medianPairedChangePercent": -68.95407230894249,
+        "equalWorkChangePercent": -67.6592314298925,
+        "fasterPairs": 4,
+        "minimumChangePercent": -69.16976912627204,
+        "maximumChangePercent": -63.54442683394391,
+        "maxAbsoluteChangePercent": 69.16976912627204
+      },
+      "validator.identicalControl.elapsedMs": {
+        "firstValues": [
+          64.899789,
+          65.15230000000003,
+          64.802367,
+          64.78172900000004
+        ],
+        "secondValues": [
+          64.85184899999996,
+          65.14029700000003,
+          64.76816400000001,
+          64.84109899999999
+        ],
+        "pairedChangesPercent": [
+          -0.07386772859929724,
+          -0.01842298736958181,
+          -0.0527804794537734,
+          0.09164621092461189
+        ],
+        "medianPairedChangePercent": -0.035601733411677605,
+        "equalWorkChangePercent": -0.013394126862587008,
+        "fasterPairs": 3,
+        "minimumChangePercent": -0.07386772859929724,
+        "maximumChangePercent": 0.09164621092461189,
+        "maxAbsoluteChangePercent": 0.09164621092461189
+      },
+      "validator.candidate.cpuMs": {
+        "firstValues": [
+          69.961,
+          68.513,
+          68.622,
+          68.755
+        ],
+        "secondValues": [
+          31.482,
+          37.39,
+          25.645,
+          31.573
+        ],
+        "pairedChangesPercent": [
+          -55.00064321550578,
+          -45.426415424809896,
+          -62.628603071901146,
+          -54.0789760744673
+        ],
+        "medianPairedChangePercent": -54.53980964498654,
+        "equalWorkChangePercent": -54.29054090795393,
+        "fasterPairs": 4,
+        "minimumChangePercent": -62.628603071901146,
+        "maximumChangePercent": -45.426415424809896,
+        "maxAbsoluteChangePercent": 62.628603071901146
+      },
+      "validator.identicalControl.cpuMs": {
+        "firstValues": [
+          69.098,
+          69.439,
+          68.441,
+          68.34
+        ],
+        "secondValues": [
+          68.661,
+          69.509,
+          68.508,
+          69.001
+        ],
+        "pairedChangesPercent": [
+          -0.6324350921878996,
+          0.10080790333963918,
+          0.09789453690038918,
+          0.9672227099795094
+        ],
+        "medianPairedChangePercent": 0.09935122012001418,
+        "equalWorkChangePercent": 0.13112110359656537,
+        "fasterPairs": 1,
+        "minimumChangePercent": -0.6324350921878996,
+        "maximumChangePercent": 0.9672227099795094,
+        "maxAbsoluteChangePercent": 0.9672227099795094
+      },
+      "sidecar.candidate.elapsedMs": {
+        "firstValues": [
+          59.15998599999995,
+          59.55167399999999,
+          62.80423400000001,
+          75.59476700000005
+        ],
+        "secondValues": [
+          33.20913300000001,
+          37.89018800000002,
+          41.16169400000001,
+          34.21597800000001
+        ],
+        "pairedChangesPercent": [
+          -43.86554959630985,
+          -36.3742688408725,
+          -34.460319984159014,
+          -54.7376367996478
+        ],
+        "medianPairedChangePercent": -40.119909218591175,
+        "equalWorkChangePercent": -43.02959183788958,
+        "fasterPairs": 4,
+        "minimumChangePercent": -54.7376367996478,
+        "maximumChangePercent": -34.460319984159014,
+        "maxAbsoluteChangePercent": 54.7376367996478
+      },
+      "sidecar.identicalControl.elapsedMs": {
+        "firstValues": [
+          47.436464,
+          56.226608,
+          42.03627800000004,
+          58.380605
+        ],
+        "secondValues": [
+          79.07009400000001,
+          47.39002700000003,
+          36.04693099999997,
+          52.675017000000025
+        ],
+        "pairedChangesPercent": [
+          66.68631540495937,
+          -15.716012959558167,
+          -14.248043083167495,
+          -9.773088168579235
+        ],
+        "medianPairedChangePercent": -12.010565625873365,
+        "equalWorkChangePercent": 5.440080580182416,
+        "fasterPairs": 3,
+        "minimumChangePercent": -15.716012959558167,
+        "maximumChangePercent": 66.68631540495937,
+        "maxAbsoluteChangePercent": 66.68631540495937
+      },
+      "sidecar.candidate.cpuMs": {
+        "firstValues": [
+          62.403,
+          62.446,
+          63.95,
+          78.539
+        ],
+        "secondValues": [
+          35.027,
+          38.325,
+          44.026,
+          35.142
+        ],
+        "pairedChangesPercent": [
+          -43.869685752287545,
+          -38.62697370528135,
+          -31.155590304925717,
+          -55.25535084480322
+        ],
+        "medianPairedChangePercent": -41.24832972878445,
+        "equalWorkChangePercent": -42.948626831950556,
+        "fasterPairs": 4,
+        "minimumChangePercent": -55.25535084480322,
+        "maximumChangePercent": -31.155590304925717,
+        "maxAbsoluteChangePercent": 55.25535084480322
+      },
+      "sidecar.identicalControl.cpuMs": {
+        "firstValues": [
+          47.836,
+          57.901,
+          43.573,
+          61.038
+        ],
+        "secondValues": [
+          80.402,
+          48.346,
+          37.649,
+          54.382
+        ],
+        "pairedChangesPercent": [
+          68.07843465172674,
+          -16.502305659660465,
+          -13.595575241548662,
+          -10.904682329040927
+        ],
+        "medianPairedChangePercent": -12.250128785294795,
+        "equalWorkChangePercent": 4.958925209652576,
+        "fasterPairs": 3,
+        "minimumChangePercent": -16.502305659660465,
+        "maximumChangePercent": 68.07843465172674,
+        "maxAbsoluteChangePercent": 68.07843465172674
+      }
+    },
+    "boundariesAudit": {
+      "validator": {
+        "allFourCandidatePairsFaster": true,
+        "medianReductionLargerThanLargestAbsoluteControl": true,
+        "everyCandidatePairFasterThanEveryControl": true,
+        "medianPairedMsPerCorpusPass": -1.3991444531250008,
+        "controlMedianPairedMsPerCorpusPass": -0.0007219687499997463
+      },
+      "sidecar": {
+        "allFourCandidatePairsFaster": true,
+        "medianReductionLargerThanLargestAbsoluteControl": false,
+        "everyCandidatePairFasterThanEveryControl": true,
+        "medianPairedMsPerCorpusPass": -5.951542374999988,
+        "controlMedianPairedMsPerCorpusPass": -1.4618668750000055
+      }
+    },
+    "rawTimes": [
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 65.28261199999997,
+        "cpuMs": 69.961,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 20.126780000000025,
+        "cpuMs": 31.482,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 64.899789,
+        "cpuMs": 69.098,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 0,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 64.85184899999996,
+        "cpuMs": 68.661,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 65.14029700000003,
+        "cpuMs": 69.509,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 65.15230000000003,
+        "cpuMs": 69.439,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 23.634151000000003,
+        "cpuMs": 37.39,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 1,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 64.83000799999996,
+        "cpuMs": 68.513,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 64.93158800000003,
+        "cpuMs": 68.622,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 20.067830999999984,
+        "cpuMs": 25.645,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 64.802367,
+        "cpuMs": 68.441,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 2,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 64.76816400000001,
+        "cpuMs": 68.508,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 64.84109899999999,
+        "cpuMs": 69.001,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 64.78172900000004,
+        "cpuMs": 68.34,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 20.249077999999997,
+        "cpuMs": 31.573,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "validator",
+        "pair": 3,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 64.930566,
+        "cpuMs": 68.755,
+        "sink": 3882663584,
+        "outputDigest": "bf3378ee06ff80c966055bf5a63542f7a841082201a38ca18e48db7266f9c61a"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 59.15998599999995,
+        "cpuMs": 62.403,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 33.20913300000001,
+        "cpuMs": 35.027,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 47.436464,
+        "cpuMs": 47.836,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 0,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 79.07009400000001,
+        "cpuMs": 80.402,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 47.39002700000003,
+        "cpuMs": 48.346,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 56.226608,
+        "cpuMs": 57.901,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 37.89018800000002,
+        "cpuMs": 38.325,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 1,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 59.55167399999999,
+        "cpuMs": 62.446,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 62.80423400000001,
+        "cpuMs": 63.95,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 41.16169400000001,
+        "cpuMs": 44.026,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 42.03627800000004,
+        "cpuMs": 43.573,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 2,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 36.04693099999997,
+        "cpuMs": 37.649,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "D",
+        "rows": 436555,
+        "elapsedMs": 52.675017000000025,
+        "cpuMs": 54.382,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "C",
+        "rows": 436555,
+        "elapsedMs": 58.380605,
+        "cpuMs": 61.038,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "B",
+        "rows": 436555,
+        "elapsedMs": 34.21597800000001,
+        "cpuMs": 35.142,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      },
+      {
+        "dictionary": "jitendex",
+        "replicate": 0,
+        "boundary": "sidecar",
+        "pair": 3,
+        "arm": "A",
+        "rows": 436555,
+        "elapsedMs": 75.59476700000005,
+        "cpuMs": 78.539,
+        "sink": 95333892,
+        "outputDigest": "5109d857c484724acdd5ebcd7b55b686432a40ac997d7dccd8453dbd5b8b2718"
+      }
+    ],
+    "interpretation": "Warm component replay only. Validator-only gains are insufficient. Review enclosing sidecar across both independent hosts, identical-code controls, all semantics, and non-target regressions; do not pool hosts or dictionaries."
+  },
+  "artifact": {
+    "id": 15249357490,
+    "name": "compact-score-jitendex-0-1",
+    "size_in_bytes": 78482,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249357490",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249357490/zip",
+    "expired": false,
+    "created_at": "2026-11-28T05:03:49Z",
+    "expires_at": "2026-12-12T05:03:49Z",
+    "updated_at": "2026-11-28T05:03:49Z",
+    "digest": "sha256:c643b12548e6377bc3cd9750412f5bb26ad1d947c9ca548ab11e89aca72798e6",
+    "workflow_run": {
+      "id": 46104113507,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/compact-score-screen-20261128-c563d487",
+      "head_sha": "93e4b8081d24eb3b368523211b2cf4f40b95fa17"
+    }
+  },
+  "rawArtifactAudit": "Passed: all 32 original stdout receipts match logs/result, source/fixtures/hashes/digests/work parity verified against original artifact",
+  "decision": "Await all planned cells; no promotion inference from first host; retained sidecar A/A outlier."
+}

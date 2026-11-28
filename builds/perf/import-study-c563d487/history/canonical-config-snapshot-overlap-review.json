@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 05:17:04 UTC",
+  "scope": "Bounded source/history overlap review only; no implementation, compiler work, candidate execution or timing",
+  "proposedMechanism": "Snapshot immutable config c[10], c[12], c[16..21] before scan_canonical row loop, preserving volatile progress/journal writes, asm barrier, validation and traps",
+  "conclusion": "The proposal is a strict subset of the existing open draft PR #880. Every requested scalar snapshot is already present there; its additional snapshots are c[1], c[13] and per-row length/hash words. No unchanged requalification or duplicate implementation is justified by this review.",
+  "priorPullRequest": {
+    "number": 880,
+    "title": "perf: snapshot immutable inputs in native canonical scans",
+    "url": "https://github.com/ManabiIO/manabitan/pull/880",
+    "state": "open",
+    "draft": true,
+    "head": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+    "branch": "perf/canonical-input-snapshots-20261124-3aac",
+    "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "updatedAt": "2026-11-24T20:55:36Z"
+  },
+  "sourceIdentity": {
+    "currentBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "priorBaseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "currentBaselineBlob": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+    "priorBaselineBlob": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+    "priorCandidateBlob": "1c1f1104ce0f744c9f9f55a0c7fa5986e48272c3",
+    "comparison": "Both current and prior baseline C paths resolve to the same exact Git blob"
+  },
+  "requestedScalarsAlreadyCovered": {
+    "c[10]": "capacity",
+    "c[12]": "row_count",
+    "c[16]": "row_start",
+    "c[17]": "base_offset",
+    "c[18]": "buffer_length",
+    "c[19]": "lookup",
+    "c[20]": "reserve",
+    "c[21]": "trap_after"
+  },
+  "additionalPriorSnapshots": {
+    "c[1]": "slots_count",
+    "c[13]": "first_unique",
+    "m[1]": "content_length",
+    "m[2]": "content_hash1",
+    "m[3]": "content_hash2"
+  },
+  "priorPublishedResult": {
+    "attribution": "PR body and existing authoritative repository handoff; not a new independent raw-data audit",
+    "outcome": "Hold; all three complete-import screens inconclusive; every candidate descriptive 95% interval crosses zero",
+    "jmdict": {
+      "pairedMedianBOverAPercent": -2.3588,
+      "pairedMedianBOverCPercent": -0.1053,
+      "identicalProductCOverAPercent": -0.8721
+    },
+    "jitendex": {
+      "pairedMedianBOverAPercent": -2.1959,
+      "pairedMedianBOverCPercent": -0.6593,
+      "identicalProductCOverAPercent": -1.2521
+    },
+    "vndb": {
+      "pairedMedianBOverAPercent": -0.7313,
+      "pairedMedianBOverCPercent": -0.4309,
+      "identicalProductCOverAPercent": -0.3003
+    },
+    "assemblyMechanism": "Handoff reports 11 repeated config-load sites removed in pinned compiler assembly; module increases43 bytes",
+    "observations": 69,
+    "completeScreenRun": 45472377306,
+    "sourceCiRun": 45471884754,
+    "statedPlan": "No additional qualification of unchanged candidate planned"
+  },
+  "distinctionFromOtherWork": "#876 concerns synchronous cache-publication proof; #864 counter writes and #856 journal compaction are also separate. Our composite-hints local-state attempt is not this scanner, but does not erase the direct #880 overlap.",
+  "sources": [
+    "https://github.com/ManabiIO/manabitan/pull/880",
+    "https://api.github.com/repos/ManabiIO/manabitan/pulls/880/files?per_page=100",
+    "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/dev/perf/import-experiments-20260914.md",
+    "https://github.com/ManabiIO/manabitan/actions/runs/45472377306"
+  ],
+  "limitations": [
+    "Earlier complete-import baseline differs elsewhere from current develop, even though canonical C is byte-identical.",
+    "A narrower subset is not an identical product patch. Reconsideration would need a concrete distinct compiled-code mechanism, not the already observed reloads or another noisy remeasurement.",
+    "GitHub issue-search returned empty results despite direct PR existence; direct known-PR/source retrieval, not negative search results, supports this conclusion."
+  ]
+}

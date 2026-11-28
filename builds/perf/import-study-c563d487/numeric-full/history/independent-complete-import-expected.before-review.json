@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 05:42:38 UTC",
+  "role": "Independent read-only audit; does not alter the observer, acquisition or prospective criteria",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+  "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167",
+  "runId": 46113243549,
+  "sourceTrees": {
+    "A": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "B": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+  },
+  "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "browser": {
+    "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "version": "153.0.8010.12",
+    "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+  },
+  "nodeVersion": "v22.22.0",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "packageEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "packageEntryCount": 554,
+  "packageHashes": {
+    "A": {
+      "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "B": {
+      "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+      "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+    }
+  },
+  "sourceHashes": {
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "fixtures": {
+    "jmdict": {
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    "jitendex": {
+      "cacheFile": "jitendex-yomitan.zip",
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "label": "Jitendex",
+      "mediaBytes": 4992155,
+      "mediaFiles": 236,
+      "release": "2026.10.03.0",
+      "revision": "2026.10.03.0",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ],
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+    },
+    "vndb": {
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "expectedTitle": "VNDB Characters by Bee",
+      "label": "VNDB",
+      "mediaBytes": 188131284,
+      "mediaFiles": 146570,
+      "mediaRows": 146570,
+      "optional": true,
+      "release": "1.0.0",
+      "revision": "395525135651",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "termRows": 6648310,
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+    }
+  },
+  "summaryFixtureHashes": {
+    "jmdict": "4336fb06e8fc7c1d5d0050ee13bc924a054080aaabc99dcf39ecaa862c8ebbdf",
+    "jitendex": "c0960358910697c8746365da4790b0406b074795a7140b68bb681e176e8a6bbc",
+    "vndb": "d6ba3ef5a17d4b4fc1cc8d909c54964ec0cf40be74083047ce4b3586f47c6154"
+  },
+  "storageBytes": {
+    "jmdict": 43520477,
+    "jitendex": 67466332,
+    "vndb": 609176779
+  },
+  "targetDictionary": "vndb",
+  "targetMinimumReductionPercent": 2,
+  "minimumFasterPairs": 9,
+  "nonTargetMinimumSlowdownPercent": 1,
+  "minimumSlowerPairs": 9,
+  "criteriaSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+  "requireProvenance": true,
+  "provenanceHashes": {
+    "prospective-review-criteria.json": "46af7d3fa175aae01fb47b4e96a1f367b50273728fcff55aa87a1c83a9f9a17b",
+    "package-entry-amendment.json": "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3"
+  },
+  "criteriaInterpretation": "Per-host statistics only. Replicated target thresholds, materially smaller identical-code variation, all correctness/storage/package/memory gates, and non-target tradeoffs require root review. No pooling, control subtraction, outlier removal, selected retry or automatic promotion."
+}

@@ -1,0 +1,88 @@
+{
+  "recordedAtUtc": "2026-11-28 05:41:31 UTC",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "product": {
+    "branch": "perf/numeric-row-suffix-20261128-c563d487",
+    "commit": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07",
+    "files": [
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "sha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+        "bytes": 161377
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "sha256": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a",
+        "bytes": 68522
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "sha256": "6cf200239142277f2ea63612339ca86a50a25ea74f4c29fb9432ac980cc0bdd4",
+        "bytes": 2588
+      },
+      {
+        "path": "test/term-bank-row-suffix-reuse.test.js",
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "bytes": 15101
+      }
+    ]
+  },
+  "tooling": {
+    "branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+    "commit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+    "tree": "6940c7f4dae082431996fad725e62c88497580c3",
+    "files": [
+      {
+        "path": ".github/workflows/import-numeric-suffix-qualification-c563d487.yml",
+        "sha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167",
+        "bytes": 23997
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/prospective-review-criteria.json",
+        "sha256": "46af7d3fa175aae01fb47b4e96a1f367b50273728fcff55aa87a1c83a9f9a17b",
+        "bytes": 2280
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/prospective-review-criteria-v2.json",
+        "sha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+        "bytes": 2322
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/package-entry-amendment.json",
+        "sha256": "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3",
+        "bytes": 4419
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/component-promotion-decision.json",
+        "sha256": "a4477096a3414db8f82b29d94ec3fce2b680156367d77cd19253e35713d661fa",
+        "bytes": 622
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/source-history-amendment.json",
+        "sha256": "d04ab718e4a0a739b02a526fdbb59627063011787ac3153668d0989bb407bff5",
+        "bytes": 3752
+      },
+      {
+        "path": "dev/perf/import-numeric-suffix-qualification-c563d487/shallow-history-reproduction.json",
+        "sha256": "03578c54373f973fcb0fecb3b18ce2b6b96b323fb23ad61eb31c7820beffa86d",
+        "bytes": 1041
+      }
+    ]
+  },
+  "run": {
+    "id": 46113243549,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549",
+    "initialStatus": "queued"
+  },
+  "componentPromotionDecision": {
+    "at": "2026-11-28 05:35:51 UTC",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidateC": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+    "componentAll48Audited": true,
+    "target": "VNDB component −8.646261% median, all4 faster, small controls",
+    "nonTargetConcern": "Jitendex +1.718978% elapsed (3/4 slower) and +3.200218% native (4/4 slower); A/A material. JMdict −1.464627% elapsed with larger controls. Neither proves non-regression.",
+    "decision": "Proceed to frozen full qualification with unchanged source and predeclared gates; no PR or full-import speed claim."
+  },
+  "pullRequestOpened": false
+}

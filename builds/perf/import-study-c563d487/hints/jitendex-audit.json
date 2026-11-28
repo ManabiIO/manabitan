@@ -1,0 +1,310 @@
+{
+  "complete": true,
+  "kind": "hints",
+  "dictionary": "jitendex",
+  "scope": "Independent raw receipt and reconstructed-byte audit; component evidence only",
+  "toolingHead": "e908a53a639d486c9f77eea0899c803fa4890e1b",
+  "observations": 16,
+  "rowsPerObservation": 436555,
+  "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+  "recoveredProduct": {
+    "cSha256": "94fd7415158b640b56bb8113b1df791aa0e691a66a9be5e6cd09686b55c622ab",
+    "manifestSha256": "8e71dee62d66fe6a90a4f7eb8a8fbffd03a7fe3127dfebb2c984868ba7264f07",
+    "wasmSha256": "672f6aef621ab3fd22bf1c0675033eedde6245ee62284be7fcbd0738c471ae32",
+    "wasmBytes": 67769
+  },
+  "metrics": {
+    "candidate.elapsedMs": {
+      "baselineValues": [
+        1004.369623,
+        984.8674379999989,
+        981.7314989999986,
+        987.8702470000017
+      ],
+      "comparisonValues": [
+        1001.4319149999992,
+        1009.1632490000002,
+        1006.176207999999,
+        991.4749500000007
+      ],
+      "pairedChangesPercent": [
+        -0.2924927170961282,
+        2.466911795697052,
+        2.4899587132428724,
+        0.36489640324181727
+      ],
+      "medianPairedChangePercent": 1.4159040994694345,
+      "equalWorkChangePercent": 1.248030480873274,
+      "fasterPairs": 1
+    },
+    "identicalControl.elapsedMs": {
+      "baselineValues": [
+        984.3691989999998,
+        1006.7084099999997,
+        996.2163570000012,
+        991.5257510000006
+      ],
+      "comparisonValues": [
+        985.2310399999988,
+        1005.1654320000007,
+        985.9081529999999,
+        986.3569839999996
+      ],
+      "pairedChangesPercent": [
+        0.08755261754172418,
+        -0.15326960465136466,
+        -1.0347354696165951,
+        -0.5212942775099971
+      ],
+      "medianPairedChangePercent": -0.3372819410806809,
+      "equalWorkChangePercent": -0.4061030443516914,
+      "fasterPairs": 3
+    },
+    "candidate.cpuMs": {
+      "baselineValues": [
+        1058.852,
+        1043.389,
+        1036.7630000000001,
+        1040.9650000000001
+      ],
+      "comparisonValues": [
+        1053.2990000000004,
+        1061.2700000000002,
+        1056.317,
+        1044.9810000000002
+      ],
+      "pairedChangesPercent": [
+        -0.5244358985013633,
+        1.7137424297170387,
+        1.8860626777768743,
+        0.3857958720994535
+      ],
+      "medianPairedChangePercent": 1.049769150908246,
+      "equalWorkChangePercent": 0.8588101969177534,
+      "fasterPairs": 1
+    },
+    "identicalControl.cpuMs": {
+      "baselineValues": [
+        1037.249,
+        1059.3329999999999,
+        1047.6349999999995,
+        1046.0200000000002
+      ],
+      "comparisonValues": [
+        1037.3459999999998,
+        1055.9550000000002,
+        1034.6829999999998,
+        1039.8260000000002
+      ],
+      "pairedChangesPercent": [
+        0.009351660016037867,
+        -0.31887989895525787,
+        -1.2363084471213521,
+        -0.5921492896885298
+      ],
+      "medianPairedChangePercent": -0.4555145943218938,
+      "equalWorkChangePercent": -0.5352203228600121,
+      "fasterPairs": 3
+    },
+    "candidate.parseMs": {
+      "baselineValues": [
+        617.1762600000011,
+        610.0473739999989,
+        608.6940269999977,
+        601.4356659999999
+      ],
+      "comparisonValues": [
+        627.7685190000025,
+        626.1628419999993,
+        625.4436470000005,
+        618.0737760000015
+      ],
+      "pairedChangesPercent": [
+        1.7162453721083437,
+        2.6416748414690248,
+        2.7517306326389894,
+        2.766398958455133
+      ],
+      "medianPairedChangePercent": 2.6967027370540073,
+      "equalWorkChangePercent": 2.4656030102116713,
+      "fasterPairs": 0
+    },
+    "identicalControl.parseMs": {
+      "baselineValues": [
+        611.5503160000007,
+        616.5217680000019,
+        613.8104139999996,
+        608.3141169999994
+      ],
+      "comparisonValues": [
+        600.4116879999992,
+        621.0630679999999,
+        606.1531680000003,
+        602.7028549999995
+      ],
+      "pairedChangesPercent": [
+        -1.821375561189556,
+        0.7366001065509875,
+        -1.2474936601514406,
+        -0.9224283709989756
+      ],
+      "medianPairedChangePercent": -1.084961015575208,
+      "equalWorkChangePercent": -0.8107853826254128,
+      "fasterPairs": 3
+    },
+    "candidate.nativeParseMs": {
+      "baselineValues": [
+        599,
+        596,
+        589,
+        583
+      ],
+      "comparisonValues": [
+        608,
+        606,
+        605,
+        601
+      ],
+      "pairedChangesPercent": [
+        1.5025041736227045,
+        1.6778523489932886,
+        2.7164685908319184,
+        3.0874785591766725
+      ],
+      "medianPairedChangePercent": 2.1971604699126033,
+      "equalWorkChangePercent": 2.2391212505280946,
+      "fasterPairs": 0
+    },
+    "identicalControl.nativeParseMs": {
+      "baselineValues": [
+        593,
+        593,
+        595,
+        590
+      ],
+      "comparisonValues": [
+        584,
+        601,
+        586,
+        583
+      ],
+      "pairedChangesPercent": [
+        -1.5177065767284992,
+        1.3490725126475547,
+        -1.5126050420168067,
+        -1.1864406779661016
+      ],
+      "medianPairedChangePercent": -1.3495228599914542,
+      "equalWorkChangePercent": -0.7169970476592155,
+      "fasterPairs": 3
+    },
+    "candidate.lookupMs": {
+      "baselineValues": [
+        12.313668000001144,
+        11.814276000000518,
+        11.771382000000358,
+        11.652207000000999
+      ],
+      "comparisonValues": [
+        11.584904999999253,
+        11.634691999999177,
+        14.92953099999977,
+        11.601569999999356
+      ],
+      "pairedChangesPercent": [
+        -5.918325879842002,
+        -1.520059290991115,
+        26.82904182363053,
+        -0.4345700346864661
+      ],
+      "medianPairedChangePercent": -0.9773146628387905,
+      "equalWorkChangePercent": 4.624803578875989,
+      "fasterPairs": 3
+    },
+    "identicalControl.lookupMs": {
+      "baselineValues": [
+        11.835932000000412,
+        11.799894000000677,
+        11.624426000000312,
+        11.622982999999294
+      ],
+      "comparisonValues": [
+        11.67709300000024,
+        11.652036999999837,
+        11.550988999999845,
+        11.702789000000848
+      ],
+      "pairedChangesPercent": [
+        -1.3420066962210109,
+        -1.2530366798280719,
+        -0.6317473224094283,
+        0.6866223584905765
+      ],
+      "medianPairedChangePercent": -0.9423920011187501,
+      "equalWorkChangePercent": -0.640585062016135,
+      "fasterPairs": 3
+    }
+  },
+  "maxWasmHeapBytesByArm": {
+    "A": [
+      73531392
+    ],
+    "B": [
+      73531392
+    ],
+    "C": [
+      73531392
+    ],
+    "D": [
+      73531392
+    ]
+  },
+  "rawReportSha256": "32dded2ca5f0aaf0f5356aaf073e19f30fc8651f666bfb770c80d7826c1741c1",
+  "nativeMetadataOracle": {
+    "syntheticComparisons": 2224,
+    "corpus": {
+      "parse_term_bank": {
+        "banks": 219,
+        "rows": 436555,
+        "digest": "5c523c196502e6af5ff38cb64b0ec96db6b550f1aa2f1191156b9bb2564dbd18"
+      },
+      "parse_term_bank_with_media_hints": {
+        "banks": 219,
+        "rows": 436555,
+        "digest": "afaebcadb1bf5258684ac09be1cb97f34c5c25e4713ba5272579c88b25d631d0"
+      }
+    }
+  },
+  "codegen": {
+    "baseline": {
+      "wasmBytes": 67659,
+      "functions": {
+        "parse_composite_span_impl": {
+          "assemblyLines": 3353,
+          "loadStoreSites": {
+            "i32.load8_u": 110,
+            "i32.load": 7,
+            "i32.store": 12,
+            "i64.load": 2,
+            "i32.store8": 2
+          }
+        }
+      }
+    },
+    "candidate": {
+      "wasmBytes": 67769,
+      "functions": {
+        "parse_composite_span_impl": {
+          "assemblyLines": 3411,
+          "loadStoreSites": {
+            "i32.load": 8,
+            "i32.store": 7,
+            "i32.load8_u": 99,
+            "i64.load": 2,
+            "i32.store8": 2
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-11-28T05:25:24.706950+00:00",
+  "originalNumericCriteriaPreserved": true,
+  "numericStructuralDiff": [
+    "requiredGates.package"
+  ],
+  "oldNumericCriteriaSha256": "46af7d3fa175aae01fb47b4e96a1f367b50273728fcff55aa87a1c83a9f9a17b",
+  "newNumericCriteriaSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+  "prefixCriteriaSha256": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+  "packageAmendmentSha256": "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3",
+  "workflows": [
+    {
+      "path": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric/qualification/import-numeric-suffix-qualification-c563d487.yml",
+      "sha256": "f064a65e38f4e894484ed73e682a56ce07a38140b2a441789ce49184cfa47d53",
+      "embeddedPythonBlocksParsed": 4,
+      "published": false
+    },
+    {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/qualification/import-prefix-selector-qualification-c563d487.yml",
+      "sha256": "0ce7ddf59d981c625513e758042ee3a0bd1e6290f6e33f9496d5c5ebef3c34fd",
+      "embeddedPythonBlocksParsed": 4,
+      "published": false
+    }
+  ],
+  "allChecksPassed": true,
+  "fullQualificationObservations": 0,
+  "componentCohortsUnchanged": true
+}

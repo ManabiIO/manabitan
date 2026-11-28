@@ -1,0 +1,14 @@
+{
+  "branch": "perf/jmdict-prefix-selector-screen-20261128-c563d487",
+  "commit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "tree": "38e40facc1abf6a013587c8873e3b92498013c2f",
+  "manifest": "42c33c25a69695ea876f07fb2059011946763cc5f5c2c4b45feab4c7bbca2483",
+  "productC": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "patch": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+  "scope": "Only experimental tooling, no performance PR or production source changes",
+  "observations": 96,
+  "runId": 46110806989,
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989",
+  "independentReview": "experiments/jmdict-prefix-selector/independent-hosted-protocol-review.json",
+  "rootVerifiedRef": true
+}

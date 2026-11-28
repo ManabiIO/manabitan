@@ -1,0 +1,396 @@
+{
+  "complete": true,
+  "scope": "Independent frozen component audit; no full-import or browser memory claim",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "toolingHead": "a4d76c89f8c3748690abffb5e0518c5fcf60494b",
+  "run": 46102733673,
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "rawObservationsAudited": 16,
+      "rowsPerObservation": 528299,
+      "digest": "af0ca3b550dd1254aa349b4cf93b7d6a05fbf17b55bac10495b414783edd2641",
+      "summary": {
+        "candidate.elapsedMs": {
+          "pairedChangesPercent": [
+            -0.3367130582270339,
+            1.6988216637140896,
+            11.069104834673137,
+            0.9732351298358921
+          ],
+          "medianPairedChangePercent": 1.3360283967749909,
+          "equalWorkChangePercent": 3.311090980222975,
+          "fasterPairs": 1
+        },
+        "identicalControl.elapsedMs": {
+          "pairedChangesPercent": [
+            -1.5761569281280696,
+            0.19895303355503824,
+            0.8613818540611273,
+            -1.9507606224856366
+          ],
+          "medianPairedChangePercent": -0.6886019472865157,
+          "equalWorkChangePercent": -0.6179723143970861,
+          "fasterPairs": 2
+        },
+        "candidate.cpuMs": {
+          "pairedChangesPercent": [
+            -1.6309069514247154,
+            1.206616796454174,
+            10.135910810456794,
+            3.958699506481733
+          ],
+          "medianPairedChangePercent": 2.5826581514679536,
+          "equalWorkChangePercent": 3.345573505600763,
+          "fasterPairs": 1
+        },
+        "identicalControl.cpuMs": {
+          "pairedChangesPercent": [
+            -0.6768827737368643,
+            1.1476465592070273,
+            0.1682106661982541,
+            -2.566045150454277
+          ],
+          "medianPairedChangePercent": -0.2543360537693051,
+          "equalWorkChangePercent": -0.47887618693892575,
+          "fasterPairs": 2
+        },
+        "candidate.parseMs": {
+          "pairedChangesPercent": [
+            -0.03156106464813346,
+            1.5222929057372436,
+            11.45382399955528,
+            0.4737175256309234
+          ],
+          "medianPairedChangePercent": 0.9980052156840835,
+          "equalWorkChangePercent": 3.321385736079341,
+          "fasterPairs": 1
+        },
+        "identicalControl.parseMs": {
+          "pairedChangesPercent": [
+            -0.815527888706491,
+            -0.5929142364889617,
+            0.9921893780386215,
+            -0.2741048312230987
+          ],
+          "medianPairedChangePercent": -0.4335095338560302,
+          "equalWorkChangePercent": -0.17374897963711167,
+          "fasterPairs": 3
+        },
+        "candidate.nativeParseMs": {
+          "pairedChangesPercent": [
+            -0.30864197530864335,
+            2.857142857142847,
+            9.90712074303406,
+            -0.6134969325153339
+          ],
+          "medianPairedChangePercent": 1.2742504409171018,
+          "equalWorkChangePercent": 2.9503105590062084,
+          "fasterPairs": 2
+        },
+        "identicalControl.nativeParseMs": {
+          "pairedChangesPercent": [
+            -1.2307692307692353,
+            -0.30864197530864335,
+            1.552795031055898,
+            0.0
+          ],
+          "medianPairedChangePercent": -0.15432098765432167,
+          "equalWorkChangePercent": 0.0,
+          "fasterPairs": 2
+        },
+        "candidate.lookupMs": {
+          "pairedChangesPercent": [
+            4.0109396050967305,
+            -2.879847089700671,
+            32.77412405589146,
+            4.643914399679949
+          ],
+          "medianPairedChangePercent": 4.32742700238834,
+          "equalWorkChangePercent": 8.530418426641017,
+          "fasterPairs": 1
+        },
+        "identicalControl.lookupMs": {
+          "pairedChangesPercent": [
+            -7.764724145414825,
+            3.649187094395745,
+            1.3961897957219804,
+            -2.4782962107467665
+          ],
+          "medianPairedChangePercent": -0.541053207512393,
+          "equalWorkChangePercent": -1.331795761579202,
+          "fasterPairs": 2
+        }
+      },
+      "mechanicalCounts": {
+        "attempts": 154409,
+        "boundedRanges": 154401,
+        "tailRejected": 150629,
+        "fullRejected": 3772,
+        "hits": 0,
+        "hitBytes": 0,
+        "potentialRangeBytes": 43930780
+      },
+      "componentMaxWasmHeapBytes": 63963136,
+      "rawReportSha256": "20c97fd1054fc8231b0bbd2b0cb7cb8e7c28af2b0b4120df3a83b3dc9d204867"
+    },
+    {
+      "dictionary": "jitendex",
+      "rawObservationsAudited": 16,
+      "rowsPerObservation": 436555,
+      "digest": "bdabee2e3f6af6c192d2e9af809c66c3d05ba3652a6456bb45ca557456363eb6",
+      "summary": {
+        "candidate.elapsedMs": {
+          "pairedChangesPercent": [
+            1.1554970172664492,
+            -0.6179978572106282,
+            -0.4729002078508793,
+            -0.5710292285307506
+          ],
+          "medianPairedChangePercent": -0.5219647181908149,
+          "equalWorkChangePercent": -0.12696577171261714,
+          "fasterPairs": 3
+        },
+        "identicalControl.elapsedMs": {
+          "pairedChangesPercent": [
+            0.6948261747420359,
+            0.3308124052102457,
+            -1.7865554368420744,
+            0.42246809358030823
+          ],
+          "medianPairedChangePercent": 0.37664024939527696,
+          "equalWorkChangePercent": -0.08685032456920982,
+          "fasterPairs": 1
+        },
+        "candidate.cpuMs": {
+          "pairedChangesPercent": [
+            0.8795559601265879,
+            -1.2702805828104347,
+            -0.6853869924251077,
+            -0.48648908638417865
+          ],
+          "medianPairedChangePercent": -0.5859380394046432,
+          "equalWorkChangePercent": -0.39301979858938907,
+          "fasterPairs": 3
+        },
+        "identicalControl.cpuMs": {
+          "pairedChangesPercent": [
+            0.5399111142621704,
+            0.48137501284364337,
+            -1.90393872175878,
+            0.9286618826509052
+          ],
+          "medianPairedChangePercent": 0.5106430635529069,
+          "equalWorkChangePercent": 0.009455084201404063,
+          "fasterPairs": 1
+        },
+        "candidate.parseMs": {
+          "pairedChangesPercent": [
+            2.2853315775524186,
+            1.0798549542090141,
+            -0.3687071165378031,
+            -0.9108653186853499
+          ],
+          "medianPairedChangePercent": 0.3555739188356055,
+          "equalWorkChangePercent": 0.5223787207104813,
+          "fasterPairs": 2
+        },
+        "identicalControl.parseMs": {
+          "pairedChangesPercent": [
+            0.8019037310385224,
+            0.2509741173186031,
+            -2.505025615271972,
+            0.636008696774848
+          ],
+          "medianPairedChangePercent": 0.4434914070467255,
+          "equalWorkChangePercent": -0.21068070598311284,
+          "fasterPairs": 1
+        },
+        "candidate.nativeParseMs": {
+          "pairedChangesPercent": [
+            2.2696929238985364,
+            0.8042895442359255,
+            -0.5398110661268607,
+            -0.6711409395973145
+          ],
+          "medianPairedChangePercent": 0.1322392390545324,
+          "equalWorkChangePercent": 0.4696410600469658,
+          "fasterPairs": 2
+        },
+        "identicalControl.nativeParseMs": {
+          "pairedChangesPercent": [
+            0.5376344086021501,
+            0.13280212483399723,
+            -2.5232403718459473,
+            -0.13368983957219305
+          ],
+          "medianPairedChangePercent": -0.00044385736909791085,
+          "equalWorkChangePercent": -0.5003335557038024,
+          "fasterPairs": 2
+        },
+        "candidate.lookupMs": {
+          "pairedChangesPercent": [
+            0.4240548470328953,
+            21.359460706844047,
+            -0.092950634071165,
+            -1.1515160651055623
+          ],
+          "medianPairedChangePercent": 0.16555210648086516,
+          "equalWorkChangePercent": 5.132158454666524,
+          "fasterPairs": 2
+        },
+        "identicalControl.lookupMs": {
+          "pairedChangesPercent": [
+            1.3211888669205196,
+            0.9699073471186592,
+            -1.9579888754208463,
+            0.9132445662384026
+          ],
+          "medianPairedChangePercent": 0.9415759566785309,
+          "equalWorkChangePercent": 0.3067015527711492,
+          "fasterPairs": 1
+        }
+      },
+      "mechanicalCounts": {
+        "attempts": 73243,
+        "boundedRanges": 73226,
+        "tailRejected": 56056,
+        "fullRejected": 17170,
+        "hits": 0,
+        "hitBytes": 0,
+        "potentialRangeBytes": 128374559
+      },
+      "componentMaxWasmHeapBytes": 73531392,
+      "rawReportSha256": "4d3745a759e1e3d4ea0c557ed4fe6cbea7b0efc32c285775cf7ad74c93b1de0d"
+    },
+    {
+      "dictionary": "vndb",
+      "rawObservationsAudited": 16,
+      "rowsPerObservation": 6648310,
+      "digest": "c16eeb559fd140bce9a29f4abbf1500c8e3572505b92d871a3ffa3a639765d2c",
+      "summary": {
+        "candidate.elapsedMs": {
+          "pairedChangesPercent": [
+            -4.513999551984793,
+            -9.843244188937339,
+            -6.631771280700671,
+            -10.335603484291022
+          ],
+          "medianPairedChangePercent": -8.237507734819005,
+          "equalWorkChangePercent": -7.755920876572143,
+          "fasterPairs": 4
+        },
+        "identicalControl.elapsedMs": {
+          "pairedChangesPercent": [
+            10.478804410743447,
+            -1.5110879950153366,
+            -2.5569361326448603,
+            -0.8872739953377229
+          ],
+          "medianPairedChangePercent": -1.1991809951765298,
+          "equalWorkChangePercent": 1.3504399560246405,
+          "fasterPairs": 3
+        },
+        "candidate.cpuMs": {
+          "pairedChangesPercent": [
+            -4.914934036902208,
+            -9.939636091425408,
+            -6.812067902413565,
+            -10.065756778147906
+          ],
+          "medianPairedChangePercent": -8.375851996919486,
+          "equalWorkChangePercent": -7.868595407380075,
+          "fasterPairs": 4
+        },
+        "identicalControl.cpuMs": {
+          "pairedChangesPercent": [
+            10.761741227607624,
+            -1.6162880400137136,
+            -3.170779542399904,
+            -0.7191141275443402
+          ],
+          "medianPairedChangePercent": -1.167701083779027,
+          "equalWorkChangePercent": 1.2833389278905427,
+          "fasterPairs": 3
+        },
+        "candidate.parseMs": {
+          "pairedChangesPercent": [
+            -5.338484032831515,
+            -11.39246897340308,
+            -7.976595431406109,
+            -12.090220871395196
+          ],
+          "medianPairedChangePercent": -9.684532202404593,
+          "equalWorkChangePercent": -9.098680077451816,
+          "fasterPairs": 4
+        },
+        "identicalControl.parseMs": {
+          "pairedChangesPercent": [
+            11.955690027571597,
+            -1.4733168223519222,
+            -2.8846858173345646,
+            -1.0075550781932119
+          ],
+          "medianPairedChangePercent": -1.240435950272567,
+          "equalWorkChangePercent": 1.6106721843048177,
+          "fasterPairs": 3
+        },
+        "candidate.nativeParseMs": {
+          "pairedChangesPercent": [
+            -6.148282097649183,
+            -13.16187594553706,
+            -8.850457782299081,
+            -12.753036437246967
+          ],
+          "medianPairedChangePercent": -10.801747109773025,
+          "equalWorkChangePercent": -10.114292736880914,
+          "fasterPairs": 4
+        },
+        "identicalControl.nativeParseMs": {
+          "pairedChangesPercent": [
+            12.192674360260902,
+            -1.6301579215486472,
+            -3.1052886948083502,
+            -1.9202363367799125
+          ],
+          "medianPairedChangePercent": -1.7751971291642799,
+          "equalWorkChangePercent": 1.3419483101391627,
+          "fasterPairs": 3
+        },
+        "candidate.lookupMs": {
+          "pairedChangesPercent": [
+            1.2641946962895778,
+            -0.6777679548661819,
+            1.880892743868956,
+            0.22082172725821358
+          ],
+          "medianPairedChangePercent": 0.7425082117738957,
+          "equalWorkChangePercent": 0.6720352131877494,
+          "fasterPairs": 1
+        },
+        "identicalControl.lookupMs": {
+          "pairedChangesPercent": [
+            1.4838994663127325,
+            -0.30923340226853835,
+            -0.17015880499225977,
+            0.802751949913727
+          ],
+          "medianPairedChangePercent": 0.3162965724607336,
+          "equalWorkChangePercent": 0.45033512858416724,
+          "fasterPairs": 2
+        }
+      },
+      "mechanicalCounts": {
+        "attempts": 6482124,
+        "boundedRanges": 6482122,
+        "tailRejected": 145754,
+        "fullRejected": 11786,
+        "hits": 6324582,
+        "hitBytes": 3759301929,
+        "potentialRangeBytes": 3851883767
+      },
+      "componentMaxWasmHeapBytes": 45219840,
+      "rawReportSha256": "a6f07b3dccc260926364f2d46052e802d81a3363351a67f777b73d751bdd405e"
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+name: JMdict prefix selector import qualification c563d487
+
+on:
+  push:
+    branches: ['perf/import-prefix-selector-qualification-20261128-c563d487']
+    paths: ['.github/workflows/import-prefix-selector-qualification-c563d487.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: REVIEW_PENDING_EXACT_PREFIX_SELECTOR_CANDIDATE_SHA
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    name: Exact candidate correctness
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_CANDIDATE }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Confirm exact candidate source
+        run: |
+          mkdir -p builds/perf/prefix-selector-validation
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git rev-parse HEAD 'HEAD^{tree}' | tee builds/perf/prefix-selector-validation/source-identity.txt
+      - name: Bind the exact product diff and frozen parser source
+        run: |
+          git fetch --no-tags origin "$PERF_BASELINE"
+          python - <<'PYTHON'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          baseline = os.environ["PERF_BASELINE"]
+          candidate = os.environ["PERF_CANDIDATE"]
+          for value in (baseline, candidate):
+              if re.fullmatch(r"[a-f0-9]{40}", value) is None:
+                  raise SystemExit("Frozen source IDs must be complete lowercase commit hashes")
+          if baseline == candidate:
+              raise SystemExit("Candidate must differ; identical controls are interleaved separately")
+          subprocess.run(["git", "merge-base", "--is-ancestor", baseline, candidate], check=True)
+          allowed = {
+              "ext/js/dictionary/wasm/term-bank-parser.c",
+              "dev/data/dictionary-wasm/term-bank-parser.wasm",
+              "dev/data/dictionary-wasm/manifest.json",
+              "test/term-bank-prefix-selector-fixtures.js",
+              "test/term-bank-prefix-selector-reuse.test.js",
+          }
+          changed = set(subprocess.check_output(["git", "diff", "--name-only", baseline, candidate], text=True).splitlines())
+          if changed != allowed:
+              raise SystemExit("Candidate changed-file set differs from the reviewed five product/test/generated files: " + repr(sorted(changed)))
+          hashes = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in sorted(changed)}
+          c_source = "ext/js/dictionary/wasm/term-bank-parser.c"
+          if hashes[c_source] != "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68":
+              raise SystemExit("Candidate C source differs from the prospective prefix-selector registration")
+          baseline_source = subprocess.check_output(["git", "show", baseline + ":" + c_source])
+          if hashlib.sha256(baseline_source).hexdigest() != "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a":
+              raise SystemExit("Baseline C source differs from the frozen registration")
+          receipt = {"baseline": baseline, "candidate": candidate, "changedFileSha256": hashes,
+                     "candidateTree": subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip(),
+                     "prospectiveCandidateCSourceSha256": hashes[c_source],
+                     "expectedChangedPackageEntries": ["js/dictionary/wasm/term-bank-parser.c", "lib/term-bank-parser.wasm"]}
+          target = Path("builds/perf/prefix-selector-validation/source-binding.json")
+          target.write_text(json.dumps(receipt, indent=2) + "\n")
+          print("MANABITAN_PREFIX_SOURCE_BINDING " + json.dumps(receipt, sort_keys=True, separators=(",", ":")), flush=True)
+          PYTHON
+      - name: Install compiler required by native unit fixtures
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          clang-21 --version | tee builds/perf/prefix-selector-validation/compiler.txt
+          wasm-ld-21 --version | tee builds/perf/prefix-selector-validation/linker.txt
+      - name: Reproduce every pinned native artifact from both frozen sources
+        run: |
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/prefix-selector-validation/native-candidate.log
+          git fetch --no-tags origin "$PERF_BASELINE"
+          BASELINE_CHECKOUT="$RUNNER_TEMP/prefix-selector-baseline-rebuild"
+          git worktree add --detach "$BASELINE_CHECKOUT" "$PERF_BASELINE"
+          test "$(git -C "$BASELINE_CHECKOUT" rev-parse HEAD)" = "$PERF_BASELINE"
+          npm --prefix "$BASELINE_CHECKOUT" run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/prefix-selector-validation/native-baseline.log
+      - name: Lint the focused production regression suite
+        run: npx eslint test/term-bank-prefix-selector-fixtures.js test/term-bank-prefix-selector-reuse.test.js 2>&1 | tee builds/perf/prefix-selector-validation/lint.log
+      - name: Check strict main types
+        run: npm run test:ts:main 2>&1 | tee builds/perf/prefix-selector-validation/types-main.log
+      - name: Check strict test types
+        run: npm run test:ts:test 2>&1 | tee builds/perf/prefix-selector-validation/types-test.log
+      - name: Run complete unit suite
+        run: npm run test:unit -- --maxWorkers=2 2>&1 | tee builds/perf/prefix-selector-validation/unit.log
+      - name: Run options unit suite
+        run: npm run test:unit:options -- --maxWorkers=2 2>&1 | tee builds/perf/prefix-selector-validation/options.log
+      - name: Validate every build target
+        run: npm run test:build 2>&1 | tee builds/perf/prefix-selector-validation/build.log
+      - name: Retain every correctness and native reproduction log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: prefix-selector-c563d487-validation-${{ github.run_attempt }}
+          path: builds/perf/prefix-selector-validation
+          if-no-files-found: warn
+          retention-days: 14
+
+  qualify:
+    name: '${{ matrix.dictionary }} (${{ matrix.order }})'
+    needs: validate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Validate the independent observer
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Fetch frozen product sources
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Bind the unchanged observer to the frozen baseline
+        run: git diff --exit-code "$PERF_BASELINE" HEAD -- dev/perf/import-qualification-20261125-a7f7.py dev/perf/import-memory-20261125-a7f7
+      - name: Run registered complete-import and separate memory cohorts
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          criteria = Path("dev/perf/import-prefix-selector-qualification-c563d487/prospective-review-criteria.json").read_bytes()
+          if hashlib.sha256(criteria).hexdigest() != "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18":
+              raise SystemExit("Prospective review criteria differ from the pre-acquisition record")
+          amendment = Path("dev/perf/import-prefix-selector-qualification-c563d487/package-entry-amendment.json").read_bytes()
+          if hashlib.sha256(amendment).hexdigest() != "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3":
+              raise SystemExit("Prospective package-entry amendment differs from the pre-acquisition record")
+          baseline = os.environ["PERF_BASELINE"]
+          candidate = os.environ["PERF_CANDIDATE"]
+          for value in (baseline, candidate):
+              if re.fullmatch(r"[a-f0-9]{40}", value) is None:
+                  raise SystemExit("Frozen source IDs must be complete lowercase commit hashes")
+          if baseline == candidate:
+              raise SystemExit("Candidate must differ; identical controls are interleaved separately")
+          subprocess.run(["git", "merge-base", "--is-ancestor", baseline, candidate], check=True)
+          dictionary = os.environ["PERF_DICTIONARY"]
+          order = os.environ["PERF_ORDER"]
+          command = [
+              "python", "dev/perf/import-qualification-20261125-a7f7.py",
+              "--baseline", baseline, "--candidate", candidate,
+              "--dictionary", dictionary, "--initial-order", order,
+              "--pairs", "12", "--flags", "{}",
+              "--expected-package-entry", "js/dictionary/wasm/term-bank-parser.c",
+              "--expected-package-entry", "lib/term-bank-parser.wasm",
+              "--evidence", f"builds/perf/prefix-selector-c563d487-{dictionary}-{order}",
+          ]
+          if dictionary == "vndb":
+              # Frozen before acquisition; every observed byte still compares
+              # exactly. A failing cohort is retained, never repaired in place.
+              command.extend(["--vndb-sah-allocation-units", "37", "37"])
+          subprocess.run(command, check=True)
+          PYTHON
+      - name: Preserve the unchanged prospective review criteria
+        if: always()
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import os
+          from pathlib import Path
+          source = Path("dev/perf/import-prefix-selector-qualification-c563d487/prospective-review-criteria.json")
+          data = source.read_bytes()
+          digest = hashlib.sha256(data).hexdigest()
+          if digest != "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18":
+              raise SystemExit("Prospective review criteria changed")
+          target = Path("builds/perf") / ("prefix-selector-c563d487-" + os.environ["PERF_DICTIONARY"] + "-" + os.environ["PERF_ORDER"])
+          target.mkdir(parents=True, exist_ok=True)
+          (target / "prospective-review-criteria.json").write_bytes(data)
+          print("MANABITAN_PROSPECTIVE_CRITERIA_SHA256 " + digest)
+          provenance = [("package-entry-amendment.json", "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3")]
+          for name, expected in provenance:
+              retained = source.with_name(name).read_bytes()
+              actual = hashlib.sha256(retained).hexdigest()
+              if actual != expected:
+                  raise SystemExit("Prospective provenance changed: " + name)
+              (target / name).write_bytes(retained)
+              print("MANABITAN_PROSPECTIVE_PROVENANCE " + name + " " + actual)
+          PYTHON
+      - name: Print every raw observation and final result as compact JSON lines
+        if: always()
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import statistics
+          
+          PREFIX = "MANABITAN_QUALIFICATION_JSON "
+          root = Path("builds/perf") / ("prefix-selector-c563d487-" + os.environ["PERF_DICTIONARY"] + "-" + os.environ["PERF_ORDER"])
+          
+          def emit(kind, value):
+              print(PREFIX + json.dumps({"kind": kind, "value": value}, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True)
+          
+          def read(path):
+              if not path.is_file():
+                  return None
+              try:
+                  return json.loads(path.read_text())
+              except Exception as error:
+                  emit("read-error", {"path": str(path), "type": type(error).__name__, "message": str(error)})
+                  return None
+          
+          def digest(value):
+              return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+          
+          def file_digest(path):
+              if not path.is_file():
+                  return None
+              result = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1048576), b""):
+                      result.update(block)
+              return result.hexdigest()
+          
+          def pick(value, keys):
+              value = value if isinstance(value, dict) else {}
+              return {key: value.get(key) for key in keys}
+          
+          def compact_validation(value):
+              value = value if isinstance(value, dict) else {}
+              result = pick(value, ("title", "revision", "termRows", "contentReadable", "probeCount", "probeTerms", "outputDigestSha256"))
+              result["restart"] = pick(value.get("restart"), ("title", "revision", "termRows", "contentReadable", "probeCount", "mediaFiles"))
+              result["media"] = pick(value.get("media"), ("mode", "totalFiles", "totalBytes", "files", "bytes", "sha256"))
+              result["storage"] = value.get("storage")
+              lookup = value.get("lookup") or {}
+              rows = lookup.get("observations") or []
+              semantic = [{key: item for key, item in row.items() if key != "elapsedMs"} for row in rows]
+              semantic.sort(key=lambda row: (row.get("pass", -1), row.get("term", "")))
+              groups = {}
+              for row in rows:
+                  groups.setdefault(row.get("pass"), []).append(row)
+              passes = []
+              for number, group in sorted(groups.items(), key=lambda item: str(item[0])):
+                  durations = [row["elapsedMs"] for row in group if type(row.get("elapsedMs")) in (int, float)]
+                  passes.append({"pass": number, "count": len(group), "elapsedCount": len(durations),
+                                 "totalMs": sum(durations), "medianMs": statistics.median(durations) if durations else None,
+                                 "maxMs": max(durations) if durations else None})
+              result["lookup"] = {"timingBoundary": lookup.get("timingBoundary"), "observationCount": len(rows),
+                                  "distinctPassTerms": len({(row.get("pass"), row.get("term")) for row in rows}),
+                                  "allExactHeadwordMatches": all(row.get("hasExactHeadwordMatch") is True for row in rows),
+                                  "semanticSha256": digest(semantic), "passes": passes}
+              return result
+          
+          plan = read(root / "registered-plan.json") or {}
+          identities = read(root / "source-identities.json") or {}
+          fixture_lock = read(Path("test/perf/dictionaries.lock.json")) or {}
+          fixture = fixture_lock.get("dictionaries", {}).get(os.environ["PERF_DICTIONARY"])
+          emit("cohort", {"dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"],
+                          "baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"],
+                          "expectedObservationCount": 42, "workflowCommit": os.environ.get("GITHUB_SHA"), "runId": os.environ.get("GITHUB_RUN_ID"),
+                          "attempt": os.environ.get("GITHUB_RUN_ATTEMPT"), "fixture": fixture,
+                          "fixtureLockSha256": file_digest(Path("test/perf/dictionaries.lock.json")),
+                          "observerSha256": file_digest(Path("dev/perf/import-qualification-20261125-a7f7.py")),
+                          "workflowSha256": file_digest(Path(".github/workflows/import-prefix-selector-qualification-c563d487.yml")),
+                          "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements"})
+          emit("registered-plan", plan)
+          emit("browser-identity", read(root / "browser-identity.json"))
+          changed = identities.get("changedPackageEntries", [])
+          for arm, identity in identities.get("arms", {}).items():
+              result = {key: value for key, value in identity.items() if key != "entries"}
+              result["packageEntryCount"] = len(identity.get("entries", {}))
+              result["packageEntriesSha256"] = digest(identity.get("entries", {}))
+              result["changedPackageEntryHashes"] = {name: identity.get("entries", {}).get(name) for name in changed}
+              emit("source-identity", {"arm": arm, **result})
+          emit("package-diff", {"changedPackageEntries": changed, "controlC": identities.get("controlC")})
+          
+          roles = {}
+          for position, item in enumerate(plan.get("schedule", []), 1):
+              roles[item["id"]] = {**item, "position": position, "authoritativeCohort": item["kind"] == "candidate"}
+          for position, arm in enumerate(plan.get("initialOrder", ""), 1):
+              roles["exhaustive-media-" + arm] = {"kind": "exhaustive-media", "arm": arm, "position": position, "authoritativeCohort": False}
+          for item in plan.get("memorySchedule", []):
+              roles["memory/" + item["name"]] = {**item, "kind": "memory", "authoritativeCohort": False}
+          
+          report_paths = sorted(root.rglob("run-1.json")) if root.is_dir() else []
+          attempted = {path.parent for path in report_paths}
+          if root.is_dir():
+              attempted.update(path.parent for path in root.rglob("run.log"))
+          for location in sorted(attempted):
+              name = location.relative_to(root).as_posix()
+              report = read(location / "run-1.json") or {}
+              summary = read(location / "summary.json") or {}
+              runs = summary.get("runs") or []
+              run = runs[0] if len(runs) == 1 else {}
+              benchmark = report.get("benchmark") or {}
+              validation = benchmark.get("validation") or {}
+              canonical = read(location / "canonical-receipt.json")
+              phases = [phase for phase in report.get("phases", [])
+                        if phase.get("name") in ((fixture or {}).get("label", "") + ": total import",
+                                                 "Import " + (fixture or {}).get("label", "") + " via file input")]
+              phase_rows = [{**pick(phase, ("name", "startMs", "endMs", "durationMs")),
+                             "browserTiming": (phase.get("data") or {}).get("browserTiming"),
+                             "importDebug": pick((phase.get("data") or {}).get("importDebug"),
+                                                 ("hasResult", "resultTitle", "errorCount", "addSettingsErrorCount", "usesFallbackStorage"))}
+                            for phase in phases]
+              emit("observation", {
+                  "id": name, "role": roles.get(name), "requestedFlags": plan.get("flags"),
+                  "report": pick(report, ("status", "failureReason", "skipReason", "skippedVerification", "buildTarget", "browserFlavor", "launchMode", "browserVersion", "packageSha256")),
+                  "benchmark": pick(benchmark, ("dictionary", "pinnedDictionaries", "productionImportDefaults", "traceEnabled", "authoritativeTiming", "phaseProfiling", "phaseScreenshots", "processSampling", "importFlags", "mediaCheck")),
+                  "summary": pick(summary, ("schemaVersion", "dictionary", "buildTarget", "authoritativeTiming", "traceEnabled", "gitSha", "source", "browserVersion", "importFlags", "mediaCheck", "timingBoundary", "timing")),
+                  "fixtureSha256": digest(summary.get("fixture")) if summary.get("fixture") is not None else None,
+                  "runCount": len(runs),
+                  "run": pick(run, ("index", "tracePath", "browserVersion", "packageSha256", "totalImportMs", "automationObservedImportMs", "workerImportMs")),
+                  "rawPhases": phase_rows, "validation": compact_validation(validation),
+                  "summaryValidationSha256": digest(run.get("validation")) if run.get("validation") is not None else None,
+                  "rawValidationSha256": digest(validation) if validation else None,
+                  "canonicalCommonSha256": digest(canonical["common"]) if isinstance(canonical, dict) and "common" in canonical else None,
+                  "canonicalMedia": canonical.get("media") if isinstance(canonical, dict) else None,
+                  "host": summary.get("hostEnvironment"), "rawHost": report.get("hostEnvironment"),
+                  "fileSha256": {filename: file_digest(location / filename) for filename in ("run-1.json", "summary.json", "canonical-receipt.json")},
+              })
+              if report.get("status") != "success" or not summary:
+                  log = location / "run.log"
+                  if log.is_file():
+                      emit("failure-log-tail", {"id": name, "lines": log.read_text(errors="replace").splitlines()[-35:]})
+          
+          for name in ("observations.json", "analysis.json", "memory/observations.json", "memory/memory-comparison.json",
+                       "memory/memory-audit.json", "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
+              value = read(root / name)
+              if value is not None:
+                  emit("result-file", {"path": name, "sha256": file_digest(root / name), "value": value})
+          if not (root / "analysis.json").is_file() and root.is_dir():
+              for path in sorted(root.glob("*.log")):
+                  emit("setup-log-tail", {"path": path.name, "lines": path.read_text(errors="replace").splitlines()[-12:]})
+          emit("extraction-complete", {"rawReportCount": len(report_paths), "attemptedObservationCount": len(attempted),
+                                       "plannedObservationCount": len(roles), "analysisPresent": (root / "analysis.json").is_file(),
+                                       "unattemptedPlannedIds": sorted(set(roles) - {path.relative_to(root).as_posix() for path in attempted})})
+          PYTHON
+      - name: Retain all original evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: prefix-selector-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: builds/perf/prefix-selector-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 14

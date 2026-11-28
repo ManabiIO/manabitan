@@ -1,0 +1,17 @@
+{
+  "artifactId": 15247819303,
+  "run": 46104620899,
+  "artifactSha256": "c3692ab68427e4b1f73a51416a021d1ac37e0d7002941e2efdc0b53336d0d5b4",
+  "bytes": 71849,
+  "observedFailure": "same-length-unequal-glossary attempts expected1 actual0; single-bank route preflight defect",
+  "timingObservations": 0,
+  "files": [
+    "diagnostic-build.json",
+    "diagnostic-source.c",
+    "diagnostic.wasm",
+    "rebuilt-candidate.diff",
+    "smoke-baseline.json",
+    "smoke-candidate.json",
+    "smoke-diagnostic.json"
+  ]
+}

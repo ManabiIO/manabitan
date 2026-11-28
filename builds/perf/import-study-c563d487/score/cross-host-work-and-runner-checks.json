@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "scope": "Cross-replicate work identities and separately provisioned job identities; no pooling or physical-hardware-independence inference",
+  "checks": [
+    {
+      "dictionary": "jmdict",
+      "fixturesEqual": true,
+      "inputsEqual": true,
+      "manifestsEqual": true,
+      "sidecarDigestEqual": true,
+      "rowsEqual": true,
+      "hostA": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+      "hostB": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+      "workerIds": {
+        "0": {
+          "jobId": 140859683797,
+          "provisionerWorkerId": "e4aab36c-bfb1-4250-a9e9-d7604492c318"
+        },
+        "1": {
+          "jobId": 140859683820,
+          "provisionerWorkerId": "6bb01b86-44c3-48e3-8947-1812392a8a11"
+        }
+      },
+      "distinctProvisionerWorkerIds": true
+    },
+    {
+      "dictionary": "jitendex",
+      "fixturesEqual": true,
+      "inputsEqual": true,
+      "manifestsEqual": true,
+      "sidecarDigestEqual": true,
+      "rowsEqual": true,
+      "hostA": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+      "hostB": "Linux ip-10-0-134-234 7.0.0-1018-aws #19-Ubuntu SMP PREEMPT Tue Nov 10 20:30:58 UTC 2026 x86_64 GNU/Linux",
+      "workerIds": {
+        "0": {
+          "jobId": 140859683789,
+          "provisionerWorkerId": "647f09e3-5a0b-4716-84de-9ffdd3a9fb5b"
+        },
+        "1": {
+          "jobId": 140859683792,
+          "provisionerWorkerId": "687cbc20-3d61-44f7-bc3e-6a32deb119c8"
+        }
+      },
+      "distinctProvisionerWorkerIds": true
+    }
+  ],
+  "note": "JMdict hosts report the same uname hostname/kernel string, which is not used as a unique identity. Original job headers record distinct provisioner Worker IDs. All per-corpus input/manifest/output digests match across those jobs."
+}

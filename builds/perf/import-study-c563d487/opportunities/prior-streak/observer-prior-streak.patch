@@ -1,0 +1,106 @@
+--- run-3/observer-source.mjs
++++ observer-prior-streak.mjs
+@@ -53,10 +53,13 @@
+ const makeSelectorCell = () => ({counters: selectorEmptyCounters(), maxima: selectorEmptyMaxima()});
+ const makeSelectorStats = () => ({...makeSelectorCell(), byKeyKind: {}, bySelectedDistance: {},
+     bySelectedLength: {}, oraclePrefixCandidateCount: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0}});
+-const makeStats = () => ({...emptyCounters(), byPriorSequence: Object.fromEntries(categories.map((name) => [name, emptyCounters()])), extension: {missingWitnessFullContent: {}, adjacentGlossaryAtZeroLookback: {}, keyAtZeroLookback: {}, existingWitnessIntersection: {}}, selector: makeSelectorStats()});
+-const report = {schema: 1, complete: false, extension: 'One separately recorded generic prefix-selector pass; run-1 and run-2 are preserved unchanged',
++const makeStats = () => ({...emptyCounters(), byPriorSequence: Object.fromEntries(categories.map((name) => [name, emptyCounters()])), extension: {missingWitnessFullContent: {}, adjacentGlossaryAtZeroLookback: {}, keyAtZeroLookback: {}, existingWitnessIntersection: {}}, selector: makeSelectorStats(), priorStreakSelector: {zero: makeSelectorStats(), positive: makeSelectorStats()}});
++const report = {schema: 1, complete: false, extension: 'One untimed prior-streak-nonzero partition of the frozen run-3 selector; all previous results remain unchanged',
+     scope: 'Untimed baseline opportunity observer. Sequence-span equality only rejects candidates; a complete bounded glossary equality proof is mandatory. Hypothetical witnesses never alter the replay budget, streak, metadata, or outputs. Byte counts describe offered ranges/reusable validation, not avoided I/O or predicted runtime.',
+     selectorProtocol: 'At ORIGINAL lookback0 with an existing bounded adjacent-key identity, select the FIRST newest-first prior record among the unchanged four-row window whose definitionTags and rules lengths and raw first up-to-four-byte signatures match. Attempt only that glossary, bounded to the current logical bank, using opener, tail/middle rejection samples and complete raw equality. No dictionary/tag/distance literal, added cap, second attempt, or hypothetical state update. Ambiguity/later-match/actual extent/content/hints are separate post-admission oracle work. Signature bytes are complete field-signature reads; logical equality bytes include the first mismatch and overlapping samples. All run-2 legacy totals/banks/groups must match exactly.',
++    priorStreakProtocol: 'Partition ONLY the ORIGINAL pre-row recent_content_match_streak === 0 versus != 0 at original lookback0. Reuse the exact run-3 key admission, first prefix selection and complete glossary proof once; no new witness affects original budget/streak/state. All original run-3 scalar, bank, group and metadata results must reconcile.',
++    parentObserverSha256: '548b43bb6f16301aa279bd35dd2f559298f4e69a246770cf24731c3853ad3dad',
++    parentResultSha256: 'adfe631bc36931eef394075c456b75bd0252001f0613171ebcc2a009fa5cb362',
+     node: process.version, observerSha256: sha(scriptBytes), wasmSha256: sha(wasmBytes), fixtureLockSha256: sha(lockBytes),
+     baselineCSourceSha256: sha(await readFile(path.join(root, 'ext/js/dictionary/wasm/term-bank-parser.c'))),
+     constants: {banksPerGroup: 7, recentWindow: 4, probeBudget: 4, admissionMatches: 4, longGlossaryBytes: 512},
+@@ -180,8 +183,12 @@
+     for (const [name, value] of Object.entries(counters)) { cell.counters[name] += value; }
+     for (const [name, value] of Object.entries(maxima)) { cell.maxima[name] = Math.max(cell.maxima[name], value); }
+ }
+-function observeSelector(bytes, current, cache) {
+-    const contexts = [report.totals.selector, bankStats.selector, groupStats.selector];
++function observeSelector(bytes, current, cache, priorStreak) {
++    assert(Number.isInteger(priorStreak) && priorStreak >= 0 && priorStreak < report.constants.admissionMatches,
++        'Original zero lookback cannot retain a streak that already refreshed the original budget');
++    const partition = priorStreak === 0 ? 'zero' : 'positive';
++    const contexts = [report.totals, bankStats, groupStats].flatMap((stats) =>
++        [stats.selector, stats.priorStreakSelector[partition]]);
+     for (const stats of contexts) { ++stats.counters.zeroLookbackRows; }
+     const keys = keyEvidence(current, cache.at(-1));
+     if (!keys.existingComparisons) {
+@@ -435,7 +442,7 @@
+             else { update('firstRows'); }
+             if (prior) {
+                 update(lookback === 0 ? 'existingLookbackZero' : 'existingLookbackPositive');
+-                if (lookback === 0) { observe(bytes, current, prior, state.streak); bucketZeroLookback(bytes, current, prior); observeSelector(bytes, current, state.cache); }
++                if (lookback === 0) { observe(bytes, current, prior, state.streak); bucketZeroLookback(bytes, current, prior); observeSelector(bytes, current, state.cache, state.streak); }
+             }
+             let witness = null;
+             for (let i = state.cache.length - 1; i >= Math.max(0, state.cache.length - lookback); --i) {
+@@ -515,6 +522,51 @@
+         }
+     }
+     report.legacyRun2Reconciled = true;
++    const parentResultBytes = await readFile(new URL('./run-3/result.json', import.meta.url));
++    assert.equal(sha(parentResultBytes), report.parentResultSha256);
++    const parentResult = JSON.parse(parentResultBytes);
++    assert(parentResult.complete && parentResult.failures.length === 0);
++    for (const key of ['node', 'wasmSha256', 'fixtureLockSha256', 'baselineCSourceSha256', 'archiveSha256',
++        'metadataDigest', 'constants', 'limits', 'maxima', 'hitGlossaryLengthHistogram', 'selectorProtocol', 'legacyRun2Reconciled']) {
++        assert.deepEqual(report[key], parentResult[key], `Run-3 ${key} differs`);
++    }
++    compareLegacyStats(report.totals, parentResult.totals);
++    for (const collection of ['banks', 'groups']) {
++        assert.equal(report[collection].length, parentResult[collection].length);
++        for (let i = 0; i < report[collection].length; ++i) {
++            compareLegacyStats(report[collection][i], parentResult[collection][i]);
++        }
++    }
++    const checkCells = (original, zero, positive) => {
++        for (const name of selectorCounterNames) {
++            assert.equal(original.counters[name], (zero?.counters[name] ?? 0) + (positive?.counters[name] ?? 0), name);
++        }
++        for (const name of Object.keys(selectorEmptyMaxima())) {
++            assert.equal(original.maxima[name], Math.max(zero?.maxima[name] ?? 0, positive?.maxima[name] ?? 0), name);
++        }
++    };
++    for (const stats of [report.totals, ...report.banks, ...report.groups]) {
++        const {zero, positive} = stats.priorStreakSelector;
++        checkCells(stats.selector, zero, positive);
++        for (const partition of [zero, positive]) {
++            const c = partition.counters;
++            assert.equal(c.zeroLookbackRows, c.keyRejected + c.admissions);
++            assert.equal(c.admissions, c.noPrefixCandidate + c.selected);
++            assert.equal(c.selected, c.boundsRejected + c.openerRejected + c.tailRejected + c.middleRejected + c.fullRejected + c.hits);
++            assert.equal(c.fullBytesOffered, c.hitBytes + c.failedFullBytesOffered);
++            assert.equal(c.fullLogicalBytesCompared, c.hitBytes + c.failedFullLogicalBytesCompared);
++        }
++        for (const key of Object.keys(stats.selector.oraclePrefixCandidateCount)) {
++            assert.equal(stats.selector.oraclePrefixCandidateCount[key], zero.oraclePrefixCandidateCount[key] + positive.oraclePrefixCandidateCount[key]);
++        }
++        for (const collection of ['byKeyKind', 'bySelectedDistance', 'bySelectedLength']) {
++            assert.deepEqual([...new Set([...Object.keys(zero[collection]), ...Object.keys(positive[collection])])].sort(), Object.keys(stats.selector[collection]).sort());
++            for (const key of Object.keys(stats.selector[collection])) {
++                checkCells(stats.selector[collection][key], zero[collection][key], positive[collection][key]);
++            }
++        }
++    }
++    report.legacyRun3Reconciled = true;
+     report.complete = true;
+ } catch (error) {
+     report.failures.push({...currentLocation, message: String(error), stack: error.stack});
+@@ -522,6 +574,8 @@
+ } finally {
+     report.maxRssKiB = process.resourceUsage().maxRSS;
+     await save();
+-    console.log(JSON.stringify({complete: report.complete, totals: report.totals, maxima: report.maxima,
+-        metadataDigest: report.metadataDigest, maxRssKiB: report.maxRssKiB, failures: report.failures}));
+-}
++    console.log(JSON.stringify({complete: report.complete, priorStreakPositive: report.totals.priorStreakSelector.positive.counters,
++        originalSelectorHits: report.totals.selector.counters.hits, originalSelectorHitBytes: report.totals.selector.counters.hitBytes,
++        metadataDigest: report.metadataDigest, legacyRun3Reconciled: report.legacyRun3Reconciled,
++        maxRssKiB: report.maxRssKiB, failures: report.failures}));
++}

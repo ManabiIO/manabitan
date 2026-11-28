@@ -1,0 +1,19 @@
+{
+  "recordedAtUtc": "2026-11-28 05:46:33 UTC",
+  "idea": "Reuse precompiled Zstd compression dictionaries across frames",
+  "outcome": "Do not start a duplicate native/WASM integration experiment from the current evidence",
+  "primaryEvidence": "https://github.com/ManabiIO/manabitan/blob/3d7b4528c295a3e0f9cf97e8d6967896c51d2310/dev/perf/import-experiments-20260914.md",
+  "priorPr": "https://github.com/ManabiIO/manabitan/pull/903",
+  "priorScope": {
+    "library": "native libzstd 1.5.7",
+    "corpus": "50 canonical blocks from 56555 Jitendex rows",
+    "inputBytes": 51564333,
+    "compressedBytes": 4203636,
+    "observations": 6,
+    "medianDecreasePercent": 1.08,
+    "directions": "mixed",
+    "additionalCDictBytes": 47680,
+    "perContextBytes": 549920,
+    "limitations": "Native-only screen included output hashing, no A/A controls, no WASM integration or import gain"
+  }
+}

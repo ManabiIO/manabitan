@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 06:02:50 UTC",
+  "runId": 46104113507,
+  "candidate": "1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+  "workflow": "93e4b8081d24eb3b368523211b2cf4f40b95fa17",
+  "plannedObservations": 192,
+  "measuredObservations": 128,
+  "completedCells": 4,
+  "failedBeforeTimingCells": 2,
+  "pendingCells": 0,
+  "cells": [
+    {
+      "label": "jmdict-0",
+      "jobId": 140859683797,
+      "status": "complete",
+      "measuredObservations": 32,
+      "artifactId": 15249811031,
+      "artifactSha256": "94c07b0cb849922b16a73278f60d705a870ffdd1ef0327aa1942cf0c4327a5dc",
+      "boundaries": {
+        "validator": {
+          "medianPairedChangePercent": -71.37347858117508,
+          "fasterPairs": 4,
+          "candidatePairRangePercent": [
+            -71.44659241997499,
+            -68.31117349864557
+          ],
+          "controlMedianChangePercent": -0.14298712976623107,
+          "controlPairRangePercent": [
+            -1.251884048247831,
+            -0.028169146389478428
+          ]
+        },
+        "sidecar": {
+          "medianPairedChangePercent": -1.7317207451549468,
+          "fasterPairs": 2,
+          "candidatePairRangePercent": [
+            -13.816548119435767,
+            9.555364302254855
+          ],
+          "controlMedianChangePercent": 0.9146417527807982,
+          "controlPairRangePercent": [
+            -0.8426029180464201,
+            47.73039697608954
+          ]
+        }
+      }
+    },
+    {
+      "label": "jmdict-1",
+      "jobId": 140859683820,
+      "status": "complete",
+      "measuredObservations": 32,
+      "artifactId": 15250001320,
+      "artifactSha256": "1393d8a46d8a785dbeabdf453847900b1a3ceeb6189ba24941eb80c7cef654e0",
+      "boundaries": {
+        "validator": {
+          "medianPairedChangePercent": -71.15414521304889,
+          "fasterPairs": 4,
+          "candidatePairRangePercent": [
+            -71.29842531399484,
+            -70.70329155669734
+          ],
+          "controlMedianChangePercent": -0.04523935274161617,
+          "controlPairRangePercent": [
+            -0.11060364554769109,
+            0.10951147581834686
+          ]
+        },
+        "sidecar": {
+          "medianPairedChangePercent": -10.07250449141781,
+          "fasterPairs": 3,
+          "candidatePairRangePercent": [
+            -13.706266719655025,
+            10.186781956220315
+          ],
+          "controlMedianChangePercent": -29.840704416376006,
+          "controlPairRangePercent": [
+            -46.195104190246894,
+            3.306077524277762
+          ]
+        }
+      }
+    },
+    {
+      "label": "jitendex-0",
+      "jobId": 140859683789,
+      "status": "complete",
+      "measuredObservations": 32,
+      "artifactId": 15249357490,
+      "artifactSha256": "c643b12548e6377bc3cd9750412f5bb26ad1d947c9ca548ab11e89aca72798e6",
+      "boundaries": {
+        "validator": {
+          "medianPairedChangePercent": -68.95407230894249,
+          "fasterPairs": 4,
+          "candidatePairRangePercent": [
+            -69.16976912627204,
+            -63.54442683394391
+          ],
+          "controlMedianChangePercent": -0.035601733411677605,
+          "controlPairRangePercent": [
+            -0.07386772859929724,
+            0.09164621092461189
+          ]
+        },
+        "sidecar": {
+          "medianPairedChangePercent": -40.119909218591175,
+          "fasterPairs": 4,
+          "candidatePairRangePercent": [
+            -54.7376367996478,
+            -34.460319984159014
+          ],
+          "controlMedianChangePercent": -12.010565625873365,
+          "controlPairRangePercent": [
+            -15.716012959558167,
+            66.68631540495937
+          ]
+        }
+      }
+    },
+    {
+      "label": "jitendex-1",
+      "jobId": 140859683792,
+      "status": "complete",
+      "measuredObservations": 32,
+      "artifactId": 15249877315,
+      "artifactSha256": "f7ad0f31831c9e71c266468bbd1d33bea21e5067076d49db77dd77d29331a0b8",
+      "boundaries": {
+        "validator": {
+          "medianPairedChangePercent": -72.47712415495646,
+          "fasterPairs": 4,
+          "candidatePairRangePercent": [
+            -74.49531779055,
+            -68.68417399862754
+          ],
+          "controlMedianChangePercent": -0.12923571226073904,
+          "controlPairRangePercent": [
+            -6.533154265320662,
+            -0.07135556652749786
+          ]
+        },
+        "sidecar": {
+          "medianPairedChangePercent": -28.900980677283574,
+          "fasterPairs": 3,
+          "candidatePairRangePercent": [
+            -56.79772063218951,
+            2.292510876461562
+          ],
+          "controlMedianChangePercent": -12.93591080118587,
+          "controlPairRangePercent": [
+            -48.5140826859679,
+            28.572894530419358
+          ]
+        }
+      }
+    },
+    {
+      "label": "vndb-1",
+      "jobId": 140859683779,
+      "status": "failed before timing",
+      "measuredObservations": 0,
+      "artifactId": 15249857359,
+      "artifactSha256": "9da45a84ef0efd4b6c23f926816afae9dbed041f20f2b5d705bc6f55a60a80e0",
+      "failure": "V8 reached --max-old-space-size=512 during observer preparation before any SCORE_PREP_PROGRESS/SCORE_PREPARED/SCORE_PLAN/SCORE_OBSERVATION; process aborted with heap out of memory"
+    },
+    {
+      "label": "vndb-0",
+      "jobId": 140859683791,
+      "status": "failed before timing",
+      "measuredObservations": 0,
+      "artifactId": 15251122640,
+      "artifactSha256": "a6f14b937c673ae5d4774684bca0de5b55f5c57dafdba50c3c24954d39b05ec5",
+      "failure": "V8 reached --max-old-space-size=512 during observer preparation before any SCORE_PREP_PROGRESS/SCORE_PREPARED/SCORE_PLAN/SCORE_OBSERVATION; process aborted with heap out of memory"
+    }
+  ],
+  "conclusion": "Large isolated validator reductions are consistent on JMdict and Jitendex; enclosing sidecar variation overlaps broad identical-code controls. Both VNDB cells aborted during untimed preparation and contribute no runtime comparison. No promotion or complete-import gain conclusion; all128 measured observations and both failures retained without retry.",
+  "externalOverlap": "Independent-overlap-review.json documents a separate identical-tree candidate with all three complete-import screens inconclusive. Results are not pooled and no duplicate PR/full-import score study is planned."
+}

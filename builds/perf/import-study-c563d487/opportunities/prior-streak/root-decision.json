@@ -1,0 +1,28 @@
+{
+  "recordedAtUtc": "2026-11-28 05:54:45 UTC",
+  "status": "Untimed opportunity only; not implemented or timed; frozen current cohort unchanged",
+  "originalPrefixC": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "frozenCurrentRun": 46110806989,
+  "currentRunStatus": "All four jobs were queued at the root 05:50 UTC read; no candidate execution result observed",
+  "prospectiveSinglePrecondition": "Require original prior recent_content_match_streak != 0 in addition to unchanged original lookback==0, adjacent-key identity and first tag/rule-prefix candidate selection.",
+  "existingAdmissionMatches": 4,
+  "originalStateUnaffected": true,
+  "counts": {
+    "extraGlossaryProofs": 44102,
+    "extraGlossaryProofBytes": 8059365,
+    "admissions": 44466,
+    "priorMetadataInspections": 100878,
+    "selected": 44181,
+    "tailRejected": 75,
+    "middleRejected": 3,
+    "fullRejected": 1,
+    "failedFullBytesOffered": 31,
+    "failedFullBytesCompared": 8,
+    "fullContentWitnesses": 43068
+  },
+  "retainedResultSha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31",
+  "observerSha256": "f21076ad64cc8624afdd4af502a2f1730c9def0cac53e0f07cf1f24f42ee32c7",
+  "auditSha256": "83f920edc827c4af098d322e88352bd1ccaacfef006ad3f2298027a6e39a6bc0",
+  "nextDecision": "Wait for frozen current prefix results before deciding whether to implement a separate candidate.",
+  "futureNegativeControlRequirement": "Existing all-unique controls would deactivate under this predicate. Also test an active repeating pattern that creates a prior exact full-content match followed by a same-header almost-equal glossary whose full proof fails. Keep old controls and all prior results; freeze a new schedule before timing."
+}

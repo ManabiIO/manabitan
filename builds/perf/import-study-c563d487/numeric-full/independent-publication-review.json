@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-11-28 05:46:30 UTC",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "candidateTree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07",
+  "toolingCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+  "toolingBranch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+  "runId": 46113243549,
+  "runAttempt": 1,
+  "event": "push",
+  "createdAtUtc": "2026-11-28T05:41:31Z",
+  "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167",
+  "criteriaSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+  "packageAmendmentSha256": "e42417d5a60f7205770debc05e2826e3189dbf229ab7e3c15c497685a6d70de3",
+  "sourceHistoryAmendmentSha256": "d04ab718e4a0a739b02a526fdbb59627063011787ac3153668d0989bb407bff5",
+  "githubApiChecks": {
+    "publishedWorkflowByteIdenticalToReviewedBoundVersion": true,
+    "toolingContainsExactlySevenAddedWorkflowAndEvidenceFiles": true,
+    "toolingBaseAndMergeBaseAreFrozenBaseline": true,
+    "runUsesFrozenToolingCommit": true,
+    "runIsFirstPushAttempt": true,
+    "changedPaths": [
+      ".github/workflows/import-numeric-suffix-qualification-c563d487.yml",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/component-promotion-decision.json",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/package-entry-amendment.json",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/prospective-review-criteria-v2.json",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/prospective-review-criteria.json",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/shallow-history-reproduction.json",
+      "dev/perf/import-numeric-suffix-qualification-c563d487/source-history-amendment.json"
+    ]
+  },
+  "qualificationStatusAtReview": "queued",
+  "productPullRequestOpened": false
+}

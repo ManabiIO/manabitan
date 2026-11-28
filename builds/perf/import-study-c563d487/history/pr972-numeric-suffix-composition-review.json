@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only composition hazard; no merge, product edit, build, test or timing",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "numericProduct": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "otherPullRequest": {
+    "number": 972,
+    "url": "https://github.com/ManabiIO/manabitan/pull/972",
+    "head": "32c643f9be41f04a6e824ca40d3a0649da87a050",
+    "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "title": "perf(import): fast path compact structured glossary lists",
+    "parserGitBlob": "403272a3e65cbd4084f6211a46df7d3db78979ac"
+  },
+  "sources": [
+    "https://api.github.com/repos/ManabiIO/manabitan/pulls/972",
+    "https://api.github.com/repos/ManabiIO/manabitan/pulls/972/files?per_page=100",
+    "https://github.com/ManabiIO/manabitan/blob/32c643f9be41f04a6e824ca40d3a0649da87a050/ext/js/dictionary/wasm/term-bank-parser.c",
+    "https://github.com/ManabiIO/manabitan/blob/399feae29fea358560af27af68f03dfb6d8b6f58/ext/js/dictionary/wasm/term-bank-parser.c"
+  ],
+  "independentSourceCheck": {
+    "githubPrHeadAndBaseRead": true,
+    "githubParserDiffRead": true,
+    "numericReviewedPatchRead": true
+  },
+  "findings": [
+    "PR972 adds score_token_end and sequence_token_end output pointers to parse_format3_row and parse_row_single_pass.",
+    "Its strict parser sets those outputs when it scans the score and non-null sequence; the fused caller initializes both to zero and consumes them directly in parse_int32_token instead of rescanning.",
+    "The numeric suffix candidate returns early after expression/reading and a complete suffix equality proof, before those numeric-scan assignments would execute in a naive combination.",
+    "Copying current TermRowMeta fields alone cannot populate the new token-end outputs. A naive textual combination would leave them at zero on successful suffix reuse."
+  ],
+  "decision": "Do not mix the candidates or treat their independent evidence as combined qualification. A future composition must establish the numeric token-end outputs on every reuse path and undergo separate correctness and performance qualification.",
+  "currentFrozenBaselineUnchanged": true,
+  "currentNumericProductAffected": false,
+  "combinedCandidateImplemented": false,
+  "combinedCandidateTested": false
+}

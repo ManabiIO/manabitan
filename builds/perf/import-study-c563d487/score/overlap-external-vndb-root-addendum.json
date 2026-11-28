@@ -1,0 +1,26 @@
+{
+  "observedAtUtc": "2026-11-28 04:58:16 UTC",
+  "source": "Root's independent primary fetch of external VNDB job logs, communicated in this thread; this child did not expand the external audit.",
+  "jobId": 140853370720,
+  "jobConclusion": "failure",
+  "artifactId": 15248364821,
+  "reportedSummary": {
+    "candidateMedianPairedChangePercent": -0.978497,
+    "fasterPairs": 4,
+    "totalPairs": 6,
+    "descriptiveBootstrap95Percent": [
+      -3.016732,
+      4.174987
+    ],
+    "equalWorkChangePercent": 0.034648,
+    "controlMedianPairedChangePercent": -0.298371,
+    "controlRangePercent": [
+      -1.66423,
+      1.06749
+    ],
+    "memoryPassed": false
+  },
+  "precision": "Values retained at the precision supplied in root's message; original logs/artifact remain authoritative.",
+  "failureReason": "Only generic separate memory qualification failure was exposed in the fetched log; no more specific cause inferred.",
+  "conclusion": "All three external identical-source one-host screens are inconclusive; no pooling or import-speedup claim."
+}

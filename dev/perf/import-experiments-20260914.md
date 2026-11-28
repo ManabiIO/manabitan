@@ -1,5 +1,103 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: JMdict-priority import study checkpoint
+
+This study freezes product source at `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. No performance PR has qualified. The publication-receipt candidate is rejected; the original suffix, local-hint and score experiments do not establish full-import gains. Corrected numeric-suffix components are complete and its published full qualification awaits correctness validation. The original prefix-selector cohort remains pending. This checkpoint records owner-audited results available on November 28; a queued or unaudited cell supplies no result.
+
+The machine evidence index is [builds/perf/import-study-c563d487/evidence-index.json](../../builds/perf/import-study-c563d487/evidence-index.json). It binds exact product/tooling commits, original artifact hashes and CI links, per-cell audits, failed acquisitions, and replay inputs. Small audit files and the profile analysis are preserved beside it; large raw archives and traces remain linked by verified hashes. The previous content of this canonical document is preserved byte for byte below this section. Historical baselines and fixtures in that content do not replace this study's identities.
+
+### Locked fixtures and acquisition rules
+
+`test/perf/dictionaries.lock.json` has SHA-256 `60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89`. The index retains the full selected records, including media counts and Jitendex's unreferenced paths.
+
+| Corpus and release | Term rows | Archive bytes | Archive SHA-256 |
+| --- | ---: | ---: | --- |
+| JMdict 2026-11-22 | 528,299 | 15,645,766 | `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f` |
+| Jitendex 2026.10.03.0 | 436,555 | 38,831,822 | `e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356` |
+| VNDB Characters by Bee 1.0.0 | 6,648,310 | 291,705,969 | `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` |
+
+No worker count, batch size, cache, compression level or dictionary-specific threshold was tuned. Full-import observations use fresh browser profiles, production defaults and the unchanged `a7f7` observer, from the page's file-input change to the post-UI completion event. Native component screens cover compressed inflate, CRC, strict parse and completed lookup construction in fixed groups of 7/10/4 banks. They use fresh Node processes, two excluded warmups, four alternating candidate pairs and four same-code control pairs per corpus; VNDB explicitly activates the escaped-key route. They exclude browser orchestration, persistence, media import and post-UI work. Component WASM maxima are not whole-process or browser-memory qualification.
+
+### Results and unresolved cells
+
+All percentages below are median paired candidate/baseline changes; negative values mean less elapsed time at the stated boundary. No control subtraction, pooling, timing-directed trimming or replacement observations were used.
+
+| Experiment and original CI run | Audited coverage | Decision at this checkpoint |
+| --- | --- | --- |
+| Publication receipt, [46102247054](https://github.com/ManabiIO/manabitan/actions/runs/46102247054) | All 252 full-import observations, six independent corpus/order cells | **Reject.** AB/BA medians: JMdict −0.2225%/+0.4431%; Jitendex +1.0788%/+1.6132%; VNDB +0.2687%/−1.7818%. Every descriptive interval crosses zero. JMdict AB and VNDB AB also fail memory sampling coverage; that is not an established memory regression. Semantic/storage/package checks pass. |
+| Original admitted row suffix, [46102733673](https://github.com/ManabiIO/manabitan/actions/runs/46102733673) | All 48 component observations | **Hold.** JMdict +1.3360% with zero reuse hits; Jitendex −0.5220% with zero hits; VNDB −8.2375%, four of four faster, 6,324,582 hits. Same-code medians −0.6886%/+0.3766%/−1.1992%; retain the VNDB +10.4788% control outlier. Original semantic/key/index/media digest excludes exact dedup-plan columns. Numeric admission is a separate refinement. |
+| Composite local hints, [46103359353](https://github.com/ManabiIO/manabitan/actions/runs/46103359353) | All 48 component observations | **Reject.** JMdict +0.4346%, Jitendex +1.4159%, VNDB −2.7810%; control medians −0.5485%/−0.3373%/−1.9005%. No convincing improvement beyond controls. Native 17-word/every-row/both-export oracle, synthetic cases and focused tests pass. |
+| Indexed compact-score validation, [46104113507](https://github.com/ManabiIO/manabitan/actions/runs/46104113507) | Four measured cells complete, 128 of 192 planned observations; both VNDB cells failed untimed preparation; none pending | **Inconclusive; no promotion.** JMdict hosts 0/1: validator −71.3735%/−71.1541%, enclosing sidecar −1.7317%/−10.0725%. Jitendex: validator −68.9541%/−72.4771%, sidecar −40.1199%/−28.9010%. All sidecar controls remain: JMdict host 0 has a +47.7304% outlier and host 1 a −29.8407% median; Jitendex host 0 has a +66.6863% outlier and host 1 ranges −48.5141% to +28.5729%. No enclosing-path qualification. |
+| Original numeric-suffix preflight, [46104620899](https://github.com/ManabiIO/manabitan/actions/runs/46104620899) | All three cells failed before timing; zero timed observations | **Preserve failure.** Single-bank synthetic fixtures did not enter default fused parsing. The separately named corrected cohort appends an empty second bank to those synthetic cases and verifies the public fused-attempt counter. No original result was relabeled or replaced. |
+| Corrected numeric suffix, [46106358342](https://github.com/ManabiIO/manabitan/actions/runs/46106358342) | All 48 component observations audited | **Full qualification published; no PR.** VNDB elapsed −8.6463%, four of four faster, CPU −8.5642%; same-code elapsed median +0.1026%, range −1.0071% to +1.7005%. It retains 6,324,582 suffix hits. JMdict elapsed −1.4646% is within its control range −3.1173% to +4.6312%, with zero attempts/hits. Jitendex is a non-target concern: elapsed +1.7190% with three of four slower, native +3.2002% with all four slower, against control median +0.2678% and range −2.4132% to +3.4931%. Rich outputs, dedup columns and media match; this does not prove Jitendex nonregression. |
+| Numeric full qualification, [46113243549](https://github.com/ManabiIO/manabitan/actions/runs/46113243549) | Correctness job `140881240942` queued at 05:55 UTC; zero full-import observations | **Pending.** All 252 planned observations and all full-browser qualification gates remain outstanding. Product `399feae29fea358560af27af68f03dfb6d8b6f58`; tooling `ee9450923d14e95b7958feeffffde4998cf8c5d9`. |
+| JMdict prefix selector, [46110806989](https://github.com/ManabiIO/manabitan/actions/runs/46110806989) | All 96 planned observations pending: 48 corpus components and 48 synthetic negatives | **Pending.** Frozen tooling `268296d7ddd1933cb756fcd9794a89ba40386e23`; 22-file manifest SHA-256 `42c33c25a69695ea876f07fb2059011946763cc5f5c2c4b45feab4c7bbca2483`. Candidate compilation, correctness, oracle, mechanics and timing are not yet established. Untimed selector opportunities are not gains. |
+
+The receipt candidate is `eb52c4f58d6ad15690d3f124ac2aba09bd9e7907`. Its [combined index](../../builds/perf/import-study-c563d487/receipt/combined-evidence-index.json), SHA-256 `8e9f872b82a68c3240ced2885444e51ed9d71526fb68ac6c125fa6f0f9743104`, preserves all 252 reports and the two memory-coverage failures. Hosted validation passed lint, both strict type checks, 15,141 unit tests, 32 options tests and build checks. Avoiding the extra marker-cleanup transaction did not yield a worthwhile replicated completion-time gain.
+
+The score candidate `1aa5ac5fed41f761244fe80af0cf011d93dfe4a7` restores the two-line indexed loop accepted in #944 (`e7a0780cfe7e952d5440de5b0fdcc88d53e60203`) and overwritten by the #897 integration commit `a35b064d5d37960429ce591c9f6f17a2df0486c5`. The bounded ancestry audit found no other currently lost import-runtime hunk. Both VNDB jobs aborted in untimed `prepare.mjs` at the observer's 512 MiB V8 limit (exit 134), before a plan or any measured observation. The [final score index](../../builds/perf/import-study-c563d487/score/final-evidence-index.json) preserves all 128 measured observations and both failures; neither failure supports product-runtime or product-memory inference, and neither was retried. Concurrent candidate `7e488d809ba18ce120f5766651bdfdf622561fab` has the identical whole Git tree. Its independent [full-import run 46104264150](https://github.com/ManabiIO/manabitan/actions/runs/46104264150) reports inconclusive results on all three corpora. Results are not pooled; no duplicate PR or further full-import score study is planned.
+
+### Three baseline profiles and corrected interpretation
+
+[Run 46105388810](https://github.com/ManabiIO/manabitan/actions/runs/46105388810) contains three unchanged JMdict baseline observations with a constant package SHA-256 `ff1704be8eef0f2546a2fa5e0e0ea438d93a9d4c2222d020c2f94d9dee6ab7b9`. The original ZIP is artifact `15248970912`, SHA-256 `cfa56814d23e85daa1ad9c61dc3b7ded41a7db79ae75d8ade6b7aa7bbd3cfaad`. The [complete analysis](../../builds/perf/import-study-c563d487/profiles/independent-profile-analysis.json) hashes to `e164348ac4f66d7b6e37cf787f7631f77564896fac5225c31fa088c6ab940133`; its [replay script](../../builds/perf/import-study-c563d487/profiles/independent-profile-analysis.py) hashes to `b5645750f12924b25771d8ceb74bd37428a48597948bf897c9a4c4124e1a5811`.
+
+Profiles are linked by `(pid, id)` and owned by `Profile.tid`, not the sampling thread's `ProfileChunk.tid`. Signed deltas and sample pairs remain intact; the long first interval is reported separately, paired samples are sorted by timestamp, and there is no tail extrapolation. Large first-message-handler attributions do not establish recurring handler CPU or serialization work. Parallel parser weights overlap; their sums cannot be added to import wall time. SQLite `Atomics.wait` samples likewise do not prove CPU use. The frozen trace ends at worker completion and omits the later UI tail covered by the raw full-import report.
+
+Bulk finalization is 31/32/38 ms in the three repeats, so the initial 479 ms profile outlier was not reproduced. Composite glossary validation and the fused parser recur, but function samples do not identify a removable suboperation. The prefix selector and separately owned structured-glossary work already address that frontier. These profiles justify source investigation only. The canonical-scanner configuration-snapshot proposal is fully covered by draft [#880](https://github.com/ManabiIO/manabitan/pull/880), head `2dfa72962c9d9f1976011e41b9bbce2375f4dbb5`; current and prior baseline scanner blobs are identical. No duplicate implementation or unchanged requalification was made.
+
+### Untimed opportunity and composition limits
+
+One additional read-only opportunity count applies the single predicate **original prior `recent_content_match_streak != 0`** to the original prefix selection. It retains 44,102 glossary proofs covering 8,059,365 bytes from 44,466 admissions. The existing `admissionMatches = 4`, original state updates and frozen prefix candidate remain unchanged. The [exact result](../../builds/perf/import-study-c563d487/opportunities/prior-streak/result.json.gz) is retained as deterministic gzip: decompression reproduces all 5,094,430 original bytes and SHA-256 `c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31`. Observer, patch, independent reconciliation and root decision are indexed. **This predicate is not implemented or timed.** Wait for the original queued prefix cohort before deciding whether to create a separate candidate; any later screen must include an active repeating negative case because all-unique streams deactivate this predicate.
+
+Precompiled Zstd dictionary reuse was dropped as a duplicate of the existing [#903](https://github.com/ManabiIO/manabitan/pull/903) native-only investigation, which did not establish a WASM or import gain. Separately, [#972](https://github.com/ManabiIO/manabitan/pull/972), head `32c643f9be41f04a6e824ca40d3a0649da87a050`, adds numeric token-end outputs that a naive combination would skip at the suffix-reuse early return. A future composition must populate those outputs and qualify the combined source. Neither idea changes this study's frozen baseline or candidate.
+
+### Replay and the next qualification gate
+
+The index's `publishedWorkflows` map contains every exact commit, branch, workflow path and original run ID. Recover the original evidence and inspect immutable setup with the following commands; use an unused output directory and verify the ZIP hashes recorded in the index when fetching individual artifact archives:
+
+```bash
+gh run download 46102247054 --repo ManabiIO/manabitan --dir builds/perf/receipt-original-retrieved
+git fetch origin 268296d7ddd1933cb756fcd9794a89ba40386e23
+git show 268296d7ddd1933cb756fcd9794a89ba40386e23:.github/workflows/jmdict-prefix-selector-component-c563d487.yml
+```
+
+For an explicitly reviewed reproduction of a dispatchable component workflow, this recipe checks its branch still names the frozen commit before dispatch. It creates a new run; record that identity separately and never replace an original cell. Use `score`, `hints`, `suffix-original`, or `suffix-numeric-corrected` in place of `prefix` to select that exact published tooling. The rejected receipt workflow is push-only and is not dispatched by this recipe. Reproducing a known failed or rejected acquisition is not the next optimization step.
+
+```bash
+python3 - builds/perf/import-study-c563d487/evidence-index.json prefix <<'PY'
+import json, subprocess, sys
+index = json.load(open(sys.argv[1]))
+workflow = index['publishedWorkflows'][sys.argv[2]]
+assert workflow['workflowDispatch']
+repo = index['repository']
+head = subprocess.check_output([
+    'gh', 'api', f"repos/{repo}/git/ref/heads/{workflow['branch']}",
+    '--jq', '.object.sha'], text=True).strip()
+assert head == workflow['commit'], (head, workflow['commit'])
+subprocess.run(['gh', 'workflow', 'run', workflow['workflowPath'].rsplit('/', 1)[-1],
+    '--repo', repo, '--ref', workflow['branch']], check=True)
+PY
+```
+
+The profile script can replay attribution without importing again. Recover artifact `15248970912` as `profiles/hosted.zip`, verify its recorded ZIP hash, extract it under `profiles/hosted/`, and use a clean detached checkout of the baseline:
+
+```bash
+study=builds/perf/import-study-c563d487
+git worktree add --detach "$study/replay-source" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+python3 "$study/profiles/independent-profile-analysis.py" \
+  --evidence-dir "$study/profiles" --repo "$study/replay-source" \
+  --named-wasm "$study/baseline-jmdict-profile/term-bank-parser-names.wasm" \
+  --output "$study/profiles/replayed-analysis.json"
+```
+
+The published numeric product `399feae29fea358560af27af68f03dfb6d8b6f58` has tree `5e3262fc31b50faf75abed53e45c21c9f9c74a07` and the baseline as its sole parent. Its exact four-file C/WASM/manifest/test blobs match independent reconstruction. Published tooling `ee9450923d14e95b7958feeffffde4998cf8c5d9` binds workflow SHA-256 `a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167`. The ancestry issue was resolved before acquisition: the recorded tiny Git reproduction failed with a depth-1 candidate checkout and passed with depth 2. The only correction adds `fetch-depth: 2` to the validation checkout. Both prior and corrected workflows, the reproduction and amendment `d04ab718e4a0a739b02a526fdbb59627063011787ac3153668d0989bb407bff5` are retained. Numeric template `52a73a43eca5b3f15e44f0b646af636a2481ade8ec5c668e20f368df52bcb547` and unpublished prefix template `3ba3202f7b8be649265f2352fd999b088812fa1c51eafd5d2d8005aa23bebd29` contain the same bounded history correction.
+
+The independent postprocessing auditor has SHA-256 `0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656`; its expected identities hash to `9b967422711deee9c0f13edcfc3bc8c24df9864accff982cf5900b52a567771c`. The index retains both, their independent review and prior versions. Historical receipt compatibility checks are not numeric performance evidence. The auditor checks emitted timing, semantic, storage, media, source and memory receipts; final promotion still requires both hosts, controls and non-target review.
+
+Qualification must reproduce both native builds with the pinned compiler and pass exact-source lint/types/unit/options/build gates. The unchanged observer uses 12 alternating pairs, four same-code pairs, four excluded warmups, two exhaustive-media observations and four separate memory observations on each of six independent corpus/order hosts (252 observations). Both the packaged C source and WASM are expected to change; the pre-acquisition package-guard amendment and original criteria are retained in the index.
+
+The prospectively registered target rule is at least 1% median JMdict reduction on each host for the prefix selector, and at least 2% VNDB reduction on each host for numeric suffix, with at least 9/12 faster pairs, descriptive intervals below zero, controls materially smaller, and all semantic/storage/memory gates. Both require explicit non-target review; inconclusive cells do not prove nonregression. A qualifying replicated 1% slowdown on either non-target rejects or holds the candidate. Preserve the original thresholds, failed gates and every acquisition. A full product PR remains conditional on worthwhile completed evidence; component results and profiles cannot substitute for it.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.

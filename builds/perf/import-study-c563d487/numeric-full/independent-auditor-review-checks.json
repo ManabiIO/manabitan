@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 05:55:36 UTC",
+  "scope": "Independent postprocessing audit only; frozen acquisition observer, workflow, product, schedule and prospective criteria unchanged",
+  "qualificationRunId": 46113243549,
+  "qualificationStatusAtReview": "Correctness job queued; zero full-browser observations",
+  "originalAuditorSha256": "376b33b120c8c65ce2aa30706a48606a76cb3574e7570fa9530e4ca8638e393f",
+  "originalExpectedIdentitiesSha256": "a96042f0b09b04f37c876a3063be4565c06e32f9666344e396daf07e77c02c59",
+  "auditorSha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+  "expectedIdentitiesSha256": "9b967422711deee9c0f13edcfc3bc8c24df9864accff982cf5900b52a567771c",
+  "originalsPreservedUnder": "history/",
+  "independentReviewer": "/root/benchmark_setup/review_full_auditor",
+  "reviewVerdict": "No remaining blocker after resolving memory-harness expected-variable shadowing",
+  "changes": [
+    "Reject duplicate/missing result files and extraction read errors; verify all 36 original timing roles/durations and complete pair ratios",
+    "Reject coerced/non-finite/negative timing values, invalid completion sequences, reversed trigger phases and inconsistent single-run summaries",
+    "Check full emitted media receipts, exhaustive byte coverage, restart identity, probe uniqueness and six lookup passes",
+    "Bind four memory summaries to roles, source overlay, coverage bounds and emitted window markers; independently recompute pair metrics and unchanged5%median/10%maximum gates",
+    "Parse only emitted tagged output, retaining malformed payload errors and excluding echoed script definitions"
+  ],
+  "memoryOverlayProof": {
+    "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+    "method": "Pure in-memory protocol.memory_overlay applied to frozen baseline harness; no source files changed; equals all 24 prior receipt memory observations"
+  },
+  "checks": {
+    "checks": [
+      {
+        "jobId": 140849197228,
+        "allChecksPass": false,
+        "recomputedMemoryPass": false,
+        "errors": [
+          "Original correctness/memory gate did not pass",
+          "Separate memory observations/audit did not qualify",
+          "A2: memory coverage did not qualify",
+          "A2: emitted prospective memory coverage is insufficient"
+        ]
+      },
+      {
+        "jobId": 140849197219,
+        "allChecksPass": true,
+        "recomputedMemoryPass": true,
+        "errors": []
+      },
+      {
+        "jobId": 140849197262,
+        "allChecksPass": true,
+        "recomputedMemoryPass": true,
+        "errors": []
+      },
+      {
+        "jobId": 140849197208,
+        "allChecksPass": true,
+        "recomputedMemoryPass": true,
+        "errors": []
+      },
+      {
+        "jobId": 140849197313,
+        "allChecksPass": false,
+        "recomputedMemoryPass": false,
+        "errors": [
+          "Original correctness/memory gate did not pass",
+          "Separate memory observations/audit did not qualify",
+          "B1: memory coverage did not qualify",
+          "B1: emitted prospective memory coverage is insufficient"
+        ]
+      },
+      {
+        "jobId": 140849197259,
+        "allChecksPass": true,
+        "recomputedMemoryPass": true,
+        "errors": []
+      }
+    ],
+    "mutations": [
+      {
+        "name": "duplicate result file",
+        "rejected": true,
+        "errors": [
+          "Duplicate result-file records"
+        ]
+      },
+      {
+        "name": "absent original candidate statistics",
+        "rejected": true,
+        "errors": [
+          "candidate: missing original paired statistics"
+        ]
+      },
+      {
+        "name": "string browser timestamp",
+        "rejected": true,
+        "errors": [
+          "control-01-A: browser or automation timing is not numeric and finite",
+          "control-01-A: negative or invalid timestamp"
+        ]
+      },
+      {
+        "name": "wrong memory role",
+        "rejected": true,
+        "errors": [
+          "Memory comparison observation inventory differs",
+          "Separate memory observation role/order differs",
+          "Separate memory pair is incomplete",
+          "Memory pair arithmetic differs from the four observation summaries",
+          "Memory comparison/audit metric summaries differ",
+          "Memory summary gate booleans differ from observation arithmetic"
+        ]
+      },
+      {
+        "name": "incomplete exhaustive media bytes",
+        "rejected": true,
+        "errors": [
+          "exhaustive-media-A: complete media receipt differs",
+          "exhaustive-media-A: exhaustive media bytes differ"
+        ]
+      }
+    ],
+    "rawLogParserExact": true,
+    "malformedOutputRetained": true,
+    "echoedSourceIgnored": true
+  },
+  "limits": [
+    "Prior receipt data is compatibility evidence only, never numeric performance evidence",
+    "Per-process raw memory scan reconstruction is performed by the unchanged CI helper; originals remain in Actions artifacts",
+    "Deeply malformed nested entries can raise an exception; any exception is an unsuccessful independent audit, never a pass",
+    "Mechanical single-host timing signals do not decide promotion; both hosts, controls, all gates and non-target policy require review"
+  ]
+}

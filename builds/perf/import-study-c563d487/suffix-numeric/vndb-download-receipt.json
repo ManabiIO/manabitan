@@ -1,0 +1,10 @@
+{
+  "run": 46106358342,
+  "artifactId": 15250356311,
+  "toolingHead": "2665a956d566b4f7c12e10b81dc404e154c85bf1",
+  "zipSha256": "9e81d6fc0489b2f7cdfff2a4d61910200e425b26b8d66d865eec8a52c823282d",
+  "zipBytes": 122398,
+  "files": 45,
+  "apiDigestVerified": true,
+  "priorTransferFailure": "First verified in-memory download could not create the evidence directory due to shared disk ENOSPC; zero evidence files written before retry."
+}

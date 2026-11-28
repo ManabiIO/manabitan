@@ -1,0 +1,44 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "scope": "Bounded read-only audit of JMdict-relevant runtime hunks in recent #967-971 integration ancestry, plus the final #957 merge; not an exhaustive audit of all history.",
+  "conclusion": "No second currently missing optimization was found. #944 remains the only concrete lost hunk found in this scope. No additional experiment or restoration is proposed.",
+  "lostScoreLoop": {
+    "acceptedPr": 944,
+    "acceptedCommit": "e7a0780cfe7e952d5440de5b0fdcc88d53e60203",
+    "integrationReversalCommit": "a35b064d5d37960429ce591c9f6f17a2df0486c5",
+    "path": "ext/js/dictionary/term-record-opfs-store.js",
+    "baselineBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+    "restorationBlob": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+    "restorationCommit": "1aa5ac5fed41f761244fe80af0cf011d93dfe4a7",
+    "candidateBytes": "for (let i = 0; i < scoreKeys.length; ++i) {\n        if (scoreKeys[i] >= scoreCount) {"
+  },
+  "alreadyRepairedNearMiss": {
+    "acceptedPr": 931,
+    "acceptedCommit": "abc6a9c53b17ca3be2981dd071dd95cd9c8516fd",
+    "integrationReversalCommit": "52de9a1864fc3262f0728a24df33b531a7310e92",
+    "repairCommit": "cc5fe09dce9ded4f247d367719ea59d42655d835",
+    "path": "ext/js/dictionary/dictionary-importer.js",
+    "behavior": "The default ARCHIVE_BANK_QUERY_DETAILS argument and t/k filename prefilter were restored before #967 merged. Current source retains both. The caller's explicit shared constant is equivalent to the accepted omitted/default argument.",
+    "restorationNeeded": false
+  },
+  "currentFileIdentityChecks": [
+    {"integrationCommit": "9ab0f2512a0af8b0718a7d152a4cd7834aa3b6af", "path": "ext/js/dictionary/term-content-metadata-arena.js", "currentAndIntegratedBlob": "39ec6a4dcaafafbdbec4b94b7dac0a26379c6223"},
+    {"integrationCommit": "1dbf8ab15d41eaaf16899f8d1262f51208ee2165", "path": "ext/js/dictionary/term-content-plan-resolution.js", "currentAndIntegratedBlob": "49533c80d35350a9d3887c3e44a06cec14a70481"},
+    {"integrationCommit": "ec2b4c043cbb2664811d5401064b47c31b4536e5", "path": "ext/js/dictionary/term-bank-source-pipeline.js", "currentAndIntegratedBlob": "8fc3ba89987cac5da4f6ac18a1b76e05ceeb9831"},
+    {"integrationCommit": "906e2259e55e359703678e1f2cb14dd2b8de1856", "path": "ext/js/dictionary/zstd-term-content.js", "currentAndIntegratedBlob": "ad06b4edb908d0b95e662813affbfd3721611e02"},
+    {"integrationCommit": "297bf9605ba9e81882d4df041f616b7aeef1f254", "path": "ext/js/dictionary/wasm/term-bank-parser.c", "currentAndIntegratedBlob": "ccfba94ced59e465859ccec855f4e6947f23f413"},
+    {"integrationCommit": "12051e3a8ea77ecb4eee4f62a283d3d8c9a14ebf", "path": "ext/js/dictionary/term-record-opfs-store.js", "currentAndIntegratedBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae"}
+  ],
+  "databaseCheck": {
+    "integrationCommit": "c2f39345de52fe2a75fe4f34af958d84b61be893",
+    "integratedBlob": "498dca7b5b7af3c3364ac7565f4865637ac207b1",
+    "currentBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+    "difference": "Only the startup-index explanatory comment and semicolon lint style differ; the secondary-index guard remains."
+  },
+  "finalMergeCheck": {
+    "previousDevelop": "bbce14f4f4fe434afd2e3ef318003d6d4a5cfc97",
+    "currentDevelop": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "paths": ["ext/js", "ext/lib", "dev/data/dictionary-wasm"],
+    "diffEmpty": true
+  }
+}
