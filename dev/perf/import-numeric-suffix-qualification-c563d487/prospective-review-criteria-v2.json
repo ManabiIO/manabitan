@@ -1,0 +1,26 @@
+{
+  "recordedAtUtc": "2026-11-28 04:13:36 UTC",
+  "phase": "Before corrected component results and before any full-browser candidate acquisition",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateSourceSha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+  "fullProductCommit": "Must be frozen before qualification begins",
+  "target": "VNDB; JMdict is the priority non-regression corpus, with Jitendex also required",
+  "performanceReviewThreshold": {
+    "minimumReplicatedMedianReductionPercent": 2,
+    "minimumFasterPairsPerIndependentHost": 9,
+    "totalPairsPerHost": 12,
+    "interval": "Descriptive paired 95% interval below zero on each independent host",
+    "controls": "Candidate effect must be meaningfully larger than identical-code control variation; never subtract controls",
+    "nonTargetPolicy": "Hold if either non-target corpus shows a replicated material regression. A slowdown of at least 1% on both hosts, at least 9/12 slower pairs on each, intervals above zero and controls materially smaller is a predeclared rejection condition. Inconclusive or discordant evidence must be reported and does not prove non-regression.",
+    "scope": "File input through completion of required post-UI work; fresh profiles, production defaults, uninstrumented timing",
+    "noPooling": true,
+    "noSelectedRetriesOrOutlierRemoval": true
+  },
+  "requiredGates": {
+    "correctness": "Exact source reproduction, focused regression suite, full unit/options suites, strict main/test types, lint, dry builds, full browser inventory/restart/canonical lookup/media validation",
+    "storage": "Unchanged complete validation receipts and exact corpus storage totals under the existing observer",
+    "memory": "Unchanged a7f7 prospective coverage and process-tree memory screens on both independent hosts; no new parser heap reservation",
+    "package": "Only js/dictionary/wasm/term-bank-parser.c and lib/term-bank-parser.wasm may differ in the release package; record exact compressed/uncompressed size changes and source-bound binary hashes for review"
+  },
+  "failurePolicy": "Preserve all observations and failed gates. Component or profiler gains cannot substitute for full-import qualification. No performance PR if the completed evidence does not justify review."
+}

@@ -1,0 +1,42 @@
+{
+  "case": "Direct child candidate and independent workflow child, baseline has one parent",
+  "results": [
+    {
+      "role": "validate-original",
+      "initialDepth": 1,
+      "subsequentFetchDepth": null,
+      "isAncestorExit": 1,
+      "shallowCommits": [
+        "945c8d8ea1e0355bb672a12bd62140ec179081ae"
+      ]
+    },
+    {
+      "role": "validate-fixed",
+      "initialDepth": 2,
+      "subsequentFetchDepth": null,
+      "isAncestorExit": 0,
+      "shallowCommits": [
+        "dcfd227ae7c9aad698b078a935cb3d3d3b496be9"
+      ]
+    },
+    {
+      "role": "qualify-original",
+      "initialDepth": 1,
+      "subsequentFetchDepth": null,
+      "isAncestorExit": 0,
+      "shallowCommits": [
+        "2d65c54e7dce14ff0b5f8d2ff9ca69d8fa2a57ce"
+      ]
+    },
+    {
+      "role": "qualify-bounded",
+      "initialDepth": 1,
+      "subsequentFetchDepth": 2,
+      "isAncestorExit": 0,
+      "shallowCommits": [
+        "2d65c54e7dce14ff0b5f8d2ff9ca69d8fa2a57ce",
+        "6815000bd19fdcd25e28f2a3be32ee277d3beee3"
+      ]
+    }
+  ]
+}

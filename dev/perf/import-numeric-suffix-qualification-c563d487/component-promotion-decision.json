@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-28 05:35:51 UTC",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateC": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+  "componentAll48Audited": true,
+  "target": "VNDB component −8.646261% median, all4 faster, small controls",
+  "nonTargetConcern": "Jitendex +1.718978% elapsed (3/4 slower) and +3.200218% native (4/4 slower); A/A material. JMdict −1.464627% elapsed with larger controls. Neither proves non-regression.",
+  "decision": "Proceed to frozen full qualification with unchanged source and predeclared gates; no PR or full-import speed claim."
+}

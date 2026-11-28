@@ -1,0 +1,84 @@
+{
+  "recordedAtUtc": "2026-11-28T05:40:53.096508+00:00",
+  "purpose": "Prospective bounded ancestry acquisition correction before any numeric or prefix full-browser qualification observations",
+  "fullBrowserObservationsAcquired": 0,
+  "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "candidateTree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07",
+  "verifiedDirectParent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "justification": "Default depth-1 candidate checkout retains a shallow boundary after fetching baseline, causing ancestry gate failure. The reviewed numeric candidate is a direct child of baseline, so depth 2 includes its verified parent. Prefix template now requires the same bounded direct-parent source arrangement at activation.",
+  "reproduction": {
+    "path": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric/qualification/bound-publication/shallow-history-reproduction.json",
+    "sha256": "03578c54373f973fcb0fecb3b18ce2b6b96b323fb23ad61eb31c7820beffa86d",
+    "value": {
+      "case": "Direct child candidate and independent workflow child, baseline has one parent",
+      "results": [
+        {
+          "role": "validate-original",
+          "initialDepth": 1,
+          "subsequentFetchDepth": null,
+          "isAncestorExit": 1,
+          "shallowCommits": [
+            "945c8d8ea1e0355bb672a12bd62140ec179081ae"
+          ]
+        },
+        {
+          "role": "validate-fixed",
+          "initialDepth": 2,
+          "subsequentFetchDepth": null,
+          "isAncestorExit": 0,
+          "shallowCommits": [
+            "dcfd227ae7c9aad698b078a935cb3d3d3b496be9"
+          ]
+        },
+        {
+          "role": "qualify-original",
+          "initialDepth": 1,
+          "subsequentFetchDepth": null,
+          "isAncestorExit": 0,
+          "shallowCommits": [
+            "2d65c54e7dce14ff0b5f8d2ff9ca69d8fa2a57ce"
+          ]
+        },
+        {
+          "role": "qualify-bounded",
+          "initialDepth": 1,
+          "subsequentFetchDepth": 2,
+          "isAncestorExit": 0,
+          "shallowCommits": [
+            "2d65c54e7dce14ff0b5f8d2ff9ca69d8fa2a57ce",
+            "6815000bd19fdcd25e28f2a3be32ee277d3beee3"
+          ]
+        }
+      ]
+    }
+  },
+  "changedOnly": "Add fetch-depth: 2 to the validate job candidate checkout; qualify fetch remains unchanged because its local reproduction passed",
+  "unchanged": [
+    "candidate product source and artifacts",
+    "prospective performance criteria",
+    "package-entry amendment",
+    "observer and runtime",
+    "all correctness and memory gates",
+    "all timing schedules and workloads"
+  ],
+  "files": [
+    {
+      "role": "numericTemplate",
+      "path": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric/qualification/import-numeric-suffix-qualification-c563d487.yml",
+      "oldSha256": "f064a65e38f4e894484ed73e682a56ce07a38140b2a441789ce49184cfa47d53",
+      "newSha256": "52a73a43eca5b3f15e44f0b646af636a2481ade8ec5c668e20f368df52bcb547"
+    },
+    {
+      "role": "prefixTemplate",
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/qualification/import-prefix-selector-qualification-c563d487.yml",
+      "oldSha256": "0ce7ddf59d981c625513e758042ee3a0bd1e6290f6e33f9496d5c5ebef3c34fd",
+      "newSha256": "3ba3202f7b8be649265f2352fd999b088812fa1c51eafd5d2d8005aa23bebd29"
+    },
+    {
+      "role": "numericBound",
+      "path": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric/qualification/bound-publication/import-numeric-suffix-qualification-c563d487.yml",
+      "oldSha256": "05772e849cd1e4bf8136c927c767bc1f9bd90f808fe528ca911ea535b698cf4e",
+      "newSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+    }
+  ]
+}
