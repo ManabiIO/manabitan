@@ -8,6 +8,7 @@ on:
       - .github/workflows/import-macos-bda85f3c7e15.yml
       - dev/perf/import-macos-screen-driver-bda85f3c7e15.py
       - dev/perf/bda85f3c7e15/macos-import-screen.py
+      - dev/perf/bda85f3c7e15/macos-validation-compiler.py
 
 permissions:
   contents: read
@@ -52,6 +53,11 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           node-version: '22.22.0'
+      - name: Select and verify pinned validation compiler
+        run: |
+          set -euo pipefail
+          python3 dev/perf/bda85f3c7e15/macos-validation-compiler.py \
+            --evidence "$GITHUB_WORKSPACE/builds/perf/import-macos-bda85f3c7e15/validation-$IMPORT_MAC_CELL/compiler-preflight"
       - name: Validate exact candidate before timing is admitted
         run: |
           set -euo pipefail

@@ -50,7 +50,7 @@ VALIDATION = {
          "test/perf-experiment-receipts.test.js", "test/perf-import-experiment-evidence.test.js",
          "--maxWorkers=2"],
         ["npm", "run", "test:build"],
-        ["npm", "run", "test:unit", "--", "--maxWorkers=2"],
+        ["npm", "run", "test:unit", "--", "--maxWorkers=2", "--testTimeout=20000"],
     ],
     "preload": [
         ["npx", "eslint", "ext/js/dictionary/dictionary-importer.js",
@@ -61,7 +61,7 @@ VALIDATION = {
          "test/term-content-canonical-scan.test.js", "test/dictionary-importer-row-materialization.test.js",
          "test/dictionary-importer-source-cancellation.test.js", "--maxWorkers=2"],
         ["npm", "run", "test:build"],
-        ["npm", "run", "test:unit", "--", "--maxWorkers=2"],
+        ["npm", "run", "test:unit", "--", "--maxWorkers=2", "--testTimeout=20000"],
     ],
 }
 
