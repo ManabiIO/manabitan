@@ -1,0 +1,452 @@
+name: Fused record fields setup-corrected qualification d2d1
+'on':
+  push:
+    branches:
+    - perf/import-fused-fields-qualification-setup-correction-20261128-d2d13264
+    paths:
+    - .github/workflows/import-fused-fields-qualification-setup-correction-d2d1.yml
+    - dev/perf/import-fused-fields-qualification-setup-correction-20261128-d2d1/**
+permissions:
+  contents: read
+concurrency:
+  group: fused-fields-setup-corrected-qualification-d2d1-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_SHA: 91dfdea8f6d2f801b97c1f05a25102f3308371b0
+jobs:
+  qualify:
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-fused-fields-qualification-setup-correction-20261128-d2d13264'
+    name: ${{ matrix.cell }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - cell: jmdict-ab12
+          dictionary: jmdict
+          initialOrder: AB
+        - cell: jmdict-ba12
+          dictionary: jmdict
+          initialOrder: BA
+        - cell: jitendex-ba12
+          dictionary: jitendex
+          initialOrder: BA
+        - cell: vndb-ba12
+          dictionary: vndb
+          initialOrder: BA
+    env:
+      CELL: ${{ matrix.cell }}
+      DICTIONARY: ${{ matrix.dictionary }}
+      INITIAL_ORDER: ${{ matrix.initialOrder }}
+      EVIDENCE_ROOT: builds/perf/20261128-d2d1-fused-fields-setup-corrected/${{ matrix.cell }}
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      with:
+        fetch-depth: 0
+        persist-credentials: 'false'
+        ref: ${{ github.sha }}
+    - name: Record all four fixed cohorts before any acquisition
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import datetime, hashlib, json, os, pathlib, subprocess
+        plan_path = pathlib.Path("dev/perf/import-fused-fields-qualification-setup-correction-20261128-d2d1/registered-qualification.json")
+        plan_bytes = plan_path.read_bytes()
+        plan = json.loads(plan_bytes)
+        assert plan["baseline"] == os.environ["BASE_SHA"]
+        assert plan["candidate"] == os.environ["CANDIDATE_SHA"]
+        assert plan["candidateTree"] == subprocess.check_output(["git", "rev-parse", os.environ["CANDIDATE_SHA"] + "^{tree}"], text=True).strip()
+        assert os.environ["GITHUB_RUN_ATTEMPT"] == "1", "This fixed qualification forbids reruns after any failure"
+        cell = next(row for row in plan["cells"] if row["cell"] == os.environ["CELL"])
+        assert cell["dictionary"] == os.environ["DICTIONARY"]
+        assert cell["initialOrder"] == os.environ["INITIAL_ORDER"]
+        assert cell["pairs"] == 12
+        validation_source = pathlib.Path(os.environ["RUNNER_TEMP"]) / ("fused-fields-setup-corrected-" + os.environ["CELL"]) / "candidate-validation"
+        with open(os.environ["GITHUB_ENV"], "a") as environment_file:
+            environment_file.write("VALIDATION_SOURCE=" + str(validation_source) + "\n")
+        for name, expected in plan["frozenToolingFilesSha256"].items():
+            assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() == expected, name
+        subprocess.run(["git", "merge-base", "--is-ancestor", plan["inheritedToolingCommit"], "HEAD"], check=True)
+        folder = pathlib.Path(os.environ["EVIDENCE_ROOT"])
+        for subfolder in ["validation", "tooling", "oracles"]:
+            (folder / subfolder).mkdir(parents=True, exist_ok=False)
+        (folder / "registered-qualification.json").write_bytes(plan_bytes)
+        receipt = {
+            "recordedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "registrationSha256": hashlib.sha256(plan_bytes).hexdigest(),
+            "workflowCommitAndTree": subprocess.check_output(["git", "rev-parse", "HEAD", "HEAD^{tree}"], text=True).splitlines(),
+            "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+            "cell": cell, "allFourCellsRegistered": plan["cells"],
+            "imageOS": os.environ.get("ImageOS"), "imageVersion": os.environ.get("ImageVersion"),
+            "runnerOS": os.environ["RUNNER_OS"], "runnerArch": os.environ["RUNNER_ARCH"],
+            "reviewCriteria": plan["reviewCriteria"], "decisionPolicy": plan["decisionPolicy"],
+            "campaign": plan["campaign"], "protocolAmendment": plan["protocolAmendment"],
+        }
+        (folder / "registration-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+        print("FUSION_QUALIFICATION " + json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+        PY
+    - name: Install pinned native test compiler
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update 2>&1 | tee "$EVIDENCE_ROOT/validation/apt-update.log"
+        sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee "$EVIDENCE_ROOT/validation/compiler.log"
+    - uses: ./.github/actions/setup
+      with:
+        node-version: 22.22.0
+    - name: Prepare exact clean candidate source for full validation
+      shell: bash
+      run: |
+        set -euo pipefail
+        git worktree add --detach "$VALIDATION_SOURCE" "$CANDIDATE_SHA"
+        python3 - <<'PY'
+        import os, pathlib, shutil
+        source = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "node_modules"
+        target = pathlib.Path(os.environ["VALIDATION_SOURCE"]) / "node_modules"
+        assert source.stat().st_dev == target.parent.stat().st_dev, "Dependency hardlinks require the same filesystem"
+        shutil.copytree(source, target, copy_function=os.link, symlinks=True)
+        assert target.is_dir() and not target.is_symlink()
+        PY
+        git -C "$VALIDATION_SOURCE" rev-parse HEAD 'HEAD^{tree}' > "$EVIDENCE_ROOT/validation/source.txt"
+        npm --prefix "$VALIDATION_SOURCE" run build:libs 2>&1 | tee "$EVIDENCE_ROOT/validation/libs.log"
+        npm --prefix "$VALIDATION_SOURCE" run license-report:html 2>&1 | tee "$EVIDENCE_ROOT/validation/license.log"
+    - name: Check changed JavaScript
+      shell: bash
+      run: |
+        set -euo pipefail
+        npx eslint \
+          ext/js/dictionary/term-bank-wasm-parser.js \
+          ext/js/dictionary/term-record-opfs-store.js \
+          ext/js/dictionary/term-record-field-preparation.js \
+          test/term-record-fused-fields.test.js \
+          eslint.config.js 2>&1 | tee "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/validation/eslint.log"
+      working-directory: ${{ env.VALIDATION_SOURCE }}
+    - name: Validate all type projects
+      shell: bash
+      run: |
+        set -euo pipefail
+        npm run test:ts 2>&1 | tee "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/validation/types.log"
+      working-directory: ${{ env.VALIDATION_SOURCE }}
+    - name: Run complete unit tests
+      shell: bash
+      run: |
+        set -euo pipefail
+        npm run test:unit 2>&1 | tee "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/validation/unit.log"
+      working-directory: ${{ env.VALIDATION_SOURCE }}
+    - name: Validate all build targets
+      shell: bash
+      run: |
+        set -euo pipefail
+        npm run test:build 2>&1 | tee "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/validation/build.log"
+      working-directory: ${{ env.VALIDATION_SOURCE }}
+    - name: Require candidate validation source to stay clean
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git -C "$VALIDATION_SOURCE" rev-parse HEAD)" = "$CANDIDATE_SHA"
+        git -C "$VALIDATION_SOURCE" status --porcelain | tee "$EVIDENCE_ROOT/validation/source-status.log"
+        test -z "$(git -C "$VALIDATION_SOURCE" status --porcelain)"
+        git -C "$VALIDATION_SOURCE" rev-parse HEAD 'HEAD^{tree}' > "$EVIDENCE_ROOT/validation/source-after.txt"
+    - name: Test exact package additions and file types
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 test/perf/import-package-identity-d2d1.test.py 2>&1 | tee "builds/perf/20261128-d2d1-fused-fields-setup-corrected/${CELL}/tooling/package-tests.log"
+    - name: Verify existing qualification receipt tests
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee "builds/perf/20261128-d2d1-fused-fields-setup-corrected/${CELL}/tooling/receipt-memory-tests.log"
+    - name: Assert unchanged measurement suffix
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import os, pathlib, subprocess
+        path = "dev/perf/import-qualification-20261125-a7f7.py"
+        original = subprocess.check_output(["git", "show", os.environ["BASE_SHA"] + ":" + path], text=True)
+        current = pathlib.Path(path).read_text()
+        metadata = '    "expectedAddedPackageEntries": args.expected_added_package_entry,\n'
+        assert current.count(metadata) == 1
+        assert original.split("schedule = []", 1)[1] == current.split("schedule = []", 1)[1].replace(metadata, "")
+        print("FUSION_EVIDENCE measurement suffix is byte-identical to frozen baseline except prospective added-package metadata")
+        PY
+    - name: Verify executable source bindings
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 dev/perf/import-fused-fields-20261128-d2d13264/verify-source-bindings.py | tee "builds/perf/20261128-d2d1-fused-fields-setup-corrected/${CELL}/tooling/source-bindings.json"
+    - name: Replay deterministic helper and integration checks
+      shell: bash
+      run: |
+        set -euo pipefail
+        node --input-type=module < dev/perf/import-fused-fields-20261128-d2d13264/helper-oracle.mjs.txt > "builds/perf/20261128-d2d1-fused-fields-setup-corrected/${CELL}/tooling/helper-oracle.json"
+        node --input-type=module < dev/perf/import-fused-fields-20261128-d2d13264/integration-oracle.mjs.txt > "builds/perf/20261128-d2d1-fused-fields-setup-corrected/${CELL}/tooling/integration-oracle.json"
+        python3 - <<'PY'
+        import json, os, pathlib
+        root = pathlib.Path(os.environ["EVIDENCE_ROOT"]) / "tooling"
+        helper = json.loads((root / "helper-oracle.json").read_text())
+        integration = json.loads((root / "integration-oracle.json").read_text())
+        print("FUSION_EVIDENCE " + json.dumps({
+            "helperCases": helper["cases"],
+            "helperFailures": sum(not row["pass"] for row in helper["records"]),
+            "integrationCases": integration["cases"],
+            "integrationPassed": integration["passed"],
+            "scope": "extracted executable-source control flow; fallback lookup and persistence are stubs; separate real-source corpus oracle required",
+        }, sort_keys=True))
+        PY
+    - name: Restore locked dictionary archives
+      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+      with:
+        path: builds/e2e-dictionary-cache
+        key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+    - name: Prepare unchanged actual-worker oracle source trees
+      shell: bash
+      run: |
+        set -euo pipefail
+        oracle_sources="$RUNNER_TEMP/fused-fields-setup-corrected-$CELL/corpus-sources"
+        mkdir -p "$oracle_sources"
+        git worktree add --detach "$oracle_sources/A" "$BASE_SHA"
+        git worktree add --detach "$oracle_sources/B" "$CANDIDATE_SHA"
+        for oracle_arm in A B; do
+          ORACLE_SOURCE="$oracle_sources/$oracle_arm" python3 - <<'PY'
+        import os, pathlib, shutil
+        source = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "node_modules"
+        target = pathlib.Path(os.environ["ORACLE_SOURCE"]) / "node_modules"
+        assert source.stat().st_dev == target.parent.stat().st_dev, "Dependency hardlinks require the same filesystem"
+        shutil.copytree(source, target, copy_function=os.link, symlinks=True)
+        assert target.is_dir() and not target.is_symlink()
+        PY
+          npm --prefix "$oracle_sources/$oracle_arm" run build:libs 2>&1 | tee "$EVIDENCE_ROOT/oracles/libs-$oracle_arm.log"
+          git -C "$oracle_sources/$oracle_arm" status --porcelain | tee "$EVIDENCE_ROOT/oracles/source-$oracle_arm-status.log"
+          test -z "$(git -C "$oracle_sources/$oracle_arm" status --porcelain)"
+        done
+        cp dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt builds/actual-fused-fields-oracle.mjs
+        sha256sum dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt > "$EVIDENCE_ROOT/oracles/oracle-sha256.txt"
+    - name: Require unchanged full jmdict corpus envelope and activation oracle
+      shell: bash
+      run: |
+        set -euo pipefail
+        oracle_sources="$RUNNER_TEMP/fused-fields-setup-corrected-$CELL/corpus-sources"
+        node dev/perf/prepare-dictionaries.js "jmdict" 2>&1 | tee "$EVIDENCE_ROOT/oracles/jmdict-fixtures.log"
+        node builds/actual-fused-fields-oracle.mjs \
+          "$oracle_sources/A" "$oracle_sources/B" \
+          "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+          "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/oracles/jmdict.json" \
+          "jmdict" 4 8 2>&1 | tee "$EVIDENCE_ROOT/oracles/jmdict-replay.log"
+        DICTIONARY=jmdict python3 - <<'PY'
+        import json, os, pathlib
+        path = pathlib.Path(os.environ["EVIDENCE_ROOT"]) / "oracles" / (os.environ["DICTIONARY"] + ".json")
+        report = json.loads(path.read_text())
+        assert report["complete"] and report["error"] is None
+        assert report["summary"]["rows"] == report["fixture"]["termRows"]
+        assert report["executedWorkerCounts"] == [3]
+        assert report["identities"]["A"]["commitAndTree"][0] == os.environ["BASE_SHA"]
+        assert report["identities"]["B"]["commitAndTree"][0] == os.environ["CANDIDATE_SHA"]
+        if report["dictionary"] == "jmdict":
+            assert len(report["groups"]) == 12
+            assert report["summary"]["preparedGroups"] == 12
+            assert report["summary"]["fusedGroups"] == 12
+            assert report["summary"]["fusedRecordFieldRows"] == 528299
+        print("FUSION_EVIDENCE real-corpus byte oracle and prospective activation gate passed")
+        PY
+    - name: Require unchanged full jitendex corpus envelope and activation oracle
+      shell: bash
+      run: |
+        set -euo pipefail
+        oracle_sources="$RUNNER_TEMP/fused-fields-setup-corrected-$CELL/corpus-sources"
+        node dev/perf/prepare-dictionaries.js "jitendex" 2>&1 | tee "$EVIDENCE_ROOT/oracles/jitendex-fixtures.log"
+        node builds/actual-fused-fields-oracle.mjs \
+          "$oracle_sources/A" "$oracle_sources/B" \
+          "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+          "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/oracles/jitendex.json" \
+          "jitendex" 4 8 2>&1 | tee "$EVIDENCE_ROOT/oracles/jitendex-replay.log"
+        DICTIONARY=jitendex python3 - <<'PY'
+        import json, os, pathlib
+        path = pathlib.Path(os.environ["EVIDENCE_ROOT"]) / "oracles" / (os.environ["DICTIONARY"] + ".json")
+        report = json.loads(path.read_text())
+        assert report["complete"] and report["error"] is None
+        assert report["summary"]["rows"] == report["fixture"]["termRows"]
+        assert report["executedWorkerCounts"] == [3]
+        assert report["identities"]["A"]["commitAndTree"][0] == os.environ["BASE_SHA"]
+        assert report["identities"]["B"]["commitAndTree"][0] == os.environ["CANDIDATE_SHA"]
+        if report["dictionary"] == "jmdict":
+            assert len(report["groups"]) == 12
+            assert report["summary"]["preparedGroups"] == 12
+            assert report["summary"]["fusedGroups"] == 12
+            assert report["summary"]["fusedRecordFieldRows"] == 528299
+        print("FUSION_EVIDENCE real-corpus byte oracle and prospective activation gate passed")
+        PY
+    - name: Require unchanged full vndb corpus envelope and activation oracle
+      shell: bash
+      run: |
+        set -euo pipefail
+        oracle_sources="$RUNNER_TEMP/fused-fields-setup-corrected-$CELL/corpus-sources"
+        node dev/perf/prepare-dictionaries.js "vndb" 2>&1 | tee "$EVIDENCE_ROOT/oracles/vndb-fixtures.log"
+        node builds/actual-fused-fields-oracle.mjs \
+          "$oracle_sources/A" "$oracle_sources/B" \
+          "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+          "$GITHUB_WORKSPACE/$EVIDENCE_ROOT/oracles/vndb.json" \
+          "vndb" 4 8 2>&1 | tee "$EVIDENCE_ROOT/oracles/vndb-replay.log"
+        DICTIONARY=vndb python3 - <<'PY'
+        import json, os, pathlib
+        path = pathlib.Path(os.environ["EVIDENCE_ROOT"]) / "oracles" / (os.environ["DICTIONARY"] + ".json")
+        report = json.loads(path.read_text())
+        assert report["complete"] and report["error"] is None
+        assert report["summary"]["rows"] == report["fixture"]["termRows"]
+        assert report["executedWorkerCounts"] == [3]
+        assert report["identities"]["A"]["commitAndTree"][0] == os.environ["BASE_SHA"]
+        assert report["identities"]["B"]["commitAndTree"][0] == os.environ["CANDIDATE_SHA"]
+        if report["dictionary"] == "jmdict":
+            assert len(report["groups"]) == 12
+            assert report["summary"]["preparedGroups"] == 12
+            assert report["summary"]["fusedGroups"] == 12
+            assert report["summary"]["fusedRecordFieldRows"] == 528299
+        print("FUSION_EVIDENCE real-corpus byte oracle and prospective activation gate passed")
+        PY
+    - name: Install locked Chromium
+      run: npx playwright install --with-deps chromium
+    - name: Acquire this fixed twelve-pair cohort and identical controls
+      shell: bash
+      run: |
+        set -euo pipefail
+        evidence_root="$EVIDENCE_ROOT"
+        mkdir -p "$evidence_root"
+        git rev-parse HEAD 'HEAD^{tree}' > "$evidence_root/workflow-source.txt"
+        sha256sum \
+          .github/workflows/import-fused-fields-qualification-setup-correction-d2d1.yml \
+          dev/perf/import-qualification-20261125-a7f7.py \
+          dev/perf/import-memory-20261125-a7f7/package_identity.py \
+          test/perf/import-package-identity-d2d1.test.py \
+          dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt > "$evidence_root/tooling-sha256.txt"
+        fused_fields_extra_args=()
+        if [[ "$DICTIONARY" == vndb ]]; then
+          fused_fields_extra_args+=(--vndb-sah-allocation-units 37 37)
+        fi
+        python3 dev/perf/import-qualification-20261125-a7f7.py \
+          --baseline "$BASE_SHA" \
+          --candidate "$CANDIDATE_SHA" \
+          --dictionary "$DICTIONARY" \
+          --initial-order "$INITIAL_ORDER" \
+          --pairs 12 \
+          --expected-workers 3 \
+          --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+          --expected-package-entry js/dictionary/term-record-opfs-store.js \
+          --expected-package-entry js/dictionary/term-record-field-preparation.js \
+          --expected-added-package-entry js/dictionary/term-record-field-preparation.js \
+          --evidence "$evidence_root/measurement" \
+          "${fused_fields_extra_args[@]}" \
+          2>&1 | tee "$evidence_root/acquisition.log"
+    - name: Print compact evidence receipts
+      if: always()
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import hashlib, json, os, pathlib
+        folder = pathlib.Path(os.environ["EVIDENCE_ROOT"]) / "measurement"
+        def emit(name, value):
+            print("FUSION_EVIDENCE " + json.dumps({"file": name, "value": value}, sort_keys=True, separators=(",", ":")))
+        for name in [
+            "registered-plan.json", "analysis.json", "observations.json",
+            "memory/plan.json", "memory/observations.json",
+            "memory/memory-comparison.json", "memory/memory-audit.json",
+            "memory/semantic-failures.json", "memory/memory-audit-failure.json",
+        ]:
+            path = folder / name
+            if path.is_file():
+                value = json.loads(path.read_text())
+                if name == "memory/plan.json":
+                    for arm in value.get("sourceHashes", {}).values():
+                        arm.pop("entries", None)
+                emit(name, value)
+        source_path = folder / "source-identities.json"
+        if source_path.is_file():
+            source = json.loads(source_path.read_text())
+            emit("source-identities.json", {
+                "changedPackageEntries": source["changedPackageEntries"],
+                "arms": {
+                    key: {
+                        **{field: arm[field] for field in ["sha", "tree", "packageSha256", "lockSha256", "fixtureLockSha256", "sourceHashes"]},
+                        "changedEntries": {name: arm["entries"].get(name) for name in source["changedPackageEntries"]},
+                    }
+                    for key, arm in source["arms"].items()
+                },
+            })
+        package_sizes = {
+            arm: (folder / ("package-" + arm + ".zip")).stat().st_size
+            for arm in ["A", "B"] if (folder / ("package-" + arm + ".zip")).is_file()
+        }
+        if package_sizes:
+            if "A" in package_sizes and "B" in package_sizes:
+                package_sizes["deltaBytes"] = package_sizes["B"] - package_sizes["A"]
+                package_sizes["candidateToBaselineRatio"] = package_sizes["B"] / package_sizes["A"]
+            emit("package-zip-bytes", package_sizes)
+        browser = folder / "browser-identity.json"
+        if browser.is_file():
+            emit("browser-identity.json", json.loads(browser.read_text()))
+        seen_receipts = set()
+        for receipt in sorted(folder.rglob("canonical-receipt.json")):
+            content = receipt.read_bytes()
+            signature = hashlib.sha256(content).hexdigest()
+            value = {"sha256": signature}
+            if signature not in seen_receipts:
+                value["receipt"] = json.loads(content)
+                seen_receipts.add(signature)
+            emit(str(receipt.relative_to(folder)), value)
+        for summary in sorted(folder.glob("*/summary.json")):
+            value = json.loads(summary.read_text())
+            keys = ["totalImportMs", "step4Breakdown", "phaseTimings", "phaseDurationsMs"]
+            emit(str(summary.relative_to(folder)), {
+                "runs": [{key: run[key] for key in keys if key in run} for run in value.get("runs", [])],
+            })
+        for name in ["libs-A.log", "libs-B.log", "build-A.log", "build-B.log"]:
+            path = folder / name
+            if path.is_file():
+                emit(name, {"tail": path.read_text(errors="replace").splitlines()[-12:]})
+        for path in sorted(folder.glob("*/run.log")):
+            if not (path.parent / "canonical-receipt.json").is_file():
+                emit(str(path.relative_to(folder)), {"incomplete": True, "tail": path.read_text(errors="replace").splitlines()[-25:]})
+        PY
+    - name: Print source tooling and all corpus outcomes
+      if: always()
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import json, os, pathlib
+        folder = pathlib.Path(os.environ["EVIDENCE_ROOT"])
+        for name in ["registration-receipt.json", "tooling/source-bindings.json", "tooling/helper-oracle.json", "tooling/integration-oracle.json"]:
+            path = folder / name
+            if path.is_file():
+                value = json.loads(path.read_text())
+                if name.endswith("helper-oracle.json"):
+                    value = {"cases": value["cases"], "failed": sum(not row["pass"] for row in value["records"])}
+                elif name.endswith("integration-oracle.json"):
+                    value = {"cases": value["cases"], "passed": value["passed"]}
+                print("FUSION_QUALIFICATION " + json.dumps({"file": name, "value": value}, sort_keys=True, separators=(",", ":")))
+        for dictionary in ["jmdict", "jitendex", "vndb"]:
+            path = folder / "oracles" / (dictionary + ".json")
+            if path.is_file():
+                report = json.loads(path.read_text())
+                keys = ["complete", "error", "node", "identities", "fastPathActivated", "executedWorkerCounts", "dictionary", "hardwareConcurrency", "deviceMemory", "fixture", "lockSha256", "parserWasmSha256", "parentSourceSha256", "candidateSourceSha256", "candidateWorkerSourceSha256", "entryFactorySourceSha256", "scope", "summary", "encodedByteSha256", "groups"]
+                print("FUSION_QUALIFICATION " + json.dumps({"file": str(path.relative_to(folder)), "value": {key: report[key] for key in keys}}, sort_keys=True, separators=(",", ":")))
+            else:
+                print("FUSION_QUALIFICATION no " + dictionary + " corpus report; preceding gate or setup did not complete")
+        for subfolder in ["validation", "tooling", "oracles"]:
+            for log in sorted((folder / subfolder).glob("*.log")):
+                print("FUSION_QUALIFICATION " + json.dumps({"file": str(log.relative_to(folder)), "tail": log.read_text(errors="replace").splitlines()[-20:]}, sort_keys=True))
+        print("FUSION_QUALIFICATION Workflow success alone does not qualify latency; all raw observations require independent per-cohort review.")
+        PY
+    - name: Preserve every completed or failed gate and observation
+      if: always()
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+      with:
+        name: fused-fields-setup-corrected-${{ matrix.cell }}-${{ github.run_id }}
+        path: |
+          ${{ env.EVIDENCE_ROOT }}
+          !${{ env.EVIDENCE_ROOT }}/measurement-sources/**
+        if-no-files-found: error
+        retention-days: 90

@@ -1,0 +1,354 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "campaign": {
+    "branch": "perf/import-fused-fields-qualification-setup-correction-20261128-d2d13264",
+    "id": "fused-fields-setup-corrected-qualification-20261128-d2d13264",
+    "parentCommit": "f2d1c28f8b6661a37817dca5be99147b48bbdc3b",
+    "registrationPath": "dev/perf/import-fused-fields-qualification-setup-correction-20261128-d2d1/registered-qualification.json",
+    "workflowPath": ".github/workflows/import-fused-fields-qualification-setup-correction-d2d1.yml"
+  },
+  "candidate": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+  "candidateTree": "cc5ebc68ac9c185cb5ea0c7313f37bd22be47c00",
+  "cells": [
+    {
+      "cell": "jmdict-ab12",
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "pairs": 12,
+      "role": "JMdict independent qualification cohort 1"
+    },
+    {
+      "cell": "jmdict-ba12",
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "pairs": 12,
+      "role": "JMdict independent qualification cohort 2"
+    },
+    {
+      "cell": "jitendex-ba12",
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "pairs": 12,
+      "role": "Jitendex independent nonregression confirmation"
+    },
+    {
+      "cell": "vndb-ba12",
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "pairs": 12,
+      "role": "VNDB independent nonregression confirmation"
+    }
+  ],
+  "decisionPolicy": {
+    "allFourCellsFixedBeforeFirstCandidateTiming": true,
+    "completeIndependently": true,
+    "latencyDecision": "Independent per-host raw-observation audit against every original criterion; both JMdict cohorts must each satisfy every criterion. Jitendex and VNDB each require median, equal-work and descriptive 95% upper at most +3%.",
+    "noObservationRemoval": true,
+    "noOutcomeDependentAbortOrReplacement": true,
+    "noPooling": true,
+    "noRerunAfterTimeoutMemoryOrOtherFailure": true,
+    "qualificationIndependentOfScreenOutcome": true,
+    "retainAllCompletedAndFailedEvidence": true,
+    "workflowSuccessIsNotLatencyQualification": true
+  },
+  "draftCreatedAtUtc": "2026-11-28T07:39:57.850083+00:00",
+  "expectedAddedPackageEntries": [
+    "js/dictionary/term-record-field-preparation.js"
+  ],
+  "expectedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-record-opfs-store.js",
+    "js/dictionary/term-record-field-preparation.js"
+  ],
+  "expectedWorkers": 3,
+  "format": "manabitan-fused-fields-setup-corrected-qualification-v1",
+  "frozenToolingFilesSha256": {
+    ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+    "dev/perf/import-fused-fields-20261128-d2d13264/README.txt": "c3020c7dfab046e3eae0a8b61809e3a919b73670bf90050fb93b46c547cf1674",
+    "dev/perf/import-fused-fields-20261128-d2d13264/actual-worker-oracle.mjs.txt": "433060d4e2af34cd4b70ee6e98f19eaa042d6205f98dea38bd93d4cef639368c",
+    "dev/perf/import-fused-fields-20261128-d2d13264/exploratory-synthetic-observations.json": "2c3a95b21ac84a29c6a69141fc4e457642dac9d0b990c474e2c6f430cec9e8d0",
+    "dev/perf/import-fused-fields-20261128-d2d13264/fixed-base-getter-before-repair.json": "5d90aed00d407927beda5712ae24b13d44f7f8f36be5b14498852bf9e33c8434",
+    "dev/perf/import-fused-fields-20261128-d2d13264/helper-harness.js.txt": "f6d5560cc608e0121cacb1429cc5b22076dc505d27619f6289c72d93898dccc5",
+    "dev/perf/import-fused-fields-20261128-d2d13264/helper-oracle-results.json": "89677fa0b1f0418bff1934d6bc3680ca64cf09d7c7dae7eb1405938af19d8803",
+    "dev/perf/import-fused-fields-20261128-d2d13264/helper-oracle.mjs.txt": "42699507bfe846738fe43ac1093b589e04b92df1d06a88f3935e8b1d54eca8d7",
+    "dev/perf/import-fused-fields-20261128-d2d13264/initial-incomplete-harness-results.json": "a1927e64afcc16b66ebc4f001c3c5b3988f5c298cff49dd05f2d50902558f469",
+    "dev/perf/import-fused-fields-20261128-d2d13264/integration-baseline-harness.js.txt": "eb5f53f1da46d21951ab2cd5aa617b6777e19a7a95aea4178ca9ee26d88008b4",
+    "dev/perf/import-fused-fields-20261128-d2d13264/integration-candidate-harness.js.txt": "69ceeac0b4f4908ae44ad8915f753abbdcfa30e89ba1275f7c0f4a9d09d3e400",
+    "dev/perf/import-fused-fields-20261128-d2d13264/integration-oracle-results.json": "abd99d6e564af5573272ff647123745f2292c5c41bfb89ba53d8f765fce28343",
+    "dev/perf/import-fused-fields-20261128-d2d13264/integration-oracle.mjs.txt": "49896b48c6518bde45b3ddf0c74927c18e3b6c91cae493dee834cdfb80ce0302",
+    "dev/perf/import-fused-fields-20261128-d2d13264/local-validation-logs.json": "2330a80a8eee66b3ece8eea1ee62607be86aa6c2f3afcd881bc91812d4af27d5",
+    "dev/perf/import-fused-fields-20261128-d2d13264/local-validation-manifest.json": "3eff00da32cbb840155ca9c4b9cbd090f940b4c433509f29d8d79de6d9e2186d",
+    "dev/perf/import-fused-fields-20261128-d2d13264/regenerate-source-bound-harnesses.py.txt": "497037ba7e112edfed259d430a77a1d38a3ff0b101aff06c09822f4e9abb7882",
+    "dev/perf/import-fused-fields-20261128-d2d13264/source-bindings.json": "13d32a8fa5b530a693a7c8c65ab8709229eade6e331dcc94612fc8cb1ed7f638",
+    "dev/perf/import-fused-fields-20261128-d2d13264/style-check.mjs.txt": "f3d19fb5e40aa469a984f2db31af75191327be55dedc0f6665bdaed86010517d",
+    "dev/perf/import-fused-fields-20261128-d2d13264/synthetic-helper.mjs.txt": "b2a9421776a94005cc43ec83341c4028e9311f30c5f189a1df7db1d5631f5344",
+    "dev/perf/import-fused-fields-20261128-d2d13264/verify-source-bindings.py": "88a862d2880b4f6b52c8bd34ad242ccef311acd1c702fac08e2c10a27f36a6c9",
+    "dev/perf/import-memory-20261125-a7f7/README.md": "687943ffc81758e973767cbcf9a63567e842a02d1828150270c1f8e0ddf88529",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/package_identity.py": "df8eed99d8cbda6ff6090b967b9760d072615a995e8b54fbb63ab806cec3e9d8",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/import-memory-20261125-a7f7/source-provenance.json": "218b3f8f0723585f3f51493a25b568614dc72cd7e5418caa818ba1c232845adf",
+    "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+    "dev/perf/import-memory-20261125-a7f7/test_import_window.py": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518",
+    "dev/perf/import-memory-20261125-a7f7/test_protocol.py": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba",
+    "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d",
+    "dev/perf/import-qualification-20261125-a7f7.py": "8a1d8cfdb18f7346a9f62cc732d3ae566e6c3466fc4c2d2ce6010dbc78b41fb5",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "test/perf/import-package-identity-d2d1.test.py": "752c3a61d99f7b7c3129605b9f42caeae8971a5e90ccff6aa190c31a98cd4564"
+  },
+  "hostPolicy": {
+    "cancelInProgress": false,
+    "failFast": false,
+    "freshRunnerPerCell": true,
+    "node": "22.22.0",
+    "oneTimedDictionaryPerCell": true,
+    "runsOn": "ubuntu-26.04",
+    "timeoutMinutes": 180
+  },
+  "inheritedToolingCommit": "f2d1c28f8b6661a37817dca5be99147b48bbdc3b",
+  "measurementProtocol": "Use the unchanged inherited qualification driver: four warmups, twelve alternating pairs starting at this cell initialOrder, interleaved identical A/C controls, strict canonical receipts, exhaustive media after timing, separate prospective memory plan. No timing instrumentation or source overlay.",
+  "originalExploratoryScreen": {
+    "branch": "perf/import-fused-fields-screen-20261128-d2d13264",
+    "initialOrder": "AB",
+    "pairs": 6,
+    "permanentRole": "exploratory; retained independently and never used to select, abort, replace or pool these cohorts",
+    "runId": 46112095821,
+    "workflowCommit": "f2d1c28f8b6661a37817dca5be99147b48bbdc3b"
+  },
+  "preAcquisitionGatesPerCell": [
+    "unchanged full candidate typed ESLint scope",
+    "unchanged complete test:ts",
+    "unchanged complete test:unit",
+    "unchanged all-target test:build",
+    "unchanged package identity and receipt/memory helper tests",
+    "unchanged measurement suffix and exact source binding verification",
+    "unchanged 2019 helper and 41 integration oracle cases",
+    "all three unchanged actual three-worker corpus envelope/activation oracles"
+  ],
+  "protocolAmendment": {
+    "artifactScope": {
+      "change": "Second harness-only correction: exclude only the reproducible measurement-sources subtree from the uploaded artifact. The frozen driver creates these A/B worktree/dependency trees beside measurement and does not remove them.",
+      "excludePattern": "!${{ env.EVIDENCE_ROOT }}/measurement-sources/**",
+      "includePattern": "${{ env.EVIDENCE_ROOT }}",
+      "noMeasurementSubtreeExclusion": true,
+      "noTimingAcquisitionOrDecisionChange": true,
+      "retained": "Every raw measurement, complete package ZIP, source identity, host sidecar, canonical receipt, exhaustive-media result, memory observation/scan, source/tooling/corpus gate and log remains included. Immutable source Git identities and complete built packages make the excluded worktrees reproducible."
+    },
+    "auditRequirement": "The independent auditor remains bound to the original registration until a separate explicitly reviewed audit-binding amendment pins this new campaign. No old audit result is accepted as this campaign's result; numeric methods and thresholds remain unchanged.",
+    "kind": "New prospectively registered campaign following a setup failure; an explicit deviation from the original campaign's no-rerun policy, not an exception or reinterpretation of it",
+    "localReproduction": {
+      "afterUnlinkingOnlyThatFixtureSymlinkPorcelain": "",
+      "directoryTargetSymlinkPorcelain": "?? node_modules\n",
+      "gitVersion": "2.56.1",
+      "interpretation": "Proven isolated Git semantics; a root node_modules symlink is not covered by the directory-only ignore. This supports a concrete setup defect but does not prove it was the only hosted dirty path.",
+      "trackedIgnore": "node_modules/"
+    },
+    "newCampaignIndependence": {
+      "allFourCellsOnFreshHosts": true,
+      "allPreAcquisitionGatesRepeatedOnEveryHost": true,
+      "fillMissingOldPairsOrCells": false,
+      "newCampaignStillForbidsRerunsAfterAnyFailure": true,
+      "originalEvidenceRetained": true,
+      "originalSourceCriteriaSchedulesAndToolingUnchanged": true,
+      "poolOldAndNewObservations": false,
+      "reuseOldObservations": false,
+      "substitutePriorSourceCorpusMemoryOrSemanticGates": false
+    },
+    "originalCampaign": {
+      "artifactBytes": 53552,
+      "artifactId": 15253397297,
+      "artifactName": "fused-fields-direct-jitendex-ba12-46114708622",
+      "artifactSha256": "bea5d5768ad1a042506609e86c9e831767d0b3b49334c897c15285a8d162b687",
+      "branch": "perf/import-fused-fields-qualification-20261128-d2d13264",
+      "failedCell": "jitendex-ba12",
+      "failedJobId": 140885803022,
+      "failedStepName": "Require candidate validation source to stay clean",
+      "failedStepNumber": 11,
+      "observedFailureScope": "The retained Jitendex artifact has source gates through builds but no source-after receipt, tooling/corpus completion, or measurement observations. Exact hosted dirty-path output was not retained.",
+      "permanentDisposition": "Failed/incomplete under its unchanged original protocol; cannot qualify the candidate. No old job is rerun or repaired by this campaign.",
+      "registrationSha256": "2caa3d5a782b1766687586d7e19eee7bb3f512943936b625647b78af6ce74263",
+      "runId": 46114708622,
+      "workflowCommit": "f8105b7c767e6eb55933d6c11d86508312d6180a"
+    },
+    "preLaunchObservation": {
+      "knownFinalSourceWorkflows": [
+        {
+          "jobs": [
+            {
+              "acquisitionSteps": [],
+              "activeSteps": [],
+              "conclusion": "success",
+              "id": 140880557823,
+              "name": "validate-tooling",
+              "status": "completed"
+            },
+            {
+              "acquisitionSteps": [],
+              "activeSteps": [],
+              "conclusion": "success",
+              "id": 140880557953,
+              "name": "validate",
+              "status": "completed"
+            },
+            {
+              "acquisitionSteps": [],
+              "activeSteps": [],
+              "conclusion": null,
+              "id": 140904339598,
+              "name": "corpus-oracle (jitendex)",
+              "status": "queued"
+            },
+            {
+              "acquisitionSteps": [],
+              "activeSteps": [],
+              "conclusion": null,
+              "id": 140904339613,
+              "name": "corpus-oracle (jmdict)",
+              "status": "queued"
+            },
+            {
+              "acquisitionSteps": [],
+              "activeSteps": [],
+              "conclusion": null,
+              "id": 140904339616,
+              "name": "corpus-oracle (vndb)",
+              "status": "queued"
+            }
+          ],
+          "runId": 46112095821
+        },
+        {
+          "jobs": [
+            {
+              "acquisitionSteps": [
+                {
+                  "conclusion": "skipped",
+                  "name": "Acquire this fixed twelve-pair cohort and identical controls",
+                  "status": "completed"
+                }
+              ],
+              "activeSteps": [],
+              "conclusion": "failure",
+              "id": 140885803022,
+              "name": "jitendex-ba12",
+              "status": "completed"
+            },
+            {
+              "acquisitionSteps": [
+                {
+                  "conclusion": null,
+                  "name": "Acquire this fixed twelve-pair cohort and identical controls",
+                  "status": "pending"
+                }
+              ],
+              "activeSteps": [
+                "Validate all type projects"
+              ],
+              "conclusion": null,
+              "id": 140885803160,
+              "name": "jmdict-ab12",
+              "status": "in_progress"
+            },
+            {
+              "acquisitionSteps": [
+                {
+                  "conclusion": null,
+                  "name": "Acquire this fixed twelve-pair cohort and identical controls",
+                  "status": "pending"
+                }
+              ],
+              "activeSteps": [
+                "Run complete unit tests"
+              ],
+              "conclusion": null,
+              "id": 140885803164,
+              "name": "vndb-ba12",
+              "status": "in_progress"
+            },
+            {
+              "acquisitionSteps": [
+                {
+                  "conclusion": null,
+                  "name": "Acquire this fixed twelve-pair cohort and identical controls",
+                  "status": "pending"
+                }
+              ],
+              "activeSteps": [
+                "Validate all type projects"
+              ],
+              "conclusion": null,
+              "id": 140885803209,
+              "name": "jmdict-ba12",
+              "status": "in_progress"
+            }
+          ],
+          "runId": 46114708622
+        }
+      ],
+      "observedAtUtc": "2026-11-28T07:40:26Z",
+      "observedBrowserAcquisitionsStarted": 0,
+      "snapshotScope": "Known final-source screen and original direct qualification workflows; no acquired final-source browser observation has been inspected or used. Original campaign remains failed/incomplete.",
+      "snapshotSha256": "7728b75388b5b7eee9b9d5a0ce2330e83891b0a99072ed83fe7d313fbfc97108",
+      "source": "Root independently fetched original GitHub workflow job/step states before this new campaign launch; all existing acquisition steps were queued or skipped and the exploratory screen had no timing jobs."
+    },
+    "preLaunchRequirement": "Root must independently verify and record that candidate browser timing observations remain zero before launching this separately registered campaign. This local draft does not establish that live condition and is not authorization to launch.",
+    "setupCorrection": {
+      "method": "Real node_modules directories via the frozen acquisition driver's shutil.copytree(source, target, copy_function=os.link, symlinks=True) pattern; internal dependency symlinks are preserved. No top-level dependency symlink.",
+      "scope": [
+        "candidate validation worktree",
+        "baseline corpus-oracle worktree",
+        "candidate corpus-oracle worktree"
+      ],
+      "sourceChecks": "Retain strict empty git status --porcelain checks; capture full porcelain before the validation check and each corpus setup check. Existing oracle end-of-run cleanliness assertions remain byte-unchanged.",
+      "trackedOutputs": "License generation remains unchanged. Any tracked ext/legal-npm.html or other source change remains an error; no ignore, restore, reset, or allowlist hides it."
+    }
+  },
+  "reviewCriteria": {
+    "analysisPolicy": "retain every failed or completed observation; no host pooling, pair removal or data-dependent rerun; reverse-order qualification and confirmation must precede a product PR",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+    "correctnessAndResources": "all frozen receipt, exhaustive media and separate prospective memory gates must pass; inspect exact package ZIP byte delta and unchanged storage footprint",
+    "jmdictQualification": {
+      "applyAllConditionsIndependentlyToEachCohort": true,
+      "bootstrap95UpperPercentMustBeBelow": 0.0,
+      "completePairsPerCohort": 12,
+      "equalWorkChangePercentMustBeBelow": 0.0,
+      "independentHostCohorts": 2,
+      "initialOrders": [
+        "AB",
+        "BA"
+      ],
+      "maxAbsoluteIdenticalControlEqualWorkPercent": 1.5,
+      "maxAbsoluteIdenticalControlMedianPercent": 1.5,
+      "maxMedianPairedChangePercent": -3.0,
+      "medianEffectControlInequality": "-candidateMedianPairedChangePercent >= 2 * max(abs(controlMedianPairedChangePercent), abs(controlEqualWorkChangePercent))",
+      "minimumFasterPairsPerCohort": 10,
+      "minimumGainToLargerAbsoluteControlShiftRatio": 2.0
+    },
+    "otherDictionaryConfirmation": {
+      "dictionaries": [
+        "jitendex",
+        "vndb"
+      ],
+      "independentConfirmationRequired": true,
+      "maxBootstrap95UpperPercent": 3.0,
+      "maxEqualWorkChangePercent": 3.0,
+      "maxMedianPairedChangePercent": 3.0
+    },
+    "screen": {
+      "initialOrder": "AB",
+      "pairs": 6,
+      "purpose": "Always exploratory, irrespective of later outcome; cannot establish a publishable gain or select/abort/replace the fixed qualification cohorts."
+    },
+    "status": "prospective; no performance result"
+  },
+  "status": "Prospectively registered separate setup-corrected campaign; no performance result",
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ]
+}
