@@ -1,0 +1,2158 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed prospectively frozen current-source #830 component cohort; all raw observations, controls, tails, admission, tests and failures retained",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "upstreamHead": "a628c6c7915576dcf280e98bc9129a508f2f9644",
+  "componentCandidate": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+  "sourceOnlyTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "protocolSha256": "a9dd8b81161d03830c098b58fd1c63bb67b07e80be81feaab30a76664e962e4c",
+  "resultSha256": "c9a77c4417ac8525b1c4ab78c9e339eb4a8ac74f88ac429c43ea030518bb0ad9",
+  "analysisSha256": "8576456e01c3ec604fe7da59df08904c21430692c3d352912f2be2b42a28cdeb",
+  "independentReadbackSha256": "96a890c4de9e1bc2d18eb6fde9c3602cc45e91dac0a58690ac529cecae29c9fe",
+  "archive": {
+    "path": "evidence.tar.gz",
+    "bytes": 1514762,
+    "sha256": "01a3154653e6b55de5ab4b689abf42b017cf6c5d2b4959c6c59f50244d7f0b2d",
+    "gitBlobSha": "57c8a7c0a486e1756a8aa331eed21a5085c859e1"
+  },
+  "fileCount": 305,
+  "uncompressedPayloadBytes": 8041560,
+  "archiveLayout": "Study root plus the two required sibling oracle receipts and exact runtime/test sources under source/. Links in the inner README resolve after extraction, not as loose GitHub paths.",
+  "files": [
+    {
+      "path": "20261128-canonical-sink-profile/run-1/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-canonical-sink-profile/run-1/result.json",
+      "bytes": 52420,
+      "sha256": "1b7d938c604de4cf9c05b4f45cc226b36ea4d54f9a077ad09e9dd3647ca52e39",
+      "gitBlobSha": "71a410504c852b400d6fa423d3cdaf2eb465fa5c"
+    },
+    {
+      "path": "20261128-compression-request-batches/capture.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-compression-request-batches/capture.json",
+      "bytes": 56885,
+      "sha256": "a8e5e8cfc710bac06f0fd17a4c8da12cfbda53bd497bae3522d8e986947663b1",
+      "gitBlobSha": "29258149709a2ba54fa9cb5989ddbde5d8df1f35"
+    },
+    {
+      "path": "20261128-inflight-validation-830/README.md",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/README.md",
+      "bytes": 9892,
+      "sha256": "342a4ecb7b354f5b54230ae7ed9ad0f29673b3f63b4854b06fe3da4f3ef25cbe",
+      "gitBlobSha": "9fd036c5e3ec5a0864f342dd6eb11f48b4bafb4c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/build-bundle.py",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/build-bundle.py",
+      "bytes": 13263,
+      "sha256": "44eb92aba697ba13af63e6cfda7365c709acc7ab318219efbaf9c41165c1d7f1",
+      "gitBlobSha": "7f345a5419effbf668cee38f1a21163576ceec64"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/analysis.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/analysis.json",
+      "bytes": 29669,
+      "sha256": "8576456e01c3ec604fe7da59df08904c21430692c3d352912f2be2b42a28cdeb",
+      "gitBlobSha": "96883e35cc32371c3aab91156cee60faaeb68ab5"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/independent-readback.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/independent-readback.json",
+      "bytes": 45224,
+      "sha256": "96a890c4de9e1bc2d18eb6fde9c3602cc45e91dac0a58690ac529cecae29c9fe",
+      "gitBlobSha": "c34544767bee493071b308434fcf65a8a87665a5"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/result.json",
+      "bytes": 3434135,
+      "sha256": "c9a77c4417ac8525b1c4ab78c9e339eb4a8ac74f88ac429c43ea030518bb0ad9",
+      "gitBlobSha": "610469d52d975f8584642b47415ead425a8d6314"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/config.json",
+      "bytes": 3787,
+      "sha256": "59e475932783ca0a169292c8a9bba83d802d888e7ec4e2e9b06a260de9b84dbe",
+      "gitBlobSha": "80384f48118c1d8355d2c93ad285b0e7f3536df8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/process.json",
+      "bytes": 3826,
+      "sha256": "53f54e6ee9c17eb20e2d4440df64cfe311180b79b477499348fb7db654092078",
+      "gitBlobSha": "7f2cf7d3ebff8f642bc7cfa0502f10bc2a6e0f92"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "c334c7d23e1b5c312553ab6006c6711c452c5edaf17b2d04d8342f720156193e",
+      "gitBlobSha": "d6052d8aa1a7420654eb1cd517dde5e043b0d587"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/result.json",
+      "bytes": 75221,
+      "sha256": "67d9e6c06573e225225a16112d6ded29d53c71fbf5070fcd6d341aa71d96d707",
+      "gitBlobSha": "ef0685ecfd1d1ba3060626f1021d74b9aa3902b9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/stderr.log",
+      "bytes": 875,
+      "sha256": "48b1d1285e0fce5678011848d5f4e13df72cbabf933750280de7bd577449be7a",
+      "gitBlobSha": "68e7176b824834fa70a3e2d708860129acd0af11"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/config.json",
+      "bytes": 3801,
+      "sha256": "c780c6cddfb030d1886e3a69ee195f33d895f3b080f8b8b02f0e1032bfd08d58",
+      "gitBlobSha": "35f55acb343bbcf86f768c2e974a916ae18918aa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/process.json",
+      "bytes": 3832,
+      "sha256": "8a3b606bba12e5989b036386b70f74e788005769082f9172464045a346281cb8",
+      "gitBlobSha": "b8717903bf435193adc816eb1edb185012ef837b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "206be6e6f7e7a65c21f3634baeda989d9167321abb519892a681efadea76f02b",
+      "gitBlobSha": "e32a24c026987ba6e9bb572f61b2f69e7efe11d0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/result.json",
+      "bytes": 75262,
+      "sha256": "37b0964eb378b9d71aad3ecb5cdbeab0c9216dd811c873a8298945c7afc089c0",
+      "gitBlobSha": "f06b55af25e07b4b988e6c024552e92e9c1b3f06"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/stderr.log",
+      "bytes": 875,
+      "sha256": "700a2c3ae583e732b4ccb1309107768ea410b195516ecfba1299545b904ab147",
+      "gitBlobSha": "12d1bf55dec998352a62b982b1343232af2c0d69"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/config.json",
+      "bytes": 3787,
+      "sha256": "2a7144eddedfbba90bb1715de1206d53a88c66dc706a02061d9d89334495bec2",
+      "gitBlobSha": "9528fb80c6997ff70d26c181bef82daa4c3dc89e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/process.json",
+      "bytes": 3835,
+      "sha256": "22650abdda887cc42bd687ac04490fe2bb33b67992093e29e53f1c3320db5f56",
+      "gitBlobSha": "fabed3c92b5afd909bebec4370b58d4efa7a869d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a72d5ae3f07a87dc16c0430678ca12930a2ddceddd321d3dfebcddec15837285",
+      "gitBlobSha": "fc9b682747cdb40d3c71bfb3855b751d8385d3bf"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/result.json",
+      "bytes": 75233,
+      "sha256": "1f5087644e07194405d0ca021af8da179b2490023999c24a72b117877868029f",
+      "gitBlobSha": "3f25674e48504155b209dfb9490323b651faa9aa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/stderr.log",
+      "bytes": 875,
+      "sha256": "d309f12c2d4d68ed6a38c68869baf5c26864a099603525c6482c0d606a0141c5",
+      "gitBlobSha": "f754d7cec4f05907976582b8216433a96fa5969d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-01-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-01-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/config.json",
+      "bytes": 3787,
+      "sha256": "6898f17d4d9c2d39498539335f4fb0b769d55e22a69bc525f39d26a9f74b760b",
+      "gitBlobSha": "358de6d15bbd1003210fd244579b06c01ccd1982"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/process.json",
+      "bytes": 3839,
+      "sha256": "ff846d90c0cf9099c5c2a89bbce0f0f90d04a6ab601e5c356e52783322433311",
+      "gitBlobSha": "88268e6ce04b798e04cb796fd63b606378ea8afa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "75d2dcef05e3c721c6b25027b1cbe2dfca6b371c2446ad577dad515e8ab3c301",
+      "gitBlobSha": "56c7ecc60c5c7b79236c657d432c5d8015f713d2"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/result.json",
+      "bytes": 75218,
+      "sha256": "dc249dc3cbd068d32c926bec37e5b2597a1363a9c03a33d3d72b0b8c516de36a",
+      "gitBlobSha": "5aca8155a7db97f5de3c27d95b90d501e6fbe3b6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/stderr.log",
+      "bytes": 880,
+      "sha256": "07374c6948e65eb4ebb3112fd351cc37b3210942487215cd7438906999150f8e",
+      "gitBlobSha": "5229a5511575b5785de655f10a793a2adbc5ae1f"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/config.json",
+      "bytes": 3801,
+      "sha256": "4fbb0772533324ba1098e93b69ddfcd18d895a46a1a4f91eb157711ad12ff3aa",
+      "gitBlobSha": "f7b1f0f1095fcbc4d563594e59b348eb40d955d1"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/process.json",
+      "bytes": 3835,
+      "sha256": "4782d2f2a28542519cb417edcacc5b2cee9cf88e4bc82cceb744a9179b2f1577",
+      "gitBlobSha": "e991f8b0903cdfcde2b1c585e5969a9a41ed3bc9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "e6268551974022f2a34a888c22ca76a3a3a28ac5f1c62cd47345574be32e7cd0",
+      "gitBlobSha": "32334206d4640e490cd7f6a3bd3aa8a73cd5a440"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/result.json",
+      "bytes": 75298,
+      "sha256": "3c6ec071d22188ac0c00423aa57d85bd0f5e07086d28db94354ca0c9b8da8ce8",
+      "gitBlobSha": "4f734bc08b45cf68b05aebee2b3c4b5be5296b1e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/stderr.log",
+      "bytes": 880,
+      "sha256": "f8a75d026e752d494baf52eb065c88c9f92ac39dcb7402300b70eb849fd83be8",
+      "gitBlobSha": "9275c6c2c4327ae503b3bc4b57af1296967c25ba"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/config.json",
+      "bytes": 3787,
+      "sha256": "e68f068be9997384865597aa82b0a911c568a36170612161a297b8b0078b1454",
+      "gitBlobSha": "02ce3849e5c4e0c9f0328b4eb1accc63c9467216"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/process.json",
+      "bytes": 3836,
+      "sha256": "f4f8cce160ee4920a50626082deaddcd590a1e10626ee096e0fa825a1d0c3971",
+      "gitBlobSha": "a0aea30d7ddcb3393328b4dcb21a2368b1537bde"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "d1c9f8fe0b9febbd16e8a1f4b4701db2a8660ae0a24378f08ac9bfddc560003b",
+      "gitBlobSha": "284bd2a89f8e1b5ab8983daad9d90b5d54b4add8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/result.json",
+      "bytes": 75259,
+      "sha256": "f6147a3b71deafa63127b3a78144958665478864a3fce904b6fa035177fa4231",
+      "gitBlobSha": "4b259fad5f46c8633af80bdbffbedd2aa7042c2c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/stderr.log",
+      "bytes": 880,
+      "sha256": "5664a581a7a6a223fd197c28437ddbf294a728fff74e7fa5281b39345fa5d98c",
+      "gitBlobSha": "f00a819e23be9e89d5fc2de6130e156805a45e88"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-02-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-02-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/config.json",
+      "bytes": 3787,
+      "sha256": "81df71886f3e2aeb8d9edd735726daf9dd2f745a54775e3a0422a31e0f652d51",
+      "gitBlobSha": "a4c7e5c3b2c75bb035c0aeb2216aad8ae17999cd"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/process.json",
+      "bytes": 3834,
+      "sha256": "df935709ab6e719d9a71935f117ef8d62436ad02cd3758046652cbe165acad38",
+      "gitBlobSha": "91a1b046d6f8853d3557a8fcaf92840d7ebc6c35"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "63fedd91f68b4f592f171276c1a76a99e34a3fd650585bd87ee6bf694712e27f",
+      "gitBlobSha": "ea4116dbccc9c867d07c490058db439568ca3686"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/result.json",
+      "bytes": 75267,
+      "sha256": "b2a98e86577e23e50cf480d29fdf275d5040b8f6b5ac7575c75667b632a547d0",
+      "gitBlobSha": "233456be98b87f7d61347da1accb2a9148b1636d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/stderr.log",
+      "bytes": 880,
+      "sha256": "c107d554dea8eb256ded3b8053b80275d5d95e9318c17724298d6237169f2dfc",
+      "gitBlobSha": "43970a3de979cb69a835c9150bf6273ead894837"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/config.json",
+      "bytes": 3801,
+      "sha256": "dadc74805ab40e271ab7db9e4c0da74c8a1de22565d28ceb91729fadff4ffc42",
+      "gitBlobSha": "b83c431c3e4894222147d066564f140f593bfed9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/process.json",
+      "bytes": 3845,
+      "sha256": "bc6996f2744a486b1c893ce84e336a2ebfc8e133e3e3052e087f93f9b4e90e56",
+      "gitBlobSha": "6a1b38d4e3c897da331cc9e7ee3b9ebc42eb3782"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "7889d274d37c8849879086f24701e011ef78d4aa0439f3a61b942cc8adad412a",
+      "gitBlobSha": "17b1fbc7981da6e46b919284f866bd9118da776f"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/result.json",
+      "bytes": 75284,
+      "sha256": "f9701aa6d2f65fc559cfd1762a628f58c80b15c20b11b87b274e4265b699b1f4",
+      "gitBlobSha": "c6a2c5a4123003d9845fdbbc0566d31ba86e5cab"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/stderr.log",
+      "bytes": 880,
+      "sha256": "fc684e82e6f0e52f98bf715be436a510c10da5cde7e9036f3869911e0d18df6f",
+      "gitBlobSha": "cbb0120f0aa40101262ac7354c6cc5b9d4d368e0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/config.json",
+      "bytes": 3787,
+      "sha256": "ca799f18bea2d8425ec75a8cf71d03fefb49c489541a64319e1d94fd3ca6e5d8",
+      "gitBlobSha": "086051924414cebf4ef837ffc269985f9356a40b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/process.json",
+      "bytes": 3841,
+      "sha256": "af88a7621bade8d9f3d5f58ba677edbbe9d2416f25fdb37cd331ab46a0b744eb",
+      "gitBlobSha": "15e06327dbd0ef39e4127202a95ce58ea64bade4"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a94d879ba03ce6b3b07328d06c4b60c6f060c4e5023d2f7b12d1b9522e6a735b",
+      "gitBlobSha": "ab7f6c6edbac8e2b2a2981aef02ab87dcc76af41"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/result.json",
+      "bytes": 75234,
+      "sha256": "0affd02c55d4e386a97364341fcd52fe2743f70ae4768d8e679827642eb17591",
+      "gitBlobSha": "35eae6ae25ad08eba41c674fbf30c926afbcf074"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/stderr.log",
+      "bytes": 880,
+      "sha256": "c9f4049ae99cb902e379e8dca1095f75d7bfc83dea72dbe2fba78453983f9e8f",
+      "gitBlobSha": "489c2f69c86bcd58d0e698d7996abc5f52a707be"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-03-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-03-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/config.json",
+      "bytes": 3787,
+      "sha256": "e1c298bcc088c565a96305edd8fa8b0cc53b2cbf002f94cf77c08b09e974162c",
+      "gitBlobSha": "795a62768a69953b992f0eac2dbc29703d885b11"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/process.json",
+      "bytes": 3846,
+      "sha256": "b450407aa39d1f69c825336ede09a48e2997aa708193e608026a4786a2c222ff",
+      "gitBlobSha": "cf3ef8857903b5fb3225a215c74ed66bf6816896"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "e986b1b89240272f1e552d7483cfbc64f46917892e194987ab88a723fff3dc89",
+      "gitBlobSha": "71bf54523027ebf75c4ecfa8226faa2309a1ba9d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/result.json",
+      "bytes": 75222,
+      "sha256": "f2ddb803cf718f0b618766234f9aa2a8e6670b7a1b795e5978aa9f93ddf16a15",
+      "gitBlobSha": "9cc313839a13ac7d5769c327a8494befc46a3f15"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/stderr.log",
+      "bytes": 880,
+      "sha256": "7ff047012179a07cf932e6c084e0cae7ec09d661c30517f94427cadcb5741e61",
+      "gitBlobSha": "9dba67bc5903caad066017a604f582dbe401b28e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/config.json",
+      "bytes": 3801,
+      "sha256": "c27a8d39703b9bbb715f44432701dfe4c3cd4bf7a5ddb0cb8a964d7b8cadd1b3",
+      "gitBlobSha": "bf18b95636ba88b2634f6d5f6e1891386c898b9c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/process.json",
+      "bytes": 3851,
+      "sha256": "5ce559541bfa83c5ed0174b22b7c7963c64fe358dd1f683eb11468972e968448",
+      "gitBlobSha": "12721cd1145faa199696cdbda4b418540ba769a7"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "24b7313cfd5f9f5d2da61c2d568400e6842237bccc31fc3d74db68ac7cb3ed4b",
+      "gitBlobSha": "4cc9b3420ea2f4521b585bd4df9655f3bf096b97"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/result.json",
+      "bytes": 75231,
+      "sha256": "1450f6ba2b83933c3aa866e2399503346f83a1965c8e83e0205f069a9664112e",
+      "gitBlobSha": "3223ac0fdf54bcb911ed54ed829d15e2ceeea41b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/stderr.log",
+      "bytes": 880,
+      "sha256": "3c349c298e1bba89ab14c20541bac1d249978f43651bfe581a03b394cf66241c",
+      "gitBlobSha": "6707c987460296061313e65f5b06194667dcfe24"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/config.json",
+      "bytes": 3787,
+      "sha256": "99fd7d8eb9ae0c52f5d5db79efadfd5d6d471ee87ae2b8173840dbe2620c0e68",
+      "gitBlobSha": "13d89c6a779a01fbf90efc1af96c6da60237f22d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/process.json",
+      "bytes": 3851,
+      "sha256": "667f054f0653d121732578ce05f417dba131ba4adc15dbbf4e780bbd1e5c0227",
+      "gitBlobSha": "f399e19292bb439d2be1ba2e16acef43ecb4837c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a72a478dc0759839cd3225c059f626f6f2bddb21dc06de42005510f69bba288b",
+      "gitBlobSha": "fbd8a84f12431ab0847842161ca779f604c7525f"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/result.json",
+      "bytes": 75215,
+      "sha256": "959242eba4016b2c0259baa1188ece62ea0a5fddd975c228d1a8c679296d3396",
+      "gitBlobSha": "cb6340ea035c6c01a85a3751794b18a953b51bee"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/stderr.log",
+      "bytes": 880,
+      "sha256": "99ff104fe76ead5f900350ecaaaff8a449dcdd0bcbcdae8a9f76f6bfba9c0190",
+      "gitBlobSha": "78674be0d7a38c11258c6778c3b440763c1d6200"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-04-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-04-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/config.json",
+      "bytes": 3787,
+      "sha256": "ded3a6eec4cd0e3a93cc854cb284865c39dee9aa8c4fd24f32bdd63f07e07ee5",
+      "gitBlobSha": "dc3f011be53bd9cb782f94681e6c1ba81afdd9c8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/process.json",
+      "bytes": 3847,
+      "sha256": "b5bef66c1223d3377d160ca622172a306830bdd8cc0deb743613714843b5a52a",
+      "gitBlobSha": "0aa08649d5f511aa0a09563c3fa368869fded71f"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "cf21d6b0b9bc6e24a0f1c7b67adcec054f3cc0559f9f3c38a224b548255ac62f",
+      "gitBlobSha": "63018745d43f2552fb67b240e87090081080f87b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/result.json",
+      "bytes": 75228,
+      "sha256": "e6add1a923a0c2a19f372d618bd1122b6bb6d870c6672d6563350de6d921b01a",
+      "gitBlobSha": "422f61c62705b8d66237adf68839a556e60816ce"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/stderr.log",
+      "bytes": 880,
+      "sha256": "77ba86546a2f66e8c1fd5a0988e12ebf3efcd46626231f00e1fdcb28c409a7bb",
+      "gitBlobSha": "96d21f0a6f2db8018192ec8034de23e9c3aaefb2"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/config.json",
+      "bytes": 3801,
+      "sha256": "5a347b1077a46228319cf71acfdad87ce2fed37bdba151b73dd73597ac120e38",
+      "gitBlobSha": "e44aeaef5a87c65922f1f68deeb8c744a8111cc7"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/process.json",
+      "bytes": 3840,
+      "sha256": "76dafc8c993ae4d3c7b32811d8c4a40eed2ef625243d5370b27c2069580116d0",
+      "gitBlobSha": "f0c56c6746561266d09c401ef13805ca9b2a9f4b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "55decce5c6b2a711be19c5a1dfaf2e7b9119bf5807b5a6927a2c906bb8d3ce79",
+      "gitBlobSha": "29a3adf81cd4cafbcc26d64ec59346693b41ea6e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/result.json",
+      "bytes": 75260,
+      "sha256": "599a26300d9c01f30998ebd044502f26494a0c075fecf302808bf1c135ee6677",
+      "gitBlobSha": "24d6a126b1bdab736387b4f722e2da8a46073c57"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/stderr.log",
+      "bytes": 880,
+      "sha256": "ed8ce729ccd52cc2f91ea8a73acb7034022cf9fcfaadbab35399b2d520907587",
+      "gitBlobSha": "be4c33e669fe9e2d1296a67aa98dbe9ab97ccdc6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/config.json",
+      "bytes": 3787,
+      "sha256": "edcf02929387f50244c56eb0ac48a4d04d499d11b915de1aaf459ef7b7ba61ea",
+      "gitBlobSha": "324d9bd824226b5bb48bd0017cd6b364d4d38d54"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/process.json",
+      "bytes": 3851,
+      "sha256": "721ce04f5a4516db280ab2fe025d311122e7eff1c95825c51e2d678249b913c0",
+      "gitBlobSha": "48e0b577a761bdafe284656f14b9cc69c84d89de"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "63cc21bf927ebc21ab35ba9507970712a1c962efd59f6f952ad3cbc842bac073",
+      "gitBlobSha": "9791cd012a354eac5892faa45863b7cf0262973c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/result.json",
+      "bytes": 75250,
+      "sha256": "4697e8933c8769cec94d0d6ff4631f235439853dcd243fceda58ef3cfb0aa289",
+      "gitBlobSha": "06d1d48423c93dcf01ecf0cb944132588c0adf93"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/stderr.log",
+      "bytes": 880,
+      "sha256": "3935d94012128345d2d12700dfa5315877b61eaec559aaaccfb087d08e06b5be",
+      "gitBlobSha": "5e65c67a3010d14e52992286547c8eabea3ce04b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-05-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-05-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/config.json",
+      "bytes": 3787,
+      "sha256": "7ab2cc9e7b312c10e8844eab08bb71380063ef7583aa6bfceb15cd60b6a9e498",
+      "gitBlobSha": "cb646e0dd5908a9a88e75a8a94d12f98221e2988"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/process.json",
+      "bytes": 3850,
+      "sha256": "86804ab8bbc842cc06ec61faa7b206d7261f98f8bf13150dc8869c9158d79d96",
+      "gitBlobSha": "66a2d3339be68d895dc044e4259723f886dcc098"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "1caea7373d15936fd590a1bab7f47d073068df374e78f3a608dd58d63288064d",
+      "gitBlobSha": "d33bcaef81ee69e51ade73702191de636ac57794"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/result.json",
+      "bytes": 75249,
+      "sha256": "16a4ed5b23d935023e1117357d6930f06017f22953940d1807b2edc53111447d",
+      "gitBlobSha": "c9128af5b6e0ba55093ff93ea138f060687ecf83"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/stderr.log",
+      "bytes": 880,
+      "sha256": "05d0fb52a1439131ffa5744974e6f8f8cd7dfd2ded15ec70bb5c149c603d5dfe",
+      "gitBlobSha": "2dc4c1a48dd4f0f50f166f82c5b37a1c35bc31e8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/config.json",
+      "bytes": 3801,
+      "sha256": "16dda096d694847808b3959ea567475f646a6d1023cf2b68b6521c3cbc30ac0e",
+      "gitBlobSha": "451b9009b50456611a1e92ba20f0bffc54441a48"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/process.json",
+      "bytes": 3849,
+      "sha256": "8ad8753de6930b906b5f4cc216b39718d2ab82832dec728cdaf12d80dc7d0985",
+      "gitBlobSha": "2c0262e746b417204cd0612caf17171eb75271d4"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "6ca3bfe97479c286dfec00ca88c9eff20ba4d0cceb26f0b58b7a4aec0e8cfccf",
+      "gitBlobSha": "4f2518055b05be3ca9462ddbb29311e2cf983230"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/result.json",
+      "bytes": 75288,
+      "sha256": "0ff253917dbe14079e906b1a5abfeade15d036266b014fe589f7adf2005d52f1",
+      "gitBlobSha": "a1b3c7dc2289f81b761e7b6fba27c9097ca7d00e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/stderr.log",
+      "bytes": 880,
+      "sha256": "511a7a593b42e301f058207681eb937268040cb1c2286d160821b4b0ce65d8a7",
+      "gitBlobSha": "ca7ba654856ef917edca14bcd57dd4df7537c435"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/config.json",
+      "bytes": 3787,
+      "sha256": "0502bfa42157c468a459af0668dba22370dd2890f1043f00301dbe2424cc4e4b",
+      "gitBlobSha": "d5b7f3fcf7d66e1cb75d4d6f121c16c28c5e590e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/process.json",
+      "bytes": 3850,
+      "sha256": "2c8470eb770e5ae8c24d76fca18efaba925eac57b335e5661fe84775ecd2dc6a",
+      "gitBlobSha": "5bfc7afcf5675a26ca557a9f4b38ca1e2709b4c8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a3be8964a090d9f9be7ad0dbf381d0b93434c6ea82e73549cd16e47b179bc8a8",
+      "gitBlobSha": "727615d0345e9723b6e45929db73b6c92c60e751"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/result.json",
+      "bytes": 75255,
+      "sha256": "1d8faccadf5f7b58632b954c79a095a19073434644e27ea93ba326ccaaa3ba7e",
+      "gitBlobSha": "589c9a3d3257bacbd0dd4afb618aa976ea2ab658"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/stderr.log",
+      "bytes": 880,
+      "sha256": "380b095a51f4b4d474f42325baecebb69bc4b23a159495637ba2abb2515d7f3c",
+      "gitBlobSha": "83e1ddabe37a22a4d986888ca290e4eac70888e0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-06-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-06-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/config.json",
+      "bytes": 3787,
+      "sha256": "5ac7f68b4107bbdcea1c7d2f7ee6baffb5f7812abe3182d4e7a39aa1f647749d",
+      "gitBlobSha": "03f9c13b2e52f81f02f4402e9d8b1374912d26ec"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/process.json",
+      "bytes": 3847,
+      "sha256": "e8f7c34788ec9a7be8625f19cfb64c8e9088b61fafe4a48da240675ad6bec654",
+      "gitBlobSha": "acc23b13ebcd273735cd466ab306496bee66e514"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "43024622b769449dca25d826529921edcb7a1d40930041b846d996c1761ead85",
+      "gitBlobSha": "c6dfcd5091b1dc579fb6c5953c6672f334c46c9a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/result.json",
+      "bytes": 75212,
+      "sha256": "e18ac26898682bf30a6aab64c5330d7886cab1bc6d6d25df438d745e7668dd47",
+      "gitBlobSha": "37046870097845aeb757fcce4879fc8e77897996"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/stderr.log",
+      "bytes": 880,
+      "sha256": "79905b6f2f460c3a5e2a150aaaeffff74a23f7b3511fd87eb1043182ec0e394c",
+      "gitBlobSha": "32eef69277fd2672b969fa6732c3332cc3642d2e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/config.json",
+      "bytes": 3801,
+      "sha256": "d03e12ee35149fedb3b1da133cef92f64c8e58c97c30ad98a13db3f3182060de",
+      "gitBlobSha": "7576453c40211513e8a991c2a532de229aad9bb4"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/process.json",
+      "bytes": 3850,
+      "sha256": "ad3f41fe432bffa9782dbcf0f306ef3626ba257b58a3da95d0588a425571ef30",
+      "gitBlobSha": "25747f94376effc26e79085f929709fc1952028e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "c3f2cda12d0c42352833f4c4400372f3236bdea69874ee3fad1ce11c63297dac",
+      "gitBlobSha": "8c8724b371ad917e745a414dec6d0c1cbee59ce2"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/result.json",
+      "bytes": 75271,
+      "sha256": "20a2fb3b73026aecd1617a98f3f004e56016324cb3738fab2d6b2bb6dec20ed8",
+      "gitBlobSha": "f1655d479ffe8f338c018c35b7c16cf45877a360"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/stderr.log",
+      "bytes": 880,
+      "sha256": "377ff340cbbdb391870c0cf49639b802de71d5dc8b6ad5da97da01e62e107593",
+      "gitBlobSha": "4066a13c211d9a82a9cd8b0467d9fc19bb6dd011"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/config.json",
+      "bytes": 3787,
+      "sha256": "f17830680bbf5b776dfa09b3ca7cf2c5e424cc83f47cef332c4154fadf964006",
+      "gitBlobSha": "da6367a8317291032561313af880eecf11f78e33"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/process.json",
+      "bytes": 3851,
+      "sha256": "6be7c2d88f9ae2dc0aa2634a2dbae1cc164d764d85fb2ca70e1c789de4182aa5",
+      "gitBlobSha": "a980db2e4c52b320bc826b1b1dccf211a61305f7"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "46cf163caa2856eab02a02c5f04fd0efefdf3eb8c79e12bf45cdc6ca334929aa",
+      "gitBlobSha": "565699d864d46e6fea0e7cd39377673fec9ecf26"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/result.json",
+      "bytes": 75266,
+      "sha256": "a11abd4df48ae48e507a666961c2156a1994213d9d562080849cc99e10fd3b2b",
+      "gitBlobSha": "2973d0e15dfffd27d1682c9356297e30dc1419c7"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/stderr.log",
+      "bytes": 880,
+      "sha256": "0eaeba5c9c9a4245e6194c0a43d98b04f985be6392a429fc0c32124d38c9178a",
+      "gitBlobSha": "8d8ca85a0c77f89e32167b882818ecc471c6a0ad"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-07-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-07-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/config.json",
+      "bytes": 3787,
+      "sha256": "eb01c418842404bf6b564646887884eeaae07917ce5443813f87ae5e566b170c",
+      "gitBlobSha": "c4a0e9d84d2c08ac9a1fd084d765c0d5cb02e84a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/process.json",
+      "bytes": 3850,
+      "sha256": "9f9ac183b8750e9a9183eeab6201783ff6fbf38dce3d748e338f06bebc231196",
+      "gitBlobSha": "67e099875fff47a2b48f36b3f7caeefd20d872e5"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "228d73ded0feb593f2c6c6525847f336d9ae69c02cdc695132dacf1791994f1b",
+      "gitBlobSha": "ec0dcbc00a038d681e5aec7c116d14d27038058a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/result.json",
+      "bytes": 75246,
+      "sha256": "91587f93f6236b015408c7b234f3065772760c03d2b961f4a3ff7d1a701bf446",
+      "gitBlobSha": "40c7a510d09ab883d433782e7335c3380dfa119f"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/stderr.log",
+      "bytes": 880,
+      "sha256": "1d9019a689fbbdbd07935edebc4c280cad633f02442a627738e5d9fc4e662afd",
+      "gitBlobSha": "bdbf3ab7d9a67ff881982e3f4589eeff916a1161"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/config.json",
+      "bytes": 3801,
+      "sha256": "e3f6cf7e61c1704bb16eb6fa12bfc0dc30f30e23feb999da2588113960752ed7",
+      "gitBlobSha": "6331d2bb2ebcd6cd5c2b8c97748a158f690e01b8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/process.json",
+      "bytes": 3851,
+      "sha256": "13dd3e5d36c8ded6eb37f51c9e176ed9da6ee385a03342a3289cca5a0eb8ab42",
+      "gitBlobSha": "70764830062ed567eb71d13972addf1e6391d5f9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "f104d3d3e668d8e163690fb0e22edfbb4c96cea297327935fdc9f0a221a9fec0",
+      "gitBlobSha": "c4f16c853c1080a45494ccde39d9a22407d731ef"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/result.json",
+      "bytes": 75282,
+      "sha256": "8039b923ce7684d3e70e060ee582b7198bd9a70503817d39d52553c0105b6b0a",
+      "gitBlobSha": "f82d3ef33f7254b0266763888d90ddaec7c4ec13"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/stderr.log",
+      "bytes": 880,
+      "sha256": "95c669a0ed5f03e897d041f967e7f06d4b22ef03eb2d8014c9a0d863332abc9a",
+      "gitBlobSha": "6860fa16c9984a629b04607d23419778f4c6f4fa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/config.json",
+      "bytes": 3787,
+      "sha256": "33bc3d3b65aede1235864790062a48f3b29439405156de82fab76b3228ddcbde",
+      "gitBlobSha": "a2243f12c1ce524560a484a49da0dcc75e0fec8e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/process.json",
+      "bytes": 3848,
+      "sha256": "704391fe79f6942865e8b4740d6e5d2dd5cbd8e48d401af2c8ff486c38c7f986",
+      "gitBlobSha": "fda7d80f52289f595f9509105c135463fd23fd6a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "62768ae5898ed024759bb00eb44c3f3101d9b5458f2ec3b86ecab2b5524435d2",
+      "gitBlobSha": "bd2041d64432c3ae2c46a1e835f05489dc0ed349"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/result.json",
+      "bytes": 75259,
+      "sha256": "e945d72d8a46ada2db35cc84dee52f2323091901708bc88662ae280a1273068a",
+      "gitBlobSha": "8757d85c2a946b22bcf3af3d708cebbc7404cad0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/stderr.log",
+      "bytes": 880,
+      "sha256": "5df98662fb11cbdaa7f0895bf506c411e017d7636ced4009b40835a372239eae",
+      "gitBlobSha": "d5b8ee53a329d3ed021aa61fb2745aef03ed37db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-08-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-08-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/config.json",
+      "bytes": 3787,
+      "sha256": "e745ce641b1faf62b79a238062b11154605dac2322a1e36cb116753b082001a0",
+      "gitBlobSha": "114101c3eb3a562115c985ee0a27aac38483be20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/process.json",
+      "bytes": 3849,
+      "sha256": "8bc7309df7faed5cdc7860277025ff10e20462f4c4e8b0de97bb8a51e92ceb0f",
+      "gitBlobSha": "ce281f47716d8034de0fad59cdea4ae72664fd62"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "4d8456823ac0dd47f8efa5c112a67e9030f0f20614492675e87bde1f049b81fa",
+      "gitBlobSha": "281352fbe18d6ee28180709ee2e06aad1ed65dd4"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/result.json",
+      "bytes": 75210,
+      "sha256": "92bade554fa0fd325e1d9b3ce5df772df866c54d0e4addefbf55d5f1d5df56d4",
+      "gitBlobSha": "736bcdaa5a235ceab27643b275511d88f4e82163"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/stderr.log",
+      "bytes": 880,
+      "sha256": "a936c2a964b19fc068b191df89de6d8ddbef5a86dc8e12a4ce4b4855652784ff",
+      "gitBlobSha": "c920bdfd863acfa62db4daf16aebb45f4387456d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/config.json",
+      "bytes": 3801,
+      "sha256": "fde5c2b7ff1038e947ee097309e09d407a2d86e4c2f254681b70a3b1fa821bf9",
+      "gitBlobSha": "3effef989b72041b845ba3add2faca9cde6d204e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/process.json",
+      "bytes": 3851,
+      "sha256": "025d08fdc209c1444ffd7df6fe77cc38391f8db20c2e3ef2f5f90f8ff95a6aef",
+      "gitBlobSha": "cfc25c01a8b988dfd46e42e6ee2ba83e85f00d78"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "9c06bdc8e979b74be868ac727777063186ef1ea7bd87d53ce1ddbd9cf60907d2",
+      "gitBlobSha": "86f1909bccd590f0356e94a18244fa195a1cb5ef"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/result.json",
+      "bytes": 75255,
+      "sha256": "89b68854c7d57fdf78b3c6158300c858ac46d976609fd86668ea84beb4003410",
+      "gitBlobSha": "e16389fb4ec1105dd4cd33a094bbf3e0bf5404ac"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/stderr.log",
+      "bytes": 880,
+      "sha256": "2063d1965ad948206d054f48f2697c8c4bec2db92640f0658ea596813e1962e6",
+      "gitBlobSha": "075b767645c9f3ff35960749f8ff1d1ba06a24de"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/config.json",
+      "bytes": 3787,
+      "sha256": "1a8c8e0ac02e5a60f2e2ab2b824eff2bae9ad451c859f1d93cb38607b42f416e",
+      "gitBlobSha": "79309eae0f971caef381b42f39f6b222f2f230ea"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/process.json",
+      "bytes": 3849,
+      "sha256": "88b0421d2b25737613095834d4ad4bf62e4b2beedd878af585bcd8645a246073",
+      "gitBlobSha": "72a56a2dbc1e392ddb7bd95a5aa75c4221c7a990"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "e9bacf46871c66ecb7d639f9cca29ec86d68e635b2509aea1ffab6342cec9afd",
+      "gitBlobSha": "7d4e6f2ea70df46d6cedeab30e5e652a914a3115"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/result.json",
+      "bytes": 75250,
+      "sha256": "83c0674cc9ca6942b2bbe6fb5adcc9711d21816120a679fffaecb48466c48968",
+      "gitBlobSha": "9e919ca901bd3cd65c17a348effd2d1a1ed2d2a0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/stderr.log",
+      "bytes": 880,
+      "sha256": "95274fb39c4bc27a5c9f4008ba07e71396c0cc114937d4c649408adb1c838008",
+      "gitBlobSha": "83ef7dbea9592b68c29dd165a3352741c116f559"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-09-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-09-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/config.json",
+      "bytes": 3788,
+      "sha256": "da0cb5f7c2ab06e4e4d98458cb712fb2d03cbc94705aefc617c9d705d03294c2",
+      "gitBlobSha": "095d0acb0cb618b7a920c372187a58e564a848b5"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/process.json",
+      "bytes": 3853,
+      "sha256": "5ef8c50c83f22785324468d9ed473390ff0adba7fd165fc54fbf9fb0210569ad",
+      "gitBlobSha": "256a0302507ef6d93259bc6dac5835e5f9306aa1"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a6512046da31ea03d3785fd01e0429c079c9e60137f4dedb7532ad979eadce23",
+      "gitBlobSha": "25bf6e854d304d1eafcfa11e6c161daa74d55070"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/result.json",
+      "bytes": 75258,
+      "sha256": "2f2ac9a94c9334d7a618bdde92d2d51edee97ac34e9636f02bd5a950f1832189",
+      "gitBlobSha": "743f835288b7e5fdfc5d5edc52533eb7b05294f1"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/stderr.log",
+      "bytes": 880,
+      "sha256": "c04a79d8031240b3da2b55abe332f2081e21da2cc6a84f34ff7ff5f33595d900",
+      "gitBlobSha": "28b4b1325e868b02734a8c96919ee49a5712991e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/config.json",
+      "bytes": 3802,
+      "sha256": "e5e843ce33db4d341d522cda66ce79027794d3b01aed883c653f440448aa0daa",
+      "gitBlobSha": "06e239163d1fe3ffad748637e9253598d391a136"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/process.json",
+      "bytes": 3854,
+      "sha256": "f1fe4e9119f1e1a3e85c762959b4b95e2e3eadc2f935cbf178aa6a0b770bec28",
+      "gitBlobSha": "d469d1635371e7e5b26a17dc9b1b2020bd906519"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "41bdbf8600eea4783612a6bf60c9c84f26a4552872a2e35c35f0aeca4ae34ede",
+      "gitBlobSha": "f05211ed6ca1aeade226d58490e97521e83d7f90"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/result.json",
+      "bytes": 75274,
+      "sha256": "1fd3b4a820419b7c2fa577e9d53d27d47e577d30f7eecbf483d14086094abb4d",
+      "gitBlobSha": "f9db7972aa615048c17c98b9c005b39ccd0a581c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/stderr.log",
+      "bytes": 880,
+      "sha256": "ce56afa5901f85ca06f7c7b37a1d15bbcc50644e7d5925320a36873a885de039",
+      "gitBlobSha": "be06604e4f9f272c79c078e346d5db9ab3f39466"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/config.json",
+      "bytes": 3788,
+      "sha256": "20645bed8dd8f4dd45d14637b24487c737d8989f8681c83ce7741b73dac8eebd",
+      "gitBlobSha": "e2bcc752b2c8fc26af70cc68a9cbd1b5ba21d46c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/process.json",
+      "bytes": 3853,
+      "sha256": "b7721468d24e4f7c007ea3dd67f6e5a4b72c4600c20c1de39d27df51fb785325",
+      "gitBlobSha": "6941fb8748e8388ba57b143cac9f201189009dfa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "ae3659294a5f683572875432f459af2007eebfa8324496185d41e29a01a6d6f3",
+      "gitBlobSha": "5bd8a2f9dd33a908fa10ba71a3c1196739e20d82"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/result.json",
+      "bytes": 75183,
+      "sha256": "5876921e08039e00ab227f1fba4537e547f905ac770e8e5b09cf81aca86ccd33",
+      "gitBlobSha": "004c494eed599930ff9871d352c0adbcbb3930ae"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/stderr.log",
+      "bytes": 880,
+      "sha256": "05a95b7dfc6f80f17c605a4bc5e46187034f0c305b9b91f7e0182630cc43991e",
+      "gitBlobSha": "100c0c108468525072986ece181ab3dbce6e8c31"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-10-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-10-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/config.json",
+      "bytes": 3788,
+      "sha256": "31079a17e734f2a397081b3d5de92c92a24e19dbaad5dd6f8a4f1ed2e72e3a72",
+      "gitBlobSha": "a7c66f0403ad2f9d818964c81194550c475aecf0"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/process.json",
+      "bytes": 3851,
+      "sha256": "66fb7235389765f37a385b13de2ccf12a89f0933ce0168907117b995ba1cffe0",
+      "gitBlobSha": "3b24599dd50e75f703ed65de141e4990ee515706"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "c76c12b705814993863d67226f1281fc6ada373aaa73ceb4b5573182e59e3646",
+      "gitBlobSha": "ad5c7f4e5815f047e1758c70dae8a7f4050f8f95"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/result.json",
+      "bytes": 75247,
+      "sha256": "532c76fe2d602ffdc49862bf61c39d021c4836ae5c33539a2833d61c43ad3b84",
+      "gitBlobSha": "e5d2d83b47ff8f2c9288fb3164c7be163194f5fb"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/stderr.log",
+      "bytes": 880,
+      "sha256": "852370eabcbe870d4e12fafa2b25352d87fe767142563ee16bc45a2686ae743b",
+      "gitBlobSha": "259366968679c9fa2f42ff57072157557945a877"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/config.json",
+      "bytes": 3802,
+      "sha256": "72fdc08942aa6a954c8f7906e6772fa3fef8480a1971e8a31b902e3116d77f15",
+      "gitBlobSha": "a73efa62a13695f5d0d4cc8b76970d6c303e6a93"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/process.json",
+      "bytes": 3854,
+      "sha256": "1bf75efe6f963c5738fa26260fd353e7e490f373c77d01656c6ef29aa9dbe362",
+      "gitBlobSha": "f3ab196136b52d9137dc7784641ab1171050930a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "e6b1d0298b4d325cfaa3faf67de518d0f2d5a14e0a2272706d33aae9ce8f728b",
+      "gitBlobSha": "3bfe735211ece00516a88fee3f0d6f74ba8f42a6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/result.json",
+      "bytes": 75255,
+      "sha256": "d1a883c5a89517892c882f7f246cbd97d4d12f7a0ec03877a6f8be034886e1c2",
+      "gitBlobSha": "7f81a6ebc74393bf356c53a3174105f5c279f80c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/stderr.log",
+      "bytes": 880,
+      "sha256": "49a0dbbb2564582bc1d8b03e5b27252793ed03da9564d2c38c0a17178ad8e77e",
+      "gitBlobSha": "8105919e6f3f12b04e401cf8e6a739f3e3eaece6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/config.json",
+      "bytes": 3788,
+      "sha256": "3d2e9abee3533dec93c5b6974f7434791b4447db427be026427fb1cf59c245c4",
+      "gitBlobSha": "e4690823aa59a24fac200c96424a88837dbc98dc"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/process.json",
+      "bytes": 3853,
+      "sha256": "5452ab9b4f0cdbb8db44abd3a247ed4942bcd11d4c857f777f58f8ee21630b63",
+      "gitBlobSha": "286830f99ba15307a6bba16cfce3e5d67ef1473e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "882cfe03b926fd8abd6caad5a4ca760c5034b609924e7e976da46c2018fd82e8",
+      "gitBlobSha": "6891e2367cde328a4e046f83e5a9a245093fee5e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/result.json",
+      "bytes": 75241,
+      "sha256": "86fe45158d520ba3f2078d4c4ebe7787e28398b86c172a98e7e4958710f4e145",
+      "gitBlobSha": "53208f138b1be8301b7bcf2c931166b6b7c5ccf8"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/stderr.log",
+      "bytes": 880,
+      "sha256": "cc955fe90f5bd7f7df72c5a8b7ff5c30d8f6bca6550e95d0a0b0b6c1406f34c2",
+      "gitBlobSha": "4c64959dd8bc641a5d9d26cb27528049b6967ba7"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-11-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-11-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/config.json",
+      "bytes": 3788,
+      "sha256": "263e8f8f477cae6982dacf8cb2b0c25b19262daeededc105c19075dabdb8c743",
+      "gitBlobSha": "cd8788d293b468007bc6a177b71e41733cddca55"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/process.json",
+      "bytes": 3855,
+      "sha256": "4338173c1e5ce2b317e1b4d7629cc558819e17b8f792754611ded3890f8090cc",
+      "gitBlobSha": "6b6c7598609f900ad11814ec2b9e53bcbf415287"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "773748264b2180974811062818df1e554f580f0be3ce2dd40580894024c33dcb",
+      "gitBlobSha": "1f6fb412dea72288e13bf6d0d75f0fd21db6126a"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/result.json",
+      "bytes": 75235,
+      "sha256": "ab327a55e19ea34ddf074ecda4f3c8bc6c8663b2f8363f12bbd5471e247f9cf0",
+      "gitBlobSha": "e8a8fd09fffb2146e5a51375109d1964733a4674"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/stderr.log",
+      "bytes": 885,
+      "sha256": "aa75ca4eb288a53979434e7a909d01bae5933d565ec7d118207ab62607009edb",
+      "gitBlobSha": "b66f38f3c23711e35a1dd552e897523fde140de1"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-A/stdout.log",
+      "bytes": 113,
+      "sha256": "a53066f6b88d8142c4fa1b354df6127cd804365ec4d437c2d80c7195126ceb98",
+      "gitBlobSha": "04974a978a3ff66093794c5607d1fceee963d5db"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/config.json",
+      "bytes": 3802,
+      "sha256": "c9f3a013e2307b62956026d1998f74bfda5fd6510040520d0ad55183f024dcc6",
+      "gitBlobSha": "0dddb863a0b6a1d54898437ffad02fef51230352"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/process.json",
+      "bytes": 3857,
+      "sha256": "949685f01a908a28d64a5cc2c89ef6b78139eafa68fd92fc987a5cc931263ce3",
+      "gitBlobSha": "5fb2bfd77356527d007ce11dff3224826206ee14"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a9349059de37c2ede8849cea81f648609896305bdab925d6074dc060642cc56d",
+      "gitBlobSha": "d6d1e894007f7efe8522f8d82889b7ce265bfc2b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/result.json",
+      "bytes": 75228,
+      "sha256": "fbc7c69ada591380498f0306bf174e5e04818ed61eac0ceeb37a62ee07285313",
+      "gitBlobSha": "fce5b3060b09a90dae5ba3d83dcc5d9af43d87a2"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/stderr.log",
+      "bytes": 880,
+      "sha256": "76a004fe00823d4053bf8d31474d3f5aebb55cbfb93db963098a9c9c718fe248",
+      "gitBlobSha": "cb68d4ec53be76fe716c41e61c7919d3ca583ded"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-B/stdout.log",
+      "bytes": 113,
+      "sha256": "1380873389d947baa28107ca9e156084cb232691667b57535278ec4b8e75c4df",
+      "gitBlobSha": "5648e591593b81ccd810d1a80913ef0c3195ac20"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/config.json",
+      "bytes": 3788,
+      "sha256": "46337d62f09544d9f5778e4748a40d468ef072985e62a4b3f2f16406a55a545a",
+      "gitBlobSha": "ada1d760cae8fdf4a2e7396cf224df29a7a668af"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/process.json",
+      "bytes": 3853,
+      "sha256": "58ebd69870e01bfb4157868868d7d34f08eba55cd6887ddb3470483211084fec",
+      "gitBlobSha": "f0e77f14a1cb9feb17c53bbfdadc68fba3f98817"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "a82464a15285b6ee0c025e06f9e8fab2d2df60b03d6541ec81e036f0666de83f",
+      "gitBlobSha": "720e679a32f75351833177aa0cc0cc232a234321"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/result.json",
+      "bytes": 75250,
+      "sha256": "c855e4c84992f9f13212a77c5fcb6f617d3cf56c2f96247413b5131f751b4568",
+      "gitBlobSha": "573f16535f11533be7195b34d7864d0d2433f832"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/stderr.log",
+      "bytes": 885,
+      "sha256": "ee6ff6c72e45355d774409aa33e7624018b62a0ef9a6205f1ac7355e4274f84a",
+      "gitBlobSha": "958cf3b95c9522b24952a865571fab4557941819"
+    },
+    {
+      "path": "20261128-inflight-validation-830/cohort-1/round-12-C/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/cohort-1/round-12-C/stdout.log",
+      "bytes": 113,
+      "sha256": "5e3ab3b02680a809b1e4c4e08a0fb80d591f88bc551f62f6cf1c77392593f260",
+      "gitBlobSha": "244815d2b74a01d6df37cf93997a79cf52b0e698"
+    },
+    {
+      "path": "20261128-inflight-validation-830/common.mjs",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/common.mjs",
+      "bytes": 5044,
+      "sha256": "7d7cbcdc497e4bde442b6e2dd12646b96d94ba343630d338ec704338260dee88",
+      "gitBlobSha": "049c6a71580c4e4f795e1dcb380bd3a1963e227e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/focused-tests-receipt.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/focused-tests-receipt.json",
+      "bytes": 965,
+      "sha256": "83c25b1057aabd9cd97cc971c448d445cf707bc570bfbac7859690fb4154f7d4",
+      "gitBlobSha": "9f0a7338e3a8adad906b92710b31bc12ac3de566"
+    },
+    {
+      "path": "20261128-inflight-validation-830/focused-tests.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/focused-tests.json",
+      "bytes": 103570,
+      "sha256": "7d6f0920162eec9d73317dd4f4355828c990281820a883c99bbc68559c799bbc",
+      "gitBlobSha": "7e8ee8c34a9ad07efb69b8dda8d261791ca9ca9b"
+    },
+    {
+      "path": "20261128-inflight-validation-830/focused-tests.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/focused-tests.log",
+      "bytes": 1766,
+      "sha256": "5a1ab323d020db3d6f46e0c4fcd7481f2c9c71b140ece26144a5a622e1e759a8",
+      "gitBlobSha": "fb3a077dc2427e1b4a9bc8eb8f18c8979b59d826"
+    },
+    {
+      "path": "20261128-inflight-validation-830/independent-preflight-review.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/independent-preflight-review.json",
+      "bytes": 4565,
+      "sha256": "46420cb8bed31680451b938600cf98f3be3fc8db12d0cc33c3ae839b7f99d9a2",
+      "gitBlobSha": "736c84d2903c9921238609951ac40bf28bee95d9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/independent-timing-review.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/independent-timing-review.json",
+      "bytes": 2722,
+      "sha256": "3cef4182ecf94a9ca456febac380a28af4a658b734d3f9643f326ae1156e0b27",
+      "gitBlobSha": "ebbf38b92d955494f646e9e936d2e1af2c3b6689"
+    },
+    {
+      "path": "20261128-inflight-validation-830/port-commit.txt",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/port-commit.txt",
+      "bytes": 272,
+      "sha256": "8c0080cac7fed48a84412e13bc825fa5f0ad32ecbb06a54792092b926b38ea3f",
+      "gitBlobSha": "cd67e112dd713a531cff456ec7ef5122e8483b94"
+    },
+    {
+      "path": "20261128-inflight-validation-830/port-source.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/port-source.json",
+      "bytes": 924,
+      "sha256": "ea372aa36d760d0f83b178fee43acdddcb9584fb81340f1c836c12755ebe9649",
+      "gitBlobSha": "35906dfc1d58a2349a79d9bb721999061f66b18e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/port.diff",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/port.diff",
+      "bytes": 26117,
+      "sha256": "a9bbb773661fccb060ced37de200dc20e7d04884ccd736083c004598293cd327",
+      "gitBlobSha": "8246cf1da904edabd92dfead736f21d4938ac105"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/config.json",
+      "bytes": 3545,
+      "sha256": "fdb8495a9e3e1d9e57d3f1e32e50ae780d69feeaf3f4cb860f8a7929da9f4bf1",
+      "gitBlobSha": "06fbd54d0273bf051127c2646bce9dff052e9d8e"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/process.json",
+      "bytes": 3831,
+      "sha256": "6a021f1b52536f4ecaf2a9ea8f484cead719a8525edc5151597da214a6f25c8d",
+      "gitBlobSha": "34c5dfa6d79797d6b30d452d76230a8de3abf4e6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "1fa224c8f56ea91d0d6b7d85be54ab944924fb2fe4673ae71a2c663db7da2440",
+      "gitBlobSha": "755abe4641199f063bbc727a3c41e5bd264664cf"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/result.json",
+      "bytes": 75231,
+      "sha256": "4caed0c3b7e334115a9a1832bf69d5588f9b6a127b5fcd2473aa5bf95d213474",
+      "gitBlobSha": "9e0710d67736ff5ac812f255ef2300bd57bb4a27"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/stderr.log",
+      "bytes": 875,
+      "sha256": "48b1d1285e0fce5678011848d5f4e13df72cbabf933750280de7bd577449be7a",
+      "gitBlobSha": "68e7176b824834fa70a3e2d708860129acd0af11"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/A/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/A/stdout.log",
+      "bytes": 117,
+      "sha256": "cf607b0369dc44ed52a78e3dd051140794912ee17b2af3c1b87112fe5ca74d94",
+      "gitBlobSha": "769552db6fe77b568ffa32295369da853f36e294"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/config.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/config.json",
+      "bytes": 3798,
+      "sha256": "dd092cec8a3d48356c7e3f0b0d2bc4b8c5a64a0f2775e7fc6f1f015d58c3ceee",
+      "gitBlobSha": "40167667d52b22862c3e57c7a58b6e2f06c2a0f6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/final-output-oracle.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+      "gitBlobSha": "c0aebde439f77cb0239c4c0c161407b4a9e58537"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/precise-coverage.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/precise-coverage.json",
+      "bytes": 53168,
+      "sha256": "6c881fb774b82b51739ffb8ce86d228201b64158b308efaf9f103da8127d11d2",
+      "gitBlobSha": "a02ec7be05bb4cf859a30b261003246e1d679b18"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/process.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/process.json",
+      "bytes": 3830,
+      "sha256": "9acc9402b8248621cba7dd4639ec7d252f9f53f49262d7954696ca2dc61ad754",
+      "gitBlobSha": "8fcfcf18eca87cd44e8170b8051c075a913f6232"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/raw-final-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/raw-final-files.json",
+      "bytes": 1028,
+      "sha256": "d65ae0d9b1132dc21a2ec24a24c644ba4040dcc510d08ace91b0f79ed4bc23ae",
+      "gitBlobSha": "001258ce37b04d655f2f1f850b1eb8212809a666"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/result.json",
+      "bytes": 82260,
+      "sha256": "75cee4a29579bfca07f403afc66277d2ecafa16f2eeb4e234d865c4ced1a0372",
+      "gitBlobSha": "427767b080377e34bde83bd3c538a5a5a11df021"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/stderr.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/stderr.log",
+      "bytes": 875,
+      "sha256": "700a2c3ae583e732b4ccb1309107768ea410b195516ecfba1299545b904ab147",
+      "gitBlobSha": "12d1bf55dec998352a62b982b1343232af2c0d69"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/B/stdout.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/B/stdout.log",
+      "bytes": 113,
+      "sha256": "02c61616acaeaa39cb0b321f17506477c0dace11e840462a121c4c56c900ec37",
+      "gitBlobSha": "9a54a81d72e059a8d3be8a4d4912f91fa599edfa"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/inputs.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/inputs.json",
+      "bytes": 6047,
+      "sha256": "5239da593fae1873166d6a4908fcfb00d247fc6a49fa72de55ed7505980a13bc",
+      "gitBlobSha": "691815e7359537a400c7ef7bfd2ff7335790eefe"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-1/result.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-1/result.json",
+      "bytes": 16645,
+      "sha256": "b94a46e06953bb86cf231b8b1bfa057dbb79870af1812058e6f82f594206901c",
+      "gitBlobSha": "7e96bb369a58767dc0d336064a47fe7e8b38d1b6"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-review-hardening.patch",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-review-hardening.patch",
+      "bytes": 2680,
+      "sha256": "2655a395a535b7d1b179f1852b0ec93a9076054a0c069c1e1b83e7f8727f4fdb",
+      "gitBlobSha": "b87a68eafd132d44ad263818a4dd6d958d5f68dc"
+    },
+    {
+      "path": "20261128-inflight-validation-830/preflight-runner-review.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/preflight-runner-review.json",
+      "bytes": 1389,
+      "sha256": "c0f6e990b8d01d91fa7d64742fb718070604b21adfa21b29a7411ac4ecb2e0fc",
+      "gitBlobSha": "78e2caebe4ddc8e1e02e2ac9b50669f63aa13f07"
+    },
+    {
+      "path": "20261128-inflight-validation-830/protocol.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/protocol.json",
+      "bytes": 8282,
+      "sha256": "a9dd8b81161d03830c098b58fd1c63bb67b07e80be81feaab30a76664e962e4c",
+      "gitBlobSha": "1f0ee99507203c61b4be79bb63e2578dd2a38c78"
+    },
+    {
+      "path": "20261128-inflight-validation-830/protocol.md",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/protocol.md",
+      "bytes": 5952,
+      "sha256": "66af749eb93f6778e6d389c2a90c5943026d93d1a618860e4038f45c2fbb58b2",
+      "gitBlobSha": "12f3113711f2aaef205a310853242bf4bc166fbf"
+    },
+    {
+      "path": "20261128-inflight-validation-830/run.mjs",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/run.mjs",
+      "bytes": 12635,
+      "sha256": "f286b40ed33ced64072aedd872e6afe3859e308457652bd40bc849657ded3282",
+      "gitBlobSha": "693ba5540924f4bee8513e6c83f67ead1d83bc0d"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-eslint-receipt.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-eslint-receipt.json",
+      "bytes": 450,
+      "sha256": "8a4e90f4bf2dbe7caf2b81ff96766f1b02017baa7b53de19fd16673d77bfc8b4",
+      "gitBlobSha": "6db5f5a3cc014e56430e30eac1cb98c4717540df"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-eslint-retry-receipt.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-eslint-retry-receipt.json",
+      "bytes": 3068,
+      "sha256": "e15786eca4e4c8ea22740d976a7e9ad6fb603ca2bef2efac2563ab66ef8c7b50",
+      "gitBlobSha": "5892693948dc02900967d7369f68ea67337cdd77"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-eslint-retry-resources-before.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-eslint-retry-resources-before.json",
+      "bytes": 2378,
+      "sha256": "42c19bc5ed0829bee0dc17254cca9c190c06b10e79fb2b180cefb1db988482a4",
+      "gitBlobSha": "9778db7e62ee9b3b5f8f88b603dabe56d33843bb"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-eslint-retry.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-eslint-retry.log",
+      "bytes": 1042,
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67",
+      "gitBlobSha": "ab2c1b98fc2c80db8b269f9612fdb5a810b60bec"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-eslint.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-eslint.log",
+      "bytes": 1044,
+      "sha256": "8a99ed173907a71473ca3a4baa039654e65d7d5cfc99811186587f79c2e86433",
+      "gitBlobSha": "8f46d231c19e88050965c383969b8170d4f24912"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-types-receipt.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-types-receipt.json",
+      "bytes": 435,
+      "sha256": "5394b6093481eae10a12dfe481a674923112a2960588e7ceb327d6f350a68b26",
+      "gitBlobSha": "1a1e5b0ebc14448e6fa90b746792d3d9df944deb"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-types.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-types.json",
+      "bytes": 312,
+      "sha256": "00147ab9619af1d9570c5aaf2cc997d8c23d0f0f2124eeeb26342cd4caf97bb5",
+      "gitBlobSha": "9acb7ac48c5f95da5efdfb743a3e4aa79c77e93c"
+    },
+    {
+      "path": "20261128-inflight-validation-830/scoped-types.log",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/scoped-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "20261128-inflight-validation-830/setup-failures/workspace-checkpoint-enospc.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/setup-failures/workspace-checkpoint-enospc.json",
+      "bytes": 594,
+      "sha256": "0942ecbde0ecc7d27d90e50fea270a2b466c09b18cd96f997e0e4f4e67fe79d5",
+      "gitBlobSha": "e8655ec696dff70023dab977d7cf86f923c314d9"
+    },
+    {
+      "path": "20261128-inflight-validation-830/setup-failures/workspace-checkpoint-partial.tar.gz",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/setup-failures/workspace-checkpoint-partial.tar.gz",
+      "bytes": 28672,
+      "sha256": "8d2f60f7601513084aba97d7d79d66a9a5eb8669d44dd36d8790656bbfe566e2",
+      "gitBlobSha": "8d0c17795f69d24225bcbefe1b36950c0ddb06cb"
+    },
+    {
+      "path": "20261128-inflight-validation-830/sink-child.mjs",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/sink-child.mjs",
+      "bytes": 31014,
+      "sha256": "452ccb05d5b0a6dc712a0e2a69f660a4d8c328845fd0a5ed0a04b853229040e3",
+      "gitBlobSha": "f927d42e6717b8c826d693a4d88077f02bed3b65"
+    },
+    {
+      "path": "20261128-inflight-validation-830/upstream-pr.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/upstream-pr.json",
+      "bytes": 5582,
+      "sha256": "8843664ab4910afcdfbf5c24ebdcd52a81b636bc8f9ed52b4faec01fc2cafc6e",
+      "gitBlobSha": "4bf04e73b1f010802303dde2d396b13e5dcb87c5"
+    },
+    {
+      "path": "20261128-inflight-validation-830/upstream.diff",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/upstream.diff",
+      "bytes": 25994,
+      "sha256": "d898d3d68852072ccffae877a003781e52730f4f880c983e1d3c7b28be9ee756",
+      "gitBlobSha": "bd12f46b3b70aa5ad6938f0be60fa6c89385c74d"
+    },
+    {
+      "path": "source/ext/js/dictionary/dictionary-database.js",
+      "localPath": "/workspace/scratch/83b3b3bfba02/inflight-validation-830/ext/js/dictionary/dictionary-database.js",
+      "bytes": 617755,
+      "sha256": "12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd",
+      "gitBlobSha": "8bf7e205e0d4216d43475a77e273986cd44e2078"
+    },
+    {
+      "path": "source/test/dictionary-in-flight-content-sources.test.js",
+      "localPath": "/workspace/scratch/83b3b3bfba02/inflight-validation-830/test/dictionary-in-flight-content-sources.test.js",
+      "bytes": 16759,
+      "sha256": "0b162f3d4889fba176a08aaee15bd8641115db7012f75c5124dcaf43119c30fe",
+      "gitBlobSha": "724d8c92b44e211c5f422caa71f7af9d3b5ad093"
+    }
+  ]
+}

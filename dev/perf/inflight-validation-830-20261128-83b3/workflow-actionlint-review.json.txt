@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "utc": "2026-11-28T05:50:07.486293+00:00",
+  "workflowSha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5",
+  "repositoryPin": {
+    "sourceCommit": "914e7df21a07ef503a81201c76d2b11c789d3fca",
+    "version": "1.7.12",
+    "scriptSha256": "72fa3e45ac20f3c3a512d6747b4fcf719e21f890e8c43e78d48a41fdfb900c4e"
+  },
+  "download": {
+    "archiveUrl": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz",
+    "archiveBytes": 2353908,
+    "archiveSha256": "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8",
+    "officialChecksumsUrl": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt",
+    "officialChecksumsSha256": "433028cf0ba3c42163ea1a668dedce30fcdbe84fe912b1a5e288c006eab8a4f5",
+    "checksumMatches": true
+  },
+  "retainedExtractedFiles": [
+    {
+      "path": "actionlint",
+      "bytes": 6074530,
+      "sha256": "c872d6db8c6bf83a8eaa704fc93999f027d55dffbc63b8a6abdccb47df5f4cd4"
+    },
+    {
+      "path": "LICENSE.txt",
+      "bytes": 1067,
+      "sha256": "03a26b06d224380a02bf100e05fff3b2dfc71b14d4e2fa685ec9963a87563c22"
+    }
+  ],
+  "versionOutput": "1.7.12\ninstalled by downloading from release page\nbuilt with go1.26.1 compiler for linux/amd64\n",
+  "command": [
+    "/tmp/manabitan-actionlint-830-83b3-20261128/actionlint",
+    "-color",
+    "/workspace/scratch/83b3b3bfba02/qualification-draft/import-inflight-validation-830-83b3.yml"
+  ],
+  "cwd": "/workspace/scratch/83b3b3bfba02/manabitan",
+  "shellcheckExecutable": null,
+  "pyflakesExecutable": null,
+  "exitCode": 0,
+  "output": "",
+  "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Only the frozen 7153-byte workflow was linted. No workflow or source was edited, and no benchmark or GitHub action was run.",
+  "setupFailurePreserved": "extract-setup-failure.json records an initial incorrect license member name before any actionlint execution; corrected to the observed LICENSE.txt member without changing binary/version/workflow."
+}

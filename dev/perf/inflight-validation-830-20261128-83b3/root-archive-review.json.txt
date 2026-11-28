@@ -1,0 +1,14 @@
+{
+  "complete": true,
+  "verifiedBy": "root independent stream readback",
+  "archiveSha256": "01a3154653e6b55de5ab4b689abf42b017cf6c5d2b4959c6c59f50244d7f0b2d",
+  "archiveGitBlobSha": "57c8a7c0a486e1756a8aa331eed21a5085c859e1",
+  "payloadFiles": 305,
+  "payloadBytes": 8041560,
+  "sourceOnlyTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "exactMeasuredCommit": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+  "commitBytes": 272,
+  "commitSha256": "8c0080cac7fed48a84412e13bc825fa5f0ad32ecbb06a54792092b926b38ea3f",
+  "extractsOrExecutesPayloads": false,
+  "runtimeOrExperimentChanges": false
+}

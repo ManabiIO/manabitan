@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "native_hotpaths",
+  "reviewedUtc": "2026-11-28T05:44:38.900663+00:00",
+  "scope": "Independent read-only source/semantic review; no workflow or browser acquisition executed",
+  "workflowSha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5",
+  "driverSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "result": "No blocking finding",
+  "findings": [
+    "Exact original #830 branch, repository and develop-base selector; candidate uses event head SHA.",
+    "Only dictionary-database.js may differ under ext, and its final source SHA is pinned before setup.",
+    "Protected package/build/fixture and Python/JS/MJS/HTML acquisition sources must match immutable9e.",
+    "The unchanged driver independently builds A/B and admits exactly one changed packaged runtime entry; C reuses identical A package/source/flags.",
+    "Opposite-order JMdict12-pair jobs and Jitendex/VNDB6-pair jobs retain frozen alternating schedule and interleaved same-code controls; no host pooling is introduced.",
+    "No new flags, parser-worker override, timing trace or instrumentation; original fresh-profile/post-UI/restart/media verification remains.",
+    "Memory overlay is original driver behavior and occurs only after all timing/media observations; source is restored and verified.",
+    "VNDB37-37 allocation range is declared prospectively and fails outside it, without fallback or relaxation.",
+    "pipefail/tee plus always-upload preserve failed acquisition logs and all existing observations."
+  ],
+  "limits": [
+    "No actionlint execution; tool unavailable in prior validation.",
+    "No CI or browser result exists for this new workflow at review time.",
+    "A completed correctness/memory cohort would still need latency interpretation against controls and opposite-order replication."
+  ]
+}

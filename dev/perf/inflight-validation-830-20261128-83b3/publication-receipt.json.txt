@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "originalPrHead": "a628c6c7915576dcf280e98bc9129a508f2f9644",
+  "measuredLocalCommit": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+  "measuredSourceOnlyTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "remoteSourceOnlyCommit": "70ae536b297c8825dc80f3cb5340eb2513b2e05f",
+  "remoteSourceOnlyTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "historyPreservingMerge": "3a2e7cda7b379bf4720c8d9ef35c4c9f0546f495",
+  "historyPreservingMergeParents": [
+    "a628c6c7915576dcf280e98bc9129a508f2f9644",
+    "70ae536b297c8825dc80f3cb5340eb2513b2e05f"
+  ],
+  "sourceTreeEqualityVerified": true,
+  "commitIdentityNote": "The exact measured Git commit payload is preserved in the 305-file archive and reconstructs 3eb1b7af. The GitHub-created source commit has identical tree bytes with different commit metadata. The final published commit adds only the listed workflow and evidence paths to that tree.",
+  "runtimeAndTest": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 617755,
+      "sha256": "12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd",
+      "gitBlobSha": "8bf7e205e0d4216d43475a77e273986cd44e2078"
+    },
+    {
+      "path": "test/dictionary-in-flight-content-sources.test.js",
+      "bytes": 16759,
+      "sha256": "0b162f3d4889fba176a08aaee15bd8641115db7012f75c5124dcaf43119c30fe",
+      "gitBlobSha": "724d8c92b44e211c5f422caa71f7af9d3b5ad093"
+    }
+  ],
+  "componentEvidence": {
+    "archiveSha256": "01a3154653e6b55de5ab4b689abf42b017cf6c5d2b4959c6c59f50244d7f0b2d",
+    "payloadFiles": 305,
+    "payloadBytes": 8041560,
+    "rootAndIndependentArchiveReadback": true,
+    "all36ChildrenPassed": true,
+    "additionalTimingRounds": 0,
+    "directRegistrationMedianDeltaMs": -16.99974275,
+    "directRegistrationBeatsBothControls": 12,
+    "totalSinkOrImportSpeedupQualified": false
+  },
+  "workflow": {
+    "sha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5",
+    "actionlintVersion": "1.7.12",
+    "actionlintExitCode": 0,
+    "cleanSourceGuardExitCode": 0,
+    "cleanGuardCandidate": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+    "cleanGuardTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+    "independentSourceReviews": 2,
+    "protectedBrowserAcquisitionSourcesUnchanged": true,
+    "wholeBrowserQualification": "Prospective; no result claimed by this publication receipt"
+  },
+  "changesAfterSourceOnlyTree": [
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ddd1963dab486e6d5129e7c8a2e25f1a597c676",
+      "size": 7219,
+      "sha256": "c5dffb0b33247b1ceb29b561cab6b6915e1a223668d628577ce76df2e2aa4a25"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/MANIFEST.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76c0ccdbca9ede9a3c749bbe3abbb4b244d05bd2",
+      "size": 125191,
+      "sha256": "868023cb386249d025ead516ee50afd1905377699717fd0a8f6e0cb24855cb2d"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57c8a7c0a486e1756a8aa331eed21a5085c859e1",
+      "size": 1514762,
+      "sha256": "01a3154653e6b55de5ab4b689abf42b017cf6c5d2b4959c6c59f50244d7f0b2d"
+    },
+    {
+      "path": ".github/workflows/import-inflight-validation-830-83b3.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49cb018a564a53d7d3b68bb80dc6000fafc7a026",
+      "size": 7153,
+      "sha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/root-archive-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa372f1b6a4518e487d672fad139e3bfc8473e29",
+      "size": 598,
+      "sha256": "b26cd7a2a391d05648701fbbed586e84eef380e74c081fbab69ea59a7da774dd"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/independent-publication-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef3a873f2cdd07b1803b5d2956d4ed8c8cb75f75",
+      "size": 1149,
+      "sha256": "92498c4c07ae8809b5f06bc0f5383536df663c302345c33372a5a7cc305d453a"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-validation-830-83b3-compact.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "246f5a4e18913d84d82a405ce78ad110ac250d76",
+      "size": 6566,
+      "sha256": "44cca872705b58b258df7c1a10c5ba1e036b5e5a6c525fe5e50cff09ff993ae9"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-validation-830-83b3-compact-manifest.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6a502c813d71c91a3d9d9d28701aef6d6cee40a",
+      "size": 4276,
+      "sha256": "03cbaa85d4d566ca2f36b531a3c7af8898720202299adba3c4c3a82ab9ee4521"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-static-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "723a783900d1035650037523349e85a1088a70f9",
+      "size": 2927,
+      "sha256": "c95aea4012c4a580cb34464af9ebe9eb4452b04b0ad0ba96978e0d91bb138757"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-actionlint-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "567976dc5354dbc2001699404f3460003e714e8c",
+      "size": 2113,
+      "sha256": "b182d8ebaad162dd6af8e730466f6db921b38dfdbe5f56d7ee13f570142deade"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-clean-source-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e68d3ab52759426fc703e948a99c9f3066980437",
+      "size": 3624,
+      "sha256": "3db084ca34dd5ceea656fcbce733a7697682fce5a408b2d5363c5a7506704a1c"
+    },
+    {
+      "path": "dev/perf/inflight-validation-830-20261128-83b3/workflow-independent-native-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c02b74ed0869367dcbd5918c6fc023753beac87",
+      "size": 1879,
+      "sha256": "c5f55480e6c9a0ac997d4593aff777d003aed062efee455dd21c6d55b355f9e1"
+    }
+  ],
+  "receiptSelfExcluded": true
+}

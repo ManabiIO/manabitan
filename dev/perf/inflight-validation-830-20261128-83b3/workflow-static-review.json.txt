@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-11-28T05:43:05.863666+00:00",
+  "status": "Prospective local draft only; not uploaded, committed, published or executed",
+  "workflow": {
+    "path": "/workspace/scratch/83b3b3bfba02/qualification-draft/import-inflight-validation-830-83b3.yml",
+    "bytes": 7153,
+    "sha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5"
+  },
+  "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "verifiedProductPort": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+  "exactRuntimeFile": "ext/js/dictionary/dictionary-database.js",
+  "exactRuntimeSha256": "12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd",
+  "branch": "perf/jmdict-inflight-validation-20261123-71149",
+  "baseRef": "develop",
+  "driver": {
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "unchanged": true
+  },
+  "matrix": [
+    {
+      "dictionary": "jmdict",
+      "initial_order": "AB",
+      "pairs": 12
+    },
+    {
+      "dictionary": "jmdict",
+      "initial_order": "BA",
+      "pairs": 12
+    },
+    {
+      "dictionary": "jitendex",
+      "initial_order": "AB",
+      "pairs": 6
+    },
+    {
+      "dictionary": "vndb",
+      "initial_order": "AB",
+      "pairs": 6
+    }
+  ],
+  "packageEntriesAllowed": [
+    "js/dictionary/dictionary-database.js"
+  ],
+  "pythonAcquisitionGuard": {
+    "matchedAllTrackedPerfPythonFiles": true,
+    "count": 21
+  },
+  "validation": {
+    "yamlUniqueKeysAndMatrix": "pass",
+    "bashSyntaxRunBlocks": 4,
+    "prettier": "pass",
+    "exactRuntimeAndProtectedSourceDiff": "pass",
+    "actionlint": "not available; not installed",
+    "futureCleanCheckoutGuard": "Present; not executed on local port because its untracked ext/lib and node_modules symlinks are local setup artifacts"
+  },
+  "changesFrom820Qualification": [
+    "Exact existing #830 branch and one dictionary-database.js package entry, with source SHA pinned before setup.",
+    "No owned-columns replay, #820 runtime changes, added trace, import flags or parser-policy override.",
+    "The unchanged driver itself acquires and verifies the locked corpus before independent source builds.",
+    "Same opposite-order JMdict 12-pair cells, Jitendex/VNDB 6 pairs, interleaved identical controls, fresh profiles, post-UI endpoint, restart/readback, media and separate memory qualification; VNDB exactly 37 allocation units.",
+    "Driver stdout/stderr preserved with pipefail and tee outside its fresh evidence directory; always-upload includes all reports/packages/failure logs."
+  ],
+  "limits": [
+    "No browser observation has been acquired by this draft.",
+    "No host pooling, gate relaxation or automatic retry added.",
+    "The original driver deliberately applies its existing memory-only harness overlay after timing; timed source and product packages have no overlay."
+  ]
+}

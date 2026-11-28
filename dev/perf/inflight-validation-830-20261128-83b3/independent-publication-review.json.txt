@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "prior_work_audit",
+  "utc": "2026-11-28T05:50:51.793742+00:00",
+  "archiveSha256": "01a3154653e6b55de5ab4b689abf42b017cf6c5d2b4959c6c59f50244d7f0b2d",
+  "manifestSha256": "868023cb386249d025ead516ee50afd1905377699717fd0a8f6e0cb24855cb2d",
+  "readmeSha256": "c5dffb0b33247b1ceb29b561cab6b6915e1a223668d628577ce76df2e2aa4a25",
+  "members": 305,
+  "payloadBytes": 8041560,
+  "everyArchiveMemberSizeAndSha256Verified": true,
+  "all36ChildResultConfigAndCompleteOutputReceiptsIncluded": true,
+  "admissionAndProspectiveProtocolIncluded": true,
+  "independentReviewsIncluded": true,
+  "bothRequiredSiblingOraclesIncluded": true,
+  "exactRuntimeAndTestSourcesIncluded": true,
+  "failuresAndSuccessfulLintRetryIncluded": true,
+  "semanticReadmeReview": "Direct registration17ms and12/12 reported separately from inconclusive aggregate4/12 and wide identical-control variation; no browser or memory qualification claim.",
+  "limitations": [
+    "The archive is self-contained for evidence review; corpus ZIP, dependency installation, baseline repository and Node runtime are external reproduction prerequisites."
+  ]
+}
