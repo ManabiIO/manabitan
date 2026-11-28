@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -24,8 +25,9 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 version = subprocess.check_output([args.emcc, '--version'], text=True)
-assert binding['emscripten'] in version, version
-assert binding['emscriptenRevision'] in version, version
+expected_version = binding['emscripten'].removesuffix('-git')
+expected_identity = re.escape(expected_version) + r'(?:-git)?\s+\(' + re.escape(binding['emscriptenRevision']) + r'\)'
+assert re.search(r'\b' + expected_identity, version), version
 (output / 'compiler-version.txt').write_text(version)
 assert sha(root / 'zstd-count64.patch') == binding['patchSha256']
 assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip() == binding['sourceHead']
