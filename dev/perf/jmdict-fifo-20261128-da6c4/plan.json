@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "studyId": "jmdict-first-free-fifo-20261128-da6c4-hosted1",
+  "scope": "Node scheduling component only. No parser, storage, browser, memory-qualification or whole-import speed claim.",
+  "captureCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+  "evidenceCommit": "1ea411e5d6409cb61503985a2a6cef8aa04eb9d3",
+  "evidenceArchive": "builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz",
+  "evidenceArchiveBytes": 1940317,
+  "evidenceArchiveSha256": "0b10131113eab3c5a627c5a009d1c2cbcaa222abdff2989b7fc306ba6e123bc1",
+  "evidenceMembers": [
+    {
+      "bytes": 13209,
+      "path": "profiling/capture-compression-groups.mjs",
+      "sha256": "0856f474db7efbf3a790479d01cabde696c908688e36766a4f0b899a356d22e8"
+    },
+    {
+      "bytes": 82573,
+      "path": "profiling/compression-groups/jmdict/manifest-db-1m.json",
+      "sha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e"
+    },
+    {
+      "bytes": 1815727,
+      "path": "profiling/compression-scheduling-db-1m-replication.json",
+      "sha256": "434f569b5a8db01fa96c549a6581f0e4bcda9e5cecf6f0e14f012de5f3562ba0"
+    },
+    {
+      "bytes": 10242,
+      "path": "profiling/compression-scheduling-replay.mjs",
+      "sha256": "7cded3af96ba6c88a5247c062c9a57b3fe93646862166dea5a4dcbc496d9f370"
+    },
+    {
+      "bytes": 1143,
+      "path": "profiling/compression-worker-node-bridge.mjs",
+      "sha256": "7b2dcf0346a78bb5070d3b43fa513f3f9ebd150c1c9f0416df45a5b99f1a0315"
+    },
+    {
+      "bytes": 4292,
+      "path": "profiling/replan-production-blocks.mjs",
+      "sha256": "728f64e207cc42cd7891640f109a3def1ba569c2ca08d0dd6165f952fde65da7"
+    }
+  ],
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "expected": {
+    "groups": 12,
+    "rows": 528299,
+    "uniqueInputBytes": 100300626,
+    "blocks": 103,
+    "blockTargetBytes": 1048576,
+    "blocksPerGroup": [
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      7,
+      8,
+      8,
+      8,
+      8,
+      10
+    ],
+    "outputBytes": 12326040,
+    "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747"
+  },
+  "nodeVersion": "v22.22.0",
+  "workerCount": 4,
+  "maximumAdmittedGroups": 2,
+  "rounds": 12,
+  "modes": [
+    "A-rotation",
+    "C-rotation-control",
+    "B-first-free-fifo"
+  ],
+  "warmupOrder": [
+    "A-rotation",
+    "C-rotation-control",
+    "B-first-free-fifo"
+  ],
+  "orders": [
+    [
+      "A-rotation",
+      "B-first-free-fifo",
+      "C-rotation-control"
+    ],
+    [
+      "B-first-free-fifo",
+      "C-rotation-control",
+      "A-rotation"
+    ],
+    [
+      "C-rotation-control",
+      "A-rotation",
+      "B-first-free-fifo"
+    ],
+    [
+      "A-rotation",
+      "C-rotation-control",
+      "B-first-free-fifo"
+    ],
+    [
+      "C-rotation-control",
+      "B-first-free-fifo",
+      "A-rotation"
+    ],
+    [
+      "B-first-free-fifo",
+      "A-rotation",
+      "C-rotation-control"
+    ],
+    [
+      "A-rotation",
+      "B-first-free-fifo",
+      "C-rotation-control"
+    ],
+    [
+      "B-first-free-fifo",
+      "C-rotation-control",
+      "A-rotation"
+    ],
+    [
+      "C-rotation-control",
+      "A-rotation",
+      "B-first-free-fifo"
+    ],
+    [
+      "A-rotation",
+      "C-rotation-control",
+      "B-first-free-fifo"
+    ],
+    [
+      "C-rotation-control",
+      "B-first-free-fifo",
+      "A-rotation"
+    ],
+    [
+      "B-first-free-fifo",
+      "A-rotation",
+      "C-rotation-control"
+    ]
+  ],
+  "sourceOwnershipCheck": "After timing, for each arm use a fresh copy of the largest captured source group. Poison the caller's offset/length arrays immediately after begin; after native sourceConsumed, poison the source SAB before awaiting completion. Require the original exact compressed block hashes, then exhaustively decode after all compressor workers terminate. In this untimed proof only, final logical replies are held while physical FIFO slots continue to retire, then released after source poisoning; this guarantees completion publication follows the poison without blocking queued source-consumed messages.",
+  "timingBoundary": "hrtime before first group submission through completion of all12 ordered groups and native sourceConsumed barriers. Include original production metadata snapshot, dispatch, gather, codec and envelope work; exclude preload, input/output hashing, output persistence, gc and final decoding.",
+  "scheduling": "A and C are identical current rotating direct dispatch. B remaps the same immutable messages to a single FIFO and dispatches to the first free physical worker. Exactly one active B job per physical worker; sourceConsumed never frees that slot. Group admission remains at most two until oldest full completion.",
+  "inputRegeneration": "Run checksum-bound archived native/canonical capture unchanged against9e10 with explicit three-parser-worker partition arguments. Run preserved exact production replanner with only its hardcoded workspace root changed. Verify every source/offset/length hash, complete group plan and packed input hash against committed1MiB oracle before timing. Runtime worker/codec imports are exclusively from5048.",
+  "deferredDecode": "Persist every completed warmup, timed observation and ownership output outside timing. Terminate all four compressor workers, release source views, then initialize the main-thread decoder and exhaustively verify all retained output blocks against input hashes. Completion requires39 full outputs plus3 ownership outputs.",
+  "analysis": "Retain all36 timed observations. Report all twelve paired B/A, B/C and C/A ratios, their medians, equal-work summed-time ratios, worker busy receipts and queue depths. No tail exclusion, adaptive stopping, timing reruns or acceptance claim from an incomplete cohort.",
+  "failurePolicy": "Preserve every setup/process/semantic failure and partial output. Do not rerun an unchanged failed hosted cohort. The two local137attempts and their incomplete observations remain distinct, never pooled with hosted data.",
+  "localAttemptsReceipt": "local-attempts.json",
+  "advanceGate": {
+    "scope": "Advance only to a separately source-bound production scheduling candidate and full browser qualification. Passing is not a whole-import speed or memory claim.",
+    "requiredCompleteObservations": 36,
+    "requiredSemanticChecks": "All warmups, timed observations, source-ownership checks and all retained outputs pass exact block-hash and exhaustive decode checks.",
+    "comparisons": [
+      "B-first-free-fifo/A-rotation",
+      "B-first-free-fifo/C-rotation-control"
+    ],
+    "minimumPairedMedianSavingMs": 5,
+    "minimumPairedMedianSavingPercent": 5,
+    "minimumFasterPairsPerComparison": 9,
+    "pairsPerComparison": 12,
+    "equalWorkRule": "Sum of all B durations is strictly lower than each control's sum.",
+    "intervalRule": "For each comparison, the upper endpoint of both the paired median millisecond-difference and percentage-difference 95% percentile bootstrap intervals is strictly below zero.",
+    "bootstrap": {
+      "resamplingUnit": "Paired round/block; resample twelve indices with replacement, preserving A/B/C within each index.",
+      "samples": 20000,
+      "generator": "Unsigned xorshift32: x ^= x << 13; x ^= x >>> 17; x ^= x << 5; apply >>> 0; use floor(x / 4294967296 * 12) as index.",
+      "initialSeedHex": "0x000da6c4",
+      "confidencePercent": 95,
+      "percentileMethod": "Type 7 linear interpolation at 0.025 and 0.975. Generate one shared resample-index sequence for all comparisons and metrics."
+    },
+    "controlDriftRule": "abs(median of paired C/A percentage differences) must be strictly less than half the smaller magnitude of the B/A and B/C paired-median percentage savings.",
+    "failureOutcome": "If any rule fails, mark the hosted screen inconclusive or reject this candidate; do not use a favorable subset, pool local partial cohorts, or rerun unchanged timing."
+  }
+}

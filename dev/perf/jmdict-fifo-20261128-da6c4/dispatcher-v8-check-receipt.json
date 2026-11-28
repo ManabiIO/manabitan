@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+  "productionModuleSha256": "4454ba014404a67a4e8c833538792131f18e5c27dd619678f98749a9191384d8",
+  "productionPoolClassSha256": "193f5709b2d898e4901af43cee7e3e6c34d3740159beb874a25f4aaf479e09cd",
+  "dispatcherClassSha256": "627fb7d6d41ecab6e76fa7a2b1e789a1defb0899c02e4b37f980b2e69ab6192d",
+  "componentSourceSha256": "f0043a72e5f72ac721d977d73070575c92aa90d512e374059e4f346b50f31bea",
+  "testBodySha256": "c19048c5e19e76b6aa45603f471fcf256651ac33496d22bced75cb72ad5a6935",
+  "scope": "V8 deterministic transport tests using exact frozen5048 pool class, exact hosted dispatcher source, fake Node workers and ArrayBuffer stand-in for unavailable SharedArrayBuffer. No Wasm/Node/corpus timing.",
+  "results": [
+    {
+      "name": "FIFO keeps four physical slots, global queue order and original result order",
+      "passed": true
+    },
+    {
+      "name": "production metadata snapshot isolates both immediately poisoned caller columns",
+      "passed": true
+    },
+    {
+      "name": "held logical completions do not block FIFO draining or native source barriers",
+      "passed": true
+    },
+    {
+      "name": "A and C forward unchanged logical assignments including multiple queued jobs",
+      "passed": true
+    },
+    {
+      "name": "one worker failure rejects running and queued jobs and both public barriers",
+      "passed": true
+    },
+    {
+      "name": "initialization errors reject readiness before any dispatch and all workers terminate",
+      "passed": true
+    },
+    {
+      "name": "unexpected worker exit latches failure and rejects queued ownership",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "ArrayBuffer stands in for SharedArrayBuffer because the functions V8 surface does not expose native SAB.",
+    "These checks exercise promises, dispatch ordering, metadata snapshot isolation, readiness/failure and logical routing with fake workers. They do not establish real cross-thread data visibility or codec parity.",
+    "The hosted job must rerun the same deterministic body against native Node SAB and the actual frozen production module before any corpus timing."
+  ]
+}

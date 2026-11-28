@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "scope": "Two incomplete local scheduling component attempts. Neither is eligible for a performance conclusion. Raw files remain in the temporarily unavailable executor; this transcription retains only observed facts.",
+  "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+  "attempts": [
+    {
+      "id": "local-fifo-v1",
+      "scriptSha256": "027175f003410ff60e559f23ee6c1a7c12649102cc120d4ce81b3955eb38bac8",
+      "planSha256": "ee4c10d9e4175be9961bb9c58ea97dc946e4555ae6366c3239e8e4b7e4c74889",
+      "execChunk": "09de12",
+      "exitCode": 137,
+      "lastLogEvent": {
+        "event": "start",
+        "mode": "A-rotation",
+        "label": "warmup-A-rotation"
+      },
+      "completedWarmups": 0,
+      "completedTimedObservations": 0,
+      "completedOwnershipChecks": 0,
+      "completedDecodeChecks": 0,
+      "mainDecoderInitializedBeforeWorkers": true,
+      "reasonForNextCohort": "Materially safer initialization: main decoder deferred until after all four compressors terminate. Timed input/work/order unchanged. This is not an established OOM diagnosis."
+    },
+    {
+      "schemaVersion": 1,
+      "cohort": "local-fifo-v2-deferred-decoder",
+      "sourceCandidate": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+      "scriptSha256": "501f6c020c69a0a33498b3dd3d5bb6e050cb41f0334e752ef0ae0495de703d50",
+      "planSha256": "a3bb528b7f56d4f07a026bd7413fcf0f2e97f494876dfd84e3e16678db44c243",
+      "command": "node --expose-gc --max-old-space-size=384 ../analysis/jmdict-fifo-component-v2.mjs > ../analysis/jmdict-fifo-component-v2.log 2>&1",
+      "cwd": "/workspace/scratch/da6c4dbd0097/startup-experiment",
+      "exec": {
+        "initialChunk": "769a4c",
+        "session": 13340,
+        "completionChunk": "60025b",
+        "exitCode": 137
+      },
+      "complete": false,
+      "warmups": 3,
+      "observations": 12,
+      "sourceOwnershipChecks": 0,
+      "exhaustiveDecodeChecks": 0,
+      "inFlight": {
+        "mode": "C-rotation-control",
+        "label": "round-4",
+        "round": 4,
+        "order": [
+          "C-rotation-control",
+          "B-first-free-fifo",
+          "A-rotation"
+        ],
+        "checkpointState": "planned",
+        "setupMemory": {
+          "rss": 326672384,
+          "heapTotal": 20238336,
+          "heapUsed": 9421880,
+          "external": 32964486,
+          "arrayBuffers": 159506559
+        }
+      },
+      "startupMemory": [
+        {
+          "phase": "sources-loaded",
+          "usage": {
+            "rss": 205754368,
+            "heapTotal": 18665472,
+            "heapUsed": 9074136,
+            "external": 66989529,
+            "arrayBuffers": 164242130
+          }
+        },
+        {
+          "phase": "four-workers-ready-without-main-decoder",
+          "usage": {
+            "rss": 267165696,
+            "heapTotal": 19189760,
+            "heapUsed": 9503040,
+            "external": 67097501,
+            "arrayBuffers": 116105115
+          }
+        }
+      ],
+      "retainedOutputs": {
+        "directory": "/home/agent/manabitan-fifo-20261128-da6c4-v2",
+        "completeFiles": 15,
+        "completeFileBytes": 12326040,
+        "partialFile": "round-4-C-rotation-control.bin",
+        "partialFileBytes": 9977856
+      },
+      "lastCompletedEvent": {
+        "mode": "B-first-free-fifo",
+        "label": "round-3",
+        "elapsedMs": 60.568149,
+        "outputBytes": 12326040,
+        "hashedBlocks": 103,
+        "expectedDecodedBytes": 100300626
+      },
+      "interpretation": "Exit137 is a process failure, not an established OOM diagnosis. The partial round4-C file proves outside-timing persistence had begun; the last report checkpoint still labels that observation planned. Three warmups and12timed observations reached output hash checks and complete persistence. No deferred exhaustive decode or source ownership check completed, so this cohort is incomplete and has no performance acceptance conclusion.",
+      "preservation": "No local rerun. Original script/plan/checkpoint/log/15complete and1partial output file remain unmodified in the unavailable executor. The last successful tool reads were chunks5973ca and15db71. This receipt transcribes those outputs; raw checkpoint/log hashes cannot be computed while the executor is unavailable."
+    }
+  ],
+  "policy": "Local execution stopped after v2. Any hosted execution is a separate environment cohort with a prospectively fixed complete36-observation schedule. Partial local observations are retained and never pooled into hosted timings."
+}

@@ -1,0 +1,65 @@
+name: JMdict FIFO scheduling component
+
+on:
+  push:
+    branches: ['perf/bounded-content-overlap-20261128-da6c4']
+    paths:
+      - 'dev/perf/jmdict-fifo-20261128-da6c4/**'
+      - '.github/workflows/jmdict-fifo-component-da6c4.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  component:
+    name: Regenerate and verify the fixed FIFO cohort
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install frozen repository dependencies
+        run: npm ci
+      - name: Regenerate exact inputs and execute one fixed cohort
+        run: |
+          python dev/perf/jmdict-fifo-20261128-da6c4/run.py \
+            --repository "$GITHUB_WORKSPACE" \
+            --workspace "$RUNNER_TEMP/jmdict-fifo-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --output "$GITHUB_WORKSPACE/builds/perf/jmdict-fifo-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Report completion or retained failure
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path('builds/perf') / f"jmdict-fifo-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+          for name in ('setup.json', 'observations.json'):
+              file = root / name
+              if file.is_file():
+                  data = json.loads(file.read_text())
+                  if name == 'observations.json':
+                      data = {key: data.get(key) for key in ('complete', 'node', 'host', 'preTimingInputProof', 'startupMemory', 'failures', 'inFlight', 'analysis')}
+                  print('FIFO_RECEIPT ' + json.dumps({'path': name, 'data': data}))
+          complete = root / 'setup.json'
+          if not complete.is_file() or not json.loads(complete.read_text()).get('complete'):
+              for file in sorted(root.glob('*.log')):
+                  print('FIFO_LOG ' + file.name)
+                  print('\n'.join(file.read_text(errors='replace').splitlines()[-60:]))
+          PY
+      - name: Retain every observation, compressed output and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-fifo-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/jmdict-fifo-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
