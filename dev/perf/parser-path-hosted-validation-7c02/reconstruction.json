@@ -1,0 +1,11 @@
+{
+  "reconstructedAtUtc": "2026-11-28T07:32:42.526390+00:00",
+  "cause": "Executor transport disconnected and recovered with an empty /tmp; all seven original workspace evidence inputs survived.",
+  "priorArchiveSha256": "364e03b474968a9d3f51109b6f3cf6245ad26f68b5ab889b6e84fbcbd1cd06bc",
+  "archiveRecreatedByteExactly": true,
+  "priorManifestSha256": "5118db4d228f1a05cb5a5a9a39bc3bfd462fb01c8d1da249b0372b873e63434f",
+  "newManifestSha256": "4a826fc533b186530ffaf65b52fe942db7e3610558391156a6f344e8dd825b62",
+  "manifestDifference": "New wrapper creation timestamp; underlying seven saved input identities and ZIP bytes unchanged.",
+  "priorOfflineVerification": "Passed before environment reset; retained tool output confirms integrity,669unitfiles/15159passes/47skips,7targets,zero newexecutions.",
+  "nativeOrBrowserAcquisitionRepeated": false
+}

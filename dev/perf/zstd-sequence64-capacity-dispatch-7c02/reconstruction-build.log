@@ -1,0 +1,11 @@
+{
+  "archiveBytes": 1866839,
+  "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+  "manifestSha256": "d5a30bbe071a8f3efc1efc26c1eff388a9e721cf30b0e1d28154a34d24a8f99e",
+  "fileCount": 199,
+  "uniqueBlobCount": 130,
+  "rawBytes": 15320716,
+  "uniqueRawBytes": 8013724,
+  "parts": 8,
+  "omittedFiles": 121
+}

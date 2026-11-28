@@ -1,0 +1,35 @@
+{
+  "status": "exact-core-archive-recovered-and-verified",
+  "createdUtc": "2026-11-28T07:35:53.106773+00:00",
+  "directory": "/workspace/scratch/7c02210aa375/import-experiments-7c02/evidence-packages/design-b",
+  "loss": "Prior /tmp package and SDK disappeared in an environment reset before Design B archive publication; original workspace study remained intact.",
+  "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+  "indexSha256": "b3073a68708603e87dd9ba9b5b40b92497b7b6dc5d24c39ec91caaf45e3ee9fc",
+  "archiveAndIndexMatchPriorExactly": true,
+  "restoredSourceHashes": {
+    "builder": "f0e147571abc0eea5b2fbb4d0810d13ff7284efb9723b1b2d5b41c93d8a3a193",
+    "verifier": "6ec508627cc892103b3d7630392a2917a47556aa52e3007b8e861c813cbf5c9e",
+    "privacyReceipt": "dfbbac3789bfe1121ee4a5f853e08504b6436e748f70a60b66363fcb1ef80594",
+    "result": "e46aedde822d32f3cb40a3f1ebf02778744e291e2ae13a0d8c15e2b4e9f47623",
+    "ledgerSnapshot": "a97cdcc29a6ab0b724b79f08d1c8c5dab96196166b9c61a3c194dd1fe878dafd"
+  },
+  "preservedCore": {
+    "logicalFiles": 199,
+    "uniqueBlobs": 130,
+    "archiveBytes": 1866839,
+    "parts": 8,
+    "omittedFiles": 121
+  },
+  "receipts": {
+    "start": "b6fd0b7c7baa4468cfbcbc9b17caaebe2aaefaeac4b00b0e74b171e5ec3bce13",
+    "identity": "30cd1b8979dbc664f93ee92d6f056ee5c1363d4d8eeb43e9bbc068f99183a8db",
+    "packingLog": "c3d3060f5b6050839d5a9a47f2489b971f2b29d9ce76d5097a281baa147c5b24",
+    "newVerification": "a6a40809d7a6f41f28146c4ef0dbeed17a081f92b22c564412a1e707a6a0e8b2",
+    "newVerificationLog": "5fa3c52d7abf7a5361b75ec0a5af0f6a27e20a881fe965a806fa1478e07f19f2"
+  },
+  "notExactlyRecovered": [
+    "The old external verification.json timestamp/bytes were unavailable; its known SHA is retained in reconstruction-start.json and verification.json, and a fresh explicitly dated offline verification receipt replaces it."
+  ],
+  "scope": "Every original archived study byte, part, index, verifier and frozen core outer file was restored exactly. Only new external recovery/verification sidecars record the reset and current audit. No SDK/native builds, native correctness executions or performance measurements occurred.",
+  "remoteWrites": false
+}

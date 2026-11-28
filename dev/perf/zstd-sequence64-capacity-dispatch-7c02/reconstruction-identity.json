@@ -1,0 +1,19 @@
+{
+  "status": "exact-archive-and-index-restored",
+  "recordedUtc": "2026-11-28T07:35:22.591836+00:00",
+  "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+  "archiveBytes": 1866839,
+  "internalManifestSha256": "d5a30bbe071a8f3efc1efc26c1eff388a9e721cf30b0e1d28154a34d24a8f99e",
+  "restoredIndexSha256": "b3073a68708603e87dd9ba9b5b40b92497b7b6dc5d24c39ec91caaf45e3ee9fc",
+  "newPackingIndexBeforeTimestampRestoration": {
+    "sha256": "6d58d1f9481c64d019a99fee18fdc5c0db1d2889161bd17763735f1d9255d96b",
+    "createdAtUtc": "2026-11-28T07:34:39.094440+00:00"
+  },
+  "restoredHistoricalCreatedAtUtc": "2026-11-28T07:27:25.978846+00:00",
+  "onlyIndexFieldChanged": "createdAtUtc",
+  "explanation": "The original timestamp was retained in the parent tool receipt. Restoring this one metadata field reproduces the original index SHA exactly. This does not backdate the recovery event, whose current timestamp is separately recorded here.",
+  "fileCount": 199,
+  "uniqueBlobCount": 130,
+  "partCount": 8,
+  "nativeExecution": false
+}

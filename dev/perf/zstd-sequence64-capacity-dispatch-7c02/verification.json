@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "createdUtc": "2026-11-28T07:35:53.106290+00:00",
+  "command": [
+    "python3",
+    "/workspace/scratch/7c02210aa375/import-experiments-7c02/evidence-packages/design-b/verify.py"
+  ],
+  "exitCode": 0,
+  "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+  "indexSha256": "b3073a68708603e87dd9ba9b5b40b92497b7b6dc5d24c39ec91caaf45e3ee9fc",
+  "verifierSha256": "6ec508627cc892103b3d7630392a2917a47556aa52e3007b8e861c813cbf5c9e",
+  "rawLogSha256": "5fa3c52d7abf7a5361b75ec0a5af0f6a27e20a881fe965a806fa1478e07f19f2",
+  "results": {
+    "integrity": "passed",
+    "files": 199,
+    "uniqueBlobs": 130,
+    "censusArithmetic": "passed",
+    "censusCalls": 772,
+    "censusSequences": 2574603,
+    "sequenceWeightedEligibilityPercent": 100.0,
+    "savedCorrectnessCounts": "passed",
+    "sequenceChecks": 818274,
+    "apiCapacityChecks": 163772,
+    "canonicalFramesPerArm": 103,
+    "syntheticCases": 79,
+    "recordedTimingObservations": 0,
+    "performanceDisposition": "incomplete; no gain, regression or memory-regression conclusion",
+    "terminationPhase": "unknown; no observation was recorded",
+    "nativeExecution": false,
+    "extracted": null
+  },
+  "nativeExecution": false,
+  "verificationInvocationsDuringRecovery": 1,
+  "priorVerificationReceiptSha256": "0e8e47e6666dab0f54182efb549c8dc5f0691eb86dfd519454fe106320ab719d",
+  "priorReceiptBytesRecovered": false,
+  "note": "This is a fresh offline saved-result audit after loss/reconstruction. No original performance acquisition was repeated."
+}

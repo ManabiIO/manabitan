@@ -1,0 +1,1481 @@
+{
+  "schemaVersion": 1,
+  "archiveName": "sequence64-design-b.zip",
+  "archiveBytes": 1866839,
+  "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+  "manifestSha256": "d5a30bbe071a8f3efc1efc26c1eff388a9e721cf30b0e1d28154a34d24a8f99e",
+  "fileCount": 199,
+  "uniqueBlobCount": 130,
+  "rawBytes": 15320716,
+  "uniqueRawBytes": 8013724,
+  "files": {
+    "README.md": {
+      "bytes": 3298,
+      "sha256": "6264f5190bd47dc3e4fc5116358a1aa9e2a6e9069f6dc4094a1e89bd856d4d95"
+    },
+    "RESULT.md": {
+      "bytes": 6176,
+      "sha256": "e46aedde822d32f3cb40a3f1ebf02778744e291e2ae13a0d8c15e2b4e9f47623"
+    },
+    "build-archive.py": {
+      "bytes": 10071,
+      "sha256": "f0e147571abc0eea5b2fbb4d0810d13ff7284efb9723b1b2d5b41c93d8a3a193"
+    },
+    "canonical-jmdict-1m/acquisition.json": {
+      "bytes": 371,
+      "sha256": "6ffa5142100c11c913758b0c73369b4def03d041fd3d3781e031523625285e8b"
+    },
+    "canonical-jmdict-1m/manifest.json": {
+      "bytes": 58219,
+      "sha256": "5ff31df0d8c069c0da248198a399879524d5bc4dff3ab48d96c5227afa578de0"
+    },
+    "canonical-jmdict-1m/partial-groups.json": {
+      "bytes": 7010,
+      "sha256": "dd872c13010f99d16f28974b559feea4a42da77ebad69e5eba64cec9a2e14282"
+    },
+    "canonical-jmdict-1m/planner-input-manifest.json": {
+      "bytes": 58022,
+      "sha256": "5ee035ff9bd539c72c89fb8e0ebb498ac298148e416d518386d1636da1e5502b"
+    },
+    "canonical-jmdict-1m/planner-verification.json": {
+      "bytes": 6752,
+      "sha256": "6fb8a9188630da6045c61a3c15e1031006f7f0ad87a797eccd6d5f2416eab6bc"
+    },
+    "canonical-jmdict-1m/planner.log": {
+      "bytes": 213,
+      "sha256": "1e5b2a402412fdff80bbdf129ac20d4083342ea279c8e2d3cdaf05bb1db3d20c"
+    },
+    "capacity-census-acquisition.log": {
+      "bytes": 1054,
+      "sha256": "8f5ad5f9ca6d604e2ad62f15e22cfeee04db6848e66857e7df9c1d0de647114d"
+    },
+    "capacity-census-freeze.json": {
+      "bytes": 661,
+      "sha256": "4798bc4556d794bc757681754b51c20e47d28b041ba806eb406884aad9844305"
+    },
+    "capacity-census-invocation.json": {
+      "bytes": 1083,
+      "sha256": "9faa2ab26d62bdc95855940fb4cd026c0d884d424d3ac12cdaa0dfe6f6672169"
+    },
+    "capacity-census-prototype/PLAN.md": {
+      "bytes": 3614,
+      "sha256": "82b2c5acdd7fd1a372310759aaa5ef46ebd6a6eeace639ca3ad9d3e360155d89"
+    },
+    "capacity-census-prototype/baseline-census.patch": {
+      "bytes": 792,
+      "sha256": "46029403be2b418779d3fe1627a3b27413de9dc3570f5b91df8970b011ba1377"
+    },
+    "capacity-census-prototype/build-census.py": {
+      "bytes": 12546,
+      "sha256": "617cfcae0a2aa79c0e8942044abc3956de759b3cc14f058aaf07afa29953775c"
+    },
+    "capacity-census-prototype/candidate-zstd_compress_sequences.c.txt": {
+      "bytes": 20233,
+      "sha256": "b6116986bb2fcfd72485c8a7d88f2092730e695a968594fb9d36e8965ba3af5f"
+    },
+    "capacity-census-prototype/census-log.c": {
+      "bytes": 1526,
+      "sha256": "bdb8d9cbb810da2dd764806fe35e8e52daa2a8520037202a9ad3ec37c9475184"
+    },
+    "capacity-census-prototype/pins.json": {
+      "bytes": 1593,
+      "sha256": "f5a344816d10f9ff32021a3087255a9109af98ad33a6511e014e1cddb9b2d9ad"
+    },
+    "capacity-census-prototype/replay-census.mjs": {
+      "bytes": 11966,
+      "sha256": "eb28aede3cf426f22cfa6ed31c2fb4db8ff20144cf416a24ac6a5a913bc4cc05"
+    },
+    "capacity-census-prototype/source-files.json": {
+      "bytes": 1595,
+      "sha256": "25505b903774c5d4675e10e910fc2dd19707216e952212c872046ecd89b7bcef"
+    },
+    "capacity-census-result/arms/instrumented/zstd-simd-module.js": {
+      "bytes": 9700,
+      "sha256": "d4bdffc1cb6c5a3049f55a4b4d692df77bda8862b73d9329fd7806433b4ec26c"
+    },
+    "capacity-census-result/arms/instrumented/zstd-simd-module.wasm": {
+      "bytes": 433845,
+      "sha256": "9cb62a2528ff883b1dc1737132b60bc7ada427c742703deaebde6f26561b03e8"
+    },
+    "capacity-census-result/census.json": {
+      "bytes": 287514,
+      "sha256": "3ca95d4946fab1d5141691a3c9ee165fee19540335d693ce50a3334b1434f4b7"
+    },
+    "capacity-census-result/inputs/PLAN.md": {
+      "bytes": 3614,
+      "sha256": "82b2c5acdd7fd1a372310759aaa5ef46ebd6a6eeace639ca3ad9d3e360155d89"
+    },
+    "capacity-census-result/inputs/baseline-census.patch": {
+      "bytes": 792,
+      "sha256": "46029403be2b418779d3fe1627a3b27413de9dc3570f5b91df8970b011ba1377"
+    },
+    "capacity-census-result/inputs/build-census.py": {
+      "bytes": 12546,
+      "sha256": "617cfcae0a2aa79c0e8942044abc3956de759b3cc14f058aaf07afa29953775c"
+    },
+    "capacity-census-result/inputs/candidate-zstd_compress_sequences.c.txt": {
+      "bytes": 20233,
+      "sha256": "b6116986bb2fcfd72485c8a7d88f2092730e695a968594fb9d36e8965ba3af5f"
+    },
+    "capacity-census-result/inputs/census-log.c": {
+      "bytes": 1526,
+      "sha256": "bdb8d9cbb810da2dd764806fe35e8e52daa2a8520037202a9ad3ec37c9475184"
+    },
+    "capacity-census-result/inputs/effective-environment.json": {
+      "bytes": 834,
+      "sha256": "639ee2e700628c9740274ee7ae5373fd6aa5d46b7e2484f51b488c4d915a1746"
+    },
+    "capacity-census-result/inputs/emscripten-config.py": {
+      "bytes": 197,
+      "sha256": "d73cf18b1ff88f2a073cf3bdf94262e0592b6800263ad75955b8c42cff6859b9"
+    },
+    "capacity-census-result/inputs/original-upstream-source-hashes.json": {
+      "bytes": 69593,
+      "sha256": "2e697323560565e2670acb16446df9f31dfa41e67b241fb11b25bce4eaf6672e"
+    },
+    "capacity-census-result/inputs/pins.json": {
+      "bytes": 1593,
+      "sha256": "f5a344816d10f9ff32021a3087255a9109af98ad33a6511e014e1cddb9b2d9ad"
+    },
+    "capacity-census-result/inputs/reference-manifest.json": {
+      "bytes": 683694,
+      "sha256": "b1c8a1db33ec9a724eb6f79350951eca287fb39f34bf0e94991be7d2cd39509e"
+    },
+    "capacity-census-result/inputs/replay-census.mjs": {
+      "bytes": 11966,
+      "sha256": "eb28aede3cf426f22cfa6ed31c2fb4db8ff20144cf416a24ac6a5a913bc4cc05"
+    },
+    "capacity-census-result/inputs/sdk-file-hashes.json": {
+      "bytes": 1966239,
+      "sha256": "5a40c2d63d7e7b269fa9a666f89c533d200e6e314caa4f9e7b5109e990e52939"
+    },
+    "capacity-census-result/inputs/sdk-python-no-cache": {
+      "bytes": 96,
+      "sha256": "3c36bd25cdb61fd3a2799dc6643ec318cba7390e5c2dafd75cb51ca71938ec73"
+    },
+    "capacity-census-result/inputs/source-files.json": {
+      "bytes": 1595,
+      "sha256": "25505b903774c5d4675e10e910fc2dd19707216e952212c872046ecd89b7bcef"
+    },
+    "capacity-census-result/inputs/zstd-block-envelope.c": {
+      "bytes": 4179,
+      "sha256": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2"
+    },
+    "capacity-census-result/logs/amalgamate-baseline-census.log": {
+      "bytes": 2239,
+      "sha256": "dce270c432380205772826a2b0438990cd488f793269a6778aad0a2f24950a3b"
+    },
+    "capacity-census-result/logs/build-baseline-census.log": {
+      "bytes": 3639,
+      "sha256": "6dba685ced32979a135935ef79cdb2a020d70bb98cc00c27ecbbe5b5f9c6a1d5"
+    },
+    "capacity-census-result/logs/census-patch-apply.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "capacity-census-result/logs/census-patch-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "capacity-census-result/logs/emcc-version.log": {
+      "bytes": 383,
+      "sha256": "810351140e703283d11c9a1e43f3860270475120d6981944ba921531e7e1d7ce"
+    },
+    "capacity-census-result/logs/untimed-complete-census.log": {
+      "bytes": 366,
+      "sha256": "acbd756e9e93ae479c8bca8cb09c5d8e4c4a471ed0a29dc1aa7e17570ad70893"
+    },
+    "capacity-census-result/manifest.json": {
+      "bytes": 319915,
+      "sha256": "682d84a6ca6f8416e405dbe78c6a6d33ce2d8ccf4d6079a9c1f1c44a5d25c8f3"
+    },
+    "capacity-dispatch-contract.md": {
+      "bytes": 5698,
+      "sha256": "b84a15ba2014be6284b468e54cc9ce040abba1600e45aa59d310102ea96eeb00"
+    },
+    "design-b-acquisition.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-code-and-suite-assessment.json": {
+      "bytes": 4918,
+      "sha256": "f500a018453619e8a9c468e8300846e80567ea6b53dfec662d5e0641d4294977"
+    },
+    "design-b-codegen/B1-loop-0.wat": {
+      "bytes": 13097,
+      "sha256": "0c9217d6f3b94516e30f8ec9083780ad24858e5a45919f62daec1fcfe3107231"
+    },
+    "design-b-codegen/B1-loop-1.wat": {
+      "bytes": 12085,
+      "sha256": "1135305843a82951b29cf5bb8558a0e54e0302e939149c67a5f3643b6daa4d55"
+    },
+    "design-b-codegen/B1-sequence-function.wat": {
+      "bytes": 56096,
+      "sha256": "2172762728168b51aee75b958bdb365d7908827691435036d9d057f9ea4422a7"
+    },
+    "design-b-codegen/P-loop-0.wat": {
+      "bytes": 11932,
+      "sha256": "e15a16b1692376b386cb736270b7c13c3726a41353080ad029ed010e4c57f0eb"
+    },
+    "design-b-codegen/P-sequence-function.wat": {
+      "bytes": 27740,
+      "sha256": "013d8f4ffbf865137a4311b16e4fe6da93a3864f53e2564e5379515a12821054"
+    },
+    "design-b-codegen/compare-exact-products.py": {
+      "bytes": 6436,
+      "sha256": "4770ecc28683c343adb02dff558495fa658a630211afd2668c597768c1181113"
+    },
+    "design-b-codegen/disassembly-receipt.json": {
+      "bytes": 1781,
+      "sha256": "fc7a8b984e351a27d9f360b9ad83a218c2c33cbd0dee0e7815fda1cc05b7233c"
+    },
+    "design-b-codegen/exact-product-structure.json": {
+      "bytes": 8255,
+      "sha256": "57beda8bbccba7137726b93156d498502942bf5418a71d288290ade49898275b"
+    },
+    "design-b-codegen/structural-review.json": {
+      "bytes": 3907,
+      "sha256": "dc393a1c6d64a8a93970f8b3a422e7504055a534b4b1c3a7aafcd6ab8b0afc18"
+    },
+    "design-b-component-screen.json": {
+      "bytes": 3654,
+      "sha256": "dcfab744040a3f66619e20ef3757103aca96e1b9d819d97d6049042b2cd6dbf7"
+    },
+    "design-b-component-screen.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-component-termination.json": {
+      "bytes": 1525,
+      "sha256": "5b53396035ddc3f5b310407493be68689f4aca17432d0877c2d13042f9b6213c"
+    },
+    "design-b-execution-freeze.json": {
+      "bytes": 7723,
+      "sha256": "61d55a8e1007d4ed67205c1db2b96322d89d485c2778596f3245538f737bd9dc"
+    },
+    "design-b-execution-preparation-note.json": {
+      "bytes": 438,
+      "sha256": "0de5ef4be38ade615bb846a68da8d839076c29571efc0df967c1b54d5285951e"
+    },
+    "design-b-integration-plan-v1.md": {
+      "bytes": 7188,
+      "sha256": "b6b85900e92845a34fdce03adc7107763fff6d85d284c8305236809a2edf45c1"
+    },
+    "design-b-integration-plan.md": {
+      "bytes": 7787,
+      "sha256": "4c84e7344e38399683396a690794348e402b19d2a0385de2ab0dee26cf6dd6ed"
+    },
+    "design-b-invocation.json": {
+      "bytes": 1163,
+      "sha256": "3bf2c25d0d4bcb40b32fbf5cef4c3c17a97f1db5379e3ebda3231ccbc053147b"
+    },
+    "design-b-prebuild-cleanup.json": {
+      "bytes": 16872,
+      "sha256": "93f78f45fd477397a577c09a289db05e12c1ad47df4c58ed0abbfcc9344dc198"
+    },
+    "design-b-prototype/PLAN.md": {
+      "bytes": 6375,
+      "sha256": "ada8c6205343033ce52faffa144635ceb8fb043b379c51c9c9e89fd1b62f62e6"
+    },
+    "design-b-prototype/build-design-b.py": {
+      "bytes": 19891,
+      "sha256": "33450961a659143b6db5f729655d51cf0237b8ae7012fd153e9603ceb4c960f9"
+    },
+    "design-b-prototype/candidate-zstd_compress_sequences.c.txt": {
+      "bytes": 28955,
+      "sha256": "6fbe3958c6f450e3e21eaf7f0c5efdf7761fa70a37ac72212fa4d1d9a6d17bd1"
+    },
+    "design-b-prototype/generate-candidate.py": {
+      "bytes": 3454,
+      "sha256": "6c544d050903bfff654e77d8e910e9c8ea73f00bc7dd8a3a9d3cbb8de52cddd8"
+    },
+    "design-b-prototype/pins.json": {
+      "bytes": 1673,
+      "sha256": "28536e510482850622f4959a82d47a802bdbebe31f2a47d7a319a063b7a0a156"
+    },
+    "design-b-prototype/qualify-frames.mjs": {
+      "bytes": 9317,
+      "sha256": "ce4ca32a175a287690eefb64414a9c646bcce44470d381eba4332fbd6149b116"
+    },
+    "design-b-prototype/qualify-sequence-probes.mjs": {
+      "bytes": 12680,
+      "sha256": "8e67571bc0aeac1537fd50d714d334317ade69733a0d2866e367432cf577f1f5"
+    },
+    "design-b-prototype/qualify-small-capacity.mjs": {
+      "bytes": 9309,
+      "sha256": "1a77c4255390f939e4b4fef76a7b0e1e164478406b96fd602f045942ae9922eb"
+    },
+    "design-b-prototype/sequence64-capacity-dispatch.patch": {
+      "bytes": 9719,
+      "sha256": "1d45a59fb8fff037f199c5e676d4fa42d36da39339f24989b26530e3438a542c"
+    },
+    "design-b-prototype/sequence64-helpers.c.txt": {
+      "bytes": 3240,
+      "sha256": "9428f8351c82337e784b5061005a37ec6b845687906f5e08b3aff74995e7405d"
+    },
+    "design-b-prototype/source-files.json": {
+      "bytes": 3543,
+      "sha256": "e75ec7c6773427690abcfcd29d38cdf726438618d8e956652d486f3f9ccd42aa"
+    },
+    "design-b-prototype/source-pins.json": {
+      "bytes": 1356,
+      "sha256": "e4cbf907e0ba2147f10011dcf896f97c07c6d1a77392551886e9f8627dfd22ca"
+    },
+    "design-b-prototype/source-transformation.json": {
+      "bytes": 1484,
+      "sha256": "96a1073f8df2379633925e6c1f68222488627277f7acae7b7bd41bf831859dac"
+    },
+    "design-b-prototype/test-adaptation-notes.md": {
+      "bytes": 3451,
+      "sha256": "cdc1583137ada94eaace0c2d712507154a73dcd25dc9b2347dc6cfdbe592582c"
+    },
+    "design-b-prototype/validate-corpus.mjs": {
+      "bytes": 3748,
+      "sha256": "858f72ef398d582a4ca238397eb6468865ab644b48c655228592cd0b8a6e9012"
+    },
+    "design-b-prototype/wasm-arm-production-capacity.mjs": {
+      "bytes": 3276,
+      "sha256": "4c23b200b1b7581a04cd64814f8c341448b0fd10b7af5a1bfae39e18abfdfe0d"
+    },
+    "design-b-prototype/wasm-sequence-probe.c": {
+      "bytes": 7947,
+      "sha256": "fcc1bd0979e05cb5d510e42f845f9c7d9f23d04336a2c9103199f9220d3e273b"
+    },
+    "design-b-result/arms/A/sequence-probe.wasm": {
+      "bytes": 12354,
+      "sha256": "d000577e5d0a7b80510daed27b7a061737083bd554b6e234145a8fa2446c0272"
+    },
+    "design-b-result/arms/A/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/A/zstd-simd-module.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "design-b-result/arms/A0/sequence-probe.wasm": {
+      "bytes": 12354,
+      "sha256": "d000577e5d0a7b80510daed27b7a061737083bd554b6e234145a8fa2446c0272"
+    },
+    "design-b-result/arms/A0/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/A0/zstd-simd-module.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "design-b-result/arms/B/sequence-probe.wasm": {
+      "bytes": 14190,
+      "sha256": "d425ef2a0045b376a7c0e470943e655d1b79072beb7605e097e1518ae7a3ab73"
+    },
+    "design-b-result/arms/B/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/B/zstd-simd-module.wasm": {
+      "bytes": 435074,
+      "sha256": "f2656e2f6d575847ca93d5a981e3c569986bbfc048809173beb3c77f5308d4e1"
+    },
+    "design-b-result/arms/B1/sequence-probe.wasm": {
+      "bytes": 14190,
+      "sha256": "d425ef2a0045b376a7c0e470943e655d1b79072beb7605e097e1518ae7a3ab73"
+    },
+    "design-b-result/arms/B1/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/B1/zstd-simd-module.wasm": {
+      "bytes": 435074,
+      "sha256": "f2656e2f6d575847ca93d5a981e3c569986bbfc048809173beb3c77f5308d4e1"
+    },
+    "design-b-result/arms/C/sequence-probe.wasm": {
+      "bytes": 12354,
+      "sha256": "d000577e5d0a7b80510daed27b7a061737083bd554b6e234145a8fa2446c0272"
+    },
+    "design-b-result/arms/C/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/C/zstd-simd-module.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "design-b-result/arms/C0/sequence-probe.wasm": {
+      "bytes": 12354,
+      "sha256": "d000577e5d0a7b80510daed27b7a061737083bd554b6e234145a8fa2446c0272"
+    },
+    "design-b-result/arms/C0/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/C0/zstd-simd-module.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "design-b-result/arms/P/zstd-simd-module.js": {
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "design-b-result/arms/P/zstd-simd-module.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "design-b-result/corpus-jmdict/acquisition.json": {
+      "bytes": 371,
+      "sha256": "6ffa5142100c11c913758b0c73369b4def03d041fd3d3781e031523625285e8b"
+    },
+    "design-b-result/corpus-jmdict/expected-manifest.json": {
+      "bytes": 58219,
+      "sha256": "5ff31df0d8c069c0da248198a399879524d5bc4dff3ab48d96c5227afa578de0"
+    },
+    "design-b-result/corpus-jmdict/manifest.json": {
+      "bytes": 58219,
+      "sha256": "5ff31df0d8c069c0da248198a399879524d5bc4dff3ab48d96c5227afa578de0"
+    },
+    "design-b-result/corpus-jmdict/partial-groups.json": {
+      "bytes": 7010,
+      "sha256": "dd872c13010f99d16f28974b559feea4a42da77ebad69e5eba64cec9a2e14282"
+    },
+    "design-b-result/corpus-jmdict/planner-input-manifest.json": {
+      "bytes": 58022,
+      "sha256": "5ee035ff9bd539c72c89fb8e0ebb498ac298148e416d518386d1636da1e5502b"
+    },
+    "design-b-result/corpus-jmdict/planner-verification.json": {
+      "bytes": 6752,
+      "sha256": "6fb8a9188630da6045c61a3c15e1031006f7f0ad87a797eccd6d5f2416eab6bc"
+    },
+    "design-b-result/corpus-jmdict/planner.log": {
+      "bytes": 213,
+      "sha256": "1e5b2a402412fdff80bbdf129ac20d4083342ea279c8e2d3cdaf05bb1db3d20c"
+    },
+    "design-b-result/inputs/PLAN.md": {
+      "bytes": 6375,
+      "sha256": "ada8c6205343033ce52faffa144635ceb8fb043b379c51c9c9e89fd1b62f62e6"
+    },
+    "design-b-result/inputs/build-design-b.py": {
+      "bytes": 19891,
+      "sha256": "33450961a659143b6db5f729655d51cf0237b8ae7012fd153e9603ceb4c960f9"
+    },
+    "design-b-result/inputs/candidate-zstd_compress_sequences.c.txt": {
+      "bytes": 28955,
+      "sha256": "6fbe3958c6f450e3e21eaf7f0c5efdf7761fa70a37ac72212fa4d1d9a6d17bd1"
+    },
+    "design-b-result/inputs/effective-environment.json": {
+      "bytes": 813,
+      "sha256": "9ba5940aa0136cd4b6bfb989b0ca9aaaf98eecd959a1a391b0b3539be0d468d8"
+    },
+    "design-b-result/inputs/emscripten-config.py": {
+      "bytes": 197,
+      "sha256": "d73cf18b1ff88f2a073cf3bdf94262e0592b6800263ad75955b8c42cff6859b9"
+    },
+    "design-b-result/inputs/generate-candidate.py": {
+      "bytes": 3454,
+      "sha256": "6c544d050903bfff654e77d8e910e9c8ea73f00bc7dd8a3a9d3cbb8de52cddd8"
+    },
+    "design-b-result/inputs/pins.json": {
+      "bytes": 1673,
+      "sha256": "28536e510482850622f4959a82d47a802bdbebe31f2a47d7a319a063b7a0a156"
+    },
+    "design-b-result/inputs/prior-product-manifest.json": {
+      "bytes": 652733,
+      "sha256": "8c5fabfe74e3e782231d70bd0eb00388e9ecd82c60535fa34509be7de87f15bf"
+    },
+    "design-b-result/inputs/qualify-frames.mjs": {
+      "bytes": 9317,
+      "sha256": "ce4ca32a175a287690eefb64414a9c646bcce44470d381eba4332fbd6149b116"
+    },
+    "design-b-result/inputs/qualify-sequence-probes.mjs": {
+      "bytes": 12680,
+      "sha256": "8e67571bc0aeac1537fd50d714d334317ade69733a0d2866e367432cf577f1f5"
+    },
+    "design-b-result/inputs/qualify-small-capacity.mjs": {
+      "bytes": 9309,
+      "sha256": "1a77c4255390f939e4b4fef76a7b0e1e164478406b96fd602f045942ae9922eb"
+    },
+    "design-b-result/inputs/reference-manifest.json": {
+      "bytes": 683694,
+      "sha256": "b1c8a1db33ec9a724eb6f79350951eca287fb39f34bf0e94991be7d2cd39509e"
+    },
+    "design-b-result/inputs/sdk-file-hashes.json": {
+      "bytes": 1966239,
+      "sha256": "5a40c2d63d7e7b269fa9a666f89c533d200e6e314caa4f9e7b5109e990e52939"
+    },
+    "design-b-result/inputs/sdk-python-no-cache": {
+      "bytes": 96,
+      "sha256": "3c36bd25cdb61fd3a2799dc6643ec318cba7390e5c2dafd75cb51ca71938ec73"
+    },
+    "design-b-result/inputs/sequence64-capacity-dispatch.patch": {
+      "bytes": 9719,
+      "sha256": "1d45a59fb8fff037f199c5e676d4fa42d36da39339f24989b26530e3438a542c"
+    },
+    "design-b-result/inputs/sequence64-helpers.c.txt": {
+      "bytes": 3240,
+      "sha256": "9428f8351c82337e784b5061005a37ec6b845687906f5e08b3aff74995e7405d"
+    },
+    "design-b-result/inputs/source-files.json": {
+      "bytes": 3543,
+      "sha256": "e75ec7c6773427690abcfcd29d38cdf726438618d8e956652d486f3f9ccd42aa"
+    },
+    "design-b-result/inputs/source-pins.json": {
+      "bytes": 1356,
+      "sha256": "e4cbf907e0ba2147f10011dcf896f97c07c6d1a77392551886e9f8627dfd22ca"
+    },
+    "design-b-result/inputs/source-transformation.json": {
+      "bytes": 1484,
+      "sha256": "96a1073f8df2379633925e6c1f68222488627277f7acae7b7bd41bf831859dac"
+    },
+    "design-b-result/inputs/test-adaptation-notes.md": {
+      "bytes": 3451,
+      "sha256": "cdc1583137ada94eaace0c2d712507154a73dcd25dc9b2347dc6cfdbe592582c"
+    },
+    "design-b-result/inputs/upstream-source-hashes.json": {
+      "bytes": 141841,
+      "sha256": "7f0ff44624693083a35b376354758b11d8d83598d5990cef0d246d4ef9ceba89"
+    },
+    "design-b-result/inputs/validate-corpus.mjs": {
+      "bytes": 3748,
+      "sha256": "858f72ef398d582a4ca238397eb6468865ab644b48c655228592cd0b8a6e9012"
+    },
+    "design-b-result/inputs/wasm-arm-production-capacity.mjs": {
+      "bytes": 3276,
+      "sha256": "4c23b200b1b7581a04cd64814f8c341448b0fd10b7af5a1bfae39e18abfdfe0d"
+    },
+    "design-b-result/inputs/wasm-sequence-probe.c": {
+      "bytes": 7947,
+      "sha256": "fcc1bd0979e05cb5d510e42f845f9c7d9f23d04336a2c9103199f9220d3e273b"
+    },
+    "design-b-result/inputs/zstd-block-envelope.c": {
+      "bytes": 4179,
+      "sha256": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2"
+    },
+    "design-b-result/logs/amalgamate-A.log": {
+      "bytes": 2239,
+      "sha256": "dce270c432380205772826a2b0438990cd488f793269a6778aad0a2f24950a3b"
+    },
+    "design-b-result/logs/amalgamate-B.log": {
+      "bytes": 2239,
+      "sha256": "dce270c432380205772826a2b0438990cd488f793269a6778aad0a2f24950a3b"
+    },
+    "design-b-result/logs/build-B1-exact-production.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-result/logs/build-dispatch-probe-A.log": {
+      "bytes": 4192,
+      "sha256": "2df063cd36b3923288b2590d05fd76a256fe04acd166e70c25790e62382e657e"
+    },
+    "design-b-result/logs/build-dispatch-probe-B.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-result/logs/canonical-and-synthetic-oracle.log": {
+      "bytes": 66,
+      "sha256": "6060cb092d554a196bae866ab43a710b50e896acbfa858e1101e1d38a45840a3"
+    },
+    "design-b-result/logs/compression-api-capacity-oracle.log": {
+      "bytes": 60,
+      "sha256": "b5524fdf086a273077cf3153cd099f41c58d0586a900fc370eb037d1dabe2662"
+    },
+    "design-b-result/logs/design-b-patch-apply.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-result/logs/design-b-patch-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "design-b-result/logs/dispatch-boundary-oracle.log": {
+      "bytes": 90,
+      "sha256": "cfd6154de5fcbe3a9295aa037ade4ae268411a2ffe9ff795a0b0010b89afc9a4"
+    },
+    "design-b-result/logs/emcc-version.log": {
+      "bytes": 383,
+      "sha256": "810351140e703283d11c9a1e43f3860270475120d6981944ba921531e7e1d7ce"
+    },
+    "design-b-result/manifest.json": {
+      "bytes": 892417,
+      "sha256": "60fe61a338106d9fbb529fc2cd5322887d19c5400f0db0b9e4cae9146750cd98"
+    },
+    "design-b-result/qualification.json": {
+      "bytes": 255934,
+      "sha256": "2170c7961ee0eabc3a010176d54e49fc4dbf253ceaad1bc51f6aab12fca9a9d5"
+    },
+    "design-b-result/sequence-probe-qualification.json": {
+      "bytes": 386098,
+      "sha256": "2aa7062f94a4c4ca9db582fdcf8ffe5a87af1d28b99121882f61d6d67fc967fc"
+    },
+    "design-b-result/small-capacity-qualification.json": {
+      "bytes": 168027,
+      "sha256": "ad59ba51037c374705589dc46eecb9b2ccc61eb160e11319b661dddf14aca3a4"
+    },
+    "design-b-study/RESULT.md": {
+      "bytes": 6176,
+      "sha256": "e46aedde822d32f3cb40a3f1ebf02778744e291e2ae13a0d8c15e2b4e9f47623"
+    },
+    "design-b-timing-prototype/PLAN.md": {
+      "bytes": 4549,
+      "sha256": "2cddb92f16cf70c709eda0aa7e19d52f03e701fbd1a168cf1561b4bebdcbd230"
+    },
+    "design-b-timing-prototype/benchmark-wasm.mjs": {
+      "bytes": 15585,
+      "sha256": "d189511250857f6d123b0a8eda3f183df08565d4d144430160d2a29d37ba6b02"
+    },
+    "design-b-timing-prototype/timing-pins.json": {
+      "bytes": 743,
+      "sha256": "8b55361d89d687c95fc3d7590b4b46dc5e1c35e40df3a3a40a9376a8a87b7711"
+    },
+    "design-b-timing-prototype/timing-source-files.json": {
+      "bytes": 1245,
+      "sha256": "37ea35dd153f1e281d1eb8932fb20fcc640df3deb63b0bbda7e35551cd9a4e2c"
+    },
+    "design-b-timing-prototype/unchanged-measurement-proof.json": {
+      "bytes": 890,
+      "sha256": "c4ca79ca4e534da59fb6ee23c2bcf64c5e47db96e8d2ff9cefa5bee87aad105b"
+    },
+    "design-b-timing-prototype/validate-corpus.mjs": {
+      "bytes": 3748,
+      "sha256": "858f72ef398d582a4ca238397eb6468865ab644b48c655228592cd0b8a6e9012"
+    },
+    "design-b-timing-prototype/wasm-arm-production-capacity.mjs": {
+      "bytes": 3276,
+      "sha256": "4c23b200b1b7581a04cd64814f8c341448b0fd10b7af5a1bfae39e18abfdfe0d"
+    },
+    "investigation-ledger-snapshot.json": {
+      "bytes": 19989,
+      "sha256": "a97cdcc29a6ab0b724b79f08d1c8c5dab96196166b9c61a3c194dd1fe878dafd"
+    },
+    "privacy-scan.json": {
+      "bytes": 37607,
+      "sha256": "dfbbac3789bfe1121ee4a5f853e08504b6436e748f70a60b66363fcb1ef80594"
+    },
+    "production-corpus-prototype/benchmark-wasm.mjs": {
+      "bytes": 13474,
+      "sha256": "581b88bb4c24b957296da5e995780ad55f257d634c3d6c6199657bd225837ac4"
+    },
+    "production-corpus-prototype/benchmark-wasm.mjs.patch": {
+      "bytes": 6274,
+      "sha256": "251093accb62d5aa755e48b1fc073848d1ca9645be644f1795d538086f6f5f4d"
+    },
+    "production-corpus-prototype/capacity-adapter.patch": {
+      "bytes": 2293,
+      "sha256": "9fd7f0bc62a116a65666a9b2188dacd3a71051f9d8f73f7cd147a25d0d9a78cb"
+    },
+    "production-corpus-prototype/corpus-pins.json": {
+      "bytes": 960,
+      "sha256": "0df25d3e2d8d516fd50acdb9514f55f81bf1a2eccde69f363871bfb8138f3c23"
+    },
+    "production-corpus-prototype/corpus-plan.md": {
+      "bytes": 5735,
+      "sha256": "a5b6f752f72ce4d16f4c8978d78f797a3756648bad40925b3cc6d8aac3b9de45"
+    },
+    "production-corpus-prototype/product-source-pins.json": {
+      "bytes": 615,
+      "sha256": "40753c2d91da0ecdb159e61a30bcdc27596a8580cb9c17714fda70e09b22cc32"
+    },
+    "production-corpus-prototype/production-workload-audit.json": {
+      "bytes": 14048,
+      "sha256": "bb3b5bfa12b4f4459e2728ae4c585a96f74ad93c3d579543723d591c7e3a8b1f"
+    },
+    "production-corpus-prototype/qualify-corpus.py": {
+      "bytes": 17180,
+      "sha256": "2fcebe14f72f43af3ce9433c6b9b205e6fa8a82e50d93a279a31f458e2adb0ab"
+    },
+    "production-corpus-prototype/qualify-frames.mjs": {
+      "bytes": 7605,
+      "sha256": "1b2408371bed2bc050f1e23c15453c69919655bb8bed053e56f0870b845e1fb9"
+    },
+    "production-corpus-prototype/qualify-frames.mjs.patch": {
+      "bytes": 7088,
+      "sha256": "db072eb8417c45e895957a208d3ac308655c45212fa5d8753c891e8932f80887"
+    },
+    "production-corpus-prototype/source-files.json": {
+      "bytes": 2767,
+      "sha256": "a388fcf6636120618c3510f0aaa49229766db39ed4ebd40512b6681e44dd33de"
+    },
+    "production-corpus-prototype/source-pins.json": {
+      "bytes": 1356,
+      "sha256": "cd490859baddf033cdb0c90449f5f870c19890abf8259b983881ce253ca51b21"
+    },
+    "production-corpus-prototype/validate-corpus.mjs": {
+      "bytes": 3748,
+      "sha256": "858f72ef398d582a4ca238397eb6468865ab644b48c655228592cd0b8a6e9012"
+    },
+    "production-corpus-prototype/wasm-arm-production-capacity.mjs": {
+      "bytes": 3276,
+      "sha256": "4c23b200b1b7581a04cd64814f8c341448b0fd10b7af5a1bfae39e18abfdfe0d"
+    },
+    "production-workload-audit/design-b-publication-validation-scope.json": {
+      "bytes": 6348,
+      "sha256": "559d58587f1fd72e33348867835d5b52e919e8a67b73a44f6decbd69e87ddb53"
+    },
+    "production-workload-audit/independent-capacity-census-result-audit.json": {
+      "bytes": 1303,
+      "sha256": "4ac1cf0d618f1e6e8a93f228c6700720dfe4a9007d012a9d506a25726b3cd024"
+    },
+    "production-workload-audit/independent-capacity-census-review.json": {
+      "bytes": 4062,
+      "sha256": "defefa239247b68b236bc045d5eb4625419b8ab7104a08388e6a7c8d6ad06a15"
+    },
+    "production-workload-audit/independent-corpus-qualification-review.json": {
+      "bytes": 5480,
+      "sha256": "c25117a874d46b88aba3b146b1f00cd36103daa2d928fef6ce46564e8a44ecbd"
+    },
+    "production-workload-audit/independent-design-b-build-freeze-review.json": {
+      "bytes": 5303,
+      "sha256": "c2a1a20f983bec2fd7479c0447b1a4d908a6bc9b1f565d6ce73c2c2e0c5adc41"
+    },
+    "production-workload-audit/independent-design-b-code-test-review.json": {
+      "bytes": 5200,
+      "sha256": "1dc4fc36db1b3c58782c0604878788370b23185002e4179da80d8bacd132d3a6"
+    },
+    "production-workload-audit/independent-design-b-final-timer-review.json": {
+      "bytes": 2870,
+      "sha256": "b0d0e729f0bbf717c51089fc59b632065f7a3afde5c23113084eef457c21d636"
+    },
+    "production-workload-audit/independent-design-b-incomplete-screen-audit.json": {
+      "bytes": 1891,
+      "sha256": "95bbd4da9a42dcc9c5299e8ca418f1c252208812be7dc958aea4a36d5c0a4b1e"
+    },
+    "production-workload-audit/independent-design-b-result-audit.json": {
+      "bytes": 2661,
+      "sha256": "0d09af568676c072ef79ad5be19115e69a2769994642674b7bb9ed8544d133c4"
+    },
+    "production-workload-audit/independent-design-b-timer-draft-review.json": {
+      "bytes": 3038,
+      "sha256": "059f1eaad697860761e0261a82552526e3c65c2f3d59d990f5ff025175bb88ed"
+    },
+    "production-workload-audit/independent-repack-review.json": {
+      "bytes": 3119,
+      "sha256": "1788e94ca07044c7ebd03ff714bff537c8e00ee7785ba9dccad891d5a4f07ac0"
+    },
+    "production-workload-audit/source-audit.json": {
+      "bytes": 14048,
+      "sha256": "bb3b5bfa12b4f4459e2728ae4c585a96f74ad93c3d579543723d591c7e3a8b1f"
+    },
+    "repack-1m-prototype/PLAN.md": {
+      "bytes": 2316,
+      "sha256": "e437d89f3412150edbe6581e80acf6fc33de4cb0d6f02a6e32d4c3e5d49a024c"
+    },
+    "repack-1m-prototype/__pycache__/repack.cpython-312.pyc": {
+      "bytes": 16202,
+      "sha256": "d330d6620e21bd5c325e7579184d3bc9bb0264364d397c31b3f700d5a1f03970"
+    },
+    "repack-1m-prototype/acquisition.log": {
+      "bytes": 1084,
+      "sha256": "d7901cff1b1a45b9f18252e95573410053eed80fd701b510c091d133e7314338"
+    },
+    "repack-1m-prototype/freeze.json": {
+      "bytes": 15070,
+      "sha256": "7bf97dec26dc03420526c498228a0f520d720840c3718a904c01c7ed34cd1a3f"
+    },
+    "repack-1m-prototype/production-planner.mjs": {
+      "bytes": 1600,
+      "sha256": "846afc08d243943755fb664ab5518760fb4a1123c5387d2641a003282f6b3a61"
+    },
+    "repack-1m-prototype/repack.py": {
+      "bytes": 11466,
+      "sha256": "5da97a2eec138f0a0786b29aa8e47d91ac1e38907a0454a16a0dde00e35fff53"
+    },
+    "repack-1m-prototype/verify-plans.mjs": {
+      "bytes": 9440,
+      "sha256": "67ac92499414faefbc50974ca53c5a7f134133625c72fe341e1a5e7b8de7dab7"
+    },
+    "toolchain-metadata/acquisition-receipt.json": {
+      "bytes": 439,
+      "sha256": "1ec696c7e2c0efc9ca4ae841cd87a8185aa78b52e048ca8b9792b4464d581d87"
+    },
+    "toolchain-metadata/full-sdk-download.json": {
+      "bytes": 636,
+      "sha256": "7a11adc61e94cbf28a1185ab665747ec72c2471e66cfea515b4c52bb34d8ff8c"
+    },
+    "toolchain-metadata/full-sdk-extraction.json": {
+      "bytes": 1779,
+      "sha256": "583fb035916e032ba2adeb5640b268715bc649c284f3a14277afe9840e5a3f87"
+    },
+    "toolchain-metadata/full-sdk-file-hashes.json": {
+      "bytes": 1966239,
+      "sha256": "5a40c2d63d7e7b269fa9a666f89c533d200e6e314caa4f9e7b5109e990e52939"
+    },
+    "toolchain-metadata/sdk-python-cache-diagnostic.json": {
+      "bytes": 9190,
+      "sha256": "b835746b849f71652ad54ee4505e6c8f3091e43e5ce2166b47ce4b136c211b37"
+    },
+    "verify.py": {
+      "bytes": 19717,
+      "sha256": "6ec508627cc892103b3d7630392a2917a47556aa52e3007b8e861c813cbf5c9e"
+    }
+  },
+  "parts": [
+    {
+      "name": "sequence64-design-b.part-001",
+      "bytes": 262144,
+      "sha256": "183584285beabf33ebff4652728de6a326cb141c12710a4e519894b3c1b8a10a",
+      "gitBlobSha1": "521201636c3a61d0fb808cd10251602dd90d03b1"
+    },
+    {
+      "name": "sequence64-design-b.part-002",
+      "bytes": 262144,
+      "sha256": "34b9f7f3e78c8afd74ca53c18032291debd68dec317a4a2d8bd58cb6a69eff80",
+      "gitBlobSha1": "58df27f1dae7d869eccd3a7853b79037311be1ee"
+    },
+    {
+      "name": "sequence64-design-b.part-003",
+      "bytes": 262144,
+      "sha256": "45986827c2b9a85a700bd36dcd08f75a05887d351b68571b1c1955c7c31f7f70",
+      "gitBlobSha1": "3ec9bc5f1f139e41b453c10f90bb01ce2aa16192"
+    },
+    {
+      "name": "sequence64-design-b.part-004",
+      "bytes": 262144,
+      "sha256": "47fcfbc95cfef29e2db9cb5eed214fdc22a09074ab43b171da6777a50049fb84",
+      "gitBlobSha1": "40f69020bc2edccf47b07fc06ec82e3ddd0e6d2f"
+    },
+    {
+      "name": "sequence64-design-b.part-005",
+      "bytes": 262144,
+      "sha256": "2ac62655ab692823f353d47f94d9bdde76c9f0c85ef35628eecf568ec85f9679",
+      "gitBlobSha1": "3e11512eb1080fc6b8b9c3b7fcf7dbdd7c7aa9d0"
+    },
+    {
+      "name": "sequence64-design-b.part-006",
+      "bytes": 262144,
+      "sha256": "3a284695507ac4606e33fa21ac0d9c4d9ebafd676ef46b82b91f5739bef8e408",
+      "gitBlobSha1": "173d2d9d00dd60768af0a4fff911be0d0a6e3b5a"
+    },
+    {
+      "name": "sequence64-design-b.part-007",
+      "bytes": 262144,
+      "sha256": "28a7ff7bc0e3e6f2477eb9a0c9d17e06d8e769f1c64c213a9f4c9641400aa1b5",
+      "gitBlobSha1": "6b41b6f8319d59fdd040f5e6e3bfdf7d271a6247"
+    },
+    {
+      "name": "sequence64-design-b.part-008",
+      "bytes": 31831,
+      "sha256": "494fb1a9a9665fcb90745757a33ad57ff73e39cc5a01a5304bfc327e5080f0d3",
+      "gitBlobSha1": "729bfd95e5992d3f2f4d1d4188ee7fcb1cad7d79"
+    }
+  ],
+  "omittedFiles": {
+    "canonical-jmdict-1m/block-000.gz": {
+      "bytes": 118633,
+      "sha256": "a7b302e0d5a9aa0c529d7258cd4f2ae05a27cbbbeeb411733d99937294817a8a",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-001.gz": {
+      "bytes": 115519,
+      "sha256": "ddf5db33db5058aae61c1ea3181cfcf87d64f9cf9177bd26e27ce5915ad56a28",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-002.gz": {
+      "bytes": 116871,
+      "sha256": "2e9d1b6c940d656905a0e92860fa7b103263e56705c8637d370436ac8796367a",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-003.gz": {
+      "bytes": 113400,
+      "sha256": "e9f754a536ea5a1c7709bcb69994fcdd47380aff2226f571d462c4cbaa070129",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-004.gz": {
+      "bytes": 115103,
+      "sha256": "3a0f4c80359db8342bf3cc072d14f59fdcb34794afa6ec1bffd62e89c208417c",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-005.gz": {
+      "bytes": 115196,
+      "sha256": "48bb8babc28cdc1b1ad7a4865f87e4126cce62abb76b79d59096b50b368b9a2f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-006.gz": {
+      "bytes": 116902,
+      "sha256": "4882a86b504fa8954c4161d469a9a82ab01ae48618373b48c4d94036e6a1af91",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-007.gz": {
+      "bytes": 119433,
+      "sha256": "0df98bb0702754065b2b25965df06532188c094b3cec91b623cb9e21a8be5372",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-008.gz": {
+      "bytes": 12493,
+      "sha256": "a9aca9331d72826a6b1985521eb479315743343ee2ab072a111486321e9945da",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-009.gz": {
+      "bytes": 119082,
+      "sha256": "90109c209198d846acd2e6bbaddb3a81ff51f71b417e6a34d86054d3080b50c9",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-010.gz": {
+      "bytes": 115914,
+      "sha256": "858bc0fbc54bf306a6f9db0514467c1c89a065f7abc00123786cc21a97fa8e46",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-011.gz": {
+      "bytes": 120581,
+      "sha256": "94737f4b4908b9ebf00381db1f39d040e0dbc994bfb9b9f84ec141c541f19b53",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-012.gz": {
+      "bytes": 120260,
+      "sha256": "9477df0684a0b7f9f6806a59dee206f352e09f6ef4c3bd33ba645d07136ad625",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-013.gz": {
+      "bytes": 120816,
+      "sha256": "d63eecdfaa7305cb5f9d00ff2380f7d0783743bfcaa363277b01efd14b83badd",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-014.gz": {
+      "bytes": 119918,
+      "sha256": "4357a3483a1d647e96dcebbe04f9866e7da2d1885c50e5f6261fc2f915794ad7",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-015.gz": {
+      "bytes": 119197,
+      "sha256": "be28a249822a3d5c63a9aa68e9bcf0a0b78f2bf175efb7a447238221a7ac981d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-016.gz": {
+      "bytes": 120954,
+      "sha256": "6abb582bb7715dcfbaf278ffc296b205bb7a8bf4d253c1c55eae355c33e9b430",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-017.gz": {
+      "bytes": 115626,
+      "sha256": "fbd4295e807a84afb2567efcb8308c0dd5faa6ea3daf3a4e0c6c11387edf650b",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-018.gz": {
+      "bytes": 120667,
+      "sha256": "ab2299103fb1bdd5e6c6ce52a9284e52593a0ce8ed559441e37ded1cf98eb2df",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-019.gz": {
+      "bytes": 122049,
+      "sha256": "9835598aa01e0389fd95d2d430324bb39a3e7ac98afec47e06630181c5674e1e",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-020.gz": {
+      "bytes": 119932,
+      "sha256": "d2314d527f53a67c67c8e6c13d8e5323d872943975ece9fc1d86ac94b5df8ea4",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-021.gz": {
+      "bytes": 121825,
+      "sha256": "259ecfa35ac4e88d811f2206111c32e2754beefe9d218cff00d2aa996de89084",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-022.gz": {
+      "bytes": 120434,
+      "sha256": "f880a5456e47fd20e7f4db520c6b63cd5eee6600974fe54657971e501fce23e3",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-023.gz": {
+      "bytes": 120792,
+      "sha256": "58d0af43fbd390a3762a2dc90eb3fd1c028f4ac5e29c84f61d19b3aa7b0a6739",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-024.gz": {
+      "bytes": 123580,
+      "sha256": "a267d2526fe8d1f69f15b3ab43977c8fd4b7a384b78fd3c9a1e1470c5892b11e",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-025.gz": {
+      "bytes": 122796,
+      "sha256": "c3f6ea6101d7a3f926411c9c695dccaf34db11addee3680f9513d86a77ba604f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-026.gz": {
+      "bytes": 98226,
+      "sha256": "aebad0b731b780c46bc5b50946bc926eff63e289761a6afb623b36c9cc54ae2d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-027.gz": {
+      "bytes": 122236,
+      "sha256": "daac33ef04ea3b5505e80b69b2b3bb2bc627e3cc0870919ab4947b6ff0b6306f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-028.gz": {
+      "bytes": 121881,
+      "sha256": "dc0b6aae8b246cd91336e71fedcf0d147504c8cd51f7892917982c7820be846d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-029.gz": {
+      "bytes": 120809,
+      "sha256": "09b1a21d7abd45b731b06acfeb47992530fcf5d43f6ac721779e2b9a46d596fe",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-030.gz": {
+      "bytes": 90854,
+      "sha256": "56e44c88e68c7888f89a2d4eb81eef54a87f461d17982a4c4371af18d28a08ab",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-031.gz": {
+      "bytes": 99798,
+      "sha256": "38a8c9ece5cfbfaae3b5dcfd6cb4321dde601e3b0aabef765b58a914af0b5974",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-032.gz": {
+      "bytes": 112153,
+      "sha256": "a6839b6408104e7c007232a9b4a1ec67a5137a28eee71a4287342bd025212f68",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-033.gz": {
+      "bytes": 111226,
+      "sha256": "1fdc4dfc7e7cf063338db9c7901fe79b458d9e921b27de47d49933422d7f04b6",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-034.gz": {
+      "bytes": 121755,
+      "sha256": "11cc90f04fc93391347986d99d161102eaa240da2f03e50bd180b6d2d7fa4360",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-035.gz": {
+      "bytes": 26400,
+      "sha256": "d48be15ac580791ceb0c123f7adc06d0264d01b4954d52d89149c8acbed7196b",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-036.gz": {
+      "bytes": 135090,
+      "sha256": "2eb6f5d2dd76742769c45ff0f96b2335f82dd3e12100455ea4b5e1146ebf9179",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-037.gz": {
+      "bytes": 120200,
+      "sha256": "9a812a282c0c02b028bfe8d4460a6bd2aabb60ce7a4e955bd689ddef769dfbb0",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-038.gz": {
+      "bytes": 129454,
+      "sha256": "8c0ba8f2bac30e005b097a171f5632676f7a151d104daa9f6e5a9bc44820c96f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-039.gz": {
+      "bytes": 131586,
+      "sha256": "86c808fdba86d7a2268042f0e3c0f3ddc11b58d4d28ad5c97e517c43803aabab",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-040.gz": {
+      "bytes": 129423,
+      "sha256": "f46123296f84b27c16a8ed34e82559b186662e71a5588603e60e2d55b23ff594",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-041.gz": {
+      "bytes": 132055,
+      "sha256": "a01e3489571ec8ab1ca074383183078aae7b68c5b3a534fbcdc16da2163afc28",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-042.gz": {
+      "bytes": 128456,
+      "sha256": "852a5754806d39dace16611a12fda3ebb7049708684dbf7bff979fdd0d90fef0",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-043.gz": {
+      "bytes": 131479,
+      "sha256": "0eea81786da4340c6c0e7b40d64e9254d7e5dc970dae409cc5dcffe7309d7dc5",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-044.gz": {
+      "bytes": 39579,
+      "sha256": "1326c07c60baafae50e419e564751e78dca920007b837e39a182c41c03abeed3",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-045.gz": {
+      "bytes": 136197,
+      "sha256": "1deb475fc23bb4535c8c445f5e3da93a6b819164f1cffd84fd56de5d024a12b9",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-046.gz": {
+      "bytes": 131032,
+      "sha256": "768ea33d4ed63f41f49f727fd0c3f8ff92271d4a5201af57de04a8be51ff05d7",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-047.gz": {
+      "bytes": 123567,
+      "sha256": "366502faa2cf67450d29a91cd2ff2c352f5b226e4df0957d42fb3248eabdbf7d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-048.gz": {
+      "bytes": 129323,
+      "sha256": "c2bae1fa7e02bdd06fba9daf0abaf192ffea0bb669d8e25e3775a347145df2ac",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-049.gz": {
+      "bytes": 147819,
+      "sha256": "d86e8773efdbf29dc9e043a5f230b4a94e5cd3f786bb131809b9372fc40296fa",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-050.gz": {
+      "bytes": 154180,
+      "sha256": "45d8f877e7d9013a926a369c5e5d7de68660ce90eb6c180fba0c695039a93777",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-051.gz": {
+      "bytes": 144612,
+      "sha256": "f568bacf459ae0456cd7e59bdad9631dfea8b72d47f2ffb07ff1ecfd5d519ea3",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-052.gz": {
+      "bytes": 146032,
+      "sha256": "74a624893a25f99c156e09ab51c5b7b0eb9ca5fe62a4eeb682b45a2d73726fcc",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-053.gz": {
+      "bytes": 75777,
+      "sha256": "9a55a3ab4299333e6bbbb83616fd6c1e5764b8508e455e23fa28f905a406348b",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-054.gz": {
+      "bytes": 144915,
+      "sha256": "6529731212d36c477ee0f9b2b64ea41410144c14734821322b2da3f49378b1e3",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-055.gz": {
+      "bytes": 134489,
+      "sha256": "62a1ad30c68fc11da160862672ad1826726a340499abe7a8435b90be938230a6",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-056.gz": {
+      "bytes": 135292,
+      "sha256": "63174ead2914ec9a3a14b1159149cb626cca6d6b2668bb9f2e21cc29d809f0ee",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-057.gz": {
+      "bytes": 134402,
+      "sha256": "227a9383f7c77522896f3f0bc9a5ef9c658dee79465239c35c5db79bfc3478c0",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-058.gz": {
+      "bytes": 127535,
+      "sha256": "995f4cd3116c63e73ae12ce55f4bc88fcc9292a8b48fc322d7397f00d0131418",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-059.gz": {
+      "bytes": 136228,
+      "sha256": "c95f468aaab745be52eeaeec7c06073fafa2642b796e9ef172346147ce9fe66f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-060.gz": {
+      "bytes": 86923,
+      "sha256": "bdbb0258f71afcca09d46f0d2ce0c05fada07bb9eb4009460b6c03c28db59d59",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-061.gz": {
+      "bytes": 107088,
+      "sha256": "534ff3968f7df8b6f0428dcdd8b3e593622c86db31fa4b1024c87416c4edf61d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-062.gz": {
+      "bytes": 92585,
+      "sha256": "62c4692a0310ead1923c391ed721119d31df6f0be627ef8ad6387e48ea36f8ee",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-063.gz": {
+      "bytes": 146363,
+      "sha256": "09f79f55a30c9925181bd4728d65cde23ae2c66cd9a95825f51332a359b6d2e2",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-064.gz": {
+      "bytes": 135949,
+      "sha256": "beda20b31ced3ddd4798668ead406b266d715db16e2b887f0d88c5eee85e8ea5",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-065.gz": {
+      "bytes": 130857,
+      "sha256": "33a9e951c66348c3bfb49f6dca8fb3c503b62b9cf75ba5051802c14776ae440f",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-066.gz": {
+      "bytes": 127084,
+      "sha256": "a73e8e22ce4795054054724714837c46211763684084fe0fb3356822d99e4844",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-067.gz": {
+      "bytes": 143904,
+      "sha256": "65dc2ced08919d14bee7a85d971e621521864d567f485c7228a8f24e65e0b70d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-068.gz": {
+      "bytes": 6264,
+      "sha256": "d21e8553fc72bb24ab64fc96d9c478c30982e5c45420b970eb700e8797231dfd",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-069.gz": {
+      "bytes": 137257,
+      "sha256": "05b369c4ce5251e877572c522dfafa6f1349bfc86288c1150a9db3b7822be812",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-070.gz": {
+      "bytes": 136245,
+      "sha256": "9bbf2d769fda8a7d88ea1b89041bfddc5135e3096745955db1fb3b307029248a",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-071.gz": {
+      "bytes": 135571,
+      "sha256": "a0545753cc9af3e66f438596299f5746cac81cb72a219fc7c539afc9606f48b4",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-072.gz": {
+      "bytes": 141833,
+      "sha256": "9e12de271438a1f9e60efa2208377b6779e0c2905d8d33d913a3fed10dc9b8f8",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-073.gz": {
+      "bytes": 142872,
+      "sha256": "042b5ca06c61df3a382c276b649ce4384c9db6aab7453f77fa751ed23764e3b6",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-074.gz": {
+      "bytes": 142956,
+      "sha256": "34839b52b2fd42113744f5a350c383ff06ce59c204d402dda0c4a2c9a6bdac0a",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-075.gz": {
+      "bytes": 141305,
+      "sha256": "815b8e7f3e76da07e5a296f68da758bc906cb2baf86b4bc90c5d37198eb1ad80",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-076.gz": {
+      "bytes": 58620,
+      "sha256": "fe0c5f364b3fb0b4541db3684f2a333fbfe511714b8e05f759dbaff56eab1ece",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-077.gz": {
+      "bytes": 143738,
+      "sha256": "8cabebc90b32e392783e046d6d4c3ff4df150747fabb6d9fee0640fc3c9cb4df",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-078.gz": {
+      "bytes": 145116,
+      "sha256": "8a492cd866fde4f5827ad1682a27e2a35ef6b68ef230350398c8b7a9446f45ec",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-079.gz": {
+      "bytes": 150033,
+      "sha256": "6b78a2f66680250753e5a3bea54ddbcdbd094fa4e758678d1d95ccc3d004adef",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-080.gz": {
+      "bytes": 142252,
+      "sha256": "6837f46703393ade0a1607b774519edf2c235ca848881fd575bfb019d232f0b5",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-081.gz": {
+      "bytes": 147995,
+      "sha256": "4d7ceff9198ad8a715600e0e9f5c7ae537babef0b86eb99350af595ae8462dca",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-082.gz": {
+      "bytes": 143768,
+      "sha256": "365c20c37c95bc7aaf1b488923345be007cdae0e7493a8217cf7f5a3d0953b75",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-083.gz": {
+      "bytes": 147345,
+      "sha256": "daa421934832d35eced486bf1679d445dc83562517849df74c9388719fad7f34",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-084.gz": {
+      "bytes": 25468,
+      "sha256": "d787846baceb3ff2f67c7e7e9ae70cb1970f5f23b6936e309b300ec06042c44c",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-085.gz": {
+      "bytes": 149556,
+      "sha256": "70d00e5799114f6bf7f658a4b1faf2c31674b53cb942003364369719ce7f1fb7",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-086.gz": {
+      "bytes": 143156,
+      "sha256": "75155aa95954d71960a80f9888de1357c76d663c51feed9346d11bda36e28bce",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-087.gz": {
+      "bytes": 149660,
+      "sha256": "f6ecf3d7be497d3ffa4d428c6098ee6473735af793dc12b47d1445464adc8eb0",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-088.gz": {
+      "bytes": 142114,
+      "sha256": "29470895dbb4b1166350949ec2a7967daa2632067cf90c7f879e3a8bd7c5bb19",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-089.gz": {
+      "bytes": 144419,
+      "sha256": "8e1abced84252ccdddd9410b39e262eb818ea04f37367cc3dd6f875d19e16b3e",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-090.gz": {
+      "bytes": 147155,
+      "sha256": "6e754f4474346a149d1bc8b3a7d049177a8fc803115b2b7d5ca2673ccf34f689",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-091.gz": {
+      "bytes": 142508,
+      "sha256": "7ffbe8ce9d757778a7866c0a5e393e9a5257169737830350d5c921ca5dd83fdf",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-092.gz": {
+      "bytes": 62197,
+      "sha256": "6df0a6841206dea0628b6db1490dec3b3cd21bb57233091e18ba202adee6d2b1",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-093.gz": {
+      "bytes": 150204,
+      "sha256": "197f730f75c85d5d591a2632859e35e1b2ae1c17bda76ac003f1fc1d70035ca7",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-094.gz": {
+      "bytes": 145437,
+      "sha256": "0e810728a5725f85c02ca818201118399ecc4921384f941a2f3a68e7e1dac896",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-095.gz": {
+      "bytes": 142178,
+      "sha256": "f73c543d49ccd1e831d937bcc79862cc35088884427ea52fd4f0ba8d6d32edda",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-096.gz": {
+      "bytes": 143103,
+      "sha256": "44f8b81f1c0bb9b6c6ab223bbc5fe826c0d21121e5df9090161fa8f80f1caa29",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-097.gz": {
+      "bytes": 142320,
+      "sha256": "9c42d4e3271fe8d46a364c996a9be268d0d4a851668191643d30e737a8dd9f7c",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-098.gz": {
+      "bytes": 137010,
+      "sha256": "7939f0ee73dae5e75425add5499ed93da0cf6222d5f45f34c421c90e7a5c5da7",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-099.gz": {
+      "bytes": 151911,
+      "sha256": "2d192b87ec20a0e54089e5ad5adfbfd7f42ba3ce2427d2a293025fd2a9f3fae9",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-100.gz": {
+      "bytes": 118650,
+      "sha256": "bcced3e68b2f6bfbf9b7343d61905cd206f29eed3f3132abf925167729a944d6",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-101.gz": {
+      "bytes": 106452,
+      "sha256": "099a227cf68117032c0e6459de513f535d6992b250b63d6d47ac297a56a333bb",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/block-102.gz": {
+      "bytes": 10112,
+      "sha256": "b35ef0b6ea992af1e2f6abd8ff6e56ba6a4fa5079ec463213218369b7552f21d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-000.gz": {
+      "bytes": 58420,
+      "sha256": "cb30dd93010afa66c9bd0fa1bdd81b1fe28de996d87e75cb22f1cfee82217038",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-001.gz": {
+      "bytes": 57398,
+      "sha256": "f5e3da286a1d864402b95c3139d49a3064b0c427424fa7dd5854f35be124ea43",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-002.gz": {
+      "bytes": 56703,
+      "sha256": "832bef50d189d8add6a88b3cdfa1973b8b97b824eb821c6fda67e5376f435c87",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-003.gz": {
+      "bytes": 51034,
+      "sha256": "5740baab307ef3f3ac131b358232c36ded146cea143e6481964d5f6a2e69dbb5",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-004.gz": {
+      "bytes": 57144,
+      "sha256": "c300be629e793348f544e1a1cfbc2d9e76ad53d3481c61ad99e1038c550ae843",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-005.gz": {
+      "bytes": 56782,
+      "sha256": "78b45a1f7902f4b2770470455cc1fcb2d8fde03a400b7ebf4c803c86d8b952d9",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-006.gz": {
+      "bytes": 41393,
+      "sha256": "0c05bf374ad3b828296640ed9793bdf48d2cc413b2d3f0f4b2503949bd11992d",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-007.gz": {
+      "bytes": 48930,
+      "sha256": "f5a64672c7bd969ad22b168adb6568259069142f93182026cb021aa72bab9ce5",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-008.gz": {
+      "bytes": 44793,
+      "sha256": "7253872e2ffc3b1145cc3b4b0992ea4c74e2a71d8dee59006b09a3a5ba9c6a33",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-009.gz": {
+      "bytes": 44266,
+      "sha256": "2fcec57e8147d7b20ae85e7b93dfd54a33f240a40c3b9856ceb66b7be349a6b3",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-010.gz": {
+      "bytes": 45554,
+      "sha256": "d6b3be2e11d917c79dda20d4e87031b048b33623f14d98a4c1f05e9826da89a9",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "canonical-jmdict-1m/lengths-011.gz": {
+      "bytes": 57762,
+      "sha256": "b4f0830193df897f254e7552f383e2cc37035d261cacb2bf6226b897b9baed2a",
+      "reason": "Canonical payload or per-entry data; exact reconstruction and identities retained"
+    },
+    "capacity-census-result/inputs/zstd-baseline-census.c": {
+      "bytes": 2220991,
+      "sha256": "be4f7656a875d30c128f1bdbc78f3d61a6c302019267994b8d8f155488b535a3",
+      "reason": "Full generated amalgamation; hash retained in build manifest"
+    },
+    "design-b-codegen/B1.wat.gz": {
+      "bytes": 570582,
+      "sha256": "e93ee074c9da1953665279a5e1b201c7c8a6ac10ddba6652993ed58d2c53b959",
+      "reason": "Full-module disassembly; exact identity and changed function/loop WAT retained"
+    },
+    "design-b-codegen/P.wat.gz": {
+      "bytes": 568586,
+      "sha256": "2bd7d69810ddaa5be455bd749e38c07b76caf9e498aa2a2002546e5ad2aeffbf",
+      "reason": "Full-module disassembly; exact identity and changed function/loop WAT retained"
+    },
+    "design-b-result/inputs/jmdict.zdict": {
+      "bytes": 16384,
+      "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "reason": "Pinned repository dictionary payload; all source/size/hash identities retained"
+    },
+    "design-b-result/inputs/zstd-A.c": {
+      "bytes": 2220762,
+      "sha256": "44efdeb3cde10589814d231664a6bd2cf51c52ebb72628a325436467b097b0a6",
+      "reason": "Full generated baseline amalgamation; hash retained in build manifest"
+    },
+    "design-b-result/inputs/zstd-B.c": {
+      "bytes": 2229713,
+      "sha256": "23d29a44efac757a479df6750a37b1d521327d3088ad23490282d04d0206974e",
+      "reason": "Full generated candidate amalgamation; hash retained in build manifest"
+    }
+  },
+  "omissions": {
+    "canonicalPayloads": "Full canonical content/dictionary and per-entry data omitted; immutable block/group/record identities and reconstruction sources retained.",
+    "sdkAndPackages": "SDK/package binaries and generated cache bytes omitted; full SDK file inventory, official acquisition identities and cache diagnostics retained.",
+    "largeDerivedFiles": "Full generated amalgamations and full-module WAT omitted; their exact hashes and compiled WASM plus changed function/loop WAT retained.",
+    "priorStudy": "Earlier checked64 setup failures and its completed negative timing cohort remain in their separate published record; this archive preserves the new study and its explicitly reused baseline receipts."
+  },
+  "createdAtUtc": "2026-11-28T07:27:25.978846+00:00",
+  "ledgerSnapshot": {
+    "sha256": "a97cdcc29a6ab0b724b79f08d1c8c5dab96196166b9c61a3c194dd1fe878dafd",
+    "suppliedAtUtc": "2026-11-28T07:19:07Z",
+    "browserQueueLastObservedAtUtc": "2026-11-28T07:13:09Z"
+  },
+  "sourceResultSha256": "dcfab744040a3f66619e20ef3757103aca96e1b9d819d97d6049042b2cd6dbf7",
+  "sourceFreezeSha256": "61d55a8e1007d4ed67205c1db2b96322d89d485c2778596f3245538f737bd9dc",
+  "qualifiedArtifactManifestSha256": "60fe61a338106d9fbb529fc2cd5322887d19c5400f0db0b9e4cae9146750cd98"
+}

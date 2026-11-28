@@ -1,0 +1,19 @@
+{
+  "integrity": "passed",
+  "files": 199,
+  "uniqueBlobs": 130,
+  "censusArithmetic": "passed",
+  "censusCalls": 772,
+  "censusSequences": 2574603,
+  "sequenceWeightedEligibilityPercent": 100.0,
+  "savedCorrectnessCounts": "passed",
+  "sequenceChecks": 818274,
+  "apiCapacityChecks": 163772,
+  "canonicalFramesPerArm": 103,
+  "syntheticCases": 79,
+  "recordedTimingObservations": 0,
+  "performanceDisposition": "incomplete; no gain, regression or memory-regression conclusion",
+  "terminationPhase": "unknown; no observation was recorded",
+  "nativeExecution": false,
+  "extracted": null
+}

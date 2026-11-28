@@ -1,0 +1,36 @@
+{
+  "createdAtUtc": "2026-11-28T07:32:42.510014+00:00",
+  "runId": 46113567719,
+  "jobId": 140882253628,
+  "files": {
+    "hosted-validation-audit.json": {
+      "bytes": 3099,
+      "sha256": "cb060965af4d4a65cdff5f1006eade865089187f2f2d598feefd1c953233088f"
+    },
+    "parser-path-validation-15253361929.zip": {
+      "bytes": 47103,
+      "sha256": "9df4dd5b1b7ffc14277ed149e9c705084f365a0e4f8df6844506d7bfb705a5e5"
+    },
+    "validation-artifact-15253361929-metadata.json": {
+      "bytes": 761,
+      "sha256": "5fd1ae1d38c3bbb5eeeb39336c3f321f1a2c52d4a0313df2fbe1f8571bc7f431"
+    },
+    "validation-job-140882253628.log": {
+      "bytes": 1040973,
+      "sha256": "7221b6b973899a08f4fef039fe1c84b599c9ce48b63034d535d8aef04cdc53e6"
+    },
+    "validation-source-comparison.json": {
+      "bytes": 11946,
+      "sha256": "3df8b7d0a662f6cdbc16866b6a90377e8ccdef41f73c5d63932ea466df2f9cd1"
+    },
+    "validation-workflow-d36ee85.yml": {
+      "bytes": 5260,
+      "sha256": "48213d39871a1e3377fc21f47812e1b431988507afa5f3012f8e6486188d0fcf"
+    },
+    "monitor-46113567719-2.json": {
+      "bytes": 4549,
+      "sha256": "5f4e4ee3806eafdff274ad69d9a435d5d396e51e92ddc3757ba768c62ef23d50"
+    }
+  },
+  "scope": "Complete original hosted validation ZIP/logs plus source/workflow/state/audit receipts; no browser result claim."
+}

@@ -1,0 +1,41 @@
+{
+  "status": "reconstruction-started",
+  "createdUtc": "2026-11-28T07:34:37.639160+00:00",
+  "event": "Environment reset removed the entire prior /tmp evidence directory before remote publication. Original workspace study inputs survived.",
+  "priorDirectory": "/tmp/manabitan-sequence64-design-b-evidence-7c02",
+  "newDirectory": "/workspace/scratch/7c02210aa375/import-experiments-7c02/evidence-packages/design-b",
+  "priorVerifiedArchive": {
+    "bytes": 1866839,
+    "sha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+    "indexSha256": "b3073a68708603e87dd9ba9b5b40b92497b7b6dc5d24c39ec91caaf45e3ee9fc",
+    "indexCreatedAtUtc": "2026-11-28T07:27:25.978846+00:00",
+    "manifestSha256": "d5a30bbe071a8f3efc1efc26c1eff388a9e721cf30b0e1d28154a34d24a8f99e",
+    "verificationReceiptSha256": "0e8e47e6666dab0f54182efb549c8dc5f0691eb86dfd519454fe106320ab719d"
+  },
+  "restoredFiles": {
+    "build-archive.py": {
+      "bytes": 10071,
+      "sha256": "f0e147571abc0eea5b2fbb4d0810d13ff7284efb9723b1b2d5b41c93d8a3a193"
+    },
+    "verify.py": {
+      "bytes": 19717,
+      "sha256": "6ec508627cc892103b3d7630392a2917a47556aa52e3007b8e861c813cbf5c9e"
+    },
+    "README.md": {
+      "bytes": 3298,
+      "sha256": "6264f5190bd47dc3e4fc5116358a1aa9e2a6e9069f6dc4094a1e89bd856d4d95"
+    },
+    "RESULT.md": {
+      "bytes": 6176,
+      "sha256": "e46aedde822d32f3cb40a3f1ebf02778744e291e2ae13a0d8c15e2b4e9f47623"
+    },
+    "investigation-ledger-snapshot.json": {
+      "bytes": 19989,
+      "sha256": "a97cdcc29a6ab0b724b79f08d1c8c5dab96196166b9c61a3c194dd1fe878dafd"
+    }
+  },
+  "restorationMethod": "Builder, verifier and README recovered from exact prior write inputs; builder/verifier hashes match prior receipts. RESULT and ledger copied from surviving workspace with exact prior hash checks.",
+  "originalVerificationReceiptLimit": "Original verification.json bytes and its wall-clock timestamp were lost. Its prior SHA and successful result remain in conversation receipts; a new verification receipt will carry the real recovery time and path.",
+  "nativeExecution": false,
+  "performanceObservationsAdded": 0
+}
