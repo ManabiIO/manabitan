@@ -378,6 +378,7 @@ describe('local owned import index envelopes', () => {
         try {
             await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
             const record = Reflect.get(store, '_recordsById').get(1)
+            if (typeof record === 'undefined') { throw new Error('Missing materialized record') }
             expect(record.expressionBytes).toEqual(keyBytes.subarray(0, 9))
             expect(record.readingBytes).toEqual(keyBytes.subarray(9, 15))
             expect(prepared.bytes.byteLength).toBeGreaterThan(0)
@@ -397,6 +398,7 @@ describe('local owned import index envelopes', () => {
         Reflect.set(store, '_importSessionActive', false)
         await store.beginImportSession()
         const createPending = store._createPendingLookupIndexChunk.bind(store)
+        /** @type {ReturnType<typeof createPending>[]} */
         const pending = []
         const override = vi.spyOn(store, '_createPendingLookupIndexChunk').mockImplementation((...args) => {
             const [firstId, count, base, payload, fields, format] = args
@@ -521,20 +523,22 @@ describe('local owned import index envelopes', () => {
     test.each(['fields', 'chunk'])('keeps the invocation witness revoked after a %s wrapper restores itself', async (kind) => {
         const fixture = await createImportIndexChunkFixture()
         const {store, consumer, prepared} = fixture
-        let retained
+        /** @type {Uint8Array[]} */
+        const retained = []
         if (kind === 'fields') {
             const original = store._encodeArtifactRecordFields.bind(store)
             store._encodeArtifactRecordFields = (...args) => {
                 Reflect.deleteProperty(store, '_encodeArtifactRecordFields')
-                retained = original(...args)
-                return retained
+                const fields = original(...args)
+                retained.push(fields)
+                return fields
             }
         } else {
             const original = store._encodeArtifactChunkRecords.bind(store)
             store._encodeArtifactChunkRecords = async (...args) => {
                 Reflect.deleteProperty(store, '_encodeArtifactChunkRecords')
                 const encoded = await original(...args)
-                retained = encoded.recordFields
+                retained.push(encoded.recordFields)
                 return encoded
             }
         }
@@ -542,6 +546,7 @@ describe('local owned import index envelopes', () => {
         Reflect.set(store, '_importSessionActive', false)
         await store.beginImportSession()
         const createPending = store._createPendingLookupIndexChunk.bind(store)
+        /** @type {ReturnType<typeof createPending>[]} */
         const pending = []
         const override = vi.spyOn(store, '_createPendingLookupIndexChunk').mockImplementation((...args) => {
             const value = createPending(...args)
@@ -553,7 +558,8 @@ describe('local owned import index envelopes', () => {
             expect(pending).toHaveLength(1)
             expect(pending[0]).toBeInstanceOf(Uint8Array)
             expect(pending[0]).toEqual(fixture.expected)
-            expect(retained?.byteLength).toBeGreaterThan(0)
+            expect(retained).toHaveLength(1)
+            expect(retained[0].byteLength).toBeGreaterThan(0)
             expect(prepared.bytes.byteLength).toBeGreaterThan(0)
         } finally {
             override.mockRestore()
@@ -564,7 +570,8 @@ describe('local owned import index envelopes', () => {
         const fixture = await createImportIndexChunkFixture()
         const {store, consumer, prepared} = fixture
         let calls = 0
-        let retained
+        /** @type {Uint8Array[]} */
+        const retained = []
         const failure = new Error('Custom envelope implementation')
         if (kind === 'custom-envelope') {
             store._createLookupIndexChunk = () => {
@@ -575,7 +582,9 @@ describe('local owned import index envelopes', () => {
             const original = store._appendEncodedChunk.bind(store)
             store._appendEncodedChunk = async (...args) => {
                 ++calls
-                retained = args[6]
+                const fields = args[6]
+                if (!(fields instanceof Uint8Array)) { throw new Error('Missing encoded record fields') }
+                retained.push(fields)
                 Reflect.deleteProperty(store, '_appendEncodedChunk')
                 return await original(...args)
             }
@@ -588,7 +597,8 @@ describe('local owned import index envelopes', () => {
             await expect(append).rejects.toBe(failure)
         } else {
             await append
-            expect(retained?.byteLength).toBeGreaterThan(0)
+            expect(retained).toHaveLength(1)
+            expect(retained[0].byteLength).toBeGreaterThan(0)
             const states = Reflect.get(store, '_shardStateByFileName')
             expect([...states.values()][0].pendingLookupIndexChunks[0]).toEqual(fixture.expected)
         }
