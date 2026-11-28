@@ -450,10 +450,9 @@ describe('term-bank WASM parser', () => {
         const discard = vi.fn(async () => {
             if (outcome === 'sink-failure') { await discardGate; }
         });
-        const prepare = vi.fn(async (
-            /** @type {TermBankColumnChunk} */ _chunk,
-            /** @type {TermBankParseProgress} */ _progress,
-        ) => ({discard}));
+        /** @type {NonNullable<import('../ext/js/dictionary/term-bank-wasm-parser.js').ParallelTermBankParserOptions['prepareTermContentLookahead']>} */
+        const prepareCallback = async (_chunk, _progress) => ({discard});
+        const prepare = vi.fn(prepareCallback);
         /** @type {TermBankParseProgress[]} */
         const progressValues = [];
         let settled = false;

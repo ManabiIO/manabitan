@@ -5,6 +5,8 @@ on:
     branches:
       - perf/import-lookahead-bda85f3c7e15
     paths:
+      - test/term-bank-wasm-parser.test.js
+      - test/dictionary-database-content-dedup.test.js
       - .github/workflows/import-lookahead-bda85f3c7e15.yml
       - dev/perf/import-lookahead-bda85f3c7e15.py
       - ext/js/dictionary/**
