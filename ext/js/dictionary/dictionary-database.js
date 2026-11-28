@@ -219,6 +219,106 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {boolean} [recentSourceHit]
  */
 
+/* eslint-disable @stylistic/semi */
+/** @type {WeakSet<object>} */
+const pendingTermContentSpanRecords = new WeakSet()
+const IN_FLIGHT_ARRAY_BUFFER_BYTE_LENGTH = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')
+const IN_FLIGHT_TYPED_ARRAY_TAG = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)
+
+/**
+ * Records only that this is a plain object created here, never a caller proxy.
+ * No numeric validation survives publication or any asynchronous boundary.
+ * @param {Uint8Array} buffer
+ * @param {Uint32Array} offsets
+ * @param {Uint32Array} lengths
+ * @returns {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}}
+ */
+function createPendingTermContentSpans(buffer, offsets, lengths) {
+    const spans = {buffer, offsets, lengths}
+    pendingTermContentSpanRecords.add(spans)
+    return spans
+}
+
+/**
+ * @param {unknown} value
+ * @param {object} prototype
+ * @param {string} name
+ * @returns {boolean}
+ */
+function isOrdinaryInFlightSourceView(value, prototype, name) {
+    return (
+        ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
+        typeof IN_FLIGHT_TYPED_ARRAY_TAG?.get === 'function' && IN_FLIGHT_TYPED_ARRAY_TAG.get.call(value) === name &&
+        !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'byteOffset') &&
+        !Object.hasOwn(value, 'byteLength') && !Object.hasOwn(value, 'length')
+    )
+}
+
+/**
+ * Validates the current values of an ordinary ordered span batch. All guards
+ * and reads finish synchronously before registration. Unproven objects,
+ * accessors, shared numeric columns, aliases and unordered references retain
+ * the general validator and its original failure behavior.
+ * @param {number[]|Float64Array} persistedOffsets
+ * @param {number[]|Uint32Array} persistedLengths
+ * @param {string|string[]} dictNames
+ * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
+ * @returns {{minimumOffset: number, maximumOffset: number}|null}
+ */
+function getOrderedInFlightTermContentBounds(persistedOffsets, persistedLengths, dictNames, spans) {
+    if (
+        spans === null || !pendingTermContentSpanRecords.has(spans) ||
+        typeof dictNames !== 'string' ||
+        typeof IN_FLIGHT_ARRAY_BUFFER_BYTE_LENGTH?.get !== 'function' ||
+        !isOrdinaryInFlightSourceView(persistedOffsets, Float64Array.prototype, 'Float64Array') ||
+        !(persistedOffsets instanceof Float64Array)
+    ) { return null }
+    // The origin check excludes proxies before inspecting property descriptors.
+    // An ordinary record may still have been mutated since the resolver ran.
+    const buffer = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'buffer')?.value)
+    const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'offsets')?.value)
+    const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'lengths')?.value)
+    if (
+        !isOrdinaryInFlightSourceView(buffer, Uint8Array.prototype, 'Uint8Array') || !(buffer instanceof Uint8Array) ||
+        !isOrdinaryInFlightSourceView(offsets, Uint32Array.prototype, 'Uint32Array') || !(offsets instanceof Uint32Array) ||
+        !isOrdinaryInFlightSourceView(lengths, Uint32Array.prototype, 'Uint32Array') || !(lengths instanceof Uint32Array) ||
+        lengths !== persistedLengths
+    ) { return null }
+    const count = persistedOffsets.length
+    const persistedBuffer = persistedOffsets.buffer
+    const offsetsBuffer = offsets.buffer
+    const lengthsBuffer = lengths.buffer
+    if (
+        count === 0 || offsets.length < count || lengths.length !== count ||
+        !(persistedBuffer instanceof ArrayBuffer) ||
+        !(offsetsBuffer instanceof ArrayBuffer) || !(lengthsBuffer instanceof ArrayBuffer) ||
+        persistedBuffer === offsetsBuffer || persistedBuffer === lengthsBuffer || offsetsBuffer === lengthsBuffer ||
+        buffer.buffer === persistedBuffer || buffer.buffer === offsetsBuffer || buffer.buffer === lengthsBuffer
+    ) { return null }
+    // Prototypes can be reassigned on genuine buffers and views. These captured
+    // getters establish their internal kinds, independently of instanceof.
+    try {
+        IN_FLIGHT_ARRAY_BUFFER_BYTE_LENGTH.get.call(persistedBuffer)
+        IN_FLIGHT_ARRAY_BUFFER_BYTE_LENGTH.get.call(offsetsBuffer)
+        IN_FLIGHT_ARRAY_BUFFER_BYTE_LENGTH.get.call(lengthsBuffer)
+    } catch {
+        return null
+    }
+    const sourceByteLength = buffer.byteLength
+    let previousOffset = -1
+    for (let i = 0; i < count; ++i) {
+        const persistedOffset = persistedOffsets[i]
+        if (
+            lengths[i] > sourceByteLength - offsets[i] ||
+            !Number.isSafeInteger(persistedOffset) || persistedOffset < 0 ||
+            persistedOffset <= previousOffset
+        ) { return null }
+        previousOffset = persistedOffset
+    }
+    return {minimumOffset: persistedOffsets[0], maximumOffset: previousOffset}
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {string|(string|null)[]} names
  * @param {number} count
@@ -6988,12 +7088,19 @@ void 0 :
         if (pendingLengths.length !== count) {
             throw new RangeError('In-flight term content offset and length counts do not match');
         }
+        /* eslint-disable @stylistic/semi */
+        const orderedBounds = this._inFlightTermContentSourceBatches.size === 0 ?
+            getOrderedInFlightTermContentBounds(pendingOffsets, pendingLengths, pendingResolvedDictNames, pendingContentSpans) :
+            null
+        /* eslint-enable @stylistic/semi */
         let sortedOffsets = true;
-        let minimumOffset = Infinity;
-        let maximumOffset = -Infinity;
+        // eslint-disable-next-line @stylistic/semi
+        let minimumOffset = orderedBounds === null ? Infinity : orderedBounds.minimumOffset
+        // eslint-disable-next-line @stylistic/semi
+        let maximumOffset = orderedBounds === null ? -Infinity : orderedBounds.maximumOffset
         /** @type {Set<string>|null} */
         let unsortedKeys = null;
-        for (let i = 0; i < count; ++i) {
+        for (let i = orderedBounds === null ? 0 : count; i < count; ++i) {
             const buffer = pendingContentSpans === null ? pendingContentBytes[i] : pendingContentSpans.buffer;
             const sourceOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
             const sourceLength = pendingContentSpans === null ? buffer?.byteLength : pendingContentSpans.lengths[i];
@@ -8941,11 +9048,11 @@ null :
             contentDedupPlan.nextUnresolvedUniqueIndex = nextPendingUniqueIndex;
             const pendingContentCount = nextPendingUniqueIndex - firstPendingUniqueIndex;
             const pendingContentSpans = useContentSpans ?
-                {
-                    buffer: contentBytesBuffer,
-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-                } :
+                createPendingTermContentSpans(
+                    contentBytesBuffer,
+                    pendingSpanOffsets.subarray(0, pendingContentCount),
+                    pendingSpanLengths.subarray(0, pendingContentCount),
+                ) :
                 null;
             return {
                 contentOffsets,
@@ -9280,11 +9387,11 @@ null :
                 pendingContentDictNames,
                 pendingRowToUniqueIndex: null,
                 pendingContentCount,
-                pendingContentSpans: {
-                    buffer: contentBytesBuffer,
-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-                },
+                pendingContentSpans: createPendingTermContentSpans(
+                    contentBytesBuffer,
+                    pendingSpanOffsets.subarray(0, pendingContentCount),
+                    pendingSpanLengths.subarray(0, pendingContentCount),
+                ),
                 uniformContentDictName,
                 pendingHitCount,
                 persistedHitCount,
@@ -9517,11 +9624,13 @@ null :
             }
         }
         if (usePendingContentSpans) {
-            pendingContentSpans = {
-                buffer: contentBytesBuffer,
-                offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-            };
+            /* eslint-disable @stylistic/semi */
+            pendingContentSpans = createPendingTermContentSpans(
+                contentBytesBuffer,
+                pendingSpanOffsets.subarray(0, pendingContentCount),
+                pendingSpanLengths.subarray(0, pendingContentCount),
+            )
+            /* eslint-enable @stylistic/semi */
         }
         return {
             contentOffsets,
