@@ -460,3 +460,4 @@ export class NativeCanonicalScanner {
 
 /* eslint-enable no-underscore-dangle */
 /* eslint-enable unicorn/prefer-spread */
+/* eslint-enable @stylistic/semi */

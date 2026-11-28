@@ -225,8 +225,13 @@ describe('native replacement-slot rebuild', () => {
         for (let i = 0; i < count; ++i) {
             const seed = i + 1
             Reflect.get(database, '_setTermEntryContentMetaByHashPair').call(database, (seed << 16) | (seed ^ 63), 0, {
-                id: seed, offset: seed * 10, length: seed, dictName: 'native-rehash',
-                signature1: seed, signature2: seed + 1, signature3: seed + 2,
+                id: seed,
+                offset: seed * 10,
+                length: seed,
+                dictName: 'native-rehash',
+                signature1: seed,
+                signature2: seed + 1,
+                signature3: seed + 2,
             })
         }
         return database
@@ -238,7 +243,9 @@ describe('native replacement-slot rebuild', () => {
         const scanner = loadedScanner()
         Reflect.set(native, '_nativeCanonicalScanner', scanner)
         const before = getArena(native)
+        // eslint-disable-next-line unicorn/prefer-spread -- Preserve the owned Uint32Array type for exact slot comparisons.
         const oldSlots = before.slots.slice()
+        // eslint-disable-next-line unicorn/prefer-spread -- Preserve each owned typed column's element type for exact comparisons.
         const previousColumns = arenaColumnNames.map((name) => before[name].slice())
         for (const database of [js, native]) {
             Reflect.get(database, '_resizeTermContentMetadataArena').call(database, count + 17, Math.max(32, before.slots.length * 2), true)
@@ -298,6 +305,7 @@ describe('native replacement-slot rebuild', () => {
         const js = collisionDatabase(31)
         const native = collisionDatabase(31)
         const previous = getArena(native)
+        // eslint-disable-next-line unicorn/prefer-spread -- Preserve the owned Uint32Array type for exact slot comparisons.
         const oldSlots = previous.slots.slice()
         const scanner = loadedScanner()
         Reflect.set(native, '_nativeCanonicalScanner', scanner)
