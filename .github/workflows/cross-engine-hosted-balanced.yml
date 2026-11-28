@@ -1,0 +1,120 @@
+name: Cross-engine hosted import and first lookup
+
+on:
+  push:
+    branches:
+      - codex/qualify-jmdict-hosted-20261128
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  balanced-cohort:
+    name: Six balanced fresh-profile pairs per dataset
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out frozen Manabitan source and qualification harness
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify product tree matches the frozen Manabitan source
+        run: git diff --exit-code f28c2801fcfd9416f220b46b9cbafeee901c1cb2 -- ext dev test/chromium test/e2e package.json package-lock.json
+
+      - name: Set up Manabitan build and Node dependencies
+        uses: ./.github/actions/setup
+
+      - name: Install headless Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Check out frozen Hoshidicts source
+        uses: actions/checkout@v6
+        with:
+          repository: Manhhao/hoshidicts
+          ref: c77b36201de0e86c8950dd1d3d88cbee36472fb1
+          path: hoshidicts
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Download and verify pinned dictionaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/cross-engine/archives"
+          curl --fail --location --retry 3 \
+            https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip \
+            --output "${RUNNER_TEMP}/cross-engine/archives/JMdict_2026-11-22.zip"
+          curl --fail --location --retry 3 \
+            https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip \
+            --output "${RUNNER_TEMP}/cross-engine/archives/jitendex_2026-10-03.zip"
+          curl --fail --location --retry 3 \
+            https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip \
+            --output "${RUNNER_TEMP}/cross-engine/archives/vndb_characters_by_bee.zip"
+          echo "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f  ${RUNNER_TEMP}/cross-engine/archives/JMdict_2026-11-22.zip" | sha256sum --check
+          echo "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356  ${RUNNER_TEMP}/cross-engine/archives/jitendex_2026-10-03.zip" | sha256sum --check
+          echo "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792  ${RUNNER_TEMP}/cross-engine/archives/vndb_characters_by_bee.zip" | sha256sum --check
+
+      - name: Build Hoshidicts benchmark driver
+        run: >-
+          cmake -S test/qualification/hoshidicts-jmdict
+          -B "${RUNNER_TEMP}/cross-engine/hoshi-build"
+          -DCMAKE_BUILD_TYPE=Release
+          -DHOSHIDICTS_SOURCE_DIR="${GITHUB_WORKSPACE}/hoshidicts"
+          && cmake --build "${RUNNER_TEMP}/cross-engine/hoshi-build"
+          --target hoshidicts-import-lookup-bench --parallel 2
+
+      - name: Verify portable digest parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="$(printf abc | sha256sum | cut -d' ' -f1)"
+          test "${digest}" = ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+          native_digest="$("${RUNNER_TEMP}/cross-engine/hoshi-build/hoshidicts-import-lookup-bench" --verify-sha256)"
+          test "${native_digest}" = "${digest}"
+
+      - name: Build frozen Manabitan extension
+        run: node ./dev/bin/build.js --target chrome-dev
+
+      - name: Attest qualification inputs and run the balanced cohort
+        shell: bash
+        env:
+          BENCH_RUN_DIR: ${{ runner.temp }}/cross-engine/evidence
+          BENCH_ARCHIVE_ROOT: ${{ runner.temp }}/cross-engine/archives
+          BENCH_HOSHIDICTS_DRIVER: ${{ runner.temp }}/cross-engine/hoshi-build/hoshidicts-import-lookup-bench
+          BENCH_EXTENSION_DIR: ${{ runner.temp }}/cross-engine/manabitan-extension
+          BENCH_COMMIT: f28c2801fcfd9416f220b46b9cbafeee901c1cb2
+        run: |
+          set -euo pipefail
+          package="builds/manabitan-chrome-dev.zip"
+          test -f "${package}"
+          BENCH_PACKAGE_SHA256="$(sha256sum "${package}" | cut -d' ' -f1)"
+          BENCH_RUNNER_SHA256="$(sha256sum test/qualification/hoshidicts-jmdict/run-glossary.mjs | cut -d' ' -f1)"
+          export BENCH_PACKAGE_SHA256 BENCH_RUNNER_SHA256
+          mkdir -p "${BENCH_EXTENSION_DIR}"
+          unzip -q "${package}" -d "${BENCH_EXTENSION_DIR}"
+          sha256sum \
+            test/qualification/hoshidicts-jmdict/run-glossary.mjs \
+            test/qualification/hoshidicts-jmdict/run-balanced-hosted.mjs \
+            test/qualification/hoshidicts-jmdict/glossary-fields.mjs \
+            test/qualification/hoshidicts-jmdict/glossary-validation.mjs \
+            test/qualification/hoshidicts-jmdict/expected-glossaries.json \
+            test/qualification/hoshidicts-jmdict/glossary-attestations.json \
+            test/qualification/hoshidicts-jmdict/fixtures/source-oracle.json \
+            test/qualification/hoshidicts-jmdict/fixtures/jitendex-source-oracle.json \
+            test/qualification/hoshidicts-jmdict/fixtures/vndb-source-oracle.json \
+            test/qualification/hoshidicts-jmdict/fixtures/vndb-media-oracle.json \
+            > "${BENCH_RUN_DIR}/qualification-manifest.sha256"
+          node test/qualification/hoshidicts-jmdict/run-balanced-hosted.mjs
+
+      - name: Upload compact hosted receipts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cross-engine-balanced-${{ github.run_id }}
+          path: ${{ runner.temp }}/cross-engine/evidence
+          if-no-files-found: warn
+          retention-days: 30

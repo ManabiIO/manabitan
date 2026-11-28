@@ -9,9 +9,9 @@
     "equal": true,
     "groups": [
       {
-        "expression": "\u65e5\u672c\u8a9e",
-        "reading": "\u306b\u307b\u3093\u3054",
-        "matched": "\u65e5\u672c\u8a9e",
+        "expression": "日本語",
+        "reading": "にほんご",
+        "matched": "日本語",
         "rows": [
           {
             "bank": "term_bank_12.json",
@@ -34,9 +34,9 @@
         ]
       },
       {
-        "expression": "\u65e5\u672c\u8a9e",
-        "reading": "\u306b\u3063\u307d\u3093\u3054",
-        "matched": "\u65e5\u672c\u8a9e",
+        "expression": "日本語",
+        "reading": "にっぽんご",
+        "matched": "日本語",
         "rows": [
           {
             "bank": "term_bank_12.json",
@@ -59,9 +59,9 @@
         ]
       },
       {
-        "expression": "\u65e5\u672c",
-        "reading": "\u306b\u3063\u307d\u3093",
-        "matched": "\u65e5\u672c",
+        "expression": "日本",
+        "reading": "にっぽん",
+        "matched": "日本",
         "rows": [
           {
             "bank": "term_bank_15.json",
@@ -84,9 +84,9 @@
         ]
       },
       {
-        "expression": "\u65e5\u672c",
-        "reading": "\u306b\u307b\u3093",
-        "matched": "\u65e5\u672c",
+        "expression": "日本",
+        "reading": "にほん",
+        "matched": "日本",
         "rows": [
           {
             "bank": "term_bank_15.json",
@@ -109,9 +109,9 @@
         ]
       },
       {
-        "expression": "\u65e5",
-        "reading": "\u306b\u3061",
-        "matched": "\u65e5",
+        "expression": "日",
+        "reading": "にち",
+        "matched": "日",
         "rows": [
           {
             "bank": "term_bank_26.json",
@@ -152,9 +152,9 @@
         ]
       },
       {
-        "expression": "\u65e5",
-        "reading": "\u3093\u3061",
-        "matched": "\u65e5",
+        "expression": "日",
+        "reading": "んち",
+        "matched": "日",
         "rows": [
           {
             "bank": "term_bank_49.json",
@@ -186,9 +186,9 @@
         ]
       },
       {
-        "expression": "\u65e5",
-        "reading": "\u304b",
-        "matched": "\u65e5",
+        "expression": "日",
+        "reading": "か",
+        "matched": "日",
         "rows": [
           {
             "bank": "term_bank_26.json",
@@ -211,9 +211,9 @@
         ]
       },
       {
-        "expression": "\u65e5",
-        "reading": "\u3061",
-        "matched": "\u65e5",
+        "expression": "日",
+        "reading": "ち",
+        "matched": "日",
         "rows": [
           {
             "bank": "term_bank_49.json",
@@ -245,9 +245,9 @@
         ]
       },
       {
-        "expression": "\u65e5",
-        "reading": "\u3072",
-        "matched": "\u65e5",
+        "expression": "日",
+        "reading": "ひ",
+        "matched": "日",
         "rows": [
           {
             "bank": "term_bank_12.json",
@@ -302,6 +302,267 @@
             "glossaryRawSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1",
             "glossaryJsonSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1",
             "glossaryCanonicalSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1"
+          }
+        ]
+      }
+    ]
+  },
+  "jitendex": {
+    "dataset": "jitendex",
+    "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "terms": 436555,
+    "receiptPath": "/Users/alex/Code/manabi/QualificationEvidence/manabitan-hoshidicts-equal-endpoint-20261127/cap-sensitivity/runs/jitendex-1-hoshidicts/receipt.json",
+    "receiptDigest": "5a086efe1bf0ec94966bf3d82aba0e756c6a80592b8af822e974216915d4da0c",
+    "reconstructedDigest": "5a086efe1bf0ec94966bf3d82aba0e756c6a80592b8af822e974216915d4da0c",
+    "equal": true,
+    "groups": [
+      {
+        "expression": "日本語",
+        "reading": "にほんご",
+        "matched": "日本語",
+        "rows": [
+          {
+            "bank": "term_bank_43.json",
+            "index": 611,
+            "rowSha256": "5d1f1c187eef2f6cf378557779610eafd705cfde49fb059738e585d9fdfcb13e",
+            "glossaryRawBytes": 2453,
+            "glossaryRawSha256": "16f89c156b8ca7b204d52c8dc5dc2eb5a26e6cdbdc3076bea2a5d306901e6962",
+            "glossaryJsonSha256": "aaf9368c3f00943590585644a295a26e0d7e85f99f40b8df705e05d3f72b3d7a",
+            "glossaryCanonicalSha256": "5f246e132d5b9c1e6e4c1f2d832d87087aaa4b15d8de83e25d4017c4289e483c"
+          }
+        ]
+      },
+      {
+        "expression": "日本語",
+        "reading": "にっぽんご",
+        "matched": "日本語",
+        "rows": [
+          {
+            "bank": "term_bank_43.json",
+            "index": 612,
+            "rowSha256": "a2d72dafa89dda8b3b171f960fc144b114078a5c942c5cc22ada0a4ccac9912c",
+            "glossaryRawBytes": 2453,
+            "glossaryRawSha256": "16f89c156b8ca7b204d52c8dc5dc2eb5a26e6cdbdc3076bea2a5d306901e6962",
+            "glossaryJsonSha256": "aaf9368c3f00943590585644a295a26e0d7e85f99f40b8df705e05d3f72b3d7a",
+            "glossaryCanonicalSha256": "5f246e132d5b9c1e6e4c1f2d832d87087aaa4b15d8de83e25d4017c4289e483c"
+          }
+        ]
+      },
+      {
+        "expression": "日本",
+        "reading": "にっぽん",
+        "matched": "日本",
+        "rows": [
+          {
+            "bank": "term_bank_54.json",
+            "index": 1815,
+            "rowSha256": "934bcd34af4c2852efc3fb0e98c5df8e22996448a1d969c27a1b483b3ecca068",
+            "glossaryRawBytes": 1990,
+            "glossaryRawSha256": "d54ea29874b25c55bf63763b51c1cb6d2f33a9ffb9bf8212b74ed9cefe7aeb2b",
+            "glossaryJsonSha256": "68a3701ca8841ca8b71cf71be1d128dbcc152bec2f3e0ddf0f5c434ec59e8f5a",
+            "glossaryCanonicalSha256": "0bdd3c2103653a631c27bd9d127cf041db7145af33dbaf9b1896e12d7c01d4f3"
+          }
+        ]
+      },
+      {
+        "expression": "日本",
+        "reading": "にほん",
+        "matched": "日本",
+        "rows": [
+          {
+            "bank": "term_bank_54.json",
+            "index": 1814,
+            "rowSha256": "6ed5315c0c5f77043bbdbec2f3aa964e371cfb1affed0c56782d5f199c7b0d45",
+            "glossaryRawBytes": 1990,
+            "glossaryRawSha256": "d54ea29874b25c55bf63763b51c1cb6d2f33a9ffb9bf8212b74ed9cefe7aeb2b",
+            "glossaryJsonSha256": "68a3701ca8841ca8b71cf71be1d128dbcc152bec2f3e0ddf0f5c434ec59e8f5a",
+            "glossaryCanonicalSha256": "0bdd3c2103653a631c27bd9d127cf041db7145af33dbaf9b1896e12d7c01d4f3"
+          }
+        ]
+      },
+      {
+        "expression": "日",
+        "reading": "にち",
+        "matched": "日",
+        "rows": [
+          {
+            "bank": "term_bank_103.json",
+            "index": 1539,
+            "rowSha256": "f565e6cccc7d0759953546d64103f00aa8e4f6428ccf660615b969a8257e26d5",
+            "glossaryRawBytes": 6661,
+            "glossaryRawSha256": "de7926e5276cdc5a7a51ddb8f0b1a4bd8dd5e9751ec902bbde6e147d6d450f60",
+            "glossaryJsonSha256": "15af52bbf55f9de3f7686a539fc2d6ce510b32e19065d14f4308ce5e582b5296",
+            "glossaryCanonicalSha256": "aec52929ce83367488f46bcb0b8ee751c90c29198cf4f89a758f024436fa3dd0"
+          }
+        ]
+      },
+      {
+        "expression": "日",
+        "reading": "んち",
+        "matched": "日",
+        "rows": [
+          {
+            "bank": "term_bank_203.json",
+            "index": 800,
+            "rowSha256": "3b3bed96a33c5f2629f20dc86eb0f5527aa493ed588b92c1123985b1fe2597cc",
+            "glossaryRawBytes": 3277,
+            "glossaryRawSha256": "21af3dd1c80f08061351d89eda13582a47ede7f8573f492bdf2b8effddf6c783",
+            "glossaryJsonSha256": "0421858b9c76cd0c8621a8d0b0ab99b9bd483ca5add9f6a0e12f4aeac1de3f63",
+            "glossaryCanonicalSha256": "3db565668847398730549c00856bfde1083c2655fa052777ad03c790c5d2bc3a"
+          }
+        ]
+      },
+      {
+        "expression": "日",
+        "reading": "か",
+        "matched": "日",
+        "rows": [
+          {
+            "bank": "term_bank_103.json",
+            "index": 1540,
+            "rowSha256": "95ee1cd2483ad67aa53008539e1a73fc09339db565b951cd5e6fd75c70cc336e",
+            "glossaryRawBytes": 1101,
+            "glossaryRawSha256": "c5800c4aad897ba8196bca01a95ef4b944191faf24a17a361abfdd2df1616ef5",
+            "glossaryJsonSha256": "ac87a4094a519fd9ecb3f3710fa85624065388eb31748b403bbf30fde8c3f0aa",
+            "glossaryCanonicalSha256": "41374d6ff969fdf1ebe730663b42f7e322b10df6995161d38baf905810777d0f"
+          }
+        ]
+      },
+      {
+        "expression": "日",
+        "reading": "ち",
+        "matched": "日",
+        "rows": [
+          {
+            "bank": "term_bank_203.json",
+            "index": 801,
+            "rowSha256": "c8f1bce30d343945f3409afcfd6bf031191c694c60aa3372104d848ef1633372",
+            "glossaryRawBytes": 3277,
+            "glossaryRawSha256": "21af3dd1c80f08061351d89eda13582a47ede7f8573f492bdf2b8effddf6c783",
+            "glossaryJsonSha256": "0421858b9c76cd0c8621a8d0b0ab99b9bd483ca5add9f6a0e12f4aeac1de3f63",
+            "glossaryCanonicalSha256": "3db565668847398730549c00856bfde1083c2655fa052777ad03c790c5d2bc3a"
+          }
+        ]
+      },
+      {
+        "expression": "日",
+        "reading": "ひ",
+        "matched": "日",
+        "rows": [
+          {
+            "bank": "term_bank_43.json",
+            "index": 504,
+            "rowSha256": "4821c70eeba2f68e5d39c1d555300fe4d710b837edcba9299854a8df4ef7cb3c",
+            "glossaryRawBytes": 8446,
+            "glossaryRawSha256": "8c163480e75156fe315df58f0581a9e101d09717314575f2497901af10f3debf",
+            "glossaryJsonSha256": "e7b01ef96eef5a4919da00cf9b863452b347d314f552dcec8317b6a7fea93fe1",
+            "glossaryCanonicalSha256": "322e8f604514b3da91e5e573cb6dfb95f9054de5f733c08177a2f7423110031b"
+          }
+        ]
+      }
+    ]
+  },
+  "vndb": {
+    "dataset": "vndb",
+    "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "terms": 6648310,
+    "receiptPath": "/Users/alex/Code/manabi/QualificationEvidence/manabitan-hoshidicts-equal-endpoint-20261127/runs/vndb-1-hoshidicts/receipt.json",
+    "receiptDigest": "f7657f8ab34fe377f3c639c931fe9906f45367e1394fdbf74f653186adf58942",
+    "reconstructedDigest": "f7657f8ab34fe377f3c639c931fe9906f45367e1394fdbf74f653186adf58942",
+    "equal": true,
+    "groups": [
+      {
+        "expression": "宇野星華",
+        "reading": "うのせいか",
+        "matched": "宇野星華",
+        "rows": [
+          {
+            "bank": "term_bank_333.json",
+            "index": 1681,
+            "rowSha256": "16cc54922402335282603e3b646af0621136e19d8c5282e370d4f1813bb41d19",
+            "glossaryRawBytes": 598,
+            "glossaryRawSha256": "13c4d51f4610d706bacb5a198f3cca90cd97f84a353040dee4792dba61c79a84",
+            "glossaryJsonSha256": "18ebc7eeaf75fddb73039f4564d53b3ad1ce2ba5c9586c0c2aa1dc26edd9f10a",
+            "glossaryCanonicalSha256": "3242cfa0888fcced3709a08aa78463517c3f3815970263f78bd510026ea41ec8"
+          }
+        ]
+      },
+      {
+        "expression": "宇野",
+        "reading": "うの",
+        "matched": "宇野",
+        "rows": [
+          {
+            "bank": "term_bank_39.json",
+            "index": 5822,
+            "rowSha256": "4cd2799b1870ea187afd7708f72c5174891e6d79a4dd8d78fe1e4612c68329f0",
+            "glossaryRawBytes": 595,
+            "glossaryRawSha256": "0fd174abbc5901e8699da39b70604fb00461f1448f5838f87b1e6d47c1e60e25",
+            "glossaryJsonSha256": "019c9c9d323b5901bbb17ae0aadfe562be5a361522dbcf305ff7d3836c44d763",
+            "glossaryCanonicalSha256": "2e294371bb568d4179a3479b4a93ad6f51694be01fe4ec430c45ff3f5cbc064a"
+          },
+          {
+            "bank": "term_bank_238.json",
+            "index": 8917,
+            "rowSha256": "ab0172b4878fbea3c43f5c1da2b94ec050943147542cbbb7788d23e9be104ec7",
+            "glossaryRawBytes": 599,
+            "glossaryRawSha256": "06872c5e2b00e2ac6947893c85558511533157d0945db00d1f6eb84478200d02",
+            "glossaryJsonSha256": "d47308a8e7f6c4f84e75d84b3c7c80797375b65ca20223864605786a7a0c36af",
+            "glossaryCanonicalSha256": "9df1f88d8d5d35dfd8c74a028874de95d0d3d66275a29a652ac70d9602341c63"
+          },
+          {
+            "bank": "term_bank_238.json",
+            "index": 8981,
+            "rowSha256": "a843dc225989874e8a0815cad34be5b61c3e61bc1a392023e6e4c3be516988cc",
+            "glossaryRawBytes": 598,
+            "glossaryRawSha256": "754291d2dc5b8251e6a124a3b7dce24dc3eef7e710e155628edbddeaa80fce4e",
+            "glossaryJsonSha256": "c284d71d8cf9cd80189598dc046b8f695e3f87e53631ba378cbe9aeeb26ac045",
+            "glossaryCanonicalSha256": "887499fbf1f61fa2ac88c0cf44a043054884a9019b82e456d01823b9a0cd0820"
+          },
+          {
+            "bank": "term_bank_333.json",
+            "index": 1618,
+            "rowSha256": "907cbb99036292d0b215835de802e0284b0470c81bfb172c47c9ce66623a575b",
+            "glossaryRawBytes": 600,
+            "glossaryRawSha256": "fc818af139db0b94c20742766ff66c948b27ca93492b95d9397514ef7570bc93",
+            "glossaryJsonSha256": "20f549bc7b9dbf51777b3ed1e3b5fe84d9bbf28e454e09ef9a399e40b58140d0",
+            "glossaryCanonicalSha256": "a9b4d85b76c59a4bd46cac314ea9e3eb3a57a763dc8012f2265330b0a1a63f83"
+          },
+          {
+            "bank": "term_bank_333.json",
+            "index": 1682,
+            "rowSha256": "b1a7d14ef71d9d6df1997581c156d1f576e172032eb6d5935839074510272417",
+            "glossaryRawBytes": 598,
+            "glossaryRawSha256": "13c4d51f4610d706bacb5a198f3cca90cd97f84a353040dee4792dba61c79a84",
+            "glossaryJsonSha256": "18ebc7eeaf75fddb73039f4564d53b3ad1ce2ba5c9586c0c2aa1dc26edd9f10a",
+            "glossaryCanonicalSha256": "3242cfa0888fcced3709a08aa78463517c3f3815970263f78bd510026ea41ec8"
+          },
+          {
+            "bank": "term_bank_341.json",
+            "index": 4129,
+            "rowSha256": "1bd9db0db56a5bc2867d53549f679fe1133bead4d7f1a0e5d6b49c7f100299f1",
+            "glossaryRawBytes": 440,
+            "glossaryRawSha256": "56b727fe568ebcc9466fef7a9c5911362613f052e580457c21e19cb0169c28d8",
+            "glossaryJsonSha256": "4f8d2f1713a9bd78a6f44a330beb946f55d1fdac7ca0aefea38bb5d76abaabdc",
+            "glossaryCanonicalSha256": "0ae04c8aa92db1c32a6a172ef133fafcef885b45b9053a527028824f80b31727"
+          },
+          {
+            "bank": "term_bank_457.json",
+            "index": 7739,
+            "rowSha256": "025eeabfba274facd2f1d587680a9e12dd563bf036ce42d89d5be0617d05d27f",
+            "glossaryRawBytes": 602,
+            "glossaryRawSha256": "5874d6d414f1050c152ec5bc3c12ed3504ebd522f0cc1d077587d831a084cfba",
+            "glossaryJsonSha256": "b345d4022aaaac6f4c8fe14dd485076a48107ab8c701bdd13917ed75a11f09e2",
+            "glossaryCanonicalSha256": "1dbacc6ed9101c9a17437b306d19ffe31e6f4234d9fa9ad3bf62760d9e37db66"
+          },
+          {
+            "bank": "term_bank_518.json",
+            "index": 6747,
+            "rowSha256": "ee22aa1e76734f23aa91d4ab3c040e494afeafd837055a76776c8358e17520a1",
+            "glossaryRawBytes": 596,
+            "glossaryRawSha256": "e3f00d59fdbd30fcbf5c571471442c8d5187c23d6249b3e28d083a27d2c598c3",
+            "glossaryJsonSha256": "ab893b245907c4ae1e6fd19280e380272e0fba7abcc90f0c1919696585c62d5d",
+            "glossaryCanonicalSha256": "636890e8eee99ec2eca9cefedcb3c0b6bea8df68b8c0b9b2800d0e6e385b6118"
           }
         ]
       }

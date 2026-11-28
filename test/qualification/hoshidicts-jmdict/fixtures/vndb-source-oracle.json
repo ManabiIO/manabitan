@@ -1,0 +1,20 @@
+{
+  "archive": "/Users/alex/Code/manabi/QualificationEvidence/manabitan-hoshidicts-equal-endpoint-20261127/inputs/vndb_characters_by_bee.zip",
+  "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "dictionaryTitle": "VNDB Characters by Bee",
+  "query": "宇野星華",
+  "termCount": 6648310,
+  "termBankCount": 665,
+  "matchedSourceRows": [
+    {
+      "bank": "term_bank_333.json",
+      "rowIndex": 1681,
+      "expression": "宇野星華",
+      "reading": "うのせいか",
+      "glossarySha256": "16cc54922402335282603e3b646af0621136e19d8c5282e370d4f1813bb41d19",
+      "glossaryBytes": 596
+    }
+  ],
+  "sourceOracleSha256": "dde4f30cf18d1adc196e5dacf183cac3a34c44fac0ebcb969bdc3398382803f2"
+}
+

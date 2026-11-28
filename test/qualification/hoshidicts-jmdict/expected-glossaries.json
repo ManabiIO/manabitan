@@ -2,49 +2,99 @@
   "jmdict": {
     "digest": "eca8c5bc57c2bf19048fb2eaa1b3fbf5c452c198893cc2e3cf4f2941470d3b7c",
     "expected": {
-      "[\"\u65e5\u672c\u8a9e\",\"\u306b\u307b\u3093\u3054\"]": [
+      "[\"日本語\",\"にほんご\"]": [
         "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
         "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
       ],
-      "[\"\u65e5\u672c\u8a9e\",\"\u306b\u3063\u307d\u3093\u3054\"]": [
+      "[\"日本語\",\"にっぽんご\"]": [
         "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
         "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
       ],
-      "[\"\u65e5\u672c\",\"\u306b\u3063\u307d\u3093\"]": [
+      "[\"日本\",\"にっぽん\"]": [
         "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
         "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
       ],
-      "[\"\u65e5\u672c\",\"\u306b\u307b\u3093\"]": [
+      "[\"日本\",\"にほん\"]": [
         "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
         "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
       ],
-      "[\"\u65e5\",\"\u306b\u3061\"]": [
+      "[\"日\",\"にち\"]": [
         "ed4d75f97e8273381ff0e6934bfb0c9ec23f707246bebe8a5821ab9b90ff99a3",
         "cf7fedfd5326627f50d64b837b68e424c9581f9f62521f35e0f466e540b9108e",
         "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
         "29491c332f6861665191db141e74a0297a739d1392a9149ffa42a2441957fed2"
       ],
-      "[\"\u65e5\",\"\u3093\u3061\"]": [
+      "[\"日\",\"んち\"]": [
         "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
         "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
         "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
       ],
-      "[\"\u65e5\",\"\u304b\"]": [
+      "[\"日\",\"か\"]": [
         "d3aa9bc001c970c8b17c44f47dc35b6beb17ff037de62d2f24f1787aca2bf5b7",
         "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439"
       ],
-      "[\"\u65e5\",\"\u3061\"]": [
+      "[\"日\",\"ち\"]": [
         "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
         "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
         "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
       ],
-      "[\"\u65e5\",\"\u3072\"]": [
+      "[\"日\",\"ひ\"]": [
         "30e8d2350e923e617ac4ecc521036bdcc5f658d2c926d5809763e7a7207c18fc",
         "bfa23902a6cc6fcc4e152e94651f40189833f0cbfdc4d57221e24ed7d405a337",
         "9bba92018ddea60e7ee6e707fd12cdfc25509f45f9425d69b79987daf0a86782",
         "c3fbae02a22cc17943489a704ebb06506444f0ea8943bb722abc9ad7813fcf04",
         "8df4a6973824cf26d16ec1a1dc66ce98cff232f6ba021ec90a8dd5be174c4c20",
         "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1"
+      ]
+    }
+  },
+  "jitendex": {
+    "digest": "5a086efe1bf0ec94966bf3d82aba0e756c6a80592b8af822e974216915d4da0c",
+    "expected": {
+      "[\"日本語\",\"にほんご\"]": [
+        "5f246e132d5b9c1e6e4c1f2d832d87087aaa4b15d8de83e25d4017c4289e483c"
+      ],
+      "[\"日本語\",\"にっぽんご\"]": [
+        "5f246e132d5b9c1e6e4c1f2d832d87087aaa4b15d8de83e25d4017c4289e483c"
+      ],
+      "[\"日本\",\"にっぽん\"]": [
+        "0bdd3c2103653a631c27bd9d127cf041db7145af33dbaf9b1896e12d7c01d4f3"
+      ],
+      "[\"日本\",\"にほん\"]": [
+        "0bdd3c2103653a631c27bd9d127cf041db7145af33dbaf9b1896e12d7c01d4f3"
+      ],
+      "[\"日\",\"にち\"]": [
+        "aec52929ce83367488f46bcb0b8ee751c90c29198cf4f89a758f024436fa3dd0"
+      ],
+      "[\"日\",\"んち\"]": [
+        "3db565668847398730549c00856bfde1083c2655fa052777ad03c790c5d2bc3a"
+      ],
+      "[\"日\",\"か\"]": [
+        "41374d6ff969fdf1ebe730663b42f7e322b10df6995161d38baf905810777d0f"
+      ],
+      "[\"日\",\"ち\"]": [
+        "3db565668847398730549c00856bfde1083c2655fa052777ad03c790c5d2bc3a"
+      ],
+      "[\"日\",\"ひ\"]": [
+        "322e8f604514b3da91e5e573cb6dfb95f9054de5f733c08177a2f7423110031b"
+      ]
+    }
+  },
+  "vndb": {
+    "digest": "f7657f8ab34fe377f3c639c931fe9906f45367e1394fdbf74f653186adf58942",
+    "expected": {
+      "[\"宇野星華\",\"うのせいか\"]": [
+        "3242cfa0888fcced3709a08aa78463517c3f3815970263f78bd510026ea41ec8"
+      ],
+      "[\"宇野\",\"うの\"]": [
+        "2e294371bb568d4179a3479b4a93ad6f51694be01fe4ec430c45ff3f5cbc064a",
+        "9df1f88d8d5d35dfd8c74a028874de95d0d3d66275a29a652ac70d9602341c63",
+        "887499fbf1f61fa2ac88c0cf44a043054884a9019b82e456d01823b9a0cd0820",
+        "a9b4d85b76c59a4bd46cac314ea9e3eb3a57a763dc8012f2265330b0a1a63f83",
+        "3242cfa0888fcced3709a08aa78463517c3f3815970263f78bd510026ea41ec8",
+        "0ae04c8aa92db1c32a6a172ef133fafcef885b45b9053a527028824f80b31727",
+        "1dbacc6ed9101c9a17437b306d19ffe31e6f4234d9fa9ad3bf62760d9e37db66",
+        "636890e8eee99ec2eca9cefedcb3c0b6bea8df68b8c0b9b2800d0e6e385b6118"
       ]
     }
   }

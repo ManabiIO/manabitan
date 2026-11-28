@@ -1,0 +1,28 @@
+{
+  "archive": "/Users/alex/Code/manabi/QualificationEvidence/manabitan-hoshidicts-equal-endpoint-20261127/inputs/jitendex-yomitan.zip",
+  "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+  "dictionaryTitle": "Jitendex.org [2026-10-03]",
+  "query": "日本語",
+  "termCount": 436555,
+  "termBankCount": 219,
+  "matchedSourceRows": [
+    {
+      "bank": "term_bank_43.json",
+      "rowIndex": 611,
+      "expression": "日本語",
+      "reading": "にほんご",
+      "glossarySha256": "5d1f1c187eef2f6cf378557779610eafd705cfde49fb059738e585d9fdfcb13e",
+      "glossaryBytes": 2296
+    },
+    {
+      "bank": "term_bank_43.json",
+      "rowIndex": 612,
+      "expression": "日本語",
+      "reading": "にっぽんご",
+      "glossarySha256": "a2d72dafa89dda8b3b171f960fc144b114078a5c942c5cc22ada0a4ccac9912c",
+      "glossaryBytes": 2283
+    }
+  ],
+  "sourceOracleSha256": "e47341c054bdf2d0744c20370e3c726e904bb05d7d9330a4f1010350da113151"
+}
+

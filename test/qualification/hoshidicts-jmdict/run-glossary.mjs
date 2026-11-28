@@ -18,7 +18,7 @@ const extensionDir = process.env.BENCH_EXTENSION_DIR
 const arm = process.env.BENCH_ARM
 const position = Number(process.env.BENCH_POSITION)
 const runnerSha256 = process.env.BENCH_RUNNER_SHA256
-if (!runnerSha256 || !evidence || !(position >= 1 && position <= 3) || !['control','candidate','hoshidicts'].includes(arm)) throw new Error('Set BENCH_RUN_DIR, BENCH_ARM and BENCH_POSITION')
+if (!runnerSha256 || !evidence || !(position >= 1 && position <= 6) || !['control','candidate','hoshidicts'].includes(arm)) throw new Error('Set BENCH_RUN_DIR, BENCH_ARM and BENCH_POSITION')
 if (arm !== 'hoshidicts' && (!extensionDir || !process.env.BENCH_PACKAGE_SHA256 || !process.env.BENCH_COMMIT)) throw new Error('Set BENCH_EXTENSION_DIR, BENCH_PACKAGE_SHA256 and BENCH_COMMIT for browser runs')
 const hoshidictsDriver = process.env.BENCH_HOSHIDICTS_DRIVER
 if (!hoshidictsDriver) throw new Error('Set BENCH_HOSHIDICTS_DRIVER')
@@ -27,6 +27,8 @@ await mkdir(scratch, {recursive:true})
 await mkdir(path.join(evidence,'runs'), {recursive:true})
 const specs = {
     jmdict: {title: 'JMdict [2026-11-22]', terms: 528299, query: '日本語', sha: '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f', archive: process.env.BENCH_ARCHIVE},
+    jitendex: {title: 'Jitendex.org [2026-10-03]', terms: 436555, query: '日本語', sha: 'e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356', archive: process.env.BENCH_ARCHIVE},
+    vndb: {title: 'VNDB Characters by Bee', terms: 6648310, query: '宇野星華', sha: 'da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792', archive: process.env.BENCH_ARCHIVE},
 }
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 const hostSnapshot = () => ({loadavg: os.loadavg(), freeMemBytes: os.freemem(), totalMemBytes: os.totalmem(), platform: process.platform, arch: process.arch})
@@ -177,6 +179,21 @@ async function probeLookup(page, query, expectedDigest, title, glossaryOracle) {
             rawEntries: probe.entries,
         }),
     }
+}
+
+async function verifyPersistedMedia(page, mediaOracle) {
+    const {path: mediaPath, sha256: expectedSha256, bytes: expectedBytes, dictionary} = mediaOracle
+    const media = await send(page, 'getMedia', {targets: [{dictionary, path: mediaPath}]})
+    if (!Array.isArray(media) || media.length !== 1 || media[0].path !== mediaPath || media[0].dictionary !== dictionary ||
+        typeof media[0].content !== 'string') {
+        throw new Error('Restarted dictionary did not return the pinned VNDB media target')
+    }
+    const bytes = Buffer.from(media[0].content, 'base64')
+    const actualSha256 = sha256(bytes)
+    if (bytes.length !== expectedBytes || actualSha256 !== expectedSha256) {
+        throw new Error(`Restarted VNDB media mismatch for ${mediaPath}: ${bytes.length} bytes, ${actualSha256}`)
+    }
+    return {dictionary, path: mediaPath, bytes: bytes.length, sha256: actualSha256, matchesSourceArchive: true}
 }
 
 async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
@@ -331,6 +348,14 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
                     record.afterRestart = await probeLookup(restartedPage, spec.query, record.resultSha256, spec.title, glossaryOracle)
                     if (!record.afterRestart.equal) errors.push('Restart lookup differs from the first lookup')
                     record.storage = await inspectPersistedContent(restartedPage, runDirectory, dataset === 'vndb' && arm === 'candidate')
+                    if (dataset === 'vndb' && arm === 'candidate') {
+                        const mediaOracle = JSON.parse(await readFile(path.join(fixtureRoot, 'fixtures/vndb-media-oracle.json'), 'utf8'))
+                        if (mediaOracle.archiveSha256 !== spec.sha || mediaOracle.dictionary !== spec.title ||
+                            !Number.isSafeInteger(mediaOracle.bytes) || !/^[0-9a-f]{64}$/.test(mediaOracle.sha256)) {
+                            throw new Error('Pinned VNDB media oracle identity does not match the dataset')
+                        }
+                        record.persistedMedia = await verifyPersistedMedia(restartedPage, mediaOracle)
+                    }
                 }
             } catch (error) {
                 errors.push({reason: 'Warm/restart/storage check did not complete', error: String(error)})
