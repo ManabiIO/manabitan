@@ -533,6 +533,7 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
 
 /** @type {WeakSet<object>} */
 const artifactTermContentSpanOrigins = new WeakSet();
+const arrayBufferByteLengthGetter = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get;
 
 /**
  * Check before reading properties that the general registration path need not
@@ -548,6 +549,21 @@ function hasPlainTypedArrayProperties(value, prototype) {
         !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'length') &&
         !Object.hasOwn(value, 'byteLength')
     );
+}
+
+/**
+ * Prototype membership alone cannot distinguish private from shared storage.
+ * @param {ArrayBufferLike} buffer
+ * @returns {boolean}
+ */
+function isPrivateTermContentMetadataBuffer(buffer) {
+    if (typeof arrayBufferByteLengthGetter !== 'function') { return false; }
+    try {
+        arrayBufferByteLengthGetter.call(buffer);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export class DictionaryDatabase {
@@ -7027,8 +7043,8 @@ void 0 :
         // Unordered or overlapping reservations retain the general path below.
         if (
             count > 0 && pendingContentSpans !== null && artifactTermContentSpanOrigins.has(pendingContentSpans) &&
-            hasPlainTypedArrayProperties(pendingOffsets, Float64Array.prototype) && pendingOffsets.buffer instanceof ArrayBuffer &&
-            hasPlainTypedArrayProperties(pendingLengths, Uint32Array.prototype) && pendingLengths.buffer instanceof ArrayBuffer &&
+            hasPlainTypedArrayProperties(pendingOffsets, Float64Array.prototype) && isPrivateTermContentMetadataBuffer(pendingOffsets.buffer) &&
+            hasPlainTypedArrayProperties(pendingLengths, Uint32Array.prototype) && isPrivateTermContentMetadataBuffer(pendingLengths.buffer) &&
             typeof pendingResolvedDictNames === 'string'
         ) {
             const buffer = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'buffer')?.value);
@@ -7036,8 +7052,8 @@ void 0 :
             const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'lengths')?.value);
             if (
                 hasPlainTypedArrayProperties(buffer, Uint8Array.prototype) &&
-                hasPlainTypedArrayProperties(offsets, Uint32Array.prototype) && offsets.buffer instanceof ArrayBuffer && offsets.length >= count &&
-                hasPlainTypedArrayProperties(lengths, Uint32Array.prototype) && lengths.buffer instanceof ArrayBuffer && lengths.length >= count
+                hasPlainTypedArrayProperties(offsets, Uint32Array.prototype) && isPrivateTermContentMetadataBuffer(offsets.buffer) && offsets.length >= count &&
+                hasPlainTypedArrayProperties(lengths, Uint32Array.prototype) && isPrivateTermContentMetadataBuffer(lengths.buffer) && lengths.length >= count
             ) {
                 let valid = true;
                 let previous = -1;
