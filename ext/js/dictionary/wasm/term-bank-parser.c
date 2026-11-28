@@ -32,6 +32,8 @@
 #define VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET 4u
 #define VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES 4u
 #define VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES 512u
+#define GLOSSARY_PREFIX_BYTES 64u
+#define GLOSSARY_PREFIX_SLOTS 256u
 /* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
 #define MAX_INTERNED_KEY_BYTES 0xffffu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
@@ -1435,6 +1437,14 @@ static int next_term_row(TermBankCursor* cursor, uint32_t row_end) {
 }
 
 static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+static uint32_t hash_content_xxh32(const uint8_t*, uint32_t, uint32_t);
+
+/* One bounded candidate per source prefix. Slots contain only complete, valid
+ * glossaries from the current bank; prefix equality never grants reuse. */
+typedef struct {
+    uint32_t rows[GLOSSARY_PREFIX_SLOTS];
+    uint32_t pending_slot;
+} GlossaryPrefixCache;
 
 /* Samples only reject candidates. Only full equality with a successful earlier
  * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
@@ -1442,9 +1452,35 @@ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*,
 static int reuse_validated_glossary(
     const uint8_t* src, uint32_t end, uint32_t start,
     const TermRowMeta* rows, uint32_t row_count,
-    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness, uint32_t lookback
+    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness, uint32_t lookback,
+    GlossaryPrefixCache* prefix_cache
 ) {
     if (start >= end || (src[start] != '[' && src[start] != '{')) { return 0; }
+    if (prefix_cache != 0 && end - start >= GLOSSARY_PREFIX_BYTES) {
+        // The current length is not known yet. Hash exactly 64 source bytes,
+        // bounded by this bank, and admit only previously parsed spans at
+        // least that long. A short current value cannot match such a span.
+        const uint32_t slot = hash_content_xxh32(src + start, GLOSSARY_PREFIX_BYTES, FNV1A_OFFSET) &
+            (GLOSSARY_PREFIX_SLOTS - 1u);
+        prefix_cache->pending_slot = slot;
+        const uint32_t stored = prefix_cache->rows[slot];
+        if (stored != 0u && stored <= row_count) {
+            const uint32_t k = stored - 1u;
+            const TermRowMeta* prior = &rows[k];
+            const uint32_t n = prior->glossary_length;
+            const uint32_t p = prior->glossary_start;
+            if (n >= GLOSSARY_PREFIX_BYTES && n <= end - start &&
+                content_bytes_equal_between(src, start + n - 8u, src, p + n - 8u, 8u) &&
+                content_bytes_equal_between(src, start, src, p, n)) {
+                meta->glossary_may_contain_media = prior->glossary_may_contain_media;
+                meta->glossary_requires_normalization = prior->glossary_requires_normalization;
+                meta->glossary_requires_text_normalization = prior->glossary_requires_text_normalization;
+                *value_end = start + n;
+                *witness = k;
+                return 1;
+            }
+        }
+    }
     const uint32_t first = row_count > lookback ? row_count - lookback : 0u;
     for (uint32_t k = row_count; k > first;) {
         const TermRowMeta* prior = &rows[--k];
@@ -1489,6 +1525,7 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
+    GlossaryPrefixCache* glossary_prefix_cache,
     uint32_t* key_escape_mask
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1538,7 +1575,7 @@ static int parse_format3_row(
     meta->glossary_requires_text_normalization = 0u;
     if (
         !(glossary_witness != 0 && reuse_validated_glossary(
-            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback, glossary_prefix_cache
         )) &&
         !parse_value_span_with_glossary_hints(
             src, len, i, &end,
@@ -1582,13 +1619,14 @@ static int parse_row_single_pass(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
+    GlossaryPrefixCache* glossary_prefix_cache,
     int validate_glossary_types,
     uint32_t* key_escape_mask
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, glossary_prefix_cache, key_escape_mask
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1621,7 +1659,7 @@ static int parse_row_single_pass(
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (
                 !(glossary_witness != 0 && reuse_validated_glossary(
-                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness, glossary_lookback
+                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness, glossary_lookback, glossary_prefix_cache
                 )) &&
                 !parse_value_span_with_glossary_hints(
                     src,
@@ -2229,7 +2267,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, 0, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -2267,7 +2305,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, 0, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -3348,6 +3386,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
     uint32_t glossary_reuse_probe_budget = 0u;
     uint32_t recent_content_match_streak = 0u;
+    GlossaryPrefixCache glossary_prefix_cache;
+    uint32_t glossary_prefix_bank = 0u;
 #if RECENT_CONTENT_DEDUP_WINDOW > 0
     uint32_t recent_content_signatures[RECENT_CONTENT_DEDUP_WINDOW];
 #endif
@@ -3368,6 +3408,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         uint32_t row_end = 0u;
         uint32_t glossary_witness = 0xffffffffu;
         uint32_t glossary_lookback = 0u;
+        if (validated_glossary_reuse_enabled) {
+            if (glossary_prefix_bank != source.next_bank) {
+                memset(glossary_prefix_cache.rows, 0, sizeof(glossary_prefix_cache.rows));
+                glossary_prefix_bank = source.next_bank;
+            }
+            glossary_prefix_cache.pending_slot = 0xffffffffu;
+        }
         if (validated_glossary_reuse_enabled && row_count > 0u) {
             if (glossary_reuse_probe_budget > 0u) {
                 glossary_lookback = RECENT_CONTENT_DEDUP_WINDOW;
@@ -3379,8 +3426,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
         uint32_t key_escape_mask;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+                rows, row_count, validated_glossary_reuse_enabled ? &glossary_witness : 0, glossary_lookback,
+                validated_glossary_reuse_enabled ? &glossary_prefix_cache : 0, validate_glossary_types != 0u, &key_escape_mask)) {
             return -1;
+        }
+        if (validated_glossary_reuse_enabled && glossary_prefix_cache.pending_slot != 0xffffffffu &&
+            rows[row_count].glossary_length >= GLOSSARY_PREFIX_BYTES) {
+            glossary_prefix_cache.rows[glossary_prefix_cache.pending_slot] = row_count + 1u;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
@@ -3565,15 +3617,17 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         } else {
 #if RECENT_CONTENT_DEDUP_WINDOW > 0
-            // The glossary witness is the newest matching raw glossary. If the
-            // remaining fields match too, it is the newest full-content match.
+            // Full equality of the remaining fields makes a validated
+            // glossary witness a complete content witness, regardless of age.
             if (
                 glossary_witness != 0xffffffffu &&
                 raw_term_content_tokens_equal(src, parsed_row, &rows[glossary_witness], 1)
             ) {
                 recent_match = glossary_witness;
                 recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] =
-                    recent_content_signatures[glossary_witness % RECENT_CONTENT_DEDUP_WINDOW];
+                    row_count - glossary_witness <= RECENT_CONTENT_DEDUP_WINDOW ?
+                        recent_content_signatures[glossary_witness % RECENT_CONTENT_DEDUP_WINDOW] :
+                        raw_term_content_quick_signature(src, parsed_row);
             } else {
                 const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
                 const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
