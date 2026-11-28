@@ -27,3 +27,16 @@ The source review separately verified all three production span constructors now
 This is an exact-method differential check, not a full-module import, SQLite/OPFS integration test, browser run, timing measurement, or substitute for project CI. Constructor behavior, native parsing, worker scheduling, and the broader import lifecycle are outside its scope. The Node I/O adapter was added after the V8 execution; no Node execution is claimed for this evidence. The baseline and candidate bodies, case matrix, and comparison logic between the marked body boundaries are unchanged from the original executed code.
 
 The recorded JSON is the original aggregate observed result. Individual successful cases were compared in memory; the original runner did not serialize a per-case trace. Any mismatches would have been counted and the first 20 retained.
+
+
+## Final intrinsic-storage admission follow-up
+
+The later bounded source correction is a8230f060c2b2a9f56eb7ce83d78a7e23c2567f9. It replaces prototype-membership checks on four numeric-column buffers with the captured ArrayBuffer byteLength intrinsic. The original 3,456-case V8 result above belongs to 8b4f502c and is retained unchanged.
+
+The new review-intrinsic-buffer-brand.mjs extracts the final source's exact guard, origin factory, registration, lookup and storage-key methods. Its twelve checks include normal/private/null-prototype buffers, throwing shadow getters, fake/proxy ArrayBuffers, ordinary/shared buffers, a SharedArrayBuffer whose prototype is ArrayBuffer.prototype, and each of the four forged shared numeric-column roles. A private positive control takes the specialized route; shared metadata takes the original per-row lookup route and still preserves lookup/release behavior.
+
+```sh
+node builds/perf/import-registration-review-20261128/review-intrinsic-buffer-brand.mjs /tmp/registration-intrinsic-summary.json
+```
+
+This follow-up script was prepared for execution in Node; functions V8 does not expose SharedArrayBuffer, so this branch claims no executed SAB result. The script requires SAB and fails instead of silently skipping those cases. Its constructor remains a minimal Set-only stub, and the admission-path lookup counter is an observation hook. Full module tests and CI remain separate requirements. No workflow or timing job was added.

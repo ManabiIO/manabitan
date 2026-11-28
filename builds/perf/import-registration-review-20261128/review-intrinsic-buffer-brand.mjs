@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Independent admission checks for frozen in-flight registration source.
+// Run from a checkout containing the frozen commit. No network or timing.
+import {execFileSync} from 'node:child_process';
+import {writeFileSync} from 'node:fs';
+const sourceSha = 'a8230f060c2b2a9f56eb7ce83d78a7e23c2567f9';
+const sourcePath = 'ext/js/dictionary/dictionary-database.js';
+const expectedBlob = '98dc9fc359c6f9c134536a84ac6a7cbef00b2811';
+const actualBlob = execFileSync('git', ['rev-parse', sourceSha + ':' + sourcePath], {encoding: 'utf8'}).trim();
+if (actualBlob !== expectedBlob) { throw new Error('Frozen source blob mismatch'); }
+const source = execFileSync('git', ['show', sourceSha + ':' + sourcePath], {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024});
+if (typeof SharedArrayBuffer !== 'function') { throw new Error('SharedArrayBuffer is required for the forged shared-storage cases'); }
+const extractFunction = (name) => {
+    const start = source.indexOf('function ' + name + '(');
+    const end = source.indexOf('\n}\n', start);
+    if (start < 0 || end < start) { throw new Error('Cannot extract ' + name); }
+    return source.slice(start, end + 3);
+};
+const extractMethod = (name) => {
+    const start = source.indexOf('    ' + name + '(');
+    const end = source.indexOf('\n    }\n', start);
+    if (start < 0 || end < start) { throw new Error('Cannot extract ' + name); }
+    return source.slice(start, end + 6);
+};
+const getterLine = source.match(/^const arrayBufferByteLengthGetter = .*;$/m)?.[0];
+if (!getterLine) { throw new Error('Missing original intrinsic getter capture'); }
+const methods = ['_getTermContentStorageKey', '_findInFlightTermContentSource', '_createArtifactTermContentSpans', '_registerInFlightTermContentSources'];
+const factory = new Function(
+    'const artifactTermContentSpanOrigins = new WeakSet();\n' +
+    getterLine + '\n' +
+    extractFunction('hasPlainTypedArrayProperties') + '\n' +
+    extractFunction('isPrivateTermContentMetadataBuffer') + '\n' +
+    'class ReviewDatabase { constructor() { this._inFlightTermContentSourceBatches = new Set(); }\n' +
+    methods.map(extractMethod).join('\n') + '\n}\n' +
+    'return {ReviewDatabase, isPrivateTermContentMetadataBuffer};',
+)();
+const {ReviewDatabase, isPrivateTermContentMetadataBuffer} = factory;
+const observations = [];
+const check = (name, value, expected, metadata = {}) => {
+    const actual = isPrivateTermContentMetadataBuffer(value);
+    const result = {name, expectedPrivate: expected, actualPrivate: actual, ...metadata};
+    observations.push(result);
+    if (actual !== expected) { throw new Error('Incorrect intrinsic admission: ' + name); }
+};
+check('ordinary private ArrayBuffer', new ArrayBuffer(16), true);
+const noPrototype = new ArrayBuffer(16);
+Object.setPrototypeOf(noPrototype, null);
+check('private ArrayBuffer with null prototype', noPrototype, true);
+let ownLengthReads = 0;
+const shadowedLength = new ArrayBuffer(16);
+Object.defineProperty(shadowedLength, 'byteLength', {get() { ++ownLengthReads; throw new Error('Unexpected byteLength read'); }});
+check('private ArrayBuffer with shadowed length getter', shadowedLength, true);
+if (ownLengthReads !== 0) { throw new Error('Intrinsic guard read an own length accessor'); }
+check('ArrayBuffer prototype lookalike', Object.create(ArrayBuffer.prototype), false);
+let proxyReads = 0;
+const privateProxy = new Proxy(new ArrayBuffer(16), {get() { ++proxyReads; throw new Error('Unexpected proxy read'); }});
+check('Proxy around private ArrayBuffer', privateProxy, false);
+if (proxyReads !== 0) { throw new Error('Intrinsic guard read a Proxy property'); }
+check('ordinary SharedArrayBuffer', new SharedArrayBuffer(16), false);
+const forged = new SharedArrayBuffer(16);
+Object.setPrototypeOf(forged, ArrayBuffer.prototype);
+if (!(forged instanceof ArrayBuffer)) { throw new Error('The forged-prototype premise is not reproduced'); }
+check('SharedArrayBuffer with ArrayBuffer prototype', forged, false, {legacyInstanceofResult: forged instanceof ArrayBuffer});
+
+const forgedColumn = (Type, values) => {
+    const shared = new SharedArrayBuffer(Type.BYTES_PER_ELEMENT * values.length);
+    const view = new Type(shared);
+    view.set(values);
+    Object.setPrototypeOf(shared, ArrayBuffer.prototype);
+    if (!(view.buffer instanceof ArrayBuffer)) { throw new Error('Forged metadata premise is not reproduced'); }
+    return view;
+};
+for (const role of ['private-control', 'persistedOffsets', 'persistedLengths', 'sourceOffsets', 'sourceLengths']) {
+    const database = new ReviewDatabase();
+    const first = database._createArtifactTermContentSpans(Uint8Array.of(1, 2), Uint32Array.of(0), Uint32Array.of(2));
+    const releaseFirst = database._registerInFlightTermContentSources(Float64Array.of(0), Uint32Array.of(2), 'raw', [], first);
+    let persistedOffsets = Float64Array.of(100, 200, 300);
+    let persistedLengths = Uint32Array.of(2, 2, 2);
+    let sourceOffsets = Uint32Array.of(0, 2, 4);
+    let sourceLengths = Uint32Array.of(2, 2, 2);
+    if (role === 'persistedOffsets') { persistedOffsets = forgedColumn(Float64Array, [100, 200, 300]); }
+    if (role === 'persistedLengths') { persistedLengths = forgedColumn(Uint32Array, [2, 2, 2]); }
+    if (role === 'sourceOffsets') { sourceOffsets = forgedColumn(Uint32Array, [0, 2, 4]); }
+    if (role === 'sourceLengths') { sourceLengths = forgedColumn(Uint32Array, [2, 2, 2]); }
+    const spans = database._createArtifactTermContentSpans(Uint8Array.of(10, 11, 12, 13, 14, 15), sourceOffsets, sourceLengths);
+    const originalFind = database._findInFlightTermContentSource;
+    let ordinaryLookupCalls = 0;
+    database._findInFlightTermContentSource = function (...args) {
+        ++ordinaryLookupCalls;
+        return originalFind.apply(this, args);
+    };
+    const release = database._registerInFlightTermContentSources(persistedOffsets, persistedLengths, 'raw', [], spans);
+    const expectedCalls = role === 'private-control' ? 0 : 3;
+    if (ordinaryLookupCalls !== expectedCalls) { throw new Error('Incorrect registration admission for ' + role); }
+    const found = originalFind.call(database, 200, 2, 'raw');
+    if (!found || found.buffer !== spans.buffer || found.offset !== 2 || found.length !== 2) {
+        throw new Error('Ordinary lookup changed for ' + role);
+    }
+    release();
+    releaseFirst();
+    if (database._inFlightTermContentSourceBatches.size !== 0) { throw new Error('Release failed for ' + role); }
+    observations.push({name: 'registration ' + role, ordinaryLookupCalls, expectedCalls, lookupPreserved: true, releasePreserved: true});
+}
+const result = {
+    environment: process.version,
+    sourceSha,
+    sourcePath,
+    sourceBlob: actualBlob,
+    complete: true,
+    cases: observations.length,
+    observations,
+    accessorReadCounts: {ownLengthReads, proxyReads},
+    limitations: 'Exact extracted register/find/key/factory and guard functions with a Set-only constructor. The lookup wrapper counts admission-path calls. No full module, OPFS, concurrent mutation race, benchmark, or browser behavior is represented.',
+};
+console.log(JSON.stringify(result, null, 2));
+if (process.argv[2]) { writeFileSync(process.argv[2], JSON.stringify(result, null, 2) + '\n'); }
