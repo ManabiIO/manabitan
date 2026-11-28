@@ -1,0 +1,147 @@
+name: Qualify latest metadata complete schema 4d9f
+
+on:
+  push:
+    branches: [experiment/latest-metadata-legacy-context-20261128-4d9f]
+    paths:
+      - .github/workflows/qualify-latest-metadata-legacy-context-4d9f.yml
+      - dev/perf/qualify-latest-metadata-legacy-context-4d9f.py
+      - builds/perf/20261128-4d9f-latest-metadata-legacy-context/verification-manifest.json
+      - builds/perf/20261128-4d9f-latest-metadata-legacy-context/protocol.json
+      - builds/perf/20261128-4d9f-latest-metadata-legacy-context/source-profile-transition.json
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  corpus:
+    name: Latest schema context ${{ matrix.corpus }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        corpus: [jitendex, vndb]
+    env:
+      META_TOOLING: ${{ github.workspace }}/tooling
+      META_A: ${{ github.workspace }}/source-a
+      META_B: ${{ github.workspace }}/source-b
+      META_HELPER: ${{ github.workspace }}/tooling/test/perf/signature1-corpus-verification
+      META_EVIDENCE: ${{ github.workspace }}/tooling/builds/perf/20261128-4d9f-latest-metadata-legacy-context
+      META_REPORTS: ${{ github.workspace }}/reports
+      META_CACHE: ${{ github.workspace }}/locked-archive
+      META_CORPUS: ${{ matrix.corpus }}
+      META_NODE_SHA: 1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31
+    steps:
+      - name: Checkout frozen tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - name: Checkout exact parent
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          path: source-a
+          persist-credentials: false
+      - name: Checkout exact candidate
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 86cd5c18d325488b0ecb04c552d1dc83567de9d2
+          path: source-b
+          persist-credentials: false
+      - name: Setup exact Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+      - name: Verify pipeline failures remain failures
+        run: |
+          mkdir -p "$META_REPORTS"
+          set +e
+          python3 -c 'raise SystemExit(37)' 2>&1 | tee "$META_REPORTS/pipeline-negative-control.log"
+          meta_negative_exit=$?
+          set -e
+          test "$meta_negative_exit" -eq 37
+          python3 -c 'import json, pathlib; pathlib.Path("reports/pipeline-negative-control.json").write_text(json.dumps({"expectedExit": 37, "actualExit": 37, "passed": True}) + "\n")'
+      - name: Verify sources, helper bytes, oracle members and locked archive
+        env:
+          META_TOOLING_COMMIT: ${{ github.sha }}
+        run: |
+          mkdir -p "$META_REPORTS"
+          python3 "$META_TOOLING/dev/perf/qualify-latest-metadata-legacy-context-4d9f.py" \
+            --tooling "$META_TOOLING" --source-a "$META_A" --source-b "$META_B" \
+            --corpus "$META_CORPUS" --cache "$META_CACHE" --reports "$META_REPORTS" \
+            --expected-tooling-commit "$META_TOOLING_COMMIT" 2>&1 | tee "$META_REPORTS/preflight.log"
+      - name: Run unchanged verifier contracts
+        run: |
+          node --test "$META_HELPER/node-opfs-bounded.contract.mjs" \
+            "$META_HELPER/metadata-oracle.contract.mjs" \
+            "$META_HELPER/logical-record-ids.contract.mjs" 2>&1 | tee "$META_REPORTS/contracts.log"
+      - name: Build ordinary parent libraries
+        working-directory: source-a
+        run: |
+          npm ci 2>&1 | tee "$META_REPORTS/npm-ci-A.log"
+          npm run build:libs 2>&1 | tee "$META_REPORTS/build-libs-A.log"
+      - name: Build ordinary candidate libraries
+        working-directory: source-b
+        run: |
+          npm ci 2>&1 | tee "$META_REPORTS/npm-ci-B.log"
+          npm run build:libs 2>&1 | tee "$META_REPORTS/build-libs-B.log"
+      - name: Build normal tooling bundles and lint new helper sources
+        working-directory: tooling
+        run: |
+          npm ci 2>&1 | tee "$META_REPORTS/npm-ci-tooling.log"
+          npm run build:libs 2>&1 | tee "$META_REPORTS/build-libs-tooling.log"
+          npx eslint --max-warnings 0 \
+            test/perf/signature1-corpus-verification/legacy-import-read-context.mjs \
+            test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs \
+            test/perf/signature1-corpus-verification/run-with-legacy-context.mjs \
+            test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs \
+            2>&1 | tee "$META_REPORTS/helper-lint.log"
+      - name: Verify actual public-sink and cold-read boundary on both exact source arms
+        run: |
+          MANABITAN_LEGACY_READ_SOURCE_ROOT="$META_A" \
+          MANABITAN_LEGACY_READ_SOURCE_COMMIT=a300da36d00df8e353c5679b1528b50a1299b75f \
+            node --test "$META_HELPER/legacy-import-read-context.contract.mjs" \
+            2>&1 | tee "$META_REPORTS/legacy-context-contracts-A.log"
+          MANABITAN_LEGACY_READ_SOURCE_ROOT="$META_B" \
+          MANABITAN_LEGACY_READ_SOURCE_COMMIT=86cd5c18d325488b0ecb04c552d1dc83567de9d2 \
+            node --test "$META_HELPER/legacy-import-read-context.contract.mjs" \
+            2>&1 | tee "$META_REPORTS/legacy-context-contracts-B.log"
+      - name: Acquire one fresh A and B and compare complete outputs
+        run: |
+          set +e
+          python3 "$META_HELPER/launch-with-legacy-context.py" --node "$(command -v node)" \
+            --source-root "$META_A" --source-id a300da36d00df8e353c5679b1528b50a1299b75f \
+            --corpus "$META_CORPUS" --arm A --cache-dir "$META_CACHE" \
+            --output "$META_REPORTS/$META_CORPUS-A-1" --evidence-dir "$META_EVIDENCE" \
+            --node-sha256 "$META_NODE_SHA"
+          meta_a_exit=$?
+          python3 "$META_HELPER/launch-with-legacy-context.py" --node "$(command -v node)" \
+            --source-root "$META_B" --source-id 86cd5c18d325488b0ecb04c552d1dc83567de9d2 \
+            --corpus "$META_CORPUS" --arm B --cache-dir "$META_CACHE" \
+            --output "$META_REPORTS/$META_CORPUS-B-1" --evidence-dir "$META_EVIDENCE" \
+            --node-sha256 "$META_NODE_SHA"
+          meta_b_exit=$?
+          set -e
+          python3 -c 'import json, pathlib, sys; pathlib.Path(sys.argv[1]).write_text(json.dumps({"A": int(sys.argv[2]), "B": int(sys.argv[3])}, indent=2) + "\n")' \
+            "$META_REPORTS/arm-exits.json" "$meta_a_exit" "$meta_b_exit"
+          test "$meta_a_exit" -eq 0
+          test "$meta_b_exit" -eq 0
+          node "$META_HELPER/compare-results-with-legacy-context.mjs" \
+            "$META_REPORTS/$META_CORPUS-A-1" "$META_REPORTS/$META_CORPUS-B-1" \
+            "$META_REPORTS/$META_CORPUS-comparison.json" --evidence-dir "$META_EVIDENCE" \
+            2>&1 | tee "$META_REPORTS/comparison.log"
+      - name: Retain every attempted observation
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: latest-metadata-legacy-context-${{ matrix.corpus }}-${{ github.run_id }}
+          path: reports
+          if-no-files-found: error
+          retention-days: 30

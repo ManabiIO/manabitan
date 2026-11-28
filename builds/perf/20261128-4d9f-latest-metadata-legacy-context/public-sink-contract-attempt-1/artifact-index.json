@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "runId": 46143955956,
+  "toolingCommit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+  "status": "public-sink-nonempty-control-failed-before-candidate-controls-and-corpus",
+  "timingEligible": false,
+  "corpusAcquisitions": 0,
+  "auditHistory": [
+    "An initial read-only audit incorrectly required empty lint stdout. The normal ESLint configuration bundler emits the retained pako CommonJS warning. Lint success is established by the immutable completed successful strict-pipefail job step instead; the helper gate uses --max-warnings0."
+  ],
+  "artifacts": [
+    {
+      "corpus": "jitendex",
+      "artifactId": 15262788971,
+      "jobId": 140975797049,
+      "file": "jitendex.zip",
+      "bytes": 24406,
+      "sha256": "715df3980f65a5e7ce5ecd0066f7116e0fa69b710aed3743d76d724a00baa426",
+      "members": {
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6239,
+          "sha256": "987491fc3577700049fe3902934faf9cd1ee2da821cf45b762ca338a6d4399d0"
+        },
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "helper-lint.log": {
+          "bytes": 694,
+          "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 4384,
+          "sha256": "c6aa9e676a8ff3ce0054bfb994c57d6745702ab5925144b5cea51e27f0259133"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8585,
+          "sha256": "57bb6903fb53dbefcf53bd2cf87df97cf32410feae9f13b2365fb96fdc6ecd4b"
+        },
+        "preflight.log": {
+          "bytes": 216,
+          "sha256": "29555d433c458044e7e1299b22216fbb568c6041400a4bb51979ed7bc9337710"
+        },
+        "protocol.json": {
+          "bytes": 10058,
+          "sha256": "956a7b1468b9a14b87db1f5a94b561d8a2eab4c5dd3e3fa3f25e7f07b7bba34e"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "source-profile-transition.json": {
+          "bytes": 12628,
+          "sha256": "5ee4a9adff30b47addcae6a549e25fe97ea3f9d5c19b33432976a573d411a078"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "scopedLint": {
+        "name": "Build normal tooling bundles and lint new helper sources",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      "parentControls": {
+        "tests": 15,
+        "pass": 14,
+        "fail": 1,
+        "failure": "Public test15 expected record-store size1 after first actual public sink and drain; observed0 at source line361.",
+        "cleanupErrors": []
+      },
+      "candidateControlsStarted": false,
+      "corpusStarted": false
+    },
+    {
+      "corpus": "vndb",
+      "artifactId": 15262452985,
+      "jobId": 140975796859,
+      "file": "vndb.zip",
+      "bytes": 24336,
+      "sha256": "2da6f1dcc5f6884119c5009cb5415af006975a27e29a85350fdd3d459f092b33",
+      "members": {
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6243,
+          "sha256": "d9c0fd85c6f811e8b66d578986267b15caed93bf2aee7617c1cb5d208af7cecb"
+        },
+        "helper-lint.log": {
+          "bytes": 694,
+          "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 4388,
+          "sha256": "547b65474acb312cb6ab0a037e23771a6e7565143aca60ea369294239ef24922"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "7a4a418d5093f51ba5b0d02f0a96f3f18fd34b4d0404ffca9b11dcbec185666c"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8114,
+          "sha256": "4e2abb127f68653268547760649405228f213562a078c5de8948a6a0883899a6"
+        },
+        "preflight.log": {
+          "bytes": 213,
+          "sha256": "c0603db40599355b2b861c6120c81ce8e28c38d45cba9c2dfa581f7bf298f2a9"
+        },
+        "protocol.json": {
+          "bytes": 10058,
+          "sha256": "956a7b1468b9a14b87db1f5a94b561d8a2eab4c5dd3e3fa3f25e7f07b7bba34e"
+        },
+        "source-profile-transition.json": {
+          "bytes": 12628,
+          "sha256": "5ee4a9adff30b47addcae6a549e25fe97ea3f9d5c19b33432976a573d411a078"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "scopedLint": {
+        "name": "Build normal tooling bundles and lint new helper sources",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      "parentControls": {
+        "tests": 15,
+        "pass": 14,
+        "fail": 1,
+        "failure": "Public test15 expected record-store size1 after first actual public sink and drain; observed0 at source line361.",
+        "cleanupErrors": []
+      },
+      "candidateControlsStarted": false,
+      "corpusStarted": false
+    }
+  ]
+}

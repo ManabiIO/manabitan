@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-28T12:26:00Z",
+  "updatedAt": "2026-11-28T12:44:00Z",
   "claim": "Exact additional typed-array/native-arena backing avoided at the completed term-ingestion checkpoint; not elapsed time or browser process memory.",
   "latestSource": {
     "publicCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
@@ -8,7 +8,7 @@
     "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
     "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
     "extTree": "6882b13827d4bb648a4a9297f293e55f055b74ed",
-    "qualification": "Independent source review and full hosted unit/types/dry-build/native-asset/changed-JavaScript gates passed. Exact latest JMdict complete-corpus replay passed and its original receipts were independently audited. Latest Jitendex/VNDB replay is pending a reviewed real-SQLite harness boundary required by upstream online content resolution; symmetric first-attempt failures remain retained."
+    "qualification": "All exact latest-source functional gates and complete corpus proofs passed. JMdict uses its original audited acquisition; Jitendex/VNDB use the separately frozen full-production-schema helper. All preserve the original full-output oracles and4/4/1MiB additional backing savings. No elapsed-time, process-peak or steady-state memory claim."
   },
   "corpusAcquisition": {
     "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
@@ -261,6 +261,18 @@
       "runId": 46138930701,
       "preparedCommit": "a76dcb948840bb0630f4eb8874c3f30ad53a4b89",
       "scope": "Ten-line diff aligning the new table; no runtime change."
+    },
+    "currentPrCi": {
+      "runId": 46144667437,
+      "head": "5e03d0460a1300f30245df5b2f4104edef3aab30",
+      "allActiveJobsPassed": true,
+      "chromiumE2E": "passed",
+      "firefoxE2E": "passed",
+      "allFourTypeScriptConfigurations": "passed",
+      "brokenLinkChecker": {
+        "runId": 46144667407,
+        "status": "passed"
+      }
     }
   },
   "latestCorpusAttempt1": {
@@ -286,7 +298,7 @@
     "qualification": "Upstream a300 added a real content-root database dependency to cold exact-deduplication. The scoped harness did not open SQLite. The original tee pipeline lacked explicit pipefail; green step color is not accepted as proof. All source hashes, complete JMdict receipts and unchanged26-contract TAP were audited; the comparator was rerun read-only under strict shell failure propagation, and a corrupted receipt rejected with no comparison output. No dictionary acquisition was repeated.",
     "evidenceCommit": "2b9a93782a6f79c3f09ef26867fa57844f437c3a",
     "evidenceDirectory": "builds/perf/20261128-4d9f-latest-metadata/attempt-1",
-    "latestJitendexVndb": "Pending source-bound helper adapter with real owned in-memory SQLite and unchanged production root/resolver/byte checks."
+    "latestJitendexVndb": "Resolved by the separately frozen successful full-schema acquisition in run46144729522; the original failed attempts remain failed."
   },
   "hostedEvidencePublication": {
     "branch": "perf/import-experiment-evidence-20261128-4d9f",
@@ -303,7 +315,7 @@
     "runtimeUnchanged": true,
     "oraclesUnchanged": true,
     "jmdictNotReacquired": true,
-    "status": "Jitendex/VNDB held behind corrected public-sink integration control",
+    "status": "Jitendex and VNDB complete on both exact source arms; original full-file oracles and4MiB/1MiB additional retained backings independently verified",
     "attempts": [
       {
         "runId": 46142163868,
@@ -332,7 +344,70 @@
     ],
     "productionSchemaFix": "Await the real _initializeSchema once after prepared stores; preserve glossary invalidation, terms virtual table and real root/resolver.",
     "prospectiveControlFix": "Retain one record import session across both chunks, drain content I/O for cold comparison, finalize records once and verify both persisted rows/IDs/fields. Do not bypass append/finalization guards.",
-    "sourceReviewBlob": "6e9bc6ea641117a0a95046ca8e4cc887680259e4"
+    "sourceReviewBlob": "6e9bc6ea641117a0a95046ca8e4cc887680259e4",
+    "final": {
+      "runId": 46144729522,
+      "tooling": "8ec2c45d182dd7615317e1675197aadd494ae964",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "candidate": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+      "ordinaryHelperContracts": 26,
+      "actualIoContractsPerArm": 15,
+      "sourceArmsPerHost": 2,
+      "hosts": 2,
+      "scopedLint": "passed",
+      "jmdictReacquired": false,
+      "sqlite": {
+        "bytes": 311296,
+        "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+        "userVersion": 0,
+        "actualEmptyGlossaryInvalidationKeepsExportUnchanged": true,
+        "seededControlDeletesOnlyIntendedDictionaryRows": true,
+        "rootEpochAndHighWaterRemainZero": true
+      },
+      "results": [
+        {
+          "dictionary": "jitendex",
+          "rows": 436555,
+          "groups": 22,
+          "backingBytesAvoided": 4194304,
+          "normalizedFileOracle": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+        },
+        {
+          "dictionary": "vndb",
+          "rows": 6648310,
+          "groups": 170,
+          "backingBytesAvoided": 1048576,
+          "normalizedFileOracle": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 15263545780,
+          "name": "latest-metadata-legacy-context-jitendex-46144729522",
+          "bytes": 195000,
+          "sha256": "be4d01efa18294ea5b67366949267db2288635afffdf5af9f07ad7d83a4259a5"
+        },
+        {
+          "id": 15263351327,
+          "name": "latest-metadata-legacy-context-vndb-46144729522",
+          "bytes": 833958,
+          "sha256": "0440aa2918394ffe7aaec47adfaf910ff5333f6995e60a4ade3e0ce3e12cfc8d"
+        }
+      ],
+      "independentAudit": "Frozen read-only comparator rerun agrees except relocated input-directory strings. All source/runtime/helper/oracle/control/cleanup receipts verified; no new acquisition.",
+      "cleanup": "All storage drains, worker joins, owned DB close and ZIP/OPFS releases fulfilled.",
+      "publication": {
+        "manifestBlob": "1dd05940bd211285edf1d33b53cf2c11fe7972d4",
+        "commit": "8b5935257faa4669fde14abc3f8cbe78eae310e0",
+        "files": 56,
+        "bytes": 2194505,
+        "scriptBlob": "4dae284b1397c7bd3e438360f14dc0fee0266a3e",
+        "independentSupplementManifest": "fa05669901c6d5f4daa1952a9ac0077862e2812e",
+        "independentAuditAcquisitionNode": "22.22.0",
+        "readOnlyComparatorAuditNode": "24.22.3",
+        "hostedContractObservations": 112
+      }
+    }
   },
   "sourceCompatibilityReview": {
     "blob": "87063c8b45537814cce782acf03576add902d6c0",
@@ -340,5 +415,40 @@
     "overlappingBaseHunks": 0,
     "sharedChangedMethods": 0,
     "combinedExecutionQualified": false
+  },
+  "timingInvestigation": {
+    "scope": "Exploratory and source-bound timing evidence; none establishes a speed gain for the published metadata or format PRs.",
+    "nativeChecksumReuse": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "7cda9a3a39f3c2626873d414a741433058f9ff16",
+      "tooling": "b129dfb0380771e4cf1346e5b68aca242196466f",
+      "runId": 46131958592,
+      "dictionaryOrderCells": 6,
+      "allDescriptiveTimingIntervalsIncludeZero": true,
+      "identicalCodeControlsShowComparableDrift": true,
+      "pullRequestOpened": false,
+      "verdict": "Correct output and memory screens did not establish a repeatable elapsed-time benefit. Do not promote isolated favorable medians.",
+      "firstFailedRunId": 46124815073,
+      "firstFailure": "Package identity preflight omitted a changed wrapper map; all six failed preflights remain retained."
+    },
+    "jmdictAttribution": {
+      "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "runId": 46132539414,
+      "parserJobs": 12,
+      "codecJobs": 103,
+      "lastParserReplyMs": 645.219,
+      "lastCodecReplyMs": 755.184,
+      "importResponseMs": 938.347,
+      "parentReplyToNextDispatchMedianMs": 0.753,
+      "indexFlushAndClose": {
+        "wallMs": 136.402,
+        "cpuMs": 2.977,
+        "intervalStartMs": 793.964,
+        "intervalEndMs": 930.366
+      },
+      "contentWritesEndedMs": 760.471,
+      "interpretation": "This trace locates work and overlap; it is not a release speed measurement. No substantial parser-dispatch idle gap appeared. The long final index flush/close was predominantly waiting, and the apparent content-finalization overlap was blocked worker-loop time rather than separate unfinished content writes. Existing finalizers were already initiated concurrently; no supported speed gain followed from simply reordering awaits. Durability was not weakened."
+    },
+    "evidenceCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800"
   }
 }

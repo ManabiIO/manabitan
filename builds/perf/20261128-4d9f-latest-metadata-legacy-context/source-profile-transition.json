@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "status": "Prospective complete-schema public-sink context freeze; no new corpus result asserted",
+  "purpose": "Preserve frozen runtime/oracles and original helper; use real full production SQLite schema after the retained additive-only failure",
+  "priorProfile": {
+    "commit": "92467bf27b8ed0661085d65eaad8f134dc2f04cc",
+    "path": "builds/perf/20261128-4d9f-latest-metadata/verification-manifest.json",
+    "sha256": "7fbb44eba25fea790606b211bf0dc7143d716f1a8e75b85c58091b79225b4d3f",
+    "executedHelper": "fb9d9612f34bdb002d846364ef089f25ed188b29"
+  },
+  "source": {
+    "A": {
+      "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+    },
+    "B": {
+      "commit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+      "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
+      "equivalentLocalCommit": "5b178ff002216d74cc8a09336c375832fc4dd994"
+    }
+  },
+  "latestManifestSha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
+  "latestProtocolSha256": "d2ea3b978ea6d2cb2aedd678898b1d11f4385c0525dd383cf5bd8c2e3d619944",
+  "changedCanonicalParentFiles": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "parentBefore": "214cbbb8f99c82564599bbd456dfe577f107044da431173b54e0aefccb5db004",
+      "parentAfter": "0d44ce707ec5c263eb045f83be2b7cd52161cb54115790950e0c5246f93fbf74",
+      "priorCandidate": "7db25f01e44da65970100b9525b95e03bdc05f285be758d4a5db71b980e3178c",
+      "blob": "1b3f8367f4b4863916e7c6189a07f5f750636d20"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "parentBefore": "5e08ea209ca816fd195aeccea81beca770bacb5e7fe6d4356f0bae8342938920",
+      "parentAfter": "b993ff8ad9646ccb45905048995831b4a54b298d5ecbdcb181b588400bc27789",
+      "priorCandidate": "5e08ea209ca816fd195aeccea81beca770bacb5e7fe6d4356f0bae8342938920",
+      "blob": "625604ccbf8f45d32f2975fe63c0265db35c0b83"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-opfs-store.js",
+      "parentBefore": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+      "parentAfter": "4f33dd7337d070672fddfbcddb97595686e155d4c830398e0143fbeaae59d7c0",
+      "priorCandidate": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+      "blob": "814f264ee50a0ad31f0816c924fa036b62ede837"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "parentBefore": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769",
+      "parentAfter": "4294d3518bca7519abf65abdad19a35e035e6961ca93a127d688698b994f466b",
+      "priorCandidate": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769",
+      "blob": "36b0ecc7fd9d4c638545aad44b7d44aa47cbb14b"
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "parentBefore": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "parentAfter": "252bd9c87a276e12fbdf2baebf82129eb54cb6ec0fac75ae4df580e2f2856e64",
+      "priorCandidate": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "blob": "5d425e840555028cf61ade055740b705dd9a20d0"
+    },
+    {
+      "path": "ext/js/pages/settings/dictionary-import-controller.js",
+      "parentBefore": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "parentAfter": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "priorCandidate": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "blob": "39888b2a25a22fd91d2aa1239dea64fc4c636ded"
+    }
+  ],
+  "candidateDatabase": {
+    "gitBlob": "503a9cc67acbaa3cb2386aa8a772d6940380c166",
+    "sha256": "50bb924703b2cf8d870a1e93534663f01fbf6847fa59cebb6d9f659d060021b3"
+  },
+  "unchangedExecutableHelpers": "All15 original helper/contract/document files remain unchanged; the five separately named files below are new.",
+  "helperFiles": [
+    {
+      "path": "test/perf/signature1-corpus-verification/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46320d92ec511faf189d8af2de8f629f4eb5e962",
+      "bytes": 11544,
+      "sha256": "6183df9ec7eef19fd406db97bee0ef7030731373cf611427fb142f03daf6da52"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/archive-catalog.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea1267f1c5cc6be84ce22c27e4441590e2d0fd7e",
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/common.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efa68fdb1bf8609af428dde134ac83fb244c78c1",
+      "bytes": 9692,
+      "sha256": "8266a7d8aa2d4bc3c067353c3c3cd7baf04df40f71107b244e54daca4f274c79"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/compare-results.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ca7c17fe50e29562a6aa6a2a30af56693cbc65e",
+      "bytes": 7585,
+      "sha256": "c490ca644d76aef431ae9a2564c0180c7d34b15320f999e1c634583874205693"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/field-analysis.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e23832e2a02797baab44896b086434123850f361",
+      "bytes": 6689,
+      "sha256": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/file-oracle.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1589b4b7c56e7f0763873542ad914ed1a012dda6",
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20a33abd0eeb019aa67480fee8b7b95d82fe25ea",
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/logical-record-ids.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b980f3132c884f33323403cc8947f39b7f33a7c0",
+      "bytes": 3046,
+      "sha256": "2e79d4909f4eab78459703ce0f1e762763f8510988da53171a3d2ee3b106965d"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/logical-record-ids.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2633ad1b193b1eeafaa39c389d0a92b460d03cc8",
+      "bytes": 1515,
+      "sha256": "a7900f780f101d32a0d1526983cb9aca9050790de8e0b3b847228acaa9a2baac"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/metadata-oracle.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca753baee23a5d053a45868a9a474ed6f04f2201",
+      "bytes": 7311,
+      "sha256": "709d78a6470fec962b68e2c0d0653afac3f6195ed808c211279ca82c1450ebfa"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/metadata-oracle.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58503348507fbcd9785eaecb901f706be3bed462",
+      "bytes": 9935,
+      "sha256": "369b507d2f2eea7f4ff36804e13786f8fbb01581836696fdc389629a816cf152"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/node-opfs-bounded.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29c3e2d0046013fb6e22318f6cd18fe602ca8c56",
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/node-opfs-bounded.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60044cb9e814b873410d1dcdeffc088fd9ab0730",
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/run.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7839945fb9a06f13db65fd404064f9ddfdc3ce33",
+      "bytes": 42080,
+      "sha256": "4f8522eeb0baa660d1bee7132a409fbf0576748ca0340c34de0f0441690f2105"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/vndb-media-oracle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a41300f989f72f417e80ea4d9cd6116fa1c0cb2e",
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15f7845ae38ee47459b53ed5066321b53f382e36",
+      "bytes": 5825,
+      "sha256": "247bd800ea9397ef9e6b4dd78c9a19fffe570ddea20ce884d337b4ec70b99233"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25b7f6b0deca943f54aa75db4acb152264fa0930",
+      "bytes": 46368,
+      "sha256": "67383e8ef0c02931fe50d0051a2cbce6ff9f18a93ccf22cb76aac4341011ef12"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/launch-with-legacy-context.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "941b94be88945614cddfa506b5b815daea80511f",
+      "sha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+      "bytes": 3277
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d5f8587cba9ff7eed2f9c47cf5126d9e35d7aef",
+      "bytes": 9243,
+      "sha256": "2990df54931eb76ebe019ef0872cdbea168b083d724a885b94f77821af3ff3e3"
+    },
+    {
+      "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+      "bytes": 26052,
+      "sha256": "9aa0c71cb18e56b8711e7dfdeab9eb1d2c5f166da22da738b3a9560a2086e22c"
+    }
+  ],
+  "canonicalSourceCount": 42,
+  "unchangedGeneratedInputs": [
+    "package-lock.json",
+    "dev/lib",
+    "dev/data/dictionary-wasm"
+  ],
+  "oracleArchive": {
+    "gitBlob": "ae9a7d731b0b257e71256726003b3fe25699c69c",
+    "sha256": "456120a04cb75c4772aeedba7738060d0a7ed956f18610f292aea5b501022a71",
+    "bytes": 74109,
+    "members": 8
+  },
+  "dictionaryLock": {
+    "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+    "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "sourceReview": "Complete-schema module and15 real-I/O/public-sink controls were independently reviewed before the scoped lint gate. Narrow lint revisions preserve every product/schema/control assertion; teardown records and settles all actual resources, keeps the original body error, and propagates cleanup-only errors after finally. The comparator retains every output oracle and additionally requires both resource releases fulfilled. The authoritative nonempty-row control now loads the real persistent dictionary index after draining and decodes actual stored rows before asserting counts; it does not change writer cache policy or accept an empty sink. The synthetic public control now respects one real record import session across both chunks, with complete authoritative two-row decoding after its only finalization and actual cold content reads retained. It records phase/row/export diagnostics; no production append guard is changed.",
+  "retainedHistory": "Original dcfc/f28 six-run successes remain immutable; latest JMdict original acquisition is retained and strictly revalidated. Latest first Jitendex/VNDB boundary failures and original workflow pipefail issue remain in attempt-1. This distinct helper is not a relabeling or unchanged rerun. The additive-only6eff attempt/run46142163868 passed all14 cold-read contracts but failed all four actual arms at public group0 glossary invalidation; exact raw artifacts are retained at attempt-1. This freeze uses the actual full production initializer and a new nonempty public-sink control.",
+  "originalHelperCount": 15,
+  "newHelperCount": 5,
+  "sqliteAssetProvenance": {
+    "source": "Preserved exact f28 real-release package inventory; package-lock/dev-lib inputs unchanged at a300. Actual generated assets must match these SHA256s before import, in each arm.",
+    "assets": {
+      "ext/lib/sqlite/index.mjs": {
+        "bytes": 373254,
+        "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+      },
+      "ext/lib/sqlite/sqlite3.wasm": {
+        "bytes": 859730,
+        "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+      }
+    }
+  },
+  "previousLegacyProfile": {
+    "commit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+    "manifestSha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6",
+    "protocolSha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1",
+    "runId": 46142163868
+  },
+  "retainedScopedLintAttempt": {
+    "commit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+    "runId": 46143543189,
+    "artifacts": "lint-attempt-1",
+    "newControlsOrCorpusExecuted": false
+  },
+  "retainedPublicSinkContractAttempt": {
+    "commit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+    "runId": 46143955956,
+    "artifacts": "public-sink-contract-attempt-1",
+    "parentControls": {
+      "pass": 14,
+      "fail": 1
+    },
+    "candidateControlsExecuted": false,
+    "corpusExecuted": false
+  },
+  "retainedPublicSinkLifecycleAttempt": {
+    "commit": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+    "runId": 46144303709,
+    "artifacts": "public-sink-contract-attempt-2",
+    "parentControls": {
+      "pass": 14,
+      "fail": 1
+    },
+    "candidateControlsExecuted": false,
+    "corpusExecuted": false
+  }
+}

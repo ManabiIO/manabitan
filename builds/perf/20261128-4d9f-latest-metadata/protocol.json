@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 6,
+  "purpose": "Separate latest a300/#982 full term-sink parity and implicit S1/name-column allocation qualification",
+  "timingEligible": false,
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidateCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+  "candidateTree": "525583edb6429008801d181ee03b3e9e5c519eae",
+  "sourceSelection": "Fresh exact public a300/86cd checkouts; independent whole-tree preflight and unchanged verifier runtime tree/every-source-and-asset guards. Earlier f28/81e observations are never relabeled as this qualification.",
+  "runtime": "Pinned Node v22.22.0 Linux x64 executable SHA256 required in both arms; ordinary locked npm ci and build:libs in each source checkout.",
+  "runtimeHeapMiB": 512,
+  "observations": "Three independent Ubuntu 26.04 matrix jobs, one per locked corpus. Each job runs one fresh-process A then one fresh-process B, followed by the unchanged comparison. No performance acquisition, unchanged rerun or failed-attempt deletion. Every attempted launcher exit, log and report is uploaded.",
+  "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS",
+  "oracles": [
+    "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
+    "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
+    "Every encoded record row independently decoded and checked against its input score/reference; every record field and final envelope hash retained",
+    "All persisted file bytes hashed twice: raw receipt plus comparison form normalizing only independently linked random 16-byte record/index generation identifiers",
+    "Every logical metadata column, slot, ordered collision entry, dictionary interner, high-water and free-ID state hashed",
+    "Candidate S1/presence independently decoded from marker 2 and literal 0x3652424d; virtual dictionary-name column independently reconstructed from its prefix with a zero capacity tail; no product getter or materializer is invoked",
+    "In both current arms, independently expand an empty Float64 record-ID view to positive zero over the full state-column capacity; physical columns retain exact bytes, including signed zero; never call a product getter. Record existing upstream ID backing separately and do not credit it to this candidate.",
+    "Per-group and final native arena, external S1 and dictionary-name backing measured separately; both prefix scalar properties explicitly validated and recorded; physical null status observed without assuming identical behavior across corpora",
+    "Independent VNDB full-corpus group/media path oracle and ZIP media filename oracle retained: 170 groups, 146725 references, 146570 distinct paths, 155 repeated group representatives",
+    "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
+    "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest"
+  ],
+  "resourcePolicy": {
+    "minimumTemporaryBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallSeconds": 1200,
+    "firstExecYieldMilliseconds": 30000
+  },
+  "excludedClaims": [
+    "Whole-browser import speed or parser concurrency timing",
+    "Browser peak/settled memory qualification",
+    "Media file persistence, settings UI, SQLite transaction, restart or lookup validation",
+    "New format byte savings from the copied field-size diagnostic"
+  ],
+  "portableDerivative": {
+    "source": "Executable verifier and contract files are byte-identical to the tested fb9/a221 package published at 3da567143d51e2857eeec7550aef4e7e4de921e6. Only this separate source profile/protocol and hosted orchestration are new. The outage reconstructed format4 derivative was not used.",
+    "runtimeCodeChangedByHelper": false,
+    "candidateRuntimeCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "helperValidation": "This prospective protocol does not assert outcomes. Run the unchanged 26 helper contracts before acquisition and preserve their complete output."
+  },
+  "logicalRecordIdRepresentation": "implicit-positive-zero-or-full-float64",
+  "priorProfile": {
+    "path": "builds/perf/20261128-4d9f-current-metadata/protocol.json",
+    "sha256": "129cb3d163d7da594c8dc4f5dd2ebca0f36e8e888519015fd01f71125d004263",
+    "qualificationNotTransferred": true
+  },
+  "upstreamIntegration": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "previousParent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "runtimePaths": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/raw-term-content.js",
+      "ext/js/dictionary/term-content-block-store.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "ext/js/dictionary/term-content-opfs-store.js",
+      "ext/js/dictionary/zstd-term-content.js",
+      "ext/js/pages/settings/dictionary-import-controller.js"
+    ],
+    "scope": "Merged #982 online Zstd is preserved; no candidate metadata method changed from the reviewed f28 integration. All six changed canonical runtime source hashes are explicit; generated library/native inputs and locked archives are unchanged.",
+    "priorPreflightHistory": "Original dcfc/f28 source-bound acquisitions and all failed attempts remain separate and immutable."
+  },
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+}

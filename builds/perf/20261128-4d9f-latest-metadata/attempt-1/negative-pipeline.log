@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(a.success && b.success && !a.timingEligible && !b.timingEligible)
+
+    at file:///workspace/scratch/4d9ffe79ec6f/experiments/metadata-latest-982/hosted-corpus/attempt-1/audit-helper/compare-results.mjs:13:1 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.3

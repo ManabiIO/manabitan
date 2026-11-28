@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": 46142163868,
+  "toolingCommit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+  "boundaryMode": "real-sqlite-epoch-zero-v1",
+  "timingEligible": false,
+  "status": "retained-public-sink-schema-failure",
+  "artifacts": [
+    {
+      "corpus": "jitendex",
+      "artifactId": 15261844217,
+      "file": "jitendex.zip",
+      "bytes": 60328,
+      "sha256": "f24ced80d069d6f14f8fe2848f9c6f32647371b3e4552b3f4171ea5266356a69",
+      "members": {
+        "arm-exits.json": {
+          "bytes": 23,
+          "sha256": "9ca9becb5b20a496811b1ffea8ead39a05bd5eb3b6ca1fbc95adda60890eace9"
+        },
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6243,
+          "sha256": "f254f358dfc4b9aad871da1ada166071119c4c4fa0b9806346388437342ae203"
+        },
+        "jitendex-A-1/failure.json": {
+          "bytes": 23488,
+          "sha256": "ecd29f5bf8b3dbaea62c483c8fbcac7b2241d7dffe5adbc6cc655b502e15e846"
+        },
+        "jitendex-A-1/legacy-read-context-cleanup.json": {
+          "bytes": 353,
+          "sha256": "194fce4a11e75e7b9c20b4bd358e6075b34a3a9842f72e9abe849553f0439476"
+        },
+        "jitendex-A-1/preflight.json": {
+          "bytes": 17980,
+          "sha256": "e82e1b939fdbf759c69bd689bc6d52db2c1f0839522babc6809cf34e5cf016e5"
+        },
+        "jitendex-A-1/setup.json": {
+          "bytes": 16683,
+          "sha256": "c55ec252a773a9fa3b4d2b55ed439ada31112661acaec87ab4158cd1aa41c70e"
+        },
+        "jitendex-A-1.launcher.json": {
+          "bytes": 1138,
+          "sha256": "028b697d8a3a1dc6d43802af34eed46912b5cd2522b1ef32f2c4162e8bcad523"
+        },
+        "jitendex-A-1.stderr.log": {
+          "bytes": 1208,
+          "sha256": "9f15ba17c88dc49dbd8ae3b95f769f53d46eafaf8eac97453e0d806a25888451"
+        },
+        "jitendex-A-1.stdout.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "jitendex-B-1/failure.json": {
+          "bytes": 23488,
+          "sha256": "f4f07da56a3e6e7999834db6a5c58854c7897fea82e523bbf256a8a0fbab9b34"
+        },
+        "jitendex-B-1/legacy-read-context-cleanup.json": {
+          "bytes": 353,
+          "sha256": "194fce4a11e75e7b9c20b4bd358e6075b34a3a9842f72e9abe849553f0439476"
+        },
+        "jitendex-B-1/preflight.json": {
+          "bytes": 17980,
+          "sha256": "272f7cc0aa28cbb5a785c8c3c86f94f828ebb004588e8edf6c08d733d598764a"
+        },
+        "jitendex-B-1/setup.json": {
+          "bytes": 16683,
+          "sha256": "08d77f85890735b67685f600894cbb93295597e77f17ec8b9b24853854fa7860"
+        },
+        "jitendex-B-1.launcher.json": {
+          "bytes": 1138,
+          "sha256": "cf88019bafbd3142ebe5a99709245d51de60ffbf5ae81e634c367e927492e6b2"
+        },
+        "jitendex-B-1.stderr.log": {
+          "bytes": 1208,
+          "sha256": "95ab7ae98478147b564a3776cbe74605b51be49fd5370b2a174ea4c7a7cdbf97"
+        },
+        "jitendex-B-1.stdout.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 3395,
+          "sha256": "0b370f0ad7c9c6220ba11c9d5585731b256db343d4b237e03545f1b4430a0f77"
+        },
+        "legacy-context-contracts-B.log": {
+          "bytes": 3394,
+          "sha256": "5b102b3da5779e2882c7bcfe4b4870ade621a16cf39ef8af7463a6b8a252af6a"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.log": {
+          "bytes": 216,
+          "sha256": "3ee6d38a88341cfd574c25cccbf6d99ac627594808a7bf0a5692f2b78440cc16"
+        },
+        "preflight.json": {
+          "bytes": 8585,
+          "sha256": "63de873ad8ac1c39529ae89eb1e83d31dee467b009455e3fa39840b8eaf97aa0"
+        },
+        "protocol.json": {
+          "bytes": 7837,
+          "sha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1"
+        },
+        "source-profile-transition.json": {
+          "bytes": 11662,
+          "sha256": "7116a15433175b38633bfbcc2e6751a9175498c0c69e78d9c1222b0e22c7073a"
+        },
+        "verification-manifest.json": {
+          "bytes": 21122,
+          "sha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "contractGroups": {
+        "contracts.log": {
+          "tests": 26,
+          "pass": 26,
+          "fail": 0
+        },
+        "legacy-context-contracts-A.log": {
+          "tests": 14,
+          "pass": 14,
+          "fail": 0
+        },
+        "legacy-context-contracts-B.log": {
+          "tests": 14,
+          "pass": 14,
+          "fail": 0
+        }
+      },
+      "arms": {
+        "A": {
+          "failure": {
+            "success": false,
+            "stage": "actual public canonical sink",
+            "currentGroup": 0,
+            "error": "SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: no such table: termGlossaryTokens\n    at toss3 (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7077:11)\n    at checkSqlite3Rc (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7096:6)\n    at DB.checkRc (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7281:37)\n    at DB.exec (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7373:11)\n    at DictionaryDatabase._invalidateGlossarySearchIndex (file:///home/runner/work/manabitan/manabitan/source-a/ext/js/dictionary/dictionary-database.js:3765:12)\n    at DictionaryDatabase.bulkAddArtifactTermsChunk (file:///home/runner/work/manabitan/manabitan/source-a/ext/js/dictionary/dictionary-database.js:7867:14)\n    at file:///home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs:613:30",
+            "rows": 16000,
+            "mediaRows": 12
+          },
+          "launcher": {
+            "schemaVersion": 1,
+            "timingEligible": false,
+            "command": [
+              "/opt/hostedtoolcache/node/22.22.0/x64/bin/node",
+              "--max-old-space-size=512",
+              "/home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+              "--source-root",
+              "/home/runner/work/manabitan/manabitan/source-a",
+              "--source-id",
+              "a300da36d00df8e353c5679b1528b50a1299b75f",
+              "--corpus",
+              "jitendex",
+              "--arm",
+              "A",
+              "--cache-dir",
+              "/home/runner/work/manabitan/manabitan/locked-archive",
+              "--output",
+              "/home/runner/work/manabitan/manabitan/reports/jitendex-A-1",
+              "--evidence-dir",
+              "/home/runner/work/manabitan/manabitan/tooling/builds/perf/20261128-4d9f-latest-metadata-legacy-context",
+              "--node-sha256",
+              "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+            ],
+            "deadlineSeconds": 1200,
+            "startedEpoch": 1795866974.0641448,
+            "launcherSha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+            "status": "failed",
+            "pid": 3008,
+            "returncode": 1,
+            "terminatingSignal": null,
+            "finishedEpoch": 1795866974.7800884
+          },
+          "cleanup": {
+            "drainResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "workerResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "closedOwnedConnection": true,
+            "closeError": null
+          }
+        },
+        "B": {
+          "failure": {
+            "success": false,
+            "stage": "actual public canonical sink",
+            "currentGroup": 0,
+            "error": "SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: no such table: termGlossaryTokens\n    at toss3 (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7077:11)\n    at checkSqlite3Rc (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7096:6)\n    at DB.checkRc (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7281:37)\n    at DB.exec (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7373:11)\n    at DictionaryDatabase._invalidateGlossarySearchIndex (file:///home/runner/work/manabitan/manabitan/source-b/ext/js/dictionary/dictionary-database.js:3769:12)\n    at DictionaryDatabase.bulkAddArtifactTermsChunk (file:///home/runner/work/manabitan/manabitan/source-b/ext/js/dictionary/dictionary-database.js:7871:14)\n    at file:///home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs:613:30",
+            "rows": 16000,
+            "mediaRows": 12
+          },
+          "launcher": {
+            "schemaVersion": 1,
+            "timingEligible": false,
+            "command": [
+              "/opt/hostedtoolcache/node/22.22.0/x64/bin/node",
+              "--max-old-space-size=512",
+              "/home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+              "--source-root",
+              "/home/runner/work/manabitan/manabitan/source-b",
+              "--source-id",
+              "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+              "--corpus",
+              "jitendex",
+              "--arm",
+              "B",
+              "--cache-dir",
+              "/home/runner/work/manabitan/manabitan/locked-archive",
+              "--output",
+              "/home/runner/work/manabitan/manabitan/reports/jitendex-B-1",
+              "--evidence-dir",
+              "/home/runner/work/manabitan/manabitan/tooling/builds/perf/20261128-4d9f-latest-metadata-legacy-context",
+              "--node-sha256",
+              "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+            ],
+            "deadlineSeconds": 1200,
+            "startedEpoch": 1795866974.8195453,
+            "launcherSha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+            "status": "failed",
+            "pid": 3035,
+            "returncode": 1,
+            "terminatingSignal": null,
+            "finishedEpoch": 1795866975.6362994
+          },
+          "cleanup": {
+            "drainResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "workerResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "closedOwnedConnection": true,
+            "closeError": null
+          }
+        }
+      }
+    },
+    {
+      "corpus": "vndb",
+      "artifactId": 15262381408,
+      "file": "vndb.zip",
+      "bytes": 61915,
+      "sha256": "eb116e7684bad04dd26ea5ec9400ddd8486b6480793fd0afee2dd444432379d4",
+      "members": {
+        "arm-exits.json": {
+          "bytes": 23,
+          "sha256": "9ca9becb5b20a496811b1ffea8ead39a05bd5eb3b6ca1fbc95adda60890eace9"
+        },
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6242,
+          "sha256": "1bd80700565a66259610deb31b1cd073befb899b96330ca888db225d17c10bda"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 3396,
+          "sha256": "9b2fa142db0b303872efea155fd4d31011adbfa7a226dd44319d6edc4a2d8898"
+        },
+        "legacy-context-contracts-B.log": {
+          "bytes": 3396,
+          "sha256": "5231012b10f5c9d9eb99b25af7faa8b3c1b99eb8587126bebf4ea73ec5a5dd83"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "7a4a418d5093f51ba5b0d02f0a96f3f18fd34b4d0404ffca9b11dcbec185666c"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8114,
+          "sha256": "4952301a03485ffeede8c21f7d83c8027ea1a3b1c1c867b65a1155c1072fac1d"
+        },
+        "preflight.log": {
+          "bytes": 213,
+          "sha256": "cb90a7e3be7ba2503d92d8c72ad26476227bb6681212cb31943e912c69493071"
+        },
+        "protocol.json": {
+          "bytes": 7837,
+          "sha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1"
+        },
+        "source-profile-transition.json": {
+          "bytes": 11662,
+          "sha256": "7116a15433175b38633bfbcc2e6751a9175498c0c69e78d9c1222b0e22c7073a"
+        },
+        "verification-manifest.json": {
+          "bytes": 21122,
+          "sha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        },
+        "vndb-A-1/catalog-oracle-receipt.json": {
+          "bytes": 171,
+          "sha256": "d2c064f947252b1f55d8c87e9538863cfeeee23bcb7760cb164bf2e60763108b"
+        },
+        "vndb-A-1/failure.json": {
+          "bytes": 23000,
+          "sha256": "ec085141c3a0880eb510b8ce37fcbe4863e93624b0c66263700d190a763e0c95"
+        },
+        "vndb-A-1/legacy-read-context-cleanup.json": {
+          "bytes": 353,
+          "sha256": "194fce4a11e75e7b9c20b4bd358e6075b34a3a9842f72e9abe849553f0439476"
+        },
+        "vndb-A-1/media-oracle-receipt.json": {
+          "bytes": 1155,
+          "sha256": "6fca16fd6e9e0ec6142b98d7a4c74b06049718d416941e81e545f8fdba63c449"
+        },
+        "vndb-A-1/preflight.json": {
+          "bytes": 17514,
+          "sha256": "d49276f62ca700285b0119d01a6d240cdf8436f6f04dcaacd8c31f8163eb4452"
+        },
+        "vndb-A-1/setup.json": {
+          "bytes": 16208,
+          "sha256": "f25e6c7fbc428ad2254db08ebcbb754bc7f4257a4db9870270c92f903e908290"
+        },
+        "vndb-A-1.launcher.json": {
+          "bytes": 1130,
+          "sha256": "ba1f000eba2a3627ec618cbd4e4b16ed25981865c95f6e26d7c5450d68d9bc6c"
+        },
+        "vndb-A-1.stderr.log": {
+          "bytes": 1208,
+          "sha256": "9f15ba17c88dc49dbd8ae3b95f769f53d46eafaf8eac97453e0d806a25888451"
+        },
+        "vndb-A-1.stdout.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "vndb-B-1/catalog-oracle-receipt.json": {
+          "bytes": 171,
+          "sha256": "d2c064f947252b1f55d8c87e9538863cfeeee23bcb7760cb164bf2e60763108b"
+        },
+        "vndb-B-1/failure.json": {
+          "bytes": 22999,
+          "sha256": "f85beffd9a0491451ab8e634af295e988b1553c0a15942e494766ec7a86f814e"
+        },
+        "vndb-B-1/legacy-read-context-cleanup.json": {
+          "bytes": 353,
+          "sha256": "194fce4a11e75e7b9c20b4bd358e6075b34a3a9842f72e9abe849553f0439476"
+        },
+        "vndb-B-1/media-oracle-receipt.json": {
+          "bytes": 1155,
+          "sha256": "6fca16fd6e9e0ec6142b98d7a4c74b06049718d416941e81e545f8fdba63c449"
+        },
+        "vndb-B-1/preflight.json": {
+          "bytes": 17513,
+          "sha256": "54dadb976a1a4e7cd8361c17dd7aac9752cacf06f7bf1695077c3b2683af8e52"
+        },
+        "vndb-B-1/setup.json": {
+          "bytes": 16207,
+          "sha256": "714ea4ff6e99fe37887a83a20b48892e2b4440ed5b2a4b26d59e0111233a65aa"
+        },
+        "vndb-B-1.launcher.json": {
+          "bytes": 1128,
+          "sha256": "6e2792405ad6286cbd4dfd22de71414032f44a6dab3a63fbfd83be92556d7aff"
+        },
+        "vndb-B-1.stderr.log": {
+          "bytes": 1208,
+          "sha256": "95ab7ae98478147b564a3776cbe74605b51be49fd5370b2a174ea4c7a7cdbf97"
+        },
+        "vndb-B-1.stdout.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "contractGroups": {
+        "contracts.log": {
+          "tests": 26,
+          "pass": 26,
+          "fail": 0
+        },
+        "legacy-context-contracts-A.log": {
+          "tests": 14,
+          "pass": 14,
+          "fail": 0
+        },
+        "legacy-context-contracts-B.log": {
+          "tests": 14,
+          "pass": 14,
+          "fail": 0
+        }
+      },
+      "arms": {
+        "A": {
+          "failure": {
+            "success": false,
+            "stage": "actual public canonical sink",
+            "currentGroup": 0,
+            "error": "SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: no such table: termGlossaryTokens\n    at toss3 (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7077:11)\n    at checkSqlite3Rc (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7096:6)\n    at DB.checkRc (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7281:37)\n    at DB.exec (file:///home/runner/work/manabitan/manabitan/source-a/ext/lib/sqlite/index.mjs:7373:11)\n    at DictionaryDatabase._invalidateGlossarySearchIndex (file:///home/runner/work/manabitan/manabitan/source-a/ext/js/dictionary/dictionary-database.js:3765:12)\n    at DictionaryDatabase.bulkAddArtifactTermsChunk (file:///home/runner/work/manabitan/manabitan/source-a/ext/js/dictionary/dictionary-database.js:7867:14)\n    at file:///home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs:613:30",
+            "rows": 40000,
+            "mediaRows": 805
+          },
+          "launcher": {
+            "schemaVersion": 1,
+            "timingEligible": false,
+            "command": [
+              "/opt/hostedtoolcache/node/22.22.0/x64/bin/node",
+              "--max-old-space-size=512",
+              "/home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+              "--source-root",
+              "/home/runner/work/manabitan/manabitan/source-a",
+              "--source-id",
+              "a300da36d00df8e353c5679b1528b50a1299b75f",
+              "--corpus",
+              "vndb",
+              "--arm",
+              "A",
+              "--cache-dir",
+              "/home/runner/work/manabitan/manabitan/locked-archive",
+              "--output",
+              "/home/runner/work/manabitan/manabitan/reports/vndb-A-1",
+              "--evidence-dir",
+              "/home/runner/work/manabitan/manabitan/tooling/builds/perf/20261128-4d9f-latest-metadata-legacy-context",
+              "--node-sha256",
+              "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+            ],
+            "deadlineSeconds": 1200,
+            "startedEpoch": 1795866988.8294861,
+            "launcherSha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+            "status": "failed",
+            "pid": 3223,
+            "returncode": 1,
+            "terminatingSignal": null,
+            "finishedEpoch": 1795866990.0479012
+          },
+          "cleanup": {
+            "drainResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "workerResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "closedOwnedConnection": true,
+            "closeError": null
+          }
+        },
+        "B": {
+          "failure": {
+            "success": false,
+            "stage": "actual public canonical sink",
+            "currentGroup": 0,
+            "error": "SQLite3Error: SQLITE_ERROR: sqlite3 result code 1: no such table: termGlossaryTokens\n    at toss3 (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7077:11)\n    at checkSqlite3Rc (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7096:6)\n    at DB.checkRc (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7281:37)\n    at DB.exec (file:///home/runner/work/manabitan/manabitan/source-b/ext/lib/sqlite/index.mjs:7373:11)\n    at DictionaryDatabase._invalidateGlossarySearchIndex (file:///home/runner/work/manabitan/manabitan/source-b/ext/js/dictionary/dictionary-database.js:3769:12)\n    at DictionaryDatabase.bulkAddArtifactTermsChunk (file:///home/runner/work/manabitan/manabitan/source-b/ext/js/dictionary/dictionary-database.js:7871:14)\n    at file:///home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs:613:30",
+            "rows": 40000,
+            "mediaRows": 805
+          },
+          "launcher": {
+            "schemaVersion": 1,
+            "timingEligible": false,
+            "command": [
+              "/opt/hostedtoolcache/node/22.22.0/x64/bin/node",
+              "--max-old-space-size=512",
+              "/home/runner/work/manabitan/manabitan/tooling/test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+              "--source-root",
+              "/home/runner/work/manabitan/manabitan/source-b",
+              "--source-id",
+              "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+              "--corpus",
+              "vndb",
+              "--arm",
+              "B",
+              "--cache-dir",
+              "/home/runner/work/manabitan/manabitan/locked-archive",
+              "--output",
+              "/home/runner/work/manabitan/manabitan/reports/vndb-B-1",
+              "--evidence-dir",
+              "/home/runner/work/manabitan/manabitan/tooling/builds/perf/20261128-4d9f-latest-metadata-legacy-context",
+              "--node-sha256",
+              "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+            ],
+            "deadlineSeconds": 1200,
+            "startedEpoch": 1795866990.1007855,
+            "launcherSha256": "2c1aa8671570c363592addd4276bdd0a583376f62ac3a2ef08241073eb1b33ae",
+            "status": "failed",
+            "pid": 3250,
+            "returncode": 1,
+            "terminatingSignal": null,
+            "finishedEpoch": 1795866991.47002
+          },
+          "cleanup": {
+            "drainResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "workerResults": [
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              },
+              {
+                "status": "fulfilled"
+              }
+            ],
+            "closedOwnedConnection": true,
+            "closeError": null
+          }
+        }
+      }
+    }
+  ]
+}

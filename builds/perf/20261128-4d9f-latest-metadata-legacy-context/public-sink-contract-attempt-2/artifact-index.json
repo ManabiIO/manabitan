@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "runId": 46144303709,
+  "toolingCommit": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+  "status": "public-sink-record-lifecycle-control-failed-before-candidate-controls-and-corpus",
+  "timingEligible": false,
+  "corpusAcquisitions": 0,
+  "artifacts": [
+    {
+      "corpus": "jitendex",
+      "artifactId": 15262773079,
+      "jobId": 140976851863,
+      "file": "jitendex.zip",
+      "bytes": 25154,
+      "sha256": "4937fb50c7ad19430ca6ac14f281fcbb510e072fb777a182ddea3cd2359a26e9",
+      "members": {
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6240,
+          "sha256": "360a5e12edcf2d5273b4304277f329288a94f6335b6a0a7f9a1ebefd78f18d9f"
+        },
+        "helper-lint.log": {
+          "bytes": 694,
+          "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 5187,
+          "sha256": "2ed7e8b246202819264ccc235d3c0e5ce3b773ce3ac705a13237309a71788a6c"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8585,
+          "sha256": "a0274828bddde752422d46f0db1bd8a36df9fa564cc644864d8b997efc1fcf3e"
+        },
+        "preflight.log": {
+          "bytes": 216,
+          "sha256": "b2230e4b6fc8ff8d8e60aab1e10d23d77b51c2658c9a6ecece7f319c939b76b9"
+        },
+        "protocol.json": {
+          "bytes": 11078,
+          "sha256": "e3a6dcf9a237b6f07cd4b22a715af66e7c3ac3726af906109b6774bb1dcfc219"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "source-profile-transition.json": {
+          "bytes": 13163,
+          "sha256": "32d06215265d336a8d14ef6649ec7f4aeb6eda463d55a072ebd3f235515822e1"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "scopedLint": {
+        "name": "Build normal tooling bundles and lint new helper sources",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      "parentControls": {
+        "tests": 15,
+        "pass": 14,
+        "fail": 1,
+        "failure": "Public test15 second append rejects the already finalized authoritative record shard at source line423; first authoritative decoded-row assertions preceded this failure.",
+        "cleanupErrors": []
+      },
+      "candidateControlsStarted": false,
+      "corpusStarted": false
+    },
+    {
+      "corpus": "vndb",
+      "artifactId": 15262684861,
+      "jobId": 140976852129,
+      "file": "vndb.zip",
+      "bytes": 25088,
+      "sha256": "2ff27f0c52c3c8eb9d7301b2a8f15aab04fc4e95f7ec25bc5e3bcb461c361801",
+      "members": {
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6243,
+          "sha256": "b6e0755401f87b6e93020c03c53b46eae7e88e191f8943f10a898716b800f8a4"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "helper-lint.log": {
+          "bytes": 694,
+          "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        "legacy-context-contracts-A.log": {
+          "bytes": 5186,
+          "sha256": "44d5e0b973a54fdd637edfe21449df79eab5df29384f1063e1883e4ede3d46ad"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8114,
+          "sha256": "7d00df3a124a47513558e498c7b139ae1ee721ede8a342cae0cdd34eff6b732c"
+        },
+        "preflight.log": {
+          "bytes": 213,
+          "sha256": "579320a6503533bee06ae6572d94e1fdea206185d16655e5c885e3fd4ac9a76d"
+        },
+        "protocol.json": {
+          "bytes": 11078,
+          "sha256": "e3a6dcf9a237b6f07cd4b22a715af66e7c3ac3726af906109b6774bb1dcfc219"
+        },
+        "source-profile-transition.json": {
+          "bytes": 13163,
+          "sha256": "32d06215265d336a8d14ef6649ec7f4aeb6eda463d55a072ebd3f235515822e1"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "scopedLint": {
+        "name": "Build normal tooling bundles and lint new helper sources",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      "parentControls": {
+        "tests": 15,
+        "pass": 14,
+        "fail": 1,
+        "failure": "Public test15 second append rejects the already finalized authoritative record shard at source line423; first authoritative decoded-row assertions preceded this failure.",
+        "cleanupErrors": []
+      },
+      "candidateControlsStarted": false,
+      "corpusStarted": false
+    }
+  ]
+}
