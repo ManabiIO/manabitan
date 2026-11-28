@@ -1,0 +1,1334 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28T08:59:16.468518+00:00",
+  "auditStatus": "passed",
+  "dictionary": "vndb",
+  "initialOrder": "BA",
+  "scope": "Independent saved-data audit only. No benchmark, browser, test or native execution.",
+  "auditorScriptSha256": "b8fd561a03c0c8dec7228c56c98ce6b784d6279007dbae1b88bf48087d2c1cd4",
+  "artifactRoot": "/tmp/manabitan-path-qualification-7c02/vndb-BA-15256915453",
+  "publicationBoundary": "Workflow success is not publication eligibility. All six independent hosts are required; no pooling or control adjustment.",
+  "frozenAuditSources": [
+    {
+      "path": "import-experiments-7c02/path-publication-review/remote-policy.md",
+      "sha256": "074a139c1807d19c4ed78b5be83ebc8bc56c6feb7fa4325d8e6175f3e668be2b"
+    },
+    {
+      "path": "import-experiments-7c02/path-hosted/validation-workflow-d36ee85.yml",
+      "sha256": "48213d39871a1e3377fc21f47812e1b431988507afa5f3012f8e6486188d0fcf"
+    },
+    {
+      "path": "import-experiments-7c02/path-hosted/summarize.py",
+      "sha256": "5397e658c840250fed03d32437d033153e8c90c43633c38ffac5198005bdf084"
+    },
+    {
+      "path": "manabitan/dev/perf/import-qualification-20261125-a7f7.py",
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    }
+  ],
+  "checklistSha256": "1f638d3a19ce3a234a9cfd491c37cf612b169ca912929d70b5d8f8b3d53311ed",
+  "artifact": {
+    "id": 15256915453,
+    "runId": 46113567719,
+    "jobId": 140904689425,
+    "researchCommit": "d36ee85feb1513af31f769175affa33b3696a307",
+    "zipBytes": 35749996,
+    "zipSha256": "f17f72117dd699d9757041d744208795429a8b92e22e6e7a554dbfd91c48bc8c",
+    "metadataSha256": "434b8b3bdd982f65bc79fe5ead0845aecc25dc50898a1002b03570e1599e1875",
+    "preservationSha256": "0cf435320d5c6d147dc7884ba72986ecbef9b0ccb633f7e157fff90ba4b9a750",
+    "members": 317,
+    "expandedBytes": 61009924,
+    "allOriginalZipCrcAndMemberHashesMatched": true,
+    "memberManifestSha256": "7cfd2347b989c2f14a36aa2b2b2101a541c0a8b335c62dc0065cde2fbf81f992"
+  },
+  "identities": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "e90c4c04172b691985858609094887f9541541dd",
+    "packages": {
+      "A": {
+        "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "packageSha256": "bf7810802a707432d8971dbe830b05cb1538de8b86439e710ebaefaf8f595796",
+        "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "entryCount": 554
+      },
+      "B": {
+        "sha": "e90c4c04172b691985858609094887f9541541dd",
+        "tree": "586061b2dfb33d9ebd3fc12a340f4def5a09abea",
+        "packageSha256": "335a1611893c77d7499e34dc4864997b9da0e64ce5237fad0376ff5e3525baf4",
+        "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "entryCount": 554
+      }
+    },
+    "changedPackageEntries": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js"
+    ],
+    "browser": {
+      "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+      "version": "153.0.8010.12",
+      "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+    },
+    "fixture": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    },
+    "fullPackageHashesAndMapsRecomputed": true,
+    "frozenGitSourceHashesIndependentlyMatched": true,
+    "browserBinaryDigestIsOriginalCapturedIdentityNotARehashOfAnIncludedBinary": true
+  },
+  "memory": {
+    "recomputedAudit": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 416,
+      "everyObservationQualified": false,
+      "passesProspectiveMemoryScreen": false,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        }
+      }
+    },
+    "coverage": [
+      {
+        "index": 1,
+        "arm": "B",
+        "name": "B1",
+        "pair": 1,
+        "allObservedSampleCount": 105,
+        "fullyContainedImportSampleCount": 36,
+        "stableFullyReadImportSampleCount": 36,
+        "preImportBracketGapMs": 80.384544,
+        "postImportBracketGapMs": 79.511454,
+        "maximumCoveredSampleGapMs": 257.913014,
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null,
+        "qualifiedForWholeTreePss": false,
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "independentMaximumGapWitness": {
+          "left": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 73,
+            "ns": 2170478582980
+          },
+          "right": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 74,
+            "ns": 2170736495994
+          },
+          "gapMs": 257.913014
+        }
+      },
+      {
+        "index": 2,
+        "arm": "A",
+        "name": "A1",
+        "pair": 1,
+        "allObservedSampleCount": 104,
+        "fullyContainedImportSampleCount": 36,
+        "stableFullyReadImportSampleCount": 36,
+        "preImportBracketGapMs": 99.713466,
+        "postImportBracketGapMs": 95.45769,
+        "maximumCoveredSampleGapMs": 281.955552,
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null,
+        "qualifiedForWholeTreePss": false,
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "independentMaximumGapWitness": {
+          "left": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 74,
+            "ns": 2201114918445
+          },
+          "right": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 75,
+            "ns": 2201396873997
+          },
+          "gapMs": 281.955552
+        }
+      },
+      {
+        "index": 3,
+        "arm": "A",
+        "name": "A2",
+        "pair": 2,
+        "allObservedSampleCount": 104,
+        "fullyContainedImportSampleCount": 37,
+        "stableFullyReadImportSampleCount": 37,
+        "preImportBracketGapMs": 24.088773,
+        "postImportBracketGapMs": 73.837741,
+        "maximumCoveredSampleGapMs": 241.73935,
+        "maxSampledPssKiB": 1203311,
+        "maxSampledPrivateKiB": 973340,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "independentMaximumGapWitness": {
+          "left": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 84,
+            "ns": 2233517691170
+          },
+          "right": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 85,
+            "ns": 2233759430520
+          },
+          "gapMs": 241.73935
+        }
+      },
+      {
+        "index": 4,
+        "arm": "B",
+        "name": "B2",
+        "pair": 2,
+        "allObservedSampleCount": 103,
+        "fullyContainedImportSampleCount": 37,
+        "stableFullyReadImportSampleCount": 37,
+        "preImportBracketGapMs": 34.950965,
+        "postImportBracketGapMs": 103.489775,
+        "maximumCoveredSampleGapMs": 322.487852,
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null,
+        "qualifiedForWholeTreePss": false,
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "independentMaximumGapWitness": {
+          "left": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 72,
+            "ns": 2261359120102
+          },
+          "right": {
+            "kind": "covered-scan-midpoint",
+            "sampleIndex": 73,
+            "ns": 2261681607954
+          },
+          "gapMs": 322.487852
+        }
+      }
+    ],
+    "pairedMetrics": {
+      "maxSampledPssKiB": {
+        "medianPairedChangePercent": null,
+        "maximumPairedChangePercent": null
+      },
+      "maxSampledPrivateKiB": {
+        "medianPairedChangePercent": null,
+        "maximumPairedChangePercent": null
+      }
+    },
+    "pairs": [
+      {
+        "pair": 1,
+        "qualified": false,
+        "maxSampledPssKiB": {
+          "baseline": null,
+          "candidate": null,
+          "changePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "baseline": null,
+          "candidate": null,
+          "changePercent": null
+        }
+      },
+      {
+        "pair": 2,
+        "qualified": false,
+        "maxSampledPssKiB": {
+          "baseline": 1203311,
+          "candidate": null,
+          "changePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "baseline": 973340,
+          "candidate": null,
+          "changePercent": null
+        }
+      }
+    ],
+    "overlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+    "exactOverlayAndOriginalHarnessMatched": true,
+    "instrumentedDurationsExcludedFromOrdinaryStatistics": true
+  },
+  "correctness": {
+    "ordinaryImports": 36,
+    "excludedWarmups": 4,
+    "candidatePairs": 12,
+    "controlPairs": 4,
+    "exhaustiveMediaImports": 2,
+    "separateMemoryImports": 4,
+    "totalImports": 42,
+    "allExactOrderedScheduleFieldsMatched": true,
+    "allSummaryRawCanonicalBindingsPassed": true,
+    "allSourcePackageBrowserAndNodeBindingsPassed": true,
+    "allWorkersEqualThree": true,
+    "allSemanticRestartLookupAndStorageReceiptsMatched": true,
+    "freshProfilePolicyBoundToUnchangedMkdtempHarness": true,
+    "lookupObservationsPerImport": 72,
+    "termRowsPerImport": 6648310,
+    "uniqueMediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+    "storageBytes": 609176779,
+    "imports": [
+      {
+        "path": "warmup-1-B",
+        "kind": "warmup",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:20:54.438Z",
+        "totalImportMs": 6422.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "warmup-1-A",
+        "kind": "warmup",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:21:25.310Z",
+        "totalImportMs": 5970.100000000035,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "warmup-2-A",
+        "kind": "warmup",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:21:52.942Z",
+        "totalImportMs": 6334.700000000012,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "warmup-2-B",
+        "kind": "warmup",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:22:21.179Z",
+        "totalImportMs": 6074.599999999977,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-01-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:22:49.336Z",
+        "totalImportMs": 6085,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-01-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:23:17.690Z",
+        "totalImportMs": 6196.400000000023,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-02-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:23:46.346Z",
+        "totalImportMs": 6173.799999999988,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-02-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:24:15.053Z",
+        "totalImportMs": 6138.79999999993,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-03-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:24:43.569Z",
+        "totalImportMs": 6136.699999999953,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-03-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:25:12.048Z",
+        "totalImportMs": 6303.29999999993,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-01-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:25:40.661Z",
+        "totalImportMs": 6132.099999999977,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-01-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:26:09.027Z",
+        "totalImportMs": 6111.699999999953,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-04-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:26:37.371Z",
+        "totalImportMs": 6159,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-04-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:27:05.887Z",
+        "totalImportMs": 5896.600000000093,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-05-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:27:33.692Z",
+        "totalImportMs": 5977.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-05-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:28:01.538Z",
+        "totalImportMs": 6010.400000000023,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-06-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:28:29.505Z",
+        "totalImportMs": 6076.70000000007,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-06-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:28:57.587Z",
+        "totalImportMs": 6104,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-02-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:29:25.584Z",
+        "totalImportMs": 5907.400000000023,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-02-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:29:53.000Z",
+        "totalImportMs": 6211.300000000047,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-07-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:30:21.020Z",
+        "totalImportMs": 6030.099999999977,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-07-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:30:48.722Z",
+        "totalImportMs": 6001.800000000047,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-08-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:31:16.726Z",
+        "totalImportMs": 5971.900000000023,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-08-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:31:44.477Z",
+        "totalImportMs": 5860.599999999977,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-09-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:32:12.396Z",
+        "totalImportMs": 6063.70000000007,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-09-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:32:40.349Z",
+        "totalImportMs": 5814.699999999953,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-03-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:33:07.847Z",
+        "totalImportMs": 5851.799999999814,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-03-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:33:35.056Z",
+        "totalImportMs": 5842.600000000093,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-10-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:34:02.415Z",
+        "totalImportMs": 5912.600000000093,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-10-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:34:29.782Z",
+        "totalImportMs": 5676.199999999953,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-11-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:34:56.980Z",
+        "totalImportMs": 5998.399999999907,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-11-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:35:24.590Z",
+        "totalImportMs": 5904.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-12-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:35:51.757Z",
+        "totalImportMs": 6243.699999999953,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "pair-12-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:36:19.913Z",
+        "totalImportMs": 5893.09999999986,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-04-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:36:47.750Z",
+        "totalImportMs": 6131,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "control-04-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:37:15.977Z",
+        "totalImportMs": 6086.09999999986,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "exhaustive-media-B",
+        "kind": "exhaustive-media",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:37:43.722Z",
+        "totalImportMs": 6001.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "f15749f9d54301faf283fca575db0f11de7e3ee471efa6a8982bc21e8b359038",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      {
+        "path": "exhaustive-media-A",
+        "kind": "exhaustive-media",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:44:29.467Z",
+        "totalImportMs": 6006.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "f15749f9d54301faf283fca575db0f11de7e3ee471efa6a8982bc21e8b359038",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      {
+        "path": "memory/B1",
+        "kind": "memory",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:51:21.439Z",
+        "totalImportMs": 7314.399999999907,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "memory/A1",
+        "kind": "memory",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:51:51.809Z",
+        "totalImportMs": 7555.300000000279,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "memory/A2",
+        "kind": "memory",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:52:22.158Z",
+        "totalImportMs": 7291,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      },
+      {
+        "path": "memory/B2",
+        "kind": "memory",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:52:52.313Z",
+        "totalImportMs": 7865,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "lookupObservations": 72,
+        "storageBytes": 609176779,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        }
+      }
+    ]
+  },
+  "statistics": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9820218191207761,
+        0.9943308821147335,
+        0.9735694001554775,
+        0.9573956811170796,
+        0.9945261546652431,
+        1.0044925699804055,
+        1.0047152520910276,
+        0.981362715383706,
+        1.0428225015908161,
+        0.9600175895544877,
+        1.0159031247353556,
+        0.9438473981773474
+      ],
+      "medianPairedChangePercent": -1.1823649382245227,
+      "equalWorkChangePercent": -1.2479249348627208,
+      "worstPairChangePercent": 4.282250159081613,
+      "descriptiveBootstrap95Percent": [
+        -3.320650514501744,
+        0.4603911035716557
+      ],
+      "fasterPairs": 8
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        1.003337860169842,
+        1.0514439516538616,
+        1.0015746414267142,
+        0.9926765617354201
+      ],
+      "medianPairedChangePercent": 0.2456250798278159,
+      "equalWorkChangePercent": 1.2028658717010865,
+      "worstPairChangePercent": 5.144395165386162,
+      "descriptiveBootstrap95Percent": [
+        -0.7323438264579929,
+        5.144395165386162
+      ],
+      "fasterPairs": 1
+    },
+    "candidateMedianVsControlCPercent": -1.5526018562468824,
+    "allSavedValuesRecomputedExactly": true,
+    "descriptiveBootstrap": {
+      "seedPerComparison": 897,
+      "completePairResamples": 10000,
+      "indexes": [
+        249,
+        9749
+      ]
+    }
+  },
+  "gates": {
+    "correctnessAndMemory": false,
+    "completeSchedule": true,
+    "unchangedControls": true,
+    "nonRegression": false,
+    "wholeImportGain": false
+  },
+  "mandatoryHostEligibility": false,
+  "ordinaryLatencyThresholds": {
+    "scope": "Numerical criteria only; these do not bypass mandatory correctness/memory qualification",
+    "nonRegressionNumericalCriteria": true,
+    "strongGainCriteria": {
+      "pairedMedianAtMostMinus5Percent": false,
+      "candidateMedianVersusControlAtMostMinus5Percent": false,
+      "atLeast10Of12FasterPairs": false,
+      "negativeEqualWorkChange": true,
+      "negativeBootstrapUpperEndpoint": false
+    }
+  },
+  "memoryInterpretation": "Coverage-invalid slots have null PSS/private maxima and null pair changes. This does not establish memory growth or regression; missing values are not zero.",
+  "decision": "VNDB BA fails mandatory host/publication eligibility; complete ordinary timings remain retained. No filtering, replacement or rerun.",
+  "failureLogs": {
+    "acquisitionLogSha256": "942cc9a29033314d2efa7c9931d3542993eb341661187d96650bec809fdcccf7",
+    "jobLogSha256": "ec2de34e7fb27e4998b1d5e0a4b04cf3423ee7c472f98d88fe169d0514a532d7",
+    "recordedRuntimeError": "Complete timing retained; separate memory/semantic qualification failed",
+    "originalAcquisitionLogPreserved": true
+  },
+  "currentDevelopNotSubstitutedForFrozenSource": true,
+  "originalsUnmodifiedAfterAudit": true
+}

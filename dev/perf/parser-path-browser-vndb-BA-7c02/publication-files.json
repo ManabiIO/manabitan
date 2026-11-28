@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent failed-cohort audit; originals unchanged",
+  "files": [
+    {
+      "path": "audit.py",
+      "size": 27522,
+      "sha256": "b8fd561a03c0c8dec7228c56c98ce6b784d6279007dbae1b88bf48087d2c1cd4",
+      "gitBlobSha1": "1139cec72f823f07396582d30ea10993789bd3a9"
+    },
+    {
+      "path": "audit-preparation.json",
+      "size": 988,
+      "sha256": "cb667eb3920d837bdc5f1f15bc6c4e29e3a3efe8427ba418830d27084a410ee9",
+      "gitBlobSha1": "d76ae2e081a9f873060b83d7c68563378cfef99c"
+    },
+    {
+      "path": "independent-audit.json",
+      "size": 48907,
+      "sha256": "e7a9d487c4db3c1db43c41e63013f429d3c95487dfab3a40f0e6395f2f5f5c46",
+      "gitBlobSha1": "5c9a61daacc43850e54c4b76fa7f3a8d0ddf4b32"
+    },
+    {
+      "path": "RESULT.md",
+      "size": 6289,
+      "sha256": "c74f48117d7c755a670a6996332c658a12b38d22a551699eb8df4c0813647374",
+      "gitBlobSha1": "b78678426ac64931313aede9165f58f123ee46e8"
+    }
+  ]
+}

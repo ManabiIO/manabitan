@@ -1,0 +1,100 @@
+{
+  "archive": {
+    "manifestSha256": "c0ba0cfe76831e161c2bd27cf92ecf054b047b51358558a4c7acd1ae9335c9b8",
+    "sha256": "81ed2de9bf862f0956e2e74c441807e6f8ff56e38ea52bb9f6b6dd521b59ea62",
+    "size": 2311129
+  },
+  "artifactId": 15256915453,
+  "builderSha256": "c96b01d267b1c479ee14776bd9f5303cce66e0f3e46262281cbd401505218473",
+  "categories": {
+    "complete-exhaustive-media-observations": {
+      "bytes": 650866,
+      "files": 10
+    },
+    "complete-memory-tree": {
+      "bytes": 14813835,
+      "files": 35
+    },
+    "complete-ordinary-observations": {
+      "bytes": 11764722,
+      "files": 252
+    },
+    "omitted-package-payloads": {
+      "bytes": 33612405,
+      "files": 2
+    },
+    "root-identity-schedule-statistics-and-logs": {
+      "bytes": 168096,
+      "files": 18
+    }
+  },
+  "configurationSha256": "1ea91a7f280865cae0028a68f07f2027aa5e27a34722bccf99fd96e3a96639ad",
+  "createdAt": "2026-11-28T09:00:38.534322+00:00",
+  "extraMetadataBytes": 366110,
+  "extraMetadataFiles": 3,
+  "format": "Deterministic ZIP split into ordered parts no larger than 256 KiB",
+  "omittedPayloadBytes": 33612405,
+  "omittedPayloadFiles": 2,
+  "originalsNotDeletedOrModified": true,
+  "parts": [
+    {
+      "gitBlobSha1": "47c1ea7bb148f43db41125f56977318693458e38",
+      "path": "cohort-evidence.part-001",
+      "sha256": "85d3f2ef981a17fb83235fffaea7ba009b6d98e7ae41126d199c4a2769e0e739",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "7484d1c44a5841cb1aa6c191dfd76585bdb2fad8",
+      "path": "cohort-evidence.part-002",
+      "sha256": "58de98e2c26561bf9509065e61248d44981f017a7a39f1acf6b53f7b533acfba",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "7a94e40a9840624df98a156572445245cb4f843d",
+      "path": "cohort-evidence.part-003",
+      "sha256": "7e063cbe710978031ad7f548886453fc0c980ff828b8535d16f1575b82f6ac6c",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "8474e1e58e55f93b267f00a82a616d60ba0cad71",
+      "path": "cohort-evidence.part-004",
+      "sha256": "22d1e15460c0b6cc71511cdb1de781e711b77c6ed2cb70a529a7470894dabd32",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "645c1cd131e05dcddf8f3767841a24ee6d2df4a0",
+      "path": "cohort-evidence.part-005",
+      "sha256": "feb7b611f05167cccb62dd9db14ea6c3980b406d88f0d65241c4d94e7e67b184",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "df93d167d4f6b86412d3409acf616c96b5464038",
+      "path": "cohort-evidence.part-006",
+      "sha256": "8b943d6dd39ae6ec803c5f80b5b264c14598b5b5402c96646fc4542abbc3837c",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "30d652c6763ef020cd1d6ff95ae53483bbb8fec0",
+      "path": "cohort-evidence.part-007",
+      "sha256": "b11acc136f3c6e846db9b3ead4f64c2cc4b3dddcc62d5d71757127279eebfd9d",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "3ec3c959c1f4f5dafcb64cd92669f93e784b6d0e",
+      "path": "cohort-evidence.part-008",
+      "sha256": "172e2b2a025bee81b6cfde13eea834c5be1773d9064d9e4ad4c2a82b684f0f49",
+      "size": 262144
+    },
+    {
+      "gitBlobSha1": "f249ecacf3fa95e38842cd0d83674dddbdd25a47",
+      "path": "cohort-evidence.part-009",
+      "sha256": "cbcea0974a984e9b6e2c37c8ebc9b5ef3b0bcbf0b402cbb61d39e4bad9291a3c",
+      "size": 213977
+    }
+  ],
+  "privacyScanSha256": "73f68d399ff830922107d792ae490d734c844275dee35b0226cd2c7a743e9992",
+  "retainedArtifactBytes": 27397519,
+  "retainedArtifactFiles": 315,
+  "schemaVersion": 1,
+  "verifierSha256": "2cf35ad0f0b78b1527463a3124b0da3e67b1dce2ed696b80d1b322b7c10a9766"
+}

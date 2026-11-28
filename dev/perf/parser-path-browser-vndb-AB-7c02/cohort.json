@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "artifactId": 15257031285,
+  "runId": 46113567719,
+  "jobId": 140904689385,
+  "dictionary": "vndb",
+  "initialOrder": "AB",
+  "extractionPath": "/tmp/manabitan-path-qualification-7c02/vndb-AB-15257031285",
+  "originalZip": {
+    "path": "/tmp/manabitan-path-qualification-7c02/originals/parser-path-qualification-7c02-vndb-AB-15257031285.zip",
+    "size": 35870913,
+    "sha256": "10730c5db5a511e7804d23093d56f74d29708c00b7c3eda9df8c52e4fcd2a8a3"
+  },
+  "preservationSha256": "a949e292172d4f2444a49b1eed0896c41313a592d18625d6e8e005b2195fad5f",
+  "metadataSha256": "ecd9c3925587610245b21a303e7aebcb9158eca79b10801859e241b6292c71d5",
+  "extractedBytes": 65377444,
+  "retainedArtifactBytes": 31765039,
+  "omittedPackageBytes": 33612405
+}

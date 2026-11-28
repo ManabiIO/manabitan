@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "artifactId": 15256069414,
+  "runId": 46113567719,
+  "jobId": 140904689455,
+  "dictionary": "jitendex",
+  "initialOrder": "BA",
+  "extractionPath": "/tmp/manabitan-path-qualification-7c02/jitendex-BA-15256069414",
+  "originalZip": {
+    "path": "/tmp/manabitan-path-qualification-7c02/originals/parser-path-qualification-7c02-jitendex-BA-15256069414.zip",
+    "size": 35601135,
+    "sha256": "8b1154e433540eb3a9cf8c0bbf24f03b180362dd7ec5a98cd8f836fb7ae0dce6"
+  },
+  "preservationSha256": "53b7849c2652829cb45e0915bc9273616ce0421a41b0131825cf623afafdb874",
+  "metadataSha256": "c84d04e48be5ddd149b99ecf0587ed43b28125d8b4c92ccf10b0c5d41a57bcf9",
+  "extractedBytes": 56449910,
+  "retainedArtifactBytes": 22837505,
+  "omittedPackageBytes": 33612405
+}

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete failed-cohort raw evidence; fresh post-recovery saved-byte verification is not candidate qualification",
+  "archiveSha256": "81ed2de9bf862f0956e2e74c441807e6f8ff56e38ea52bb9f6b6dd521b59ea62",
+  "files": [
+    {
+      "path": "README.md",
+      "size": 3787,
+      "sha256": "0719f1965f1399cd2983bdde816bc0135e9e80aca181d0ad2b09e6ef1890acad",
+      "gitBlobSha1": "ef88100853b99768c6f85f7034224fc3a1bf35ca"
+    },
+    {
+      "path": "build.py",
+      "size": 9645,
+      "sha256": "c96b01d267b1c479ee14776bd9f5303cce66e0f3e46262281cbd401505218473",
+      "gitBlobSha1": "57b5f9808fbdcacdcf0de18e33f2776ca1750919"
+    },
+    {
+      "path": "cohort-evidence.part-001",
+      "size": 262144,
+      "sha256": "85d3f2ef981a17fb83235fffaea7ba009b6d98e7ae41126d199c4a2769e0e739",
+      "gitBlobSha1": "47c1ea7bb148f43db41125f56977318693458e38"
+    },
+    {
+      "path": "cohort-evidence.part-002",
+      "size": 262144,
+      "sha256": "58de98e2c26561bf9509065e61248d44981f017a7a39f1acf6b53f7b533acfba",
+      "gitBlobSha1": "7484d1c44a5841cb1aa6c191dfd76585bdb2fad8"
+    },
+    {
+      "path": "cohort-evidence.part-003",
+      "size": 262144,
+      "sha256": "7e063cbe710978031ad7f548886453fc0c980ff828b8535d16f1575b82f6ac6c",
+      "gitBlobSha1": "7a94e40a9840624df98a156572445245cb4f843d"
+    },
+    {
+      "path": "cohort-evidence.part-004",
+      "size": 262144,
+      "sha256": "22d1e15460c0b6cc71511cdb1de781e711b77c6ed2cb70a529a7470894dabd32",
+      "gitBlobSha1": "8474e1e58e55f93b267f00a82a616d60ba0cad71"
+    },
+    {
+      "path": "cohort-evidence.part-005",
+      "size": 262144,
+      "sha256": "feb7b611f05167cccb62dd9db14ea6c3980b406d88f0d65241c4d94e7e67b184",
+      "gitBlobSha1": "645c1cd131e05dcddf8f3767841a24ee6d2df4a0"
+    },
+    {
+      "path": "cohort-evidence.part-006",
+      "size": 262144,
+      "sha256": "8b943d6dd39ae6ec803c5f80b5b264c14598b5b5402c96646fc4542abbc3837c",
+      "gitBlobSha1": "df93d167d4f6b86412d3409acf616c96b5464038"
+    },
+    {
+      "path": "cohort-evidence.part-007",
+      "size": 262144,
+      "sha256": "b11acc136f3c6e846db9b3ead4f64c2cc4b3dddcc62d5d71757127279eebfd9d",
+      "gitBlobSha1": "30d652c6763ef020cd1d6ff95ae53483bbb8fec0"
+    },
+    {
+      "path": "cohort-evidence.part-008",
+      "size": 262144,
+      "sha256": "172e2b2a025bee81b6cfde13eea834c5be1773d9064d9e4ad4c2a82b684f0f49",
+      "gitBlobSha1": "3ec3c959c1f4f5dafcb64cd92669f93e784b6d0e"
+    },
+    {
+      "path": "cohort-evidence.part-009",
+      "size": 213977,
+      "sha256": "cbcea0974a984e9b6e2c37c8ebc9b5ef3b0bcbf0b402cbb61d39e4bad9291a3c",
+      "gitBlobSha1": "f249ecacf3fa95e38842cd0d83674dddbdd25a47"
+    },
+    {
+      "path": "cohort.json",
+      "size": 761,
+      "sha256": "1ea91a7f280865cae0028a68f07f2027aa5e27a34722bccf99fd96e3a96639ad",
+      "gitBlobSha1": "17cd894b00a12d17088e03d4ecd266fd3033d06a"
+    },
+    {
+      "path": "index.json",
+      "size": 3503,
+      "sha256": "27ad7d21f515528c4b4bf3f0ca2153f36e85f3000463f5574bc0a275bcb399d2",
+      "gitBlobSha1": "198fdba9e7c781675bd305379eab6e1eb3c1c947"
+    },
+    {
+      "path": "privacy-scan.json",
+      "size": 168,
+      "sha256": "73f68d399ff830922107d792ae490d734c844275dee35b0226cd2c7a743e9992",
+      "gitBlobSha1": "59d78682e2fda60b2e5599b2c0ba1a6878db3472"
+    },
+    {
+      "path": "recovery.json",
+      "size": 1122,
+      "sha256": "eee1364658eee2db35bcbbe9ec1d2665e98199e83dd0adb58659e83ff5bbaf69",
+      "gitBlobSha1": "72f808343186d21b65f858b4e18d57d8fcfd33c3"
+    },
+    {
+      "path": "verification.json",
+      "size": 698,
+      "sha256": "a5d766243754ed3217afc846993f54e93ab6338a21c10b1d5011b8a382260c10",
+      "gitBlobSha1": "4e6a7f783e8568350d8e4f163ea65dfba9ec94cc"
+    },
+    {
+      "path": "verify.py",
+      "size": 7072,
+      "sha256": "2cf35ad0f0b78b1527463a3124b0da3e67b1dce2ed696b80d1b322b7c10a9766",
+      "gitBlobSha1": "16e386f3cbb8867aeedb78c817212e42bcc8d90c"
+    }
+  ],
+  "assembledDuplicateRemovedAfterSuccessfulPartVerification": true
+}

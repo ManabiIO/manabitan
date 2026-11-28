@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline saved-byte preservation verifier launch only; no native/product/browser execution",
+  "attemptedCommand": "python3 verify.py > verification.json",
+  "attemptedWorkingDirectory": "/workspace/scratch/7c02210aa375/import-experiments-7c02210aa375/evidence-packages/browser-vndb-AB-15257031285",
+  "error": "exec_command failed: CreateProcess { message: \"Rejected(\\\"Failed to create unified exec process: exec-server rejected request (-32603): No such file or directory (os error 2)\\\")\" }",
+  "processStarted": false,
+  "cause": "Mistyped checkpoint directory in the tool invocation",
+  "correction": "Use the existing import-experiments-7c02 directory; verifier, archive, and original inputs unchanged",
+  "correctedWorkingDirectory": "/workspace/scratch/7c02210aa375/import-experiments-7c02/evidence-packages/browser-vndb-AB-15257031285"
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "scope": "Publication file inventory; all original inputs remain untouched",
+  "archiveSha256": "5c2c5a64a2779709a87ba07b7e6c3d4c5e759004f961c52d93b7f2b52c42c2f7",
+  "files": [
+    {
+      "path": "README.md",
+      "size": 4768,
+      "sha256": "a98f18d78bba25d2df89c088de670922c1858b09df22f81325ad414f8d0f11f6",
+      "gitBlobSha1": "30f9c55ce14affc0c0c9b56a62bb4faa89563f0f"
+    },
+    {
+      "path": "build.py",
+      "size": 9645,
+      "sha256": "c96b01d267b1c479ee14776bd9f5303cce66e0f3e46262281cbd401505218473",
+      "gitBlobSha1": "57b5f9808fbdcacdcf0de18e33f2776ca1750919"
+    },
+    {
+      "path": "cohort-evidence.part-001",
+      "size": 262144,
+      "sha256": "213e98d3d332d1fc451529d653a193e8cede740f310d758472e82f762d6330d3",
+      "gitBlobSha1": "1fcf0a06fd251727ebb2da1b748c705b3754c06a"
+    },
+    {
+      "path": "cohort-evidence.part-002",
+      "size": 262144,
+      "sha256": "c203fe2f0da787b88d71d044b02b0c0bd3dcffff096866a1cc060cffcefa6274",
+      "gitBlobSha1": "abffe8b88a2c6ed5a1999fabb7e361db90c7d09c"
+    },
+    {
+      "path": "cohort-evidence.part-003",
+      "size": 262144,
+      "sha256": "480829f8890da3212628e5710c2f552c36e69fa42aa589104ecaeebf60974b38",
+      "gitBlobSha1": "1740ff9bb387a3779353a23a60477affcbe9b595"
+    },
+    {
+      "path": "cohort-evidence.part-004",
+      "size": 262144,
+      "sha256": "7bd5cc2a3d61e4bca103278cb94ed42a1e430d2ba51bb9f5ebf386a3faa97463",
+      "gitBlobSha1": "e91ada9626801995b28818b8fdbe309b6b10fff2"
+    },
+    {
+      "path": "cohort-evidence.part-005",
+      "size": 262144,
+      "sha256": "3e2135d86bf1d1e5f04111baf81722abacd6b3b52a74452984ec7eb785c00961",
+      "gitBlobSha1": "48429811a59635013d28170e0b9b81cfa6540ce3"
+    },
+    {
+      "path": "cohort-evidence.part-006",
+      "size": 262144,
+      "sha256": "e1f151c8b9150a67e7c19484b5214d81a3f3cd11e1090f309741786655ec6a34",
+      "gitBlobSha1": "884af3b5b8fb5e0d831949f60a9381796b3c2736"
+    },
+    {
+      "path": "cohort-evidence.part-007",
+      "size": 262144,
+      "sha256": "82db80571fb779e4f2d0bd4c5a4383955c734a4671b0f82767ffa25182c770e3",
+      "gitBlobSha1": "705270de9d1d0a69e404a35013457ed0ba18393d"
+    },
+    {
+      "path": "cohort-evidence.part-008",
+      "size": 262144,
+      "sha256": "ffa29df8c838ff75762f2f9795c361bb67ffd2d35a27863c3feee6bc83d25943",
+      "gitBlobSha1": "02cd03b8f9513bc6cce9a3a9cdbdda411736851a"
+    },
+    {
+      "path": "cohort-evidence.part-009",
+      "size": 262144,
+      "sha256": "1e05be5ba3a557df42e21f2cb946941645c1ce49cf4f8f69efe585c0f97b061c",
+      "gitBlobSha1": "0332c65d813219962f85d257d79bf0ea5ed86d7f"
+    },
+    {
+      "path": "cohort-evidence.part-010",
+      "size": 64181,
+      "sha256": "b132456c3e9def0c2d47657d42b2af8519169dbb0f86a4ac49c680ae0eb435ab",
+      "gitBlobSha1": "b1c11acb1ceba26f62fa08368ca6096865cdd360"
+    },
+    {
+      "path": "cohort.json",
+      "size": 761,
+      "sha256": "23c5336c555b84a6cb042a6c03e046f328f3989cb459e99fa0ea6f25ff71b551",
+      "gitBlobSha1": "e6ac067de9637705b035241d72b95f03414e370b"
+    },
+    {
+      "path": "index.json",
+      "size": 3727,
+      "sha256": "660a9d868a4eacd830ef694dda8a0e66c05ed4b804b3d491ff50cc61fe238f64",
+      "gitBlobSha1": "514715ddae10b076aca1141f46b4a62c1062af0b"
+    },
+    {
+      "path": "privacy-scan.json",
+      "size": 168,
+      "sha256": "73f68d399ff830922107d792ae490d734c844275dee35b0226cd2c7a743e9992",
+      "gitBlobSha1": "59d78682e2fda60b2e5599b2c0ba1a6878db3472"
+    },
+    {
+      "path": "verification-launch-failure.json",
+      "size": 887,
+      "sha256": "9670c97b46d1d28fa83c5b5d7c7ea391820077e67680ae4341bcfb459cd7e9cb",
+      "gitBlobSha1": "40d8eb24440428b67e822b5b8eca64b82899f996"
+    },
+    {
+      "path": "verification.json",
+      "size": 698,
+      "sha256": "a02933914ee03da3afd7992c6b20ce674b6f54e0279ea6c83dee3a95fb51f6e2",
+      "gitBlobSha1": "a9de0042fad460093c9aa6d72532db492932e771"
+    },
+    {
+      "path": "verify.py",
+      "size": 7072,
+      "sha256": "2cf35ad0f0b78b1527463a3124b0da3e67b1dce2ed696b80d1b322b7c10a9766",
+      "gitBlobSha1": "16e386f3cbb8867aeedb78c817212e42bcc8d90c"
+    }
+  ],
+  "assembledDuplicateRemovedAfterSuccessfulPartVerification": true
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent failed-cohort audit; original frozen source/data/gates unchanged",
+  "files": [
+    {
+      "path": "audit.py",
+      "size": 27522,
+      "sha256": "1b3fb9251f563c7217e9436f82bcfeac692d2e51d49a8ff84feaaca26e57703b",
+      "gitBlobSha1": "fcaaddf6daa5fd009d842b036470de8b24ef351e"
+    },
+    {
+      "path": "audit-preparation.json",
+      "size": 787,
+      "sha256": "7a42b33aaa7560c892342e8a0060e6e23449e4863458e6796e96055817fabfd3",
+      "gitBlobSha1": "f898dee7edd19a67f865ad1e9d848c4c8ab9e77e"
+    },
+    {
+      "path": "independent-audit.json",
+      "size": 48888,
+      "sha256": "324176887d78b79e5d859beb4d63d5e8e1fa1b0f5f8ca17fa5121a0f6e6d27d1",
+      "gitBlobSha1": "6235c858f66936f123c144f7611f430165c4f2f6"
+    },
+    {
+      "path": "RESULT.md",
+      "size": 7076,
+      "sha256": "cbc548473a32051b072c5b2a23ac022ced410e724342077dad10487053324933",
+      "gitBlobSha1": "ff391cbb21892f944325d1f78c704e11026226f6"
+    }
+  ]
+}

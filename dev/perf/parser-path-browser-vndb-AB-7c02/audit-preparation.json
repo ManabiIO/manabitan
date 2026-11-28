@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only independent audit of the original final VNDB AB artifact; no acquisition",
+  "basedOn": {
+    "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-hosted-audits/vndb-BA/audit.py",
+    "sha256": "b8fd561a03c0c8dec7228c56c98ce6b784d6279007dbae1b88bf48087d2c1cd4"
+  },
+  "auditorScriptSha256": "1b3fb9251f563c7217e9436f82bcfeac692d2e51d49a8ff84feaaca26e57703b",
+  "changes": [
+    "Bind exact independent VNDB AB artifact/job/ZIP/preservation identities",
+    "Require original AB ordinary/exhaustive and ABBA memory acquisition order",
+    "Retain unchanged frozen9e/e90 sources, all42semantic checks, raw gap derivation, pure memory audit and every original statistics/gate formula"
+  ],
+  "notExecutedAtPreparation": true
+}

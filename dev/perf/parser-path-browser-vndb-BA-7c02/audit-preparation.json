@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only saved-data VNDB BA audit; no acquisition or qualification repair",
+  "basedOn": {
+    "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-hosted-audits/jmdict-BA/audit.py",
+    "sha256": "eec86ccadfaf79cc2db559b47c95df130009196f40946167ef62b61cf5decb26"
+  },
+  "auditorScriptSha256": "b8fd561a03c0c8dec7228c56c98ce6b784d6279007dbae1b88bf48087d2c1cd4",
+  "changes": [
+    "Bind exact VNDB BA artifact/job/ZIP/fixture identities",
+    "Require original explicit36-38 page VNDB allocation policy while retaining exact canonical storage equality",
+    "Record and independently recompute invalid memory coverage rather than assuming every slot qualified",
+    "Preserve false memory/composite gates, null unqualified maxima, complete ordinary statistics and exact raw gap witnesses",
+    "No change to frozen runner, pure helpers, observations, thresholds, schedule, candidate or base"
+  ],
+  "notExecutedAtPreparation": true
+}

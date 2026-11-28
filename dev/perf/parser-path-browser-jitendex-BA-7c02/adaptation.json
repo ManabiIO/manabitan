@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28T08:59:31.005103+00:00",
+  "sourceAuditor": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-hosted-audits/jitendex-AB/audit.py",
+  "sourceAuditorSha256": "d59c23e793bfe7f6fcce09c500c78aad635c0cfc3a5ab718155152267b0a7a5b",
+  "adaptedAuditorSha256": "fd6b522d8025345ae80ff7a5ec26a12bfff18da27216f8e6e5a66bbc419e42f8",
+  "literalChanges": [
+    {
+      "before": "jitendex-AB",
+      "after": "jitendex-BA",
+      "count": 3
+    },
+    {
+      "before": "Jitendex AB",
+      "after": "Jitendex BA",
+      "count": 3
+    },
+    {
+      "before": "15256555705",
+      "after": "15256069414",
+      "count": 5
+    },
+    {
+      "before": "140904689410",
+      "after": "140904689455",
+      "count": 2
+    },
+    {
+      "before": "35590927",
+      "after": "35601135",
+      "count": 1
+    },
+    {
+      "before": "82ab640cdc6aec23a033dc3960cfe7e26bb1cc778d22c5efa602eddd4f81ff46",
+      "after": "8b1154e433540eb3a9cf8c0bbf24f03b180362dd7ec5a98cd8f836fb7ae0dce6",
+      "count": 1
+    },
+    {
+      "before": "enumerate(('AB', 'BA'), 1)",
+      "after": "enumerate(('BA', 'AB'), 1)",
+      "count": 1
+    },
+    {
+      "before": "('AB' if pair % 2 else 'BA')",
+      "after": "('BA' if pair % 2 else 'AB')",
+      "count": 1
+    },
+    {
+      "before": "('AC' if control % 2 else 'CA')",
+      "after": "('CA' if control % 2 else 'AC')",
+      "count": 1
+    },
+    {
+      "before": "'initialOrder': 'AB'",
+      "after": "'initialOrder': 'BA'",
+      "count": 2
+    },
+    {
+      "before": "cell['initialOrder'] == 'AB'",
+      "after": "cell['initialOrder'] == 'BA'",
+      "count": 1
+    },
+    {
+      "before": "memory_schedule(1)",
+      "after": "memory_schedule(2)",
+      "count": 4
+    },
+    {
+      "before": "mp['replication'] == 1",
+      "after": "mp['replication'] == 2",
+      "count": 1
+    },
+    {
+      "before": "memory_comparison(mem_obs, 'jitendex', 1, memory_schedule)",
+      "after": "memory_comparison(mem_obs, 'jitendex', 2, memory_schedule)",
+      "count": 1
+    },
+    {
+      "before": "for arm in 'AB':",
+      "after": "for arm in 'BA':",
+      "count": 1
+    }
+  ],
+  "additionalChanges": [
+    "Replace success-only memory assertions with exact raw-helper recomputation and frozen per-slot coverage predicates; retain invalid A1 and null aggregate metrics.",
+    "Record the exact memory coverage failure separately from unchanged time/control/nonregression gate calculations."
+  ],
+  "unchanged": [
+    "All receipt/package/fixture/source/browser/raw scan checks",
+    "All ordinary statistic/bootstrap and mandatory gate formulas",
+    "Original artifact and observation bytes"
+  ],
+  "execution": "Not yet run. Syntax compiled without writing bytecode; no acquisition, browser, test, native execution or benchmark."
+}

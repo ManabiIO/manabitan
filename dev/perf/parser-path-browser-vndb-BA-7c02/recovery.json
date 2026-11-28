@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "recoveryStartedAtUtc": "2026-11-28T09:17:16.553571+00:00",
+  "scope": "Post-executor-recovery saved-byte verification only; no benchmark, native execution, observation replacement or gate change",
+  "originalVerifier": {
+    "sessionId": 21275,
+    "completion": "unknown",
+    "savedSuccessReceiptPresent": false,
+    "savedFailureReceiptPresent": false,
+    "resumeResult": "Session could not be recovered after executor transport disconnection; no process result available"
+  },
+  "originalArchiveAndPartsByteIdentical": true,
+  "archiveSha256": "81ed2de9bf862f0956e2e74c441807e6f8ff56e38ea52bb9f6b6dd521b59ea62",
+  "originalIndexSha256": "27ad7d21f515528c4b4bf3f0ca2153f36e85f3000463f5574bc0a275bcb399d2",
+  "readmeBeforeRecoverySha256": "64977479f7580246e9baf16e135b861acb454e15e07decf0974310b3501874e7",
+  "freshSavedByteVerification": "passed",
+  "verificationFinishedAtUtc": "2026-11-28T09:17:16.845599+00:00",
+  "verificationReturnCode": 0,
+  "verificationSha256": "a5d766243754ed3217afc846993f54e93ab6338a21c10b1d5011b8a382260c10",
+  "originalVerifierCompletionRemainsUnknown": true
+}

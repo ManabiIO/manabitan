@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "scope": "Saved-byte integrity and complete non-package artifact preservation only; no numerical qualification or product execution",
+  "artifactId": 15256069414,
+  "archiveSha256": "e1d0441b9d1e17f6a999a1d108191b404782cfa94d67d41ae5d2dc44c1e29a3a",
+  "retainedArtifactFiles": 315,
+  "retainedArtifactBytes": 22837505,
+  "extraMetadataFiles": 3,
+  "explicitOmittedPackageFiles": 2,
+  "ordinarySlotDirectories": 36,
+  "exhaustiveMediaDirectories": 2,
+  "memorySlotDirectories": 4,
+  "rawMemoryScanCounts": {
+    "B1": 69,
+    "A1": 69,
+    "A2": 69,
+    "B2": 69
+  },
+  "allOriginalNonPackageBytesPreserved": true,
+  "originalInputsRequiredToVerifyThisBundle": false
+}
