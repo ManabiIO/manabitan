@@ -21,34 +21,78 @@ import createZstdModule from './zstd-simd-module.js';
 
 /** @type {import('./zstd-simd-module.js').ZstdModule|null} */
 let moduleInstance = null;
-/** @type {Promise<void>|null} */
+/** @type {Promise<WebAssembly.Module|null>|null} */
 let initialization = null;
+/** @type {WebAssembly.Module|null} */
+// eslint-disable-next-line @stylistic/semi
+let compiledModule = null
 /** @type {Map<number, {source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number, prepared: object|null}>} */
 const contextBuffers = new Map();
 const TERM_CONTENT_BLOCK_ENVELOPE_BYTES = 12;
 
+/* eslint-disable @stylistic/semi */
 /**
+ * @param {string} path
+ * @param {WebAssembly.Imports} imports
+ * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource>}
+ */
+async function instantiateZstdModule(path, imports) {
+    const response = await fetch(path, {credentials: 'same-origin'})
+    if (!response.ok) { throw new Error(`Failed to load Zstd WASM: ${response.status}`) }
+    if (typeof WebAssembly.instantiateStreaming === 'function') {
+        try {
+            return await WebAssembly.instantiateStreaming(response.clone(), imports)
+        } catch { /* Fall back for servers which do not use the WASM MIME type. */ }
+    }
+    return await WebAssembly.instantiate(await response.arrayBuffer(), imports)
+}
+
+/**
+ * Initializes a private native instance and retains its immutable compiled code
+ * so compression workers can instantiate it without loading the same asset.
  * @param {string} [path='/lib/zstd.wasm']
- * @returns {Promise<void>}
+ * @param {WebAssembly.Module} [suppliedModule]
+ * @returns {Promise<WebAssembly.Module|null>}
  * @throws {Error} If the module cannot be initialized.
  */
-export async function init(path = '/lib/zstd.wasm') {
-    if (moduleInstance !== null) { return; }
-    if (initialization !== null) { return await initialization; }
+export async function init(path = '/lib/zstd.wasm', suppliedModule) {
+    if (moduleInstance !== null) { return compiledModule }
+    if (initialization !== null) { return await initialization }
     initialization = (async () => {
-        moduleInstance = await createZstdModule({
+        /** @type {WebAssembly.Module|null} */
+        let initializedModule = null
+        /** @type {PromiseWithResolvers<never>} */
+        const failure = Promise.withResolvers()
+        const loading = createZstdModule({
             locateFile(fileName) {
-                return fileName.endsWith('.wasm') ? path : fileName;
+                return fileName.endsWith('.wasm') ? path : fileName
             },
-        });
-    })();
+            instantiateWasm(imports, receiveInstance) {
+                const pending = typeof suppliedModule === 'undefined' ?
+                    instantiateZstdModule(path, imports) :
+                    WebAssembly.instantiate(suppliedModule, imports).then((instance) => ({instance, module: suppliedModule}))
+                void pending.then(({instance, module}) => {
+                    initializedModule = module
+                    receiveInstance(instance, module)
+                }).catch(failure.reject)
+                return {}
+            },
+        })
+        // Emscripten's callback hook has no asynchronous rejection channel.
+        // Join its success promise with our load/instantiation failures so the
+        // same retryable initializer also settles failures before the callback.
+        moduleInstance = await Promise.race([loading, failure.promise])
+        compiledModule = initializedModule
+        return compiledModule
+    })()
     try {
-        await initialization;
+        return await initialization
     } catch (error) {
-        initialization = null;
-        throw error;
+        initialization = null
+        throw error
     }
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * @returns {import('./zstd-simd-module.js').ZstdModule}

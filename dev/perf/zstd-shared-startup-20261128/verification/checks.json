@@ -1,0 +1,67 @@
+{
+  "runtime": "Node22.22.0",
+  "tests": {
+    "status": "passed",
+    "files": 17,
+    "tests": 133,
+    "maxWorkers": 1,
+    "heapMiB": 512,
+    "seconds": 18.27,
+    "log": "zstd-final-suite.log.txt",
+    "note": "The subsequent cleanup-only change in the lifecycle test was verified by the final6-test rerun."
+  },
+  "lifecycleFinalRerun": {
+    "status": "passed",
+    "files": 1,
+    "tests": 6,
+    "heapMiB": 512,
+    "log": "worker-lifecycle-final-cleanup.log.txt"
+  },
+  "changedJavaScriptLint": {
+    "status": "passed",
+    "exitCode": 0,
+    "heapMiB": 1536,
+    "logs": [
+      "eslint-scoped-final.log.txt",
+      "eslint-worker-final.log.txt"
+    ],
+    "note": "The final single-file lint covers the lifecycle test edits after the complete changed-file lint."
+  },
+  "mainTypes": {
+    "status": "passed",
+    "exitCode": 0,
+    "heapMiB": 1536,
+    "log": "types-main.log.txt"
+  },
+  "changedCodecTestTypes": {
+    "status": "passed",
+    "exitCode": 0,
+    "heapMiB": 1536,
+    "files": 5,
+    "log": "types-scoped-final.log.txt",
+    "configuration": "../typecheck-scoped.json.txt",
+    "note": "Typecheck scope includes the selected tests and all their imported source/type dependencies."
+  },
+  "fullTestTypes": {
+    "status": "resource failure",
+    "exitCode": 137,
+    "heapMiB": 1536,
+    "log": "types-test.log.txt",
+    "note": "The host killed the process before diagnostics; this is not a passing full-project gate."
+  },
+  "initialChangedJavaScriptLint": {
+    "status": "resource failure",
+    "exitCode": 134,
+    "heapMiB": 512,
+    "note": "V8 reached the configured heap limit. The later1536MiB changed-file lint passed."
+  },
+  "logSha256": {
+    "worker-lifecycle-final-cleanup.log.txt": "ebec3279e53a388719702aefea717210a7b42d6b7d14db54754ba86f1a7c5668",
+    "eslint-worker-final.log.txt": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+    "eslint-scoped-final.log.txt": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+    "types-scoped-final.log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zstd-final-suite.log.txt": "043e61c50fc25ecd0578bc8ec1edba8a640e4d0d95af026091ba979f1c3e0e8f",
+    "types-test.log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "types-main.log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

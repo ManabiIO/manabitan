@@ -1,0 +1,44 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "note": "Content hashes bind the review source after the measured cohort. Successful workload was not retimed after these disclosed edits; hosted qualification uses the final PR head.",
+  "declaredPostMeasurementChanges": [
+    "Remove semicolons from two new declarations and add local lint style comments.",
+    "Add one unknown local alias before each of two existing boundary casts; each property is still read exactly once.",
+    "Immediately observe the worker module import promise rejection while waiting for initialization; the original rejection is preserved for the eventual initialization response."
+  ],
+  "astComparison": "Remove only the two declared aliases and the immediate rejection observer, then compare Acorn ASTs after stripping source positions. No other executable differences are present.",
+  "files": {
+    "dev/lib/zstd-wasm.js": {
+      "measuredSha256": "65c624a52ccca0ce6ea99b7c2d4d5cd5936100aa7c8df8da4a3bd0c69278599c",
+      "finalSha256": "c0e2935f7bbd7556d86ecb5ea38a35017e27e53236152561d20e8965272c481c",
+      "astEqualAfterDeclaredNormalizations": true
+    },
+    "dev/lib/zstd-simd-module.d.ts": {
+      "measuredSha256": "487b34eb2ece1ef793224fc590d592637280c0b7191ba3dcb3d5d7edc5c3a69d",
+      "finalSha256": "487b34eb2ece1ef793224fc590d592637280c0b7191ba3dcb3d5d7edc5c3a69d"
+    },
+    "ext/js/dictionary/zstd-term-content.js": {
+      "measuredSha256": "d3bb554f292143c1616ac53b469a3e64c2213c7a8cfacc2d1142fd5992f56638",
+      "finalSha256": "610ee5768c0b6aeeb2d3ed70810c0ac0276bf959e0a08205a1f585e5567aaa93",
+      "astEqualAfterDeclaredNormalizations": true
+    },
+    "ext/js/dictionary/zstd-term-content-compression-worker.js": {
+      "measuredSha256": "9106c1c8142332c034e0df023ef0833a968a6d997208ca81795548f94c1c3c57",
+      "finalSha256": "f2d47409c227f98ab08bdedf8b360b1cef24c5ee107dde3a09ac92f3823538ae",
+      "astEqualAfterDeclaredNormalizations": true
+    },
+    "ext/lib/zstd-wasm.js": {
+      "measuredSha256": "7ff57ddd7e383f9ab4f7b54c4a6e9621073c128e23c63363304cc8b0c4c75b04",
+      "finalSha256": "7ff57ddd7e383f9ab4f7b54c4a6e9621073c128e23c63363304cc8b0c4c75b04",
+      "astEqualAfterDeclaredNormalizations": true
+    },
+    "ext/lib/zstd.wasm": {
+      "measuredSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "finalSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "ext/lib/zstd-dicts/jmdict.zdict": {
+      "measuredSha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "finalSha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    }
+  }
+}

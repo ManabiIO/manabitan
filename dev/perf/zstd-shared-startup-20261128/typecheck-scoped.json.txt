@@ -1,0 +1,16 @@
+{
+  "extends": "./jsconfig.typecheck.json",
+  "include": [
+    "../types/ext/**/*.ts",
+    "../types/dev/**/*.ts",
+    "../types/test/**/*.ts",
+    "../types/other/globals.d.ts"
+  ],
+  "files": [
+    "./zstd-module-sharing.test.js",
+    "./zstd-compression-worker-context.test.js",
+    "./zstd-term-content-initialization.test.js",
+    "./zstd-term-content-packed-dispatch.test.js",
+    "./zstd-term-content-startup-overlap.test.js"
+  ]
+}

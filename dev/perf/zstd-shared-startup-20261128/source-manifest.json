@@ -1,0 +1,28 @@
+{
+  "A": {
+    "root": "/workspace/scratch/779cf210b028/manabitan",
+    "files": {
+      "dev/lib/zstd-wasm.js": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+      "dev/lib/zstd-simd-module.d.ts": "99910c2ea5f090dec894be789ed69d7827fa7d586a49b773b9f3ca62762f7801",
+      "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    }
+  },
+  "B": {
+    "root": "/workspace/scratch/779cf210b028/zstd-shared-module",
+    "files": {
+      "dev/lib/zstd-wasm.js": "65c624a52ccca0ce6ea99b7c2d4d5cd5936100aa7c8df8da4a3bd0c69278599c",
+      "dev/lib/zstd-simd-module.d.ts": "487b34eb2ece1ef793224fc590d592637280c0b7191ba3dcb3d5d7edc5c3a69d",
+      "ext/js/dictionary/zstd-term-content.js": "d3bb554f292143c1616ac53b469a3e64c2213c7a8cfacc2d1142fd5992f56638",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "9106c1c8142332c034e0df023ef0833a968a6d997208ca81795548f94c1c3c57",
+      "ext/lib/zstd-wasm.js": "7ff57ddd7e383f9ab4f7b54c4a6e9621073c128e23c63363304cc8b0c4c75b04",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    }
+  },
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "originalCohortStatus": "Biased Node diagnostic: worker Response/undici initialization was not equalized. Do not use as resource or latency qualification."
+}

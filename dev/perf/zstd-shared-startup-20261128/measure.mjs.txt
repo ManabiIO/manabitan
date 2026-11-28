@@ -1,0 +1,111 @@
+import {Worker as NodeWorker} from 'node:worker_threads'
+import {readFile} from 'node:fs/promises'
+import {pathToFileURL} from 'node:url'
+import path from 'node:path'
+import {createHash} from 'node:crypto'
+import assert from 'node:assert/strict'
+import os from 'node:os'
+
+const [root, fixture, mode = 'pool'] = process.argv.slice(2)
+const bytes = await readFile(fixture)
+const sources = []
+for (let index = 0; index < 4; ++index) {
+    const start = index * 1024 * 1024
+    sources.push(Uint8Array.from(bytes.subarray(start, Math.min(bytes.length, start + 1024 * 1024))))
+}
+if (sources.some((source) => source.length === 0)) { throw new Error('Fixture does not contain four nonempty blocks') }
+const hash = (parts) => {
+    const digest = createHash('sha256')
+    for (const part of parts) { digest.update(part) }
+    return digest.digest('hex')
+}
+const work = {wasmFetches: 0, dictionaryFetches: 0, fetchedBytes: 0, streamingInstantiations: 0, moduleInstantiations: 0, bufferInstantiations: 0}
+const nativeStreaming = WebAssembly.instantiateStreaming
+const nativeInstantiate = WebAssembly.instantiate
+WebAssembly.instantiateStreaming = (...args) => {
+    ++work.streamingInstantiations
+    return Reflect.apply(nativeStreaming, WebAssembly, args)
+}
+WebAssembly.instantiate = (...args) => {
+    if (args[0] instanceof WebAssembly.Module) { ++work.moduleInstantiations } else { ++work.bufferInstantiations }
+    return Reflect.apply(nativeInstantiate, WebAssembly, args)
+}
+globalThis.fetch = async (input) => {
+    const url = new URL(String(input))
+    if (url.pathname.endsWith('.wasm')) { ++work.wasmFetches } else if (url.pathname.endsWith('.zdict')) { ++work.dictionaryFetches }
+    else { throw new Error(`Unexpected codec asset: ${url}`) }
+    const body = await readFile(url)
+    work.fetchedBytes += body.byteLength
+    return new Response(body, {headers: {'Content-Type': 'application/wasm'}})
+}
+const workers = []
+class BrowserWorker {
+    constructor(url) {
+        this.listeners = new Map()
+        this.native = new NodeWorker(new URL('./codec-worker-bridge.mjs', import.meta.url), {
+            workerData: {moduleUrl: url.href},
+            resourceLimits: {maxOldGenerationSizeMb: 64},
+        })
+        this.readyMs = null
+        this.work = null
+        workers.push(this)
+        this.native.on('message', (data) => {
+            if (data.type === 'ready') {
+                this.readyMs = performance.now() - start
+                this.work = data.work
+            }
+            this.emit('message', {data})
+        })
+        this.native.on('error', (error) => { this.emit('error', {message: error.message}) })
+        this.native.on('messageerror', (error) => { this.emit('messageerror', error) })
+    }
+    emit(type, event) { for (const listener of this.listeners.get(type) ?? []) { listener(event) } }
+    addEventListener(type, listener) { this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener)) }
+    removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener) }
+    postMessage(message, transfer = []) { this.native.postMessage(message, transfer) }
+    terminate() { return this.native.terminate() }
+}
+if (mode === 'pool') { globalThis.Worker = BrowserWorker }
+// Make Node's lazy fetch adapter setup common before timing the parent. Every
+// bridge performs the same warmup before importing the production worker.
+await new Response(new Uint8Array(0), {headers: {'Content-Type': 'application/wasm'}}).arrayBuffer()
+const start = performance.now()
+const cpuStart = process.cpuUsage()
+try {
+    const api = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/zstd-term-content.js')).href)
+    const codeImportedMs = performance.now() - start
+    await api.initializeTermContentZstd()
+    const parentInitializedMs = performance.now() - start
+    const first = await api.compressWrappedTermContentZstdBatch(sources.map((source) => Uint8Array.from(source)), 'jmdict')
+    const firstJobMs = performance.now() - start
+    const firstCpu = process.cpuUsage(cpuStart)
+    const warmStart = performance.now()
+    const warmCpuStart = process.cpuUsage()
+    const warm = await api.compressWrappedTermContentZstdBatch(sources.map((source) => Uint8Array.from(source)), 'jmdict')
+    const warmJobMs = performance.now() - warmStart
+    const warmCpu = process.cpuUsage(warmCpuStart)
+    const peakRssKiB = process.resourceUsage().maxRSS
+    for (let index = 0; index < sources.length; ++index) {
+        assert.deepEqual(first.chunks[index], warm.chunks[index])
+        assert.deepEqual(api.decompressTermContentZstd(first.chunks[index].subarray(12), 'jmdict'), sources[index])
+    }
+    if (mode === 'pool' && (workers.length !== 4 || workers.some(({readyMs}) => readyMs === null))) {
+        throw new Error('Expected four ready production workers')
+    }
+    const totalWork = {...work}
+    for (const worker of workers) {
+        for (const key of Object.keys(totalWork)) { totalWork[key] += worker.work[key] }
+    }
+    console.log(JSON.stringify({
+        root, mode, node: process.version,
+        environment: {v8: process.versions.v8, platform: process.platform, arch: process.arch, osRelease: os.release(), cpu: os.cpus()[0]?.model,
+            parentHeapLimitMiB: 512, workerOldGenerationLimitMiB: 64, adapterResponseInitialized: true},
+        inputBytes: sources.reduce((sum, source) => sum + source.length, 0), inputSha256: hash(sources),
+        outputBytes: first.chunks.reduce((sum, source) => sum + source.length, 0), outputSha256: hash(first.chunks),
+        codeImportedMs, parentInitializedMs, firstJobMs, warmJobMs,
+        firstCpuMs: (firstCpu.user + firstCpu.system) / 1000, warmCpuMs: (warmCpu.user + warmCpu.system) / 1000,
+        peakRssKiB, readyMs: workers.map((worker) => worker.readyMs), totalWork,
+    }))
+} finally {
+    await Promise.all(workers.map((worker) => worker.terminate()))
+}
