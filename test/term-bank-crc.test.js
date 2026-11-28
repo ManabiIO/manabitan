@@ -117,6 +117,28 @@ function candidateCrc(bytes, alignment = 0) {
     return wasm.term_bank_crc32_test(writeBytes(bytes, alignment), bytes.length) >>> 0
 }
 
+/**
+ * Apply an independent GF(2) matrix, whose columns are CRC states for single bits.
+ * @param {Uint32Array} matrix
+ * @param {number} vector
+ * @returns {number}
+ */
+function matrixTimes(matrix, vector) {
+    let result = 0
+    for (let bit = 0; vector !== 0; vector >>>= 1, ++bit) {
+        if ((vector & 1) !== 0) { result ^= matrix[bit] }
+    }
+    return result >>> 0
+}
+
+/**
+ * @param {Uint32Array} matrix
+ * @returns {Uint32Array}
+ */
+function matrixSquare(matrix) {
+    return Uint32Array.from(matrix, (column) => matrixTimes(matrix, column))
+}
+
 describe('term bank CRC32', () => {
     test('combines exact source spans with the independent zlib CRC', () => {
         const first = randomBytes(8192, 0x51a73b92)
@@ -126,6 +148,31 @@ describe('term bank CRC32', () => {
                 const firstCrc = crc32(first.subarray(0, prefix))
                 expect(wasm.term_bank_crc32_combine_test(firstCrc, crc32(second), length) >>> 0)
                     .toBe(crc32(second, firstCrc))
+            }
+        }
+    })
+
+    test('matches an independent matrix shift for every length bit and uint32 boundary', () => {
+        const oneBit = new Uint32Array(32)
+        oneBit[0] = 0xedb88320
+        for (let bit = 1; bit < 32; ++bit) { oneBit[bit] = 2 ** (bit - 1) }
+        const bytePowers = [matrixSquare(matrixSquare(matrixSquare(oneBit)))]
+        for (let bit = 1; bit < 32; ++bit) { bytePowers.push(matrixSquare(bytePowers[bit - 1])) }
+        const lengths = new Set([0, 0xffffffff, 0xfffffffe, 0x80000001, 0xabcdef01, 0x12345678])
+        for (let bit = 0; bit < 32; ++bit) {
+            lengths.add(2 ** bit)
+            lengths.add(2 ** bit - 1)
+        }
+        for (const length of lengths) {
+            for (const first of [0, 1, 0x80000000, 0xffffffff, 0x13579bdf, 0xcbf43926]) {
+                let shifted = first
+                for (let remaining = length >>> 0, bit = 0; remaining !== 0; remaining >>>= 1, ++bit) {
+                    if ((remaining & 1) !== 0) { shifted = matrixTimes(bytePowers[bit], shifted) }
+                }
+                for (const second of [0, 0xffffffff, 0xa55a12ef]) {
+                    expect(wasm.term_bank_crc32_combine_test(first, second, length) >>> 0)
+                        .toBe((shifted ^ second) >>> 0)
+                }
             }
         }
     })

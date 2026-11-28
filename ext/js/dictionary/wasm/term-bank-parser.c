@@ -425,12 +425,23 @@ typedef struct {
     uint32_t table[8][16];
 } Crc32Shift;
 
+/* Input-independent operators for advancing 2^i bytes, i = 0..31. Starting
+ * with x^8, each entry is the square of the previous reflected polynomial. */
+static const uint32_t crc32_byte_shift_powers[32] = {
+    0x00800000u, 0x00008000u, 0xedb88320u, 0xb1e6b092u,
+    0xa06a2517u, 0xed627daeu, 0x88d14467u, 0xd7bbfe6au,
+    0xec447f11u, 0x8e7ea170u, 0x6427800eu, 0x4d47bae0u,
+    0x09fe548fu, 0x83852d0fu, 0x30362f1au, 0x7b5a9cc3u,
+    0x31fec169u, 0x9fec022au, 0x6c8dedc4u, 0x15d6874du,
+    0x5fde7a4eu, 0xbad90e37u, 0x2e4e5eefu, 0x4eaba214u,
+    0xa8a472c0u, 0x429a969eu, 0x148d302au, 0xc40ba6d0u,
+    0xc4e22c3cu, 0x40000000u, 0x20000000u, 0x08000000u,
+};
+
 static void crc32_prepare_shift(Crc32Shift* shift, uint32_t length) {
-    uint32_t power = 0x00800000u; /* x^8: advance one byte. */
     uint32_t factor = 0x80000000u;
-    for (uint32_t remaining = length; remaining != 0u; remaining >>= 1u) {
-        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, power); }
-        power = crc32_multiply_mod(power, power);
+    for (uint32_t remaining = length, bit = 0u; remaining != 0u; remaining >>= 1u, ++bit) {
+        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, crc32_byte_shift_powers[bit]); }
     }
     uint32_t basis[32];
     basis[31] = factor;
