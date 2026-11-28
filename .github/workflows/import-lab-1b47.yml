@@ -1,0 +1,142 @@
+name: Import lab baseline census (1b47)
+
+on:
+  push:
+    branches: [perf/import-lab-20261127-1b47]
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-census:
+    name: Baseline component census (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: builds/perf/import-lab-1b47
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Initialize evidence and verify frozen baseline product source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          git rev-parse HEAD > "$PERF_EVIDENCE/lab-commit.txt"
+          git rev-parse "${PERF_BASELINE_SHA}^{tree}" > "$PERF_EVIDENCE/baseline-tree.txt"
+          git diff --name-status "$PERF_BASELINE_SHA" HEAD > "$PERF_EVIDENCE/lab-overlay.txt"
+          python3 - <<'PY'
+          import os, subprocess
+          expected = {
+              ".github/workflows/import-lab-1b47.yml",
+              "dev/perf/import-lab-1b47/node-sink-file-fetch.mjs",
+              "dev/perf/import-lab-1b47/node-sink-worker.mjs",
+              "dev/perf/import-lab-1b47/node-sink-opfs.mjs",
+              "dev/perf/import-lab-1b47/node-sink-replay.mjs",
+          }
+          changed = set(subprocess.check_output(
+              ["git", "diff", "--name-only", os.environ["PERF_BASELINE_SHA"], "HEAD"],
+              text=True).splitlines())
+          unexpected = changed - expected
+          if unexpected:
+              raise SystemExit("Unexpected baseline product changes: " + repr(sorted(unexpected)))
+          print("Frozen baseline product source verified; diagnostic overlay:", sorted(changed))
+          PY
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Check helpers and prepare pinned dictionaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          for helper in dev/perf/import-lab-1b47/node-sink-*.mjs; do
+            node --check "$helper"
+          done
+          node dev/perf/prepare-dictionaries.js --all 2>&1 | tee "$PERF_EVIDENCE/prepare.log"
+          node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-before.json"
+          node --version > "$PERF_EVIDENCE/node-version.txt"
+          git status --porcelain > "$PERF_EVIDENCE/status-before.txt"
+          sha256sum package-lock.json test/perf/dictionaries.lock.json dev/perf/import-lab-1b47/node-sink-*.mjs ext/lib/term-bank-parser.wasm ext/lib/term-content-canonical-scan-v1.wasm ext/lib/zstd.wasm > "$PERF_EVIDENCE/input-sha256.txt"
+
+      - name: Run full pinned corpus through real component sink
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-lab-1b47/node-sink-replay.mjs \
+            "$GITHUB_WORKSPACE" \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            "$GITHUB_WORKSPACE/$PERF_EVIDENCE/$PERF_DICTIONARY.json" \
+            "$PERF_DICTIONARY" 0 1 \
+            2>&1 | tee "$PERF_EVIDENCE/$PERF_DICTIONARY.log"
+          node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-after.json"
+
+      - name: Print complete baseline census for remote inspection
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee "$PERF_EVIDENCE/$PERF_DICTIONARY-census.log"
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["PERF_EVIDENCE"]) / (os.environ["PERF_DICTIONARY"] + ".json")
+          if not p.exists():
+              print("NO_CENSUS_REPORT: inspect setup and replay logs; no result is inferred.")
+              raise SystemExit(0)
+          report = json.loads(p.read_text())
+          def emit(label, value):
+              print(label + " " + json.dumps(value, ensure_ascii=False, separators=(",", ":")))
+          emit("SCOPE", report["scope"])
+          emit("IDENTITY", {k: report.get(k) for k in (
+              "complete", "failure", "node", "sourceCommit", "dirty", "cpus", "memory",
+              "fixture", "fileLimit", "fileCount", "rawTermBankSourceBytes", "blockTargetBytes",
+              "rows", "parserOptions", "sourceHashingInsideTimer", "sourceDigestSha256", "parserWasmSha256",
+              "lockSha256", "sourceFiles", "totalPersistedBytes", "filesDigestSha256")})
+          emit("OBSERVED_COMPONENT_TIMING_NOT_A_COMPARISON", report.get("timings"))
+          emit("PERSISTED_FILES", report.get("files"))
+          totals = {}
+          for group in report.get("groups", []):
+              metrics = {k: v for k, v in group.get("metrics", {}).items() if v}
+              for key, value in metrics.items():
+                  if isinstance(value, (int, float)):
+                      totals[key] = totals.get(key, 0) + value
+              detail = {k: v for k, v in group.items() if k != "metrics"}
+              detail["nonzeroMetrics"] = metrics
+              emit("GROUP", detail)
+          for key, value in (report.get("finalDeferredMetrics") or {}).items():
+              if isinstance(value, (int, float)):
+                  totals[key] = totals.get(key, 0) + value
+          emit("TOTAL_METRICS_OVERLAPPING_NOT_SUMMABLE", totals)
+          emit("FINAL_DEFERRED_METRICS", report.get("finalDeferredMetrics"))
+          emit("CONTENT_END_METRICS", report.get("contentEndMetrics"))
+          emit("RECORD_END_METRICS", report.get("recordEndMetrics"))
+          for group in report.get("sourceGroups", []):
+              emit("SOURCE_GROUP", group)
+          for profile in report.get("profiles", []):
+              emit("PARSER_PROFILE", profile)
+          PY
+
+      - name: Preserve raw baseline census including failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-lab-1b47-baseline-${{ matrix.dictionary }}
+          path: builds/perf/import-lab-1b47
+          if-no-files-found: error
+          retention-days: 14
