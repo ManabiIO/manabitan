@@ -1,0 +1,263 @@
+name: Native record fields experiment 20261128 a7c4
+
+on:
+  push:
+    branches: [test/native-record-fields-20261128-a7c4]
+    paths:
+      - '.github/workflows/native-record-fields-20261128-a7c4.yml'
+      - 'dev/perf/prepare-import-ownership-screen-a7c4.js'
+      - 'dev/perf/capture-record-fields-a7c4.js'
+      - 'dev/perf/record-fields-component-a7c4.js'
+      - 'dev/perf/compact-record-fields-a7c4.c'
+      - 'dev/perf/compact-record-fields-native-a7c4.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-record-fields-20261128-a7c4
+  cancel-in-progress: false
+
+jobs:
+  screen:
+    name: Fixed JMdict native record-field feasibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_OUT: builds/perf/native-record-fields-20261128-a7c4
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Freeze source and finite component protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_OUT"
+          git rev-parse HEAD > "$PERF_OUT/workflow-source-commit.txt"
+          git status --porcelain > "$PERF_OUT/initial-status.txt"
+          git diff --exit-code "$PERF_BASELINE" HEAD -- \
+            ext package.json package-lock.json test/perf/dictionaries.lock.json \
+            dev/data/dictionary-wasm dev/data/zstd-dicts \
+            dev/bin/build-dictionary-wasm.js dev/dictionary-wasm.js
+          git diff --stat "$PERF_BASELINE" HEAD > "$PERF_OUT/source-diff-stat.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          protocol = {
+              "scope": "Native record-field feasibility only; no product integration or browser import performance claim",
+              "workflowCommit": os.environ["GITHUB_SHA"],
+              "baselineCommit": os.environ["PERF_BASELINE"],
+              "dictionary": "jmdict",
+              "capture": "Actual 12 ordinary parser groups, scores, raw content lengths and canonical unique IDs; controlled cumulative raw-content offsets, not OPFS offsets",
+              "schedule": ["AA", "AB", "BA", "AB", "AA"],
+              "freshTimedProcesses": 10,
+              "untimedWarmupsPerProcess": 2,
+              "timedFullCorpusPassesPerProcess": 5,
+              "measured": "Per-call eligibility, input copies, native work, owned output copies and unchanged JS fallback; elapsed and process CPU",
+              "excluded": "Capture, module initialization, content-base validation, boundary controls and full byte oracles",
+              "nativeMemoryBytes": 4194304,
+              "memoryInterpretation": "Known extra native allocation; not complete-import peak-memory evidence",
+              "verification": "Fresh verification child before any timed process",
+              "reruns": 0,
+          }
+          Path(os.environ["PERF_OUT"], "protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
+          PY
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Install locked dependencies and pinned compiler family
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_OUT/npm-ci.log"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          node --version > "$PERF_OUT/node-version.txt"
+          clang-21 --version > "$PERF_OUT/clang-version.txt"
+          wasm-ld-21 --version > "$PERF_OUT/wasm-ld-version.txt"
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          assert (root / "node-version.txt").read_text().strip() == "v22.22.0"
+          compiler = (root / "clang-version.txt").read_text()
+          linker = (root / "wasm-ld-version.txt").read_text()
+          assert re.search(r"\bclang version (\d+\.\d+\.\d+)\b", compiler).group(1) == "21.1.8"
+          assert re.search(r"\bLLD (\d+\.\d+\.\d+)\b", linker).group(1) == "21.1.8"
+          PY
+      - name: Verify exact baseline source-bound WASM and build libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/a7c4-record-baseline"
+          git worktree add --detach "$baseline" "$PERF_BASELINE"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          (
+            cd "$baseline"
+            npm run build:dictionary-wasm -- --check
+            npm run build:libs
+          ) 2>&1 | tee "$PERF_OUT/baseline-build.log"
+          git -C "$baseline" diff --exit-code
+          cp "$baseline/dev/data/dictionary-wasm/manifest.json" "$PERF_OUT/baseline-manifest.json"
+          sha256sum "$baseline/ext/lib/term-bank-parser.wasm" \
+            "$baseline/ext/lib/term-content-canonical-scan-v1.wasm" \
+            "$baseline/ext/js/dictionary/term-record-opfs-store.js" \
+            > "$PERF_OUT/baseline-identities.txt"
+      - name: Compile the source-bound measurement probe outside product artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          compiler="$(command -v clang-21)"
+          linker="$(command -v wasm-ld-21)"
+          "$compiler" "-fuse-ld=$linker" \
+            --target=wasm32-freestanding -O3 -ffreestanding -fno-builtin \
+            -mbulk-memory -msimd128 -nostdlib \
+            -Wl,--no-entry -Wl,--import-memory \
+            -Wl,--initial-memory=4194304 -Wl,--max-memory=4194304 \
+            -Wl,-z,stack-size=65536 -Wl,--stack-first \
+            -Wl,--export=record_field_abi_version \
+            -Wl,--export=encode_compact_record_fields -Wl,--strip-all \
+            dev/perf/compact-record-fields-a7c4.c \
+            -o "$PERF_OUT/compact-record-fields-a7c4.wasm"
+          node --input-type=module - <<'JS' > "$PERF_OUT/probe-identity.json"
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          import {createHash} from 'node:crypto';
+          import path from 'node:path';
+          const wasmPath = path.join(process.env.PERF_OUT, 'compact-record-fields-a7c4.wasm');
+          const wasm = await readFile(wasmPath);
+          const module = await WebAssembly.compile(wasm);
+          const imports = WebAssembly.Module.imports(module);
+          const exports = WebAssembly.Module.exports(module);
+          assert.deepEqual(imports, [{module: 'env', name: 'memory', kind: 'memory'}]);
+          assert.deepEqual(exports.map(({name, kind}) => [name, kind]).sort(), [
+              ['encode_compact_record_fields', 'function'], ['record_field_abi_version', 'function'],
+          ]);
+          const memory = new WebAssembly.Memory({initial: 64, maximum: 64});
+          const instance = await WebAssembly.instantiate(module, {env: {memory}});
+          assert.equal(instance.exports.record_field_abi_version(), 1);
+          const files = [
+              'dev/perf/compact-record-fields-a7c4.c',
+              'dev/perf/compact-record-fields-native-a7c4.js',
+              'dev/perf/capture-record-fields-a7c4.js',
+              'dev/perf/record-fields-component-a7c4.js',
+              'dev/perf/prepare-import-ownership-screen-a7c4.js',
+              'package-lock.json', 'test/perf/dictionaries.lock.json', wasmPath,
+          ];
+          const hashes = Object.fromEntries(await Promise.all(files.map(async (file) => [
+              file, createHash('sha256').update(await readFile(file)).digest('hex'),
+          ])));
+          console.log(JSON.stringify({node: process.version, imports, exports, abi: 1, memoryBytes: memory.buffer.byteLength, wasmBytes: wasm.byteLength, hashes}, null, 2));
+          JS
+          node --check dev/perf/capture-record-fields-a7c4.js
+          node --check dev/perf/record-fields-component-a7c4.js
+          node --check dev/perf/compact-record-fields-native-a7c4.js
+      - name: Prepare exact fixture and actual ownership support
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'JS' > "$PERF_OUT/fixture.json"
+          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js';
+          console.log(JSON.stringify(await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', ['jmdict']), null, 2));
+          JS
+          node dev/perf/prepare-import-ownership-screen-a7c4.js "$RUNNER_TEMP/a7c4-record-baseline" \
+            > "$PERF_OUT/generated-support.json"
+          node --check "$RUNNER_TEMP/a7c4-record-baseline/dev/perf/import-ownership-support-a7c4.js"
+          cp "$RUNNER_TEMP/a7c4-record-baseline/dev/perf/import-ownership-support-a7c4.js" "$PERF_OUT/"
+      - name: Capture the full corpus once outside timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/capture-record-fields-a7c4.js \
+            "$RUNNER_TEMP/a7c4-record-baseline" \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            "$GITHUB_WORKSPACE/$PERF_OUT/capture" \
+            2>&1 | tee "$PERF_OUT/capture.log"
+      - name: Verify all boundaries then run the fixed ten-process screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --expose-gc dev/perf/record-fields-component-a7c4.js \
+            --source-root "$RUNNER_TEMP/a7c4-record-baseline" \
+            --capture-dir "$GITHUB_WORKSPACE/$PERF_OUT/capture" \
+            --wrapper "$GITHUB_WORKSPACE/dev/perf/compact-record-fields-native-a7c4.js" \
+            --wasm "$GITHUB_WORKSPACE/$PERF_OUT/compact-record-fields-a7c4.wasm" \
+            --out "$GITHUB_WORKSPACE/$PERF_OUT/record-fields.json" \
+            2>&1 | tee "$PERF_OUT/screen.log"
+      - name: Restore export-only measurement shim and verify baseline
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/a7c4-record-baseline"
+          if [[ -d "$baseline" ]]; then
+            git -C "$baseline" restore --source="$PERF_BASELINE" -- ext/js/dictionary/term-record-opfs-store.js
+            git -C "$baseline" diff --exit-code > "$PERF_OUT/restored-baseline-diff.txt"
+            sha256sum "$baseline/ext/js/dictionary/term-record-opfs-store.js" > "$PERF_OUT/restored-store-identity.txt"
+          fi
+      - name: Print compact results and all source identities
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          output = {"job": "native-record-fields"}
+          for filename in ("protocol.json", "probe-identity.json", "baseline-manifest.json", "generated-support.json"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = json.loads(path.read_text())
+          path = root / "record-fields.json"
+          if path.exists():
+              report = json.loads(path.read_text())
+              output["recordFields"] = {
+                  key: value for key, value in report.items()
+                  if key not in ("observations", "verification")
+              }
+              verification = report.get("verification") or {}
+              output["verification"] = {
+                  key: value for key, value in verification.items()
+                  if key not in ("baseline", "candidate")
+              }
+              for arm in ("baseline", "candidate"):
+                  if arm in verification:
+                      output["verification"][arm] = verification[arm]
+              output["observations"] = [
+                  {key: item.get(key) for key in
+                   ("file", "arm", "passed", "total", "passes", "nativeStats",
+                    "memoryBefore", "memoryAfter", "memoryScope", "gcAvailable")}
+                  for item in report.get("observations", [])
+              ]
+          path = root / "capture/manifest.json"
+          if path.exists():
+              capture = json.loads(path.read_text())
+              output["capture"] = {
+                  key: value for key, value in capture.items()
+                  if key not in ("groups", "blocks", "chunks", "arrays", "recordBatches")
+              }
+              for key in ("groups", "blocks", "chunks", "recordBatches"):
+                  if isinstance(capture.get(key), list):
+                      output["capture"][key + "Count"] = len(capture[key])
+          for filename in ("baseline-identities.txt", "restored-store-identity.txt", "node-version.txt", "clang-version.txt", "wasm-ld-version.txt"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = path.read_text()
+          print("A7C4_RESULT_BEGIN")
+          print(json.dumps(output, separators=(",", ":")))
+          print("A7C4_RESULT_END")
+          PY
+      - name: Retain every original observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-fields-a7c4
+          path: builds/perf/native-record-fields-20261128-a7c4
+          if-no-files-found: error
+          retention-days: 14
