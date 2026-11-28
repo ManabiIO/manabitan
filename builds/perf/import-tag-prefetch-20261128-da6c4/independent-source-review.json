@@ -1,0 +1,30 @@
+{
+  "schema": "manabitan.small-tag-prefetch.independent-source-review.v1",
+  "reviewedUtc": "2026-11-28T08:18:00Z",
+  "reviewer": "import_history",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "worktree": "/home/agent/manabitan-da6c4dbd0097/tag-prefetch-experiment",
+  "scope": "Four product/test/config paths only; qualification/workflow research files are outside this source review.",
+  "sourceSha256": {
+    "ext/js/dictionary/dictionary-importer.js": "0b54ace29853f07757b65ceda841469842db37658fc4b47345e47368d35a46a4",
+    "ext/js/dictionary/bounded-zip-text-writer.js": "2257e20d6c70353314a578bdec326f5e942d474919c049fddd67c0f62fdb06ef",
+    "test/dictionary-importer-tag-prefetch.test.js": "dd9be66e7d517f60469de964ad789b246233a456acf178f61bd06332a1a50e11",
+    "eslint.config.js": "e45b20da1f827df5898d6b1cdefa2ae72bfaf00492c4999ba5df342454e0f8e5"
+  },
+  "disposition": "No concrete blocker found in the bounded source review; this is not a performance or complete-CI qualification.",
+  "findings": [
+    "Only the first ordinary tag bank is read speculatively, only when ordinary term work exists and compressed/uncompressed declared sizes are safe nonnegative integers <=64KiB. Preloaded and term-artifact sources retain their previous route.",
+    "The packed-artifact early archive close is before the prefetch location and requires the artifact route excluded by admission. No later early archive close was found on the admitted ordinary-source route.",
+    "The existing direct ZIP read scope owns the read, cancellation signal and joined decoder cleanup. The unused tag promise is observed immediately and then joined before import-session archive disposal and database finalization. An earlier term failure remains primary.",
+    "Prefetch retains bounded decoded bytes and text, but leaves JSON parsing, schema validation, conversion, progress and tag writes at the original ordered tag phase. The normal read is replaced exactly once.",
+    "The writer copies at most the declared <=64KiB into its private buffer, rejects output overflow before retaining the oversized chunk, rejects underflow, and uses the existing UTF-8 replacement/BOM semantics of default TextWriter/Blob.text.",
+    "Actual ZIP CRC checking remains checkSignature:true. Existing decoded output-size verification remains in _getData. An original bounded-output error is retained if zip.js stream-close cleanup would otherwise replace it.",
+    "The underlying ZIP Reader creates a separate readable stream per extraction, so per-entry offset/size state is not overwritten by the concurrent term read.",
+    "The focused test source covers stored/deflate single-read and ordered writes, deferred invalid JSON/schema failure, cancellation and sink failure with delayed cleanup before archive close/rollback, unknown/unsafe/preloaded admission fallback, split UTF-8, actual oversized deflate output, and wrong stored/deflate CRC."
+  ],
+  "validation": {
+    "independentlyExecuted": "Read-only source/identity inspection only; no new test or timing process.",
+    "authorReported": "137 focused tests and full test types pass. Author separately retains a failed broad local unit run; this review does not turn that into a pass.",
+    "remaining": "Exact frozen product CI and prospective whole-browser comparison, including full semantics/nonregression and memory gates."
+  }
+}

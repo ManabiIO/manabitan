@@ -1,0 +1,64 @@
+{
+  "experiment": "Bounded single small tag-bank text prefetch",
+  "registeredAtUtc": "2026-11-28T08:05:31Z",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateBinding": "Exact GitHub workflow source SHA, runtime blob map and independently built release packages recorded before acquisition",
+  "qualificationRunnerBlob": "7bfac83eedfbae61590b849c0934060c30ff4cef",
+  "implementation": "Ordinary source imports only, one first tag entry, both declared sizes <=64 KiB, actual decoded byte writer bounded to declared uncompressed length, text retained during terms, ordinary tag-stage JSON/conversion/storage order, direct ZIP scope abort/join",
+  "relatedAlternative": {
+    "branch": "perf/cached-tag-quality-20261128-4a779",
+    "sha": "f44f6e34e6",
+    "mechanism": "Cached native late small-text read; does not overlap the tag read with terms",
+    "limits": "Related source only; result not used as evidence for this candidate"
+  },
+  "currentEvidence": "137 focused tests passed before final test type cleanup; no candidate timing has been observed",
+  "independentCells": [
+    "jmdict-AB",
+    "jmdict-BA",
+    "jitendex-AB",
+    "jitendex-BA",
+    "vndb-AB",
+    "vndb-BA"
+  ],
+  "schedule": {
+    "warmups": 4,
+    "candidatePairsPerCell": 12,
+    "interleavedIdenticalControlPairsPerCell": 4,
+    "freshProfilePerObservation": true,
+    "flags": {},
+    "expectedParserWorkers": 3,
+    "vndbSahUnits": [
+      37,
+      37
+    ]
+  },
+  "advancement": {
+    "allCells": "Every prescribed observation, strict source/package/fixture/browser identity, complete semantic equality and separate memory audit must pass; skipped/failed observations do not become passes",
+    "jmdictEachIndependentCell": {
+      "minimumPairedMedianSavingMs": 5,
+      "minimumPairedMedianSavingPercent": 0.5,
+      "minimumFasterPairs": 9,
+      "equalWorkChangePercentStrictlyLessThan": 0,
+      "upper95PairedBootstrapChangeMsStrictlyLessThan": 0,
+      "upper95PairedBootstrapChangePercentStrictlyLessThan": 0,
+      "absoluteIdenticalControlMedianPercentBelowFractionOfCandidateSaving": 0.5,
+      "absoluteIdenticalControlEqualWorkPercentBelowFractionOfCandidateEqualWorkSaving": 0.5
+    },
+    "jitendexAndVndbEachIndependentCell": {
+      "maximumMedianPairedRegressionPercent": 1,
+      "maximumEqualWorkRegressionPercent": 1,
+      "maximumUpper95BootstrapRegressionPercent": 3
+    },
+    "bootstrap": "10000 complete-pair resamples per comparison using Python random.Random(897); same draws for ms and percent paired medians; percentile indices249 and9749 in sorted arrays, matching the frozen runner's ratio interval",
+    "memory": "Unchanged qualified memory protocol/audit: median <=+5%, each pair <=+10% for private/PSS, minimum5 valid scans, maximum250ms gaps, separate instrumented observations",
+    "action": "Only a replicated JMdict gain with all cross-corpus safety gates permits a PR; job success by itself is only correctness/memory status"
+  },
+  "failurePolicy": "Retain every failed and completed observation. No unchanged rerun for favorable timing, source repair cannot be pooled with old observations, no relaxed gates, no mixed-host pooling.",
+  "expectedChangedPackageEntries": [
+    "js/dictionary/dictionary-importer.js"
+  ],
+  "expectedAddedPackageEntries": [
+    "js/dictionary/bounded-zip-text-writer.js"
+  ],
+  "limitations": "The previous 13ms late tag read is a single old diagnostic opportunity ceiling. This candidate also uses a bounded byte writer, so any measured effect includes that implementation change; it is not pure scheduling attribution."
+}

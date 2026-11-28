@@ -45,6 +45,7 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/dictionary/bounded-zip-text-writer.js',
     'ext/js/comm/dictionary-import-owner-client.js',
     'ext/js/dictionary/dictionary-zip-read-scope.js',
     'ext/js/dictionary/dense-zip-directory.js',

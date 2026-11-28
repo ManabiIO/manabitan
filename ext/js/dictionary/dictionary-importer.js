@@ -69,6 +69,7 @@ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} fr
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
+import {BoundedZipTextWriter} from './bounded-zip-text-writer.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
@@ -1551,6 +1552,8 @@ export class DictionaryImporter {
         importSession.setSourcePipeline(termBankSourcePipeline);
         archiveOwnership.transfer(archiveReader);
         let initialSourcePrefetch = {fileCount: 0, estimatedBytes: 0};
+        /** @type {{file: ImportFileEntry, text: Promise<string>}|null} */
+        let tagPrefetch = null;
         // Overlap only referenced, metadata-free media with term processing.
         // The final join keeps the archive alive until every started read settles.
         let mediaPrefetch = Promise.resolve();
@@ -2158,6 +2161,16 @@ export class DictionaryImporter {
             ) {
                 void prewarmParallelTermBankParser(this._termBankExperiments);
             }
+            // Retain at most one small decoded tag bank while terms are processed.
+            // Parsing, validation, progress and writes still occur in bank order.
+            // Artifact imports can close their source archive before this point.
+            if (!useTermArtifactFiles && !usePackedTermArtifact && activeTermFiles.length > 0 && tagFiles.length > 0) {
+                const file = tagFiles[0];
+                const text = this._prefetchSmallTagBank(file);
+                if (text !== null) {
+                    tagPrefetch = {file, text};
+                }
+            }
             let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
                 const termFile = activeTermFiles[termFileIndex];
@@ -2715,7 +2728,9 @@ export class DictionaryImporter {
 
             for (const tagFile of tagFiles) {
                 const tTagFile = Date.now();
-                let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle));
+                const prefetchedText = tagPrefetch?.file === tagFile ? tagPrefetch.text : null;
+                let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle, prefetchedText));
+                tagPrefetch = null;
                 step4TimingBreakdown.tagReadMs += Math.max(0, Date.now() - tTagFile);
 
                 const tTagWriteStart = Date.now();
@@ -2917,6 +2932,11 @@ export class DictionaryImporter {
             // A failed sink can leave media decoders pending. Abort and join
             // direct reads before waiting for prefetch or closing the archive.
             await this._directZipReads?.dispose();
+            if (tagPrefetch !== null) {
+                // Preserve the earlier import failure if the unused read fails.
+                await tagPrefetch.text.catch(() => {});
+                tagPrefetch = null;
+            }
             await mediaPrefetch;
             prefetchedNoMetadataMedia.length = 0;
             eventLoopYielder.close();
@@ -4948,12 +4968,14 @@ export class DictionaryImporter {
      * @param {ImportFileEntry[]} files
      * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
      * @param {string} dictionaryTitle
+     * @param {Promise<string>|null} [firstFileText]
      * @returns {Promise<TResult[]>}
      */
-    async _readFileSequence(files, convertEntry, dictionaryTitle) {
+    async _readFileSequence(files, convertEntry, dictionaryTitle, firstFileText = null) {
         const results = [];
         for (const file of files) {
-            const content = await this._getData(file, new TextWriter());
+            const content = await (firstFileText ?? this._getData(file, new TextWriter()));
+            firstFileText = null;
             let entries;
 
             try {
@@ -4978,6 +5000,30 @@ export class DictionaryImporter {
             }
         }
         return results;
+    }
+
+    /**
+     * Start one owned read; its rejection is observed again at the normal tag phase.
+     * Unknown, oversized and preloaded entries keep the existing late read.
+     * @param {ImportFileEntry} file
+     * @returns {Promise<string>|null}
+     */
+    _prefetchSmallTagBank(file) {
+        const uncompressedSize = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+        const compressedSize = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
+        if (
+            typeof uncompressedSize !== 'number' || !Number.isSafeInteger(uncompressedSize) ||
+            uncompressedSize < 0 || uncompressedSize > INLINE_TEXT_ENTRY_MAX_BYTES ||
+            typeof compressedSize !== 'number' || !Number.isSafeInteger(compressedSize) ||
+            compressedSize < 0 || compressedSize > INLINE_TEXT_ENTRY_MAX_BYTES ||
+            Reflect.get(file, 'bytes') instanceof Uint8Array ||
+            typeof Reflect.get(file, 'getData') !== 'function'
+        ) {
+            return null;
+        }
+        const text = this._getData(file, new BoundedZipTextWriter(file.filename, uncompressedSize));
+        void text.catch(() => {});
+        return text;
     }
 
     /**
@@ -6422,7 +6468,7 @@ null;
         // defer the startup avoided for index.json. Binary/media reads retain
         // their existing worker policy.
         let useWebWorkers = this._zipUseWebWorkers;
-        if (useWebWorkers && writer instanceof TextWriter) {
+        if (useWebWorkers && (writer instanceof TextWriter || writer instanceof BoundedZipTextWriter)) {
             const entryMetadata = /** @type {{uncompressedSize?: unknown, compressedSize?: unknown}} */ (/** @type {unknown} */ (entry));
             const uncompressedSize = entryMetadata.uncompressedSize;
             const compressedSize = entryMetadata.compressedSize;
@@ -6436,13 +6482,20 @@ null;
             }
         }
         const read = async (/** @type {AbortSignal|undefined} */ readSignal) => {
-            const result = await getData.call(entry, writer, {
-                useWebWorkers,
-                // zip.js leaves CRC verification disabled unless explicitly requested.
-                // Decoded fallbacks must enforce the raw parser's integrity contract.
-                checkSignature: true,
-                ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
-            });
+            let result;
+            try {
+                result = await getData.call(entry, writer, {
+                    useWebWorkers,
+                    // zip.js leaves CRC verification disabled unless explicitly requested.
+                    // Decoded fallbacks must enforce the raw parser's integrity contract.
+                    checkSignature: true,
+                    ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
+                });
+            } catch (error) {
+                // Closing a decoder-aborted stream can replace its original error.
+                // Keep an actual output-bound failure after ZIP cleanup has joined.
+                throw writer instanceof BoundedZipTextWriter ? (writer.getFailure() ?? error) : error;
+            }
             // zip.js counts bytes actually decoded on the destination stream.
             // A Uint8ArrayWriter may preallocate or pad its returned array, and
             // text decoding can replace invalid UTF-8, so neither result length
