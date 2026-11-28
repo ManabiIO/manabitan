@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:13:35.969773+00:00",
+  "scope": "Concise retained-evidence explanation of JMdict frontier and fixture-specific proof-consumer applicability. No new execution, profiling, timing or inferred speedup. Current a300 full results remain a separate cohort.",
+  "mainFinding": "The proof consumer has a measured activation opportunity in the locked VNDB component fixture:6,324,582 complete suffix proofs. It has zero proofs on locked JMdict and Jitendex. JMdict remains the priority, but these experiments do not establish a JMdict performance improvement.",
+  "whyThisMechanismIsFixtureSpecific": "The consumer requires a successful full bounded byte-equality proof of the complete adjacent row suffix, including independently validated tags/rules/numeric tokens/glossary/sequence/term tags. In the fixed f28 diagnostic, the already-frozen numeric admission rejects all154,409 JMdict and73,243 Jitendex prior-streak opportunities before suffix probing. VNDB has6,324,582 complete proofs. These are workload-specific route counts, not a rule based on dictionary names.",
+  "diagnosticEvidence": [
+    {
+      "dictionary": "jmdict",
+      "artifactAudit": {
+        "path": "numeric-suffix-proof-consumer-corrected-evidence/jmdict/independent-artifact-replay-1/independent-component-audit.json",
+        "bytes": 29408,
+        "sha256": "7ee11a3f2ba94a897f30a03718b7c6830e85bb0f7a4c56e464f337c0278ae4ea"
+      },
+      "frozenBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "rows": 528299,
+      "diagnostic": {
+        "eligibleStreakRows": 154409,
+        "numericRejected": 154409,
+        "attempts": 0,
+        "hits": 0,
+        "actualSuffixSuccessRows": 0,
+        "numericCopyRows": 0,
+        "ordinaryContentComparisonsAvoided": 0
+      },
+      "componentElapsed": {
+        "medianPairedChangePercent": 1.4208505740824384,
+        "fasterPairs": 2,
+        "pairedChangesPercent": [
+          8.100854124603085,
+          -3.2003912817672675,
+          -0.10722910488224491,
+          2.9489302530471218
+        ]
+      },
+      "nativePhase": {
+        "medianPairedChangePercent": 3.043875043875044,
+        "fasterPairs": 1,
+        "pairedChangesPercent": [
+          14.00778210116731,
+          -3.985507246376807,
+          1.454545454545464,
+          4.633204633204624
+        ]
+      },
+      "controlElapsed": {
+        "medianPairedChangePercent": 0.29187714231746487,
+        "fasterPairs": 2,
+        "pairedChangesPercent": [
+          -1.2859589138205396,
+          1.9203578428081514,
+          -0.4285225977703533,
+          1.012276882405283
+        ]
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "artifactAudit": {
+        "path": "numeric-suffix-proof-consumer-corrected-evidence/jitendex/independent-artifact-replay-1/independent-component-audit.json",
+        "bytes": 29444,
+        "sha256": "2d74199f9dec0c46b01949b08b97304bfe0380b6bf28b2320e56d5c5cb510b2f"
+      },
+      "frozenBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "rows": 436555,
+      "diagnostic": {
+        "eligibleStreakRows": 73243,
+        "numericRejected": 73243,
+        "attempts": 0,
+        "hits": 0,
+        "actualSuffixSuccessRows": 0,
+        "numericCopyRows": 0,
+        "ordinaryContentComparisonsAvoided": 0
+      },
+      "componentElapsed": {
+        "medianPairedChangePercent": 0.2791608046135374,
+        "fasterPairs": 2,
+        "pairedChangesPercent": [
+          2.490382012856851,
+          -0.9801886796206971,
+          1.538510288847772,
+          -1.8623997237059986
+        ]
+      },
+      "nativePhase": {
+        "medianPairedChangePercent": 1.7384537881650175,
+        "fasterPairs": 1,
+        "pairedChangesPercent": [
+          3.660565723793674,
+          0.8591065292096189,
+          2.617801047120416,
+          -0.519031141868509
+        ]
+      },
+      "controlElapsed": {
+        "medianPairedChangePercent": -0.25672777524187174,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          -0.048171411448272305,
+          -2.8985253388020493,
+          0.961212143765322,
+          -0.46528413903547117
+        ]
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "artifactAudit": {
+        "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/independent-artifact-replay-after-recovery-1/independent-component-audit.json",
+        "bytes": 29597,
+        "sha256": "ade67deebfbd7e7a699cc5445d03d2c2502075a79039646b051ac0dbe99a36ab"
+      },
+      "frozenBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "rows": 6648310,
+      "diagnostic": {
+        "eligibleStreakRows": 6482124,
+        "numericRejected": 0,
+        "attempts": 6482124,
+        "hits": 6324582,
+        "actualSuffixSuccessRows": 6324582,
+        "numericCopyRows": 6324582,
+        "ordinaryContentComparisonsAvoided": 6324582
+      },
+      "componentElapsed": {
+        "medianPairedChangePercent": -13.036258000381984,
+        "fasterPairs": 4,
+        "pairedChangesPercent": [
+          -13.575682537511147,
+          -12.496833463252822,
+          -15.309224441321112,
+          -9.326240175833844
+        ]
+      },
+      "nativePhase": {
+        "medianPairedChangePercent": -15.93570450224231,
+        "fasterPairs": 4,
+        "pairedChangesPercent": [
+          -16.80997420464316,
+          -15.061434799841456,
+          -18.96483603318846,
+          -11.842633480529907
+        ]
+      },
+      "controlElapsed": {
+        "medianPairedChangePercent": -0.2152174143356278,
+        "fasterPairs": 4,
+        "pairedChangesPercent": [
+          -8.873952250017858,
+          -0.06808721837128218,
+          -0.15947546247889743,
+          -0.27095936619235816
+        ]
+      }
+    }
+  ],
+  "jmdictFrontier": [
+    {
+      "hypothesis": "Keep composite-parser hints in locals until the scan boundary.",
+      "scope": "Frozen9e10 native component experiment, run46103359353.",
+      "evidence": {
+        "path": "composite-hints-evidence/jmdict/independent-audit.json",
+        "bytes": 7840,
+        "sha256": "be9419dc1a1614aa3f0c07b2f9aa2ac5a9cbbc1611254aef2166e6b2e8101420"
+      },
+      "elapsed": {
+        "medianPairedChangePercent": 0.43456667509661506,
+        "fasterPairs": 1,
+        "pairedChangesPercent": [
+          4.3831654601448555,
+          -0.810487315000626,
+          0.021702921572931983,
+          0.8474304286202982
+        ]
+      },
+      "controlElapsed": {
+        "medianPairedChangePercent": -0.5485264661045903,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          1.5936414370979226,
+          -1.0130450574494145,
+          -0.08400787475976616,
+          -1.680307725932963
+        ]
+      },
+      "disposition": "No JMdict gain demonstrated; no performance PR."
+    },
+    {
+      "hypothesis": "Select one prior glossary candidate using an existing bounded key identity plus header-prefix signature.",
+      "scope": "Frozen9e10 corrected component and synthetic-negative cohort, run46119683668.",
+      "evidence": {
+        "path": "jmdict-prefix-selector-corrected-evidence/jmdict/independent-artifact-audit.json",
+        "bytes": 8991,
+        "sha256": "9f3349aa3b17046ec5d6aad0b998450f7dca676b9d9cd21ce8d5b2068fde89f7"
+      },
+      "newExactGlossaryProofs": 80102,
+      "elapsed": {
+        "medianPairedChangePercent": -0.09159410961831635,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          -0.0020780667079021127,
+          -0.18111015252873058,
+          1.046922274556893,
+          -3.2060997321119054
+        ]
+      },
+      "controlElapsed": {
+        "medianPairedChangePercent": 0.6807826130938541,
+        "fasterPairs": 1,
+        "pairedChangesPercent": [
+          0.5904664941621005,
+          0.7710987320256076,
+          0.8831211716646239,
+          -0.8540539452285306
+        ]
+      },
+      "negativeEvidence": {
+        "path": "jmdict-prefix-selector-corrected-evidence/negative/independent-artifact-audit.json",
+        "bytes": 47955,
+        "sha256": "245f7daeff398565922511adef093a70e41dee758394569075aa22d67c461fb6"
+      },
+      "negativeCase2": {
+        "name": "same-key-short-full-misses",
+        "medianElapsedChangePercent": 5.872604548929134,
+        "fasterPairs": 0,
+        "largestAbsoluteControlChangePercent": 2.0119124522421696,
+        "frozenRejectRuleTriggered": true
+      },
+      "disposition": "JMdict result is effectively flat; case2 triggers the predeclared negative-screen rejection. No performance PR."
+    },
+    {
+      "hypothesis": "Gate that selector with prior recent-content reuse, preserving the baseline late interner.",
+      "scope": "Separate frozen9e10 nine-cell component cohort, run46124542684.",
+      "evidence": {
+        "path": "jmdict-prior-streak-selector-evidence/primary-log-audit.json",
+        "bytes": 192712,
+        "sha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193"
+      },
+      "decision": {
+        "status": "Do not promote this exact successor to full import qualification or a performance PR",
+        "jmdictProspectiveComponentGatePassed": false,
+        "reason": "JMdict has3/4 faster pairs and median\u22122.1224309%, while largest absolute same-code paired change is7.48181595%; the frozen gate required all4 faster and an effect larger than that control.",
+        "negativeRiskRuleTriggered": false,
+        "negativeAmbiguity": "Case6 median+3.3405957% has only3/4 slower pairs, so it does not trigger the declared all4 rule; cases4/5/6 adverse directions and all outliers remain retained as uncertainty, not proof of nonregression.",
+        "nonTargetInterpretation": "Jitendex+0.3964726% and VNDB\u22120.3826250% are small relative to controls; no complete-import or equivalence claim.",
+        "currentDevelopLimitation": "Frozen9e10 source only; develop advanced to dcfc02a0. No current-source gain transfer.",
+        "noRetryNoReplacementNoThresholdTuning": true
+      },
+      "disposition": "JMdict median reduction does not clear the frozen all-four/control gate. No full-import promotion or performance PR."
+    },
+    {
+      "hypothesis": "Use predicted post-glossary sequence span as a negative prefilter.",
+      "scope": "Untimed one-bank-at-a-time opportunity observer only; no production implementation.",
+      "evidence": {
+        "path": "sequence-probe-opportunity/run-1/result.json",
+        "bytes": 254917,
+        "sha256": "4af98e448f02029393858b28f0d4beb41c7f122fe3548a0a3bf549026f795cc5"
+      },
+      "attemptedRows": 353880,
+      "fullProofs": 5459,
+      "potentialGlossaryValidationBytes": 1147359,
+      "disposition": "Only5,459 potential proofs among353,880 attempted rows; not implemented. These byte counts are not avoided wall time or I/O."
+    },
+    {
+      "hypothesis": "Let a later exact-content match supply an otherwise missing deferred-CRC glossary witness.",
+      "scope": "Source and retained-receipt review only; no new instrumentation or implementation.",
+      "evidence": {
+        "path": "numeric-suffix-proof-consumer/jmdict-consumer-opportunity-review.json",
+        "bytes": 6912,
+        "sha256": "51e06287485efbfffb70974d54562b4c68e2ce36e102c73af9c3cc60a43e1001"
+      },
+      "otherCorporaEvidence": {
+        "path": "numeric-suffix-proof-consumer/crc-consumer-other-corpora-coverage.json",
+        "bytes": 4153,
+        "sha256": "d90659372a0dfa276efd6b705437dae3979751470c58e4c48713c4d24b6e22f6"
+      },
+      "disposition": "Locked JMdict and Jitendex are ineligible under the unchanged compression-ratio admission. VNDB eligibility is known, but the missing-witness intersection remains unmeasured; no byte or gain claim."
+    }
+  ],
+  "limits": [
+    "These different-source and different-algorithm experiments are not pooled or treated as replications.",
+    "Diagnostic skipped-work counts and inclusive profile totals do not predict enclosing wall-time savings.",
+    "A component signal does not qualify complete-browser latency, storage or whole-process sampled memory.",
+    "The current full252 target result is governed by its exact frozen2% threshold and controls; no rounding or extrapolation from the f28 component result."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "root-raw-auditor-producer-filename-correction-review",
+  "recordedAtUtc": "2026-11-28T11:55:26.137550+00:00",
+  "oldVersion": "v2",
+  "oldSha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+  "newVersion": "v3",
+  "newSha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+  "approved": true,
+  "exactlyOneFilenameReplacement": true,
+  "producerWorkflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "criteriaSha256Unchanged": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "allOtherAuditorBytesIdentical": true,
+  "nativeObserverAcquisitionOrRawDataChanged": false,
+  "priorRawFailurePreserved": true,
+  "rootReviewPreparationFailure": {
+    "inputMistake": "First root comparison selected originalv1 file743a instead of v2, which also differed by two already-reviewed output-provenance fields. Exact single-replacement assertion correctly stopped.",
+    "dataExecutedOrChanged": false,
+    "resolution": "Selected exact v2 whose Gitblobbf755 was frozen before data retrieval; then the one-replacement invariant passed."
+  },
+  "scope": "Same original ZIP and logs; evidence postprocessing only, no selected acquisition retry."
+}

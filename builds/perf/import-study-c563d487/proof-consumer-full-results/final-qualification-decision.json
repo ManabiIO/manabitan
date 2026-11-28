@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:20:51.538391+00:00",
+  "scope": "Final source-bound review of the complete a300-to-61ac qualification; each original order cell remains separate. This review adds no observations and changes no gate.",
+  "runId": 46141233321,
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "primaryIndexSha256": "2e385a89c6acd0e9915da871c3264fb16130826edf19e5e90fdeca946542dfd1",
+  "originalRawIndexSha256": "8109382e7590e352c31fc4eba98437863fca2ce7714eda037f2471dd6f0f7758",
+  "packageAccountingSha256": "5f737881108025345d7eea18b4e5faeff166b82c38dd019b83a70b0485fbf7e2",
+  "status": "unqualified-for-performance-PR",
+  "cells": {
+    "jmdict-AB": {
+      "jobId": 140967463788,
+      "primaryAuditSha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+      "rawAuditSha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+      "medianPairedChangePercent": -0.38636855636422496,
+      "medianPairedChangeMs": -3.5499999999592546,
+      "fasterPairs": 7,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        -1.9612844737780022,
+        1.4489308347128027
+      ],
+      "identicalCodeMedianPercent": 0.3298665986952276,
+      "identicalCodeRangePercent": [
+        -2.761341222874647,
+        1.3870246085037286
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 4,
+      "qualifiedMemoryObservations": 4,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": true,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": false
+    },
+    "jmdict-BA": {
+      "jobId": 140967463778,
+      "primaryAuditSha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+      "rawAuditSha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+      "medianPairedChangePercent": 1.0241768965175702,
+      "medianPairedChangeMs": 9,
+      "fasterPairs": 2,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        0.44172925068028945,
+        1.889465192718065
+      ],
+      "identicalCodeMedianPercent": 1.180615125844442,
+      "identicalCodeRangePercent": [
+        -0.13675213675345965,
+        3.734051270041361
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 2,
+      "qualifiedMemoryObservations": 4,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": true,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": false
+    },
+    "jitendex-AB": {
+      "jobId": 140967463739,
+      "primaryAuditSha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6",
+      "rawAuditSha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967",
+      "medianPairedChangePercent": -0.37831935508045866,
+      "medianPairedChangeMs": -5.100000000005821,
+      "fasterPairs": 6,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        -3.074168479263384,
+        1.9284714605263265
+      ],
+      "identicalCodeMedianPercent": -1.0994844825471306,
+      "identicalCodeRangePercent": [
+        -10.665115377160783,
+        1.2655512655500134
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 4,
+      "qualifiedMemoryObservations": 4,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": true,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": false
+    },
+    "jitendex-BA": {
+      "jobId": 140967463737,
+      "primaryAuditSha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+      "rawAuditSha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+      "medianPairedChangePercent": -0.37663848592044413,
+      "medianPairedChangeMs": -5.150000000023283,
+      "fasterPairs": 9,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        -0.9724112026222809,
+        0.18131061553323669
+      ],
+      "identicalCodeMedianPercent": 1.0612735025024245,
+      "identicalCodeRangePercent": [
+        -2.749468436102309,
+        2.0358842914674824
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 4,
+      "qualifiedMemoryObservations": 4,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": true,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": false
+    },
+    "vndb-AB": {
+      "jobId": 140967463725,
+      "primaryAuditSha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8",
+      "rawAuditSha256": "d23ebdefbd9aa61a67dd8b3486c46daf1d5dd67705413da42a46cbb453f5022e",
+      "medianPairedChangePercent": -6.456496372136344,
+      "medianPairedChangeMs": -368.8999999999796,
+      "fasterPairs": 12,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        -7.849683112036954,
+        -4.8439288254995
+      ],
+      "identicalCodeMedianPercent": -1.2947733975335662,
+      "identicalCodeRangePercent": [
+        -2.876806607021165,
+        -0.10652416875979176
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 0,
+      "qualifiedMemoryObservations": 2,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": false,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": true
+    },
+    "vndb-BA": {
+      "jobId": 140967463694,
+      "primaryAuditSha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7",
+      "rawAuditSha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60",
+      "medianPairedChangePercent": -1.995784404609613,
+      "medianPairedChangeMs": -86.54999999998836,
+      "fasterPairs": 9,
+      "pairs": 12,
+      "descriptiveBootstrap95Percent": [
+        -3.576857856922533,
+        -0.021093738198030287
+      ],
+      "identicalCodeMedianPercent": 0.7057714693122552,
+      "identicalCodeRangePercent": [
+        -6.102203511286309,
+        2.5467321912465923
+      ],
+      "absoluteControlsLargerThanAbsoluteCandidateMedian": 3,
+      "qualifiedMemoryObservations": 4,
+      "memoryObservations": 4,
+      "prospectiveMemoryScreenPassed": true,
+      "rawIntegrityPass": true,
+      "mechanicalTargetThresholdPass": false
+    }
+  },
+  "decisionReasons": [
+    {
+      "cell": "vndb-BA",
+      "reason": "The exact median reduction is 1.995784404609613%, below the frozen minimum 2%; it is not rounded to pass. Nine of 12 pairs and the negative descriptive interval pass their separate conditions. Three of 4 absolute A/A changes exceed the candidate median effect, so the required materially smaller identical-code variation is not established."
+    },
+    {
+      "cell": "vndb-AB",
+      "reason": "Latency passes the target screen, but baseline A1 and A2 fail the fixed 250 ms memory-coverage rule at 286.319545 ms and 265.378713 ms. Their maxima and paired growth metrics remain null. No candidate memory-growth conclusion follows from the missing qualification."
+    },
+    {
+      "cell": "combined",
+      "reason": "All target conditions were required in each order cell, with all correctness/storage/package/memory gates. Neither pooling the two effects nor rerunning the failed coverage is allowed. The exact candidate remains unqualified."
+    }
+  ],
+  "nonTargetInterpretation": {
+    "jmdict": "AB interval crosses zero; BA is slower but its magnitude is within identical-code variation and the result is not replicated. No JMdict gain or established non-regression is claimed.",
+    "jitendex": "Both intervals cross zero and the small medians are within controls. No Jitendex gain or established non-regression is claimed."
+  },
+  "retention": {
+    "reports": 252,
+    "primaryRecords": 330,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 22,
+    "rawScans": 2108,
+    "allObservationsFailuresAndOutliersRetained": true,
+    "acquisitionRetries": 0,
+    "unqualifiedMemoryAssignedZero": false
+  },
+  "limits": [
+    "Six distinct job assignments do not establish distinct physical hosts.",
+    "Intervals are descriptive finite-cohort summaries, not universal performance guarantees.",
+    "Earlier f28 component and older-base full cohorts remain separate; their gains or failures are not transferred to this current comparison.",
+    "The separately reviewed fresh correctness at exact commit 61ac, source, package, storage and raw integrity receipts remain valid even though performance promotion fails."
+  ]
+}

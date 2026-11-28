@@ -1,0 +1,1268 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:19:20.519Z",
+  "scope": "Original terminal GitHub API metadata; read-only, no artifact download or acquisition change",
+  "runId": 46141233321,
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "jobs": [
+    {
+      "id": 140967406330,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0k_q-g",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967406330",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967406330",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:39Z",
+      "started_at": "2026-11-28T11:43:41Z",
+      "completed_at": "2026-11-28T11:43:53Z",
+      "name": "Bind exact product to fresh current correctness",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:42Z",
+          "completed_at": "2026-11-28T11:43:42Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:42Z",
+          "completed_at": "2026-11-28T11:43:46Z"
+        },
+        {
+          "name": "Verify frozen qualification tooling and syntax",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:43:46Z",
+          "completed_at": "2026-11-28T11:43:47Z"
+        },
+        {
+          "name": "Fetch only frozen source and correctness commits",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:43:47Z",
+          "completed_at": "2026-11-28T11:43:47Z"
+        },
+        {
+          "name": "Bind the eight-file product to fresh exact-head correctness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:43:47Z",
+          "completed_at": "2026-11-28T11:43:49Z"
+        },
+        {
+          "name": "Retain original correctness artifact and every binding outcome",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:43:49Z",
+          "completed_at": "2026-11-28T11:43:51Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T11:43:51Z",
+          "completed_at": "2026-11-28T11:43:51Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T11:43:51Z",
+          "completed_at": "2026-11-28T11:43:51Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967406330",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093437,
+      "runner_name": "GitHub Actions 1000093437",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463694,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLDg",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463694",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463694",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T12:06:21Z",
+      "name": "vndb (BA)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:55Z",
+          "completed_at": "2026-11-28T11:43:56Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:44:00Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:44:00Z",
+          "completed_at": "2026-11-28T11:44:12Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:12Z",
+          "completed_at": "2026-11-28T11:44:26Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:26Z",
+          "completed_at": "2026-11-28T11:44:26Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:26Z",
+          "completed_at": "2026-11-28T11:44:27Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:27Z",
+          "completed_at": "2026-11-28T11:44:28Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:28Z",
+          "completed_at": "2026-11-28T11:44:33Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:33Z",
+          "completed_at": "2026-11-28T11:44:33Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:33Z",
+          "completed_at": "2026-11-28T12:06:12Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T12:06:12Z",
+          "completed_at": "2026-11-28T12:06:12Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T12:06:12Z",
+          "completed_at": "2026-11-28T12:06:13Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T12:06:13Z",
+          "completed_at": "2026-11-28T12:06:15Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T12:06:15Z",
+          "completed_at": "2026-11-28T12:06:17Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-28T12:06:17Z",
+          "completed_at": "2026-11-28T12:06:18Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T12:06:18Z",
+          "completed_at": "2026-11-28T12:06:18Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T12:06:18Z",
+          "completed_at": "2026-11-28T12:06:18Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T12:06:18Z",
+          "completed_at": "2026-11-28T12:06:18Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463694",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093439,
+      "runner_name": "GitHub Actions 1000093439",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463725,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLLQ",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463725",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463725",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T12:16:53Z",
+      "name": "vndb (AB)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:55Z",
+          "completed_at": "2026-11-28T11:43:56Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:44:00Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:44:00Z",
+          "completed_at": "2026-11-28T11:44:13Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:13Z",
+          "completed_at": "2026-11-28T11:44:30Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:30Z",
+          "completed_at": "2026-11-28T11:44:30Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:30Z",
+          "completed_at": "2026-11-28T11:44:31Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:31Z",
+          "completed_at": "2026-11-28T11:44:31Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:31Z",
+          "completed_at": "2026-11-28T11:44:37Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:37Z",
+          "completed_at": "2026-11-28T11:44:37Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:37Z",
+          "completed_at": "2026-11-28T12:16:44Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T12:16:44Z",
+          "completed_at": "2026-11-28T12:16:44Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T12:16:44Z",
+          "completed_at": "2026-11-28T12:16:45Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T12:16:45Z",
+          "completed_at": "2026-11-28T12:16:49Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T12:16:49Z",
+          "completed_at": "2026-11-28T12:16:51Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 26,
+          "started_at": "2026-11-28T12:16:51Z",
+          "completed_at": "2026-11-28T12:16:51Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T12:16:51Z",
+          "completed_at": "2026-11-28T12:16:51Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T12:16:51Z",
+          "completed_at": "2026-11-28T12:16:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T12:16:52Z",
+          "completed_at": "2026-11-28T12:16:52Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463725",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093441,
+      "runner_name": "GitHub Actions 1000093441",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463737,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLOQ",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463737",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463737",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T11:51:08Z",
+      "name": "jitendex (BA)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:55Z",
+          "completed_at": "2026-11-28T11:43:56Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:44:00Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:44:00Z",
+          "completed_at": "2026-11-28T11:44:12Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:12Z",
+          "completed_at": "2026-11-28T11:44:26Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:26Z",
+          "completed_at": "2026-11-28T11:44:27Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:27Z",
+          "completed_at": "2026-11-28T11:44:27Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:27Z",
+          "completed_at": "2026-11-28T11:44:28Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:28Z",
+          "completed_at": "2026-11-28T11:44:34Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:34Z",
+          "completed_at": "2026-11-28T11:44:34Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:34Z",
+          "completed_at": "2026-11-28T11:51:00Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T11:51:00Z",
+          "completed_at": "2026-11-28T11:51:00Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T11:51:00Z",
+          "completed_at": "2026-11-28T11:51:00Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T11:51:00Z",
+          "completed_at": "2026-11-28T11:51:03Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T11:51:03Z",
+          "completed_at": "2026-11-28T11:51:05Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-28T11:51:05Z",
+          "completed_at": "2026-11-28T11:51:06Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T11:51:06Z",
+          "completed_at": "2026-11-28T11:51:06Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T11:51:06Z",
+          "completed_at": "2026-11-28T11:51:06Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T11:51:06Z",
+          "completed_at": "2026-11-28T11:51:06Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463737",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093440,
+      "runner_name": "GitHub Actions 1000093440",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463739,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLOw",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463739",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463739",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T11:51:48Z",
+      "name": "jitendex (AB)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:43:57Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:57Z",
+          "completed_at": "2026-11-28T11:44:01Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:44:01Z",
+          "completed_at": "2026-11-28T11:44:15Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:15Z",
+          "completed_at": "2026-11-28T11:44:33Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:33Z",
+          "completed_at": "2026-11-28T11:44:34Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:34Z",
+          "completed_at": "2026-11-28T11:44:35Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:35Z",
+          "completed_at": "2026-11-28T11:44:35Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:35Z",
+          "completed_at": "2026-11-28T11:44:43Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:43Z",
+          "completed_at": "2026-11-28T11:44:43Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:43Z",
+          "completed_at": "2026-11-28T11:51:38Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T11:51:38Z",
+          "completed_at": "2026-11-28T11:51:38Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T11:51:38Z",
+          "completed_at": "2026-11-28T11:51:38Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T11:51:38Z",
+          "completed_at": "2026-11-28T11:51:41Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T11:51:41Z",
+          "completed_at": "2026-11-28T11:51:44Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-28T11:51:44Z",
+          "completed_at": "2026-11-28T11:51:45Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T11:51:45Z",
+          "completed_at": "2026-11-28T11:51:45Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T11:51:45Z",
+          "completed_at": "2026-11-28T11:51:45Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T11:51:45Z",
+          "completed_at": "2026-11-28T11:51:45Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463739",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093442,
+      "runner_name": "GitHub Actions 1000093442",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463778,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLYg",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463778",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463778",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T11:50:55Z",
+      "name": "jmdict (BA)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:43:56Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:44:00Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:44:00Z",
+          "completed_at": "2026-11-28T11:44:12Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:12Z",
+          "completed_at": "2026-11-28T11:44:28Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:28Z",
+          "completed_at": "2026-11-28T11:44:29Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:29Z",
+          "completed_at": "2026-11-28T11:44:29Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:29Z",
+          "completed_at": "2026-11-28T11:44:30Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:30Z",
+          "completed_at": "2026-11-28T11:44:35Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:35Z",
+          "completed_at": "2026-11-28T11:44:35Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:35Z",
+          "completed_at": "2026-11-28T11:50:44Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T11:50:44Z",
+          "completed_at": "2026-11-28T11:50:44Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T11:50:44Z",
+          "completed_at": "2026-11-28T11:50:44Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T11:50:44Z",
+          "completed_at": "2026-11-28T11:50:47Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T11:50:47Z",
+          "completed_at": "2026-11-28T11:50:50Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-28T11:50:50Z",
+          "completed_at": "2026-11-28T11:50:52Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T11:50:52Z",
+          "completed_at": "2026-11-28T11:50:52Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T11:50:52Z",
+          "completed_at": "2026-11-28T11:50:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T11:50:53Z",
+          "completed_at": "2026-11-28T11:50:53Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463778",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093444,
+      "runner_name": "GitHub Actions 1000093444",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 140967463788,
+      "run_id": 46141233321,
+      "workflow_name": "Current-base suffix proof consumer import qualification c563d487",
+      "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46141233321",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0lDLbA",
+      "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140967463788",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463788",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T11:43:53Z",
+      "started_at": "2026-11-28T11:43:55Z",
+      "completed_at": "2026-11-28T11:52:16Z",
+      "name": "jmdict (AB)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T11:43:55Z",
+          "completed_at": "2026-11-28T11:43:56Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T11:43:56Z",
+          "completed_at": "2026-11-28T11:43:59Z"
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T11:43:59Z",
+          "completed_at": "2026-11-28T11:44:13Z"
+        },
+        {
+          "name": "Install pinned Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T11:44:13Z",
+          "completed_at": "2026-11-28T11:44:30Z"
+        },
+        {
+          "name": "Verify pinned browser before any observation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T11:44:30Z",
+          "completed_at": "2026-11-28T11:44:31Z"
+        },
+        {
+          "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T11:44:31Z",
+          "completed_at": "2026-11-28T11:44:32Z"
+        },
+        {
+          "name": "Validate the independent observer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T11:44:32Z",
+          "completed_at": "2026-11-28T11:44:33Z"
+        },
+        {
+          "name": "Fetch frozen product sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-28T11:44:33Z",
+          "completed_at": "2026-11-28T11:44:38Z"
+        },
+        {
+          "name": "Bind the unchanged observer to the frozen baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-28T11:44:38Z",
+          "completed_at": "2026-11-28T11:44:38Z"
+        },
+        {
+          "name": "Run registered complete-import and separate memory cohorts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-28T11:44:38Z",
+          "completed_at": "2026-11-28T11:52:06Z"
+        },
+        {
+          "name": "Preserve prospective criteria and exact correctness provenance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-28T11:52:06Z",
+          "completed_at": "2026-11-28T11:52:06Z"
+        },
+        {
+          "name": "Print every raw observation and final result as compact JSON lines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-28T11:52:06Z",
+          "completed_at": "2026-11-28T11:52:06Z"
+        },
+        {
+          "name": "Preserve all original non-package evidence in bounded log chunks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T11:52:06Z",
+          "completed_at": "2026-11-28T11:52:10Z"
+        },
+        {
+          "name": "Retain all original evidence including failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T11:52:10Z",
+          "completed_at": "2026-11-28T11:52:13Z"
+        },
+        {
+          "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-28T11:52:13Z",
+          "completed_at": "2026-11-28T11:52:13Z"
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-28T11:52:13Z",
+          "completed_at": "2026-11-28T11:52:13Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-28T11:52:13Z",
+          "completed_at": "2026-11-28T11:52:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-28T11:52:14Z",
+          "completed_at": "2026-11-28T11:52:14Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140967463788",
+      "labels": [
+        "ubuntu-26.04"
+      ],
+      "runner_id": 1000093443,
+      "runner_name": "GitHub Actions 1000093443",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 15262223153,
+      "name": "suffix-proof-982-c563d487-vndb-BA",
+      "size_in_bytes": 38490576,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262223153",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262223153/zip",
+      "expired": false,
+      "created_at": "2026-11-28T12:06:17Z",
+      "expires_at": "2026-12-12T12:06:15Z",
+      "updated_at": "2026-11-28T12:06:17Z",
+      "digest": "sha256:947e3ff3d0f84a5b81b9fc904ede4b02f881cee55b526e1541f1ede99da74881",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15262171083,
+      "name": "suffix-proof-982-c563d487-jmdict-AB",
+      "size_in_bytes": 38197376,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262171083",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262171083/zip",
+      "expired": false,
+      "created_at": "2026-11-28T11:52:13Z",
+      "expires_at": "2026-12-12T11:52:11Z",
+      "updated_at": "2026-11-28T11:52:13Z",
+      "digest": "sha256:91658a4c161e674341daf2bed1cc971688b0c6e1076cd23eb7c1b338ec4da9a0",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15262058367,
+      "name": "suffix-proof-982-c563d487-vndb-AB",
+      "size_in_bytes": 38472572,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262058367",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262058367/zip",
+      "expired": false,
+      "created_at": "2026-11-28T12:16:51Z",
+      "expires_at": "2026-12-12T12:16:49Z",
+      "updated_at": "2026-11-28T12:16:51Z",
+      "digest": "sha256:1365dfe62832ff617e1fe9c2cd1e72220cf6432b27d82809f08a38562a8b7fa9",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15261892671,
+      "name": "suffix-proof-982-c563d487-jmdict-BA",
+      "size_in_bytes": 38380476,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15261892671",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15261892671/zip",
+      "expired": false,
+      "created_at": "2026-11-28T11:50:50Z",
+      "expires_at": "2026-12-12T11:50:48Z",
+      "updated_at": "2026-11-28T11:50:50Z",
+      "digest": "sha256:168cf257b01b1a8694e995b9ba68d54369a254c6f13046b1efe58130737f12ad",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15261873081,
+      "name": "suffix-proof-982-c563d487-jitendex-AB",
+      "size_in_bytes": 38318726,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15261873081",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15261873081/zip",
+      "expired": false,
+      "created_at": "2026-11-28T11:51:44Z",
+      "expires_at": "2026-12-12T11:51:41Z",
+      "updated_at": "2026-11-28T11:51:44Z",
+      "digest": "sha256:4f8493e34fe4276bc86503d09428eb7f566a6115750cfe0ce968b225836c893c",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15260894982,
+      "name": "suffix-proof-982-c563d487-jitendex-BA",
+      "size_in_bytes": 38273418,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260894982",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260894982/zip",
+      "expired": false,
+      "created_at": "2026-11-28T11:51:05Z",
+      "expires_at": "2026-12-12T11:51:03Z",
+      "updated_at": "2026-11-28T11:51:05Z",
+      "digest": "sha256:c5ec117589639f25da0b7a9f718f8f2e5e7765e63aa0c054e6dbbe411a5cde12",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    },
+    {
+      "id": 15260889272,
+      "name": "suffix-proof-982-c563d487-correctness-reuse-1",
+      "size_in_bytes": 159185,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260889272",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260889272/zip",
+      "expired": false,
+      "created_at": "2026-11-28T11:43:50Z",
+      "expires_at": "2026-12-12T11:43:49Z",
+      "updated_at": "2026-11-28T11:43:50Z",
+      "digest": "sha256:fb2955c3f17039552eaa1f7127167a7cc2a529d9275d3f935b24badea03d1e8e",
+      "workflow_run": {
+        "id": 46141233321,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+        "head_sha": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+      }
+    }
+  ]
+}

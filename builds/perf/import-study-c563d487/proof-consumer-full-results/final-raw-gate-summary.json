@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:21:11.647919+00:00",
+  "scope": "Final secondary original-raw gate summary for the source-bound a300 to 61ac full cohort. No new acquisition; not a replacement for per-cell primary latency decisions.",
+  "runId": 46141233321,
+  "rawIndex": {
+    "path": "numeric-suffix-proof-consumer-982-full-evidence/all-six-independent-raw-index.json",
+    "bytes": 69392,
+    "sha256": "8109382e7590e352c31fc4eba98437863fca2ce7714eda037f2471dd6f0f7758"
+  },
+  "source": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "sourceTrees": {
+      "A": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "B": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+    },
+    "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+    "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+    "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "allSixOriginalRawIntegrityAuditsPassed": true,
+    "sameEightReviewedProductFiles": true,
+    "sameFrozenPolicySourceHashes": true,
+    "releaseEntriesPerArm": 582,
+    "onlyChangedReleaseEntries": [
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "releaseEntryMaps": {
+      "A": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+      "B": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b"
+    },
+    "scope": "Source/flags/browser/fixture identities and reported actual release-member hashes reconcile in all six cells. Outer release ZIP bytes were excluded by the frozen post-acquisition producer and were not separately downloaded."
+  },
+  "semanticsAndStorage": {
+    "rawReports": 252,
+    "primaryRecords": 330,
+    "allCanonicalReceiptsRecomputedWithUnchangedFrozenValidator": true,
+    "sameDictionarySemanticSha256": {
+      "jmdict": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb",
+      "jitendex": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da",
+      "vndb": "15b71877b4813bf34b99ddd33206a94d6f0eda533d26208c25fd3d8288bc3fb7"
+    },
+    "canonicalLogicalOpfsBytesAfterRestart": {
+      "jmdict": 43684317,
+      "jitendex": 67630172,
+      "vndb": 609340619
+    },
+    "layout": {
+      "sahFiles": 8,
+      "reserveFiles": 7,
+      "reserveFileLogicalBytes": 4096,
+      "activeSahLogicalBytes": {
+        "jmdict": 339968,
+        "jitendex": 5623808,
+        "vndb": 315392
+      },
+      "activeSah4096ByteUnits": {
+        "jmdict": 83,
+        "jitendex": 1373,
+        "vndb": 77
+      },
+      "vndbProspectiveExactBound": [
+        77,
+        77
+      ],
+      "knownNonSahPathsAndBytes": "Unchanged canonical path/size set required by frozen validator, with only predeclared generation/opaque name canonicalization."
+    },
+    "meaning": "These are exact logical OPFS file sizes/layout after restart, not physical disk-block allocation or total browser disk footprint."
+  },
+  "memory": {
+    "separateMemoryObservations": 24,
+    "qualifiedObservations": 22,
+    "allObservedRawScans": 2108,
+    "policy": {
+      "maxCoveredGapMs": 250,
+      "minimumEligibleStableFullyReadSamples": 5,
+      "maximumPairedMedianPssOrPrivateGrowthPercent": 5,
+      "maximumAnyPairedPssOrPrivateGrowthPercent": 10
+    },
+    "passedCells": [
+      "jmdict-AB",
+      "jmdict-BA",
+      "jitendex-AB",
+      "jitendex-BA",
+      "vndb-BA"
+    ],
+    "failedCell": "vndb-AB",
+    "unqualified": [
+      {
+        "cell": "vndb-AB",
+        "name": "A1",
+        "arm": "A",
+        "pair": 1,
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 286.319545,
+        "maximumGapProof": [
+          {
+            "leftNs": 1940943432578,
+            "rightNs": 1941229752123,
+            "gapMs": 286.319545
+          }
+        ],
+        "allObservedSampleCount": 103,
+        "sampleCount": 37,
+        "stableFullyReadTreeSampleCount": 37,
+        "overlappingImportSampleCount": 37,
+        "fullyContainedImportSampleCount": 36,
+        "stableFullyReadImportSampleCount": 36,
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null
+      },
+      {
+        "cell": "vndb-AB",
+        "name": "A2",
+        "arm": "A",
+        "pair": 2,
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 265.378713,
+        "maximumGapProof": [
+          {
+            "leftNs": 2032279562660,
+            "rightNs": 2032544941373,
+            "gapMs": 265.378713
+          }
+        ],
+        "allObservedSampleCount": 104,
+        "sampleCount": 37,
+        "stableFullyReadTreeSampleCount": 37,
+        "overlappingImportSampleCount": 37,
+        "fullyContainedImportSampleCount": 35,
+        "stableFullyReadImportSampleCount": 35,
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "maxSampledPssKiB": null,
+        "maxSampledPrivateKiB": null
+      }
+    ],
+    "interpretation": "VNDB AB cannot establish the required sampled whole-browser process-tree memory qualification. Both baseline observations fail only the covered-interval gap; no unavailable or unreadable samples caused the failure. Their qualified PSS/private maxima and paired metrics remain null. This is missing coverage, not evidence of a memory regression.",
+    "precision": "sampleCount/stableFullyReadTreeSampleCount/overlappingImportSampleCount are 37 each; fullyContainedImportSampleCount/stableFullyReadImportSampleCount are 36 for A1 and 35 for A2. These boundary definitions are not interchangeable.",
+    "limit": "Finite sampled process-tree PSS/private measurements do not establish exact instantaneous peaks."
+  },
+  "postprocessing": {
+    "originalCriteriaFilenameFailurePreserved": true,
+    "correctedAuditor": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v3.py",
+      "bytes": 34614,
+      "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0"
+    },
+    "exactFilenameAmendment": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.json",
+      "bytes": 2867,
+      "sha256": "9a2216d274dfed5bd570cd90f16f4983422c047d870a92d90ea9ed32181758d9"
+    },
+    "unmodifiedAcquisitionAndObservations": true,
+    "repeatedAcquisitionOrSelectedReplacement": false,
+    "allTimingAndControlOutliersRetained": true
+  },
+  "performanceBoundary": "The raw layer preserves every latency/control observation but does not pool hosts, subtract controls, round the target threshold or turn a faster component result into a full-import qualification. Root owns the exact frozen per-cell latency interpretation.",
+  "jmdictPriorityContext": {
+    "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-frontier-and-proof-scope.json",
+    "bytes": 12208,
+    "sha256": "ea05709425f2257481eaa496c193340f3716da40ea9a4ae695b5cd23f9ac35d0"
+  }
+}

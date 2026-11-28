@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records.tar.gz",
+    "bytes": 2398716,
+    "sha256": "142d503dac297a672f3971623ef17f768631814373e6964dd8f79924f917ee14",
+    "gitBlobSha1": "7d8622b65925b3cf6f7caae9a99be6147285560f"
+  },
+  "memberCount": 18,
+  "rawMemberBytes": 4514090,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-job.log",
+      "bytes": 3589957,
+      "sha256": "e6a0287fa159a1ccf399e04a01fe796bdd25a3877e5b7c58f282dc3d3cec748c",
+      "gitBlobSha1": "61799578a9c16ce75d55d59bdeeab35dfee6ea54"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+      "bytes": 20882,
+      "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+      "gitBlobSha1": "a2a87f1c5d1da0805de807cda37bf83e2318bfd3"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-records.jsonl",
+      "bytes": 362612,
+      "sha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a",
+      "gitBlobSha1": "ecdcdb4e91216abd13eab4de582e094c6bc89dad"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-command-1.status.json",
+      "bytes": 1105,
+      "sha256": "2e7aeb5f9a7a5eef39236e995c97016c62fef2efb99094e8bd737578da6afb6c",
+      "gitBlobSha1": "08d5fa54e5af361556fbce058619b67ea0d741d0"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-command-1.stderr.log",
+      "bytes": 1099,
+      "sha256": "f6a7b25a41b90520c61883991d26c7b771a02d7219e75c3b9f9c88612715c692",
+      "gitBlobSha1": "cff34d7208d594240f7c1dfbe775428721a20285"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-command-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-v3-command-1.status.json",
+      "bytes": 877,
+      "sha256": "057ff0850bf176aa2b8f59607a08f8a14b63773605655bb02ca52049b561fac0",
+      "gitBlobSha1": "22bac5f171ba8445d2ce8e439d60eb7cb3c9ed4a"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-v3-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-v3-command-1.stdout.log",
+      "bytes": 1454,
+      "sha256": "5d79e9d14a9bc7f80262575bd4453d445dbc8eeea80abcf985e090243dfec794",
+      "gitBlobSha1": "ec5438368197cbc1c9a5808bd670d8ae9a9ae2f8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "bytes": 18341,
+      "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+      "gitBlobSha1": "871b1b606b0bdb6955aa9511ecc73c6ff3dc00b9"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/primary-records.jsonl",
+      "bytes": 362612,
+      "sha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a",
+      "gitBlobSha1": "ecdcdb4e91216abd13eab4de582e094c6bc89dad"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-archive-recovery.json",
+      "bytes": 40353,
+      "sha256": "cf7015c9c6bad4595e6ac5cca96d63dc5c7cc3cf58485d5eb56474a636d97f25",
+      "gitBlobSha1": "f90c2f4406d5321ea945278777c17be4a132e51f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-audit-failure-20261128T115319113368.json",
+      "bytes": 1395,
+      "sha256": "c4c246a0982fbc176ef652158bb3a09412da4044ccec55509efa1cc0248e71aa",
+      "gitBlobSha1": "6b74394063db423eec9dbb10d333c716ce97f571"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-manifest.json",
+      "bytes": 51529,
+      "sha256": "e3a1c100a098934932d8af24edf5fb50f24a1be3a2dea3077b494c302b02467e",
+      "gitBlobSha1": "04d5ad8c64a1c11829880d75aadac81b741f1b7c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+      "bytes": 60192,
+      "sha256": "1ae6c72054010009ccc38a8be613b78d75d6b9926a7dc2cee311b3b01d61b9d7",
+      "gitBlobSha1": "50875fc503f57dea71eff58465157233ad176f72"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/recovery-command-1.status.json",
+      "bytes": 1355,
+      "sha256": "0e534cf7c0732d9e91d09a848280f2741a75251a96ec30051c1e5ae5edfd2b0c",
+      "gitBlobSha1": "bb7a4834cf01d9214396097d62624fd2dec261cf"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/recovery-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/recovery-command-1.stdout.log",
+      "bytes": 327,
+      "sha256": "f88082d5ff2cb8176fd6c2d8758fde56a18e989c7c81bea24455584189522adb",
+      "gitBlobSha1": "69e79f423aa841692217ed299e8f292654d60a30"
+    }
+  ],
+  "roundTripExact": true
+}

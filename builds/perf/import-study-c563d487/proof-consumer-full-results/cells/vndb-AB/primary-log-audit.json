@@ -1,0 +1,680 @@
+{
+  "dictionary": "vndb",
+  "order": "AB",
+  "errors": [
+    "Original correctness/memory gate did not pass",
+    "Separate memory observations/audit did not qualify",
+    "A1: memory coverage did not qualify",
+    "A1: emitted prospective memory coverage is insufficient",
+    "A2: memory coverage did not qualify",
+    "A2: emitted prospective memory coverage is insufficient"
+  ],
+  "allChecksPass": false,
+  "cohort": {
+    "attempt": "1",
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "dictionary": "vndb",
+    "expectedObservationCount": 42,
+    "fixture": {
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "expectedTitle": "VNDB Characters by Bee",
+      "label": "VNDB",
+      "mediaBytes": 188131284,
+      "mediaFiles": 146570,
+      "mediaRows": 146570,
+      "optional": true,
+      "release": "1.0.0",
+      "revision": "395525135651",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "termRows": 6648310,
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+    },
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "order": "AB",
+    "runId": "46141233321",
+    "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+    "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9"
+  },
+  "browser": {
+    "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "version": "153.0.8010.12",
+    "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+  },
+  "sourceIdentities": {
+    "A": {
+      "arm": "A",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+      "packageEntryCount": 582,
+      "packageSha256": "3f348c2500f7ff6cbf875e243c90436772fd2fe6e1b3985e8377aaca734790e9",
+      "sha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "3f348c2500f7ff6cbf875e243c90436772fd2fe6e1b3985e8377aaca734790e9",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+    },
+    "B": {
+      "arm": "B",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+        "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+      "packageEntryCount": 582,
+      "packageSha256": "84f82afee542cc07f31a3f9fefbc2d84b8415f40c2fa59915e39d32e37a8259f",
+      "sha": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "84f82afee542cc07f31a3f9fefbc2d84b8415f40c2fa59915e39d32e37a8259f",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+    }
+  },
+  "originalCorrectnessMemoryStatus": {
+    "status": "memory-or-semantics-failed",
+    "memoryPassed": false
+  },
+  "observations": 42,
+  "rawTimes": [
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "arm": "A",
+      "position": 11,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5703,
+      "reportedImportMs": 5703
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "arm": "C",
+      "position": 12,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5593.299999999988,
+      "reportedImportMs": 5593.299999999988
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "arm": "A",
+      "position": 20,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5812,
+      "reportedImportMs": 5812
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "arm": "C",
+      "position": 19,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5644.79999999993,
+      "reportedImportMs": 5644.79999999993
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "arm": "A",
+      "position": 27,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5726.399999999907,
+      "reportedImportMs": 5726.399999999907
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "arm": "C",
+      "position": 28,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5720.300000000047,
+      "reportedImportMs": 5720.300000000047
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "arm": "A",
+      "position": 36,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5780.800000000047,
+      "reportedImportMs": 5780.800000000047
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "arm": "C",
+      "position": 35,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5742.300000000047,
+      "reportedImportMs": 5742.300000000047
+    },
+    {
+      "id": "exhaustive-media-A",
+      "kind": "exhaustive-media",
+      "arm": "A",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5695.300000000047,
+      "reportedImportMs": 5695.300000000047
+    },
+    {
+      "id": "exhaustive-media-B",
+      "kind": "exhaustive-media",
+      "arm": "B",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5426.600000000093,
+      "reportedImportMs": 5426.600000000093
+    },
+    {
+      "id": "memory/A1",
+      "index": 1,
+      "arm": "A",
+      "name": "A1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 6952.300000000047,
+      "reportedImportMs": 6952.300000000047
+    },
+    {
+      "id": "memory/A2",
+      "index": 4,
+      "arm": "A",
+      "name": "A2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 6860.700000000186,
+      "reportedImportMs": 6860.700000000186
+    },
+    {
+      "id": "memory/B1",
+      "index": 2,
+      "arm": "B",
+      "name": "B1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 6574.09999999986,
+      "reportedImportMs": 6574.09999999986
+    },
+    {
+      "id": "memory/B2",
+      "index": 3,
+      "arm": "B",
+      "name": "B2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 6645.799999999814,
+      "reportedImportMs": 6645.799999999814
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "A",
+      "position": 5,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5686.100000000006,
+      "reportedImportMs": 5686.100000000006
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "B",
+      "position": 6,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5333.900000000023,
+      "reportedImportMs": 5333.900000000023
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "A",
+      "position": 8,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5639.100000000035,
+      "reportedImportMs": 5639.100000000035
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "B",
+      "position": 7,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5478,
+      "reportedImportMs": 5478
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "A",
+      "position": 9,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 6013.099999999977,
+      "reportedImportMs": 6013.099999999977
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "B",
+      "position": 10,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5477.099999999977,
+      "reportedImportMs": 5477.099999999977
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "A",
+      "position": 14,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5728.099999999977,
+      "reportedImportMs": 5728.099999999977
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "B",
+      "position": 13,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5317.900000000023,
+      "reportedImportMs": 5317.900000000023
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "A",
+      "position": 15,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5739,
+      "reportedImportMs": 5739
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "B",
+      "position": 16,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5353.400000000023,
+      "reportedImportMs": 5353.400000000023
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "A",
+      "position": 18,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5692.099999999977,
+      "reportedImportMs": 5692.099999999977
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "B",
+      "position": 17,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5404.900000000023,
+      "reportedImportMs": 5404.900000000023
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "A",
+      "position": 21,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5720.800000000047,
+      "reportedImportMs": 5720.800000000047
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "B",
+      "position": 22,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5252.099999999977,
+      "reportedImportMs": 5252.099999999977
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "A",
+      "position": 24,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5769.699999999953,
+      "reportedImportMs": 5769.699999999953
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "B",
+      "position": 23,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5336.599999999977,
+      "reportedImportMs": 5336.599999999977
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "A",
+      "position": 25,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5704.800000000047,
+      "reportedImportMs": 5704.800000000047
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "B",
+      "position": 26,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5455.599999999977,
+      "reportedImportMs": 5455.599999999977
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "A",
+      "position": 30,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5699.800000000047,
+      "reportedImportMs": 5699.800000000047
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "B",
+      "position": 29,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5435.199999999953,
+      "reportedImportMs": 5435.199999999953
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "A",
+      "position": 31,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 6150,
+      "reportedImportMs": 6150
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "B",
+      "position": 32,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5408.400000000023,
+      "reportedImportMs": 5408.400000000023
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "A",
+      "position": 34,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5654.5,
+      "reportedImportMs": 5654.5
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "B",
+      "position": 33,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 5358.5,
+      "reportedImportMs": 5358.5
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "A",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5916.600000000006,
+      "reportedImportMs": 5916.600000000006
+    },
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "B",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5303.799999999988,
+      "reportedImportMs": 5303.799999999988
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "A",
+      "position": 4,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5665.099999999977,
+      "reportedImportMs": 5665.099999999977
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "B",
+      "position": 3,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 5399,
+      "reportedImportMs": 5399
+    }
+  ],
+  "candidateVsBaseline": {
+    "count": 12,
+    "ratios": [
+      0.9380594783770981,
+      0.9714316114273495,
+      0.9108612861918142,
+      0.92838812171576,
+      0.9328105941801749,
+      0.9495441049876224,
+      0.918070899174929,
+      0.9249354385843319,
+      0.9563174870284553,
+      0.9535773185023876,
+      0.8794146341463452,
+      0.9476523123176231
+    ],
+    "baselineMs": [
+      5686.100000000006,
+      5639.100000000035,
+      6013.099999999977,
+      5728.099999999977,
+      5739,
+      5692.099999999977,
+      5720.800000000047,
+      5769.699999999953,
+      5704.800000000047,
+      5699.800000000047,
+      6150,
+      5654.5
+    ],
+    "candidateMs": [
+      5333.900000000023,
+      5478,
+      5477.099999999977,
+      5317.900000000023,
+      5353.400000000023,
+      5404.900000000023,
+      5252.099999999977,
+      5336.599999999977,
+      5455.599999999977,
+      5435.199999999953,
+      5408.400000000023,
+      5358.5
+    ],
+    "baselineMedianMs": 5712.800000000047,
+    "candidateMedianMs": 5381.700000000012,
+    "medianPairedChangeMs": -368.8999999999796,
+    "medianPairedChangePercent": -6.456496372136344,
+    "equalWorkChangePercent": -6.626722796186668,
+    "worstPairChangePercent": -2.856838857265054,
+    "fasterPairs": 12,
+    "descriptiveBootstrap95Percent": [
+      -7.849683112036954,
+      -4.8439288254995
+    ]
+  },
+  "identicalCodeControl": {
+    "count": 4,
+    "ratios": [
+      0.9807645099070644,
+      0.9712319339297883,
+      0.9989347583124021,
+      0.9933400221422641
+    ],
+    "baselineMs": [
+      5703,
+      5812,
+      5726.399999999907,
+      5780.800000000047
+    ],
+    "candidateMs": [
+      5593.299999999988,
+      5644.79999999993,
+      5720.300000000047,
+      5742.300000000047
+    ],
+    "baselineMedianMs": 5753.599999999977,
+    "candidateMedianMs": 5682.549999999988,
+    "medianPairedChangeMs": -74.10000000000582,
+    "medianPairedChangePercent": -1.2947733975335662,
+    "equalWorkChangePercent": -1.3964781819284955,
+    "worstPairChangePercent": -0.10652416875979176,
+    "fasterPairs": 4,
+    "descriptiveBootstrap95Percent": [
+      -2.876806607021165,
+      -0.10652416875979176
+    ]
+  },
+  "storageBytes": 609340619,
+  "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+  "memoryMetrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    }
+  },
+  "memoryAudit": {
+    "everyObservationQualified": false,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": null,
+        "medianPairedChangePercent": null
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": null,
+        "medianPairedChangePercent": null
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": false,
+    "rawScanCount": 411,
+    "schemaVersion": 1
+  },
+  "recomputedMemoryMetrics": {
+    "maxSampledPssKiB": {
+      "medianPairedChangePercent": null,
+      "maximumPairedChangePercent": null
+    },
+    "maxSampledPrivateKiB": {
+      "medianPairedChangePercent": null,
+      "maximumPairedChangePercent": null
+    }
+  },
+  "recomputedMemoryPass": false,
+  "memoryAuditScope": "Four emitted observation summaries, coverage bounds and paired metric arithmetic independently checked. Per-process raw scan reconstruction remains the unchanged CI audit; originals retained in Actions artifacts.",
+  "mechanicalTargetThresholdPass": true,
+  "mechanicalNonTargetHoldSignal": false,
+  "identicalCodeChangePercentRange": [
+    -2.876806607021165,
+    -0.10652416875979176
+  ],
+  "promotionDecision": "No per-host automatic promotion; requires both independent hosts, controls review, all gates, and non-target review under frozen prospective criteria.",
+  "controlInterpretation": "Materially smaller identical-code variation requires explicit review; no control subtraction or host pooling.",
+  "runId": 46141233321,
+  "jobId": 140967463725,
+  "auditorSha256": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003",
+  "expectedSha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+  "primaryLogSha256": "813ee28b9ebfe7ad930c05220c8ca6804dccd20cf3a3733612c63237a3d16206",
+  "primaryLogBytes": 3681141,
+  "rawTaggedRecordsSha256": "3e530b2e3216862cd40a68b4a90da6e784063e2c94fdf4d8f756b4b5897762b0",
+  "rawTaggedRecordsBytes": 376837,
+  "recordedAtUtc": "2026-11-28T12:18:35.679Z",
+  "originalLogConsumedWithoutChanges": true
+}

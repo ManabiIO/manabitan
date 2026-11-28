@@ -1,0 +1,11 @@
+--- raw-evidence-audit-v2.py
++++ raw-evidence-audit-v3.py
+@@ -304,7 +304,7 @@
+                           'fixtureLockSha256': sha(fixture_lock.read_bytes()),
+                           'observerSha256': source_hashes[source_paths[0]], 'workflowSha256': expected['workflowSha256'],
+                           'logExtractionPolicy': 'Read-only after acquisition; every raw report discovered, no timing or semantic replacements'}
+-        provenance = {'prospective-complete-import-criteria.json': expected['criteriaSha256'], **expected['provenanceHashes']}
++        provenance = {'prospective-review-criteria.json': expected['criteriaSha256'], **expected['provenanceHashes']}
+         for filename, expected_sha in provenance.items():
+             assert sha(z.read(filename)) == expected_sha
+         source_projection = []

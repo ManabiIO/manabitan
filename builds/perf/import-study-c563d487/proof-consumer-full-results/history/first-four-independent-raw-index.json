@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:56:01.169605+00:00",
+  "scope": "First four completed current-source non-target original raw archives, reports and process scans. No target timing decision and no new acquisition.",
+  "runId": 46141233321,
+  "toolingHead": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "expected": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-expected.json",
+    "bytes": 6838,
+    "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+    "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf"
+  },
+  "publicationBinding": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/publication-binding.json",
+    "bytes": 4147,
+    "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+    "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863"
+  },
+  "recoverySource": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/recover-raw-archive-v2.py",
+    "bytes": 12954,
+    "sha256": "d23e55c961851b39dc0a000e4274500655bf3beee4f76f47ec0d6bce94a70330",
+    "gitBlobSha1": "66ccde540f093449baca577c064b399f115b15e6"
+  },
+  "auditorSource": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v3.py",
+    "bytes": 34614,
+    "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+    "gitBlobSha1": "f27d724b11665ec96ee8ad5a8afe69e9ecace86d"
+  },
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140967463788,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18329,
+        "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+        "gitBlobSha1": "cfc9fe294b4f8d122534322ed1929f19541bcbfc"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2160510,
+        "sha256": "ed39f0fb245b2cc12b2f0723f8ab5b70e8fcbc93d82effa9e7c22a827920e9e2",
+        "gitBlobSha1": "0033df83faf07cbe4d0c7263927ab505ab3d1a56"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39308,
+        "sha256": "2be9395c18028206be3e78bec716d716c75dcd581b304772b5a0d75e0724b05b",
+        "gitBlobSha1": "3fb121c999bf8ce0a727d237b2ae4952660e904d"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60205,
+        "sha256": "2255467e5f165dfbafb9f05b4fd05439ccd0f3618465fcd25f6e5ae3b3684742",
+        "gitBlobSha1": "285a2cb85690021c999d8b34b1d656a6c8db37cb"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-job.log",
+        "bytes": 3431521,
+        "sha256": "b2cb128c26221fa9c3619924cc1499ff0750c1b4d7f5115d6592318345a07911",
+        "gitBlobSha1": "efc32b92f6abb852002955e8c31a612da4a31e11"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-records.jsonl",
+        "bytes": 362187,
+        "sha256": "94fb550676a4e40c94bc4e71767a75ff9361a21f7f4b112bdb7ad8248ea7ad8e",
+        "gitBlobSha1": "7fa5cde8d8b883e2e50dff4f23a4e80275264be0"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+        "bytes": 20917,
+        "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+        "gitBlobSha1": "c04608ec322f9a32d90f452cfb448584ed45eb49"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 267,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.521336541881585,
+            "maximumPairedChangePercent": -1.100204475485922
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.9577977161181148,
+            "maximumPairedChangePercent": -0.97123719464145
+          }
+        }
+      },
+      "semanticSha256": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb"
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140967463778,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18341,
+        "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+        "gitBlobSha1": "871b1b606b0bdb6955aa9511ecc73c6ff3dc00b9"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2277726,
+        "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed",
+        "gitBlobSha1": "87379cc4c392ba2bf01871de68b73d817109f46a"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 40353,
+        "sha256": "cf7015c9c6bad4595e6ac5cca96d63dc5c7cc3cf58485d5eb56474a636d97f25",
+        "gitBlobSha1": "f90c2f4406d5321ea945278777c17be4a132e51f"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60192,
+        "sha256": "1ae6c72054010009ccc38a8be613b78d75d6b9926a7dc2cee311b3b01d61b9d7",
+        "gitBlobSha1": "50875fc503f57dea71eff58465157233ad176f72"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-job.log",
+        "bytes": 3589957,
+        "sha256": "e6a0287fa159a1ccf399e04a01fe796bdd25a3877e5b7c58f282dc3d3cec748c",
+        "gitBlobSha1": "61799578a9c16ce75d55d59bdeeab35dfee6ea54"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-records.jsonl",
+        "bytes": 362612,
+        "sha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a",
+        "gitBlobSha1": "ecdcdb4e91216abd13eab4de582e094c6bc89dad"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+        "bytes": 20882,
+        "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+        "gitBlobSha1": "a2a87f1c5d1da0805de807cda37bf83e2318bfd3"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 385,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.815300867200731,
+            "maximumPairedChangePercent": 2.7969668623117228
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.521770580657001,
+            "maximumPairedChangePercent": 3.6359183423559482
+          }
+        }
+      },
+      "semanticSha256": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb"
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140967463739,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18421,
+        "sha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967",
+        "gitBlobSha1": "6691bff9fdc98f2d59f22148035776de957f8388"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2231469,
+        "sha256": "aee1884b7d6124e92af1fbd82e45cab08328dd6de935483b15939e0cf3d14846",
+        "gitBlobSha1": "c3c286b101890e3d520738766da5d4787913121e"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39973,
+        "sha256": "c92e3fae29d5c462a564037a53b13ce748923a5cca9e06e8a9db43d89ab0d786",
+        "gitBlobSha1": "9ba6dde8574dce143cb3d92aaef7eddfc3de11d7"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60230,
+        "sha256": "6964e85eb9373f19d9737c00f2f5a8310e653b8be7a372c65e6e75ec85f2ab24",
+        "gitBlobSha1": "4a9afb09310cc13286d1a8e344754f8b2711ff97"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-job.log",
+        "bytes": 3528422,
+        "sha256": "39d4130b66fa670ec8fbd935dadf7973d5d23365a6d109c11aa09b81ed7d6409",
+        "gitBlobSha1": "17913fe4a65ef7842a6c9138fe88ec00e112fd22"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-records.jsonl",
+        "bytes": 363328,
+        "sha256": "ea61b2a28f8016a6d8c8a1e79dba4b5b0eb9496211a523ee07cd1f0bcd81e4a1",
+        "gitBlobSha1": "95dbb3b53307dceed8b73005c816c1c536f5e192"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6",
+        "gitBlobSha1": "7a386d72fa22d8396f4d281585e236e18331a8a2"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 326,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.6804841608513532,
+            "maximumPairedChangePercent": 0.17874788188925184
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -2.260505525454742,
+            "maximumPairedChangePercent": 0.35961711354381976
+          }
+        }
+      },
+      "semanticSha256": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da"
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140967463737,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18424,
+        "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+        "gitBlobSha1": "b422cce388a55167e344443b995fc4aa3a6aca2a"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2205404,
+        "sha256": "0285ee591f2808de8285d18e30afee5c6738a9f9e895e0b66e79bdf2b0533d83",
+        "gitBlobSha1": "bbc06c4041fd0acc95bd03878c0e151ebf146acd"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39697,
+        "sha256": "6887812c79648f0e4bd344076bd9c2c9bc741ade968c726bd293488dafb18433",
+        "gitBlobSha1": "58fccba997d6282cdcd54d7bfe98f952dfb50ac0"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60228,
+        "sha256": "48b8913d542387c309e7f4a39bbc7ab966a137ead0a79bc0f68ea1eb07cadbf1",
+        "gitBlobSha1": "6956d2d37712f542dfeacb5ba2b209034173e31c"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-job.log",
+        "bytes": 3493205,
+        "sha256": "4ee7c3dc807ae85fb77fedd6f78d4bf6dc8c003089bf9c332d33efe2e2f8435d",
+        "gitBlobSha1": "78e391743305467948114686b9cddb66963b7594"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-records.jsonl",
+        "bytes": 363358,
+        "sha256": "8a51c3b2665cc518693ee39b2980d083ffe5d4355fe7a99768757c913ae0d491",
+        "gitBlobSha1": "0e83672ecb1cdc3a5698dc8467494ef8feed76ce"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+        "gitBlobSha1": "f8552473b6c7b1387e47f65031fbdbc76c8a6a67"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 301,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.1116382600679264,
+            "maximumPairedChangePercent": 3.9740840751836037
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.5290302586898508,
+            "maximumPairedChangePercent": 5.542553456922583
+          }
+        }
+      },
+      "semanticSha256": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da"
+    }
+  ],
+  "totals": {
+    "completedCells": 4,
+    "pendingCells": [
+      "vndb-AB",
+      "vndb-BA"
+    ],
+    "rawReports": 168,
+    "primaryRecords": 220,
+    "archiveMembers": 1264,
+    "memoryObservations": 16,
+    "qualifiedMemoryObservations": 16,
+    "rawScans": 1279
+  },
+  "crossCellChecks": {
+    "sameArm582EntryMapSha256": {
+      "A": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+      "B": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b"
+    },
+    "sameDictionarySemanticSha256": {
+      "jmdict": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb",
+      "jitendex": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da"
+    },
+    "allPass": true
+  },
+  "postprocessorHistory": {
+    "originalV2Source": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v2.py",
+      "bytes": 34623,
+      "sha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+      "gitBlobSha1": "bf755667b8f62cef383c96f0c8cb43db4774d6a5"
+    },
+    "firstFailure": {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-audit-failure-20261128T115319113368.json",
+      "bytes": 1395,
+      "sha256": "c4c246a0982fbc176ef652158bb3a09412da4044ccec55509efa1cc0248e71aa",
+      "gitBlobSha1": "6b74394063db423eec9dbb10d333c716ce97f571"
+    },
+    "amendment": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.json",
+      "bytes": 2867,
+      "sha256": "9a2216d274dfed5bd570cd90f16f4983422c047d870a92d90ea9ed32181758d9",
+      "gitBlobSha1": "30780dd21b1cf3851f51232fbe92071cc92ac92b"
+    },
+    "patch": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.patch",
+      "bytes": 823,
+      "sha256": "e98585a75bbe17d290432191110bbe6c7a361ed238f85ddfd1d44fa8c8b1f3be",
+      "gitBlobSha1": "ec0cebf2d0a64148baba0cd545b68723df141a8a"
+    },
+    "independentReview": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-independent-review.json",
+      "bytes": 1828,
+      "sha256": "08dc7a7e851dafd864c3759acd43676bef8986886595fc4f811733aee690be76",
+      "gitBlobSha1": "a9649bff3931a8522bdeb3885e5bc4a15e4f5fcf"
+    },
+    "rootReview": {
+      "path": "root-remote-continuation-20261128/a300-raw-auditor-filename-root-review.json",
+      "bytes": 1246,
+      "sha256": "e3d8b52ce7515fa05e4837d608efac43288541e05a4111cdb34e692f36d4a5f5",
+      "gitBlobSha1": "38290f1c578ff91b8fd3ab260a6eca0ca2d85b45"
+    },
+    "sameOriginalDataReplayed": true
+  },
+  "limits": [
+    "Package ZIP bytes were not downloaded; exact original excluded-package hashes/sizes and582-entry maps are reconciled.",
+    "Memory is sampled process-tree data under unchanged a7f7 gates, not an exact peak.",
+    "All original timing/control outliers remain in the primary records; no subtraction, pooling or reruns.",
+    "Both target cells remain pending in this immutable partial index."
+  ]
+}

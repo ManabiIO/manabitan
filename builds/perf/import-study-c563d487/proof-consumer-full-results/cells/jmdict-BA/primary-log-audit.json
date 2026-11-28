@@ -1,0 +1,671 @@
+{
+  "dictionary": "jmdict",
+  "order": "BA",
+  "errors": [],
+  "allChecksPass": true,
+  "cohort": {
+    "attempt": "1",
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "dictionary": "jmdict",
+    "expectedObservationCount": 42,
+    "fixture": {
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "order": "BA",
+    "runId": "46141233321",
+    "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+    "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9"
+  },
+  "browser": {
+    "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "version": "153.0.8010.12",
+    "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+  },
+  "sourceIdentities": {
+    "A": {
+      "arm": "A",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+      "packageEntryCount": 582,
+      "packageSha256": "e6726848915fdc08a7c0de5c83d0e7d72a41058d9d07ae5fb9357f4cf0cb2fa5",
+      "sha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "e6726848915fdc08a7c0de5c83d0e7d72a41058d9d07ae5fb9357f4cf0cb2fa5",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+    },
+    "B": {
+      "arm": "B",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+        "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+      "packageEntryCount": 582,
+      "packageSha256": "6fd353e2ad2a84f5b58a203c978d7ce942fb0b5acdaa19fa73d95abb6bec7a9e",
+      "sha": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "6fd353e2ad2a84f5b58a203c978d7ce942fb0b5acdaa19fa73d95abb6bec7a9e",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+    }
+  },
+  "originalCorrectnessMemoryStatus": {
+    "status": "correctness-memory-passed",
+    "memoryPassed": true
+  },
+  "observations": 42,
+  "rawTimes": [
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "arm": "A",
+      "position": 12,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 862.3999999999942,
+      "reportedImportMs": 862.3999999999942
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "arm": "C",
+      "position": 11,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 875,
+      "reportedImportMs": 875
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "arm": "A",
+      "position": 19,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 888.7000000000116,
+      "reportedImportMs": 888.7000000000116
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "arm": "C",
+      "position": 20,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 896.7000000000116,
+      "reportedImportMs": 896.7000000000116
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "arm": "A",
+      "position": 28,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 877.5,
+      "reportedImportMs": 877.5
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "arm": "C",
+      "position": 27,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 876.2999999999884,
+      "reportedImportMs": 876.2999999999884
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "arm": "A",
+      "position": 35,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 854.3000000000466,
+      "reportedImportMs": 854.3000000000466
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "arm": "C",
+      "position": 36,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 886.2000000000116,
+      "reportedImportMs": 886.2000000000116
+    },
+    {
+      "id": "exhaustive-media-A",
+      "kind": "exhaustive-media",
+      "arm": "A",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 852.2999999999884,
+      "reportedImportMs": 852.2999999999884
+    },
+    {
+      "id": "exhaustive-media-B",
+      "kind": "exhaustive-media",
+      "arm": "B",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 877.7999999999884,
+      "reportedImportMs": 877.7999999999884
+    },
+    {
+      "id": "memory/A1",
+      "index": 2,
+      "arm": "A",
+      "name": "A1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 1004.8999999999651,
+      "reportedImportMs": 1004.8999999999651
+    },
+    {
+      "id": "memory/A2",
+      "index": 3,
+      "arm": "A",
+      "name": "A2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 983.1000000000349,
+      "reportedImportMs": 983.1000000000349
+    },
+    {
+      "id": "memory/B1",
+      "index": 1,
+      "arm": "B",
+      "name": "B1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 984.9000000000233,
+      "reportedImportMs": 984.9000000000233
+    },
+    {
+      "id": "memory/B2",
+      "index": 4,
+      "arm": "B",
+      "name": "B2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 999.1000000000349,
+      "reportedImportMs": 999.1000000000349
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "A",
+      "position": 6,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 905.8000000000175,
+      "reportedImportMs": 905.8000000000175
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "B",
+      "position": 5,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 882.5,
+      "reportedImportMs": 882.5
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "A",
+      "position": 7,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 869.5,
+      "reportedImportMs": 869.5
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "B",
+      "position": 8,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 876.7999999999884,
+      "reportedImportMs": 876.7999999999884
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "A",
+      "position": 10,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 834.7999999999884,
+      "reportedImportMs": 834.7999999999884
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "B",
+      "position": 9,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 864.2999999999884,
+      "reportedImportMs": 864.2999999999884
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "A",
+      "position": 13,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 877.6000000000058,
+      "reportedImportMs": 877.6000000000058
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "B",
+      "position": 14,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 885.1999999999825,
+      "reportedImportMs": 885.1999999999825
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "A",
+      "position": 16,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 871.4000000000233,
+      "reportedImportMs": 871.4000000000233
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "B",
+      "position": 15,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 873.7999999999884,
+      "reportedImportMs": 873.7999999999884
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "A",
+      "position": 17,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 879.5999999999767,
+      "reportedImportMs": 879.5999999999767
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "B",
+      "position": 18,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 890,
+      "reportedImportMs": 890
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "A",
+      "position": 22,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 888.1000000000349,
+      "reportedImportMs": 888.1000000000349
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "B",
+      "position": 21,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 893.5,
+      "reportedImportMs": 893.5
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "A",
+      "position": 23,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 884,
+      "reportedImportMs": 884
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "B",
+      "position": 24,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 901.6000000000349,
+      "reportedImportMs": 901.6000000000349
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "A",
+      "position": 26,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 882,
+      "reportedImportMs": 882
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "B",
+      "position": 25,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 880.9000000000233,
+      "reportedImportMs": 880.9000000000233
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "A",
+      "position": 29,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 858.5,
+      "reportedImportMs": 858.5
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "B",
+      "position": 30,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 872.1000000000349,
+      "reportedImportMs": 872.1000000000349
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "A",
+      "position": 32,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 880.2000000000116,
+      "reportedImportMs": 880.2000000000116
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "B",
+      "position": 31,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 902.7000000000116,
+      "reportedImportMs": 902.7000000000116
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "A",
+      "position": 33,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 866.9000000000233,
+      "reportedImportMs": 866.9000000000233
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "B",
+      "position": 34,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 882.4000000000233,
+      "reportedImportMs": 882.4000000000233
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "A",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 864.1000000000058,
+      "reportedImportMs": 864.1000000000058
+    },
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "B",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 1131.6000000000058,
+      "reportedImportMs": 1131.6000000000058
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "A",
+      "position": 3,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 872.7000000000116,
+      "reportedImportMs": 872.7000000000116
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "B",
+      "position": 4,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 869.5,
+      "reportedImportMs": 869.5
+    }
+  ],
+  "candidateVsBaseline": {
+    "count": 12,
+    "ratios": [
+      0.9742768823139578,
+      1.008395629672212,
+      1.0353378054623867,
+      1.0086599817684327,
+      1.0027541886618832,
+      1.0118235561619187,
+      1.0060803963517226,
+      1.019909502262483,
+      0.9987528344671466,
+      1.0158415841584565,
+      1.0255623721881386,
+      1.0178798015918786
+    ],
+    "baselineMs": [
+      905.8000000000175,
+      869.5,
+      834.7999999999884,
+      877.6000000000058,
+      871.4000000000233,
+      879.5999999999767,
+      888.1000000000349,
+      884,
+      882,
+      858.5,
+      880.2000000000116,
+      866.9000000000233
+    ],
+    "candidateMs": [
+      882.5,
+      876.7999999999884,
+      864.2999999999884,
+      885.1999999999825,
+      873.7999999999884,
+      890,
+      893.5,
+      901.6000000000349,
+      880.9000000000233,
+      872.1000000000349,
+      902.7000000000116,
+      882.4000000000233
+    ],
+    "baselineMedianMs": 878.5999999999913,
+    "candidateMedianMs": 882.4500000000116,
+    "medianPairedChangeMs": 9,
+    "medianPairedChangePercent": 1.0241768965175702,
+    "equalWorkChangePercent": 1.023013030556963,
+    "worstPairChangePercent": 3.533780546238674,
+    "fasterPairs": 2,
+    "descriptiveBootstrap95Percent": [
+      0.44172925068028945,
+      1.889465192718065
+    ]
+  },
+  "identicalCodeControl": {
+    "count": 4,
+    "ratios": [
+      1.0146103896103964,
+      1.0090019129064924,
+      0.9986324786324654,
+      1.0373405127004136
+    ],
+    "baselineMs": [
+      862.3999999999942,
+      888.7000000000116,
+      877.5,
+      854.3000000000466
+    ],
+    "candidateMs": [
+      875,
+      896.7000000000116,
+      876.2999999999884,
+      886.2000000000116
+    ],
+    "baselineMedianMs": 869.9499999999971,
+    "candidateMedianMs": 881.25,
+    "medianPairedChangeMs": 10.30000000000291,
+    "medianPairedChangePercent": 1.180615125844442,
+    "equalWorkChangePercent": 1.4729105056119574,
+    "worstPairChangePercent": 3.734051270041361,
+    "fasterPairs": 1,
+    "descriptiveBootstrap95Percent": [
+      -0.13675213675345965,
+      3.734051270041361
+    ]
+  },
+  "storageBytes": 43684317,
+  "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+  "memoryMetrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": 3.6359183423559482,
+      "medianPairedChangePercent": 2.521770580657001
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": 2.7969668623117228,
+      "medianPairedChangePercent": 1.815300867200731
+    }
+  },
+  "memoryAudit": {
+    "everyObservationQualified": true,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": 3.6359183423559482,
+        "medianPairedChangePercent": 2.521770580657001
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": 2.7969668623117228,
+        "medianPairedChangePercent": 1.815300867200731
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": true,
+    "rawScanCount": 385,
+    "schemaVersion": 1
+  },
+  "recomputedMemoryMetrics": {
+    "maxSampledPssKiB": {
+      "medianPairedChangePercent": 1.815300867200731,
+      "maximumPairedChangePercent": 2.7969668623117228
+    },
+    "maxSampledPrivateKiB": {
+      "medianPairedChangePercent": 2.521770580657001,
+      "maximumPairedChangePercent": 3.6359183423559482
+    }
+  },
+  "recomputedMemoryPass": true,
+  "memoryAuditScope": "Four emitted observation summaries, coverage bounds and paired metric arithmetic independently checked. Per-process raw scan reconstruction remains the unchanged CI audit; originals retained in Actions artifacts.",
+  "mechanicalTargetThresholdPass": false,
+  "mechanicalNonTargetHoldSignal": true,
+  "identicalCodeChangePercentRange": [
+    -0.13675213675345965,
+    3.734051270041361
+  ],
+  "promotionDecision": "No per-host automatic promotion; requires both independent hosts, controls review, all gates, and non-target review under frozen prospective criteria.",
+  "controlInterpretation": "Materially smaller identical-code variation requires explicit review; no control subtraction or host pooling.",
+  "runId": 46141233321,
+  "jobId": 140967463778,
+  "auditorSha256": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003",
+  "expectedSha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+  "primaryLogSha256": "e6a0287fa159a1ccf399e04a01fe796bdd25a3877e5b7c58f282dc3d3cec748c",
+  "primaryLogBytes": 3589957,
+  "rawTaggedRecordsSha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a",
+  "rawTaggedRecordsBytes": 362612,
+  "recordedAtUtc": "2026-11-28T11:51:45.461Z",
+  "originalLogConsumedWithoutChanges": true
+}

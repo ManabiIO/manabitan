@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:55:10.836584+00:00",
+  "kind": "independent-source-only-current-full-assembler-adaptation-review",
+  "reviewer": "pipeline_audit",
+  "result": "PASS",
+  "oldSha256": "016f06aec92e716517dfefea6e3fe487079a29e047aa63294975716661645187",
+  "newSha256": "65cb39cd9d9e2f63bb40cc372da03746a1c3ce567ef7a8462051f16c17fc1981",
+  "preparationSha256": "cd6fca345e168e0f55a9bfdf76ac7f639df3d0a973e2a1d96a091b353bc48cb8",
+  "patchSha256": "fa1a1ec77913c71f5a66d6d050ef68f3ef7dd14bc50ada5051033354433a48d8",
+  "exactReviewedReplacementsReconstructAllNewBytes": true,
+  "replacementCount": 18,
+  "syntaxPass": true,
+  "review": [
+    "Read the complete final assembler and exact adaptation against016f. All data validation, aggregation, gate and output logic are unchanged.",
+    "Only current tool/source/expected/job/path identities and accurate current-source/physical-host wording differ.",
+    "All six terminal per-cell audits are required; exact original log/tag bytes, frozen source/fixture/browser/package identities and same-arm/same-corpus consistency remain checked.",
+    "All controls, coverage failures, null disqualified memory results and per-order-cell statistics remain preserved. No pooling, automatic promotion, overwrite or selective retry is introduced.",
+    "The assembler does not replace independent raw report/scan replay or the manual review of effects against controls. Fresh same-head correctness and merge checks remain separate."
+  ],
+  "actualFullObservationDataReadForThisReview": false,
+  "assemblerExecuted": false,
+  "nativeTestsBrowserOrNewAcquisition": false,
+  "checkpoint109FilesModified": false
+}

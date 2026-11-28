@@ -1,0 +1,3225 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:31:45.948515+00:00",
+  "kind": "Final source-bound full-browser qualification and no-PR disposition; complete observations with failed qualification.",
+  "evidenceParent": {
+    "commit": "16f8ae5d39bd8c1c41be489fd1ab5386b332b93d",
+    "tree": "a85c9e138350e4ec50b796e7c2e81ab692fadf83",
+    "allExistingFilesPreserved": true
+  },
+  "canonical": {
+    "path": "dev/perf/import-experiments-20260914.md",
+    "bytes": 176547,
+    "sha256": "40381108bebab7d890d6f414081a999dd4b1adc362de6e0475d3441e70a5a109",
+    "gitBlobSha1": "3cc3f388f6463f1c74307223961b3fedd794bf16",
+    "parent": {
+      "commit": "16f8ae5d39bd8c1c41be489fd1ab5386b332b93d",
+      "bytes": 165996,
+      "sha256": "124eb59e5a456553e374ff055b95de42b133063add309d1353bad952ea5b4d1a",
+      "gitBlobSha1": "d5d9e53689fb02107b1cf2884d9e2d3c06afc1aa"
+    },
+    "pureInsertion": true,
+    "insertionOffsetBytes": 55,
+    "insertionBytes": 10551,
+    "insertionSha256": "4c937d13ee8fb8935fd588e41a1e7f27b6300b0e0255935078ec7661c676ab19",
+    "parentBytesReconstructExactly": true
+  },
+  "source": {
+    "runId": 46141233321,
+    "attempt": 1,
+    "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+    "workflowTree": "b0fd76d25763d484e057f1306bea913adc55cfd1",
+    "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "sourceTrees": {
+      "A": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "B": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+    },
+    "productFiles": [
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "bytes": 164931,
+        "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+        "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "bytes": 70091,
+        "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+        "gitBlobSha1": "ff499838f2e1ef5a209de4639e22f5681dbf7c0d"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "bytes": 2588,
+        "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+        "gitBlobSha1": "a7d307b072092a026c7a200d1995441cbd9b2ba8"
+      },
+      {
+        "path": "test/term-bank-row-suffix-proof-consumer.test.js",
+        "bytes": 10092,
+        "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+        "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c"
+      },
+      {
+        "path": "test/term-bank-row-suffix-proof-fixtures.js",
+        "bytes": 6382,
+        "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+        "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab"
+      },
+      {
+        "path": "test/term-bank-row-suffix-reuse.test.js",
+        "bytes": 15101,
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+        "bytes": 3037,
+        "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+        "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-ends.test.js",
+        "bytes": 7560,
+        "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+        "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+      }
+    ],
+    "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "nodeVersion": "v22.22.0",
+    "browser": {
+      "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+      "version": "153.0.8010.12",
+      "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+    },
+    "fixtures": {
+      "jmdict": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-11-22]",
+        "label": "JMdict",
+        "mediaBytes": 0,
+        "mediaFiles": 0,
+        "release": "2026-11-22",
+        "revision": "JMdict.2026-11-22",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "termRows": 528299,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+      },
+      "jitendex": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "label": "Jitendex",
+        "mediaBytes": 4992155,
+        "mediaFiles": 236,
+        "release": "2026.10.03.0",
+        "revision": "2026.10.03.0",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ],
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+      },
+      "vndb": {
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB",
+        "mediaBytes": 188131284,
+        "mediaFiles": 146570,
+        "mediaRows": 146570,
+        "optional": true,
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      }
+    },
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "productionFlagsUnchanged": true,
+    "oldSourceCohortsPooledOrTransferred": false
+  },
+  "protocol": {
+    "jobCells": 6,
+    "physicalHostIndependenceEstablished": false,
+    "inheritedOriginalAuditHostWording": "Original primary audits retain their inherited independent-hosts wording. The final interpretation establishes separately scheduled AB/BA job cells only.",
+    "candidatePairsPerCell": 12,
+    "identicalCodePairsPerCell": 4,
+    "excludedWarmupsPerCell": 4,
+    "exhaustiveMediaReportsPerCell": 2,
+    "separateMemoryReportsPerCell": 4,
+    "timingScope": "Original browser completedAtMs minus startedAtMs; no diagnostic, component or automation duration substituted.",
+    "newAcquisitionOrReplacement": false,
+    "outliersDropped": false,
+    "controlSubtraction": false,
+    "cellPooling": false
+  },
+  "totals": {
+    "primaryRecords": 330,
+    "reports": 252,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 22,
+    "rawScans": 2108,
+    "archiveMembers": 1896,
+    "originalInnerZipBytes": 13557952,
+    "unqualifiedMemoryObservations": 2,
+    "unattemptedReports": 0,
+    "completeRegisteredPlanPresent": true
+  },
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140967463788,
+      "jobConclusion": "success",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/primary-log-audit.json",
+        "bytes": 20917,
+        "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+        "gitBlobSha1": "c04608ec322f9a32d90f452cfb448584ed45eb49"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/independent-raw-evidence-audit.json",
+        "bytes": 18329,
+        "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+        "gitBlobSha1": "cfc9fe294b4f8d122534322ed1929f19541bcbfc"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/raw-evidence.zip",
+        "bytes": 2160510,
+        "sha256": "ed39f0fb245b2cc12b2f0723f8ab5b70e8fcbc93d82effa9e7c22a827920e9e2",
+        "gitBlobSha1": "0033df83faf07cbe4d0c7263927ab505ab3d1a56"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/raw-archive-recovery.json",
+        "bytes": 39308,
+        "sha256": "2be9395c18028206be3e78bec716d716c75dcd581b304772b5a0d75e0724b05b",
+        "gitBlobSha1": "3fb121c999bf8ce0a727d237b2ae4952660e904d"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2304563,
+        "sha256": "c113ea547843d48fc4751bd8c4079b156b54b3f549107552d6789d6d8919a947",
+        "gitBlobSha1": "ab81670e3c01055ba64edaf94d94eb140222d8f0"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/original-logs-and-postprocessing-records-members.json",
+        "bytes": 4722,
+        "sha256": "16ed29062b212af22edc8b9d6122151b16d0f6d6170b8d0edb16bc29ccb70862",
+        "gitBlobSha1": "56410044d586a82d719baf2d66add7eff0c2044d"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          0.9976989854617597,
+          1.0068935803532582,
+          0.9837282952931931,
+          0.9853416684629311,
+          0.8375838926174497,
+          1.016535177780229,
+          0.9945736434109559,
+          0.9770460152312469,
+          0.972327315965866,
+          1.012443438914027,
+          1.0302655265526839,
+          1.0338885697874785
+        ],
+        "baselineMs": [
+          956.1000000000349,
+          928.4000000000233,
+          915.7000000000116,
+          927.8000000000466,
+          1117.5,
+          925.3000000000466,
+          903.0,
+          932.2999999999302,
+          925.0999999999767,
+          884.0,
+          888.7999999999302,
+          870.5
+        ],
+        "candidateMs": [
+          953.9000000000233,
+          934.7999999999884,
+          900.7999999999884,
+          914.1999999999534,
+          936.0,
+          940.6000000000931,
+          898.1000000000931,
+          910.9000000000233,
+          899.5,
+          895.0,
+          915.6999999999534,
+          900.0
+        ],
+        "baselineMedianMs": 925.2000000000116,
+        "candidateMedianMs": 912.5499999999884,
+        "medianPairedChangeMs": -3.5499999999592546,
+        "medianPairedChangePercent": -0.38636855636422496,
+        "equalWorkChangePercent": -1.5660655957750569,
+        "worstPairChangePercent": 3.388856978747845,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Percent": [
+          -1.9612844737780022,
+          1.4489308347128027
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 956.1000000000349,
+            "candidateMs": 953.9000000000233,
+            "changeMs": -2.2000000000116415,
+            "ratio": 0.9976989854617597,
+            "changePercent": -0.23010145382402758
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 928.4000000000233,
+            "candidateMs": 934.7999999999884,
+            "changeMs": 6.399999999965075,
+            "ratio": 1.0068935803532582,
+            "changePercent": 0.6893580353258155
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 915.7000000000116,
+            "candidateMs": 900.7999999999884,
+            "changeMs": -14.900000000023283,
+            "ratio": 0.9837282952931931,
+            "changePercent": -1.6271704706806944
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 927.8000000000466,
+            "candidateMs": 914.1999999999534,
+            "changeMs": -13.600000000093132,
+            "ratio": 0.9853416684629311,
+            "changePercent": -1.4658331537068858
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 1117.5,
+            "candidateMs": 936.0,
+            "changeMs": -181.5,
+            "ratio": 0.8375838926174497,
+            "changePercent": -16.24161073825503
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 925.3000000000466,
+            "candidateMs": 940.6000000000931,
+            "changeMs": 15.300000000046566,
+            "ratio": 1.016535177780229,
+            "changePercent": 1.653517778022895
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 903.0,
+            "candidateMs": 898.1000000000931,
+            "changeMs": -4.899999999906868,
+            "ratio": 0.9945736434109559,
+            "changePercent": -0.5426356589044112
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 932.2999999999302,
+            "candidateMs": 910.9000000000233,
+            "changeMs": -21.399999999906868,
+            "ratio": 0.9770460152312469,
+            "changePercent": -2.29539847687531
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 925.0999999999767,
+            "candidateMs": 899.5,
+            "changeMs": -25.599999999976717,
+            "ratio": 0.972327315965866,
+            "changePercent": -2.767268403413403
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 884.0,
+            "candidateMs": 895.0,
+            "changeMs": 11.0,
+            "ratio": 1.012443438914027,
+            "changePercent": 1.2443438914027105
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 888.7999999999302,
+            "candidateMs": 915.6999999999534,
+            "changeMs": 26.900000000023283,
+            "ratio": 1.0302655265526839,
+            "changePercent": 3.0265526552683886
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 870.5,
+            "candidateMs": 900.0,
+            "changeMs": 29.5,
+            "ratio": 1.0338885697874785,
+            "changePercent": 3.388856978747845
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          0.994000872600349,
+          1.0138702460850373,
+          0.9723865877712535,
+          1.0125964593735557
+        ],
+        "baselineMs": [
+          916.7999999999884,
+          894.0,
+          912.5999999999767,
+          881.1999999999534
+        ],
+        "candidateMs": [
+          911.2999999999884,
+          906.4000000000233,
+          887.4000000000233,
+          892.2999999999302
+        ],
+        "baselineMedianMs": 903.2999999999884,
+        "candidateMedianMs": 899.3499999999767,
+        "medianPairedChangeMs": 2.7999999999883585,
+        "medianPairedChangePercent": 0.3298665986952276,
+        "equalWorkChangePercent": -0.19974477056965423,
+        "worstPairChangePercent": 1.3870246085037286,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -2.761341222874647,
+          1.3870246085037286
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 916.7999999999884,
+            "candidateMs": 911.2999999999884,
+            "changeMs": -5.5,
+            "ratio": 0.994000872600349,
+            "changePercent": -0.5999127399651027
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 894.0,
+            "candidateMs": 906.4000000000233,
+            "changeMs": 12.400000000023283,
+            "ratio": 1.0138702460850373,
+            "changePercent": 1.3870246085037286
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 912.5999999999767,
+            "candidateMs": 887.4000000000233,
+            "changeMs": -25.199999999953434,
+            "ratio": 0.9723865877712535,
+            "changePercent": -2.761341222874647
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 881.1999999999534,
+            "candidateMs": 892.2999999999302,
+            "changeMs": 11.099999999976717,
+            "ratio": 1.0125964593735557,
+            "changePercent": 1.259645937355569
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.761341222874647,
+        1.3870246085037286
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 1.3233352729296488,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 4,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": true,
+      "reproducedPrimaryQualificationErrors": [],
+      "memory": {
+        "qualified": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.521336541881585,
+            "maximumPairedChangePercent": -1.100204475485922
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.9577977161181148,
+            "maximumPairedChangePercent": -0.97123719464145
+          }
+        },
+        "passesDeclaredScreen": true,
+        "observations": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 224.163416,
+            "stableFullyReadImportSampleCount": 6,
+            "maxSampledPssKiB": 1044624,
+            "maxSampledPrivateKiB": 812160
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 197.663081,
+            "stableFullyReadImportSampleCount": 7,
+            "maxSampledPssKiB": 1033131,
+            "maxSampledPrivateKiB": 804272
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 226.617983,
+            "stableFullyReadImportSampleCount": 6,
+            "maxSampledPssKiB": 1028548,
+            "maxSampledPrivateKiB": 793096
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 201.592879,
+            "stableFullyReadImportSampleCount": 7,
+            "maxSampledPssKiB": 1048923,
+            "maxSampledPrivateKiB": 817156
+          }
+        ]
+      },
+      "rawScanCount": 267,
+      "storageBytes": 43684317,
+      "semanticReceiptSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140967463778,
+      "jobConclusion": "success",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/primary-log-audit.json",
+        "bytes": 20882,
+        "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+        "gitBlobSha1": "a2a87f1c5d1da0805de807cda37bf83e2318bfd3"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/independent-raw-evidence-audit.json",
+        "bytes": 18341,
+        "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+        "gitBlobSha1": "871b1b606b0bdb6955aa9511ecc73c6ff3dc00b9"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/raw-evidence.zip",
+        "bytes": 2277726,
+        "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed",
+        "gitBlobSha1": "87379cc4c392ba2bf01871de68b73d817109f46a"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/raw-archive-recovery.json",
+        "bytes": 40353,
+        "sha256": "cf7015c9c6bad4595e6ac5cca96d63dc5c7cc3cf58485d5eb56474a636d97f25",
+        "gitBlobSha1": "f90c2f4406d5321ea945278777c17be4a132e51f"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2398716,
+        "sha256": "142d503dac297a672f3971623ef17f768631814373e6964dd8f79924f917ee14",
+        "gitBlobSha1": "7d8622b65925b3cf6f7caae9a99be6147285560f"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records-members.json",
+        "bytes": 5910,
+        "sha256": "aa48920d9865027c95f5fd1a4666a4858123ff4dcf1d973a3cb450c80f02c7c7",
+        "gitBlobSha1": "eb8e971eedf6af3d2b10f9df5fec37690b92963d"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          0.9742768823139578,
+          1.008395629672212,
+          1.0353378054623867,
+          1.0086599817684327,
+          1.0027541886618832,
+          1.0118235561619187,
+          1.0060803963517226,
+          1.019909502262483,
+          0.9987528344671466,
+          1.0158415841584565,
+          1.0255623721881386,
+          1.0178798015918786
+        ],
+        "baselineMs": [
+          905.8000000000175,
+          869.5,
+          834.7999999999884,
+          877.6000000000058,
+          871.4000000000233,
+          879.5999999999767,
+          888.1000000000349,
+          884.0,
+          882.0,
+          858.5,
+          880.2000000000116,
+          866.9000000000233
+        ],
+        "candidateMs": [
+          882.5,
+          876.7999999999884,
+          864.2999999999884,
+          885.1999999999825,
+          873.7999999999884,
+          890.0,
+          893.5,
+          901.6000000000349,
+          880.9000000000233,
+          872.1000000000349,
+          902.7000000000116,
+          882.4000000000233
+        ],
+        "baselineMedianMs": 878.5999999999913,
+        "candidateMedianMs": 882.4500000000116,
+        "medianPairedChangeMs": 9.0,
+        "medianPairedChangePercent": 1.0241768965175702,
+        "equalWorkChangePercent": 1.023013030556963,
+        "worstPairChangePercent": 3.533780546238674,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          0.44172925068028945,
+          1.889465192718065
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 905.8000000000175,
+            "candidateMs": 882.5,
+            "changeMs": -23.300000000017462,
+            "ratio": 0.9742768823139578,
+            "changePercent": -2.5723117686042185
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 869.5,
+            "candidateMs": 876.7999999999884,
+            "changeMs": 7.2999999999883585,
+            "ratio": 1.008395629672212,
+            "changePercent": 0.8395629672212079
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 834.7999999999884,
+            "candidateMs": 864.2999999999884,
+            "changeMs": 29.5,
+            "ratio": 1.0353378054623867,
+            "changePercent": 3.533780546238674
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 877.6000000000058,
+            "candidateMs": 885.1999999999825,
+            "changeMs": 7.599999999976717,
+            "ratio": 1.0086599817684327,
+            "changePercent": 0.8659981768432745
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 871.4000000000233,
+            "candidateMs": 873.7999999999884,
+            "changeMs": 2.3999999999650754,
+            "ratio": 1.0027541886618832,
+            "changePercent": 0.275418866188315
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 879.5999999999767,
+            "candidateMs": 890.0,
+            "changeMs": 10.400000000023283,
+            "ratio": 1.0118235561619187,
+            "changePercent": 1.1823556161918658
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 888.1000000000349,
+            "candidateMs": 893.5,
+            "changeMs": 5.399999999965075,
+            "ratio": 1.0060803963517226,
+            "changePercent": 0.6080396351722639
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 884.0,
+            "candidateMs": 901.6000000000349,
+            "changeMs": 17.600000000034925,
+            "ratio": 1.019909502262483,
+            "changePercent": 1.9909502262482892
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 882.0,
+            "candidateMs": 880.9000000000233,
+            "changeMs": -1.099999999976717,
+            "ratio": 0.9987528344671466,
+            "changePercent": -0.12471655328534226
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 858.5,
+            "candidateMs": 872.1000000000349,
+            "changeMs": 13.600000000034925,
+            "ratio": 1.0158415841584565,
+            "changePercent": 1.584158415845649
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 880.2000000000116,
+            "candidateMs": 902.7000000000116,
+            "changeMs": 22.5,
+            "ratio": 1.0255623721881386,
+            "changePercent": 2.5562372188138616
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 866.9000000000233,
+            "candidateMs": 882.4000000000233,
+            "changeMs": 15.5,
+            "ratio": 1.0178798015918786,
+            "changePercent": 1.787980159187863
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          1.0146103896103964,
+          1.0090019129064924,
+          0.9986324786324654,
+          1.0373405127004136
+        ],
+        "baselineMs": [
+          862.3999999999942,
+          888.7000000000116,
+          877.5,
+          854.3000000000466
+        ],
+        "candidateMs": [
+          875.0,
+          896.7000000000116,
+          876.2999999999884,
+          886.2000000000116
+        ],
+        "baselineMedianMs": 869.9499999999971,
+        "candidateMedianMs": 881.25,
+        "medianPairedChangeMs": 10.30000000000291,
+        "medianPairedChangePercent": 1.180615125844442,
+        "equalWorkChangePercent": 1.4729105056119574,
+        "worstPairChangePercent": 3.734051270041361,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -0.13675213675345965,
+          3.734051270041361
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 862.3999999999942,
+            "candidateMs": 875.0,
+            "changeMs": 12.60000000000582,
+            "ratio": 1.0146103896103964,
+            "changePercent": 1.4610389610396401
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 888.7000000000116,
+            "candidateMs": 896.7000000000116,
+            "changeMs": 8.0,
+            "ratio": 1.0090019129064924,
+            "changePercent": 0.9001912906492437
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 877.5,
+            "candidateMs": 876.2999999999884,
+            "changeMs": -1.2000000000116415,
+            "ratio": 0.9986324786324654,
+            "changePercent": -0.13675213675345965
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 854.3000000000466,
+            "candidateMs": 886.2000000000116,
+            "changeMs": 31.899999999965075,
+            "ratio": 1.0373405127004136,
+            "changePercent": 3.734051270041361
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -0.13675213675345965,
+        3.734051270041361
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 1.180615125844442,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 2,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": true,
+      "reproducedPrimaryQualificationErrors": [],
+      "memory": {
+        "qualified": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.815300867200731,
+            "maximumPairedChangePercent": 2.7969668623117228
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.521770580657001,
+            "maximumPairedChangePercent": 3.6359183423559482
+          }
+        },
+        "passesDeclaredScreen": true,
+        "observations": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 124.066181,
+            "stableFullyReadImportSampleCount": 12,
+            "maxSampledPssKiB": 1017124,
+            "maxSampledPrivateKiB": 786696
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 124.211858,
+            "stableFullyReadImportSampleCount": 12,
+            "maxSampledPssKiB": 1008715,
+            "maxSampledPrivateKiB": 775776
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 131.784483,
+            "stableFullyReadImportSampleCount": 11,
+            "maxSampledPssKiB": 1016637,
+            "maxSampledPrivateKiB": 783956
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 98.705845,
+            "stableFullyReadImportSampleCount": 12,
+            "maxSampledPssKiB": 1045072,
+            "maxSampledPrivateKiB": 812460
+          }
+        ]
+      },
+      "rawScanCount": 385,
+      "storageBytes": 43684317,
+      "semanticReceiptSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": true
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140967463739,
+      "jobConclusion": "success",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6",
+        "gitBlobSha1": "7a386d72fa22d8396f4d281585e236e18331a8a2"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/independent-raw-evidence-audit.json",
+        "bytes": 18421,
+        "sha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967",
+        "gitBlobSha1": "6691bff9fdc98f2d59f22148035776de957f8388"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/raw-evidence.zip",
+        "bytes": 2231469,
+        "sha256": "aee1884b7d6124e92af1fbd82e45cab08328dd6de935483b15939e0cf3d14846",
+        "gitBlobSha1": "c3c286b101890e3d520738766da5d4787913121e"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/raw-archive-recovery.json",
+        "bytes": 39973,
+        "sha256": "c92e3fae29d5c462a564037a53b13ce748923a5cca9e06e8a9db43d89ab0d786",
+        "gitBlobSha1": "9ba6dde8574dce143cb3d92aaef7eddfc3de11d7"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2370002,
+        "sha256": "5705328ee9d824ecd21ace8fff6b95949c3f393c38aee0a1f7535a2596dd24e1",
+        "gitBlobSha1": "f9749fd3fc9ad67fb70e03eb974e263facda5872"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/original-logs-and-postprocessing-records-members.json",
+        "bytes": 4752,
+        "sha256": "8d3d8db714ca6f5a33b0a35e28ee568f62da596f223ce3f6422ec64b4abbed54",
+        "gitBlobSha1": "064afcf061869a5ae64ce6c53a8208c179ec7b83"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          1.0347227309354692,
+          1.0299851137732956,
+          0.9597888742273808,
+          1.0085843154372307,
+          0.98817306985971,
+          0.9254147402773732,
+          1.0051046452271568,
+          0.9831253050693332,
+          0.9467276565798651,
+          1.1847440071026538,
+          1.0042605430386808,
+          0.9787277561873516
+        ],
+        "baselineMs": [
+          1365.0999999999913,
+          1410.7000000000116,
+          1439.8999999999942,
+          1374.6000000000058,
+          1361.2999999999884,
+          1470.8000000000175,
+          1371.2999999999884,
+          1434.100000000035,
+          1421.0,
+          1351.600000000035,
+          1384.7999999999884,
+          1466.7000000000116
+        ],
+        "candidateMs": [
+          1412.5,
+          1453.0,
+          1382.0,
+          1386.4000000000233,
+          1345.2000000000116,
+          1361.0999999999767,
+          1378.2999999999884,
+          1409.899999999965,
+          1345.2999999999884,
+          1601.2999999999884,
+          1390.6999999999534,
+          1435.5
+        ],
+        "baselineMedianMs": 1397.75,
+        "candidateMedianMs": 1388.5499999999884,
+        "medianPairedChangeMs": -5.100000000005821,
+        "medianPairedChangePercent": -0.37831935508045866,
+        "equalWorkChangePercent": 0.29254861469525384,
+        "worstPairChangePercent": 18.47440071026538,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -3.074168479263384,
+          1.9284714605263265
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 1365.0999999999913,
+            "candidateMs": 1412.5,
+            "changeMs": 47.40000000000873,
+            "ratio": 1.0347227309354692,
+            "changePercent": 3.472273093546918
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 1410.7000000000116,
+            "candidateMs": 1453.0,
+            "changeMs": 42.29999999998836,
+            "ratio": 1.0299851137732956,
+            "changePercent": 2.99851137732956
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 1439.8999999999942,
+            "candidateMs": 1382.0,
+            "changeMs": -57.89999999999418,
+            "ratio": 0.9597888742273808,
+            "changePercent": -4.0211125772619205
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 1374.6000000000058,
+            "candidateMs": 1386.4000000000233,
+            "changeMs": 11.800000000017462,
+            "ratio": 1.0085843154372307,
+            "changePercent": 0.8584315437230705
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 1361.2999999999884,
+            "candidateMs": 1345.2000000000116,
+            "changeMs": -16.099999999976717,
+            "ratio": 0.98817306985971,
+            "changePercent": -1.1826930140290015
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 1470.8000000000175,
+            "candidateMs": 1361.0999999999767,
+            "changeMs": -109.70000000004075,
+            "ratio": 0.9254147402773732,
+            "changePercent": -7.4585259722626756
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 1371.2999999999884,
+            "candidateMs": 1378.2999999999884,
+            "changeMs": 7.0,
+            "ratio": 1.0051046452271568,
+            "changePercent": 0.5104645227156812
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 1434.100000000035,
+            "candidateMs": 1409.899999999965,
+            "changeMs": -24.20000000006985,
+            "ratio": 0.9831253050693332,
+            "changePercent": -1.6874694930666845
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 1421.0,
+            "candidateMs": 1345.2999999999884,
+            "changeMs": -75.70000000001164,
+            "ratio": 0.9467276565798651,
+            "changePercent": -5.327234342013487
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 1351.600000000035,
+            "candidateMs": 1601.2999999999884,
+            "changeMs": 249.69999999995343,
+            "ratio": 1.1847440071026538,
+            "changePercent": 18.47440071026538
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 1384.7999999999884,
+            "candidateMs": 1390.6999999999534,
+            "changeMs": 5.899999999965075,
+            "ratio": 1.0042605430386808,
+            "changePercent": 0.4260543038680842
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 1466.7000000000116,
+            "candidateMs": 1435.5,
+            "changeMs": -31.20000000001164,
+            "ratio": 0.9787277561873516,
+            "changePercent": -2.127224381264836
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          1.0091373480106567,
+          1.0126555126555001,
+          0.9688729623384008,
+          0.8933488462283922
+        ],
+        "baselineMs": [
+          1389.8999999999942,
+          1398.6000000000058,
+          1423.2000000000116,
+          1547.100000000035
+        ],
+        "candidateMs": [
+          1402.6000000000058,
+          1416.2999999999884,
+          1378.9000000000233,
+          1382.0999999999767
+        ],
+        "baselineMedianMs": 1410.9000000000087,
+        "candidateMedianMs": 1392.3499999999913,
+        "medianPairedChangeMs": -15.799999999988358,
+        "medianPairedChangePercent": -1.0994844825471306,
+        "equalWorkChangePercent": -3.106549975690265,
+        "worstPairChangePercent": 1.2655512655500134,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -10.665115377160783,
+          1.2655512655500134
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 1389.8999999999942,
+            "candidateMs": 1402.6000000000058,
+            "changeMs": 12.700000000011642,
+            "ratio": 1.0091373480106567,
+            "changePercent": 0.9137348010656687
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 1398.6000000000058,
+            "candidateMs": 1416.2999999999884,
+            "changeMs": 17.699999999982538,
+            "ratio": 1.0126555126555001,
+            "changePercent": 1.2655512655500134
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 1423.2000000000116,
+            "candidateMs": 1378.9000000000233,
+            "changeMs": -44.29999999998836,
+            "ratio": 0.9688729623384008,
+            "changePercent": -3.112703766159919
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 1547.100000000035,
+            "candidateMs": 1382.0999999999767,
+            "changeMs": -165.0000000000582,
+            "ratio": 0.8933488462283922,
+            "changePercent": -10.665115377160783
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -10.665115377160783,
+        1.2655512655500134
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 2.189127515854966,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 4,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": true,
+      "reproducedPrimaryQualificationErrors": [],
+      "memory": {
+        "qualified": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.6804841608513532,
+            "maximumPairedChangePercent": 0.17874788188925184
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -2.260505525454742,
+            "maximumPairedChangePercent": 0.35961711354381976
+          }
+        },
+        "passesDeclaredScreen": true,
+        "observations": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 150.84121,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1064628,
+            "maxSampledPrivateKiB": 831996
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 162.39037,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1066531,
+            "maxSampledPrivateKiB": 834988
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 153.368686,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1047005,
+            "maxSampledPrivateKiB": 813088
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 162.902651,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1085426,
+            "maxSampledPrivateKiB": 854808
+          }
+        ]
+      },
+      "rawScanCount": 326,
+      "storageBytes": 67630172,
+      "semanticReceiptSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140967463737,
+      "jobConclusion": "success",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+        "gitBlobSha1": "f8552473b6c7b1387e47f65031fbdbc76c8a6a67"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/independent-raw-evidence-audit.json",
+        "bytes": 18424,
+        "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+        "gitBlobSha1": "b422cce388a55167e344443b995fc4aa3a6aca2a"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/raw-evidence.zip",
+        "bytes": 2205404,
+        "sha256": "0285ee591f2808de8285d18e30afee5c6738a9f9e895e0b66e79bdf2b0533d83",
+        "gitBlobSha1": "bbc06c4041fd0acc95bd03878c0e151ebf146acd"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/raw-archive-recovery.json",
+        "bytes": 39697,
+        "sha256": "6887812c79648f0e4bd344076bd9c2c9bc741ade968c726bd293488dafb18433",
+        "gitBlobSha1": "58fccba997d6282cdcd54d7bfe98f952dfb50ac0"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2343476,
+        "sha256": "67c51ff1d7f153edfbc2c6f44ce012fad3fcf44993660075b2e1914a52020848",
+        "gitBlobSha1": "1339664012581f80c3720152dd68b066d613c517"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/original-logs-and-postprocessing-records-members.json",
+        "bytes": 4752,
+        "sha256": "92422b68ec1dfe5067c9b877c78eac2f6ce13f366612a383bacbf2ed06d24a94",
+        "gitBlobSha1": "6344c5c5fd3eb630bf199660e9be8a74ffaf316a"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          0.9934022432372993,
+          1.005695687550863,
+          0.967083513008468,
+          0.9965387731055221,
+          1.010218542552407,
+          0.9689996335653744,
+          0.9871495327102552,
+          0.9959284571760689,
+          0.9957341715311993,
+          1.0066484450025854,
+          0.9979305247598017,
+          0.996944403040709
+        ],
+        "baselineMs": [
+          1364.1000000000058,
+          1351.8999999999942,
+          1391.3999999999942,
+          1357.9000000000233,
+          1340.6999999999534,
+          1364.5,
+          1369.600000000035,
+          1375.4000000000233,
+          1336.2000000000116,
+          1353.7000000000116,
+          1353.0,
+          1341.7999999999884
+        ],
+        "candidateMs": [
+          1355.1000000000058,
+          1359.6000000000058,
+          1345.5999999999767,
+          1353.2000000000116,
+          1354.399999999965,
+          1322.1999999999534,
+          1352.0,
+          1369.7999999999884,
+          1330.5,
+          1362.7000000000116,
+          1350.2000000000116,
+          1337.7000000000116
+        ],
+        "baselineMedianMs": 1355.8000000000175,
+        "candidateMedianMs": 1352.6000000000058,
+        "medianPairedChangeMs": -5.150000000023283,
+        "medianPairedChangePercent": -0.37663848592044413,
+        "equalWorkChangePercent": -0.6576606422013187,
+        "worstPairChangePercent": 1.0218542552407062,
+        "fasterPairs": 9,
+        "descriptiveBootstrap95Percent": [
+          -0.9724112026222809,
+          0.18131061553323669
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 1364.1000000000058,
+            "candidateMs": 1355.1000000000058,
+            "changeMs": -9.0,
+            "ratio": 0.9934022432372993,
+            "changePercent": -0.6597756762700691
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 1351.8999999999942,
+            "candidateMs": 1359.6000000000058,
+            "changeMs": 7.7000000000116415,
+            "ratio": 1.005695687550863,
+            "changePercent": 0.5695687550862916
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 1391.3999999999942,
+            "candidateMs": 1345.5999999999767,
+            "changeMs": -45.80000000001746,
+            "ratio": 0.967083513008468,
+            "changePercent": -3.2916486991532046
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 1357.9000000000233,
+            "candidateMs": 1353.2000000000116,
+            "changeMs": -4.7000000000116415,
+            "ratio": 0.9965387731055221,
+            "changePercent": -0.346122689447792
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 1340.6999999999534,
+            "candidateMs": 1354.399999999965,
+            "changeMs": 13.700000000011642,
+            "ratio": 1.010218542552407,
+            "changePercent": 1.0218542552407062
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 1364.5,
+            "candidateMs": 1322.1999999999534,
+            "changeMs": -42.300000000046566,
+            "ratio": 0.9689996335653744,
+            "changePercent": -3.100036643462556
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 1369.600000000035,
+            "candidateMs": 1352.0,
+            "changeMs": -17.600000000034925,
+            "ratio": 0.9871495327102552,
+            "changePercent": -1.2850467289744816
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 1375.4000000000233,
+            "candidateMs": 1369.7999999999884,
+            "changeMs": -5.600000000034925,
+            "ratio": 0.9959284571760689,
+            "changePercent": -0.40715428239310736
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 1336.2000000000116,
+            "candidateMs": 1330.5,
+            "changeMs": -5.7000000000116415,
+            "ratio": 0.9957341715311993,
+            "changePercent": -0.42658284688007475
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 1353.7000000000116,
+            "candidateMs": 1362.7000000000116,
+            "changeMs": 9.0,
+            "ratio": 1.0066484450025854,
+            "changePercent": 0.6648445002585435
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 1353.0,
+            "candidateMs": 1350.2000000000116,
+            "changeMs": -2.7999999999883585,
+            "ratio": 0.9979305247598017,
+            "changePercent": -0.2069475240198293
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 1341.7999999999884,
+            "candidateMs": 1337.7000000000116,
+            "changeMs": -4.099999999976717,
+            "ratio": 0.996944403040709,
+            "changePercent": -0.3055596959291029
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          1.0145851656405704,
+          1.006640304409478,
+          0.9725053156389769,
+          1.0203588429146748
+        ],
+        "baselineMs": [
+          1364.3999999999942,
+          1340.2999999999884,
+          1363.9000000000233,
+          1365.5
+        ],
+        "candidateMs": [
+          1384.2999999999884,
+          1349.2000000000116,
+          1326.4000000000233,
+          1393.2999999999884
+        ],
+        "baselineMedianMs": 1364.1500000000087,
+        "candidateMedianMs": 1366.75,
+        "medianPairedChangeMs": 14.400000000008731,
+        "medianPairedChangePercent": 1.0612735025024245,
+        "equalWorkChangePercent": 0.3514841464088869,
+        "worstPairChangePercent": 2.0358842914674824,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -2.749468436102309,
+          2.0358842914674824
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 1364.3999999999942,
+            "candidateMs": 1384.2999999999884,
+            "changeMs": 19.89999999999418,
+            "ratio": 1.0145851656405704,
+            "changePercent": 1.458516564057044
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 1340.2999999999884,
+            "candidateMs": 1349.2000000000116,
+            "changeMs": 8.900000000023283,
+            "ratio": 1.006640304409478,
+            "changePercent": 0.6640304409478048
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 1363.9000000000233,
+            "candidateMs": 1326.4000000000233,
+            "changeMs": -37.5,
+            "ratio": 0.9725053156389769,
+            "changePercent": -2.749468436102309
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 1365.5,
+            "candidateMs": 1393.2999999999884,
+            "changeMs": 27.79999999998836,
+            "ratio": 1.0203588429146748,
+            "changePercent": 2.0358842914674824
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.749468436102309,
+        2.0358842914674824
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 1.7472004277622633,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 4,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": true,
+      "reproducedPrimaryQualificationErrors": [],
+      "memory": {
+        "qualified": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.1116382600679264,
+            "maximumPairedChangePercent": 3.9740840751836037
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.5290302586898508,
+            "maximumPairedChangePercent": 5.542553456922583
+          }
+        },
+        "passesDeclaredScreen": true,
+        "observations": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 162.24407,
+            "stableFullyReadImportSampleCount": 12,
+            "maxSampledPssKiB": 1044777,
+            "maxSampledPrivateKiB": 811840
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 158.328172,
+            "stableFullyReadImportSampleCount": 12,
+            "maxSampledPssKiB": 1063395,
+            "maxSampledPrivateKiB": 832524
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 166.137801,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1035811,
+            "maxSampledPrivateKiB": 801580
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 160.54029,
+            "stableFullyReadImportSampleCount": 13,
+            "maxSampledPssKiB": 1076975,
+            "maxSampledPrivateKiB": 846008
+          }
+        ]
+      },
+      "rawScanCount": 301,
+      "storageBytes": 67630172,
+      "semanticReceiptSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false
+    },
+    {
+      "cell": "vndb-AB",
+      "jobId": 140967463725,
+      "jobConclusion": "failure",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/primary-log-audit.json",
+        "bytes": 21249,
+        "sha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8",
+        "gitBlobSha1": "5fb0f9bf8dfeffaedf3d78818d72d4c2188993b0"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/independent-raw-evidence-audit.json",
+        "bytes": 18434,
+        "sha256": "d23ebdefbd9aa61a67dd8b3486c46daf1d5dd67705413da42a46cbb453f5022e",
+        "gitBlobSha1": "25a5d9699cc3a163feafc6ff822854adcc5db65c"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/raw-evidence.zip",
+        "bytes": 2334535,
+        "sha256": "22da4b313d4ea29308d467ca254296ca27a72f9a3cb14c30d2d7c6464a9359e5",
+        "gitBlobSha1": "3b1111b68d95bd65958062c4aed88561eba9e3b6"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/raw-archive-recovery.json",
+        "bytes": 40855,
+        "sha256": "54137c4edd9ac0f26f0569f10fa2d8fd9d6c24531ed062658ab8062ac7c6292f",
+        "gitBlobSha1": "23f746453cd06ceb30a20d4fabdb4e1ac996ad2a"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2444567,
+        "sha256": "ab910f5d8703c8d396eefc1a0da76bcc2a5b93f258d3bc0231b4674ef3a92698",
+        "gitBlobSha1": "a2624522645e496c48aca8e7c4fbfc4ec94b41ab"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/original-logs-and-postprocessing-records-members.json",
+        "bytes": 4692,
+        "sha256": "0ea682a65f86ac9ca35d6344b5b289b2cc703ec55819ac60f3ccc23647510fb0",
+        "gitBlobSha1": "65fb7249d0c9a8a346d63b7575549b51a1060cf9"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          0.9380594783770981,
+          0.9714316114273495,
+          0.9108612861918142,
+          0.92838812171576,
+          0.9328105941801749,
+          0.9495441049876224,
+          0.918070899174929,
+          0.9249354385843319,
+          0.9563174870284553,
+          0.9535773185023876,
+          0.8794146341463452,
+          0.9476523123176231
+        ],
+        "baselineMs": [
+          5686.100000000006,
+          5639.100000000035,
+          6013.099999999977,
+          5728.099999999977,
+          5739.0,
+          5692.099999999977,
+          5720.800000000047,
+          5769.699999999953,
+          5704.800000000047,
+          5699.800000000047,
+          6150.0,
+          5654.5
+        ],
+        "candidateMs": [
+          5333.900000000023,
+          5478.0,
+          5477.099999999977,
+          5317.900000000023,
+          5353.400000000023,
+          5404.900000000023,
+          5252.099999999977,
+          5336.599999999977,
+          5455.599999999977,
+          5435.199999999953,
+          5408.400000000023,
+          5358.5
+        ],
+        "baselineMedianMs": 5712.800000000047,
+        "candidateMedianMs": 5381.700000000012,
+        "medianPairedChangeMs": -368.8999999999796,
+        "medianPairedChangePercent": -6.456496372136344,
+        "equalWorkChangePercent": -6.626722796186668,
+        "worstPairChangePercent": -2.856838857265054,
+        "fasterPairs": 12,
+        "descriptiveBootstrap95Percent": [
+          -7.849683112036954,
+          -4.8439288254995
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 5686.100000000006,
+            "candidateMs": 5333.900000000023,
+            "changeMs": -352.19999999998254,
+            "ratio": 0.9380594783770981,
+            "changePercent": -6.194052162290187
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 5639.100000000035,
+            "candidateMs": 5478.0,
+            "changeMs": -161.10000000003492,
+            "ratio": 0.9714316114273495,
+            "changePercent": -2.856838857265054
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 6013.099999999977,
+            "candidateMs": 5477.099999999977,
+            "changeMs": -536.0,
+            "ratio": 0.9108612861918142,
+            "changePercent": -8.913871380818584
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 5728.099999999977,
+            "candidateMs": 5317.900000000023,
+            "changeMs": -410.19999999995343,
+            "ratio": 0.92838812171576,
+            "changePercent": -7.161187828423998
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 5739.0,
+            "candidateMs": 5353.400000000023,
+            "changeMs": -385.5999999999767,
+            "ratio": 0.9328105941801749,
+            "changePercent": -6.718940581982514
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 5692.099999999977,
+            "candidateMs": 5404.900000000023,
+            "changeMs": -287.19999999995343,
+            "ratio": 0.9495441049876224,
+            "changePercent": -5.045589501237757
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 5720.800000000047,
+            "candidateMs": 5252.099999999977,
+            "changeMs": -468.70000000006985,
+            "ratio": 0.918070899174929,
+            "changePercent": -8.1929100825071
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 5769.699999999953,
+            "candidateMs": 5336.599999999977,
+            "changeMs": -433.0999999999767,
+            "ratio": 0.9249354385843319,
+            "changePercent": -7.506456141566808
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 5704.800000000047,
+            "candidateMs": 5455.599999999977,
+            "changeMs": -249.20000000006985,
+            "ratio": 0.9563174870284553,
+            "changePercent": -4.368251297154469
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 5699.800000000047,
+            "candidateMs": 5435.199999999953,
+            "changeMs": -264.60000000009313,
+            "ratio": 0.9535773185023876,
+            "changePercent": -4.642268149761241
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 6150.0,
+            "candidateMs": 5408.400000000023,
+            "changeMs": -741.5999999999767,
+            "ratio": 0.8794146341463452,
+            "changePercent": -12.058536585365475
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 5654.5,
+            "candidateMs": 5358.5,
+            "changeMs": -296.0,
+            "ratio": 0.9476523123176231,
+            "changePercent": -5.234768768237686
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          0.9807645099070644,
+          0.9712319339297883,
+          0.9989347583124021,
+          0.9933400221422641
+        ],
+        "baselineMs": [
+          5703.0,
+          5812.0,
+          5726.399999999907,
+          5780.800000000047
+        ],
+        "candidateMs": [
+          5593.299999999988,
+          5644.79999999993,
+          5720.300000000047,
+          5742.300000000047
+        ],
+        "baselineMedianMs": 5753.599999999977,
+        "candidateMedianMs": 5682.549999999988,
+        "medianPairedChangeMs": -74.10000000000582,
+        "medianPairedChangePercent": -1.2947733975335662,
+        "equalWorkChangePercent": -1.3964781819284955,
+        "worstPairChangePercent": -0.10652416875979176,
+        "fasterPairs": 4,
+        "descriptiveBootstrap95Percent": [
+          -2.876806607021165,
+          -0.10652416875979176
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 5703.0,
+            "candidateMs": 5593.299999999988,
+            "changeMs": -109.70000000001164,
+            "ratio": 0.9807645099070644,
+            "changePercent": -1.923549009293557
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 5812.0,
+            "candidateMs": 5644.79999999993,
+            "changeMs": -167.20000000006985,
+            "ratio": 0.9712319339297883,
+            "changePercent": -2.876806607021165
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 5726.399999999907,
+            "candidateMs": 5720.300000000047,
+            "changeMs": -6.099999999860302,
+            "ratio": 0.9989347583124021,
+            "changePercent": -0.10652416875979176
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 5780.800000000047,
+            "candidateMs": 5742.300000000047,
+            "changeMs": -38.5,
+            "ratio": 0.9933400221422641,
+            "changePercent": -0.6659977857735866
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.876806607021165,
+        -0.10652416875979176
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 1.2947733975335718,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 0,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": false,
+      "reproducedPrimaryQualificationErrors": [
+        "Original correctness/memory gate did not pass",
+        "Separate memory observations/audit did not qualify",
+        "A1: memory coverage did not qualify",
+        "A1: emitted prospective memory coverage is insufficient",
+        "A2: memory coverage did not qualify",
+        "A2: emitted prospective memory coverage is insufficient"
+      ],
+      "memory": {
+        "qualified": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        },
+        "passesDeclaredScreen": false,
+        "observations": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": false,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ],
+            "maximumCoveredSampleGapMs": 286.319545,
+            "stableFullyReadImportSampleCount": 36,
+            "maxSampledPssKiB": null,
+            "maxSampledPrivateKiB": null
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 244.653042,
+            "stableFullyReadImportSampleCount": 34,
+            "maxSampledPssKiB": 1247343,
+            "maxSampledPrivateKiB": 1020372
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 246.830052,
+            "stableFullyReadImportSampleCount": 34,
+            "maxSampledPssKiB": 1251084,
+            "maxSampledPrivateKiB": 1022252
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": false,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ],
+            "maximumCoveredSampleGapMs": 265.378713,
+            "stableFullyReadImportSampleCount": 35,
+            "maxSampledPssKiB": null,
+            "maxSampledPrivateKiB": null
+          }
+        ]
+      },
+      "rawScanCount": 411,
+      "storageBytes": 609340619,
+      "semanticReceiptSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "mechanicalTargetThresholdPass": true,
+      "mechanicalNonTargetHoldSignal": false
+    },
+    {
+      "cell": "vndb-BA",
+      "jobId": 140967463694,
+      "jobConclusion": "success",
+      "reportCount": 42,
+      "primaryRecordCount": 55,
+      "rawArchiveMemberCount": 316,
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/primary-log-audit.json",
+        "bytes": 21015,
+        "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7",
+        "gitBlobSha1": "64808a830662226fc50caad38c8e57c6a59b28b8"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/independent-raw-evidence-audit.json",
+        "bytes": 18347,
+        "sha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60",
+        "gitBlobSha1": "41d8052ffcfec6f9f1a90103c8b93a76db435b39"
+      },
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/raw-evidence.zip",
+        "bytes": 2348308,
+        "sha256": "498ac2785aa955dcc5642097fb41a1d5251d0c61872db33f4396ee844d260882",
+        "gitBlobSha1": "7dc83d0695ddac9126fdc2a578e75f17c4f26777"
+      },
+      "recoveryReceipt": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/raw-archive-recovery.json",
+        "bytes": 41009,
+        "sha256": "dea9370f81b1ea599fc47e680525efda50ce0b7464ab597d4a49455a0d25e6d4",
+        "gitBlobSha1": "31ab1f0591cb64d82d7f92d8049cc049e5f5e37a"
+      },
+      "originalLogAndMetadataArchive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2460008,
+        "sha256": "5f2c61cd25995d373bb234633a0f82ef9466e46a7e7c984186b22a52fed46a57",
+        "gitBlobSha1": "63a69a7d2bb487466616ab96f9263f30e8f97ce6"
+      },
+      "originalLogAndMetadataMembers": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/original-logs-and-postprocessing-records-members.json",
+        "bytes": 4692,
+        "sha256": "f4c75fbf591191c8fd952b5c01d81001e696644b1e2e3ca3023628e8df937026",
+        "gitBlobSha1": "fc9abc4675fb093a09c245facd883fbb435b1d6b"
+      },
+      "candidatePairedStatistics": {
+        "count": 12,
+        "ratios": [
+          1.0394727550900345,
+          0.9602109635714519,
+          0.9697600703361765,
+          1.011354892862961,
+          0.9644296074594221,
+          0.9813152548778813,
+          0.9869478142768325,
+          0.9640332354021273,
+          0.9627421758569303,
+          0.9787690570299266,
+          0.9992572303978567,
+          1.0003208948381828
+        ],
+        "baselineMs": [
+          4248.5,
+          4285.099999999977,
+          4322.100000000006,
+          4288.900000000023,
+          4343.5,
+          4233.399999999965,
+          4344.099999999977,
+          4356.799999999988,
+          4562.800000000047,
+          4427.5,
+          4308.199999999953,
+          4362.800000000047
+        ],
+        "candidateMs": [
+          4416.200000000012,
+          4114.600000000006,
+          4191.399999999994,
+          4337.599999999977,
+          4189.0,
+          4154.299999999988,
+          4287.399999999965,
+          4200.099999999977,
+          4392.800000000047,
+          4333.5,
+          4305.0,
+          4364.20000000007
+        ],
+        "baselineMedianMs": 4332.800000000003,
+        "candidateMedianMs": 4296.1999999999825,
+        "medianPairedChangeMs": -86.54999999998836,
+        "medianPairedChangePercent": -1.995784404609613,
+        "equalWorkChangePercent": -1.5313812190761222,
+        "worstPairChangePercent": 3.947275509003445,
+        "fasterPairs": 9,
+        "descriptiveBootstrap95Percent": [
+          -3.576857856922533,
+          -0.021093738198030287
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "pair-01-A",
+            "candidateId": "pair-01-B",
+            "baselineMs": 4248.5,
+            "candidateMs": 4416.200000000012,
+            "changeMs": 167.70000000001164,
+            "ratio": 1.0394727550900345,
+            "changePercent": 3.947275509003445
+          },
+          {
+            "pair": 2,
+            "baselineId": "pair-02-A",
+            "candidateId": "pair-02-B",
+            "baselineMs": 4285.099999999977,
+            "candidateMs": 4114.600000000006,
+            "changeMs": -170.4999999999709,
+            "ratio": 0.9602109635714519,
+            "changePercent": -3.978903642854814
+          },
+          {
+            "pair": 3,
+            "baselineId": "pair-03-A",
+            "candidateId": "pair-03-B",
+            "baselineMs": 4322.100000000006,
+            "candidateMs": 4191.399999999994,
+            "changeMs": -130.70000000001164,
+            "ratio": 0.9697600703361765,
+            "changePercent": -3.0239929663823495
+          },
+          {
+            "pair": 4,
+            "baselineId": "pair-04-A",
+            "candidateId": "pair-04-B",
+            "baselineMs": 4288.900000000023,
+            "candidateMs": 4337.599999999977,
+            "changeMs": 48.699999999953434,
+            "ratio": 1.011354892862961,
+            "changePercent": 1.1354892862960986
+          },
+          {
+            "pair": 5,
+            "baselineId": "pair-05-A",
+            "candidateId": "pair-05-B",
+            "baselineMs": 4343.5,
+            "candidateMs": 4189.0,
+            "changeMs": -154.5,
+            "ratio": 0.9644296074594221,
+            "changePercent": -3.557039254057792
+          },
+          {
+            "pair": 6,
+            "baselineId": "pair-06-A",
+            "candidateId": "pair-06-B",
+            "baselineMs": 4233.399999999965,
+            "candidateMs": 4154.299999999988,
+            "changeMs": -79.09999999997672,
+            "ratio": 0.9813152548778813,
+            "changePercent": -1.8684745122118707
+          },
+          {
+            "pair": 7,
+            "baselineId": "pair-07-A",
+            "candidateId": "pair-07-B",
+            "baselineMs": 4344.099999999977,
+            "candidateMs": 4287.399999999965,
+            "changeMs": -56.70000000001164,
+            "ratio": 0.9869478142768325,
+            "changePercent": -1.3052185723167464
+          },
+          {
+            "pair": 8,
+            "baselineId": "pair-08-A",
+            "candidateId": "pair-08-B",
+            "baselineMs": 4356.799999999988,
+            "candidateMs": 4200.099999999977,
+            "changeMs": -156.70000000001164,
+            "ratio": 0.9640332354021273,
+            "changePercent": -3.5966764597872736
+          },
+          {
+            "pair": 9,
+            "baselineId": "pair-09-A",
+            "candidateId": "pair-09-B",
+            "baselineMs": 4562.800000000047,
+            "candidateMs": 4392.800000000047,
+            "changeMs": -170.0,
+            "ratio": 0.9627421758569303,
+            "changePercent": -3.725782414306966
+          },
+          {
+            "pair": 10,
+            "baselineId": "pair-10-A",
+            "candidateId": "pair-10-B",
+            "baselineMs": 4427.5,
+            "candidateMs": 4333.5,
+            "changeMs": -94.0,
+            "ratio": 0.9787690570299266,
+            "changePercent": -2.123094297007344
+          },
+          {
+            "pair": 11,
+            "baselineId": "pair-11-A",
+            "candidateId": "pair-11-B",
+            "baselineMs": 4308.199999999953,
+            "candidateMs": 4305.0,
+            "changeMs": -3.199999999953434,
+            "ratio": 0.9992572303978567,
+            "changePercent": -0.07427696021432562
+          },
+          {
+            "pair": 12,
+            "baselineId": "pair-12-A",
+            "candidateId": "pair-12-B",
+            "baselineMs": 4362.800000000047,
+            "candidateMs": 4364.20000000007,
+            "changeMs": 1.400000000023283,
+            "ratio": 1.0003208948381828,
+            "changePercent": 0.03208948381827614
+          }
+        ]
+      },
+      "identicalCodeStatistics": {
+        "count": 4,
+        "ratios": [
+          0.9935357401227549,
+          1.0205796892634902,
+          1.025467321912466,
+          0.9389779648871369
+        ],
+        "baselineMs": [
+          4285.099999999977,
+          4164.300000000047,
+          4354.599999999977,
+          4465.599999999977
+        ],
+        "candidateMs": [
+          4257.399999999994,
+          4250.0,
+          4465.5,
+          4193.099999999977
+        ],
+        "baselineMedianMs": 4319.849999999977,
+        "candidateMedianMs": 4253.699999999997,
+        "medianPairedChangeMs": 28.999999999985448,
+        "medianPairedChangePercent": 0.7057714693122552,
+        "equalWorkChangePercent": -0.5998980868115456,
+        "worstPairChangePercent": 2.5467321912465923,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -6.102203511286309,
+          2.5467321912465923
+        ],
+        "pairs": [
+          {
+            "pair": 1,
+            "baselineId": "control-01-A",
+            "candidateId": "control-01-C",
+            "baselineMs": 4285.099999999977,
+            "candidateMs": 4257.399999999994,
+            "changeMs": -27.699999999982538,
+            "ratio": 0.9935357401227549,
+            "changePercent": -0.6464259877245082
+          },
+          {
+            "pair": 2,
+            "baselineId": "control-02-A",
+            "candidateId": "control-02-C",
+            "baselineMs": 4164.300000000047,
+            "candidateMs": 4250.0,
+            "changeMs": 85.69999999995343,
+            "ratio": 1.0205796892634902,
+            "changePercent": 2.0579689263490186
+          },
+          {
+            "pair": 3,
+            "baselineId": "control-03-A",
+            "candidateId": "control-03-C",
+            "baselineMs": 4354.599999999977,
+            "candidateMs": 4465.5,
+            "changeMs": 110.90000000002328,
+            "ratio": 1.025467321912466,
+            "changePercent": 2.5467321912465923
+          },
+          {
+            "pair": 4,
+            "baselineId": "control-04-A",
+            "candidateId": "control-04-C",
+            "baselineMs": 4465.599999999977,
+            "candidateMs": 4193.099999999977,
+            "changeMs": -272.5,
+            "ratio": 0.9389779648871369,
+            "changePercent": -6.102203511286309
+          }
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -6.102203511286309,
+        2.5467321912465923
+      ],
+      "descriptiveAbsoluteControlMedianPercent": 2.3023505587978055,
+      "descriptiveAbsoluteControlPairsExceedingAbsoluteCandidateMedian": 3,
+      "controlComparisonIsDescriptiveNotNewGate": true,
+      "originalPrimaryAllChecksPass": true,
+      "reproducedPrimaryQualificationErrors": [],
+      "memory": {
+        "qualified": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.4351893443975685,
+            "maximumPairedChangePercent": 1.3332498547151017
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.4903780341102226,
+            "maximumPairedChangePercent": 1.7377879037958177
+          }
+        },
+        "passesDeclaredScreen": true,
+        "observations": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 175.431258,
+            "stableFullyReadImportSampleCount": 36,
+            "maxSampledPssKiB": 1262438,
+            "maxSampledPrivateKiB": 1030616
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "pair": 1,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 155.952564,
+            "stableFullyReadImportSampleCount": 38,
+            "maxSampledPssKiB": 1245828,
+            "maxSampledPrivateKiB": 1013012
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 182.940348,
+            "stableFullyReadImportSampleCount": 37,
+            "maxSampledPssKiB": 1245703,
+            "maxSampledPrivateKiB": 1013960
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "pair": 2,
+            "qualifiedForWholeTreePss": true,
+            "qualificationFailures": [],
+            "maximumCoveredSampleGapMs": 176.211086,
+            "stableFullyReadImportSampleCount": 37,
+            "maxSampledPssKiB": 1239937,
+            "maxSampledPrivateKiB": 1006284
+          }
+        ]
+      },
+      "rawScanCount": 418,
+      "storageBytes": 609340619,
+      "semanticReceiptSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false
+    }
+  ],
+  "decision": {
+    "productPerformancePr": "Do not create for this exact candidate/cohort",
+    "performanceQualificationPassed": false,
+    "targetRuleUnchanged": "Each VNDB cell requires at least 2% median reduction, at least 9/12 faster pairs, descriptive upper interval below 0, materially smaller A/A variation and every required non-timing gate.",
+    "vndbAB": "Latency target passes; original baseline A1/A2 coverage gaps of 286.319545/265.378713 ms exceed 250 ms. Qualified PSS/private pair aggregates remain null. Job failure is retained despite all 42 reports.",
+    "vndbBA": "Exact 1.995784404609613% reduction is below 2%; rounding cannot change the gate. Three of four absolute A/A changes exceed that effect, with median absolute change of 2.3023505587978055%.",
+    "jmdict": "No demonstrated complete-import gain. BA has a one-cell adverse numerical signal, larger same-cell controls and no matching AB signal. No non-regression/equivalence claim.",
+    "jitendex": "Both intervals cross zero; adverse equal-work direction and all large outliers remain. No gain or non-regression/equivalence claim.",
+    "memoryFailureMeaning": "Incomplete required baseline coverage; not an established candidate memory regression.",
+    "rootFinalDecision": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/root-qualification-decision-v2.json",
+      "bytes": 14401,
+      "sha256": "189bb2337b2d54409d27d8aa14100e2aa5e9dbb361d9d7115f828525214fbab4",
+      "gitBlobSha1": "ea991e6482d727eddb5894303927af5909da5f9a"
+    },
+    "rootHistoricalBeforeimage": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/root-qualification-decision.json",
+      "bytes": 13134,
+      "sha256": "e403dc802e0dc3d72e35d97a3ba32f0923c207411949ac78457d4f9eb8ddd00d",
+      "gitBlobSha1": "d8f2c00938b56994a214ea2293a6b7e692dd6309"
+    },
+    "rootProvenanceAmendment": "Earlier scope wording used past tense while the supplemental replay was pending. Final v2 binds actual completed replay 022922; statistics/disposition are unchanged.",
+    "derivedDecision": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/final-qualification-decision.json",
+      "bytes": 8620,
+      "sha256": "4f26dc008defc5e9f505c017eb9e898f220f6a8bcb908f96692dec26a8fbc538",
+      "gitBlobSha1": "6c87770eacbed93e45939f70fba85864979ac347"
+    },
+    "jmdictPriority": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/jmdict-frontier-and-proof-scope.json",
+      "bytes": 12208,
+      "sha256": "ea05709425f2257481eaa496c193340f3716da40ea9a4ae695b5cd23f9ac35d0",
+      "gitBlobSha1": "c6f54d56032a6b0f0da952797f47e2ea8183f1a1"
+    }
+  },
+  "integrityAndQualification": {
+    "originalArchiveIntegrityPassed": true,
+    "additionalEvidenceReconciliationPassed": true,
+    "allOriginalPrimaryChecksPass": false,
+    "allMemoryQualificationGatesPass": false,
+    "bothTargetNumericalGatesPass": false,
+    "replicatedNonTargetMechanicalHoldSignals": {
+      "jmdict": false,
+      "jitendex": false
+    },
+    "logicalStorageBytes": {
+      "jmdict": 43684317,
+      "jitendex": 67630172,
+      "vndb": 609340619
+    },
+    "vndbSahAllocationUnits": [
+      77,
+      77
+    ],
+    "observedSahFileCount": 8,
+    "observed4096ByteReserveFiles": 7,
+    "storageComparisonScope": "Logical file sizes, paths and validation receipts.",
+    "browserOutputComparisonScope": "Declared row-count, lookup, restart and media probes.",
+    "packageEntryCount": 582,
+    "unchangedPackageEntryCount": 580,
+    "packageAccounting": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/package-byte-deltas.json",
+      "bytes": 10901,
+      "sha256": "5f737881108025345d7eea18b4e5faeff166b82c38dd019b83a70b0485fbf7e2",
+      "gitBlobSha1": "6702e6938f9b64785d0337c9f42e654ce09bd5f7"
+    },
+    "rawGateSummary": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/final-raw-gate-summary.json",
+      "bytes": 7181,
+      "sha256": "80fa6a8e7bdea7d7446196f5e2ff843824619db31e07bd3d641ac56d436af0ca",
+      "gitBlobSha1": "4e35bdadddaf0bdf81cada6b81f1ae8e9f90533b"
+    }
+  },
+  "machineEvidence": {
+    "primaryIndex": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/combined-primary-index.json",
+      "bytes": 45148,
+      "sha256": "2e385a89c6acd0e9915da871c3264fb16130826edf19e5e90fdeca946542dfd1",
+      "gitBlobSha1": "53c12606b7fd64330c033c2606724c3c3dd0ab6b"
+    },
+    "rawIndex": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/all-six-independent-raw-index.json",
+      "bytes": 69392,
+      "sha256": "8109382e7590e352c31fc4eba98437863fca2ce7714eda037f2471dd6f0f7758",
+      "gitBlobSha1": "86f226f655e49f8a0f874a624e228d3ca138c205"
+    },
+    "additionalReplay": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/independent-paired-result-review-v2.json",
+      "bytes": 76664,
+      "sha256": "02292230349a2c51ddc37a7eb38925c0e28b67f2a41ab0b1232d464758c0f077",
+      "gitBlobSha1": "e197b0af58297be2166797f5f8222f03e6e75b06"
+    },
+    "terminalAcquisitionApi": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/terminal-acquisition-api.json",
+      "bytes": 46927,
+      "sha256": "715bb6cbfb9de43f7a7d2eb8c75a168ca7e8cb586fe9daba8b1363b93b069d11",
+      "gitBlobSha1": "93707b50db061e839a2951d11f009012a18de271"
+    },
+    "firstFourHistoricalSnapshot": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/history/first-four-independent-raw-index.json",
+      "bytes": 16663,
+      "sha256": "3c53e22ce56e25644481f3d7c90405f2329f51c99ad9ce8cdaa3539f5c4aee3c",
+      "gitBlobSha1": "b6671af4fe3b371bc9bda3e6f664e3c32b92e288"
+    }
+  },
+  "postprocessingHistory": {
+    "rawFilenameCorrection": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/criteria-member-name-amendment.json",
+      "bytes": 2867,
+      "sha256": "9a2216d274dfed5bd570cd90f16f4983422c047d870a92d90ea9ed32181758d9",
+      "gitBlobSha1": "30780dd21b1cf3851f51232fbe92071cc92ac92b"
+    },
+    "rawFilenamePeerReview": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/criteria-member-name-independent-review.json",
+      "bytes": 1828,
+      "sha256": "08dc7a7e851dafd864c3759acd43676bef8986886595fc4f811733aee690be76",
+      "gitBlobSha1": "a9649bff3931a8522bdeb3885e5bc4a15e4f5fcf"
+    },
+    "rawFilenameRootReviewIncludingWrongV1SourceComparison": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/root-filename-review.json",
+      "bytes": 1246,
+      "sha256": "e3d8b52ce7515fa05e4837d608efac43288541e05a4111cdb34e692f36d4a5f5",
+      "gitBlobSha1": "38290f1c578ff91b8fd3ab260a6eca0ca2d85b45"
+    },
+    "rawAuditorV3": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/raw-evidence-audit-v3.py",
+      "bytes": 34614,
+      "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+      "gitBlobSha1": "f27d724b11665ec96ee8ad5a8afe69e9ecace86d"
+    },
+    "sourceBeforeimages": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessor-source-history-members.json",
+      "bytes": 1726,
+      "sha256": "b3008461cae1fbf561866474cd489fcb7fa8688e0f0c13e93ecda65a5bbde3a7",
+      "gitBlobSha1": "3fa7ba930846a4b3e07134dc71a54074f2f96e57"
+    },
+    "firstActualRawV2Failure": {
+      "archive": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records.tar.gz",
+        "bytes": 2398716,
+        "sha256": "142d503dac297a672f3971623ef17f768631814373e6964dd8f79924f917ee14",
+        "gitBlobSha1": "7d8622b65925b3cf6f7caae9a99be6147285560f"
+      },
+      "member": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-audit-failure-20261128T115319113368.json",
+      "sha256": "c4c246a0982fbc176ef652158bb3a09412da4044ccec55509efa1cc0248e71aa"
+    },
+    "additionalReviewerOriginalFailureAndReviewedV2": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/checkpoint-replay-sources-members.json",
+      "bytes": 4851,
+      "sha256": "a8fc9ea3ef514223d0f06307e9011c9ba482d85b2345cc90042843d8de17c1f7",
+      "gitBlobSha1": "30e8658d0b262a022413e783dc1289401ad28cbc"
+    },
+    "additionalReviewerRootReview": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/root-reviewer-qualification-separation-review.json",
+      "bytes": 2230,
+      "sha256": "01352394791863620c6dc221387743b299b8e60697c021a2f6519444afe7cf25",
+      "gitBlobSha1": "02a64d72058db3e828aa7829bacab9a5796611f5"
+    },
+    "allOriginalAuditsPreserved": true,
+    "noMeasurementOrCriteriaChange": true
+  },
+  "durablePriorInputs": {
+    "commit": "16f8ae5d39bd8c1c41be489fd1ab5386b332b93d",
+    "index": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/index.json",
+      "bytes": 110964,
+      "sha256": "4f02aa8b9bf16c3b43826d53cc1be1a52feaa2fad05332da03fa5782ce77b0e9",
+      "gitBlobSha1": "34f70502c5d2e887a4e219da9528e590efa7812b"
+    },
+    "files": [
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history-members.json",
+        "bytes": 6478,
+        "sha256": "d53eca0c1a25b7ab989808d160298bf735a4cd236d436258e49de7a12615f645",
+        "gitBlobSha1": "8942c1ae261f149957cb2fba9fa1e14acb7413b2",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history.tar.gz",
+        "bytes": 43674,
+        "sha256": "be9edf6eef90b5df064d4b1794e53b980e24662534b750304c7f890376e8d49c",
+        "gitBlobSha1": "7eaa65ea2a6e0062a9c7e1940301981c1b61075b",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/final-raw-auditor-preparation.json",
+        "bytes": 1462,
+        "sha256": "be8686c09fb6637515c0cac4675e9c1545492c3b2dc02ee51669eee9b9414d28",
+        "gitBlobSha1": "b45bc6bb4a96ef894d495d1735d7d56417f5e9fa",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/independent-complete-import-expected.json",
+        "bytes": 6838,
+        "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+        "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/publication-binding.json",
+        "bytes": 4147,
+        "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+        "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-initial-run-identity.json",
+        "bytes": 1404,
+        "sha256": "6400c7bd9ddcfdb9df64659f27eb7373a72e01d02857d9be0e33e465e6c68aa5",
+        "gitBlobSha1": "baf17c69f9ac97d41be677e384c41a098bd5f7fd",
+        "storage": "exact-local-staged-file"
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-qualification-binding.json",
+        "bytes": 4887,
+        "sha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+        "gitBlobSha1": "187897af74f8e0ade9d990310106efc04f4395d9",
+        "storage": "exact-local-staged-file"
+      }
+    ],
+    "purpose": "Reuse already durable exact frozen observer/auditor/binding/correctness/criteria inputs rather than duplicate them."
+  },
+  "replay": {
+    "originalRun": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321",
+    "readOriginalLogCommand": "gh run view 46141233321 --repo ManabiIO/manabitan --log",
+    "originalToolingCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+    "offlineRestoration": "Per-cell gzip/tar member paths are relative to the recorded experiments root; restore their exact bytes and direct-copy sourceRelativeToExperiments mappings. Restore the unchanged auditor inputs from the prior checkpoint source archive. Use a separate new output directory because replay tools refuse overwrites.",
+    "additionalReviewerSource": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/review-original-paired-results-v2.py",
+      "bytes": 15331,
+      "sha256": "dba56d6a547a83c38146cfc8d86809e11b4fc1256ab6e6e14bd28c48b7b8f0cf",
+      "gitBlobSha1": "46b83b9d98650ed0169f5d025a281234f30e748a"
+    },
+    "primaryIndexAssembler": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-primary-index.py",
+      "bytes": 11486,
+      "sha256": "65cb39cd9d9e2f63bb40cc372da03746a1c3ce567ef7a8462051f16c17fc1981",
+      "gitBlobSha1": "3b4e3e20c85426e977f6074c99bf357a8b33df3b"
+    },
+    "rawIndexCollector": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/build-final-raw-index-v2.py",
+      "bytes": 8103,
+      "sha256": "0f06c6786828c9273335b2336a05a4da9a3e40391513ced6251a0af877cf9e19",
+      "gitBlobSha1": "4bcc9980a53bfffb924b53408ae9123d87972356"
+    },
+    "noReplayPerformedByCheckpointAssembly": true,
+    "newMeasurementPolicy": "Any future acquisition is a separate source-bound study; this exact completed cohort is not retried or replaced."
+  },
+  "evidenceFileCount": 71,
+  "evidenceBytes": 28859685,
+  "evidenceFiles": [
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/all-six-independent-raw-index.json",
+      "bytes": 69392,
+      "sha256": "8109382e7590e352c31fc4eba98437863fca2ce7714eda037f2471dd6f0f7758",
+      "gitBlobSha1": "86f226f655e49f8a0f874a624e228d3ca138c205",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/all-six-independent-raw-index.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-package-byte-deltas.py",
+      "bytes": 7493,
+      "sha256": "6d55c9316393451e5734ab53e961bcfc3c08db1cd3e1fe2eea515fdc0e9ee39a",
+      "gitBlobSha1": "752165c433477fa61465c6f0cd5dc44349526520",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/assemble-package-byte-deltas.py",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-primary-index-adaptation.patch",
+      "bytes": 5605,
+      "sha256": "fa1a1ec77913c71f5a66d6d050ef68f3ef7dd14bc50ada5051033354433a48d8",
+      "gitBlobSha1": "31d3e6b6cbf3b8ac9367d381a2683eb008aa4d5b",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/assemble-primary-index-adaptation.patch",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-primary-index-independent-review.json",
+      "bytes": 1682,
+      "sha256": "e53d28688c8383eb4ebb163c3425dbdd599aa0ccfefdf8f4ca383b3117148186",
+      "gitBlobSha1": "174b4a6208703bde388bcaf9211f6764960e90a7",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/assemble-primary-index-independent-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-primary-index-preparation.json",
+      "bytes": 2974,
+      "sha256": "cd6fca345e168e0f55a9bfdf76ac7f639df3d0a973e2a1d96a091b353bc48cb8",
+      "gitBlobSha1": "9cf774fc119b1987948224b7ffcead87a277151e",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/assemble-primary-index-preparation.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/assemble-primary-index.py",
+      "bytes": 11486,
+      "sha256": "65cb39cd9d9e2f63bb40cc372da03746a1c3ce567ef7a8462051f16c17fc1981",
+      "gitBlobSha1": "3b4e3e20c85426e977f6074c99bf357a8b33df3b",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/assemble-primary-index.py",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/benchmark-terminal-replay-source-review.json",
+      "bytes": 1909,
+      "sha256": "80af64158ae24bc32bef8892c082df587104ce4d238c8e25f19ab7e2e406c33d",
+      "gitBlobSha1": "10ec2325835b11b1dcfd29514cc335d08fb03294",
+      "sourceRelativeToExperiments": "import-study-proof-consumer-full-final-20261128/benchmark-terminal-replay-source-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/build-final-raw-index-independent-review.json",
+      "bytes": 1187,
+      "sha256": "b56ff0ffa545e50fe958d41fcad8b6e0ba88d1d395b7ef5a5c8e2c0a8bc90dc9",
+      "gitBlobSha1": "b6b253ab82a225bd409437de1548de1c8840054d",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/build-final-raw-index-independent-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/build-final-raw-index-v2.py",
+      "bytes": 8103,
+      "sha256": "0f06c6786828c9273335b2336a05a4da9a3e40391513ced6251a0af877cf9e19",
+      "gitBlobSha1": "4bcc9980a53bfffb924b53408ae9123d87972356",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/build-final-raw-index-v2.py",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/independent-paired-result-review-v2.json",
+      "bytes": 76664,
+      "sha256": "02292230349a2c51ddc37a7eb38925c0e28b67f2a41ab0b1232d464758c0f077",
+      "gitBlobSha1": "e197b0af58297be2166797f5f8222f03e6e75b06",
+      "sourceRelativeToExperiments": "import-study-proof-consumer-full-final-20261128/independent-paired-result-review-v2.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/jmdict-frontier-independent-review.json",
+      "bytes": 1370,
+      "sha256": "a340f828133b8fba6d543e36ea9ed7f1fb662f6e74f84a24fad4562d44009542",
+      "gitBlobSha1": "f7b91142bd021b78897a28d4e29dd29c998fb32f",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-frontier-independent-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/package-accounting-independent-source-review.json",
+      "bytes": 1128,
+      "sha256": "d369e0189e5d1913cc3120f6032e667508059c56014dc0f6c694208a532105aa",
+      "gitBlobSha1": "d6e5d3d4ffd8a34ad2ff9481fd7df70a416de198",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/package-accounting-independent-source-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/review-original-paired-results-v2.py",
+      "bytes": 15331,
+      "sha256": "dba56d6a547a83c38146cfc8d86809e11b4fc1256ab6e6e14bd28c48b7b8f0cf",
+      "gitBlobSha1": "46b83b9d98650ed0169f5d025a281234f30e748a",
+      "sourceRelativeToExperiments": "import-study-proof-consumer-full-final-20261128/review-original-paired-results-v2.py",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/analysis/root-reviewer-qualification-separation-review.json",
+      "bytes": 2230,
+      "sha256": "01352394791863620c6dc221387743b299b8e60697c021a2f6519444afe7cf25",
+      "gitBlobSha1": "02a64d72058db3e828aa7829bacab9a5796611f5",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/a300-final-reviewer-qualification-separation-root-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/canonical-preparation-history-members.json",
+      "bytes": 2204,
+      "sha256": "3c2d2f9bcb0293e902c093b986bbfd7fc781eb0e22c4932cd6e2a61e8c0d01e0",
+      "gitBlobSha1": "34f2e9df521791c7fc00073eeaa5937ba97c273f",
+      "storage": "new-prose-history-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/canonical-preparation-history.tar.gz",
+      "bytes": 11819,
+      "sha256": "a325835e939d127a7b38d4e38bf0f016749692a89129e7a89014536c09ca59a2",
+      "gitBlobSha1": "7b7b46cd0254c36e4c8afbb87bfc70857a4af814",
+      "storage": "new-lossless-prose-history"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/independent-raw-evidence-audit.json",
+      "bytes": 18421,
+      "sha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967",
+      "gitBlobSha1": "6691bff9fdc98f2d59f22148035776de957f8388",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/original-logs-and-postprocessing-records-members.json",
+      "bytes": 4752,
+      "sha256": "8d3d8db714ca6f5a33b0a35e28ee568f62da596f223ce3f6422ec64b4abbed54",
+      "gitBlobSha1": "064afcf061869a5ae64ce6c53a8208c179ec7b83",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2370002,
+      "sha256": "5705328ee9d824ecd21ace8fff6b95949c3f393c38aee0a1f7535a2596dd24e1",
+      "gitBlobSha1": "f9749fd3fc9ad67fb70e03eb974e263facda5872",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/primary-log-audit.json",
+      "bytes": 21756,
+      "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6",
+      "gitBlobSha1": "7a386d72fa22d8396f4d281585e236e18331a8a2",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/raw-archive-recovery.json",
+      "bytes": 39973,
+      "sha256": "c92e3fae29d5c462a564037a53b13ce748923a5cca9e06e8a9db43d89ab0d786",
+      "gitBlobSha1": "9ba6dde8574dce143cb3d92aaef7eddfc3de11d7",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-AB/raw-evidence.zip",
+      "bytes": 2231469,
+      "sha256": "aee1884b7d6124e92af1fbd82e45cab08328dd6de935483b15939e0cf3d14846",
+      "gitBlobSha1": "c3c286b101890e3d520738766da5d4787913121e",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/independent-raw-evidence-audit.json",
+      "bytes": 18424,
+      "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+      "gitBlobSha1": "b422cce388a55167e344443b995fc4aa3a6aca2a",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/original-logs-and-postprocessing-records-members.json",
+      "bytes": 4752,
+      "sha256": "92422b68ec1dfe5067c9b877c78eac2f6ce13f366612a383bacbf2ed06d24a94",
+      "gitBlobSha1": "6344c5c5fd3eb630bf199660e9be8a74ffaf316a",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2343476,
+      "sha256": "67c51ff1d7f153edfbc2c6f44ce012fad3fcf44993660075b2e1914a52020848",
+      "gitBlobSha1": "1339664012581f80c3720152dd68b066d613c517",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/primary-log-audit.json",
+      "bytes": 21756,
+      "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+      "gitBlobSha1": "f8552473b6c7b1387e47f65031fbdbc76c8a6a67",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/raw-archive-recovery.json",
+      "bytes": 39697,
+      "sha256": "6887812c79648f0e4bd344076bd9c2c9bc741ade968c726bd293488dafb18433",
+      "gitBlobSha1": "58fccba997d6282cdcd54d7bfe98f952dfb50ac0",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/raw-evidence.zip",
+      "bytes": 2205404,
+      "sha256": "0285ee591f2808de8285d18e30afee5c6738a9f9e895e0b66e79bdf2b0533d83",
+      "gitBlobSha1": "bbc06c4041fd0acc95bd03878c0e151ebf146acd",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/independent-raw-evidence-audit.json",
+      "bytes": 18329,
+      "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+      "gitBlobSha1": "cfc9fe294b4f8d122534322ed1929f19541bcbfc",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/original-logs-and-postprocessing-records-members.json",
+      "bytes": 4722,
+      "sha256": "16ed29062b212af22edc8b9d6122151b16d0f6d6170b8d0edb16bc29ccb70862",
+      "gitBlobSha1": "56410044d586a82d719baf2d66add7eff0c2044d",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2304563,
+      "sha256": "c113ea547843d48fc4751bd8c4079b156b54b3f549107552d6789d6d8919a947",
+      "gitBlobSha1": "ab81670e3c01055ba64edaf94d94eb140222d8f0",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/primary-log-audit.json",
+      "bytes": 20917,
+      "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+      "gitBlobSha1": "c04608ec322f9a32d90f452cfb448584ed45eb49",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/raw-archive-recovery.json",
+      "bytes": 39308,
+      "sha256": "2be9395c18028206be3e78bec716d716c75dcd581b304772b5a0d75e0724b05b",
+      "gitBlobSha1": "3fb121c999bf8ce0a727d237b2ae4952660e904d",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/raw-evidence.zip",
+      "bytes": 2160510,
+      "sha256": "ed39f0fb245b2cc12b2f0723f8ab5b70e8fcbc93d82effa9e7c22a827920e9e2",
+      "gitBlobSha1": "0033df83faf07cbe4d0c7263927ab505ab3d1a56",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/independent-raw-evidence-audit.json",
+      "bytes": 18341,
+      "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+      "gitBlobSha1": "871b1b606b0bdb6955aa9511ecc73c6ff3dc00b9",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records-members.json",
+      "bytes": 5910,
+      "sha256": "aa48920d9865027c95f5fd1a4666a4858123ff4dcf1d973a3cb450c80f02c7c7",
+      "gitBlobSha1": "eb8e971eedf6af3d2b10f9df5fec37690b92963d",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2398716,
+      "sha256": "142d503dac297a672f3971623ef17f768631814373e6964dd8f79924f917ee14",
+      "gitBlobSha1": "7d8622b65925b3cf6f7caae9a99be6147285560f",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/primary-log-audit.json",
+      "bytes": 20882,
+      "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+      "gitBlobSha1": "a2a87f1c5d1da0805de807cda37bf83e2318bfd3",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/raw-archive-recovery.json",
+      "bytes": 40353,
+      "sha256": "cf7015c9c6bad4595e6ac5cca96d63dc5c7cc3cf58485d5eb56474a636d97f25",
+      "gitBlobSha1": "f90c2f4406d5321ea945278777c17be4a132e51f",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-BA/raw-evidence.zip",
+      "bytes": 2277726,
+      "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed",
+      "gitBlobSha1": "87379cc4c392ba2bf01871de68b73d817109f46a",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/independent-raw-evidence-audit.json",
+      "bytes": 18434,
+      "sha256": "d23ebdefbd9aa61a67dd8b3486c46daf1d5dd67705413da42a46cbb453f5022e",
+      "gitBlobSha1": "25a5d9699cc3a163feafc6ff822854adcc5db65c",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/original-logs-and-postprocessing-records-members.json",
+      "bytes": 4692,
+      "sha256": "0ea682a65f86ac9ca35d6344b5b289b2cc703ec55819ac60f3ccc23647510fb0",
+      "gitBlobSha1": "65fb7249d0c9a8a346d63b7575549b51a1060cf9",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2444567,
+      "sha256": "ab910f5d8703c8d396eefc1a0da76bcc2a5b93f258d3bc0231b4674ef3a92698",
+      "gitBlobSha1": "a2624522645e496c48aca8e7c4fbfc4ec94b41ab",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/primary-log-audit.json",
+      "bytes": 21249,
+      "sha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8",
+      "gitBlobSha1": "5fb0f9bf8dfeffaedf3d78818d72d4c2188993b0",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/raw-archive-recovery.json",
+      "bytes": 40855,
+      "sha256": "54137c4edd9ac0f26f0569f10fa2d8fd9d6c24531ed062658ab8062ac7c6292f",
+      "gitBlobSha1": "23f746453cd06ceb30a20d4fabdb4e1ac996ad2a",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-AB/raw-evidence.zip",
+      "bytes": 2334535,
+      "sha256": "22da4b313d4ea29308d467ca254296ca27a72f9a3cb14c30d2d7c6464a9359e5",
+      "gitBlobSha1": "3b1111b68d95bd65958062c4aed88561eba9e3b6",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/independent-raw-evidence-audit.json",
+      "bytes": 18347,
+      "sha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60",
+      "gitBlobSha1": "41d8052ffcfec6f9f1a90103c8b93a76db435b39",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/original-logs-and-postprocessing-records-members.json",
+      "bytes": 4692,
+      "sha256": "f4c75fbf591191c8fd952b5c01d81001e696644b1e2e3ca3023628e8df937026",
+      "gitBlobSha1": "fc9abc4675fb093a09c245facd883fbb435b1d6b",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/original-logs-and-postprocessing-records.tar.gz",
+      "bytes": 2460008,
+      "sha256": "5f2c61cd25995d373bb234633a0f82ef9466e46a7e7c984186b22a52fed46a57",
+      "gitBlobSha1": "63a69a7d2bb487466616ab96f9263f30e8f97ce6",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/primary-log-audit.json",
+      "bytes": 21015,
+      "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7",
+      "gitBlobSha1": "64808a830662226fc50caad38c8e57c6a59b28b8",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-log-audit.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/raw-archive-recovery.json",
+      "bytes": 41009,
+      "sha256": "dea9370f81b1ea599fc47e680525efda50ce0b7464ab597d4a49455a0d25e6d4",
+      "gitBlobSha1": "31ab1f0591cb64d82d7f92d8049cc049e5f5e37a",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-archive-recovery.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/raw-evidence.zip",
+      "bytes": 2348308,
+      "sha256": "498ac2785aa955dcc5642097fb41a1d5251d0c61872db33f4396ee844d260882",
+      "gitBlobSha1": "7dc83d0695ddac9126fdc2a578e75f17c4f26777",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-evidence.zip",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/checkpoint-replay-sources-members.json",
+      "bytes": 4851,
+      "sha256": "a8fc9ea3ef514223d0f06307e9011c9ba482d85b2345cc90042843d8de17c1f7",
+      "gitBlobSha1": "30e8658d0b262a022413e783dc1289401ad28cbc",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/checkpoint-replay-sources.tar.gz",
+      "bytes": 13615,
+      "sha256": "1a334265db15f923b058481b4bfe33f6a88cbe75645f86b2a02f1219ed24cfd1",
+      "gitBlobSha1": "6d8fb408ccb9310cd614cc0875eb99f73e70d954",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/combined-primary-index.json",
+      "bytes": 45148,
+      "sha256": "2e385a89c6acd0e9915da871c3264fb16130826edf19e5e90fdeca946542dfd1",
+      "gitBlobSha1": "53c12606b7fd64330c033c2606724c3c3dd0ab6b",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/combined-primary-index.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/final-qualification-decision.json",
+      "bytes": 8620,
+      "sha256": "4f26dc008defc5e9f505c017eb9e898f220f6a8bcb908f96692dec26a8fbc538",
+      "gitBlobSha1": "6c87770eacbed93e45939f70fba85864979ac347",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/final-qualification-decision.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/final-raw-gate-summary.json",
+      "bytes": 7181,
+      "sha256": "80fa6a8e7bdea7d7446196f5e2ff843824619db31e07bd3d641ac56d436af0ca",
+      "gitBlobSha1": "4e35bdadddaf0bdf81cada6b81f1ae8e9f90533b",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/final-raw-gate-summary.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/history/first-four-independent-raw-index.json",
+      "bytes": 16663,
+      "sha256": "3c53e22ce56e25644481f3d7c90405f2329f51c99ad9ce8cdaa3539f5c4aee3c",
+      "gitBlobSha1": "b6671af4fe3b371bc9bda3e6f664e3c32b92e288",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/first-four-independent-raw-index.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/jmdict-frontier-and-proof-scope.json",
+      "bytes": 12208,
+      "sha256": "ea05709425f2257481eaa496c193340f3716da40ea9a4ae695b5cd23f9ac35d0",
+      "gitBlobSha1": "c6f54d56032a6b0f0da952797f47e2ea8183f1a1",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-frontier-and-proof-scope.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/package-byte-deltas.json",
+      "bytes": 10901,
+      "sha256": "5f737881108025345d7eea18b4e5faeff166b82c38dd019b83a70b0485fbf7e2",
+      "gitBlobSha1": "6702e6938f9b64785d0337c9f42e654ce09bd5f7",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/package-byte-deltas.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/criteria-member-name-amendment.json",
+      "bytes": 2867,
+      "sha256": "9a2216d274dfed5bd570cd90f16f4983422c047d870a92d90ea9ed32181758d9",
+      "gitBlobSha1": "30780dd21b1cf3851f51232fbe92071cc92ac92b",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/criteria-member-name-amendment.patch",
+      "bytes": 823,
+      "sha256": "e98585a75bbe17d290432191110bbe6c7a361ed238f85ddfd1d44fa8c8b1f3be",
+      "gitBlobSha1": "ec0cebf2d0a64148baba0cd545b68723df141a8a",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.patch",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/criteria-member-name-independent-review.json",
+      "bytes": 1828,
+      "sha256": "08dc7a7e851dafd864c3759acd43676bef8986886595fc4f811733aee690be76",
+      "gitBlobSha1": "a9649bff3931a8522bdeb3885e5bc4a15e4f5fcf",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-independent-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/raw-evidence-audit-v3.py",
+      "bytes": 34614,
+      "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+      "gitBlobSha1": "f27d724b11665ec96ee8ad5a8afe69e9ecace86d",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v3.py",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessing/root-filename-review.json",
+      "bytes": 1246,
+      "sha256": "e3d8b52ce7515fa05e4837d608efac43288541e05a4111cdb34e692f36d4a5f5",
+      "gitBlobSha1": "38290f1c578ff91b8fd3ab260a6eca0ca2d85b45",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/a300-raw-auditor-filename-root-review.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessor-source-history-members.json",
+      "bytes": 1726,
+      "sha256": "b3008461cae1fbf561866474cd489fcb7fa8688e0f0c13e93ecda65a5bbde3a7",
+      "gitBlobSha1": "3fa7ba930846a4b3e07134dc71a54074f2f96e57",
+      "storage": "new-archive-member-manifest"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessor-source-history.tar.gz",
+      "bytes": 13217,
+      "sha256": "58071afafd79c225db52df5233a4203a4995ae077d51fee17fbb9fbf4162cd6a",
+      "gitBlobSha1": "0253ca5754ab800ce7a8dad9d87b2a02c551ea76",
+      "storage": "new-lossless-archive"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/predecessor-publication.json",
+      "bytes": 1268,
+      "sha256": "fe087c0357daa903933b43dbac719ef5922ea4d3cd00efcc15a2d3fd41239ccd",
+      "gitBlobSha1": "bbe9c3def300e5fe089fe672ebcb9b1f70e0449d",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/proof-consumer-checkpoint-publication.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/root-qualification-decision-v2.json",
+      "bytes": 14401,
+      "sha256": "189bb2337b2d54409d27d8aa14100e2aa5e9dbb361d9d7115f828525214fbab4",
+      "gitBlobSha1": "ea991e6482d727eddb5894303927af5909da5f9a",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/a300-full-root-qualification-decision-v2.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/root-qualification-decision.json",
+      "bytes": 13134,
+      "sha256": "e403dc802e0dc3d72e35d97a3ba32f0923c207411949ac78457d4f9eb8ddd00d",
+      "gitBlobSha1": "d8f2c00938b56994a214ea2293a6b7e692dd6309",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/a300-full-root-qualification-decision.json",
+      "storage": "exact-hardlinked-local-copy"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/terminal-acquisition-api.json",
+      "bytes": 46927,
+      "sha256": "715bb6cbfb9de43f7a7d2eb8c75a168ca7e8cb586fe9daba8b1363b93b069d11",
+      "gitBlobSha1": "93707b50db061e839a2951d11f009012a18de271",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-982-full-evidence/terminal-acquisition-api.json",
+      "storage": "exact-hardlinked-local-copy"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:23:53.988588+00:00",
+  "kind": "Root narrow source review of supplemental result reviewer qualification/integrity separation",
+  "oldSource": {
+    "path": "experiments/import-study-proof-consumer-full-final-20261128/review-original-paired-results.py",
+    "bytes": 12957,
+    "sha256": "f44695bd98c216d20256eb2534f7ce1bff1938bebd9df8d0bcc27c974bcee659"
+  },
+  "newSource": {
+    "path": "experiments/import-study-proof-consumer-full-final-20261128/review-original-paired-results-v2.py",
+    "bytes": 15331,
+    "sha256": "dba56d6a547a83c38146cfc8d86809e11b4fc1256ab6e6e14bd28c48b7b8f0cf"
+  },
+  "exactPatch": {
+    "path": "experiments/import-study-proof-consumer-full-final-20261128/paired-replay-qualification-amendment.patch",
+    "bytes": 5118,
+    "sha256": "deffd113348f12eeba78c4add47b58fb4c1796baa68d395810b5c73470557337"
+  },
+  "unchangedFunctionAsts": [
+    "identity",
+    "records",
+    "require_equal_number",
+    "ordered_sum",
+    "pair_statistics",
+    "match_statistics"
+  ],
+  "changedFunctionAsts": [
+    "review_cell",
+    "main"
+  ],
+  "approved": true,
+  "scope": "Only the additional evidence reviewer changes. Frozen producer, observer, acquisition, original primary/raw audits, timing/bootstrap calculations, thresholds and original observations remain unchanged.",
+  "review": [
+    "Exact patch matches actual old/new source bytes.",
+    "The reviewer reconstructs qualification errors from original raw-bound memory summaries and requires exact equality with the original primary error list.",
+    "The precise six AB coverage errors, false qualification, null paired metrics, equality to the independent raw audit and empty original semantic-failures list are mandatory.",
+    "Every other cell must have no qualification errors and must pass memory qualification. Every unexpected primary error is rejected.",
+    "The output field now names successful evidence reconciliation and cannot be read as successful performance or memory qualification.",
+    "Original failed reviewer source/attempt and stderr remain preserved. Execute the corrected read-only reviewer once after both peer approvals; no new acquisition or selected retry."
+  ]
+}

@@ -1,5 +1,58 @@
 # Codex instructions: import optimization experiments
 
+## 2026-11-28: complete browser qualification of the suffix-proof consumer does not qualify for a performance PR
+
+The source-distinct suffix-proof consumer has completed its separately frozen browser study. **No performance PR is justified under the declared qualification rules.** VNDB AB improves latency but fails two required memory-coverage observations. VNDB BA falls just below the required 2% latency reduction and has substantial identical-code variation. JMdict still has no demonstrated complete-import improvement. The successful component screen in the preceding checkpoint remains useful evidence about native work, but it does not override these browser results.
+
+[Run 46141233321](https://github.com/ManabiIO/manabitan/actions/runs/46141233321), tooling `e8f2ccf9738839a901703890fb0061bb5eeae743`, compares baseline `a300da36d00df8e353c5679b1528b50a1299b75f` with its eight-file child `61ac55c50d9ade7b90dbeb9299de18e094e25044`. The exact C/WASM/test changes, fresh correctness proof, production settings, pinned Chrome, fixtures, observer and prospective 77-unit VNDB storage policy are those recorded below. This checkpoint completes that study without replacing any observation or transferring results from `f28`, `dcfc` or `9e10`.
+
+### Complete observations, separate decisions
+
+All six scheduled AB/BA job cells produced their complete original data: **252 reports, 330 primary records, 72 candidate pairs, 24 identical-code pairs and 24 separate memory observations**. Each cell retains four excluded warmups, twelve alternating candidate pairs, four identical-code pairs, two exhaustive-media imports and four memory imports. The VNDB AB job ended in failure because of its memory qualification, after producing all 42 reports; no planned report is missing or replaced.
+
+These are separately scheduled job cells. Distinct physical hosts are not established. Some inherited original-audit prose says “independent hosts”; those bytes are preserved as provenance, and that wording is not adopted as a factual claim here. No cells, dictionaries or earlier sources are pooled, and controls are not subtracted.
+
+Percentages below are paired candidate/baseline changes; negative is faster. Intervals are the frozen descriptive 95% paired-bootstrap intervals, not guarantees about other machines or workloads.
+
+| Corpus / cell | Median paired import change | Median paired time change | Faster pairs | Descriptive interval | Identical-code median | Identical-code range |
+| --- | ---: | ---: | ---: | --- | ---: | --- |
+| JMdict AB | -0.386369% | -3.55 ms | 7/12 | [-1.961284%, +1.448931%] | +0.329867% | [-2.761341%, +1.387025%] |
+| JMdict BA | +1.024177% | +9.00 ms | 2/12 | [+0.441729%, +1.889465%] | +1.180615% | [-0.136752%, +3.734051%] |
+| Jitendex AB | -0.378319% | -5.10 ms | 6/12 | [-3.074168%, +1.928471%] | -1.099484% | [-10.665115%, +1.265551%] |
+| Jitendex BA | -0.376638% | -5.15 ms | 9/12 | [-0.972411%, +0.181311%] | +1.061274% | [-2.749468%, +2.035884%] |
+| VNDB AB | -6.456496% | -368.90 ms | 12/12 | [-7.849683%, -4.843929%] | -1.294773% | [-2.876807%, -0.106524%] |
+| VNDB BA | -1.995784% | -86.55 ms | 9/12 | [-3.576858%, -0.021094%] | +0.705771% | [-6.102204%, +2.546732%] |
+
+The target rule requires a reduction of at least 2%, at least nine faster pairs and an interval wholly below zero **in each VNDB cell**, with materially smaller identical-code variation and all non-timing gates passing. AB meets the latency conditions. BA's exact median change is **-1.995784404609613%**, so rounding it to -2.00% cannot turn it into a pass. Its control concern is substantive: three of four absolute identical-code changes exceed the candidate's median effect, and their median absolute change is 2.3023505587978055%. This is a descriptive comparison, not a new gate. AB cannot compensate for BA, and neither can compensate for incomplete memory qualification.
+
+JMdict BA meets the three numerical conditions for an adverse signal in that one cell: +1.024177%, ten slower pairs and an interval above zero. Its control median, +1.180615%, is larger; JMdict AB is inconclusive. The predeclared replicated adverse condition is therefore not met, but this does not establish non-regression or equivalence. Both Jitendex intervals cross zero. All outliers remain, including its AB candidate pair at +18.4744% and identical-code pair at -10.6651%, as well as the large faster JMdict AB pair. Jitendex AB's equal-work result is +0.2925% despite its negative median; that discordance is also retained in the machine evidence.
+
+### Memory, storage and package integrity
+
+Independent original-archive replay verifies all **1,896 retained members and 2,108 raw process scans**. Twenty-two of twenty-four memory observations qualify under the unchanged policy. VNDB AB baseline A1 and A2 have maximum covered gaps of **286.319545 ms** and **265.378713 ms**, exceeding the fixed 250 ms limit. They still have 36 and 35 stable, fully read, fully contained import samples; the failed interval coverage remains decisive. Their qualified PSS/private maxima and the affected paired aggregate metrics remain `null`. Both candidate observations in that cell qualify, but they cannot supply the missing qualified baseline comparison.
+
+This is a **memory-coverage failure, not an established candidate memory regression**. The other five cells pass their separate sampled-memory qualification and growth checks. No missing reading is assigned zero, no gap is interpolated away, and no repeated observation is substituted. Sampled process-tree PSS/private data remain distinct from an exact peak-memory measurement.
+
+All retained source, package-entry, output, persisted lookup, restart and exhaustive-media checks reconcile. Storage comparisons cover logical file sizes, paths and validation receipts; browser output comparisons cover the declared row-count, lookup, restart and media probes. Canonical logical storage is identical across arms and observations: JMdict 43,684,317 bytes, Jitendex 67,630,172 bytes and VNDB 609,340,619 bytes. The known product paths, eight SAH files, seven 4,096-byte reserve files and prospective VNDB 77/77 allocation-unit bound are preserved. These are the source-reviewed current-storage requirements fixed before the full acquisition, not relaxed rules applied after a failure.
+
+Each release package has 582 entries. Only the expected parser C and WASM entry hashes differ; the other 580 entries and complete path set match. Whole compressed release ZIPs grow from 17,060,417 to 17,061,961 bytes, **+1,544 bytes**. Exact changed-file bytes grow by **+4,887 uncompressed bytes**: +3,864 C bytes and +1,023 WASM bytes. The receipt binds original excluded-package hashes/sizes and every original entry map. It does not invent individual compressed-entry sizes or treat code size as runtime memory. No extra release-package download was needed.
+
+### What this means for the JMdict priority
+
+The retained [JMdict frontier and proof-scope note](../../builds/perf/import-study-c563d487/proof-consumer-full-results/jmdict-frontier-and-proof-scope.json) makes the limitation explicit. The frozen diagnostic records 6,324,582 complete suffix proofs for VNDB and zero for JMdict/Jitendex. The existing numeric admission rejects all 154,409 JMdict and 73,243 Jitendex prior-streak opportunities before suffix probing. This is a property of the locked inputs and the general proof requirement, not a dictionary-name special case. Zero proof activation also does not mean zero overhead or overall runtime equivalence.
+
+Other JMdict hypotheses remain preserved below rather than recast as wins: local composite-parser hints did not improve its component; the prefix selector's 80,102 additional exact proofs produced no demonstrated elapsed gain and failed its synthetic negative screen; the prior-streak successor did not clear its all-four/control requirement; the sequence-span and deferred-CRC consumer ideas were rejected or deferred on bounded opportunity/source evidence. Diagnostic bytes skipped and overlapping profile totals were never treated as complete-import savings. This investigation has not established a JMdict import optimization worth promoting.
+
+### Reproducible evidence and retained postprocessing failures
+
+The [final evidence index](../../builds/perf/import-study-c563d487/proof-consumer-full-results/index.json) binds the complete primary index, six exact original non-package ZIPs, original logs and records, source identities, package accounting, memory scans and all decisions. The six inner ZIPs retain 13,557,952 bytes of original compressed evidence; only the release-package copies were excluded by the frozen producer, with their identities and maps retained. New per-cell gzip/tar files are explicitly labeled lossless storage representations of the exact original log and metadata bytes.
+
+Two postprocessing corrections remain visible. The raw auditor first requested an outdated criteria filename; its failed attempt is preserved alongside the one-literal correction to the frozen producer's `prospective-review-criteria.json`. Root's separate source-review preparation initially compared the wrong historical auditor version; its receipt records that failed comparison and the correct v2-to-v3 review. Neither changed acquisition, criteria or observations.
+
+The additional arithmetic reviewer initially required the primary auditor's broad `allChecksPass` flag, which also includes the expected memory-qualification failures. Its original source and failed attempt remain. A separately reviewed v2 reconstructs only the exact six VNDB AB qualification errors from the original memory data, requires raw false/null agreement, and rejects every other primary error. It then independently reconciles all 252 browser-clock deltas, all candidate/control pairs and the frozen bootstrap intervals. Its successful **evidence reconciliation does not convert failed qualification into a pass**. The original primary audits remain unchanged.
+
+The final root decision binds that completed replay. Its earlier receipt is retained as a historical beforeimage because one scope sentence prematurely used past tense while the supplemental replay was still pending; the correction changes provenance wording and references, not statistics or disposition. The immutable tooling commit and the source/member manifests provide the original acquisition and offline-replay commands. Any future measurement would be a new, separately bound study. This exact cohort is closed with **no product PR**.
+
 ## 2026-11-28: full-suffix proof consumption passes a VNDB component screen; fresh-source browser qualification remains separate
 
 A source-distinct follow-up now consumes an already validated full-row suffix equality proof in the native fused parser. It skips token-end rescans when bounded full-suffix equality succeeds. Numeric-value reuse and the ordinary full-content comparison bypass occur only after the current expression and reading pass the existing key validation and interning path. The bounded equality helper, admission predicate, strict grammar, global-content branch and completed-index publication contract remain unchanged. This is a separate candidate from the closed `4cd1abfa` study below; none of that study's observations is replaced or pooled with this screen.

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jitendex-BA/original-logs-and-postprocessing-records.tar.gz",
+    "bytes": 2343476,
+    "sha256": "67c51ff1d7f153edfbc2c6f44ce012fad3fcf44993660075b2e1914a52020848",
+    "gitBlobSha1": "1339664012581f80c3720152dd68b066d613c517"
+  },
+  "memberCount": 14,
+  "rawMemberBytes": 4415315,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-job.log",
+      "bytes": 3493205,
+      "sha256": "4ee7c3dc807ae85fb77fedd6f78d4bf6dc8c003089bf9c332d33efe2e2f8435d",
+      "gitBlobSha1": "78e391743305467948114686b9cddb66963b7594"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+      "bytes": 21756,
+      "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+      "gitBlobSha1": "f8552473b6c7b1387e47f65031fbdbc76c8a6a67"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-records.jsonl",
+      "bytes": 363358,
+      "sha256": "8a51c3b2665cc518693ee39b2980d083ffe5d4355fe7a99768757c913ae0d491",
+      "gitBlobSha1": "0e83672ecb1cdc3a5698dc8467494ef8feed76ce"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-audit-v3-command-1.status.json",
+      "bytes": 879,
+      "sha256": "7fadafef53b7f6b8905523a835263aba5ebd4e6e15a3546210b3a9a0c3be210f",
+      "gitBlobSha1": "9ba7ccddbb0005ff7ed27116ab917a8fadbff7f8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-audit-v3-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-audit-v3-command-1.stdout.log",
+      "bytes": 1454,
+      "sha256": "4a406a046383707ffead184c21aa456e786c019de8c82e16c5ca5582ded19676",
+      "gitBlobSha1": "8b8317a7abe049122c8f180f94a6f0562a63950e"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "bytes": 18424,
+      "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+      "gitBlobSha1": "b422cce388a55167e344443b995fc4aa3a6aca2a"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/primary-records.jsonl",
+      "bytes": 363358,
+      "sha256": "8a51c3b2665cc518693ee39b2980d083ffe5d4355fe7a99768757c913ae0d491",
+      "gitBlobSha1": "0e83672ecb1cdc3a5698dc8467494ef8feed76ce"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-archive-recovery.json",
+      "bytes": 39697,
+      "sha256": "6887812c79648f0e4bd344076bd9c2c9bc741ade968c726bd293488dafb18433",
+      "gitBlobSha1": "58fccba997d6282cdcd54d7bfe98f952dfb50ac0"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence-manifest.json",
+      "bytes": 51533,
+      "sha256": "1c40d83c0266120437df858d8797fedcc5fee6b250cb8b1cc1497f1ef6fab5e7",
+      "gitBlobSha1": "d84f1cec6b752be2867b6516282145bab923b00c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+      "bytes": 60228,
+      "sha256": "48b8913d542387c309e7f4a39bbc7ab966a137ead0a79bc0f68ea1eb07cadbf1",
+      "gitBlobSha1": "6956d2d37712f542dfeacb5ba2b209034173e31c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/recovery-command-1.status.json",
+      "bytes": 1096,
+      "sha256": "ecbfb8ee28bb454a022c3a2ce6abaa6ee0fb549e1f67d650b104db6429783b4f",
+      "gitBlobSha1": "25a7987bd0e619f78c7678d604f2eae498154bbf"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/recovery-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/recovery-command-1.stdout.log",
+      "bytes": 327,
+      "sha256": "5a581edfbd0d4f4d273ed4984f605680dad2f389c74d4b2b2428ff283ac8b082",
+      "gitBlobSha1": "8240744ba6797b8be1aa5e4932e7964d20ea219a"
+    }
+  ],
+  "roundTripExact": true
+}

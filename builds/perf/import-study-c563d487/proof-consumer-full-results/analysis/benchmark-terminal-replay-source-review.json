@@ -1,0 +1,21 @@
+{
+  "kind": "independent-source-review-of-terminal-arithmetic-replay",
+  "reviewer": "benchmark_setup",
+  "reviewedSourceSha256": "f44695bd98c216d20256eb2534f7ce1bff1938bebd9df8d0bcc27c974bcee659",
+  "priorReviewedSourceSha256": "b712c625960d8cb5f1edbc64be3d0573d22c4295914599def821168f48eb5150",
+  "exactOnlyAddedBlock": "    dictionary, order = cell.rsplit('-', 1)\n    assert raw_audit['auditIntegrityPassed'] is True\n    assert raw_audit['runId'] == 46141233321 and raw_audit['jobId'] == job\n    assert raw_audit['dictionary'] == dictionary and raw_audit['order'] == order\n    assert raw_audit['expectedSha256'] == EXPECTED\n    assert raw_audit['primaryRecordsSha256'] == identity(record_path)['sha256']\n    assert raw_audit['auditorSha256'] == '2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0'\n",
+  "sourceReview": [
+    "Exact42 browser-clock subtractions per cell, complete candidate/control pairing and originallog/record equality",
+    "Independent Python Random897 bootstrap,10000 resamples and original249/9749 quantiles",
+    "Explicit sequential float additions and stated strict numeric tolerance",
+    "Separate memory-summary arithmetic and unchanged5/10 gates; raw process classification credited separately",
+    "Allsix terminal primary/raw inputs required with frozen source/job/run/expected identities",
+    "Added rawIntegrity/currentcell/records/source-auditor checks close a concrete present-but-wrong-raw-file acceptance gap"
+  ],
+  "existingSchemaCheck": "Read existing completed JMBA raw and primary field schemas only; no target data or terminal arithmetic replay executed by this review.",
+  "allOtherSourceBytesMatchPrior": true,
+  "syntaxPass": true,
+  "acquisitionOrNativeExecution": false,
+  "terminalReplayExecuted": false,
+  "decision": "PASS for later read-only terminal reconciliation; no source, timing, threshold, observation or retry changes."
+}

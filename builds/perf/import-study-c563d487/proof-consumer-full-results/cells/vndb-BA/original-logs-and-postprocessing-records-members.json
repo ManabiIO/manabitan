@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/vndb-BA/original-logs-and-postprocessing-records.tar.gz",
+    "bytes": 2460008,
+    "sha256": "5f2c61cd25995d373bb234633a0f82ef9466e46a7e7c984186b22a52fed46a57",
+    "gitBlobSha1": "63a69a7d2bb487466616ab96f9263f30e8f97ce6"
+  },
+  "memberCount": 14,
+  "rawMemberBytes": 4651369,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-job.log",
+      "bytes": 3700048,
+      "sha256": "63aa0de451c07edb515fcedbaeeb9e4132ba04961aba9877d2cbea699b4423ae",
+      "gitBlobSha1": "a961ce08368575b1cf82db82e9e815627431cfbb"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-log-audit.json",
+      "bytes": 21015,
+      "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7",
+      "gitBlobSha1": "64808a830662226fc50caad38c8e57c6a59b28b8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-records.jsonl",
+      "bytes": 377714,
+      "sha256": "92692cdc9d9f458239ec8a3b439bf6d102951628b6ca62f1c0623ff9146d86d3",
+      "gitBlobSha1": "40d6e4cfd3dcc4f5f13e08df589598970198d319"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-audit-v3-command-1.status.json",
+      "bytes": 880,
+      "sha256": "75d526b07daa91b3b70c96f32e4a7c5dca83aa24118beda4d12fa6b989721d11",
+      "gitBlobSha1": "48c80137133a388d461857d8e938d7b649bf959f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-audit-v3-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-audit-v3-command-1.stdout.log",
+      "bytes": 1461,
+      "sha256": "1245e6ffcc733fe402c50a3ca11b6937ceb13f55451f18b320eb6bb6f08137a3",
+      "gitBlobSha1": "64c35b411fc0babb2f5001ddba4ebb47cf3d465f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+      "bytes": 18347,
+      "sha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60",
+      "gitBlobSha1": "41d8052ffcfec6f9f1a90103c8b93a76db435b39"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/primary-records.jsonl",
+      "bytes": 377714,
+      "sha256": "92692cdc9d9f458239ec8a3b439bf6d102951628b6ca62f1c0623ff9146d86d3",
+      "gitBlobSha1": "40d6e4cfd3dcc4f5f13e08df589598970198d319"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-archive-recovery.json",
+      "bytes": 41009,
+      "sha256": "dea9370f81b1ea599fc47e680525efda50ce0b7464ab597d4a49455a0d25e6d4",
+      "gitBlobSha1": "31ab1f0591cb64d82d7f92d8049cc049e5f5e37a"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-evidence-manifest.json",
+      "bytes": 51525,
+      "sha256": "d184e4d8eb7d91a73cb23585bd2c930f3b91ee232ba47b4e7479b9d104e4822c",
+      "gitBlobSha1": "e38b7afbc838ea7452808be6882a731bc630f0df"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+      "bytes": 60203,
+      "sha256": "288ae1019803b4ec5ca1594822385dc5913e0ab535afd9db307fdfdd6ccb4e9a",
+      "gitBlobSha1": "d7fffd26b8ecb39d1081e6828695f2114ad007e4"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/recovery-command-1.status.json",
+      "bytes": 1126,
+      "sha256": "dcef2acd560edc0d55229e6604d140ed3891e90c0c3ebd7a845bc73121dda9a0",
+      "gitBlobSha1": "71c542c6fcf624c80bce9c4648bfafff414ccb03"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/recovery-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/recovery-command-1.stdout.log",
+      "bytes": 327,
+      "sha256": "7d1f4318fc8f2a979fb775b92d5b9183e0961d944714b0ae436f05d575b09aec",
+      "gitBlobSha1": "b41f4059b0e9f9c652ba9b24ee2fc82db4d2f14e"
+    }
+  ],
+  "roundTripExact": true
+}

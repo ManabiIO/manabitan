@@ -1,0 +1,84 @@
+{
+  "kind": "prospective-read-only-combined-primary-index-adaptation",
+  "oldSha256": "016f06aec92e716517dfefea6e3fe487079a29e047aa63294975716661645187",
+  "newSha256": "65cb39cd9d9e2f63bb40cc372da03746a1c3ce567ef7a8462051f16c17fc1981",
+  "replacements": [
+    {
+      "before": "numeric-suffix-972-full-qualification/published-faf6d9d9",
+      "after": "numeric-suffix-proof-consumer-982-full-audit"
+    },
+    {
+      "before": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+      "after": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003"
+    },
+    {
+      "before": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+      "after": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9"
+    },
+    {
+      "before": "140933489138",
+      "after": "140967463788"
+    },
+    {
+      "before": "140933489203",
+      "after": "140967463778"
+    },
+    {
+      "before": "140933489159",
+      "after": "140967463739"
+    },
+    {
+      "before": "140933489153",
+      "after": "140967463737"
+    },
+    {
+      "before": "140933489168",
+      "after": "140967463725"
+    },
+    {
+      "before": "140933489131",
+      "after": "140967463694"
+    },
+    {
+      "before": "current-dcfc full-import cohort",
+      "after": "current-a300/61ac full-import cohort"
+    },
+    {
+      "before": "validation/independent-primary-audit.json",
+      "after": "correctness/independent-primary-validation-audit.json"
+    },
+    {
+      "before": "Cross-host same-arm",
+      "after": "Cross-order-cell same-arm"
+    },
+    {
+      "before": "Cross-host same-corpus",
+      "after": "Cross-order-cell same-corpus"
+    },
+    {
+      "before": "per-host effects",
+      "after": "per-order-cell effects"
+    },
+    {
+      "before": "pooling hosts",
+      "after": "pooling order cells"
+    },
+    {
+      "before": "No host pooling",
+      "after": "No order-cell pooling"
+    },
+    {
+      "before": "Distinct Actions jobs establish separate provisioning, not independently verified physical hardware.",
+      "after": "Distinct Actions jobs establish separate job assignments, not independently verified physical hardware."
+    },
+    {
+      "before": "Exact source-tree reuse binds earlier correctness; it does not claim the old CI ran at the published product commit.",
+      "after": "Exact source-tree reuse consumes the fresh successful prerequisite at the same published61ac product commit; required exact-head repository checks remain required before merge."
+    }
+  ],
+  "allOtherBytesIdentical": true,
+  "newAcquisition": false,
+  "actualFullObservationDataConsumed": false,
+  "syntaxPass": true,
+  "scope": "Only source/expected/job/path identities and accurate current-source/physical-host wording changed. Still requires all six terminal audits, refuses overwrite, independently binds original logs/tagged record bytes and aggregates already-audited statistics without pooling or automatic promotion."
+}

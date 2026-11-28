@@ -1,0 +1,1337 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:19:06.007834+00:00",
+  "scope": "Terminal primary-log reconciliation of the separately frozen current-a300/61ac full-import cohort; no new observations.",
+  "runId": 46141233321,
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "auditor": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-audit.js",
+    "bytes": 34024,
+    "sha256": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003"
+  },
+  "expected": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-expected.json",
+    "bytes": 6838,
+    "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9"
+  },
+  "assembler": {
+    "path": "numeric-suffix-proof-consumer-982-full-evidence/assemble-primary-index.py",
+    "bytes": 11486,
+    "sha256": "65cb39cd9d9e2f63bb40cc372da03746a1c3ce567ef7a8462051f16c17fc1981"
+  },
+  "correctnessBindingAudit": {
+    "path": "numeric-suffix-proof-consumer-982-full-evidence/correctness/independent-primary-validation-audit.json",
+    "bytes": 2903,
+    "sha256": "519da1b02a000af25789356ddc8adbeee23f6fc8d17458edfdd40ed94133ec63"
+  },
+  "cells": {
+    "jmdict-AB": {
+      "jobId": 140967463788,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463788",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-job.log",
+        "bytes": 3431521,
+        "sha256": "b2cb128c26221fa9c3619924cc1499ff0750c1b4d7f5115d6592318345a07911"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-records.jsonl",
+        "bytes": 362187,
+        "sha256": "94fb550676a4e40c94bc4e71767a75ff9361a21f7f4b112bdb7ad8248ea7ad8e"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+        "bytes": 20917,
+        "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": true,
+      "errors": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9976989854617597,
+          1.0068935803532582,
+          0.9837282952931931,
+          0.9853416684629311,
+          0.8375838926174497,
+          1.016535177780229,
+          0.9945736434109559,
+          0.9770460152312469,
+          0.972327315965866,
+          1.012443438914027,
+          1.0302655265526839,
+          1.0338885697874785
+        ],
+        "baselineMs": [
+          956.1000000000349,
+          928.4000000000233,
+          915.7000000000116,
+          927.8000000000466,
+          1117.5,
+          925.3000000000466,
+          903,
+          932.2999999999302,
+          925.0999999999767,
+          884,
+          888.7999999999302,
+          870.5
+        ],
+        "candidateMs": [
+          953.9000000000233,
+          934.7999999999884,
+          900.7999999999884,
+          914.1999999999534,
+          936,
+          940.6000000000931,
+          898.1000000000931,
+          910.9000000000233,
+          899.5,
+          895,
+          915.6999999999534,
+          900
+        ],
+        "baselineMedianMs": 925.2000000000116,
+        "candidateMedianMs": 912.5499999999884,
+        "medianPairedChangeMs": -3.5499999999592546,
+        "medianPairedChangePercent": -0.38636855636422496,
+        "equalWorkChangePercent": -1.5660655957750569,
+        "worstPairChangePercent": 3.388856978747845,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Percent": [
+          -1.9612844737780022,
+          1.4489308347128027
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.994000872600349,
+          1.0138702460850373,
+          0.9723865877712535,
+          1.0125964593735557
+        ],
+        "baselineMs": [
+          916.7999999999884,
+          894,
+          912.5999999999767,
+          881.1999999999534
+        ],
+        "candidateMs": [
+          911.2999999999884,
+          906.4000000000233,
+          887.4000000000233,
+          892.2999999999302
+        ],
+        "baselineMedianMs": 903.2999999999884,
+        "candidateMedianMs": 899.3499999999767,
+        "medianPairedChangeMs": 2.7999999999883585,
+        "medianPairedChangePercent": 0.3298665986952276,
+        "equalWorkChangePercent": -0.19974477056965423,
+        "worstPairChangePercent": 1.3870246085037286,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -2.761341222874647,
+          1.3870246085037286
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.761341222874647,
+        1.3870246085037286
+      ],
+      "largestAbsoluteControlChangePercent": 2.761341222874647,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "storageBytes": 43684317,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memoryPass": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -1.521336541881585,
+          "maximumPairedChangePercent": -1.100204475485922
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -1.9577977161181148,
+          "maximumPairedChangePercent": -0.97123719464145
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 4,
+      "memoryCoverage": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 224.163416,
+          "preImportBracketGapMs": 76.377454,
+          "postImportBracketGapMs": 9.831295,
+          "stableFullyReadImportSampleCount": 6,
+          "maxSampledPssKiB": 1044624,
+          "maxSampledPrivateKiB": 812160
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 197.663081,
+          "preImportBracketGapMs": 84.866565,
+          "postImportBracketGapMs": 20.829747,
+          "stableFullyReadImportSampleCount": 7,
+          "maxSampledPssKiB": 1033131,
+          "maxSampledPrivateKiB": 804272
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 226.617983,
+          "preImportBracketGapMs": 57.018826,
+          "postImportBracketGapMs": 95.503761,
+          "stableFullyReadImportSampleCount": 6,
+          "maxSampledPssKiB": 1028548,
+          "maxSampledPrivateKiB": 793096
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 201.592879,
+          "preImportBracketGapMs": 19.772892,
+          "postImportBracketGapMs": 105.663564,
+          "stableFullyReadImportSampleCount": 7,
+          "maxSampledPssKiB": 1048923,
+          "maxSampledPrivateKiB": 817156
+        }
+      ],
+      "rawScanCount": 267,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2160510,
+          "gitBlobSha1": "0033df83faf07cbe4d0c7263927ab505ab3d1a56",
+          "sha256": "ed39f0fb245b2cc12b2f0723f8ab5b70e8fcbc93d82effa9e7c22a827920e9e2"
+        },
+        "chunkCount": 352,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "795a1c0d475f10d0d1a335607dcab0ea27a7f0f8e34f3e589275bda7975b1cdf",
+        "memberCount": 316
+      }
+    },
+    "jmdict-BA": {
+      "jobId": 140967463778,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463778",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-job.log",
+        "bytes": 3589957,
+        "sha256": "e6a0287fa159a1ccf399e04a01fe796bdd25a3877e5b7c58f282dc3d3cec748c"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-records.jsonl",
+        "bytes": 362612,
+        "sha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+        "bytes": 20882,
+        "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": true,
+      "errors": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9742768823139578,
+          1.008395629672212,
+          1.0353378054623867,
+          1.0086599817684327,
+          1.0027541886618832,
+          1.0118235561619187,
+          1.0060803963517226,
+          1.019909502262483,
+          0.9987528344671466,
+          1.0158415841584565,
+          1.0255623721881386,
+          1.0178798015918786
+        ],
+        "baselineMs": [
+          905.8000000000175,
+          869.5,
+          834.7999999999884,
+          877.6000000000058,
+          871.4000000000233,
+          879.5999999999767,
+          888.1000000000349,
+          884,
+          882,
+          858.5,
+          880.2000000000116,
+          866.9000000000233
+        ],
+        "candidateMs": [
+          882.5,
+          876.7999999999884,
+          864.2999999999884,
+          885.1999999999825,
+          873.7999999999884,
+          890,
+          893.5,
+          901.6000000000349,
+          880.9000000000233,
+          872.1000000000349,
+          902.7000000000116,
+          882.4000000000233
+        ],
+        "baselineMedianMs": 878.5999999999913,
+        "candidateMedianMs": 882.4500000000116,
+        "medianPairedChangeMs": 9,
+        "medianPairedChangePercent": 1.0241768965175702,
+        "equalWorkChangePercent": 1.023013030556963,
+        "worstPairChangePercent": 3.533780546238674,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          0.44172925068028945,
+          1.889465192718065
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0146103896103964,
+          1.0090019129064924,
+          0.9986324786324654,
+          1.0373405127004136
+        ],
+        "baselineMs": [
+          862.3999999999942,
+          888.7000000000116,
+          877.5,
+          854.3000000000466
+        ],
+        "candidateMs": [
+          875,
+          896.7000000000116,
+          876.2999999999884,
+          886.2000000000116
+        ],
+        "baselineMedianMs": 869.9499999999971,
+        "candidateMedianMs": 881.25,
+        "medianPairedChangeMs": 10.30000000000291,
+        "medianPairedChangePercent": 1.180615125844442,
+        "equalWorkChangePercent": 1.4729105056119574,
+        "worstPairChangePercent": 3.734051270041361,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -0.13675213675345965,
+          3.734051270041361
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -0.13675213675345965,
+        3.734051270041361
+      ],
+      "largestAbsoluteControlChangePercent": 3.734051270041361,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": true,
+      "storageBytes": 43684317,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memoryPass": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 1.815300867200731,
+          "maximumPairedChangePercent": 2.7969668623117228
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 2.521770580657001,
+          "maximumPairedChangePercent": 3.6359183423559482
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 4,
+      "memoryCoverage": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 124.066181,
+          "preImportBracketGapMs": 3.621337,
+          "postImportBracketGapMs": 20.843165,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1017124,
+          "maxSampledPrivateKiB": 786696
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 124.211858,
+          "preImportBracketGapMs": 40.900365,
+          "postImportBracketGapMs": 22.024984,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1008715,
+          "maxSampledPrivateKiB": 775776
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 131.784483,
+          "preImportBracketGapMs": 33.718562,
+          "postImportBracketGapMs": 24.604418,
+          "stableFullyReadImportSampleCount": 11,
+          "maxSampledPssKiB": 1016637,
+          "maxSampledPrivateKiB": 783956
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 98.705845,
+          "preImportBracketGapMs": 37.835683,
+          "postImportBracketGapMs": 28.948264,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1045072,
+          "maxSampledPrivateKiB": 812460
+        }
+      ],
+      "rawScanCount": 385,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2277726,
+          "gitBlobSha1": "87379cc4c392ba2bf01871de68b73d817109f46a",
+          "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed"
+        },
+        "chunkCount": 371,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "e3a1c100a098934932d8af24edf5fb50f24a1be3a2dea3077b494c302b02467e",
+        "memberCount": 316
+      }
+    },
+    "jitendex-AB": {
+      "jobId": 140967463739,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463739",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-job.log",
+        "bytes": 3528422,
+        "sha256": "39d4130b66fa670ec8fbd935dadf7973d5d23365a6d109c11aa09b81ed7d6409"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-records.jsonl",
+        "bytes": 363328,
+        "sha256": "ea61b2a28f8016a6d8c8a1e79dba4b5b0eb9496211a523ee07cd1f0bcd81e4a1"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": true,
+      "errors": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0347227309354692,
+          1.0299851137732956,
+          0.9597888742273808,
+          1.0085843154372307,
+          0.98817306985971,
+          0.9254147402773732,
+          1.0051046452271568,
+          0.9831253050693332,
+          0.9467276565798651,
+          1.1847440071026538,
+          1.0042605430386808,
+          0.9787277561873516
+        ],
+        "baselineMs": [
+          1365.0999999999913,
+          1410.7000000000116,
+          1439.8999999999942,
+          1374.6000000000058,
+          1361.2999999999884,
+          1470.8000000000175,
+          1371.2999999999884,
+          1434.100000000035,
+          1421,
+          1351.600000000035,
+          1384.7999999999884,
+          1466.7000000000116
+        ],
+        "candidateMs": [
+          1412.5,
+          1453,
+          1382,
+          1386.4000000000233,
+          1345.2000000000116,
+          1361.0999999999767,
+          1378.2999999999884,
+          1409.899999999965,
+          1345.2999999999884,
+          1601.2999999999884,
+          1390.6999999999534,
+          1435.5
+        ],
+        "baselineMedianMs": 1397.75,
+        "candidateMedianMs": 1388.5499999999884,
+        "medianPairedChangeMs": -5.100000000005821,
+        "medianPairedChangePercent": -0.37831935508045866,
+        "equalWorkChangePercent": 0.29254861469525384,
+        "worstPairChangePercent": 18.47440071026538,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -3.074168479263384,
+          1.9284714605263265
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0091373480106567,
+          1.0126555126555001,
+          0.9688729623384008,
+          0.8933488462283922
+        ],
+        "baselineMs": [
+          1389.8999999999942,
+          1398.6000000000058,
+          1423.2000000000116,
+          1547.100000000035
+        ],
+        "candidateMs": [
+          1402.6000000000058,
+          1416.2999999999884,
+          1378.9000000000233,
+          1382.0999999999767
+        ],
+        "baselineMedianMs": 1410.9000000000087,
+        "candidateMedianMs": 1392.3499999999913,
+        "medianPairedChangeMs": -15.799999999988358,
+        "medianPairedChangePercent": -1.0994844825471306,
+        "equalWorkChangePercent": -3.106549975690265,
+        "worstPairChangePercent": 1.2655512655500134,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -10.665115377160783,
+          1.2655512655500134
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -10.665115377160783,
+        1.2655512655500134
+      ],
+      "largestAbsoluteControlChangePercent": 10.665115377160783,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "storageBytes": 67630172,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memoryPass": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -1.6804841608513532,
+          "maximumPairedChangePercent": 0.17874788188925184
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -2.260505525454742,
+          "maximumPairedChangePercent": 0.35961711354381976
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 4,
+      "memoryCoverage": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 150.84121,
+          "preImportBracketGapMs": 10.84358,
+          "postImportBracketGapMs": 81.317352,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1064628,
+          "maxSampledPrivateKiB": 831996
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 162.39037,
+          "preImportBracketGapMs": 55.974279,
+          "postImportBracketGapMs": 16.094484,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1066531,
+          "maxSampledPrivateKiB": 834988
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 153.368686,
+          "preImportBracketGapMs": 77.24568,
+          "postImportBracketGapMs": 28.4745,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1047005,
+          "maxSampledPrivateKiB": 813088
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 162.902651,
+          "preImportBracketGapMs": 8.717008,
+          "postImportBracketGapMs": 50.71973,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1085426,
+          "maxSampledPrivateKiB": 854808
+        }
+      ],
+      "rawScanCount": 326,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2231469,
+          "gitBlobSha1": "c3c286b101890e3d520738766da5d4787913121e",
+          "sha256": "aee1884b7d6124e92af1fbd82e45cab08328dd6de935483b15939e0cf3d14846"
+        },
+        "chunkCount": 364,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "7976f34b7b88eb822d1b55bee881f3c055007d4ed8db8055b8293b6a764ef31a",
+        "memberCount": 316
+      }
+    },
+    "jitendex-BA": {
+      "jobId": 140967463737,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463737",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-job.log",
+        "bytes": 3493205,
+        "sha256": "4ee7c3dc807ae85fb77fedd6f78d4bf6dc8c003089bf9c332d33efe2e2f8435d"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-records.jsonl",
+        "bytes": 363358,
+        "sha256": "8a51c3b2665cc518693ee39b2980d083ffe5d4355fe7a99768757c913ae0d491"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": true,
+      "errors": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9934022432372993,
+          1.005695687550863,
+          0.967083513008468,
+          0.9965387731055221,
+          1.010218542552407,
+          0.9689996335653744,
+          0.9871495327102552,
+          0.9959284571760689,
+          0.9957341715311993,
+          1.0066484450025854,
+          0.9979305247598017,
+          0.996944403040709
+        ],
+        "baselineMs": [
+          1364.1000000000058,
+          1351.8999999999942,
+          1391.3999999999942,
+          1357.9000000000233,
+          1340.6999999999534,
+          1364.5,
+          1369.600000000035,
+          1375.4000000000233,
+          1336.2000000000116,
+          1353.7000000000116,
+          1353,
+          1341.7999999999884
+        ],
+        "candidateMs": [
+          1355.1000000000058,
+          1359.6000000000058,
+          1345.5999999999767,
+          1353.2000000000116,
+          1354.399999999965,
+          1322.1999999999534,
+          1352,
+          1369.7999999999884,
+          1330.5,
+          1362.7000000000116,
+          1350.2000000000116,
+          1337.7000000000116
+        ],
+        "baselineMedianMs": 1355.8000000000175,
+        "candidateMedianMs": 1352.6000000000058,
+        "medianPairedChangeMs": -5.150000000023283,
+        "medianPairedChangePercent": -0.37663848592044413,
+        "equalWorkChangePercent": -0.6576606422013187,
+        "worstPairChangePercent": 1.0218542552407062,
+        "fasterPairs": 9,
+        "descriptiveBootstrap95Percent": [
+          -0.9724112026222809,
+          0.18131061553323669
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0145851656405704,
+          1.006640304409478,
+          0.9725053156389769,
+          1.0203588429146748
+        ],
+        "baselineMs": [
+          1364.3999999999942,
+          1340.2999999999884,
+          1363.9000000000233,
+          1365.5
+        ],
+        "candidateMs": [
+          1384.2999999999884,
+          1349.2000000000116,
+          1326.4000000000233,
+          1393.2999999999884
+        ],
+        "baselineMedianMs": 1364.1500000000087,
+        "candidateMedianMs": 1366.75,
+        "medianPairedChangeMs": 14.400000000008731,
+        "medianPairedChangePercent": 1.0612735025024245,
+        "equalWorkChangePercent": 0.3514841464088869,
+        "worstPairChangePercent": 2.0358842914674824,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Percent": [
+          -2.749468436102309,
+          2.0358842914674824
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.749468436102309,
+        2.0358842914674824
+      ],
+      "largestAbsoluteControlChangePercent": 2.749468436102309,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "storageBytes": 67630172,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memoryPass": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 1.1116382600679264,
+          "maximumPairedChangePercent": 3.9740840751836037
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 1.5290302586898508,
+          "maximumPairedChangePercent": 5.542553456922583
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 4,
+      "memoryCoverage": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 162.24407,
+          "preImportBracketGapMs": 58.081418,
+          "postImportBracketGapMs": 59.110367,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1044777,
+          "maxSampledPrivateKiB": 811840
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 158.328172,
+          "preImportBracketGapMs": 50.625647,
+          "postImportBracketGapMs": 64.01847,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1063395,
+          "maxSampledPrivateKiB": 832524
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 166.137801,
+          "preImportBracketGapMs": 85.946406,
+          "postImportBracketGapMs": 23.648752,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1035811,
+          "maxSampledPrivateKiB": 801580
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 160.54029,
+          "preImportBracketGapMs": 20.970051,
+          "postImportBracketGapMs": 30.164918,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1076975,
+          "maxSampledPrivateKiB": 846008
+        }
+      ],
+      "rawScanCount": 301,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2205404,
+          "gitBlobSha1": "bbc06c4041fd0acc95bd03878c0e151ebf146acd",
+          "sha256": "0285ee591f2808de8285d18e30afee5c6738a9f9e895e0b66e79bdf2b0533d83"
+        },
+        "chunkCount": 359,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "1c40d83c0266120437df858d8797fedcc5fee6b250cb8b1cc1497f1ef6fab5e7",
+        "memberCount": 316
+      }
+    },
+    "vndb-AB": {
+      "jobId": 140967463725,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463725",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-job.log",
+        "bytes": 3681141,
+        "sha256": "813ee28b9ebfe7ad930c05220c8ca6804dccd20cf3a3733612c63237a3d16206"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-records.jsonl",
+        "bytes": 376837,
+        "sha256": "3e530b2e3216862cd40a68b4a90da6e784063e2c94fdf4d8f756b4b5897762b0"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-log-audit.json",
+        "bytes": 21249,
+        "sha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": false,
+      "errors": [
+        "Original correctness/memory gate did not pass",
+        "Separate memory observations/audit did not qualify",
+        "A1: memory coverage did not qualify",
+        "A1: emitted prospective memory coverage is insufficient",
+        "A2: memory coverage did not qualify",
+        "A2: emitted prospective memory coverage is insufficient"
+      ],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9380594783770981,
+          0.9714316114273495,
+          0.9108612861918142,
+          0.92838812171576,
+          0.9328105941801749,
+          0.9495441049876224,
+          0.918070899174929,
+          0.9249354385843319,
+          0.9563174870284553,
+          0.9535773185023876,
+          0.8794146341463452,
+          0.9476523123176231
+        ],
+        "baselineMs": [
+          5686.100000000006,
+          5639.100000000035,
+          6013.099999999977,
+          5728.099999999977,
+          5739,
+          5692.099999999977,
+          5720.800000000047,
+          5769.699999999953,
+          5704.800000000047,
+          5699.800000000047,
+          6150,
+          5654.5
+        ],
+        "candidateMs": [
+          5333.900000000023,
+          5478,
+          5477.099999999977,
+          5317.900000000023,
+          5353.400000000023,
+          5404.900000000023,
+          5252.099999999977,
+          5336.599999999977,
+          5455.599999999977,
+          5435.199999999953,
+          5408.400000000023,
+          5358.5
+        ],
+        "baselineMedianMs": 5712.800000000047,
+        "candidateMedianMs": 5381.700000000012,
+        "medianPairedChangeMs": -368.8999999999796,
+        "medianPairedChangePercent": -6.456496372136344,
+        "equalWorkChangePercent": -6.626722796186668,
+        "worstPairChangePercent": -2.856838857265054,
+        "fasterPairs": 12,
+        "descriptiveBootstrap95Percent": [
+          -7.849683112036954,
+          -4.8439288254995
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9807645099070644,
+          0.9712319339297883,
+          0.9989347583124021,
+          0.9933400221422641
+        ],
+        "baselineMs": [
+          5703,
+          5812,
+          5726.399999999907,
+          5780.800000000047
+        ],
+        "candidateMs": [
+          5593.299999999988,
+          5644.79999999993,
+          5720.300000000047,
+          5742.300000000047
+        ],
+        "baselineMedianMs": 5753.599999999977,
+        "candidateMedianMs": 5682.549999999988,
+        "medianPairedChangeMs": -74.10000000000582,
+        "medianPairedChangePercent": -1.2947733975335662,
+        "equalWorkChangePercent": -1.3964781819284955,
+        "worstPairChangePercent": -0.10652416875979176,
+        "fasterPairs": 4,
+        "descriptiveBootstrap95Percent": [
+          -2.876806607021165,
+          -0.10652416875979176
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -2.876806607021165,
+        -0.10652416875979176
+      ],
+      "largestAbsoluteControlChangePercent": 2.876806607021165,
+      "mechanicalTargetThresholdPass": true,
+      "mechanicalNonTargetHoldSignal": false,
+      "storageBytes": 609340619,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memoryPass": false,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 2,
+      "memoryCoverage": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 286.319545,
+          "preImportBracketGapMs": 65.92277,
+          "postImportBracketGapMs": 22.375774,
+          "stableFullyReadImportSampleCount": 36,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 244.653042,
+          "preImportBracketGapMs": 107.375622,
+          "postImportBracketGapMs": 21.112527,
+          "stableFullyReadImportSampleCount": 34,
+          "maxSampledPssKiB": 1247343,
+          "maxSampledPrivateKiB": 1020372
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 246.830052,
+          "preImportBracketGapMs": 89.931255,
+          "postImportBracketGapMs": 57.925847,
+          "stableFullyReadImportSampleCount": 34,
+          "maxSampledPssKiB": 1251084,
+          "maxSampledPrivateKiB": 1022252
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 265.378713,
+          "preImportBracketGapMs": 113.799882,
+          "postImportBracketGapMs": 31.074168,
+          "stableFullyReadImportSampleCount": 35,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        }
+      ],
+      "rawScanCount": 411,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2334535,
+          "gitBlobSha1": "3b1111b68d95bd65958062c4aed88561eba9e3b6",
+          "sha256": "22da4b313d4ea29308d467ca254296ca27a72f9a3cb14c30d2d7c6464a9359e5"
+        },
+        "chunkCount": 380,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "77bf2dd6b702a644b259788b3686c36d976a727683a80637e8f8bd8dd737a49f",
+        "memberCount": 316
+      }
+    },
+    "vndb-BA": {
+      "jobId": 140967463694,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46141233321/job/140967463694",
+      "primaryLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-job.log",
+        "bytes": 3700048,
+        "sha256": "63aa0de451c07edb515fcedbaeeb9e4132ba04961aba9877d2cbea699b4423ae"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-records.jsonl",
+        "bytes": 377714,
+        "sha256": "92692cdc9d9f458239ec8a3b439bf6d102951628b6ca62f1c0623ff9146d86d3"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-log-audit.json",
+        "bytes": 21015,
+        "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7"
+      },
+      "records": 55,
+      "observations": 42,
+      "observationKinds": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryChecksPass": true,
+      "errors": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0394727550900345,
+          0.9602109635714519,
+          0.9697600703361765,
+          1.011354892862961,
+          0.9644296074594221,
+          0.9813152548778813,
+          0.9869478142768325,
+          0.9640332354021273,
+          0.9627421758569303,
+          0.9787690570299266,
+          0.9992572303978567,
+          1.0003208948381828
+        ],
+        "baselineMs": [
+          4248.5,
+          4285.099999999977,
+          4322.100000000006,
+          4288.900000000023,
+          4343.5,
+          4233.399999999965,
+          4344.099999999977,
+          4356.799999999988,
+          4562.800000000047,
+          4427.5,
+          4308.199999999953,
+          4362.800000000047
+        ],
+        "candidateMs": [
+          4416.200000000012,
+          4114.600000000006,
+          4191.399999999994,
+          4337.599999999977,
+          4189,
+          4154.299999999988,
+          4287.399999999965,
+          4200.099999999977,
+          4392.800000000047,
+          4333.5,
+          4305,
+          4364.20000000007
+        ],
+        "baselineMedianMs": 4332.800000000003,
+        "candidateMedianMs": 4296.1999999999825,
+        "medianPairedChangeMs": -86.54999999998836,
+        "medianPairedChangePercent": -1.995784404609613,
+        "equalWorkChangePercent": -1.5313812190761222,
+        "worstPairChangePercent": 3.947275509003445,
+        "fasterPairs": 9,
+        "descriptiveBootstrap95Percent": [
+          -3.576857856922533,
+          -0.021093738198030287
+        ]
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9935357401227549,
+          1.0205796892634902,
+          1.025467321912466,
+          0.9389779648871369
+        ],
+        "baselineMs": [
+          4285.099999999977,
+          4164.300000000047,
+          4354.599999999977,
+          4465.599999999977
+        ],
+        "candidateMs": [
+          4257.399999999994,
+          4250,
+          4465.5,
+          4193.099999999977
+        ],
+        "baselineMedianMs": 4319.849999999977,
+        "candidateMedianMs": 4253.699999999997,
+        "medianPairedChangeMs": 28.999999999985448,
+        "medianPairedChangePercent": 0.7057714693122552,
+        "equalWorkChangePercent": -0.5998980868115456,
+        "worstPairChangePercent": 2.5467321912465923,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Percent": [
+          -6.102203511286309,
+          2.5467321912465923
+        ]
+      },
+      "identicalCodeChangePercentRange": [
+        -6.102203511286309,
+        2.5467321912465923
+      ],
+      "largestAbsoluteControlChangePercent": 6.102203511286309,
+      "mechanicalTargetThresholdPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "storageBytes": 609340619,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memoryPass": true,
+      "memoryMetrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.4351893443975685,
+          "maximumPairedChangePercent": 1.3332498547151017
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.4903780341102226,
+          "maximumPairedChangePercent": 1.7377879037958177
+        }
+      },
+      "memoryObservationCount": 4,
+      "qualifiedMemoryObservationCount": 4,
+      "memoryCoverage": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 175.431258,
+          "preImportBracketGapMs": 3.30198,
+          "postImportBracketGapMs": 66.506363,
+          "stableFullyReadImportSampleCount": 36,
+          "maxSampledPssKiB": 1262438,
+          "maxSampledPrivateKiB": 1030616
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 155.952564,
+          "preImportBracketGapMs": 12.448316,
+          "postImportBracketGapMs": 6.586238,
+          "stableFullyReadImportSampleCount": 38,
+          "maxSampledPssKiB": 1245828,
+          "maxSampledPrivateKiB": 1013012
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 182.940348,
+          "preImportBracketGapMs": 15.49245,
+          "postImportBracketGapMs": 85.549873,
+          "stableFullyReadImportSampleCount": 37,
+          "maxSampledPssKiB": 1245703,
+          "maxSampledPrivateKiB": 1013960
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 176.211086,
+          "preImportBracketGapMs": 49.362566,
+          "postImportBracketGapMs": 78.96488,
+          "stableFullyReadImportSampleCount": 37,
+          "maxSampledPssKiB": 1239937,
+          "maxSampledPrivateKiB": 1006284
+        }
+      ],
+      "rawScanCount": 418,
+      "losslessArchive": {
+        "acquisitionOrObservationsChanged": false,
+        "archive": {
+          "bytes": 2348308,
+          "gitBlobSha1": "7dc83d0695ddac9126fdc2a578e75f17c4f26777",
+          "sha256": "498ac2785aa955dcc5642097fb41a1d5251d0c61872db33f4396ee844d260882"
+        },
+        "chunkCount": 383,
+        "complete": true,
+        "excludedCount": 2,
+        "manifestSha256": "d184e4d8eb7d91a73cb23585bd2c930f3b91ee232ba47b4e7479b9d104e4822c",
+        "memberCount": 316
+      }
+    }
+  },
+  "totals": {
+    "primaryRecords": 330,
+    "reports": 252,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 22,
+    "rawScans": 2108
+  },
+  "completeRegisteredPlanPresent": true,
+  "sameArmPackageEntryMapsAcrossSixJobs": {
+    "A": [
+      "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802"
+    ],
+    "B": [
+      "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b"
+    ]
+  },
+  "sameCorpusPersistedSemanticsAcrossBothJobs": {
+    "jmdict": [
+      "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11"
+    ],
+    "jitendex": [
+      "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a"
+    ],
+    "vndb": [
+      "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c"
+    ]
+  },
+  "allPrimaryChecksPass": false,
+  "allMemoryGatesPass": false,
+  "bothTargetMechanicalThresholdsPass": false,
+  "replicatedNonTargetMechanicalHoldSignals": {
+    "jmdict": false,
+    "jitendex": false
+  },
+  "decisionScope": "No automatic promotion. Root must review per-order-cell effects against controls, every correctness/storage/package/memory gate, the separate original raw archive audit, and non-target uncertainty under the frozen criteria. Failed target thresholds cannot be rescued by pooling order cells or older-baseline evidence.",
+  "limits": [
+    "No order-cell pooling, control subtraction, outlier removal, retry, or source/threshold changes.",
+    "Distinct Actions jobs establish separate job assignments, not independently verified physical hardware.",
+    "Memory is sampled whole-process-tree PSS/private usage, not an exact peak.",
+    "Inconclusive non-target timings are not equivalence or proof of no regression.",
+    "Exact source-tree reuse consumes the fresh successful prerequisite at the same published61ac product commit; required exact-head repository checks remain required before merge."
+  ],
+  "originalObservationsChanged": false
+}

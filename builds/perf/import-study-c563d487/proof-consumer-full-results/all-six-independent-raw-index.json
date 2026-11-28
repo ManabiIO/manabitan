@@ -1,0 +1,1632 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:19:21.376590+00:00",
+  "scope": "All six original current-source raw archives/reports/process scans. Integrity and policy replay only; no new acquisition or performance decision.",
+  "runId": 46141233321,
+  "toolingHead": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "expected": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-expected.json",
+    "bytes": 6838,
+    "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+    "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf"
+  },
+  "publicationBinding": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/publication-binding.json",
+    "bytes": 4147,
+    "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+    "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863"
+  },
+  "recoverySource": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/recover-raw-archive-v2.py",
+    "bytes": 12954,
+    "sha256": "d23e55c961851b39dc0a000e4274500655bf3beee4f76f47ec0d6bce94a70330",
+    "gitBlobSha1": "66ccde540f093449baca577c064b399f115b15e6"
+  },
+  "auditorSource": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v3.py",
+    "bytes": 34614,
+    "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+    "gitBlobSha1": "f27d724b11665ec96ee8ad5a8afe69e9ecace86d"
+  },
+  "indexBuilder": {
+    "path": "numeric-suffix-proof-consumer-982-full-audit/build-final-raw-index-v2.py",
+    "bytes": 8103,
+    "sha256": "0f06c6786828c9273335b2336a05a4da9a3e40391513ced6251a0af877cf9e19",
+    "gitBlobSha1": "4bcc9980a53bfffb924b53408ae9123d87972356"
+  },
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140967463788,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18329,
+        "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+        "gitBlobSha1": "cfc9fe294b4f8d122534322ed1929f19541bcbfc"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2160510,
+        "sha256": "ed39f0fb245b2cc12b2f0723f8ab5b70e8fcbc93d82effa9e7c22a827920e9e2",
+        "gitBlobSha1": "0033df83faf07cbe4d0c7263927ab505ab3d1a56"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39308,
+        "sha256": "2be9395c18028206be3e78bec716d716c75dcd581b304772b5a0d75e0724b05b",
+        "gitBlobSha1": "3fb121c999bf8ce0a727d237b2ae4952660e904d"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60205,
+        "sha256": "2255467e5f165dfbafb9f05b4fd05439ccd0f3618465fcd25f6e5ae3b3684742",
+        "gitBlobSha1": "285a2cb85690021c999d8b34b1d656a6c8db37cb"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-job.log",
+        "bytes": 3431521,
+        "sha256": "b2cb128c26221fa9c3619924cc1499ff0750c1b4d7f5115d6592318345a07911",
+        "gitBlobSha1": "efc32b92f6abb852002955e8c31a612da4a31e11"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-records.jsonl",
+        "bytes": 362187,
+        "sha256": "94fb550676a4e40c94bc4e71767a75ff9361a21f7f4b112bdb7ad8248ea7ad8e",
+        "gitBlobSha1": "7fa5cde8d8b883e2e50dff4f23a4e80275264be0"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+        "bytes": 20917,
+        "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+        "gitBlobSha1": "c04608ec322f9a32d90f452cfb448584ed45eb49"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 267,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.521336541881585,
+            "maximumPairedChangePercent": -1.100204475485922
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.9577977161181148,
+            "maximumPairedChangePercent": -0.97123719464145
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "e379a5f494baf910eaacb65b39e4833a8ec04238eeedd9b4c7c8a7d4d0f7f766",
+          "rawMarkersSha256": "e5ab8d061a508b4aa21118f766d18bdaef4d95b7446dacd28e04101d3606ae41",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 7,
+          "stableFullyReadTreeSampleCount": 7,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 4,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 4,
+          "confirmedExitedZombieIdentityCount": 1,
+          "windowDurationMs": 1187.494443,
+          "preImportBracketGapMs": 76.377454,
+          "postImportBracketGapMs": 9.831295,
+          "maximumCoveredSampleGapMs": 224.163416,
+          "allObservedSampleCount": 66,
+          "overlappingImportSampleCount": 7,
+          "fullyContainedImportSampleCount": 6,
+          "stableFullyReadImportSampleCount": 6,
+          "maxSampledPssKiB": 1044624,
+          "maxSampledPrivateKiB": 812160,
+          "rawProcessReadCount": 394,
+          "maximumGapProof": [
+            {
+              "leftNs": 780143315737,
+              "rightNs": 780367479153,
+              "gapMs": 224.163416
+            }
+          ]
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "77562bd2e852e076e7752c7682f99becd348daeb68f133b0d22c6aa7b3e09eb7",
+          "rawMarkersSha256": "82786fc7ba4875ddd0d2a5056ec8878e19741d35466f54e2e13600630fb6bafb",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 8,
+          "stableFullyReadTreeSampleCount": 8,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1260.34523,
+          "preImportBracketGapMs": 84.866565,
+          "postImportBracketGapMs": 20.829747,
+          "maximumCoveredSampleGapMs": 197.663081,
+          "allObservedSampleCount": 66,
+          "overlappingImportSampleCount": 8,
+          "fullyContainedImportSampleCount": 7,
+          "stableFullyReadImportSampleCount": 7,
+          "maxSampledPssKiB": 1033131,
+          "maxSampledPrivateKiB": 804272,
+          "rawProcessReadCount": 398,
+          "maximumGapProof": [
+            {
+              "leftNs": 791520288136,
+              "rightNs": 791717951217,
+              "gapMs": 197.663081
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "b34775e584f8bc30061973e3bc63d75002a4b7b7109f08223de5121e2d2fe0d2",
+          "rawMarkersSha256": "dfdce3ca910d2cc3a732b813702a7ea483ce92d5dba357e0012d923d6eba76e3",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 8,
+          "stableFullyReadTreeSampleCount": 8,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1206.072373,
+          "preImportBracketGapMs": 57.018826,
+          "postImportBracketGapMs": 95.503761,
+          "maximumCoveredSampleGapMs": 226.617983,
+          "allObservedSampleCount": 68,
+          "overlappingImportSampleCount": 8,
+          "fullyContainedImportSampleCount": 6,
+          "stableFullyReadImportSampleCount": 6,
+          "maxSampledPssKiB": 1028548,
+          "maxSampledPrivateKiB": 793096,
+          "rawProcessReadCount": 415,
+          "maximumGapProof": [
+            {
+              "leftNs": 802955592781,
+              "rightNs": 803182210764,
+              "gapMs": 226.617983
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "67cecd0f51026d2d0bb5c649d64ae965e0cfe42f80ae4b52a32fccac71f7fbb0",
+          "rawMarkersSha256": "2af8e0c382fa04535ba52fd9d0a0c92a94e4fcbb7782d8a2df777e1e1cf62f90",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 8,
+          "stableFullyReadTreeSampleCount": 8,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1252.331701,
+          "preImportBracketGapMs": 19.772892,
+          "postImportBracketGapMs": 105.663564,
+          "maximumCoveredSampleGapMs": 201.592879,
+          "allObservedSampleCount": 67,
+          "overlappingImportSampleCount": 8,
+          "fullyContainedImportSampleCount": 7,
+          "stableFullyReadImportSampleCount": 7,
+          "maxSampledPssKiB": 1048923,
+          "maxSampledPrivateKiB": 817156,
+          "rawProcessReadCount": 404,
+          "maximumGapProof": [
+            {
+              "leftNs": 814318433395,
+              "rightNs": 814520026274,
+              "gapMs": 201.592879
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "a9b459abc36c8a4a9ec5e81785e3b03c601ae6138836e12184b6b4e2ec69a1df",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "b34156b81c7d41fde65552e12540c011a69b8b0c16bf49d4940e3ea716f84189",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140967463778,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18341,
+        "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e",
+        "gitBlobSha1": "871b1b606b0bdb6955aa9511ecc73c6ff3dc00b9"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2277726,
+        "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed",
+        "gitBlobSha1": "87379cc4c392ba2bf01871de68b73d817109f46a"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 40353,
+        "sha256": "cf7015c9c6bad4595e6ac5cca96d63dc5c7cc3cf58485d5eb56474a636d97f25",
+        "gitBlobSha1": "f90c2f4406d5321ea945278777c17be4a132e51f"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60192,
+        "sha256": "1ae6c72054010009ccc38a8be613b78d75d6b9926a7dc2cee311b3b01d61b9d7",
+        "gitBlobSha1": "50875fc503f57dea71eff58465157233ad176f72"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-job.log",
+        "bytes": 3589957,
+        "sha256": "e6a0287fa159a1ccf399e04a01fe796bdd25a3877e5b7c58f282dc3d3cec748c",
+        "gitBlobSha1": "61799578a9c16ce75d55d59bdeeab35dfee6ea54"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-records.jsonl",
+        "bytes": 362612,
+        "sha256": "620f6d35f76d135649601be546767bb0d9c7f6acfb7563f21a6aba596cd15c5a",
+        "gitBlobSha1": "ecdcdb4e91216abd13eab4de582e094c6bc89dad"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+        "bytes": 20882,
+        "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b",
+        "gitBlobSha1": "a2a87f1c5d1da0805de807cda37bf83e2318bfd3"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 385,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.815300867200731,
+            "maximumPairedChangePercent": 2.7969668623117228
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.521770580657001,
+            "maximumPairedChangePercent": 3.6359183423559482
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "65e57fbd496158b4d68fc43920a04f29962e5eb1a54391a7ef9fabca93ec5c76",
+          "rawMarkersSha256": "cee60f94f84ad8dc20c6d3241bb1d0fdc4c89481b97ab673ff6b46585f802b30",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 12,
+          "stableFullyReadTreeSampleCount": 12,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1038.326219,
+          "preImportBracketGapMs": 3.621337,
+          "postImportBracketGapMs": 20.843165,
+          "maximumCoveredSampleGapMs": 124.066181,
+          "allObservedSampleCount": 97,
+          "overlappingImportSampleCount": 12,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1017124,
+          "maxSampledPrivateKiB": 786696,
+          "rawProcessReadCount": 617,
+          "maximumGapProof": [
+            {
+              "leftNs": 454637716598,
+              "rightNs": 454761782779,
+              "gapMs": 124.066181
+            }
+          ]
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "16276f9c2e426eeea58d31f4c4b9d05bf860aeab2f10258b103789e6dbfa220b",
+          "rawMarkersSha256": "ffc3380f3412ad7d90dfc156f85e058220876623b812def321ff88eccfb6ca2f",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 13,
+          "stableFullyReadTreeSampleCount": 13,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1037.524839,
+          "preImportBracketGapMs": 40.900365,
+          "postImportBracketGapMs": 22.024984,
+          "maximumCoveredSampleGapMs": 124.211858,
+          "allObservedSampleCount": 93,
+          "overlappingImportSampleCount": 13,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1008715,
+          "maxSampledPrivateKiB": 775776,
+          "rawProcessReadCount": 597,
+          "maximumGapProof": [
+            {
+              "leftNs": 463320325495,
+              "rightNs": 463444537353,
+              "gapMs": 124.211858
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "202b2205acc4f6c2e26746deb2693f7b63241ef430b588d40014dbd8b12ea8c9",
+          "rawMarkersSha256": "0a769205093eeb1d4c8f09652328704ce667d9f80e68c757c1daea4f13243dc8",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 12,
+          "stableFullyReadTreeSampleCount": 12,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1008.846575,
+          "preImportBracketGapMs": 33.718562,
+          "postImportBracketGapMs": 24.604418,
+          "maximumCoveredSampleGapMs": 131.784483,
+          "allObservedSampleCount": 96,
+          "overlappingImportSampleCount": 12,
+          "fullyContainedImportSampleCount": 11,
+          "stableFullyReadImportSampleCount": 11,
+          "maxSampledPssKiB": 1016637,
+          "maxSampledPrivateKiB": 783956,
+          "rawProcessReadCount": 624,
+          "maximumGapProof": [
+            {
+              "leftNs": 472363006947,
+              "rightNs": 472494791430,
+              "gapMs": 131.784483
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "b422f3c481cd4cf52661dfa312f62429cc602fc67fc4e7c9695a8712433fbac5",
+          "rawMarkersSha256": "bd040954d49062eecfb71285e688d7ca272d05c6c394bf33ced17d95f5e1cc2b",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1045.370236,
+          "preImportBracketGapMs": 37.835683,
+          "postImportBracketGapMs": 28.948264,
+          "maximumCoveredSampleGapMs": 98.705845,
+          "allObservedSampleCount": 99,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1045072,
+          "maxSampledPrivateKiB": 812460,
+          "rawProcessReadCount": 655,
+          "maximumGapProof": [
+            {
+              "leftNs": 481329072345,
+              "rightNs": 481427778190,
+              "gapMs": 98.705845
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "e6726848915fdc08a7c0de5c83d0e7d72a41058d9d07ae5fb9357f4cf0cb2fa5",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "6fd353e2ad2a84f5b58a203c978d7ce942fb0b5acdaa19fa73d95abb6bec7a9e",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140967463739,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18421,
+        "sha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967",
+        "gitBlobSha1": "6691bff9fdc98f2d59f22148035776de957f8388"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2231469,
+        "sha256": "aee1884b7d6124e92af1fbd82e45cab08328dd6de935483b15939e0cf3d14846",
+        "gitBlobSha1": "c3c286b101890e3d520738766da5d4787913121e"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39973,
+        "sha256": "c92e3fae29d5c462a564037a53b13ce748923a5cca9e06e8a9db43d89ab0d786",
+        "gitBlobSha1": "9ba6dde8574dce143cb3d92aaef7eddfc3de11d7"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60230,
+        "sha256": "6964e85eb9373f19d9737c00f2f5a8310e653b8be7a372c65e6e75ec85f2ab24",
+        "gitBlobSha1": "4a9afb09310cc13286d1a8e344754f8b2711ff97"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-job.log",
+        "bytes": 3528422,
+        "sha256": "39d4130b66fa670ec8fbd935dadf7973d5d23365a6d109c11aa09b81ed7d6409",
+        "gitBlobSha1": "17913fe4a65ef7842a6c9138fe88ec00e112fd22"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-records.jsonl",
+        "bytes": 363328,
+        "sha256": "ea61b2a28f8016a6d8c8a1e79dba4b5b0eb9496211a523ee07cd1f0bcd81e4a1",
+        "gitBlobSha1": "95dbb3b53307dceed8b73005c816c1c536f5e192"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6",
+        "gitBlobSha1": "7a386d72fa22d8396f4d281585e236e18331a8a2"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 326,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.6804841608513532,
+            "maximumPairedChangePercent": 0.17874788188925184
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -2.260505525454742,
+            "maximumPairedChangePercent": 0.35961711354381976
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "b5b39b6c94188de5714af4de9c00a18749422d6a9fba621c478ff847ca1832a0",
+          "rawMarkersSha256": "24433883fe805b533bd5d95c59cc9db3bc29d60814c88383253d06fe42c9b704",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1686.596894,
+          "preImportBracketGapMs": 10.84358,
+          "postImportBracketGapMs": 81.317352,
+          "maximumCoveredSampleGapMs": 150.84121,
+          "allObservedSampleCount": 81,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1064628,
+          "maxSampledPrivateKiB": 831996,
+          "rawProcessReadCount": 520,
+          "maximumGapProof": [
+            {
+              "leftNs": 442720067554,
+              "rightNs": 442870908764,
+              "gapMs": 150.84121
+            }
+          ]
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "e2b99ea8d9a1d56def9130db95e533791e5b744eb8725fc3ae650c0a4ff38ff4",
+          "rawMarkersSha256": "7f7729e54e4455689013e0d2b96657b4dd249489eab4ca2ca54cd850c3e3d993",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1791.930416,
+          "preImportBracketGapMs": 55.974279,
+          "postImportBracketGapMs": 16.094484,
+          "maximumCoveredSampleGapMs": 162.39037,
+          "allObservedSampleCount": 80,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1066531,
+          "maxSampledPrivateKiB": 834988,
+          "rawProcessReadCount": 500,
+          "maximumGapProof": [
+            {
+              "leftNs": 452848257131,
+              "rightNs": 453010647501,
+              "gapMs": 162.39037
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "166103d4cd631adba246e365b675bbaf1046959aec8e3a408612b1656028c746",
+          "rawMarkersSha256": "d12f0fdef060d3882835f28dfe2e67aee9210318cb43a54529521a44824c449c",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 15,
+          "stableFullyReadTreeSampleCount": 15,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1743.914223,
+          "preImportBracketGapMs": 77.24568,
+          "postImportBracketGapMs": 28.4745,
+          "maximumCoveredSampleGapMs": 153.368686,
+          "allObservedSampleCount": 84,
+          "overlappingImportSampleCount": 15,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1047005,
+          "maxSampledPrivateKiB": 813088,
+          "rawProcessReadCount": 516,
+          "maximumGapProof": [
+            {
+              "leftNs": 463342448393,
+              "rightNs": 463495817079,
+              "gapMs": 153.368686
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "bbee4975d1c0ca4472a475631ba940b00362beba8e6bc5fd39c33c69515646c4",
+          "rawMarkersSha256": "52330407cc1891153e7ed26c5138585fe941e91b21af12a006153243e027f028",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1681.595112,
+          "preImportBracketGapMs": 8.717008,
+          "postImportBracketGapMs": 50.71973,
+          "maximumCoveredSampleGapMs": 162.902651,
+          "allObservedSampleCount": 81,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1085426,
+          "maxSampledPrivateKiB": 854808,
+          "rawProcessReadCount": 522,
+          "maximumGapProof": [
+            {
+              "leftNs": 474037162470,
+              "rightNs": 474200065121,
+              "gapMs": 162.902651
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "c1d22ef3082a2fcbd0ff6131b9e311a1802dfa61226db6e32634127fb7deae03",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "4e0a7d4560fa4ada221f5f49c94b515840f3b6ad7d168890e218e1b19b15f8fc",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140967463737,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18424,
+        "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21",
+        "gitBlobSha1": "b422cce388a55167e344443b995fc4aa3a6aca2a"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2205404,
+        "sha256": "0285ee591f2808de8285d18e30afee5c6738a9f9e895e0b66e79bdf2b0533d83",
+        "gitBlobSha1": "bbc06c4041fd0acc95bd03878c0e151ebf146acd"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 39697,
+        "sha256": "6887812c79648f0e4bd344076bd9c2c9bc741ade968c726bd293488dafb18433",
+        "gitBlobSha1": "58fccba997d6282cdcd54d7bfe98f952dfb50ac0"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60228,
+        "sha256": "48b8913d542387c309e7f4a39bbc7ab966a137ead0a79bc0f68ea1eb07cadbf1",
+        "gitBlobSha1": "6956d2d37712f542dfeacb5ba2b209034173e31c"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-job.log",
+        "bytes": 3493205,
+        "sha256": "4ee7c3dc807ae85fb77fedd6f78d4bf6dc8c003089bf9c332d33efe2e2f8435d",
+        "gitBlobSha1": "78e391743305467948114686b9cddb66963b7594"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-records.jsonl",
+        "bytes": 363358,
+        "sha256": "8a51c3b2665cc518693ee39b2980d083ffe5d4355fe7a99768757c913ae0d491",
+        "gitBlobSha1": "0e83672ecb1cdc3a5698dc8467494ef8feed76ce"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385",
+        "gitBlobSha1": "f8552473b6c7b1387e47f65031fbdbc76c8a6a67"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 301,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.1116382600679264,
+            "maximumPairedChangePercent": 3.9740840751836037
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.5290302586898508,
+            "maximumPairedChangePercent": 5.542553456922583
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "b4cb00d11089c342dc435720a550c6fa1699bf5923a73dc2aa695664b3fca336",
+          "rawMarkersSha256": "4c1bdf615aa54275db390c9ff2b92bded9fb55953322c31a409037a0b6cb9402",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1667.043472,
+          "preImportBracketGapMs": 58.081418,
+          "postImportBracketGapMs": 59.110367,
+          "maximumCoveredSampleGapMs": 162.24407,
+          "allObservedSampleCount": 75,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1044777,
+          "maxSampledPrivateKiB": 811840,
+          "rawProcessReadCount": 455,
+          "maximumGapProof": [
+            {
+              "leftNs": 473595956385,
+              "rightNs": 473758200455,
+              "gapMs": 162.24407
+            }
+          ]
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "8b890a91afdbd294845eb3933fe0bbfdfeaf6e9b67e4aab882ccb219b3f3eed0",
+          "rawMarkersSha256": "7b5e93486a2ed367f253aa59765756b7d404656aca1deea32b720bdcb3a05252",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1689.921835,
+          "preImportBracketGapMs": 50.625647,
+          "postImportBracketGapMs": 64.01847,
+          "maximumCoveredSampleGapMs": 158.328172,
+          "allObservedSampleCount": 77,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1063395,
+          "maxSampledPrivateKiB": 832524,
+          "rawProcessReadCount": 489,
+          "maximumGapProof": [
+            {
+              "leftNs": 483426980116,
+              "rightNs": 483585308288,
+              "gapMs": 158.328172
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "96c8c431ab6bd94ac24671f4abfd727d6cf4bc7fc0b41b404e603bd4455f1c07",
+          "rawMarkersSha256": "ad8301d684c87d5f96e19e843b1595480a6d344915c8f689bb7ba3ebcd61f692",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1663.8981,
+          "preImportBracketGapMs": 85.946406,
+          "postImportBracketGapMs": 23.648752,
+          "maximumCoveredSampleGapMs": 166.137801,
+          "allObservedSampleCount": 74,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1035811,
+          "maxSampledPrivateKiB": 801580,
+          "rawProcessReadCount": 457,
+          "maximumGapProof": [
+            {
+              "leftNs": 493111346854,
+              "rightNs": 493277484655,
+              "gapMs": 166.137801
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "22dba89338a009820999fbb5eab2baa5d5f7986b368e062cec675d3d2fed5895",
+          "rawMarkersSha256": "54085c120905d005dc494ebbddfdf88de3f5057be1cb02a710a071aaf98ec113",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 14,
+          "stableFullyReadTreeSampleCount": 14,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 1680.369414,
+          "preImportBracketGapMs": 20.970051,
+          "postImportBracketGapMs": 30.164918,
+          "maximumCoveredSampleGapMs": 160.54029,
+          "allObservedSampleCount": 75,
+          "overlappingImportSampleCount": 14,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1076975,
+          "maxSampledPrivateKiB": 846008,
+          "rawProcessReadCount": 472,
+          "maximumGapProof": [
+            {
+              "leftNs": 502983132458,
+              "rightNs": 503143672748,
+              "gapMs": 160.54029
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "621c2a1908866f69162cde77a7beb4e4fbb4bc5298ccc20b89e904af94798d5d",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "a7ff8f668df72d93957669fc231bddcf9622609dd77f0af0c823f68bd0e6db80",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    },
+    {
+      "cell": "vndb-AB",
+      "jobId": 140967463725,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18434,
+        "sha256": "d23ebdefbd9aa61a67dd8b3486c46daf1d5dd67705413da42a46cbb453f5022e",
+        "gitBlobSha1": "25a5d9699cc3a163feafc6ff822854adcc5db65c"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2334535,
+        "sha256": "22da4b313d4ea29308d467ca254296ca27a72f9a3cb14c30d2d7c6464a9359e5",
+        "gitBlobSha1": "3b1111b68d95bd65958062c4aed88561eba9e3b6"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 40855,
+        "sha256": "54137c4edd9ac0f26f0569f10fa2d8fd9d6c24531ed062658ab8062ac7c6292f",
+        "gitBlobSha1": "23f746453cd06ceb30a20d4fabdb4e1ac996ad2a"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60199,
+        "sha256": "36fe1f9ebb2530a74bd9f472bf604f286fde796c78e9737771d62f021296a97a",
+        "gitBlobSha1": "dba46511c3e4b0d3fa102906bf8310dff94452ef"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-job.log",
+        "bytes": 3681141,
+        "sha256": "813ee28b9ebfe7ad930c05220c8ca6804dccd20cf3a3733612c63237a3d16206",
+        "gitBlobSha1": "8203d420e04c9abc50dcab332e17646fd03aa4c2"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-records.jsonl",
+        "bytes": 376837,
+        "sha256": "3e530b2e3216862cd40a68b4a90da6e784063e2c94fdf4d8f756b4b5897762b0",
+        "gitBlobSha1": "4e024c17ae9738e63dd48505209e0ab55dad3bed"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-log-audit.json",
+        "bytes": 21249,
+        "sha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8",
+        "gitBlobSha1": "5fb0f9bf8dfeffaedf3d78818d72d4c2188993b0"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 411,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "ac9cce08d1bff8263443bc1ebf2ae106650be0176eb8ecfdf0a848c7ec67f78d",
+          "rawMarkersSha256": "3d3b8fa8dc82fb5198e8d9404551cd7180090f09d2bbc231c2c210a66408837a",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "sampleCount": 37,
+          "stableFullyReadTreeSampleCount": 37,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 7017.465716,
+          "preImportBracketGapMs": 65.92277,
+          "postImportBracketGapMs": 22.375774,
+          "maximumCoveredSampleGapMs": 286.319545,
+          "allObservedSampleCount": 103,
+          "overlappingImportSampleCount": 37,
+          "fullyContainedImportSampleCount": 36,
+          "stableFullyReadImportSampleCount": 36,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "rawProcessReadCount": 655,
+          "maximumGapProof": [
+            {
+              "leftNs": 1940943432578,
+              "rightNs": 1941229752123,
+              "gapMs": 286.319545
+            }
+          ]
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "7e60f32163e55e9ed2b018b5937bc2a524c994fbb50657fc927a1418d4c30296",
+          "rawMarkersSha256": "2481de62e94c09a7d2173a5cb671718e29bd33b711dd0dfa25152a0484a95856",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 35,
+          "stableFullyReadTreeSampleCount": 35,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 6638.003252,
+          "preImportBracketGapMs": 107.375622,
+          "postImportBracketGapMs": 21.112527,
+          "maximumCoveredSampleGapMs": 244.653042,
+          "allObservedSampleCount": 101,
+          "overlappingImportSampleCount": 35,
+          "fullyContainedImportSampleCount": 34,
+          "stableFullyReadImportSampleCount": 34,
+          "maxSampledPssKiB": 1247343,
+          "maxSampledPrivateKiB": 1020372,
+          "rawProcessReadCount": 632,
+          "maximumGapProof": [
+            {
+              "leftNs": 1970626838465,
+              "rightNs": 1970871491507,
+              "gapMs": 244.653042
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "978e2393823f60eccc5c5787a13669ef08ea6c4f3d943a9c030092f8b5ca1ab7",
+          "rawMarkersSha256": "81137a1936ee22d4508f86d546db40a3890054c3e5e5d5c2923a68cf095960ce",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 36,
+          "stableFullyReadTreeSampleCount": 36,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 6722.57948,
+          "preImportBracketGapMs": 89.931255,
+          "postImportBracketGapMs": 57.925847,
+          "maximumCoveredSampleGapMs": 246.830052,
+          "allObservedSampleCount": 103,
+          "overlappingImportSampleCount": 36,
+          "fullyContainedImportSampleCount": 34,
+          "stableFullyReadImportSampleCount": 34,
+          "maxSampledPssKiB": 1251084,
+          "maxSampledPrivateKiB": 1022252,
+          "rawProcessReadCount": 650,
+          "maximumGapProof": [
+            {
+              "leftNs": 2002695705490,
+              "rightNs": 2002942535542,
+              "gapMs": 246.830052
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "09d346020f7d378d7bbd7cfb733f517d208fa1302d630e56fc86da7414c56cf6",
+          "rawMarkersSha256": "ee9062fc2371a87c6f8206ea3d04f02a2620dd939f27142b526a95fe42508590",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "sampleCount": 37,
+          "stableFullyReadTreeSampleCount": 37,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 6912.194835,
+          "preImportBracketGapMs": 113.799882,
+          "postImportBracketGapMs": 31.074168,
+          "maximumCoveredSampleGapMs": 265.378713,
+          "allObservedSampleCount": 104,
+          "overlappingImportSampleCount": 37,
+          "fullyContainedImportSampleCount": 35,
+          "stableFullyReadImportSampleCount": 35,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "rawProcessReadCount": 657,
+          "maximumGapProof": [
+            {
+              "leftNs": 2032279562660,
+              "rightNs": 2032544941373,
+              "gapMs": 265.378713
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "15b71877b4813bf34b99ddd33206a94d6f0eda533d26208c25fd3d8288bc3fb7",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "3f348c2500f7ff6cbf875e243c90436772fd2fe6e1b3985e8377aaca734790e9",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "84f82afee542cc07f31a3f9fefbc2d84b8415f40c2fa59915e39d32e37a8259f",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    },
+    {
+      "cell": "vndb-BA",
+      "jobId": 140967463694,
+      "audit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18347,
+        "sha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60",
+        "gitBlobSha1": "41d8052ffcfec6f9f1a90103c8b93a76db435b39"
+      },
+      "archive": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-evidence.zip",
+        "bytes": 2348308,
+        "sha256": "498ac2785aa955dcc5642097fb41a1d5251d0c61872db33f4396ee844d260882",
+        "gitBlobSha1": "7dc83d0695ddac9126fdc2a578e75f17c4f26777"
+      },
+      "recovery": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-archive-recovery.json",
+        "bytes": 41009,
+        "sha256": "dea9370f81b1ea599fc47e680525efda50ce0b7464ab597d4a49455a0d25e6d4",
+        "gitBlobSha1": "31ab1f0591cb64d82d7f92d8049cc049e5f5e37a"
+      },
+      "memberManifest": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/raw-evidence-member-hashes.json",
+        "bytes": 60203,
+        "sha256": "288ae1019803b4ec5ca1594822385dc5913e0ab535afd9db307fdfdd6ccb4e9a",
+        "gitBlobSha1": "d7fffd26b8ecb39d1081e6828695f2114ad007e4"
+      },
+      "originalLog": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-job.log",
+        "bytes": 3700048,
+        "sha256": "63aa0de451c07edb515fcedbaeeb9e4132ba04961aba9877d2cbea699b4423ae",
+        "gitBlobSha1": "a961ce08368575b1cf82db82e9e815627431cfbb"
+      },
+      "primaryRecords": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-records.jsonl",
+        "bytes": 377714,
+        "sha256": "92692cdc9d9f458239ec8a3b439bf6d102951628b6ca62f1c0623ff9146d86d3",
+        "gitBlobSha1": "40d6e4cfd3dcc4f5f13e08df589598970198d319"
+      },
+      "primaryAudit": {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-log-audit.json",
+        "bytes": 21015,
+        "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7",
+        "gitBlobSha1": "64808a830662226fc50caad38c8e57c6a59b28b8"
+      },
+      "rawReports": 42,
+      "memberCount": 316,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 418,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.4351893443975685,
+            "maximumPairedChangePercent": 1.3332498547151017
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.4903780341102226,
+            "maximumPairedChangePercent": 1.7377879037958177
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "rawMemorySha256": "284a970264d13b18461cb814788b93c7a5c78b8bb4115789d6ac56735a83b905",
+          "rawMarkersSha256": "997c53d3b095fff591150a7a0ca58d11cb333b63fb2bcf0fb892478a8ad07c72",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 37,
+          "stableFullyReadTreeSampleCount": 37,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 4630.350328,
+          "preImportBracketGapMs": 3.30198,
+          "postImportBracketGapMs": 66.506363,
+          "maximumCoveredSampleGapMs": 175.431258,
+          "allObservedSampleCount": 102,
+          "overlappingImportSampleCount": 37,
+          "fullyContainedImportSampleCount": 36,
+          "stableFullyReadImportSampleCount": 36,
+          "maxSampledPssKiB": 1262438,
+          "maxSampledPrivateKiB": 1030616,
+          "rawProcessReadCount": 666,
+          "maximumGapProof": [
+            {
+              "leftNs": 1284225560727,
+              "rightNs": 1284400991985,
+              "gapMs": 175.431258
+            }
+          ]
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "rawMemorySha256": "43d97e267fc11e5f83cc179259f54fd4a4cd8c98e1d017b6e06d7c54f7432009",
+          "rawMarkersSha256": "67f392fe61da26fa89c594dfe5e4da6bf005dc0147f423d257404ad6326ab0c3",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 38,
+          "stableFullyReadTreeSampleCount": 38,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 4866.051313,
+          "preImportBracketGapMs": 12.448316,
+          "postImportBracketGapMs": 6.586238,
+          "maximumCoveredSampleGapMs": 155.952564,
+          "allObservedSampleCount": 105,
+          "overlappingImportSampleCount": 38,
+          "fullyContainedImportSampleCount": 38,
+          "stableFullyReadImportSampleCount": 38,
+          "maxSampledPssKiB": 1245828,
+          "maxSampledPrivateKiB": 1013012,
+          "rawProcessReadCount": 683,
+          "maximumGapProof": [
+            {
+              "leftNs": 1302440494291,
+              "rightNs": 1302596446855,
+              "gapMs": 155.952564
+            }
+          ]
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "rawMemorySha256": "e4e1fa6cd0f05e6d97649783225a1c820aad2f55cf7fb078043335cc800a6265",
+          "rawMarkersSha256": "82b01b091cc3f6a848ec7fedea4da39d710cce722bb56f6c63fdfbae50e097f0",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 38,
+          "stableFullyReadTreeSampleCount": 38,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 4969.778983,
+          "preImportBracketGapMs": 15.49245,
+          "postImportBracketGapMs": 85.549873,
+          "maximumCoveredSampleGapMs": 182.940348,
+          "allObservedSampleCount": 104,
+          "overlappingImportSampleCount": 38,
+          "fullyContainedImportSampleCount": 37,
+          "stableFullyReadImportSampleCount": 37,
+          "maxSampledPssKiB": 1245703,
+          "maxSampledPrivateKiB": 1013960,
+          "rawProcessReadCount": 676,
+          "maximumGapProof": [
+            {
+              "leftNs": 1320697361125,
+              "rightNs": 1320880301473,
+              "gapMs": 182.940348
+            }
+          ]
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "rawMemorySha256": "50bafd0904382a73e6cb55625fc35327fcda534314ab20e70b0706ea1577d01c",
+          "rawMarkersSha256": "873275297ff363db419ddbf4833c6884155b3bee45d410c0c95cf6c21a50192e",
+          "schemaVersion": 3,
+          "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+          "authoritativeTiming": false,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "sampleCount": 39,
+          "stableFullyReadTreeSampleCount": 39,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "windowDurationMs": 5178.327356,
+          "preImportBracketGapMs": 49.362566,
+          "postImportBracketGapMs": 78.96488,
+          "maximumCoveredSampleGapMs": 176.211086,
+          "allObservedSampleCount": 107,
+          "overlappingImportSampleCount": 39,
+          "fullyContainedImportSampleCount": 37,
+          "stableFullyReadImportSampleCount": 37,
+          "maxSampledPssKiB": 1239937,
+          "maxSampledPrivateKiB": 1006284,
+          "rawProcessReadCount": 688,
+          "maximumGapProof": [
+            {
+              "leftNs": 1339044828126,
+              "rightNs": 1339221039212,
+              "gapMs": 176.211086
+            }
+          ]
+        }
+      ],
+      "semanticSha256": "15b71877b4813bf34b99ddd33206a94d6f0eda533d26208c25fd3d8288bc3fb7",
+      "releasePackages": {
+        "A": {
+          "zipSha256": "5c1fc7573e5fec23ed6c563772554d573a95e3bf8a85cf86c761ae7d7cb58391",
+          "zipBytes": 17060417,
+          "entries": 582,
+          "entryMapSha256": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "77dbdb59eb0ed52968104244e77a5da3cb19ae6712eb43b4ba06ee7aad9a94c4",
+          "zipBytes": 17061961,
+          "entries": 582,
+          "entryMapSha256": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+            "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      }
+    }
+  ],
+  "totals": {
+    "completedCells": 6,
+    "rawReports": 252,
+    "primaryRecords": 330,
+    "archiveMembers": 1896,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 22,
+    "rawScans": 2108
+  },
+  "crossCellChecks": {
+    "sameArm582EntryMapSha256": {
+      "A": "75dd1dd8ca045f627257d6851a58ab5d0fe8c5389d5cde22a0a3f9c5a52e2802",
+      "B": "c4008ded760e818eb2897ed92082dec65e7085bad8edf418a775972feefda67b"
+    },
+    "sameDictionarySemanticSha256": {
+      "jmdict": "d020f5b1d128cc19b799bb102ab7a664de490dfd3d2f05a581ded2d8e1193deb",
+      "jitendex": "8899f59e7a32ffda5779a1be944caba44fa630dce6fba9cf6a450143aac778da",
+      "vndb": "15b71877b4813bf34b99ddd33206a94d6f0eda533d26208c25fd3d8288bc3fb7"
+    },
+    "sameFrozenPolicySources": true,
+    "sameReviewedEightProductFiles": true,
+    "allPass": true
+  },
+  "firstFourSnapshot": {
+    "path": "numeric-suffix-proof-consumer-982-full-evidence/first-four-independent-raw-index.json",
+    "bytes": 16663,
+    "sha256": "3c53e22ce56e25644481f3d7c90405f2329f51c99ad9ce8cdaa3539f5c4aee3c",
+    "gitBlobSha1": "b6671af4fe3b371bc9bda3e6f664e3c32b92e288"
+  },
+  "postprocessorHistory": {
+    "originalV2Source": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v2.py",
+      "bytes": 34623,
+      "sha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+      "gitBlobSha1": "bf755667b8f62cef383c96f0c8cb43db4774d6a5"
+    },
+    "firstFailureFiles": [
+      {
+        "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-audit-failure-20261128T115319113368.json",
+        "bytes": 1395,
+        "sha256": "c4c246a0982fbc176ef652158bb3a09412da4044ccec55509efa1cc0248e71aa",
+        "gitBlobSha1": "6b74394063db423eec9dbb10d333c716ce97f571"
+      }
+    ],
+    "amendment": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.json",
+      "bytes": 2867,
+      "sha256": "9a2216d274dfed5bd570cd90f16f4983422c047d870a92d90ea9ed32181758d9",
+      "gitBlobSha1": "30780dd21b1cf3851f51232fbe92071cc92ac92b"
+    },
+    "patch": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.patch",
+      "bytes": 823,
+      "sha256": "e98585a75bbe17d290432191110bbe6c7a361ed238f85ddfd1d44fa8c8b1f3be",
+      "gitBlobSha1": "ec0cebf2d0a64148baba0cd545b68723df141a8a"
+    },
+    "independentReview": {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-independent-review.json",
+      "bytes": 1828,
+      "sha256": "08dc7a7e851dafd864c3759acd43676bef8986886595fc4f811733aee690be76",
+      "gitBlobSha1": "a9649bff3931a8522bdeb3885e5bc4a15e4f5fcf"
+    },
+    "rootReview": {
+      "path": "root-remote-continuation-20261128/a300-raw-auditor-filename-root-review.json",
+      "bytes": 1246,
+      "sha256": "e3d8b52ce7515fa05e4837d608efac43288541e05a4111cdb34e692f36d4a5f5",
+      "gitBlobSha1": "38290f1c578ff91b8fd3ab260a6eca0ca2d85b45"
+    }
+  },
+  "limits": [
+    "No package ZIP bytes downloaded; retained original maps and separately logged hashes/sizes are reconciled.",
+    "Memory is sampled whole-browser process-tree data under unchanged a7f7 policy, not an exact peak.",
+    "Failed policy gates remain failed; this index never turns a missing coverage interval into a passing observation.",
+    "All original timing/control outliers remain; no pooling, subtraction, selected retry or old-source transfer."
+  ]
+}

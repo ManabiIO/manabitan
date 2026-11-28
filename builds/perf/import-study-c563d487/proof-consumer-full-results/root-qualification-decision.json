@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:21:23.652271+00:00",
+  "scope": "Root final qualification decision for the complete original252-observation a300/61ac cohort. Read-only evidence review; no acquisition, source, timer, threshold, retry, exclusion, replacement or pooling changes.",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "runId": 46141233321,
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "combinedPrimaryIndex": {
+    "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/combined-primary-index.json",
+    "bytes": 45148,
+    "sha256": "2e385a89c6acd0e9915da871c3264fb16130826edf19e5e90fdeca946542dfd1"
+  },
+  "combinedRawIndex": {
+    "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/all-six-independent-raw-index.json",
+    "bytes": 69392,
+    "sha256": "8109382e7590e352c31fc4eba98437863fca2ce7714eda037f2471dd6f0f7758"
+  },
+  "totals": {
+    "primaryRecords": 330,
+    "reports": 252,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 22,
+    "rawScans": 2108
+  },
+  "rawArchiveMembers": 1896,
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+        "bytes": 20917,
+        "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18329,
+        "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8"
+      },
+      "pairedMedianChangePercent": -0.38636855636422496,
+      "pairedMedianChangeMs": -3.5499999999592546,
+      "fasterPairs": 7,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        -1.9612844737780022,
+        1.4489308347128027
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        -0.5999127399651027,
+        1.3870246085037286,
+        -2.761341222874647,
+        1.259645937355569
+      ],
+      "medianAbsoluteControlChangePercent": 1.3233352729296488,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 4,
+      "mechanicalTargetLatencyPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "rawIntegrityPassed": true,
+      "memoryQualified": true,
+      "memoryScreenPassed": true
+    },
+    {
+      "cell": "jmdict-BA",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/primary-log-audit.json",
+        "bytes": 20882,
+        "sha256": "548ad4b3c45658bc614b35a7342389adeccef192708da0cdef848ca22383651b"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18341,
+        "sha256": "4c48a74ba8f4d5b25c2ce09689da122deeedee79fc134ab0a796779b35972c6e"
+      },
+      "pairedMedianChangePercent": 1.0241768965175702,
+      "pairedMedianChangeMs": 9.0,
+      "fasterPairs": 2,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        0.44172925068028945,
+        1.889465192718065
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        1.4610389610396401,
+        0.9001912906492437,
+        -0.13675213675345965,
+        3.734051270041361
+      ],
+      "medianAbsoluteControlChangePercent": 1.180615125844442,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 2,
+      "mechanicalTargetLatencyPass": false,
+      "mechanicalNonTargetHoldSignal": true,
+      "rawIntegrityPassed": true,
+      "memoryQualified": true,
+      "memoryScreenPassed": true
+    },
+    {
+      "cell": "jitendex-AB",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "b9af470d8db01573985563e529f5187273f256152b3dff2a98337c3a7563a8c6"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jitendex-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18421,
+        "sha256": "cda5744674f07432b504ad785a44bdec2a5cf804ce728637ac3a86cc90098967"
+      },
+      "pairedMedianChangePercent": -0.37831935508045866,
+      "pairedMedianChangeMs": -5.100000000005821,
+      "fasterPairs": 6,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        -3.074168479263384,
+        1.9284714605263265
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        0.9137348010656687,
+        1.2655512655500134,
+        -3.112703766159919,
+        -10.665115377160783
+      ],
+      "medianAbsoluteControlChangePercent": 2.189127515854966,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 4,
+      "mechanicalTargetLatencyPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "rawIntegrityPassed": true,
+      "memoryQualified": true,
+      "memoryScreenPassed": true
+    },
+    {
+      "cell": "jitendex-BA",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/primary-log-audit.json",
+        "bytes": 21756,
+        "sha256": "ea58aa0acbffcb5be724607bd48bbc1005f9000a57c500faa18c4ffe01f44385"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/jitendex-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18424,
+        "sha256": "d66923e0720d555fa72f17039f4dd441142150d14af759d7af97b9b85f176c21"
+      },
+      "pairedMedianChangePercent": -0.37663848592044413,
+      "pairedMedianChangeMs": -5.150000000023283,
+      "fasterPairs": 9,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        -0.9724112026222809,
+        0.18131061553323669
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        1.458516564057044,
+        0.6640304409478048,
+        -2.749468436102309,
+        2.0358842914674824
+      ],
+      "medianAbsoluteControlChangePercent": 1.7472004277622633,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 4,
+      "mechanicalTargetLatencyPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "rawIntegrityPassed": true,
+      "memoryQualified": true,
+      "memoryScreenPassed": true
+    },
+    {
+      "cell": "vndb-AB",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/primary-log-audit.json",
+        "bytes": 21249,
+        "sha256": "a6d75afa96600280f1835fc3354b8023299b440cb83f9e9e0817a655ba2de2c8"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/vndb-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18434,
+        "sha256": "d23ebdefbd9aa61a67dd8b3486c46daf1d5dd67705413da42a46cbb453f5022e"
+      },
+      "pairedMedianChangePercent": -6.456496372136344,
+      "pairedMedianChangeMs": -368.8999999999796,
+      "fasterPairs": 12,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        -7.849683112036954,
+        -4.8439288254995
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        -1.923549009293557,
+        -2.876806607021165,
+        -0.10652416875979176,
+        -0.6659977857735866
+      ],
+      "medianAbsoluteControlChangePercent": 1.2947733975335718,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 0,
+      "mechanicalTargetLatencyPass": true,
+      "mechanicalNonTargetHoldSignal": false,
+      "rawIntegrityPassed": true,
+      "memoryQualified": false,
+      "memoryScreenPassed": false
+    },
+    {
+      "cell": "vndb-BA",
+      "primaryAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/primary-log-audit.json",
+        "bytes": 21015,
+        "sha256": "af4ab7e3f52261a488b59bb1c6fac74144d4206f4d71d444d8d2bd11ead1f7b7"
+      },
+      "rawAudit": {
+        "path": "experiments/numeric-suffix-proof-consumer-982-full-evidence/vndb-BA/raw-recovery-1/independent-raw-evidence-audit.json",
+        "bytes": 18347,
+        "sha256": "d9b97fbb3e973be13852e80b363af9a14d42bbc34ed8b6c7d359dea546e00f60"
+      },
+      "pairedMedianChangePercent": -1.995784404609613,
+      "pairedMedianChangeMs": -86.54999999998836,
+      "fasterPairs": 9,
+      "candidatePairCount": 12,
+      "descriptiveBootstrap95Percent": [
+        -3.576857856922533,
+        -0.021093738198030287
+      ],
+      "bootstrapScope": "Original frozen paired-bootstrap result; separately independently replayed by pipeline reviewer. Root recomputed point estimates and pair signs only.",
+      "controlChangesPercent": [
+        -0.6464259877245082,
+        2.0579689263490186,
+        2.5467321912465923,
+        -6.102203511286309
+      ],
+      "medianAbsoluteControlChangePercent": 2.3023505587978055,
+      "absoluteControlChangesExceedingCandidateMedianMagnitude": 3,
+      "mechanicalTargetLatencyPass": false,
+      "mechanicalNonTargetHoldSignal": false,
+      "rawIntegrityPassed": true,
+      "memoryQualified": true,
+      "memoryScreenPassed": true
+    }
+  ],
+  "failedMemoryObservations": [
+    {
+      "name": "A1",
+      "arm": "A",
+      "pair": 1,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maximumCoveredSampleGapMs": 286.319545,
+      "fullyContainedImportSampleCount": 36,
+      "stableFullyReadImportSampleCount": 36,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumGapProof": [
+        {
+          "leftNs": 1940943432578,
+          "rightNs": 1941229752123,
+          "gapMs": 286.319545
+        }
+      ]
+    },
+    {
+      "name": "A2",
+      "arm": "A",
+      "pair": 2,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maximumCoveredSampleGapMs": 265.378713,
+      "fullyContainedImportSampleCount": 35,
+      "stableFullyReadImportSampleCount": 35,
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumGapProof": [
+        {
+          "leftNs": 2032279562660,
+          "rightNs": 2032544941373,
+          "gapMs": 265.378713
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "productPerformancePr": "Do not open",
+    "reasons": [
+      "VNDB BA reduction is1.995784404609613%, strictly below the prospectively fixed2% per-cell minimum.",
+      "Three of four absolute BA identical-code changes exceed that candidate median effect; median absolute control change is2.3023505587978055%. This is descriptive interpretation of the original control requirement, not a new gate.",
+      "VNDB AB passes the latency screen but its two baseline memory observations exceed the unchanged250ms maximum coverage gap. The qualified PSS/private pair comparison remains null."
+    ],
+    "jmdict": "AB and BA directions disagree; no demonstrated complete-import gain. The adverse BA signal is retained, with larger same-cell control median, and does not replicate in AB. This does not prove nonregression.",
+    "jitendex": "Both small negative medians have intervals crossing zero and substantial control variation; no demonstrated complete-import gain.",
+    "replicatedNonTargetHold": "Not triggered under the original per-cell replication/control rule; inconclusive outcomes are not equivalence proof.",
+    "integrityAndCorrectness": "All six original raw evidence audits reconcile source/package/report/storage/semantic data. Fresh exact-product correctness is separately bound in the published prerequisite.",
+    "memoryInterpretation": "22of24observations qualify. AB failures concern baseline sampling coverage, not demonstrated candidate memory growth. Memory remains sampled whole-process-tree evidence, not an exact peak bound.",
+    "physicalHostIndependence": "Not established; AB/BA are separately scheduled job cells.",
+    "noPoolingControlSubtractionOrRoundedPromotion": true
+  },
+  "productPrOpened": false,
+  "workModeUsed": false
+}

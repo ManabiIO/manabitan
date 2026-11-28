@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/cells/jmdict-AB/original-logs-and-postprocessing-records.tar.gz",
+    "bytes": 2304563,
+    "sha256": "c113ea547843d48fc4751bd8c4079b156b54b3f549107552d6789d6d8919a947",
+    "gitBlobSha1": "ab81670e3c01055ba64edaf94d94eb140222d8f0"
+  },
+  "memberCount": 14,
+  "rawMemberBytes": 4349934,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-job.log",
+      "bytes": 3431521,
+      "sha256": "b2cb128c26221fa9c3619924cc1499ff0750c1b4d7f5115d6592318345a07911",
+      "gitBlobSha1": "efc32b92f6abb852002955e8c31a612da4a31e11"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-log-audit.json",
+      "bytes": 20917,
+      "sha256": "7970f86beee65fc5940302ee828730c222fac2dfc465cf5f5623959f0d441a77",
+      "gitBlobSha1": "c04608ec322f9a32d90f452cfb448584ed45eb49"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/primary-records.jsonl",
+      "bytes": 362187,
+      "sha256": "94fb550676a4e40c94bc4e71767a75ff9361a21f7f4b112bdb7ad8248ea7ad8e",
+      "gitBlobSha1": "7fa5cde8d8b883e2e50dff4f23a4e80275264be0"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-audit-v3-command-1.status.json",
+      "bytes": 877,
+      "sha256": "caf910148925cf1cdc19b0f3ecce4b850fbb8db6e66e01a7fe7997e1b6bf6e2c",
+      "gitBlobSha1": "49119eedd4684fe966cedfc320af2861d4b9a84f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-audit-v3-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-audit-v3-command-1.stdout.log",
+      "bytes": 1457,
+      "sha256": "6014d5d6f552320ebff9b79801cae99bd55d7dba26ed59908d764aa43dcf3e05",
+      "gitBlobSha1": "53e4ea10fd1d7c828b523cef9609d5fc0a3dafd8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/independent-raw-evidence-audit.json",
+      "bytes": 18329,
+      "sha256": "0ad40e2b1601a2d528924281cdcc938da243d54892d4149f10c2b3f66d2034e8",
+      "gitBlobSha1": "cfc9fe294b4f8d122534322ed1929f19541bcbfc"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/primary-records.jsonl",
+      "bytes": 362187,
+      "sha256": "94fb550676a4e40c94bc4e71767a75ff9361a21f7f4b112bdb7ad8248ea7ad8e",
+      "gitBlobSha1": "7fa5cde8d8b883e2e50dff4f23a4e80275264be0"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-archive-recovery.json",
+      "bytes": 39308,
+      "sha256": "2be9395c18028206be3e78bec716d716c75dcd581b304772b5a0d75e0724b05b",
+      "gitBlobSha1": "3fb121c999bf8ce0a727d237b2ae4952660e904d"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence-manifest.json",
+      "bytes": 51529,
+      "sha256": "795a1c0d475f10d0d1a335607dcab0ea27a7f0f8e34f3e589275bda7975b1cdf",
+      "gitBlobSha1": "a1ba78e91c164f756fc98564e47fce323755fbb8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/raw-recovery-1/raw-evidence-member-hashes.json",
+      "bytes": 60205,
+      "sha256": "2255467e5f165dfbafb9f05b4fd05439ccd0f3618465fcd25f6e5ae3b3684742",
+      "gitBlobSha1": "285a2cb85690021c999d8b34b1d656a6c8db37cb"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/recovery-command-1.status.json",
+      "bytes": 1090,
+      "sha256": "36fdfa66dd77d93258ae0c4b4d110b9d826fe3d8497cb4c1f712dce598e3b913",
+      "gitBlobSha1": "84359e5a6b16e8b80fc333af239f818044532507"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/recovery-command-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-evidence/jmdict-AB/recovery-command-1.stdout.log",
+      "bytes": 327,
+      "sha256": "cdd03baa857f8e2cae91493c13c407abdcae2b9a0134f15317ada4c6ba2ded36",
+      "gitBlobSha1": "6d9028979e4fc8e7e4cb7b394ef42335c04edc1a"
+    }
+  ],
+  "roundTripExact": true
+}

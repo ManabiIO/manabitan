@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:09:27.268146+00:00",
+  "reviewer": "pipeline_audit",
+  "sourceSha256": "6d55c9316393451e5734ab53e961bcfc3c08db1cd3e1fe2eea515fdc0e9ee39a",
+  "scope": "Read entire package accounting collector before its first execution; no package download, native build, observation or accounting execution.",
+  "checks": [
+    "Requires all six completed source-bound raw audits and exact original manifest/source identity bytes.",
+    "Checks the two uncompressed native files against current baseline/product hashes and every original package entry map.",
+    "Proves complete 582-entry sets agree, only the two expected entries differ and all other 580 hashes match.",
+    "Compressed totals derive from excluded original release ZIP receipts; individual compressed entry sizes are not invented.",
+    "Historical failed-build native bytes are accepted only by exact current product hash, never reused as successful correctness evidence.",
+    "Refuses to overwrite an existing output and makes no runtime memory claim."
+  ],
+  "reviewPassed": true,
+  "executionPerformed": false
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/checkpoint-replay-sources.tar.gz",
+    "bytes": 13615,
+    "sha256": "1a334265db15f923b058481b4bfe33f6a88cbe75645f86b2a02f1219ed24cfd1",
+    "gitBlobSha1": "6d8fb408ccb9310cd614cc0875eb99f73e70d954"
+  },
+  "memberCount": 15,
+  "rawMemberBytes": 47563,
+  "members": [
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/benchmark-paired-replay-qualification-review.json",
+      "bytes": 2623,
+      "sha256": "44b930729b7d7523b9d59b2150e16c7af057b2efd079a6cb04a557607460aeba",
+      "gitBlobSha1": "fba368ac8dc9651e58ddaa2432ba55e5fbd5dd63"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/benchmark-terminal-replay-source-review.json",
+      "bytes": 1909,
+      "sha256": "80af64158ae24bc32bef8892c082df587104ce4d238c8e25f19ab7e2e406c33d",
+      "gitBlobSha1": "10ec2325835b11b1dcfd29514cc335d08fb03294"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/common-staging-1.json",
+      "bytes": 5373,
+      "sha256": "6e47ef90ae6d37157b3839981dc8cab756b7120268acfb7dd614402c33894f1c",
+      "gitBlobSha1": "a7de21947d2765e573a050ba9743cb9795d3d493"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/initial-preparation.json",
+      "bytes": 963,
+      "sha256": "19836e4c4df9f3a72133060a73a894396b80b18ac8cd8e9515cfef5ddc868785",
+      "gitBlobSha1": "1ecb7ec56430f7abd975e34c8c4c3dea9aa1066c"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-1.status.json",
+      "bytes": 747,
+      "sha256": "7aeec7d256a7cec040ce5eac9cfca889d4724699c1c683a22aa58f3cd48b4b52",
+      "gitBlobSha1": "d7cfe049012057d25496b39699b11797ecec9652"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-1.stderr.log",
+      "bytes": 780,
+      "sha256": "6ebcbf60f48f026bba54c17a67758d903a4e8ec1e00597c2c51ed12f3eb771e4",
+      "gitBlobSha1": "5c93a0f8873d2952cf40b97c68443e4bb6e6a72e"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-2.status.json",
+      "bytes": 795,
+      "sha256": "5b3386ea78844485fd1276caae1bb4479cb4ec2a2b6017d225c278415eb819a1",
+      "gitBlobSha1": "fd020b6f4c3e65589cf07f15ed797aa1055574d7"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-command-2.stdout.log",
+      "bytes": 300,
+      "sha256": "20acb85e5483190bd3f493f1548f6a57eec32219ffdca3cdd4b722551aea861d",
+      "gitBlobSha1": "88db0c3de045dad870c2ab4a4c91ca31508f0712"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-qualification-amendment.json",
+      "bytes": 1730,
+      "sha256": "1e721c40e9ef46b40c650414ee83422ea94ff6bbff82fd6f05bedf868b06b01f",
+      "gitBlobSha1": "fa87ac6550ce05cf51da6628da7907441f07b603"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/paired-replay-qualification-amendment.patch",
+      "bytes": 5118,
+      "sha256": "deffd113348f12eeba78c4add47b58fb4c1796baa68d395810b5c73470557337",
+      "gitBlobSha1": "6733daa763276f5398340d42ccf7a51008fea1e5"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/review-original-paired-results.py",
+      "bytes": 12957,
+      "sha256": "f44695bd98c216d20256eb2534f7ce1bff1938bebd9df8d0bcc27c974bcee659",
+      "gitBlobSha1": "d504670f9580b8fa06b597f2be3486d9d72e9b79"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/row-suffix-paired-replay-v2-source-review.json",
+      "bytes": 5371,
+      "sha256": "2739aae9ee8ebd1dc7c59fc42c05873b6758d03e08c0867d5885c24462027ea9",
+      "gitBlobSha1": "5a744ddc4d38eaa1544fb6b47559a68ee11bf6b9"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/stage-final-inputs.py",
+      "bytes": 8897,
+      "sha256": "057d5c26ecb4e5e755544ddb365389ed33710814972a51e9a4e9db2248b58cf1",
+      "gitBlobSha1": "aea55a9e05a6ad118c31d9d262fc8fe9d8b4b396"
+    }
+  ],
+  "roundTripExact": true
+}

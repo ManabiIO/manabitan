@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:06:15.092290+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Read-only source review of final raw-evidence collector before its first execution. No importer, raw audit, test, compiler or observation acquisition ran.",
+  "originalSha256": "aad1ebad965f06fddde25cf4cbab82eb1133ba428bacf849f973057c18815acf",
+  "reviewedSha256": "0f06c6786828c9273335b2336a05a4da9a3e40391513ced6251a0af877cf9e19",
+  "checks": [
+    "Read original collector end-to-end and the complete v2 diff.",
+    "The only five added identity constraints bind actual job to fixed publication jobs, recovery source/publication, and both exact member manifest hashes to completed raw/recovery audits.",
+    "Existing source pins, six-cell scope, original archive hashes/Git IDs, exact raw-to-primary bytes, per-arm package maps and counterpart semantics are retained.",
+    "Memory failures remain representable and countable; no success gate, statistic or observation changes.",
+    "Original unexecuted collector and amendment remain retained; final index refuses to overwrite an earlier result."
+  ],
+  "reviewPassed": true,
+  "executionPerformed": false
+}

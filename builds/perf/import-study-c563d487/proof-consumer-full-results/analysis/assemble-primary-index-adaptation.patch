@@ -1,0 +1,65 @@
+--- old-current-full-assembler
++++ current-a300-full-assembler
+@@ -8,13 +8,13 @@
+ import re
+ 
+ ROOT = pathlib.Path(__file__).resolve().parent
+-TOOLING = ROOT.parent / 'numeric-suffix-972-full-qualification/published-faf6d9d9'
+-AUDITOR_SHA = '0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656'
+-EXPECTED_SHA = 'bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912'
++TOOLING = ROOT.parent / 'numeric-suffix-proof-consumer-982-full-audit'
++AUDITOR_SHA = '638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003'
++EXPECTED_SHA = '006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9'
+ JOBS = {
+-    'jmdict-AB': 140933489138, 'jmdict-BA': 140933489203,
+-    'jitendex-AB': 140933489159, 'jitendex-BA': 140933489153,
+-    'vndb-AB': 140933489168, 'vndb-BA': 140933489131,
++    'jmdict-AB': 140967463788, 'jmdict-BA': 140967463778,
++    'jitendex-AB': 140967463739, 'jitendex-BA': 140967463737,
++    'vndb-AB': 140967463725, 'vndb-BA': 140967463694,
+ }
+ PRIMARY = re.compile(r'\bMANABITAN_QUALIFICATION_JSON (\{.*\})\s*$')
+ ARCHIVE = re.compile(r'MANABITAN_EVIDENCE_ARCHIVE_COMPLETE (\{.*\})\s*$')
+@@ -117,8 +117,8 @@
+                       candidatePairs=candidate['count'], identicalCodePairs=control['count'],
+                       memoryObservations=len(memory), qualifiedMemoryObservations=qualified,
+                       rawScans=audit['memoryAudit']['rawScanCount'])
+-    require(all(len(v) == 1 for v in source_entry_maps.values()), 'Cross-host same-arm package entry maps differ')
+-    require(all(len(v) == 1 for v in semantics.values()), 'Cross-host same-corpus persisted semantic digests differ')
++    require(all(len(v) == 1 for v in source_entry_maps.values()), 'Cross-order-cell same-arm package entry maps differ')
++    require(all(len(v) == 1 for v in semantics.values()), 'Cross-order-cell same-corpus persisted semantic digests differ')
+     complete_plan = dict(totals)
+     complete_plan_pass = all(complete_plan[k] == v for k, v in {
+         'primaryRecords': 330, 'reports': 252, 'candidatePairs': 72,
+@@ -128,12 +128,12 @@
+                                      for order in ('AB', 'BA')) for dictionary in ('jmdict', 'jitendex')}
+     result = {
+         'schemaVersion': 1, 'recordedAtUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+-        'scope': 'Terminal primary-log reconciliation of the separately frozen current-dcfc full-import cohort; no new observations.',
++        'scope': 'Terminal primary-log reconciliation of the separately frozen current-a300/61ac full-import cohort; no new observations.',
+         'runId': expected['runId'], 'baseline': expected['baseline'], 'candidate': expected['candidate'],
+         'workflowCommit': expected['workflowCommit'], 'workflowSha256': expected['workflowSha256'],
+         'criteriaSha256': expected['criteriaSha256'], 'auditor': identity(auditor_path),
+         'expected': identity(expected_path), 'assembler': identity(pathlib.Path(__file__).resolve()),
+-        'correctnessBindingAudit': identity(ROOT / 'validation/independent-primary-audit.json'),
++        'correctnessBindingAudit': identity(ROOT / 'correctness/independent-primary-validation-audit.json'),
+         'cells': cells, 'totals': complete_plan, 'completeRegisteredPlanPresent': complete_plan_pass,
+         'sameArmPackageEntryMapsAcrossSixJobs': {k: sorted(v) for k, v in source_entry_maps.items()},
+         'sameCorpusPersistedSemanticsAcrossBothJobs': {k: sorted(v) for k, v in semantics.items()},
+@@ -141,12 +141,12 @@
+         'allMemoryGatesPass': all(c['memoryPass'] for c in cells.values()),
+         'bothTargetMechanicalThresholdsPass': all(c['mechanicalTargetThresholdPass'] for c in target),
+         'replicatedNonTargetMechanicalHoldSignals': non_target_hold,
+-        'decisionScope': 'No automatic promotion. Root must review per-host effects against controls, every correctness/storage/package/memory gate, the separate original raw archive audit, and non-target uncertainty under the frozen criteria. Failed target thresholds cannot be rescued by pooling hosts or older-baseline evidence.',
+-        'limits': ['No host pooling, control subtraction, outlier removal, retry, or source/threshold changes.',
+-                   'Distinct Actions jobs establish separate provisioning, not independently verified physical hardware.',
++        'decisionScope': 'No automatic promotion. Root must review per-order-cell effects against controls, every correctness/storage/package/memory gate, the separate original raw archive audit, and non-target uncertainty under the frozen criteria. Failed target thresholds cannot be rescued by pooling order cells or older-baseline evidence.',
++        'limits': ['No order-cell pooling, control subtraction, outlier removal, retry, or source/threshold changes.',
++                   'Distinct Actions jobs establish separate job assignments, not independently verified physical hardware.',
+                    'Memory is sampled whole-process-tree PSS/private usage, not an exact peak.',
+                    'Inconclusive non-target timings are not equivalence or proof of no regression.',
+-                   'Exact source-tree reuse binds earlier correctness; it does not claim the old CI ran at the published product commit.'],
++                   'Exact source-tree reuse consumes the fresh successful prerequisite at the same published61ac product commit; required exact-head repository checks remain required before merge.'],
+         'originalObservationsChanged': False,
+     }
+     with output.open('x', encoding='utf-8') as stream:

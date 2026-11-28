@@ -1,0 +1,24 @@
+{
+  "kind": "independent-raw-auditor-criteria-member-name-correction-review",
+  "priorRawAuditorSha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+  "correctedRawAuditorSha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0",
+  "exactSingleLiteralChange": {
+    "before": "prospective-complete-import-criteria.json",
+    "after": "prospective-review-criteria.json"
+  },
+  "allOtherBytesIdentical": true,
+  "publishedWorkflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "expectedSha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+  "allFiveFrozenProvenanceMemberBytesVerifiedInOriginalRecoveredZip": {
+    "prospective-review-criteria.json": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "source-binding.json": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+    "fresh-correctness-proof.json": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+    "storage-prerequisite-decision.json": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+    "full-qualification-binding.json": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e"
+  },
+  "originalZipPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence.zip",
+  "originalZipSha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed",
+  "failurePreservation": "Originalv2 source, first raw replay failure/status and unchanged recovered ZIP remain retained; separatev3 is only a postprocessor filename correction.",
+  "sourceTimerThresholdMemoryOrObservationChanges": false,
+  "decision": "PASS for same-original raw evidence replay; no acquisition retry or repair authorized."
+}

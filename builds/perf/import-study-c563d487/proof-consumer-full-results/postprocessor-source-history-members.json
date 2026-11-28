@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless gzip/tar storage representation of exact original files; no observation serialization.",
+  "sourceRoot": "/workspace/scratch/c563d487c718/experiments",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/postprocessor-source-history.tar.gz",
+    "bytes": 13217,
+    "sha256": "58071afafd79c225db52df5233a4203a4995ae077d51fee17fbb9fbf4162cd6a",
+    "gitBlobSha1": "0253ca5754ab800ce7a8dad9d87b2a02c551ea76"
+  },
+  "memberCount": 4,
+  "rawMemberBytes": 44650,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/build-final-raw-index.py",
+      "bytes": 7675,
+      "sha256": "aad1ebad965f06fddde25cf4cbab82eb1133ba428bacf849f973057c18815acf",
+      "gitBlobSha1": "a1cf35f8ecf97e36befdce6f515018b2b1ad649e"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/final-index-identity-check-amendment.json",
+      "bytes": 1291,
+      "sha256": "9a5270ee8a0b083d08e161ef93466b892ebf1c6b19a704bb1c05e3f99566629a",
+      "gitBlobSha1": "672e7109c83e543997dc402b7f5d4e7522212cef"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/final-index-identity-check-amendment.patch",
+      "bytes": 1061,
+      "sha256": "d98bb3edc75f73a61a661855b0ae4aeb94de1898327ee5d06f2b4940fcbf4ced",
+      "gitBlobSha1": "762a47b46902106f7d9a14d005fc6f6e337efd0f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v2.py",
+      "bytes": 34623,
+      "sha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+      "gitBlobSha1": "bf755667b8f62cef383c96f0c8cb43db4774d6a5"
+    }
+  ],
+  "roundTripExact": true
+}

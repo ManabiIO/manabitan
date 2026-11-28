@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T12:15:39.408488+00:00",
+  "reviewer": "pipeline_audit",
+  "reviewedSha256": "ea05709425f2257481eaa496c193340f3716da40ea9a4ae695b5cd23f9ac35d0",
+  "scope": "Narrow read-only review of retained JMdict frontier and fixture-specific proof-consumer note. No new acquisition or source execution.",
+  "checks": [
+    "All ten referenced original file sizes and SHA256 values match.",
+    "All three displayed component metric projections, paired changes, faster counts, row totals and selected diagnostic counters exactly match original artifact audits.",
+    "Hints/prefix summary projections, 80,102 prefix proofs, the negative-case-2 rejection and entire prior-streak decision match their original audits.",
+    "Untimed sequence-opportunity counts exactly match the retained totals.",
+    "Source boundaries and diagnostic/profile-versus-wall-time limitations are explicit; current a300 full result is kept separate."
+  ],
+  "reviewPreparationNote": "One initial read-only assertion compared a selected three-field metric projection with the entire six-field source object; it failed before writing any review or changing evidence. Corrected projection comparison passed.",
+  "reviewPassed": true,
+  "finalCanonicalWording": "No JMdict gain demonstrated; no equivalence inference from a near-zero component median."
+}

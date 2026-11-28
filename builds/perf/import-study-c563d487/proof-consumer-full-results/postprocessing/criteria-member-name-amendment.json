@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:54:04.786096+00:00",
+  "kind": "Postprocessing-only exact frozen-producer criteria member correction",
+  "original": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v2.py",
+    "bytes": 34623,
+    "sha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b"
+  },
+  "corrected": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v3.py",
+    "bytes": 34614,
+    "sha256": "2dcd4c56bed134871a1cc35b5b05d170d73bca47aeb74ae38bbed9bb3ee6ace0"
+  },
+  "patch": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-audit/criteria-member-name-amendment.patch",
+    "bytes": 823,
+    "sha256": "e98585a75bbe17d290432191110bbe6c7a361ed238f85ddfd1d44fa8c8b1f3be"
+  },
+  "producerWorkflow": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/workflow.final.yml",
+    "bytes": 23024,
+    "sha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9"
+  },
+  "producerDefinedMember": "prospective-review-criteria.json",
+  "unchangedCriteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "observedOriginalArchive": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence.zip",
+    "bytes": 2277726,
+    "sha256": "2f7918cef0f07e83c4cf12304d1626b1b39cec8214566de2f861bde3234940ed"
+  },
+  "originalFailure": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-recovery-1/raw-evidence-audit-failure-20261128T115319113368.json",
+    "bytes": 1395,
+    "sha256": "c4c246a0982fbc176ef652158bb3a09412da4044ccec55509efa1cc0248e71aa"
+  },
+  "originalCommandStatus": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-command-1.status.json",
+    "bytes": 1105,
+    "sha256": "2e7aeb5f9a7a5eef39236e995c97016c62fef2efb99094e8bd737578da6afb6c"
+  },
+  "originalCommandStderr": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-full-evidence/jmdict-BA/raw-audit-command-1.stderr.log",
+    "bytes": 1099,
+    "sha256": "f6a7b25a41b90520c61883991d26c7b771a02d7219e75c3b9f9c88612715c692"
+  },
+  "change": "Exactly one filename literal replacement. All hash, source, raw report, observation, package, storage and process-memory validation code is unchanged.",
+  "newAcquisition": false,
+  "dataChanged": false,
+  "sourceProductChanged": false,
+  "criteriaChanged": false,
+  "correctedReplayExecuted": false,
+  "originalFailureRetained": true
+}

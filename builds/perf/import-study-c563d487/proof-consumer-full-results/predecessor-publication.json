@@ -1,0 +1,24 @@
+{
+  "kind": "completed-proof-consumer-checkpoint-publication",
+  "publishedAtUtc": "2026-11-28 11:54:42 UTC",
+  "branch": "perf/import-study-evidence-20261128-c563d487",
+  "head": "16f8ae5d39bd8c1c41be489fd1ab5386b332b93d",
+  "tree": "a85c9e138350e4ec50b796e7c2e81ab692fadf83",
+  "parent": "a5f664fcb20debdd30de12ff76656358f45ebbb6",
+  "manifestSha256": "291957e5fe4cc1df56e7f3d20c5604b048957c7be7116efccd4883bf163fb78c",
+  "fileCount": 109,
+  "totalBytes": 7203547,
+  "canonicalSha256": "124eb59e5a456553e374ff055b95de42b133063add309d1353bad952ea5b4d1a",
+  "indexSha256": "4f02aa8b9bf16c3b43826d53cc1be1a52feaa2fad05332da03fa5782ce77b0e9",
+  "rootReviewSha256": "23402f8089610d1725ee8f1e029d929805e48788ceec9a4daf9a091841ed71ae",
+  "readinessSha256": "06ce310056ebe2db857dca85ba3b094efd7016494fef53888957e7f255e62d51",
+  "remoteDiffVerifiedBeforePublication": true,
+  "compareCounts": {
+    "added": 108,
+    "modified": 1
+  },
+  "canonicalPreviousBytesPreserved": true,
+  "runtimeChanged": false,
+  "productPrOpened": false,
+  "scope": "Completed f28 component and all correction/recovery lineages; fresh a300 correctness and three excluded baseline storage observations; full run launch only at declared11:44:43UTC cutoff. No full performance outcomes included."
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "representation": "New deterministic lossless storage representation of exact pre-freeze prose/source bytes.",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-full-results/canonical-preparation-history.tar.gz",
+    "bytes": 11819,
+    "sha256": "a325835e939d127a7b38d4e38bf0f016749692a89129e7a89014536c09ca59a2",
+    "gitBlobSha1": "7b7b46cd0254c36e4c8afbb87bfc70857a4af814"
+  },
+  "memberCount": 6,
+  "rawMemberBytes": 53222,
+  "members": [
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/canonical-insertion-before-precision-1.md",
+      "bytes": 10398,
+      "sha256": "4c6f71e9c677aa3e49c6a2fff746fc0daebd1ccc2518e584911c5db7cc4559b2",
+      "gitBlobSha1": "327a264e9bd42eda4b559a725769a0455face283"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/canonical-insertion-before-scope-2.md",
+      "bytes": 10383,
+      "sha256": "1b1b6ff04b01d3e8725215cd3d861e0e0f819ac946b68384087beb6ad6d08d02",
+      "gitBlobSha1": "74513beb175db0e1764bdd0b0ad38f56ab1e474c"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/canonical-insertion.md",
+      "bytes": 10551,
+      "sha256": "4c937d13ee8fb8935fd588e41a1e7f27b6300b0e0255935078ec7661c676ab19",
+      "gitBlobSha1": "195798da1d575ff9d295dd0a388bae39fca2e559"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/canonical-precision-amendment.json",
+      "bytes": 961,
+      "sha256": "7841261f29545597e4d94820d7e671a76c763228639ac2848999f84a1025d2df",
+      "gitBlobSha1": "97f3e095a4fbe98589902c1ea9055c5278fbeb93"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/canonical-scope-amendment.json",
+      "bytes": 780,
+      "sha256": "6b9faebd95f02b3bf83ba27a8dbeb524b865368da8c54fa8b39cc230b98c014b",
+      "gitBlobSha1": "3d71dcd525442e222f9f8f9fe432b9ffe7c2504a"
+    },
+    {
+      "path": "import-study-proof-consumer-full-final-20261128/finalize-checkpoint.py",
+      "bytes": 20149,
+      "sha256": "8a66f4cdf95fe7e597d58a166f8b2aee9623d1c5e642430fbb4cc28ac07fd8d4",
+      "gitBlobSha1": "9c605d75679575aa99308f3e61fed8048407e907"
+    }
+  ],
+  "roundTripExact": true
+}
