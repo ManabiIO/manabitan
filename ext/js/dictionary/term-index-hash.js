@@ -22,6 +22,11 @@ import {hashTermKeyBytes} from './term-key-hash.js'
 const INPUT_BYTES = 65536
 const MEMORY_BYTES = 131072
 const MAX_INPUT_BYTES = 0xffffffff
+const TYPED_ARRAY_KIND_GETTER = Object.getOwnPropertyDescriptor(
+    Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag,
+)?.get
+const ARRAY_BUFFER_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get
+const ARRAY_BUFFER_RESIZABLE_GETTER = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable')?.get
 
 /** @typedef {{nativeHashCallCount: number, nativeHashBytes: number}} TermIndexHashMetrics */
 /** @typedef {{memory: WebAssembly.Memory, input_pointer: () => number, input_capacity: () => number, hash_abi_version: () => number, reset: (length: number) => void, update: (length: number) => void, digest: (tailLength: number) => number}} TermIndexHashExports */
@@ -60,11 +65,13 @@ export function initializeTermIndexHash() {
 export function hashTermIndexBytes(bytes, metrics = null) {
     const hash = nativeHash
     if (
-        hash !== null && Object.getPrototypeOf(bytes) === Uint8Array.prototype &&
+        hash !== null && ArrayBuffer.isView(bytes) &&
+        Object.getPrototypeOf(bytes) === Uint8Array.prototype &&
+        TYPED_ARRAY_KIND_GETTER?.call(bytes) === 'Uint8Array' &&
         !Object.hasOwn(bytes, 'buffer') && !Object.hasOwn(bytes, 'byteOffset') &&
         !Object.hasOwn(bytes, 'byteLength') &&
         bytes.byteLength >= INPUT_BYTES && bytes.byteLength <= MAX_INPUT_BYTES &&
-        bytes.buffer instanceof ArrayBuffer && Reflect.get(bytes.buffer, 'resizable') !== true
+        hasFixedPrivateStorage(bytes.buffer)
     ) {
         try {
             const result = hash(bytes)
@@ -81,6 +88,24 @@ export function hashTermIndexBytes(bytes, metrics = null) {
         }
     }
     return hashTermKeyBytes(bytes)
+}
+
+/**
+ * Intrinsic getters inspect the backing store without trusting its prototype
+ * or invoking caller-defined byteLength/resizable properties.
+ * @param {ArrayBufferLike} buffer
+ * @returns {boolean}
+ */
+function hasFixedPrivateStorage(buffer) {
+    if (typeof ARRAY_BUFFER_BYTE_LENGTH_GETTER !== 'function') { return false }
+    try {
+        ARRAY_BUFFER_BYTE_LENGTH_GETTER.call(buffer)
+        return ARRAY_BUFFER_RESIZABLE_GETTER?.call(buffer) !== true
+    } catch {
+        // Shared buffers cannot acquire private-buffer semantics by changing
+        // their prototype. Admission failure must not disable native hashing.
+        return false
+    }
 }
 
 /**

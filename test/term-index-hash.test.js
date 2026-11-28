@@ -107,6 +107,91 @@ test('retains the fallback for small, shared, resizable and caller-specialized v
     }
 })
 
+test.each([
+    [32768, 1693161426],
+    [32769, 2873677827],
+])('preserves intrinsic Uint16 semantics with a Uint8 prototype at %i elements', async (length, expected) => {
+    respond()
+    await api.initializeTermIndexHash()
+    const bytes = /** @type {Uint8Array} */ (/** @type {unknown} */ (new Uint16Array(length).fill(0x1234)))
+    Object.setPrototypeOf(bytes, Uint8Array.prototype)
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    // The aligned length already matched before this fix. The two-byte tail
+    // exposes the existing JavaScript hash's element-indexing semantics.
+    expect(hashTermKeyBytes(bytes)).toBe(expected)
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(expected)
+    expect(metrics).toEqual({nativeHashCallCount: 0, nativeHashBytes: 0})
+})
+
+test('rejects shared backing disguised with an ArrayBuffer prototype without disabling native hashing', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const buffer = new SharedArrayBuffer(65536)
+    Object.setPrototypeOf(buffer, ArrayBuffer.prototype)
+    const bytes = new Uint8Array(buffer)
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    expect(hashTermKeyBytes(bytes)).toBe(3216247056)
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(3216247056)
+    expect(metrics).toEqual({nativeHashCallCount: 0, nativeHashBytes: 0})
+    expect(api.hashTermIndexBytes(payload(65536), metrics)).toBe(780141939)
+    expect(metrics).toEqual({nativeHashCallCount: 1, nativeHashBytes: 65536})
+})
+
+test('uses intrinsic storage and view getters without invoking caller properties', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const buffer = new ArrayBuffer(65537)
+    const getter = vi.fn(() => { throw new Error('unexpected caller getter') })
+    Object.defineProperties(buffer, {
+        byteLength: {get: getter},
+        resizable: {get: getter},
+    })
+    const bytes = new Uint8Array(buffer)
+    Object.defineProperty(bytes, Symbol.toStringTag, {get: getter})
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    expect(hashTermKeyBytes(bytes)).toBe(2812252412)
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(2812252412)
+    expect(getter).not.toHaveBeenCalled()
+    expect(metrics).toEqual({nativeHashCallCount: 1, nativeHashBytes: 65537})
+})
+
+test('retains the fallback when a resizable backing store masks its resizable property', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const buffer = /** @type {ArrayBuffer} */ (Reflect.construct(ArrayBuffer, [65537, {maxByteLength: 131072}]))
+    Object.defineProperty(buffer, 'resizable', {value: false})
+    const bytes = new Uint8Array(buffer)
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(hashTermKeyBytes(bytes))
+    expect(metrics).toEqual({nativeHashCallCount: 0, nativeHashBytes: 0})
+})
+
+test('falls back for proxies without invoking their prototype trap', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const source = payload(65537)
+    const getPrototypeOf = vi.fn(() => { throw new Error('unexpected prototype trap') })
+    const bytes = new Proxy(source, {
+        getPrototypeOf,
+        get: (target, key) => Reflect.get(target, key, target),
+    })
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(hashTermKeyBytes(bytes))
+    expect(getPrototypeOf).not.toHaveBeenCalled()
+    expect(metrics).toEqual({nativeHashCallCount: 0, nativeHashBytes: 0})
+})
+
+test('preserves the non-failing own-length control on the ordinary native path', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const bytes = Uint8Array.from({length: 65536}, (_, i) => i & 255)
+    Object.defineProperty(bytes, 'length', {value: 32})
+    const metrics = {nativeHashCallCount: 0, nativeHashBytes: 0}
+    expect(hashTermKeyBytes(bytes)).toBe(4189290845)
+    expect(api.hashTermIndexBytes(bytes, metrics)).toBe(4189290845)
+    expect(metrics).toEqual({nativeHashCallCount: 1, nativeHashBytes: 65536})
+})
+
 test('copies ordinary views without invoking a caller-provided subarray method', async () => {
     respond()
     await api.initializeTermIndexHash()
