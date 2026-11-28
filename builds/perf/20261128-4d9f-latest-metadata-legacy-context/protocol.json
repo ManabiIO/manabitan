@@ -24,7 +24,7 @@
     "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
     "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest",
     "Cold persisted comparisons use unchanged production resolvers and physical OPFS/decompression/byte-equality paths. Require committed root legacy-root-v0, epoch0, highwater0, legacy manifest and no snapshots/online/recovery/lifecycle/record-health activity after every group and final drain. Do not reseed during staged import.",
-    "Settle both production store sessions with workers and SQLite alive; then join every codec/index worker and close only the owned SQLite attachment. The derived comparator requires complete successful drain/join/close receipts.",
+    "Settle both production store sessions with workers and SQLite alive; then join every codec/index worker and close only the owned SQLite attachment, followed by sequential ZIP/OPFS release. The derived comparator requires complete successful drain/join/owned-close/resource-release receipts. Cleanup-only failures throw after finally; an original body error retains precedence while cleanup failures are recorded.",
     "A real nonempty public-sink contract must pass before corpus acquisition: actual raw-v2 encoding and unchanged block compression, ordinary target-only glossary invalidation with unrelated rows retained, cold persisted exact comparison and duplicate reuse without content growth. SQLite exports are recorded diagnostically; root/epoch/high-water and user_version remain explicit invariants."
   ],
   "resourcePolicy": {
@@ -95,5 +95,12 @@
     "contracts": "26 unchanged plus14 actual cold-read controls passed on both source arms on both hosts.",
     "corpus": "All four Jitendex/VNDB arms failed group0 with SQLite3Error: no such table: termGlossaryTokens in ordinary public glossary invalidation. No completed corpus oracle.",
     "correction": "Await actual production _initializeSchema() once after normal runtime pragmas; add the missed real nonempty public-sink integration control; do not bypass invalidation or manually add tables."
+  },
+  "retainedScopedLintAttempt": {
+    "runId": 46143543189,
+    "toolingCommit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+    "rawEvidence": "lint-attempt-1",
+    "result": "Both hosts passed source/oracle guards,26 original contracts and normal A/B/tooling builds, then stopped on11 scoped helper lint errors. The new15 controls and all corpus acquisitions were skipped.",
+    "correction": "Formatting corrections and fail-closed cleanup error capture outside finally; original body errors retain precedence, all actual resources still settle and cleanup receipts are enforced. No product, schema, fixture, oracle or resource-policy change."
   }
 }

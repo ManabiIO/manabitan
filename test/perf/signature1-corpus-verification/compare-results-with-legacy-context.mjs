@@ -36,6 +36,7 @@ for (const [directory, result] of [[aDirectory, a], [bDirectory, b]]) {
     assert.deepEqual(cleanup.drainResults, [{status: 'fulfilled'}, {status: 'fulfilled'}]);
     assert.equal(cleanup.workerResults.length, result.compression.codecWorkers + result.indexWorker.count);
     assert(cleanup.workerResults.every((entry) => entry.status === 'fulfilled'));
+    assert.deepEqual(cleanup.resourceResults, [{status: 'fulfilled'}, {status: 'fulfilled'}]);
     assert.equal(cleanup.closedOwnedConnection, true);
     assert.equal(cleanup.closeError, null);
 }

@@ -20,7 +20,7 @@
     }
   },
   "latestManifestSha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
-  "latestProtocolSha256": "56935854760f82e5e0ca60f74f8d5be4b7768dbc5c2fcac340dfe5e041183a9b",
+  "latestProtocolSha256": "956a7b1468b9a14b87db1f5a94b561d8a2eab4c5dd3e3fa3f25e7f07b7bba34e",
   "changedCanonicalParentFiles": [
     {
       "path": "ext/js/dictionary/dictionary-database.js",
@@ -203,9 +203,9 @@
       "path": "test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "a6237ebe8891336f64c273131fe052343294c0e7",
-      "bytes": 45778,
-      "sha256": "c5618da98d5e4e6bbef3969fb335bc7b6e09f39cdc4255e2bfdbcc744929d811"
+      "sha": "25b7f6b0deca943f54aa75db4acb152264fa0930",
+      "bytes": 46368,
+      "sha256": "67383e8ef0c02931fe50d0051a2cbce6ff9f18a93ccf22cb76aac4341011ef12"
     },
     {
       "path": "test/perf/signature1-corpus-verification/launch-with-legacy-context.py",
@@ -219,17 +219,17 @@
       "path": "test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "ae6f63edbda2b5bbe2ee463cc204ad0fb5b892d3",
-      "bytes": 9148,
-      "sha256": "62d5d876c771d268e7d1d486a7d543df0405ce1eaa47c38e7d6e143d71cf6811"
+      "sha": "6d5f8587cba9ff7eed2f9c47cf5126d9e35d7aef",
+      "bytes": 9243,
+      "sha256": "2990df54931eb76ebe019ef0872cdbea168b083d724a885b94f77821af3ff3e3"
     },
     {
       "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "d775a3683135ec9edef6a1f8a532316bfc010beb",
-      "bytes": 22923,
-      "sha256": "1f296ebf6de255328c9b83a8c897cbb26d85173570f467bef21bc490f2816745"
+      "sha": "1f795355641792df6d6df3812135ef5757ba423f",
+      "bytes": 23474,
+      "sha256": "7eb7101b3292fb235bd1bd796d76040d8c42d6fcd5c9e39329102586e4c3d597"
     }
   ],
   "canonicalSourceCount": 42,
@@ -248,7 +248,7 @@
     "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
     "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
   },
-  "sourceReview": "Complete-schema module and15 real-I/O/public-sink contracts independently reviewed. Derived runner retains awaited attachment and drain/join/owned-close ordering; only the declared schema mode changes in the comparator. No production reader/resolver/invalidation/comparison override and no original oracle change.",
+  "sourceReview": "Complete-schema module and15 real-I/O/public-sink controls were independently reviewed before the scoped lint gate. Narrow lint revisions preserve every product/schema/control assertion; teardown records and settles all actual resources, keeps the original body error, and propagates cleanup-only errors after finally. The comparator retains every output oracle and additionally requires both resource releases fulfilled.",
   "retainedHistory": "Original dcfc/f28 six-run successes remain immutable; latest JMdict original acquisition is retained and strictly revalidated. Latest first Jitendex/VNDB boundary failures and original workflow pipefail issue remain in attempt-1. This distinct helper is not a relabeling or unchanged rerun. The additive-only6eff attempt/run46142163868 passed all14 cold-read contracts but failed all four actual arms at public group0 glossary invalidation; exact raw artifacts are retained at attempt-1. This freeze uses the actual full production initializer and a new nonempty public-sink control.",
   "originalHelperCount": 15,
   "newHelperCount": 5,
@@ -270,5 +270,11 @@
     "manifestSha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6",
     "protocolSha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1",
     "runId": 46142163868
+  },
+  "retainedScopedLintAttempt": {
+    "commit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+    "runId": 46143543189,
+    "artifacts": "lint-attempt-1",
+    "newControlsOrCorpusExecuted": false
   }
 }

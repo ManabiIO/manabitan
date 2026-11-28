@@ -86,6 +86,7 @@ let zip;
 let database;
 let legacySqlite;
 let legacyReadContext = null;
+let legacyCleanupFailure = null;
 let legacyImportReadContext = null;
 let currentGroup = -1;
 let stage = 'source preflight';
@@ -700,8 +701,10 @@ chunk.fixedContentLength :
     database._termContentBlockImportSession = null;
     await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
     legacyImportReadContext.finalState = legacyReadContext.assertState();
-    assert.deepEqual(await fileHashes(sourceRoot, Object.keys(legacySqlite.assetIdentity)),
-        Object.fromEntries(Object.entries(legacySqlite.assetIdentity).map(([file, identity]) => [file, identity.sha256])));
+    assert.deepEqual(
+        await fileHashes(sourceRoot, Object.keys(legacySqlite.assetIdentity)),
+        Object.fromEntries(Object.entries(legacySqlite.assetIdentity).map(([file, identity]) => [file, identity.sha256])),
+    );
     await save('legacy-read-context.json', legacyImportReadContext);
     codecBoundary();
     const files = await storedFileSizes(env.rootPath);
@@ -837,19 +840,32 @@ chunk.fixedContentLength :
         await worker.termination;
     }));
     let legacyCloseError = null;
-    try { legacyReadContext?.close(); } catch (error) { legacyCloseError = error; }
+    try {
+        legacyReadContext?.close();
+    } catch (error) {
+        legacyCloseError = error;
+    }
+    const resourceResults = [];
+    for (const releaseResource of [() => zip?.close(), () => env?.dispose()]) {
+        try {
+            await releaseResource();
+            resourceResults.push({status: 'fulfilled'});
+        } catch (error) {
+            resourceResults.push({status: 'rejected', reason: error});
+        }
+    }
     if (legacyReadContext !== null) {
-        const describe = (result) => result.status === 'fulfilled' ? {status: result.status} : {status: result.status, reason: String(result.reason)};
+        const describe = (result) => (result.status === 'fulfilled' ? {status: result.status} : {status: result.status, reason: String(result.reason)});
         await save('legacy-read-context-cleanup.json', {
             drainResults: legacyDrains.map(describe),
             workerResults: workerResults.map(describe),
+            resourceResults: resourceResults.map(describe),
             closedOwnedConnection: legacyCloseError === null && database._db === null && database._sqlite3 === null,
             closeError: legacyCloseError === null ? null : String(legacyCloseError),
         });
     }
-    await zip?.close();
-    await env?.dispose();
-    if (legacyCloseError !== null) { throw legacyCloseError; }
-    const rejectedCleanup = [...legacyDrains, ...workerResults].find((result) => result.status === 'rejected');
-    if (rejectedCleanup) { throw rejectedCleanup.reason; }
+    const rejectedCleanup = [...legacyDrains, ...workerResults, ...resourceResults].find((result) => result.status === 'rejected');
+    legacyCleanupFailure = legacyCloseError !== null ? {reason: legacyCloseError} : rejectedCleanup ?? null;
 }
+// An acquisition error propagates after cleanup; cleanup-only failures still fail the run.
+if (legacyCleanupFailure !== null) { throw legacyCleanupFailure.reason; }

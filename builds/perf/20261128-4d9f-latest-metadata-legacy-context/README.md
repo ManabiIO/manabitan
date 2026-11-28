@@ -22,6 +22,8 @@ Each corpus then gets one fresh A and one fresh B with the same 512MiB old-space
 
 JMdict is **not reacquired**. Its original latest-source12-group/528,299-row proof was independently revalidated from the original files and establishes exactly4MiB retained backing avoided. It is not relabeled as execution of this new helper. New Jitendex/VNDB claims require their own completed reports.
 
+The first complete-schema freeze (`d4c3991`, run46143543189) stopped at scoped lint with11 helper errors, before the15 new controls or any corpus. Its26 unchanged controls and normal builds passed. Both exact raw artifacts are retained at `lint-attempt-1`. The narrow follow-up fixes formatting and records cleanup failures without replacing an original body error; cleanup-only failures remain fatal. No source/oracle/fixture/budget or production-schema behavior changes.
+
 ## Reproduction
 
 Use the same exact Node v22.22.0 binary, clean source checkouts, locked `npm ci` and ordinary `npm run build:libs` documented in the adjacent original latest profile. Extract and hash-check the unchanged `verification-oracles.tar.gz` here using its member index. Acquire the locked archive by its declared URL, size and SHA256.

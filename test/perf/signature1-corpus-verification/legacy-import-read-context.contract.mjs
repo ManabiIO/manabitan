@@ -56,7 +56,11 @@ before(async () => {
 
 after(() => {
     globalThis.fetch = originalFetch;
-    if (navigatorDescriptor) { Object.defineProperty(globalThis, 'navigator', navigatorDescriptor); } else { delete globalThis.navigator; }
+    if (navigatorDescriptor) {
+        Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+    } else {
+        delete globalThis.navigator;
+    }
 });
 
 function sourceValues() {
@@ -73,9 +77,10 @@ function signature(bytes, offset) {
 
 async function withFixture(callback, {attach = true, values = [sourceValues()]} = {}) {
     const environment = await createBoundedNodeOpfs();
-    Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {
-        hardwareConcurrency: 4, deviceMemory: 8, storage: {getDirectory: async () => environment.root},
-    }});
+    Object.defineProperty(globalThis, 'navigator', {configurable: true,
+        value: {
+            hardwareConcurrency: 4, deviceMemory: 8, storage: {getDirectory: async () => environment.root},
+        }});
     const database = new DictionaryDatabase();
     let boundary = null;
     try {
@@ -297,11 +302,13 @@ test('foreign connection replacement is rejected without closing either connecti
 
 test('the actual nonempty public sink keeps real schema invalidation and cold exact reuse active', {timeout: 30000}, async (context) => {
     const environment = await createBoundedNodeOpfs();
-    Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {
-        hardwareConcurrency: 4, deviceMemory: 8, storage: {getDirectory: async () => environment.root},
-    }});
+    Object.defineProperty(globalThis, 'navigator', {configurable: true,
+        value: {
+            hardwareConcurrency: 4, deviceMemory: 8, storage: {getDirectory: async () => environment.root},
+        }});
     const database = new DictionaryDatabase();
     let boundary = null;
+    const cleanupErrors = [];
     try {
         await database._termContentStore.prepare();
         await database._termRecordStore.prepare();
@@ -420,15 +427,29 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
             actualScopedGlossaryInvalidation: true,
         }));
     } finally {
-        database._termContentBlockImportSession?.close();
+        try {
+            database._termContentBlockImportSession?.close();
+        } catch (error) {
+            cleanupErrors.push(error);
+        }
         const drains = await Promise.allSettled([
             Promise.resolve().then(() => database._termContentStore.endImportSession()),
             Promise.resolve().then(() => database._termRecordStore.endImportSession()),
         ]);
-        boundary?.close();
-        await environment.dispose();
-        const failure = drains.find((result) => result.status === 'rejected');
-        if (failure) { throw failure.reason; }
+        for (const result of drains) {
+            if (result.status === 'rejected') { cleanupErrors.push(result.reason); }
+        }
+        try {
+            boundary?.close();
+        } catch (error) {
+            cleanupErrors.push(error);
+        }
+        try {
+            await environment.dispose();
+        } catch (error) {
+            cleanupErrors.push(error);
+        }
+        context.diagnostic(JSON.stringify({name: 'actual-public-sink-cleanup', errors: cleanupErrors.map(String)}));
     }
+    if (cleanupErrors.length > 0) { throw cleanupErrors[0]; }
 });
-
