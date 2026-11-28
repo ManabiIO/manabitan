@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "scope": "final local source projection before the explicit metadata-only seal transition",
+  "projectorSha256": "89bf88e3cdd1305a89011f5ae28f21418f26253cf933c2cca9737f8a1876ac96",
+  "exitCode": 0,
+  "stdout": "{\n  \"passed\": true,\n  \"scope\": \"Offline immutable reference projection; no new imports, clocks or observations\",\n  \"runtimeDigests\": {\n    \"A\": \"6119c7310002869af86be34026cd334550917b435674e18abb35a326604ed743\",\n    \"B\": \"3c3f78d0c2d6bd3fad7fe84c34f52dcbffa272ed48cf81e10fb168199d3f61d2\",\n    \"C\": \"4f5574893fcbf077d8f16c2b75c6fb4f5dc7c22b4e97c8a2f5ea0174bdcdd803\"\n  },\n  \"outputDigest\": \"92ce2fa7d8347c50217615eb0d8ed2ab307a242b984e95995cff6e7905cd74cf\",\n  \"workDigests\": {\n    \"A\": \"95b88cb6c53fe5c84130a863ac4f62ce76416d7bb3e3eea0b8f194c6d1d1acd1\",\n    \"B\": \"b162a35c174f375a439d40e9e9aeec9ae5a91769d342e805a1f8e4de2a2bd44e\",\n    \"C\": \"95b88cb6c53fe5c84130a863ac4f62ce76416d7bb3e3eea0b8f194c6d1d1acd1\"\n  },\n  \"preparationSha256\": \"f6ec3995fed659b2d89f501125331cd644d41ba65e491a54592fc1a459c64d8e\",\n  \"planSha256\": \"62390422ba41dabbebe6a5c8401a6e56325884b2ebc8510bb7245bed52cb56b8\",\n  \"dictionaryImports\": 0,\n  \"timingObservations\": 0,\n  \"productModulesImported\": 0\n}\n",
+  "stderr": "",
+  "dictionaryImports": 0,
+  "timingObservations": 0,
+  "productModulesImported": 0
+}

@@ -1,0 +1,83 @@
+{
+  "evidenceKind": "synthetic-arithmetic-and-disabled-guard-checks",
+  "node": "v24.22.3",
+  "productCodeLoaded": false,
+  "dictionaryImports": 0,
+  "childProcessesLaunched": 0,
+  "timingAcquired": false,
+  "sourceSha256": {
+    "plan.json": "a541592756aabfbb7685b623452cf0cf13c4143b19b9833061c28735b43605d7",
+    "PROTOCOL.md": "191750924efbebcb3833484b3a7ce96fdee900d25f2b2cf0f8739c7dc9d536dc",
+    "screen.mjs": "20d2d9e88ce57c32224ef60fd712985821ece4b1127a838b9fac4cae561c4bf6",
+    "test-screen.mjs": "c724844c4ff250ffbfc9f5b37ce452463aa06eed651ea8615d8b18c55ff88bf6"
+  },
+  "tests": 16,
+  "passed": 16,
+  "failed": 0,
+  "results": [
+    {
+      "name": "all prescribed permutations and positions are balanced within blocks",
+      "passed": true
+    },
+    {
+      "name": "exact 20ms and 1percent candidate boundaries pass independently",
+      "passed": true
+    },
+    {
+      "name": "one microsecond under the absolute benefit floor fails",
+      "passed": true
+    },
+    {
+      "name": "one microsecond under the relative benefit floor fails",
+      "passed": true
+    },
+    {
+      "name": "both controls must pass with no pooled substitute",
+      "passed": true
+    },
+    {
+      "name": "exact plus and minus 3percent paired and summed controls pass",
+      "passed": true
+    },
+    {
+      "name": "one microsecond beyond either signed control boundary fails",
+      "passed": true
+    },
+    {
+      "name": "exact summed control boundary passes while one unit beyond fails",
+      "passed": true
+    },
+    {
+      "name": "no obsolete absolute millisecond control gate survives",
+      "passed": true
+    },
+    {
+      "name": "ten faster pairs pass and nine fail; ties are not faster",
+      "passed": true
+    },
+    {
+      "name": "median paired percentage is not a ratio of arm medians",
+      "passed": true
+    },
+    {
+      "name": "a fast wall contrast cannot rescue a failed CPU gate",
+      "passed": true
+    },
+    {
+      "name": "a failed second replication remains failed independently",
+      "passed": true
+    },
+    {
+      "name": "missing duplicate failed or timed warmup records are rejected",
+      "passed": true
+    },
+    {
+      "name": "raw process CPU snapshots are recomputed without a wall upper bound",
+      "passed": true
+    },
+    {
+      "name": "current unsealed plan rejects before any child or product import",
+      "passed": true
+    }
+  ]
+}

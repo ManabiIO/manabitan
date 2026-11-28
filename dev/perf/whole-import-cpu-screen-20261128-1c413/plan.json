@@ -1,0 +1,3857 @@
+{
+  "schemaVersion": 1,
+  "name": "JMdict complete Node import CPU nomination screen",
+  "status": "sealed",
+  "acquisitionAuthorized": true,
+  "numericPolicyStatus": "selected-prospectively-before-observations",
+  "boundary": "first-product-module-evaluation-through-import-fixed-semantic-probes-and-retirement",
+  "nodeVersion": "v22.22.0",
+  "fixture": {
+    "dictionary": "jmdict",
+    "relativePath": "fixtures/JMdict.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "bytes": 15645766,
+    "rows": 528299,
+    "parserWorkers": 3,
+    "parserGroups": 12
+  },
+  "arms": {
+    "A": {
+      "relativeRoot": "A",
+      "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "preparedRuntimeDigest": "6119c7310002869af86be34026cd334550917b435674e18abb35a326604ed743"
+    },
+    "B": {
+      "relativeRoot": "B",
+      "commit": "01eb863506012136e417167f445b2708d9136293",
+      "tree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+      "preparedRuntimeDigest": "3c3f78d0c2d6bd3fad7fe84c34f52dcbffa272ed48cf81e10fb168199d3f61d2"
+    },
+    "C": {
+      "relativeRoot": "C",
+      "commit": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+      "tree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+      "preparedRuntimeDigest": "4f5574893fcbf077d8f16c2b75c6fb4f5dc7c22b4e97c8a2f5ea0174bdcdd803"
+    }
+  },
+  "commonDriver": {
+    "provenanceCommit": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "provenancePath": "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run.mjs",
+    "provenanceBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+    "relativeEntry": "screen-kit/corpus/run.mjs",
+    "relativeReceiptAdapter": "screen-kit/corpus/receipt-adapter.mjs",
+    "files": [
+      {
+        "path": "screen-kit/PROTOCOL.md",
+        "bytes": 26548,
+        "sha256": "0984db93afee2bdf0e0a565b1ccd7a1ff57e13dc9c309642ce59484f9eab5a32"
+      },
+      {
+        "path": "screen-kit/screen.mjs",
+        "bytes": 16740,
+        "sha256": "082f344bd158ac5092053e76c3590d1f18cc7986f24128cba83b65d9c053a4d2"
+      },
+      {
+        "path": "screen-kit/screen-policy.mjs",
+        "bytes": 1652,
+        "sha256": "2da710ab0fc3274fc767da96b29b629d6804acb659dfe19385ac97ce3dca986c"
+      },
+      {
+        "path": "screen-kit/workflow-prepare.mjs",
+        "bytes": 4361,
+        "sha256": "ef335b7902c431acbebbda8bb09e69ee6950ba2f0da3715f88e5f51877c73977"
+      },
+      {
+        "path": "screen-kit/project-reference.mjs",
+        "bytes": 14592,
+        "sha256": "89bf88e3cdd1305a89011f5ae28f21418f26253cf933c2cca9737f8a1876ac96"
+      },
+      {
+        "path": "screen-kit/copy-provenance.json",
+        "bytes": 1948,
+        "sha256": "5c43993767ad600c24a374f22963297d1c8b791f9b834f560a84e9068cdfe307"
+      },
+      {
+        "path": "screen-kit/test-screen.mjs",
+        "bytes": 10630,
+        "sha256": "88830bc23e2dd47607d9d7c4947c3ea84fcf5cc4a288355c180a30cdd293e371"
+      },
+      {
+        "path": "screen-kit/test-boundary.mjs",
+        "bytes": 19844,
+        "sha256": "0a3c7e6eeaccba84726e9f58878b8638acbefd0f09d2bb60f837ceaf741b3b99"
+      },
+      {
+        "path": "screen-kit/test-plan.json",
+        "bytes": 5759,
+        "sha256": "7c4e3e0803afcf0fda0fe7db07502d492997f2177eb67482b2b9ca657e9e4e56"
+      },
+      {
+        "path": "screen-kit/corpus/run.mjs",
+        "bytes": 21269,
+        "sha256": "749848162c9b7b0b49e27788600f9d7a2e499d119af92bd9179f5365ad333531"
+      },
+      {
+        "path": "screen-kit/corpus/cpu-boundary.mjs",
+        "bytes": 2452,
+        "sha256": "8781603f8dbbab84a406795174605d45c844394abfe7bfc87f6f70a50bd3a703"
+      },
+      {
+        "path": "screen-kit/corpus/receipt-adapter.mjs",
+        "bytes": 29267,
+        "sha256": "1f10f925fa3af8d3123fea17406175d53ea4a6e6273a72e0787e8732a8f07272"
+      },
+      {
+        "path": "screen-kit/corpus/owner-observer.mjs",
+        "bytes": 15410,
+        "sha256": "6ebb47d2edf767be58ad25d341b72dd57afc5968a7cfbfd8fef06400ede925b8"
+      },
+      {
+        "path": "screen-kit/corpus/node-runtime.mjs",
+        "bytes": 8273,
+        "sha256": "6e1a4c57d3d881c1d9f6f570c56962b4473f7b5cd65ba0a3dff653709fb86fdd"
+      },
+      {
+        "path": "screen-kit/corpus/node-opfs-disk.mjs",
+        "bytes": 15180,
+        "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+      },
+      {
+        "path": "screen-kit/corpus/node-import-worker-bridge.mjs",
+        "bytes": 2148,
+        "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+      },
+      {
+        "path": "screen-kit/corpus/baseline-open-connection.txt",
+        "bytes": 1436,
+        "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0"
+      },
+      {
+        "path": "screen-kit/corpus/baseline-open-supported-connection.txt",
+        "bytes": 1538,
+        "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c"
+      },
+      {
+        "path": "screen-kit/corpus/baseline-storage-schema-version.txt",
+        "bytes": 53,
+        "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4"
+      },
+      {
+        "path": "screen-kit/corpus/run.correctness-source.txt",
+        "bytes": 24435,
+        "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b"
+      },
+      {
+        "path": "screen-kit/workflow/native-whole-import-cpu-screen-1c413.yml",
+        "bytes": 11001,
+        "sha256": "ecfa8c30ba79de2f3c16afbd4cd14b47bb06ac87cf5f060c5b7b32ea82d7a8b7"
+      }
+    ],
+    "modeArgumentStatus": "implemented-source-seal-candidate",
+    "untimedMode": "untimed",
+    "measuredMode": "cpu-screen",
+    "currentCorrectnessSource": {
+      "driverBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "driverSha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "copiedSourceManifest": "copy-provenance.json",
+      "sourceTreeModified": false
+    }
+  },
+  "expectedWork": {
+    "A": {
+      "fieldRows": 528299,
+      "fieldCalls": 12,
+      "ownerCalls": 12,
+      "parser": {
+        "fastPathParserFusedAttempts": 12,
+        "fastPathParserFusedFallbacks": 0,
+        "fastPathParserSourceTransferredBytes": 15632849,
+        "fastPathParserSourceCrcScannedBytes": 0,
+        "fastPathParserSourceCrcReusedBytes": 0,
+        "fastPathParserSourceCrcReusedGlossaryCount": 0,
+        "fastPathParserSourceCompressedBytes": 15632849,
+        "fastPathParserSourceUncompressedBytes": 171617523,
+        "fastPathParserCompactContentMetadataGroups": 0,
+        "fastPathParserParallelWorkerCount": 3,
+        "fastPathParserParallelPipelineGroupsPerWorker": 4,
+        "fastPathParserParallelGroupCount": 12,
+        "fastPathParserParallelSkipReason": null
+      },
+      "groups": [
+        {
+          "banks": [
+            {
+              "filename": "term_bank_32.json",
+              "compressionMethod": 8,
+              "compressedSize": 195735,
+              "uncompressedSize": 2530607,
+              "signature": 3200937347
+            },
+            {
+              "filename": "term_bank_33.json",
+              "compressionMethod": 8,
+              "compressedSize": 337549,
+              "uncompressedSize": 3140246,
+              "signature": 4037553909
+            },
+            {
+              "filename": "term_bank_34.json",
+              "compressionMethod": 8,
+              "compressedSize": 284530,
+              "uncompressedSize": 3038748,
+              "signature": 2394675142
+            },
+            {
+              "filename": "term_bank_35.json",
+              "compressionMethod": 8,
+              "compressedSize": 185671,
+              "uncompressedSize": 2430169,
+              "signature": 3445960956
+            },
+            {
+              "filename": "term_bank_36.json",
+              "compressionMethod": 8,
+              "compressedSize": 303667,
+              "uncompressedSize": 3168136,
+              "signature": 3402545765
+            }
+          ],
+          "sourceByteLengths": [
+            195735,
+            337549,
+            284530,
+            185671,
+            303667
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_1.json",
+              "compressionMethod": 8,
+              "compressedSize": 232927,
+              "uncompressedSize": 3224558,
+              "signature": 404261040
+            },
+            {
+              "filename": "term_bank_2.json",
+              "compressionMethod": 8,
+              "compressedSize": 201497,
+              "uncompressedSize": 2724994,
+              "signature": 2951125037
+            },
+            {
+              "filename": "term_bank_3.json",
+              "compressionMethod": 8,
+              "compressedSize": 204746,
+              "uncompressedSize": 2716299,
+              "signature": 1513352965
+            },
+            {
+              "filename": "term_bank_4.json",
+              "compressionMethod": 8,
+              "compressedSize": 200041,
+              "uncompressedSize": 2672529,
+              "signature": 2955013720
+            },
+            {
+              "filename": "term_bank_5.json",
+              "compressionMethod": 8,
+              "compressedSize": 261354,
+              "uncompressedSize": 3204994,
+              "signature": 4038780609
+            }
+          ],
+          "sourceByteLengths": [
+            232927,
+            201497,
+            204746,
+            200041,
+            261354
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_18.json",
+              "compressionMethod": 8,
+              "compressedSize": 283040,
+              "uncompressedSize": 3408913,
+              "signature": 2537180659
+            },
+            {
+              "filename": "term_bank_19.json",
+              "compressionMethod": 8,
+              "compressedSize": 278583,
+              "uncompressedSize": 2944326,
+              "signature": 812214837
+            },
+            {
+              "filename": "term_bank_20.json",
+              "compressionMethod": 8,
+              "compressedSize": 286687,
+              "uncompressedSize": 2991158,
+              "signature": 419208196
+            },
+            {
+              "filename": "term_bank_21.json",
+              "compressionMethod": 8,
+              "compressedSize": 280559,
+              "uncompressedSize": 2912871,
+              "signature": 3099569980
+            },
+            {
+              "filename": "term_bank_22.json",
+              "compressionMethod": 8,
+              "compressedSize": 257038,
+              "uncompressedSize": 2881347,
+              "signature": 1543581021
+            }
+          ],
+          "sourceByteLengths": [
+            283040,
+            278583,
+            286687,
+            280559,
+            257038
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_10.json",
+              "compressionMethod": 8,
+              "compressedSize": 285278,
+              "uncompressedSize": 3347561,
+              "signature": 1082013653
+            },
+            {
+              "filename": "term_bank_11.json",
+              "compressionMethod": 8,
+              "compressedSize": 294349,
+              "uncompressedSize": 3314411,
+              "signature": 3219201253
+            },
+            {
+              "filename": "term_bank_12.json",
+              "compressionMethod": 8,
+              "compressedSize": 288324,
+              "uncompressedSize": 3353842,
+              "signature": 4107334087
+            },
+            {
+              "filename": "term_bank_13.json",
+              "compressionMethod": 8,
+              "compressedSize": 293356,
+              "uncompressedSize": 3241923,
+              "signature": 1907558867
+            }
+          ],
+          "sourceByteLengths": [
+            285278,
+            294349,
+            288324,
+            293356
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_6.json",
+              "compressionMethod": 8,
+              "compressedSize": 285667,
+              "uncompressedSize": 3327080,
+              "signature": 3822282561
+            },
+            {
+              "filename": "term_bank_7.json",
+              "compressionMethod": 8,
+              "compressedSize": 290985,
+              "uncompressedSize": 3283936,
+              "signature": 3662505012
+            },
+            {
+              "filename": "term_bank_8.json",
+              "compressionMethod": 8,
+              "compressedSize": 286576,
+              "uncompressedSize": 3271454,
+              "signature": 2237496174
+            },
+            {
+              "filename": "term_bank_9.json",
+              "compressionMethod": 8,
+              "compressedSize": 290973,
+              "uncompressedSize": 3358246,
+              "signature": 1409343149
+            }
+          ],
+          "sourceByteLengths": [
+            285667,
+            290985,
+            286576,
+            290973
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_14.json",
+              "compressionMethod": 8,
+              "compressedSize": 294296,
+              "uncompressedSize": 3311150,
+              "signature": 2073046293
+            },
+            {
+              "filename": "term_bank_15.json",
+              "compressionMethod": 8,
+              "compressedSize": 249827,
+              "uncompressedSize": 4312211,
+              "signature": 2422392884
+            },
+            {
+              "filename": "term_bank_16.json",
+              "compressionMethod": 8,
+              "compressedSize": 219292,
+              "uncompressedSize": 3257972,
+              "signature": 990240016
+            },
+            {
+              "filename": "term_bank_17.json",
+              "compressionMethod": 8,
+              "compressedSize": 259297,
+              "uncompressedSize": 3206874,
+              "signature": 1474525502
+            }
+          ],
+          "sourceByteLengths": [
+            294296,
+            249827,
+            219292,
+            259297
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_23.json",
+              "compressionMethod": 8,
+              "compressedSize": 310787,
+              "uncompressedSize": 3130796,
+              "signature": 597792161
+            },
+            {
+              "filename": "term_bank_24.json",
+              "compressionMethod": 8,
+              "compressedSize": 308587,
+              "uncompressedSize": 2924205,
+              "signature": 2002282153
+            },
+            {
+              "filename": "term_bank_25.json",
+              "compressionMethod": 8,
+              "compressedSize": 303992,
+              "uncompressedSize": 3148618,
+              "signature": 795742897
+            },
+            {
+              "filename": "term_bank_26.json",
+              "compressionMethod": 8,
+              "compressedSize": 333406,
+              "uncompressedSize": 3377060,
+              "signature": 4212135652
+            },
+            {
+              "filename": "term_bank_27.json",
+              "compressionMethod": 8,
+              "compressedSize": 327402,
+              "uncompressedSize": 3374974,
+              "signature": 4091031990
+            }
+          ],
+          "sourceByteLengths": [
+            310787,
+            308587,
+            303992,
+            333406,
+            327402
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_28.json",
+              "compressionMethod": 8,
+              "compressedSize": 319120,
+              "uncompressedSize": 3326587,
+              "signature": 3290278121
+            },
+            {
+              "filename": "term_bank_29.json",
+              "compressionMethod": 8,
+              "compressedSize": 293949,
+              "uncompressedSize": 3411990,
+              "signature": 1362719526
+            },
+            {
+              "filename": "term_bank_30.json",
+              "compressionMethod": 8,
+              "compressedSize": 303907,
+              "uncompressedSize": 3706971,
+              "signature": 4142274620
+            },
+            {
+              "filename": "term_bank_31.json",
+              "compressionMethod": 8,
+              "compressedSize": 268676,
+              "uncompressedSize": 3257358,
+              "signature": 3980454135
+            }
+          ],
+          "sourceByteLengths": [
+            319120,
+            293949,
+            303907,
+            268676
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_41.json",
+              "compressionMethod": 8,
+              "compressedSize": 327770,
+              "uncompressedSize": 3426893,
+              "signature": 1959284467
+            },
+            {
+              "filename": "term_bank_42.json",
+              "compressionMethod": 8,
+              "compressedSize": 343507,
+              "uncompressedSize": 3505865,
+              "signature": 1303868956
+            },
+            {
+              "filename": "term_bank_43.json",
+              "compressionMethod": 8,
+              "compressedSize": 328238,
+              "uncompressedSize": 3414653,
+              "signature": 3325356598
+            },
+            {
+              "filename": "term_bank_44.json",
+              "compressionMethod": 8,
+              "compressedSize": 340246,
+              "uncompressedSize": 3427785,
+              "signature": 2046005072
+            }
+          ],
+          "sourceByteLengths": [
+            327770,
+            343507,
+            328238,
+            340246
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_37.json",
+              "compressionMethod": 8,
+              "compressedSize": 336653,
+              "uncompressedSize": 3943952,
+              "signature": 3506376422
+            },
+            {
+              "filename": "term_bank_38.json",
+              "compressionMethod": 8,
+              "compressedSize": 325795,
+              "uncompressedSize": 3323025,
+              "signature": 3376386423
+            },
+            {
+              "filename": "term_bank_39.json",
+              "compressionMethod": 8,
+              "compressedSize": 341827,
+              "uncompressedSize": 3401356,
+              "signature": 2917308995
+            },
+            {
+              "filename": "term_bank_40.json",
+              "compressionMethod": 8,
+              "compressedSize": 327365,
+              "uncompressedSize": 3450837,
+              "signature": 3430702340
+            }
+          ],
+          "sourceByteLengths": [
+            336653,
+            325795,
+            341827,
+            327365
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_45.json",
+              "compressionMethod": 8,
+              "compressedSize": 339568,
+              "uncompressedSize": 3478013,
+              "signature": 2951714289
+            },
+            {
+              "filename": "term_bank_46.json",
+              "compressionMethod": 8,
+              "compressedSize": 345914,
+              "uncompressedSize": 3653990,
+              "signature": 3189450436
+            },
+            {
+              "filename": "term_bank_47.json",
+              "compressionMethod": 8,
+              "compressedSize": 353697,
+              "uncompressedSize": 3481019,
+              "signature": 458598335
+            },
+            {
+              "filename": "term_bank_48.json",
+              "compressionMethod": 8,
+              "compressedSize": 350718,
+              "uncompressedSize": 3323625,
+              "signature": 458947805
+            }
+          ],
+          "sourceByteLengths": [
+            339568,
+            345914,
+            353697,
+            350718
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_49.json",
+              "compressionMethod": 8,
+              "compressedSize": 343674,
+              "uncompressedSize": 3291469,
+              "signature": 1365134473
+            },
+            {
+              "filename": "term_bank_50.json",
+              "compressionMethod": 8,
+              "compressedSize": 330347,
+              "uncompressedSize": 3231984,
+              "signature": 551614071
+            },
+            {
+              "filename": "term_bank_51.json",
+              "compressionMethod": 8,
+              "compressedSize": 337477,
+              "uncompressedSize": 3194840,
+              "signature": 3418542503
+            },
+            {
+              "filename": "term_bank_52.json",
+              "compressionMethod": 8,
+              "compressedSize": 366750,
+              "uncompressedSize": 3474021,
+              "signature": 1451819622
+            },
+            {
+              "filename": "term_bank_53.json",
+              "compressionMethod": 8,
+              "compressedSize": 291633,
+              "uncompressedSize": 2359082,
+              "signature": 3871091921
+            }
+          ],
+          "sourceByteLengths": [
+            343674,
+            330347,
+            337477,
+            366750,
+            291633
+          ],
+          "rowCount": 48299
+        }
+      ],
+      "workers": {
+        "zstd-term-content-compression-worker.js": {
+          "workers": 4,
+          "ready": 4,
+          "sent": 103,
+          "received": 210,
+          "sourceConsumed": 103,
+          "compressionRequests": 103,
+          "compressionResults": 103,
+          "indexActions": {},
+          "assets": [
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            }
+          ]
+        },
+        "term-bank-wasm-parser-worker.js": {
+          "workers": 3,
+          "ready": 3,
+          "sent": 15,
+          "received": 15,
+          "sourceConsumed": 0,
+          "compressionRequests": 0,
+          "compressionResults": 0,
+          "indexActions": {},
+          "assets": []
+        }
+      },
+      "fieldMetrics": null,
+      "ownerAccounting": {
+        "passed": true,
+        "ownerCalls": 12,
+        "fieldCalls": 12,
+        "nativeActivated": false
+      },
+      "owners": [
+        {
+          "ordinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "firstId": 1,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 0,
+          "fieldEnd": 1,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "firstId": 50001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 1,
+          "fieldEnd": 2,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "firstId": 90001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 2,
+          "fieldEnd": 3,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "firstId": 130001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 3,
+          "fieldEnd": 4,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "firstId": 170001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 4,
+          "fieldEnd": 5,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "firstId": 220001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 5,
+          "fieldEnd": 6,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "firstId": 270001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 6,
+          "fieldEnd": 7,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "firstId": 310001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 7,
+          "fieldEnd": 8,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "firstId": 360001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 8,
+          "fieldEnd": 9,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "firstId": 400001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 9,
+          "fieldEnd": 10,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "firstId": 440001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 10,
+          "fieldEnd": 11,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "firstId": 480001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 11,
+          "fieldEnd": 12,
+          "before": null,
+          "after": null
+        }
+      ],
+      "fieldWork": [
+        {
+          "ordinal": 0,
+          "ownerOrdinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 1,
+          "ownerOrdinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 2,
+          "ownerOrdinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 3,
+          "ownerOrdinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 4,
+          "ownerOrdinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 5,
+          "ownerOrdinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 6,
+          "ownerOrdinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 7,
+          "ownerOrdinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 8,
+          "ownerOrdinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 9,
+          "ownerOrdinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 10,
+          "ownerOrdinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 11,
+          "ownerOrdinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        }
+      ]
+    },
+    "B": {
+      "fieldRows": 528299,
+      "fieldCalls": 12,
+      "ownerCalls": 12,
+      "parser": {
+        "fastPathParserFusedAttempts": 12,
+        "fastPathParserFusedFallbacks": 0,
+        "fastPathParserSourceTransferredBytes": 15632849,
+        "fastPathParserSourceCrcScannedBytes": 0,
+        "fastPathParserSourceCrcReusedBytes": 0,
+        "fastPathParserSourceCrcReusedGlossaryCount": 0,
+        "fastPathParserSourceCompressedBytes": 15632849,
+        "fastPathParserSourceUncompressedBytes": 171617523,
+        "fastPathParserCompactContentMetadataGroups": 0,
+        "fastPathParserParallelWorkerCount": 3,
+        "fastPathParserParallelPipelineGroupsPerWorker": 4,
+        "fastPathParserParallelGroupCount": 12,
+        "fastPathParserParallelSkipReason": null
+      },
+      "groups": [
+        {
+          "banks": [
+            {
+              "filename": "term_bank_32.json",
+              "compressionMethod": 8,
+              "compressedSize": 195735,
+              "uncompressedSize": 2530607,
+              "signature": 3200937347
+            },
+            {
+              "filename": "term_bank_33.json",
+              "compressionMethod": 8,
+              "compressedSize": 337549,
+              "uncompressedSize": 3140246,
+              "signature": 4037553909
+            },
+            {
+              "filename": "term_bank_34.json",
+              "compressionMethod": 8,
+              "compressedSize": 284530,
+              "uncompressedSize": 3038748,
+              "signature": 2394675142
+            },
+            {
+              "filename": "term_bank_35.json",
+              "compressionMethod": 8,
+              "compressedSize": 185671,
+              "uncompressedSize": 2430169,
+              "signature": 3445960956
+            },
+            {
+              "filename": "term_bank_36.json",
+              "compressionMethod": 8,
+              "compressedSize": 303667,
+              "uncompressedSize": 3168136,
+              "signature": 3402545765
+            }
+          ],
+          "sourceByteLengths": [
+            195735,
+            337549,
+            284530,
+            185671,
+            303667
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_1.json",
+              "compressionMethod": 8,
+              "compressedSize": 232927,
+              "uncompressedSize": 3224558,
+              "signature": 404261040
+            },
+            {
+              "filename": "term_bank_2.json",
+              "compressionMethod": 8,
+              "compressedSize": 201497,
+              "uncompressedSize": 2724994,
+              "signature": 2951125037
+            },
+            {
+              "filename": "term_bank_3.json",
+              "compressionMethod": 8,
+              "compressedSize": 204746,
+              "uncompressedSize": 2716299,
+              "signature": 1513352965
+            },
+            {
+              "filename": "term_bank_4.json",
+              "compressionMethod": 8,
+              "compressedSize": 200041,
+              "uncompressedSize": 2672529,
+              "signature": 2955013720
+            },
+            {
+              "filename": "term_bank_5.json",
+              "compressionMethod": 8,
+              "compressedSize": 261354,
+              "uncompressedSize": 3204994,
+              "signature": 4038780609
+            }
+          ],
+          "sourceByteLengths": [
+            232927,
+            201497,
+            204746,
+            200041,
+            261354
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_18.json",
+              "compressionMethod": 8,
+              "compressedSize": 283040,
+              "uncompressedSize": 3408913,
+              "signature": 2537180659
+            },
+            {
+              "filename": "term_bank_19.json",
+              "compressionMethod": 8,
+              "compressedSize": 278583,
+              "uncompressedSize": 2944326,
+              "signature": 812214837
+            },
+            {
+              "filename": "term_bank_20.json",
+              "compressionMethod": 8,
+              "compressedSize": 286687,
+              "uncompressedSize": 2991158,
+              "signature": 419208196
+            },
+            {
+              "filename": "term_bank_21.json",
+              "compressionMethod": 8,
+              "compressedSize": 280559,
+              "uncompressedSize": 2912871,
+              "signature": 3099569980
+            },
+            {
+              "filename": "term_bank_22.json",
+              "compressionMethod": 8,
+              "compressedSize": 257038,
+              "uncompressedSize": 2881347,
+              "signature": 1543581021
+            }
+          ],
+          "sourceByteLengths": [
+            283040,
+            278583,
+            286687,
+            280559,
+            257038
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_10.json",
+              "compressionMethod": 8,
+              "compressedSize": 285278,
+              "uncompressedSize": 3347561,
+              "signature": 1082013653
+            },
+            {
+              "filename": "term_bank_11.json",
+              "compressionMethod": 8,
+              "compressedSize": 294349,
+              "uncompressedSize": 3314411,
+              "signature": 3219201253
+            },
+            {
+              "filename": "term_bank_12.json",
+              "compressionMethod": 8,
+              "compressedSize": 288324,
+              "uncompressedSize": 3353842,
+              "signature": 4107334087
+            },
+            {
+              "filename": "term_bank_13.json",
+              "compressionMethod": 8,
+              "compressedSize": 293356,
+              "uncompressedSize": 3241923,
+              "signature": 1907558867
+            }
+          ],
+          "sourceByteLengths": [
+            285278,
+            294349,
+            288324,
+            293356
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_6.json",
+              "compressionMethod": 8,
+              "compressedSize": 285667,
+              "uncompressedSize": 3327080,
+              "signature": 3822282561
+            },
+            {
+              "filename": "term_bank_7.json",
+              "compressionMethod": 8,
+              "compressedSize": 290985,
+              "uncompressedSize": 3283936,
+              "signature": 3662505012
+            },
+            {
+              "filename": "term_bank_8.json",
+              "compressionMethod": 8,
+              "compressedSize": 286576,
+              "uncompressedSize": 3271454,
+              "signature": 2237496174
+            },
+            {
+              "filename": "term_bank_9.json",
+              "compressionMethod": 8,
+              "compressedSize": 290973,
+              "uncompressedSize": 3358246,
+              "signature": 1409343149
+            }
+          ],
+          "sourceByteLengths": [
+            285667,
+            290985,
+            286576,
+            290973
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_14.json",
+              "compressionMethod": 8,
+              "compressedSize": 294296,
+              "uncompressedSize": 3311150,
+              "signature": 2073046293
+            },
+            {
+              "filename": "term_bank_15.json",
+              "compressionMethod": 8,
+              "compressedSize": 249827,
+              "uncompressedSize": 4312211,
+              "signature": 2422392884
+            },
+            {
+              "filename": "term_bank_16.json",
+              "compressionMethod": 8,
+              "compressedSize": 219292,
+              "uncompressedSize": 3257972,
+              "signature": 990240016
+            },
+            {
+              "filename": "term_bank_17.json",
+              "compressionMethod": 8,
+              "compressedSize": 259297,
+              "uncompressedSize": 3206874,
+              "signature": 1474525502
+            }
+          ],
+          "sourceByteLengths": [
+            294296,
+            249827,
+            219292,
+            259297
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_23.json",
+              "compressionMethod": 8,
+              "compressedSize": 310787,
+              "uncompressedSize": 3130796,
+              "signature": 597792161
+            },
+            {
+              "filename": "term_bank_24.json",
+              "compressionMethod": 8,
+              "compressedSize": 308587,
+              "uncompressedSize": 2924205,
+              "signature": 2002282153
+            },
+            {
+              "filename": "term_bank_25.json",
+              "compressionMethod": 8,
+              "compressedSize": 303992,
+              "uncompressedSize": 3148618,
+              "signature": 795742897
+            },
+            {
+              "filename": "term_bank_26.json",
+              "compressionMethod": 8,
+              "compressedSize": 333406,
+              "uncompressedSize": 3377060,
+              "signature": 4212135652
+            },
+            {
+              "filename": "term_bank_27.json",
+              "compressionMethod": 8,
+              "compressedSize": 327402,
+              "uncompressedSize": 3374974,
+              "signature": 4091031990
+            }
+          ],
+          "sourceByteLengths": [
+            310787,
+            308587,
+            303992,
+            333406,
+            327402
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_28.json",
+              "compressionMethod": 8,
+              "compressedSize": 319120,
+              "uncompressedSize": 3326587,
+              "signature": 3290278121
+            },
+            {
+              "filename": "term_bank_29.json",
+              "compressionMethod": 8,
+              "compressedSize": 293949,
+              "uncompressedSize": 3411990,
+              "signature": 1362719526
+            },
+            {
+              "filename": "term_bank_30.json",
+              "compressionMethod": 8,
+              "compressedSize": 303907,
+              "uncompressedSize": 3706971,
+              "signature": 4142274620
+            },
+            {
+              "filename": "term_bank_31.json",
+              "compressionMethod": 8,
+              "compressedSize": 268676,
+              "uncompressedSize": 3257358,
+              "signature": 3980454135
+            }
+          ],
+          "sourceByteLengths": [
+            319120,
+            293949,
+            303907,
+            268676
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_41.json",
+              "compressionMethod": 8,
+              "compressedSize": 327770,
+              "uncompressedSize": 3426893,
+              "signature": 1959284467
+            },
+            {
+              "filename": "term_bank_42.json",
+              "compressionMethod": 8,
+              "compressedSize": 343507,
+              "uncompressedSize": 3505865,
+              "signature": 1303868956
+            },
+            {
+              "filename": "term_bank_43.json",
+              "compressionMethod": 8,
+              "compressedSize": 328238,
+              "uncompressedSize": 3414653,
+              "signature": 3325356598
+            },
+            {
+              "filename": "term_bank_44.json",
+              "compressionMethod": 8,
+              "compressedSize": 340246,
+              "uncompressedSize": 3427785,
+              "signature": 2046005072
+            }
+          ],
+          "sourceByteLengths": [
+            327770,
+            343507,
+            328238,
+            340246
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_37.json",
+              "compressionMethod": 8,
+              "compressedSize": 336653,
+              "uncompressedSize": 3943952,
+              "signature": 3506376422
+            },
+            {
+              "filename": "term_bank_38.json",
+              "compressionMethod": 8,
+              "compressedSize": 325795,
+              "uncompressedSize": 3323025,
+              "signature": 3376386423
+            },
+            {
+              "filename": "term_bank_39.json",
+              "compressionMethod": 8,
+              "compressedSize": 341827,
+              "uncompressedSize": 3401356,
+              "signature": 2917308995
+            },
+            {
+              "filename": "term_bank_40.json",
+              "compressionMethod": 8,
+              "compressedSize": 327365,
+              "uncompressedSize": 3450837,
+              "signature": 3430702340
+            }
+          ],
+          "sourceByteLengths": [
+            336653,
+            325795,
+            341827,
+            327365
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_45.json",
+              "compressionMethod": 8,
+              "compressedSize": 339568,
+              "uncompressedSize": 3478013,
+              "signature": 2951714289
+            },
+            {
+              "filename": "term_bank_46.json",
+              "compressionMethod": 8,
+              "compressedSize": 345914,
+              "uncompressedSize": 3653990,
+              "signature": 3189450436
+            },
+            {
+              "filename": "term_bank_47.json",
+              "compressionMethod": 8,
+              "compressedSize": 353697,
+              "uncompressedSize": 3481019,
+              "signature": 458598335
+            },
+            {
+              "filename": "term_bank_48.json",
+              "compressionMethod": 8,
+              "compressedSize": 350718,
+              "uncompressedSize": 3323625,
+              "signature": 458947805
+            }
+          ],
+          "sourceByteLengths": [
+            339568,
+            345914,
+            353697,
+            350718
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_49.json",
+              "compressionMethod": 8,
+              "compressedSize": 343674,
+              "uncompressedSize": 3291469,
+              "signature": 1365134473
+            },
+            {
+              "filename": "term_bank_50.json",
+              "compressionMethod": 8,
+              "compressedSize": 330347,
+              "uncompressedSize": 3231984,
+              "signature": 551614071
+            },
+            {
+              "filename": "term_bank_51.json",
+              "compressionMethod": 8,
+              "compressedSize": 337477,
+              "uncompressedSize": 3194840,
+              "signature": 3418542503
+            },
+            {
+              "filename": "term_bank_52.json",
+              "compressionMethod": 8,
+              "compressedSize": 366750,
+              "uncompressedSize": 3474021,
+              "signature": 1451819622
+            },
+            {
+              "filename": "term_bank_53.json",
+              "compressionMethod": 8,
+              "compressedSize": 291633,
+              "uncompressedSize": 2359082,
+              "signature": 3871091921
+            }
+          ],
+          "sourceByteLengths": [
+            343674,
+            330347,
+            337477,
+            366750,
+            291633
+          ],
+          "rowCount": 48299
+        }
+      ],
+      "workers": {
+        "zstd-term-content-compression-worker.js": {
+          "workers": 4,
+          "ready": 4,
+          "sent": 103,
+          "received": 210,
+          "sourceConsumed": 103,
+          "compressionRequests": 103,
+          "compressionResults": 103,
+          "indexActions": {},
+          "assets": [
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            }
+          ]
+        },
+        "term-bank-wasm-parser-worker.js": {
+          "workers": 3,
+          "ready": 3,
+          "sent": 15,
+          "received": 15,
+          "sourceConsumed": 0,
+          "compressionRequests": 0,
+          "compressionResults": 0,
+          "indexActions": {},
+          "assets": []
+        }
+      },
+      "fieldMetrics": {
+        "calls": 12,
+        "javascriptCalls": 0,
+        "native": {
+          "nativeCalls": 12,
+          "nativeRows": 528299,
+          "nativeAttempts": 12,
+          "wholeNativeCalls": 12,
+          "wholeNativeRows": 528299,
+          "wholeNativeAttempts": 12,
+          "inputCopiedBytes": 8618752,
+          "outputCopiedBytes": 4240056,
+          "tableBytesRequested": 6291456,
+          "memoryGrowthBytes": 2293760,
+          "maximumLinearMemoryBytes": 2424832,
+          "maximumScratchBytes": 824288,
+          "declines": {},
+          "wholeAdmissionDeclines": {},
+          "wholeCopiedDeclines": {}
+        }
+      },
+      "ownerAccounting": {
+        "passed": true,
+        "ownerCalls": 12,
+        "fieldCalls": 12,
+        "nativeActivated": true,
+        "wholeNativeCalls": 12,
+        "wholeNativeRows": 528299,
+        "ordinaryNativeCalls": 0,
+        "ordinaryNativeRows": 0,
+        "readinessJavascriptCalls": 0,
+        "committedWholeAttemptDeclines": 0,
+        "inputCopiedBytes": 8618752,
+        "outputCopiedBytes": 4240056,
+        "tableBytesRequested": 6291456
+      },
+      "owners": [
+        {
+          "ordinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "firstId": 1,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 0,
+          "fieldEnd": 1,
+          "before": {
+            "calls": 0,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 0,
+              "nativeRows": 0,
+              "nativeAttempts": 0,
+              "wholeNativeCalls": 0,
+              "wholeNativeRows": 0,
+              "wholeNativeAttempts": 0,
+              "inputCopiedBytes": 0,
+              "outputCopiedBytes": 0,
+              "tableBytesRequested": 0,
+              "memoryGrowthBytes": 0,
+              "maximumLinearMemoryBytes": 131072,
+              "maximumScratchBytes": 0,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 1,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 1,
+              "nativeRows": 50000,
+              "nativeAttempts": 1,
+              "wholeNativeCalls": 1,
+              "wholeNativeRows": 50000,
+              "wholeNativeAttempts": 1,
+              "inputCopiedBytes": 819412,
+              "outputCopiedBytes": 401384,
+              "tableBytesRequested": 524288,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "firstId": 50001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 1,
+          "fieldEnd": 2,
+          "before": {
+            "calls": 1,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 1,
+              "nativeRows": 50000,
+              "nativeAttempts": 1,
+              "wholeNativeCalls": 1,
+              "wholeNativeRows": 50000,
+              "wholeNativeAttempts": 1,
+              "inputCopiedBytes": 819412,
+              "outputCopiedBytes": 401384,
+              "tableBytesRequested": 524288,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 2,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 2,
+              "nativeRows": 90000,
+              "nativeAttempts": 2,
+              "wholeNativeCalls": 2,
+              "wholeNativeRows": 90000,
+              "wholeNativeAttempts": 2,
+              "inputCopiedBytes": 1533684,
+              "outputCopiedBytes": 722956,
+              "tableBytesRequested": 1048576,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "firstId": 90001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 2,
+          "fieldEnd": 3,
+          "before": {
+            "calls": 2,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 2,
+              "nativeRows": 90000,
+              "nativeAttempts": 2,
+              "wholeNativeCalls": 2,
+              "wholeNativeRows": 90000,
+              "wholeNativeAttempts": 2,
+              "inputCopiedBytes": 1533684,
+              "outputCopiedBytes": 722956,
+              "tableBytesRequested": 1048576,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 3,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 3,
+              "nativeRows": 130000,
+              "nativeAttempts": 3,
+              "wholeNativeCalls": 3,
+              "wholeNativeRows": 130000,
+              "wholeNativeAttempts": 3,
+              "inputCopiedBytes": 2242736,
+              "outputCopiedBytes": 1044700,
+              "tableBytesRequested": 1572864,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "firstId": 130001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 3,
+          "fieldEnd": 4,
+          "before": {
+            "calls": 3,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 3,
+              "nativeRows": 130000,
+              "nativeAttempts": 3,
+              "wholeNativeCalls": 3,
+              "wholeNativeRows": 130000,
+              "wholeNativeAttempts": 3,
+              "inputCopiedBytes": 2242736,
+              "outputCopiedBytes": 1044700,
+              "tableBytesRequested": 1572864,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 4,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 4,
+              "nativeRows": 170000,
+              "nativeAttempts": 4,
+              "wholeNativeCalls": 4,
+              "wholeNativeRows": 170000,
+              "wholeNativeAttempts": 4,
+              "inputCopiedBytes": 2909476,
+              "outputCopiedBytes": 1366624,
+              "tableBytesRequested": 2097152,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "firstId": 170001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 4,
+          "fieldEnd": 5,
+          "before": {
+            "calls": 4,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 4,
+              "nativeRows": 170000,
+              "nativeAttempts": 4,
+              "wholeNativeCalls": 4,
+              "wholeNativeRows": 170000,
+              "wholeNativeAttempts": 4,
+              "inputCopiedBytes": 2909476,
+              "outputCopiedBytes": 1366624,
+              "tableBytesRequested": 2097152,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 5,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 5,
+              "nativeRows": 220000,
+              "nativeAttempts": 5,
+              "wholeNativeCalls": 5,
+              "wholeNativeRows": 220000,
+              "wholeNativeAttempts": 5,
+              "inputCopiedBytes": 3725600,
+              "outputCopiedBytes": 1767620,
+              "tableBytesRequested": 2621440,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "firstId": 220001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 5,
+          "fieldEnd": 6,
+          "before": {
+            "calls": 5,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 5,
+              "nativeRows": 220000,
+              "nativeAttempts": 5,
+              "wholeNativeCalls": 5,
+              "wholeNativeRows": 220000,
+              "wholeNativeAttempts": 5,
+              "inputCopiedBytes": 3725600,
+              "outputCopiedBytes": 1767620,
+              "tableBytesRequested": 2621440,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 6,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 6,
+              "nativeRows": 270000,
+              "nativeAttempts": 6,
+              "wholeNativeCalls": 6,
+              "wholeNativeRows": 270000,
+              "wholeNativeAttempts": 6,
+              "inputCopiedBytes": 4533672,
+              "outputCopiedBytes": 2168724,
+              "tableBytesRequested": 3145728,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "firstId": 270001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 6,
+          "fieldEnd": 7,
+          "before": {
+            "calls": 6,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 6,
+              "nativeRows": 270000,
+              "nativeAttempts": 6,
+              "wholeNativeCalls": 6,
+              "wholeNativeRows": 270000,
+              "wholeNativeAttempts": 6,
+              "inputCopiedBytes": 4533672,
+              "outputCopiedBytes": 2168724,
+              "tableBytesRequested": 3145728,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 7,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 7,
+              "nativeRows": 310000,
+              "nativeAttempts": 7,
+              "wholeNativeCalls": 7,
+              "wholeNativeRows": 310000,
+              "wholeNativeAttempts": 7,
+              "inputCopiedBytes": 5144924,
+              "outputCopiedBytes": 2489740,
+              "tableBytesRequested": 3670016,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "firstId": 310001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 7,
+          "fieldEnd": 8,
+          "before": {
+            "calls": 7,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 7,
+              "nativeRows": 310000,
+              "nativeAttempts": 7,
+              "wholeNativeCalls": 7,
+              "wholeNativeRows": 310000,
+              "wholeNativeAttempts": 7,
+              "inputCopiedBytes": 5144924,
+              "outputCopiedBytes": 2489740,
+              "tableBytesRequested": 3670016,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 8,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 8,
+              "nativeRows": 360000,
+              "nativeAttempts": 8,
+              "wholeNativeCalls": 8,
+              "wholeNativeRows": 360000,
+              "wholeNativeAttempts": 8,
+              "inputCopiedBytes": 5927796,
+              "outputCopiedBytes": 2890432,
+              "tableBytesRequested": 4194304,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "firstId": 360001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 8,
+          "fieldEnd": 9,
+          "before": {
+            "calls": 8,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 8,
+              "nativeRows": 360000,
+              "nativeAttempts": 8,
+              "wholeNativeCalls": 8,
+              "wholeNativeRows": 360000,
+              "wholeNativeAttempts": 8,
+              "inputCopiedBytes": 5927796,
+              "outputCopiedBytes": 2890432,
+              "tableBytesRequested": 4194304,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 9,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 9,
+              "nativeRows": 400000,
+              "nativeAttempts": 9,
+              "wholeNativeCalls": 9,
+              "wholeNativeRows": 400000,
+              "wholeNativeAttempts": 9,
+              "inputCopiedBytes": 6557084,
+              "outputCopiedBytes": 3211248,
+              "tableBytesRequested": 4718592,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "firstId": 400001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 9,
+          "fieldEnd": 10,
+          "before": {
+            "calls": 9,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 9,
+              "nativeRows": 400000,
+              "nativeAttempts": 9,
+              "wholeNativeCalls": 9,
+              "wholeNativeRows": 400000,
+              "wholeNativeAttempts": 9,
+              "inputCopiedBytes": 6557084,
+              "outputCopiedBytes": 3211248,
+              "tableBytesRequested": 4718592,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 10,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 10,
+              "nativeRows": 440000,
+              "nativeAttempts": 10,
+              "wholeNativeCalls": 10,
+              "wholeNativeRows": 440000,
+              "wholeNativeAttempts": 10,
+              "inputCopiedBytes": 7178392,
+              "outputCopiedBytes": 3532068,
+              "tableBytesRequested": 5242880,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "firstId": 440001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 10,
+          "fieldEnd": 11,
+          "before": {
+            "calls": 10,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 10,
+              "nativeRows": 440000,
+              "nativeAttempts": 10,
+              "wholeNativeCalls": 10,
+              "wholeNativeRows": 440000,
+              "wholeNativeAttempts": 10,
+              "inputCopiedBytes": 7178392,
+              "outputCopiedBytes": 3532068,
+              "tableBytesRequested": 5242880,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 11,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 11,
+              "nativeRows": 480000,
+              "nativeAttempts": 11,
+              "wholeNativeCalls": 11,
+              "wholeNativeRows": 480000,
+              "wholeNativeAttempts": 11,
+              "inputCopiedBytes": 7811616,
+              "outputCopiedBytes": 3852860,
+              "tableBytesRequested": 5767168,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        },
+        {
+          "ordinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "firstId": 480001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 11,
+          "fieldEnd": 12,
+          "before": {
+            "calls": 11,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 11,
+              "nativeRows": 480000,
+              "nativeAttempts": 11,
+              "wholeNativeCalls": 11,
+              "wholeNativeRows": 480000,
+              "wholeNativeAttempts": 11,
+              "inputCopiedBytes": 7811616,
+              "outputCopiedBytes": 3852860,
+              "tableBytesRequested": 5767168,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 12,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 12,
+              "nativeRows": 528299,
+              "nativeAttempts": 12,
+              "wholeNativeCalls": 12,
+              "wholeNativeRows": 528299,
+              "wholeNativeAttempts": 12,
+              "inputCopiedBytes": 8618752,
+              "outputCopiedBytes": 4240056,
+              "tableBytesRequested": 6291456,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          }
+        }
+      ],
+      "fieldWork": [
+        {
+          "ordinal": 0,
+          "ownerOrdinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "before": {
+            "calls": 0,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 1,
+              "nativeRows": 50000,
+              "nativeAttempts": 1,
+              "wholeNativeCalls": 1,
+              "wholeNativeRows": 50000,
+              "wholeNativeAttempts": 1,
+              "inputCopiedBytes": 819412,
+              "outputCopiedBytes": 401384,
+              "tableBytesRequested": 524288,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 1,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 1,
+              "nativeRows": 50000,
+              "nativeAttempts": 1,
+              "wholeNativeCalls": 1,
+              "wholeNativeRows": 50000,
+              "wholeNativeAttempts": 1,
+              "inputCopiedBytes": 819412,
+              "outputCopiedBytes": 401384,
+              "tableBytesRequested": 524288,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "0000000000000000"
+          }
+        },
+        {
+          "ordinal": 1,
+          "ownerOrdinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "before": {
+            "calls": 1,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 2,
+              "nativeRows": 90000,
+              "nativeAttempts": 2,
+              "wholeNativeCalls": 2,
+              "wholeNativeRows": 90000,
+              "wholeNativeAttempts": 2,
+              "inputCopiedBytes": 1533684,
+              "outputCopiedBytes": 722956,
+              "tableBytesRequested": 1048576,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 2,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 2,
+              "nativeRows": 90000,
+              "nativeAttempts": 2,
+              "wholeNativeCalls": 2,
+              "wholeNativeRows": 90000,
+              "wholeNativeAttempts": 2,
+              "inputCopiedBytes": 1533684,
+              "outputCopiedBytes": 722956,
+              "tableBytesRequested": 1048576,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "000000000038bd40"
+          }
+        },
+        {
+          "ordinal": 2,
+          "ownerOrdinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "before": {
+            "calls": 2,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 3,
+              "nativeRows": 130000,
+              "nativeAttempts": 3,
+              "wholeNativeCalls": 3,
+              "wholeNativeRows": 130000,
+              "wholeNativeAttempts": 3,
+              "inputCopiedBytes": 2242736,
+              "outputCopiedBytes": 1044700,
+              "tableBytesRequested": 1572864,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 3,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 3,
+              "nativeRows": 130000,
+              "nativeAttempts": 3,
+              "wholeNativeCalls": 3,
+              "wholeNativeRows": 130000,
+              "wholeNativeAttempts": 3,
+              "inputCopiedBytes": 2242736,
+              "outputCopiedBytes": 1044700,
+              "tableBytesRequested": 1572864,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "000000008065f540"
+          }
+        },
+        {
+          "ordinal": 3,
+          "ownerOrdinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "before": {
+            "calls": 3,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 4,
+              "nativeRows": 170000,
+              "nativeAttempts": 4,
+              "wholeNativeCalls": 4,
+              "wholeNativeRows": 170000,
+              "wholeNativeAttempts": 4,
+              "inputCopiedBytes": 2909476,
+              "outputCopiedBytes": 1366624,
+              "tableBytesRequested": 2097152,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 4,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 4,
+              "nativeRows": 170000,
+              "nativeAttempts": 4,
+              "wholeNativeCalls": 4,
+              "wholeNativeRows": 170000,
+              "wholeNativeAttempts": 4,
+              "inputCopiedBytes": 2909476,
+              "outputCopiedBytes": 1366624,
+              "tableBytesRequested": 2097152,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "000000000010c340"
+          }
+        },
+        {
+          "ordinal": 4,
+          "ownerOrdinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "before": {
+            "calls": 4,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 5,
+              "nativeRows": 220000,
+              "nativeAttempts": 5,
+              "wholeNativeCalls": 5,
+              "wholeNativeRows": 220000,
+              "wholeNativeAttempts": 5,
+              "inputCopiedBytes": 3725600,
+              "outputCopiedBytes": 1767620,
+              "tableBytesRequested": 2621440,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 5,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 5,
+              "nativeRows": 220000,
+              "nativeAttempts": 5,
+              "wholeNativeCalls": 5,
+              "wholeNativeRows": 220000,
+              "wholeNativeAttempts": 5,
+              "inputCopiedBytes": 3725600,
+              "outputCopiedBytes": 1767620,
+              "tableBytesRequested": 2621440,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "00000000000ed040"
+          }
+        },
+        {
+          "ordinal": 5,
+          "ownerOrdinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "before": {
+            "calls": 5,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 6,
+              "nativeRows": 270000,
+              "nativeAttempts": 6,
+              "wholeNativeCalls": 6,
+              "wholeNativeRows": 270000,
+              "wholeNativeAttempts": 6,
+              "inputCopiedBytes": 4533672,
+              "outputCopiedBytes": 2168724,
+              "tableBytesRequested": 3145728,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 6,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 6,
+              "nativeRows": 270000,
+              "nativeAttempts": 6,
+              "wholeNativeCalls": 6,
+              "wholeNativeRows": 270000,
+              "wholeNativeAttempts": 6,
+              "inputCopiedBytes": 4533672,
+              "outputCopiedBytes": 2168724,
+              "tableBytesRequested": 3145728,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "0000000040c5f340"
+          }
+        },
+        {
+          "ordinal": 6,
+          "ownerOrdinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "before": {
+            "calls": 6,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 7,
+              "nativeRows": 310000,
+              "nativeAttempts": 7,
+              "wholeNativeCalls": 7,
+              "wholeNativeRows": 310000,
+              "wholeNativeAttempts": 7,
+              "inputCopiedBytes": 5144924,
+              "outputCopiedBytes": 2489740,
+              "tableBytesRequested": 3670016,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 7,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 7,
+              "nativeRows": 310000,
+              "nativeAttempts": 7,
+              "wholeNativeCalls": 7,
+              "wholeNativeRows": 310000,
+              "wholeNativeAttempts": 7,
+              "inputCopiedBytes": 5144924,
+              "outputCopiedBytes": 2489740,
+              "tableBytesRequested": 3670016,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "0000000000909f40"
+          }
+        },
+        {
+          "ordinal": 7,
+          "ownerOrdinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "before": {
+            "calls": 7,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 8,
+              "nativeRows": 360000,
+              "nativeAttempts": 8,
+              "wholeNativeCalls": 8,
+              "wholeNativeRows": 360000,
+              "wholeNativeAttempts": 8,
+              "inputCopiedBytes": 5927796,
+              "outputCopiedBytes": 2890432,
+              "tableBytesRequested": 4194304,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 8,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 8,
+              "nativeRows": 360000,
+              "nativeAttempts": 8,
+              "wholeNativeCalls": 8,
+              "wholeNativeRows": 360000,
+              "wholeNativeAttempts": 8,
+              "inputCopiedBytes": 5927796,
+              "outputCopiedBytes": 2890432,
+              "tableBytesRequested": 4194304,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "00000000803df040"
+          }
+        },
+        {
+          "ordinal": 8,
+          "ownerOrdinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "before": {
+            "calls": 8,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 9,
+              "nativeRows": 400000,
+              "nativeAttempts": 9,
+              "wholeNativeCalls": 9,
+              "wholeNativeRows": 400000,
+              "wholeNativeAttempts": 9,
+              "inputCopiedBytes": 6557084,
+              "outputCopiedBytes": 3211248,
+              "tableBytesRequested": 4718592,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 9,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 9,
+              "nativeRows": 400000,
+              "nativeAttempts": 9,
+              "wholeNativeCalls": 9,
+              "wholeNativeRows": 400000,
+              "wholeNativeAttempts": 9,
+              "inputCopiedBytes": 6557084,
+              "outputCopiedBytes": 3211248,
+              "tableBytesRequested": 4718592,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "0000000000eaf540"
+          }
+        },
+        {
+          "ordinal": 9,
+          "ownerOrdinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "before": {
+            "calls": 9,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 10,
+              "nativeRows": 440000,
+              "nativeAttempts": 10,
+              "wholeNativeCalls": 10,
+              "wholeNativeRows": 440000,
+              "wholeNativeAttempts": 10,
+              "inputCopiedBytes": 7178392,
+              "outputCopiedBytes": 3532068,
+              "tableBytesRequested": 5242880,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 10,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 10,
+              "nativeRows": 440000,
+              "nativeAttempts": 10,
+              "wholeNativeCalls": 10,
+              "wholeNativeRows": 440000,
+              "wholeNativeAttempts": 10,
+              "inputCopiedBytes": 7178392,
+              "outputCopiedBytes": 3532068,
+              "tableBytesRequested": 5242880,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "0000000000e9eb40"
+          }
+        },
+        {
+          "ordinal": 10,
+          "ownerOrdinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "before": {
+            "calls": 10,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 11,
+              "nativeRows": 480000,
+              "nativeAttempts": 11,
+              "wholeNativeCalls": 11,
+              "wholeNativeRows": 480000,
+              "wholeNativeAttempts": 11,
+              "inputCopiedBytes": 7811616,
+              "outputCopiedBytes": 3852860,
+              "tableBytesRequested": 5767168,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 11,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 11,
+              "nativeRows": 480000,
+              "nativeAttempts": 11,
+              "wholeNativeCalls": 11,
+              "wholeNativeRows": 480000,
+              "wholeNativeAttempts": 11,
+              "inputCopiedBytes": 7811616,
+              "outputCopiedBytes": 3852860,
+              "tableBytesRequested": 5767168,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "000000000018d040"
+          }
+        },
+        {
+          "ordinal": 11,
+          "ownerOrdinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "before": {
+            "calls": 11,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 12,
+              "nativeRows": 528299,
+              "nativeAttempts": 12,
+              "wholeNativeCalls": 12,
+              "wholeNativeRows": 528299,
+              "wholeNativeAttempts": 12,
+              "inputCopiedBytes": 8618752,
+              "outputCopiedBytes": 4240056,
+              "tableBytesRequested": 6291456,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "after": {
+            "calls": 12,
+            "javascriptCalls": 0,
+            "native": {
+              "nativeCalls": 12,
+              "nativeRows": 528299,
+              "nativeAttempts": 12,
+              "wholeNativeCalls": 12,
+              "wholeNativeRows": 528299,
+              "wholeNativeAttempts": 12,
+              "inputCopiedBytes": 8618752,
+              "outputCopiedBytes": 4240056,
+              "tableBytesRequested": 6291456,
+              "memoryGrowthBytes": 2293760,
+              "maximumLinearMemoryBytes": 2424832,
+              "maximumScratchBytes": 824288,
+              "declines": {},
+              "wholeAdmissionDeclines": {},
+              "wholeCopiedDeclines": {}
+            }
+          },
+          "wholeAttempt": {
+            "copied": true,
+            "succeeded": true,
+            "contentOffsetBaseBits": "000000008066e440"
+          }
+        }
+      ]
+    },
+    "C": {
+      "fieldRows": 528299,
+      "fieldCalls": 12,
+      "ownerCalls": 12,
+      "parser": {
+        "fastPathParserFusedAttempts": 12,
+        "fastPathParserFusedFallbacks": 0,
+        "fastPathParserSourceTransferredBytes": 15632849,
+        "fastPathParserSourceCrcScannedBytes": 0,
+        "fastPathParserSourceCrcReusedBytes": 0,
+        "fastPathParserSourceCrcReusedGlossaryCount": 0,
+        "fastPathParserSourceCompressedBytes": 15632849,
+        "fastPathParserSourceUncompressedBytes": 171617523,
+        "fastPathParserCompactContentMetadataGroups": 0,
+        "fastPathParserParallelWorkerCount": 3,
+        "fastPathParserParallelPipelineGroupsPerWorker": 4,
+        "fastPathParserParallelGroupCount": 12,
+        "fastPathParserParallelSkipReason": null
+      },
+      "groups": [
+        {
+          "banks": [
+            {
+              "filename": "term_bank_32.json",
+              "compressionMethod": 8,
+              "compressedSize": 195735,
+              "uncompressedSize": 2530607,
+              "signature": 3200937347
+            },
+            {
+              "filename": "term_bank_33.json",
+              "compressionMethod": 8,
+              "compressedSize": 337549,
+              "uncompressedSize": 3140246,
+              "signature": 4037553909
+            },
+            {
+              "filename": "term_bank_34.json",
+              "compressionMethod": 8,
+              "compressedSize": 284530,
+              "uncompressedSize": 3038748,
+              "signature": 2394675142
+            },
+            {
+              "filename": "term_bank_35.json",
+              "compressionMethod": 8,
+              "compressedSize": 185671,
+              "uncompressedSize": 2430169,
+              "signature": 3445960956
+            },
+            {
+              "filename": "term_bank_36.json",
+              "compressionMethod": 8,
+              "compressedSize": 303667,
+              "uncompressedSize": 3168136,
+              "signature": 3402545765
+            }
+          ],
+          "sourceByteLengths": [
+            195735,
+            337549,
+            284530,
+            185671,
+            303667
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_1.json",
+              "compressionMethod": 8,
+              "compressedSize": 232927,
+              "uncompressedSize": 3224558,
+              "signature": 404261040
+            },
+            {
+              "filename": "term_bank_2.json",
+              "compressionMethod": 8,
+              "compressedSize": 201497,
+              "uncompressedSize": 2724994,
+              "signature": 2951125037
+            },
+            {
+              "filename": "term_bank_3.json",
+              "compressionMethod": 8,
+              "compressedSize": 204746,
+              "uncompressedSize": 2716299,
+              "signature": 1513352965
+            },
+            {
+              "filename": "term_bank_4.json",
+              "compressionMethod": 8,
+              "compressedSize": 200041,
+              "uncompressedSize": 2672529,
+              "signature": 2955013720
+            },
+            {
+              "filename": "term_bank_5.json",
+              "compressionMethod": 8,
+              "compressedSize": 261354,
+              "uncompressedSize": 3204994,
+              "signature": 4038780609
+            }
+          ],
+          "sourceByteLengths": [
+            232927,
+            201497,
+            204746,
+            200041,
+            261354
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_18.json",
+              "compressionMethod": 8,
+              "compressedSize": 283040,
+              "uncompressedSize": 3408913,
+              "signature": 2537180659
+            },
+            {
+              "filename": "term_bank_19.json",
+              "compressionMethod": 8,
+              "compressedSize": 278583,
+              "uncompressedSize": 2944326,
+              "signature": 812214837
+            },
+            {
+              "filename": "term_bank_20.json",
+              "compressionMethod": 8,
+              "compressedSize": 286687,
+              "uncompressedSize": 2991158,
+              "signature": 419208196
+            },
+            {
+              "filename": "term_bank_21.json",
+              "compressionMethod": 8,
+              "compressedSize": 280559,
+              "uncompressedSize": 2912871,
+              "signature": 3099569980
+            },
+            {
+              "filename": "term_bank_22.json",
+              "compressionMethod": 8,
+              "compressedSize": 257038,
+              "uncompressedSize": 2881347,
+              "signature": 1543581021
+            }
+          ],
+          "sourceByteLengths": [
+            283040,
+            278583,
+            286687,
+            280559,
+            257038
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_10.json",
+              "compressionMethod": 8,
+              "compressedSize": 285278,
+              "uncompressedSize": 3347561,
+              "signature": 1082013653
+            },
+            {
+              "filename": "term_bank_11.json",
+              "compressionMethod": 8,
+              "compressedSize": 294349,
+              "uncompressedSize": 3314411,
+              "signature": 3219201253
+            },
+            {
+              "filename": "term_bank_12.json",
+              "compressionMethod": 8,
+              "compressedSize": 288324,
+              "uncompressedSize": 3353842,
+              "signature": 4107334087
+            },
+            {
+              "filename": "term_bank_13.json",
+              "compressionMethod": 8,
+              "compressedSize": 293356,
+              "uncompressedSize": 3241923,
+              "signature": 1907558867
+            }
+          ],
+          "sourceByteLengths": [
+            285278,
+            294349,
+            288324,
+            293356
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_6.json",
+              "compressionMethod": 8,
+              "compressedSize": 285667,
+              "uncompressedSize": 3327080,
+              "signature": 3822282561
+            },
+            {
+              "filename": "term_bank_7.json",
+              "compressionMethod": 8,
+              "compressedSize": 290985,
+              "uncompressedSize": 3283936,
+              "signature": 3662505012
+            },
+            {
+              "filename": "term_bank_8.json",
+              "compressionMethod": 8,
+              "compressedSize": 286576,
+              "uncompressedSize": 3271454,
+              "signature": 2237496174
+            },
+            {
+              "filename": "term_bank_9.json",
+              "compressionMethod": 8,
+              "compressedSize": 290973,
+              "uncompressedSize": 3358246,
+              "signature": 1409343149
+            }
+          ],
+          "sourceByteLengths": [
+            285667,
+            290985,
+            286576,
+            290973
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_14.json",
+              "compressionMethod": 8,
+              "compressedSize": 294296,
+              "uncompressedSize": 3311150,
+              "signature": 2073046293
+            },
+            {
+              "filename": "term_bank_15.json",
+              "compressionMethod": 8,
+              "compressedSize": 249827,
+              "uncompressedSize": 4312211,
+              "signature": 2422392884
+            },
+            {
+              "filename": "term_bank_16.json",
+              "compressionMethod": 8,
+              "compressedSize": 219292,
+              "uncompressedSize": 3257972,
+              "signature": 990240016
+            },
+            {
+              "filename": "term_bank_17.json",
+              "compressionMethod": 8,
+              "compressedSize": 259297,
+              "uncompressedSize": 3206874,
+              "signature": 1474525502
+            }
+          ],
+          "sourceByteLengths": [
+            294296,
+            249827,
+            219292,
+            259297
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_23.json",
+              "compressionMethod": 8,
+              "compressedSize": 310787,
+              "uncompressedSize": 3130796,
+              "signature": 597792161
+            },
+            {
+              "filename": "term_bank_24.json",
+              "compressionMethod": 8,
+              "compressedSize": 308587,
+              "uncompressedSize": 2924205,
+              "signature": 2002282153
+            },
+            {
+              "filename": "term_bank_25.json",
+              "compressionMethod": 8,
+              "compressedSize": 303992,
+              "uncompressedSize": 3148618,
+              "signature": 795742897
+            },
+            {
+              "filename": "term_bank_26.json",
+              "compressionMethod": 8,
+              "compressedSize": 333406,
+              "uncompressedSize": 3377060,
+              "signature": 4212135652
+            },
+            {
+              "filename": "term_bank_27.json",
+              "compressionMethod": 8,
+              "compressedSize": 327402,
+              "uncompressedSize": 3374974,
+              "signature": 4091031990
+            }
+          ],
+          "sourceByteLengths": [
+            310787,
+            308587,
+            303992,
+            333406,
+            327402
+          ],
+          "rowCount": 50000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_28.json",
+              "compressionMethod": 8,
+              "compressedSize": 319120,
+              "uncompressedSize": 3326587,
+              "signature": 3290278121
+            },
+            {
+              "filename": "term_bank_29.json",
+              "compressionMethod": 8,
+              "compressedSize": 293949,
+              "uncompressedSize": 3411990,
+              "signature": 1362719526
+            },
+            {
+              "filename": "term_bank_30.json",
+              "compressionMethod": 8,
+              "compressedSize": 303907,
+              "uncompressedSize": 3706971,
+              "signature": 4142274620
+            },
+            {
+              "filename": "term_bank_31.json",
+              "compressionMethod": 8,
+              "compressedSize": 268676,
+              "uncompressedSize": 3257358,
+              "signature": 3980454135
+            }
+          ],
+          "sourceByteLengths": [
+            319120,
+            293949,
+            303907,
+            268676
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_41.json",
+              "compressionMethod": 8,
+              "compressedSize": 327770,
+              "uncompressedSize": 3426893,
+              "signature": 1959284467
+            },
+            {
+              "filename": "term_bank_42.json",
+              "compressionMethod": 8,
+              "compressedSize": 343507,
+              "uncompressedSize": 3505865,
+              "signature": 1303868956
+            },
+            {
+              "filename": "term_bank_43.json",
+              "compressionMethod": 8,
+              "compressedSize": 328238,
+              "uncompressedSize": 3414653,
+              "signature": 3325356598
+            },
+            {
+              "filename": "term_bank_44.json",
+              "compressionMethod": 8,
+              "compressedSize": 340246,
+              "uncompressedSize": 3427785,
+              "signature": 2046005072
+            }
+          ],
+          "sourceByteLengths": [
+            327770,
+            343507,
+            328238,
+            340246
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_37.json",
+              "compressionMethod": 8,
+              "compressedSize": 336653,
+              "uncompressedSize": 3943952,
+              "signature": 3506376422
+            },
+            {
+              "filename": "term_bank_38.json",
+              "compressionMethod": 8,
+              "compressedSize": 325795,
+              "uncompressedSize": 3323025,
+              "signature": 3376386423
+            },
+            {
+              "filename": "term_bank_39.json",
+              "compressionMethod": 8,
+              "compressedSize": 341827,
+              "uncompressedSize": 3401356,
+              "signature": 2917308995
+            },
+            {
+              "filename": "term_bank_40.json",
+              "compressionMethod": 8,
+              "compressedSize": 327365,
+              "uncompressedSize": 3450837,
+              "signature": 3430702340
+            }
+          ],
+          "sourceByteLengths": [
+            336653,
+            325795,
+            341827,
+            327365
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_45.json",
+              "compressionMethod": 8,
+              "compressedSize": 339568,
+              "uncompressedSize": 3478013,
+              "signature": 2951714289
+            },
+            {
+              "filename": "term_bank_46.json",
+              "compressionMethod": 8,
+              "compressedSize": 345914,
+              "uncompressedSize": 3653990,
+              "signature": 3189450436
+            },
+            {
+              "filename": "term_bank_47.json",
+              "compressionMethod": 8,
+              "compressedSize": 353697,
+              "uncompressedSize": 3481019,
+              "signature": 458598335
+            },
+            {
+              "filename": "term_bank_48.json",
+              "compressionMethod": 8,
+              "compressedSize": 350718,
+              "uncompressedSize": 3323625,
+              "signature": 458947805
+            }
+          ],
+          "sourceByteLengths": [
+            339568,
+            345914,
+            353697,
+            350718
+          ],
+          "rowCount": 40000
+        },
+        {
+          "banks": [
+            {
+              "filename": "term_bank_49.json",
+              "compressionMethod": 8,
+              "compressedSize": 343674,
+              "uncompressedSize": 3291469,
+              "signature": 1365134473
+            },
+            {
+              "filename": "term_bank_50.json",
+              "compressionMethod": 8,
+              "compressedSize": 330347,
+              "uncompressedSize": 3231984,
+              "signature": 551614071
+            },
+            {
+              "filename": "term_bank_51.json",
+              "compressionMethod": 8,
+              "compressedSize": 337477,
+              "uncompressedSize": 3194840,
+              "signature": 3418542503
+            },
+            {
+              "filename": "term_bank_52.json",
+              "compressionMethod": 8,
+              "compressedSize": 366750,
+              "uncompressedSize": 3474021,
+              "signature": 1451819622
+            },
+            {
+              "filename": "term_bank_53.json",
+              "compressionMethod": 8,
+              "compressedSize": 291633,
+              "uncompressedSize": 2359082,
+              "signature": 3871091921
+            }
+          ],
+          "sourceByteLengths": [
+            343674,
+            330347,
+            337477,
+            366750,
+            291633
+          ],
+          "rowCount": 48299
+        }
+      ],
+      "workers": {
+        "zstd-term-content-compression-worker.js": {
+          "workers": 4,
+          "ready": 4,
+          "sent": 103,
+          "received": 210,
+          "sourceConsumed": 103,
+          "compressionRequests": 103,
+          "compressionResults": 103,
+          "indexActions": {},
+          "assets": [
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631
+            }
+          ]
+        },
+        "term-bank-wasm-parser-worker.js": {
+          "workers": 3,
+          "ready": 3,
+          "sent": 15,
+          "received": 15,
+          "sourceConsumed": 0,
+          "compressionRequests": 0,
+          "compressionResults": 0,
+          "indexActions": {},
+          "assets": []
+        }
+      },
+      "fieldMetrics": null,
+      "ownerAccounting": {
+        "passed": true,
+        "ownerCalls": 12,
+        "fieldCalls": 12,
+        "nativeActivated": false
+      },
+      "owners": [
+        {
+          "ordinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "firstId": 1,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 0,
+          "fieldEnd": 1,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "firstId": 50001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 1,
+          "fieldEnd": 2,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "firstId": 90001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 2,
+          "fieldEnd": 3,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "firstId": 130001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 3,
+          "fieldEnd": 4,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "firstId": 170001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 4,
+          "fieldEnd": 5,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "firstId": 220001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 5,
+          "fieldEnd": 6,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "firstId": 270001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 6,
+          "fieldEnd": 7,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "firstId": 310001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 7,
+          "fieldEnd": 8,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "firstId": 360001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 8,
+          "fieldEnd": 9,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "firstId": 400001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 9,
+          "fieldEnd": 10,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "firstId": 440001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 10,
+          "fieldEnd": 11,
+          "before": null,
+          "after": null
+        },
+        {
+          "ordinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "firstId": 480001,
+          "contentDictName": "raw-block-v2:jmdict",
+          "fieldStart": 11,
+          "fieldEnd": 12,
+          "before": null,
+          "after": null
+        }
+      ],
+      "fieldWork": [
+        {
+          "ordinal": 0,
+          "ownerOrdinal": 0,
+          "rowCount": 50000,
+          "uniqueCount": 34951,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 1,
+          "ownerOrdinal": 1,
+          "rowCount": 40000,
+          "uniqueCount": 32856,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 2,
+          "ownerOrdinal": 2,
+          "rowCount": 40000,
+          "uniqueCount": 32421,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 3,
+          "ownerOrdinal": 3,
+          "rowCount": 40000,
+          "uniqueCount": 28895,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 4,
+          "ownerOrdinal": 4,
+          "rowCount": 50000,
+          "uniqueCount": 34677,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 5,
+          "ownerOrdinal": 5,
+          "rowCount": 50000,
+          "uniqueCount": 34006,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 6,
+          "ownerOrdinal": 6,
+          "rowCount": 40000,
+          "uniqueCount": 24271,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 7,
+          "ownerOrdinal": 7,
+          "rowCount": 50000,
+          "uniqueCount": 31906,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 8,
+          "ownerOrdinal": 8,
+          "rowCount": 40000,
+          "uniqueCount": 25774,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 9,
+          "ownerOrdinal": 9,
+          "rowCount": 40000,
+          "uniqueCount": 25109,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 10,
+          "ownerOrdinal": 10,
+          "rowCount": 40000,
+          "uniqueCount": 26102,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        },
+        {
+          "ordinal": 11,
+          "ownerOrdinal": 11,
+          "rowCount": 48299,
+          "uniqueCount": 35062,
+          "before": null,
+          "after": null,
+          "wholeAttempt": null
+        }
+      ]
+    }
+  },
+  "expectedOutputDigest": "92ce2fa7d8347c50217615eb0d8ed2ab307a242b984e95995cff6e7905cd74cf",
+  "mandatoryCheckNames": [
+    "source",
+    "fixture",
+    "harness",
+    "workflow",
+    "preparation",
+    "output",
+    "work",
+    "ownerAccounting",
+    "activation",
+    "endpoint",
+    "cleanup",
+    "timing",
+    "affinity"
+  ],
+  "preparationReceipt": {
+    "relativePath": "screen-kit/references/preparation.json",
+    "sha256": "f6ec3995fed659b2d89f501125331cd644d41ba65e491a54592fc1a459c64d8e"
+  },
+  "workflowBinding": {
+    "repository": "ManabiIO/manabitan",
+    "ref": "refs/heads/test/native-whole-import-cpu-screen-20261128-1c413",
+    "path": ".github/workflows/native-whole-import-cpu-screen-1c413.yml",
+    "sha256": "ecfa8c30ba79de2f3c16afbd4cd14b47bb06ac87cf5f060c5b7b32ea82d7a8b7",
+    "jobs": {
+      "R1": "screen_r1",
+      "R2": "screen_r2"
+    }
+  },
+  "runtimePolicy": {
+    "status": "sealed",
+    "compileCacheDisabled": true,
+    "childExecArgv": [],
+    "removeEnvironmentOptions": [
+      "NODE_OPTIONS",
+      "NODE_COMPILE_CACHE",
+      "NODE_V8_COVERAGE"
+    ],
+    "hardwareConcurrencyExposed": 4,
+    "deviceMemoryExposed": 8,
+    "affinity": "inherit the complete recorded allowed CPU set; identical for all children in one replication",
+    "minimumAllowedLogicalCpus": 4,
+    "separatelyProvisionedReplications": true,
+    "forcedGarbageCollection": false,
+    "perObservationTimeoutMs": 300000
+  },
+  "replications": [
+    {
+      "id": "R1",
+      "warmups": [
+        "ABC",
+        "CBA"
+      ],
+      "blocks": [
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA",
+        "CAB",
+        "CBA",
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA",
+        "CAB",
+        "CBA"
+      ]
+    },
+    {
+      "id": "R2",
+      "warmups": [
+        "CBA",
+        "ABC"
+      ],
+      "blocks": [
+        "ABC",
+        "BAC",
+        "ACB",
+        "CAB",
+        "BCA",
+        "CBA",
+        "ABC",
+        "BAC",
+        "ACB",
+        "CAB",
+        "BCA",
+        "CBA"
+      ]
+    }
+  ],
+  "secondReplicationOrderRule": "reverse the complete measured arm sequence from R1, then regroup into triples; warmup cycles are separately prescribed",
+  "nominationGate": {
+    "minimumMedianPairedCpuSavingMs": 20,
+    "minimumMedianPairedCpuReductionPercent": 1,
+    "minimumFasterPairsAgainstEachControl": 10,
+    "pairsPerControlPerReplication": 12,
+    "maximumAbsoluteControlPairedMedianPercent": 3,
+    "maximumAbsoluteControlSummedCpuRatioPercent": 3,
+    "absoluteControlMillisecondGate": null,
+    "bothIndependentReplicationsMustPassSeparately": true,
+    "allSourceOutputWorkActivationLifecycleChecksMandatory": true,
+    "wholeBrowserQualificationStillRequired": true
+  },
+  "activationGate": {
+    "B": {
+      "wholeNativeCalls": 12,
+      "wholeNativeRows": 528299,
+      "wholeNativeAttempts": 12,
+      "nativeCalls": 12,
+      "nativeRows": 528299,
+      "nativeAttempts": 12,
+      "javascriptCalls": 0,
+      "allOrdinaryAndWholeDeclineCounts": 0,
+      "optionalFieldWasmFetches": 1
+    },
+    "AandC": {
+      "recordFieldSessionMetrics": null,
+      "optionalFieldWasmFetches": 0
+    },
+    "initialization": "production lifecycle only; no preload, readiness wait, forced yield or replacement import"
+  },
+  "endpointRule": "No optional startup rebind; full natural B whole coverage proves its sole initializer completed; failed or unactivated original attempts retain raw intervals with endpointProven=false and fail the entire screen",
+  "sourceSupplement": {
+    "candidateParent": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "candidateChange": "one fusion-test file, JSDoc only; runtime blobs unchanged",
+    "numericPolicyChanged": false
+  },
+  "storagePolicy": {
+    "status": "sealed",
+    "observationsPerReplication": 42,
+    "finalSinkBytesPerObservation": 43315677,
+    "fieldBufferBytesPerObservation": 4239960,
+    "totalRetainedRawBytes": 1997336754,
+    "freeReserveBytes": 4294967296,
+    "fixedOverheadAllowanceBytes": 2147483648,
+    "minimumFreeBytesBeforeReplication": 8589934592,
+    "minimumFreeBytesBeforeEachObservation": 4294967296,
+    "retention": "All original successful and failed disk sinks and field buffers; no deletion",
+    "referenceRun": "46149981540",
+    "referenceAttempt": 1,
+    "referenceCorpusArtifactSha256": "c3923ee6d8a1ddfc06a136ee33f2da18ef64420b9f95498212e3148964218559"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "scope": "local source preparation only; no publication/import/timing authorized or performed by this operation",
+  "disabledSource": "/tmp/manabitan-whole-import-screen-draft-20261128-1c413",
+  "projectionReceipt": "projection-run-final.json",
+  "projectorSha256": "89bf88e3cdd1305a89011f5ae28f21418f26253cf933c2cca9737f8a1876ac96",
+  "planBeforeFinalStatusSha256": "62390422ba41dabbebe6a5c8401a6e56325884b2ebc8510bb7245bed52cb56b8",
+  "planAfterFinalStatusSha256": "1faa5618f7f5b3f537d41c9fa0f4c78870b7a8418685baf2639e01b09d598d4d",
+  "onlyChangesAfterProjection": {
+    "status": [
+      "source-only-unsealed",
+      "sealed"
+    ],
+    "acquisitionAuthorized": [
+      false,
+      true
+    ]
+  },
+  "workflowFileSha256": "ecfa8c30ba79de2f3c16afbd4cd14b47bb06ac87cf5f060c5b7b32ea82d7a8b7",
+  "preparationSha256": "f6ec3995fed659b2d89f501125331cd644d41ba65e491a54592fc1a459c64d8e",
+  "numericPolicyUnchanged": true,
+  "productSourcesUnchanged": true,
+  "schedulesUnchanged": true,
+  "workAndOutputReferencesUnchanged": true,
+  "outerProducerCommitTreeAndPlanAuditRequired": true
+}

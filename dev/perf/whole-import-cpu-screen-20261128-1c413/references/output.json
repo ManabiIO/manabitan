@@ -1,0 +1,314 @@
+{
+  "semantic": {
+    "title": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "counts": {
+      "total": {
+        "terms": 528299,
+        "kanji": 0,
+        "kanjiMeta": 0,
+        "termMeta": 0,
+        "tagMeta": 327,
+        "media": 0
+      },
+      "counts": [
+        {
+          "terms": 528299,
+          "kanji": 0,
+          "kanjiMeta": 0,
+          "termMeta": 0,
+          "tagMeta": 327,
+          "media": 0
+        }
+      ]
+    },
+    "contentState": {
+      "epoch": 0,
+      "logicalHighWater": 19566680,
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "summaryCounts": {
+      "terms": {
+        "total": 528299
+      },
+      "termMeta": {
+        "total": 0
+      },
+      "kanji": {
+        "total": 0
+      },
+      "kanjiMeta": {
+        "total": 0
+      },
+      "tagMeta": {
+        "total": 327
+      },
+      "media": {
+        "total": 0
+      }
+    },
+    "sample": {
+      "sampledRecordCount": 12,
+      "outOfBoundsRecordCount": 0,
+      "sampledRecords": [
+        {
+          "id": 1,
+          "expression": "ヽ",
+          "reading": "ヽ",
+          "entryContentOffset": 0,
+          "entryContentLength": 579,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 2,
+          "expression": "ヾ",
+          "reading": "ヾ",
+          "entryContentOffset": 20,
+          "entryContentLength": 224,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 3,
+          "expression": "ゝ",
+          "reading": "ゝ",
+          "entryContentOffset": 40,
+          "entryContentLength": 217,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 4,
+          "expression": "ゞ",
+          "reading": "ゞ",
+          "entryContentOffset": 60,
+          "entryContentLength": 224,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 5,
+          "expression": "〃",
+          "reading": "おなじ",
+          "entryContentOffset": 80,
+          "entryContentLength": 191,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 6,
+          "expression": "〃",
+          "reading": "おなじ",
+          "entryContentOffset": 100,
+          "entryContentLength": 531,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 7,
+          "expression": "〃",
+          "reading": "おなじく",
+          "entryContentOffset": 80,
+          "entryContentLength": 191,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 8,
+          "expression": "〃",
+          "reading": "おなじく",
+          "entryContentOffset": 100,
+          "entryContentLength": 531,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 9,
+          "expression": "仝",
+          "reading": "どう",
+          "entryContentOffset": 120,
+          "entryContentLength": 565,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 10,
+          "expression": "々",
+          "reading": "のま",
+          "entryContentOffset": 140,
+          "entryContentLength": 581,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 11,
+          "expression": "々",
+          "reading": "のま",
+          "entryContentOffset": 160,
+          "entryContentLength": 34,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        },
+        {
+          "id": 12,
+          "expression": "ノマ",
+          "reading": "ノマ",
+          "entryContentOffset": 140,
+          "entryContentLength": 581,
+          "entryContentDictName": "raw-block-v2:jmdict",
+          "outOfBounds": false
+        }
+      ]
+    },
+    "queries": [
+      "ヽ",
+      "ヾ",
+      "ゝ",
+      "ゞ",
+      "〃",
+      "仝",
+      "々",
+      "ノマ"
+    ],
+    "lookupRows": 13,
+    "lookupSha256": "a03532764aa7c26340204a6819ab1266366869553bc10c014504b025c02d9499"
+  },
+  "flags": {
+    "prefixWildcardsSupported": true,
+    "yomitanVersion": "0.0.0.0",
+    "skipImageMetadata": true,
+    "skipMediaImport": false,
+    "zipUseWebWorkers": false
+  },
+  "fields": [
+    {
+      "ordinal": 0,
+      "rowCount": 50000,
+      "contentOffsetBase": 0,
+      "contentOffsetBaseBits": "0000000000000000",
+      "bytes": 401376,
+      "sha256": "6d65bcc025e23a9f81a53e98652fdefb578b486a44d3c8c0797c19c3f45d1a3e"
+    },
+    {
+      "ordinal": 1,
+      "rowCount": 40000,
+      "contentOffsetBase": 7480,
+      "contentOffsetBaseBits": "000000000038bd40",
+      "bytes": 321564,
+      "sha256": "d2cdcc2645131d62f42592374f543d601993ecb6dbb9225c46bfea68fc29ac0b"
+    },
+    {
+      "ordinal": 2,
+      "rowCount": 40000,
+      "contentOffsetBase": 87640,
+      "contentOffsetBaseBits": "000000008065f540",
+      "bytes": 321736,
+      "sha256": "b17f1fa45004ec9beb5853667a16dfbeff4894088d1847b3d55f1b4fb55b7c32"
+    },
+    {
+      "ordinal": 3,
+      "rowCount": 40000,
+      "contentOffsetBase": 9760,
+      "contentOffsetBaseBits": "000000000010c340",
+      "bytes": 321916,
+      "sha256": "dcbfcaa9c4aa1873c2527c13a48e0323b5fcb6274c52d6380d47716f01752961"
+    },
+    {
+      "ordinal": 4,
+      "rowCount": 50000,
+      "contentOffsetBase": 16440,
+      "contentOffsetBaseBits": "00000000000ed040",
+      "bytes": 400988,
+      "sha256": "7e213207925cd52ad15bac661b29e8c08221e58cbc63ded0e9b1f8e33099c5a5"
+    },
+    {
+      "ordinal": 5,
+      "rowCount": 50000,
+      "contentOffsetBase": 80980,
+      "contentOffsetBaseBits": "0000000040c5f340",
+      "bytes": 401096,
+      "sha256": "9bfbefbd4e23132cfd015585b8ab8a8d21049cc219c5cc835150d90ffba4085b"
+    },
+    {
+      "ordinal": 6,
+      "rowCount": 40000,
+      "contentOffsetBase": 2020,
+      "contentOffsetBaseBits": "0000000000909f40",
+      "bytes": 321008,
+      "sha256": "fb885f10fe1c3e02966964cfda80516f6cac1374345f406134a14eb62f38c5c7"
+    },
+    {
+      "ordinal": 7,
+      "rowCount": 50000,
+      "contentOffsetBase": 66520,
+      "contentOffsetBaseBits": "00000000803df040",
+      "bytes": 400684,
+      "sha256": "0093a079a8629962ba1f5038d0b3527f97666b862f70ca6024865d7fe0ec5d4f"
+    },
+    {
+      "ordinal": 8,
+      "rowCount": 40000,
+      "contentOffsetBase": 89760,
+      "contentOffsetBaseBits": "0000000000eaf540",
+      "bytes": 320808,
+      "sha256": "ab844be7e07f6d308f1cc108d75797674909b5ee1ac43d38b5b7666493bc8b8e"
+    },
+    {
+      "ordinal": 9,
+      "rowCount": 40000,
+      "contentOffsetBase": 57160,
+      "contentOffsetBaseBits": "0000000000e9eb40",
+      "bytes": 320812,
+      "sha256": "ffffdb0dafb611a1a953d09f3c37b8912cf53fe3f754b2737be95c56881cb0a2"
+    },
+    {
+      "ordinal": 10,
+      "rowCount": 40000,
+      "contentOffsetBase": 16480,
+      "contentOffsetBaseBits": "000000000018d040",
+      "bytes": 320784,
+      "sha256": "1ddc358e5fd8af6caaeaaee2256ccdbffcb9b1c2b9e5baf05e233babeca12c34"
+    },
+    {
+      "ordinal": 11,
+      "rowCount": 48299,
+      "contentOffsetBase": 41780,
+      "contentOffsetBaseBits": "000000008066e440",
+      "bytes": 387188,
+      "sha256": "d2f2b04835164b65d84b6bb3badd49d664f6849bd5b18aae88fc57df6a40a1c8"
+    }
+  ],
+  "termFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 19566680,
+      "normalizedSha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963",
+      "normalization": null
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "bytes": 45,
+      "normalizedSha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "normalization": {
+        "offset": 8,
+        "bytes": 16,
+        "format": "MBTRD16X"
+      }
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "bytes": 23748952,
+      "normalizedSha256": "397dae5e5f86853b47a90384739e42754e7ed84869a2d2142d05220f3600114f",
+      "normalization": {
+        "offset": 24,
+        "bytes": 16,
+        "format": "MBTIDX11"
+      }
+    }
+  ]
+}

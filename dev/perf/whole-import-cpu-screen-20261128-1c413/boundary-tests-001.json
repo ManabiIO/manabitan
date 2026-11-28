@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "sourceBindings": {
+    "test-boundary.mjs": {
+      "bytes": 16275,
+      "sha256": "b6eac9a5e4f042507f3a4168f42c50dcf7127002a33002986fc0e9add7da3a98"
+    },
+    "screen.mjs": {
+      "bytes": 18134,
+      "sha256": "a0522a70ce7bdb8e41612883e3a5ea36e701174eea8a1a73191ea8c9e953d597"
+    },
+    "plan.json": {
+      "bytes": 3904,
+      "sha256": "a541592756aabfbb7685b623452cf0cf13c4143b19b9833061c28735b43605d7"
+    },
+    "corpus/run.mjs": {
+      "bytes": 20613,
+      "sha256": "9a8d10c6e935ac374f1513f39a500ce33c3458d40c0d8d2e4385565b4f233651"
+    },
+    "corpus/cpu-boundary.mjs": {
+      "bytes": 2452,
+      "sha256": "8781603f8dbbab84a406795174605d45c844394abfe7bfc87f6f70a50bd3a703"
+    },
+    "corpus/receipt-adapter.mjs": {
+      "bytes": 24956,
+      "sha256": "a306ae91e27a51362bb558affbe0a1e3a9757ed304ff3b0b2ac6ada6a0512d3a"
+    },
+    "corpus/owner-observer.mjs": {
+      "bytes": 15410,
+      "sha256": "6ebb47d2edf767be58ad25d341b72dd57afc5968a7cfbfd8fef06400ede925b8"
+    },
+    "corpus/node-runtime.mjs": {
+      "bytes": 8273,
+      "sha256": "6e1a4c57d3d881c1d9f6f570c56962b4473f7b5cd65ba0a3dff653709fb86fdd"
+    },
+    "corpus/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+    },
+    "corpus/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+    },
+    "corpus/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0"
+    },
+    "corpus/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c"
+    },
+    "corpus/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4"
+    }
+  },
+  "node": "v24.22.3",
+  "exitCode": 0,
+  "stdout": "{\n  \"schema\": 1,\n  \"scope\": \"synthetic boundary and receipt checks only\",\n  \"productModulesImported\": 0,\n  \"dictionaryImports\": 0,\n  \"childProcesses\": 0,\n  \"actualCpuOrWallClockReads\": 0,\n  \"observationsAcquired\": 0,\n  \"checks\": [\n    {\n      \"name\": \"one pair surrounds first product callback, fixed probes and all joined retirement callbacks\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"end cannot precede an unresolved worker retirement\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"untimed mode performs the same callbacks with zero clock reads\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"failed original work still retires and preserves its one raw interval\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"retirement failure is retained instead of turning into a successful interval\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"evidence guard rejects work inside the interval and rejects repeated endpoints\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"qualifying B requires all whole calls, rows and attempts, not fields-only native totals\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"readiness fallback, ordinary/whole decline, absent/repeated fetch, or unretired work fails the endpoint\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"A and dormant C share the stock no-session/no-optional-fetch endpoint\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"observer retains original owning bytes, -0 primitive and exact original Promise; all digest/scalar work is deferred\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"deferred evidence rejects a resized/detached retained field instead of hashing an empty replacement\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"asset binding has no synthetic fetched-byte digest and rejects source/length changes\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"work receipts retain bank grouping, transferred lengths, rows and direct counters while excluding worker request IDs\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"missing parser counters, missing result, row mismatch or worker failure fail exact work receipts\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"output identity includes exact base bits and complete record/index/content digests\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"disabled plan blocks the concrete preflight before workspace, host, source or child work\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"actual driver is import-inert and its default untimed/direct measured invocations reject the unsealed plan before paths or clocks\",\n      \"passed\": true\n    }\n  ],\n  \"passed\": true,\n  \"cases\": 17\n}\n",
+  "stderr": "",
+  "executionScope": "pure synthetic boundary and receipt checks only; no product imports, dictionary imports, child workload or actual CPU/wall reads"
+}

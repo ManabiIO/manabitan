@@ -1,0 +1,241 @@
+# Locally prepared sealed-source candidate; publication and execution remain root-owned.
+name: JMdict whole import CPU screen 20261128
+
+on:
+  push:
+    branches: [test/native-whole-import-cpu-screen-20261128-1c413]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-whole-import-cpu-screen-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_DISABLE_COMPILE_CACHE: '1'
+  PYTHONDONTWRITEBYTECODE: '1'
+
+# Separate jobs provision independent runners. No matrix fail-fast or needs edge
+# can cancel the second replication after a numeric failure in the first.
+jobs:
+  screen_r1:
+    if: ${{ github.run_attempt == 1 }} # Original attempt only; all sealed source and receipt guards still apply.
+    name: Replication R1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare the exact Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Validate the sealed source and stage the common immutable harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          mkdir -p study-results
+          node dev/perf/whole-import-cpu-screen-20261128-1c413/workflow-prepare.mjs stage \
+            dev/perf/whole-import-cpu-screen-20261128-1c413/plan.json \
+            "$GITHUB_WORKSPACE/screen-workspace" R1 \
+            2>&1 | tee study-results/stage.log
+      - name: Check out stock A
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          path: screen-workspace/A
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out fused B
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 01eb863506012136e417167f445b2708d9136293
+          path: screen-workspace/B
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out asset-matched dormant C
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 0ac6b01e6055fd1f3494252dea482910da3e6c77
+          path: screen-workspace/C
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Prepare independent locked dependency and generated runtime trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          for screen_arm in A B C
+          do
+            screen_root="$GITHUB_WORKSPACE/screen-workspace/$screen_arm"
+            [[ ! -e "$screen_root/node_modules" && ! -L "$screen_root/node_modules" ]]
+            npm --prefix "$screen_root" ci 2>&1 | tee "study-results/$screen_arm-npm-ci.log"
+            [[ -d "$screen_root/node_modules" && ! -L "$screen_root/node_modules" ]]
+            npm --prefix "$screen_root" run build:libs 2>&1 | tee "study-results/$screen_arm-libs.log"
+            npm --prefix "$screen_root" run license-report:html 2>&1 | tee "study-results/$screen_arm-license.log"
+          done
+      - name: Verify pure arithmetic, boundary and receipt logic on pinned Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/test-screen.mjs > study-results/numeric-tests.json
+          node screen-workspace/screen-kit/test-boundary.mjs > study-results/boundary-tests.json
+      - name: Fetch the one pinned JMdict archive without importing it
+        shell: bash
+        working-directory: screen-workspace/A
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node dev/perf/prepare-dictionaries.js jmdict \
+            2>&1 | tee "$GITHUB_WORKSPACE/study-results/fixture.log"
+          mkdir "$GITHUB_WORKSPACE/screen-workspace/fixtures"
+          cp builds/e2e-dictionary-cache/JMdict.zip "$GITHUB_WORKSPACE/screen-workspace/fixtures/JMdict.zip"
+      - name: Read-only prepared-source and full retained-sink capacity preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/workflow-prepare.mjs preflight \
+            screen-workspace/frozen-plan.json "$GITHUB_WORKSPACE/screen-workspace" R1 \
+            2>&1 | tee study-results/preflight.log
+      - name: Run the original fixed six warmups and 36 measured entries
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/screen.mjs \
+            screen-workspace/frozen-plan.json "$GITHUB_WORKSPACE/screen-workspace" R1 \
+            "$GITHUB_WORKSPACE/study-results/R1" \
+            2>&1 | tee study-results/orchestration.log
+      - name: Retain every original raw sink, field buffer, receipt, source and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-whole-import-cpu-R1-${{ github.sha }}
+          path: |
+            study-results
+            screen-workspace/preparation
+            screen-workspace/screen-kit
+            screen-workspace/frozen-plan.json
+            .github/workflows/native-whole-import-cpu-screen-1c413.yml
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
+
+  screen_r2:
+    if: ${{ github.run_attempt == 1 }} # Original attempt only; all sealed source and receipt guards still apply.
+    name: Replication R2
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare the exact Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Validate the sealed source and stage the common immutable harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          mkdir -p study-results
+          node dev/perf/whole-import-cpu-screen-20261128-1c413/workflow-prepare.mjs stage \
+            dev/perf/whole-import-cpu-screen-20261128-1c413/plan.json \
+            "$GITHUB_WORKSPACE/screen-workspace" R2 \
+            2>&1 | tee study-results/stage.log
+      - name: Check out stock A
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          path: screen-workspace/A
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out fused B
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 01eb863506012136e417167f445b2708d9136293
+          path: screen-workspace/B
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out asset-matched dormant C
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 0ac6b01e6055fd1f3494252dea482910da3e6c77
+          path: screen-workspace/C
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Prepare independent locked dependency and generated runtime trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          for screen_arm in A B C
+          do
+            screen_root="$GITHUB_WORKSPACE/screen-workspace/$screen_arm"
+            [[ ! -e "$screen_root/node_modules" && ! -L "$screen_root/node_modules" ]]
+            npm --prefix "$screen_root" ci 2>&1 | tee "study-results/$screen_arm-npm-ci.log"
+            [[ -d "$screen_root/node_modules" && ! -L "$screen_root/node_modules" ]]
+            npm --prefix "$screen_root" run build:libs 2>&1 | tee "study-results/$screen_arm-libs.log"
+            npm --prefix "$screen_root" run license-report:html 2>&1 | tee "study-results/$screen_arm-license.log"
+          done
+      - name: Verify pure arithmetic, boundary and receipt logic on pinned Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/test-screen.mjs > study-results/numeric-tests.json
+          node screen-workspace/screen-kit/test-boundary.mjs > study-results/boundary-tests.json
+      - name: Fetch the one pinned JMdict archive without importing it
+        shell: bash
+        working-directory: screen-workspace/A
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node dev/perf/prepare-dictionaries.js jmdict \
+            2>&1 | tee "$GITHUB_WORKSPACE/study-results/fixture.log"
+          mkdir "$GITHUB_WORKSPACE/screen-workspace/fixtures"
+          cp builds/e2e-dictionary-cache/JMdict.zip "$GITHUB_WORKSPACE/screen-workspace/fixtures/JMdict.zip"
+      - name: Read-only prepared-source and full retained-sink capacity preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/workflow-prepare.mjs preflight \
+            screen-workspace/frozen-plan.json "$GITHUB_WORKSPACE/screen-workspace" R2 \
+            2>&1 | tee study-results/preflight.log
+      - name: Run the original fixed six warmups and 36 measured entries
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_COMPILE_CACHE NODE_V8_COVERAGE
+          node screen-workspace/screen-kit/screen.mjs \
+            screen-workspace/frozen-plan.json "$GITHUB_WORKSPACE/screen-workspace" R2 \
+            "$GITHUB_WORKSPACE/study-results/R2" \
+            2>&1 | tee study-results/orchestration.log
+      - name: Retain every original raw sink, field buffer, receipt, source and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-whole-import-cpu-R2-${{ github.sha }}
+          path: |
+            study-results
+            screen-workspace/preparation
+            screen-workspace/screen-kit
+            screen-workspace/frozen-plan.json
+            .github/workflows/native-whole-import-cpu-screen-1c413.yml
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
+

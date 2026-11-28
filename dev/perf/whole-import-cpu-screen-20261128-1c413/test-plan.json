@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "name": "Disabled synthetic-test fixture; never an acquisition plan",
+  "status": "source-only-unsealed",
+  "acquisitionAuthorized": false,
+  "numericPolicyStatus": "selected-prospectively-before-observations",
+  "boundary": "first-product-module-evaluation-through-import-fixed-semantic-probes-and-retirement",
+  "nodeVersion": "v22.22.0",
+  "fixture": {
+    "dictionary": "jmdict",
+    "relativePath": "fixtures/JMdict.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "bytes": 15645766,
+    "rows": 528299,
+    "parserWorkers": 3,
+    "parserGroups": 12
+  },
+  "arms": {
+    "A": {
+      "relativeRoot": "A",
+      "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "preparedRuntimeDigest": null
+    },
+    "B": {
+      "relativeRoot": "B",
+      "commit": "01eb863506012136e417167f445b2708d9136293",
+      "tree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+      "preparedRuntimeDigest": null
+    },
+    "C": {
+      "relativeRoot": "C",
+      "commit": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+      "tree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+      "preparedRuntimeDigest": null
+    }
+  },
+  "commonDriver": {
+    "provenanceCommit": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "provenancePath": "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run.mjs",
+    "provenanceBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+    "relativeEntry": "screen-kit/corpus/run.mjs",
+    "relativeReceiptAdapter": "screen-kit/corpus/receipt-adapter.mjs",
+    "files": null,
+    "modeArgumentStatus": "implemented-disabled-pending-review-and-sealing",
+    "untimedMode": "untimed",
+    "measuredMode": "cpu-screen",
+    "currentCorrectnessSource": {
+      "driverBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "driverSha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "copiedSourceManifest": "copy-provenance.json",
+      "sourceTreeModified": false
+    }
+  },
+  "expectedWork": null,
+  "expectedOutputDigest": null,
+  "mandatoryCheckNames": null,
+  "preparationReceipt": null,
+  "workflowBinding": null,
+  "runtimePolicy": {
+    "status": "proposal-not-sealed",
+    "compileCacheDisabled": true,
+    "childExecArgv": [],
+    "removeEnvironmentOptions": [
+      "NODE_OPTIONS",
+      "NODE_COMPILE_CACHE",
+      "NODE_V8_COVERAGE"
+    ],
+    "hardwareConcurrencyExposed": 4,
+    "deviceMemoryExposed": 8,
+    "affinity": "inherit the complete recorded allowed CPU set; identical for all children in one replication",
+    "minimumAllowedLogicalCpus": 4,
+    "separatelyProvisionedReplications": true,
+    "forcedGarbageCollection": false,
+    "perObservationTimeoutMs": 300000
+  },
+  "replications": [
+    {
+      "id": "R1",
+      "warmups": [
+        "ABC",
+        "CBA"
+      ],
+      "blocks": [
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA",
+        "CAB",
+        "CBA",
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA",
+        "CAB",
+        "CBA"
+      ]
+    },
+    {
+      "id": "R2",
+      "warmups": [
+        "CBA",
+        "ABC"
+      ],
+      "blocks": [
+        "ABC",
+        "BAC",
+        "ACB",
+        "CAB",
+        "BCA",
+        "CBA",
+        "ABC",
+        "BAC",
+        "ACB",
+        "CAB",
+        "BCA",
+        "CBA"
+      ]
+    }
+  ],
+  "secondReplicationOrderRule": "reverse the complete measured arm sequence from R1, then regroup into triples; warmup cycles are separately prescribed",
+  "nominationGate": {
+    "minimumMedianPairedCpuSavingMs": 20,
+    "minimumMedianPairedCpuReductionPercent": 1,
+    "minimumFasterPairsAgainstEachControl": 10,
+    "pairsPerControlPerReplication": 12,
+    "maximumAbsoluteControlPairedMedianPercent": 3,
+    "maximumAbsoluteControlSummedCpuRatioPercent": 3,
+    "absoluteControlMillisecondGate": null,
+    "bothIndependentReplicationsMustPassSeparately": true,
+    "allSourceOutputWorkActivationLifecycleChecksMandatory": true,
+    "wholeBrowserQualificationStillRequired": true
+  },
+  "activationGate": {
+    "B": {
+      "wholeNativeCalls": 12,
+      "wholeNativeRows": 528299,
+      "wholeNativeAttempts": 12,
+      "nativeCalls": 12,
+      "nativeRows": 528299,
+      "nativeAttempts": 12,
+      "javascriptCalls": 0,
+      "allOrdinaryAndWholeDeclineCounts": 0,
+      "optionalFieldWasmFetches": 1
+    },
+    "AandC": {
+      "recordFieldSessionMetrics": null,
+      "optionalFieldWasmFetches": 0
+    },
+    "initialization": "production lifecycle only; no preload, readiness wait, forced yield or replacement import"
+  },
+  "endpointRule": "No optional startup rebind; full natural B whole coverage proves its sole initializer completed; failed or unactivated original attempts retain raw intervals with endpointProven=false and fail the entire screen",
+  "sourceSupplement": {
+    "candidateParent": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "candidateChange": "one fusion-test file, JSDoc only; runtime blobs unchanged",
+    "numericPolicyChanged": false
+  },
+  "storagePolicy": {
+    "status": "proposal-not-sealed",
+    "observationsPerReplication": 42,
+    "finalSinkBytesPerObservation": 43315677,
+    "fieldBufferBytesPerObservation": 4239960,
+    "totalRetainedRawBytes": 1997336754,
+    "freeReserveBytes": 4294967296,
+    "fixedOverheadAllowanceBytes": 2147483648,
+    "minimumFreeBytesBeforeReplication": 8589934592,
+    "minimumFreeBytesBeforeEachObservation": 4294967296,
+    "retention": "All original successful and failed disk sinks and field buffers; no deletion",
+    "referenceRun": "46149981540",
+    "referenceAttempt": 1,
+    "referenceCorpusArtifactSha256": "c3923ee6d8a1ddfc06a136ee33f2da18ef64420b9f95498212e3148964218559"
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "scope": "Offline immutable reference projection; no new imports, clocks or observations",
+  "originalRun": "46149981540",
+  "attempt": 1,
+  "observedProducer": "a9debd150d65c8d11884dadcdf162e7898dea309",
+  "originalActionsArtifact": {
+    "id": "15265171488",
+    "sha256": "c3923ee6d8a1ddfc06a136ee33f2da18ef64420b9f95498212e3148964218559"
+  },
+  "publishedArchive": {
+    "gitBlob": "777b53f1d1cad5eaeeb22965af7e327124d59524",
+    "sha256": "52cc6c09c352696ba526eddaa2898b372a985a54b18970a2fe4e832a16ffc96c",
+    "bytes": 4760073
+  },
+  "publishedLedgerGitBlob": "fb018d784e7e5722606f3cb42c3230de2792d550",
+  "publishedMemberReadbackGitBlob": "1ec752fae8d1d90391b68dd97d362599f0162384",
+  "B": {
+    "observedRuntimeProducer": "a9debd150d65c8d11884dadcdf162e7898dea309",
+    "productCommit": "01eb863506012136e417167f445b2708d9136293",
+    "proof": "Exact ext tree, packages, fixture lock and native manifest equality; prepared bytes remain the original observed B inventory"
+  },
+  "C": {
+    "productCommit": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+    "observed": false,
+    "expectedWorkFrom": "A",
+    "runtimeBasis": "Original observed stock A prepared runtime plus exactly four reviewed unused B assets/modules",
+    "unusedRuntime": [
+      "js/dictionary/term-record-fields.js",
+      "js/dictionary/term-record-prepared-fields.js",
+      "js/dictionary/wasm/term-record-fields.c",
+      "lib/term-record-fields.wasm"
+    ],
+    "stockCallerPaths": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/dictionary-importer.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "ext/js/dictionary/term-record-opfs-store.js"
+    ],
+    "completeChangedPaths": [
+      "dev/bin/audit-release-packages.js",
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "dev/dictionary-wasm.js",
+      "eslint.config.js",
+      "ext/js/dictionary/term-record-fields.js",
+      "ext/js/dictionary/term-record-prepared-fields.js",
+      "ext/js/dictionary/wasm/term-record-fields.c",
+      "test/dictionary-wasm-build.test.js",
+      "test/release-package-native-assets.test.js"
+    ],
+    "proof": "Sole parent A; every existing ext file unchanged; all ten changed C paths match B; first actual C warmup must validate this expectation"
+  },
+  "usedOriginalMembers": {
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/report.json": {
+      "gitBlob": "8514ece46adfc30e0ecceb077d8e7ac39612e248",
+      "sha256": "1398d3a9be92118492a4f62ec5f9be06840d236cc3a80118c0485d16f6a8ffef",
+      "bytes": 108068,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/field-calls.json": {
+      "gitBlob": "2f1a1818a7aa9aa33eb650d3dc73ab97d8e762c3",
+      "sha256": "1679a70a5ff493cd7a01e686d35a377d21f7736e927b8b7330020801a68c35f5",
+      "bytes": 4164,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/owner-calls.json": {
+      "gitBlob": "ae0693137040a73eefd0618e3032580403658918",
+      "sha256": "8c72532b8b2276a9ac2cb01872bf61dd0a13d274de249b3ebd0086d3affa388d",
+      "bytes": 3700,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/workers.json": {
+      "gitBlob": "6f6b6cb82643e6cf0e15d43a300d5651e727fbbb",
+      "sha256": "2a5a7f7d4a1d41110fa629a684c61354622aada41f71deb34cb68e629ad1395a",
+      "bytes": 18682,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/assets.json": {
+      "gitBlob": "1b725db0f91f980580a0ecd32afb02e0cc49fa97",
+      "sha256": "e036a1ad98025283f61aec7bccbe05740d4afa5982652ba83f3eb45a904cf72b",
+      "bytes": 781,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/files.json": {
+      "gitBlob": "2b5b08a59627eb5f5b227f5aecb69b16ef409a94",
+      "sha256": "9dfc6bcd6ef036dde38917e49332a8b1eaad6a3a12ac90c972f9c38867cbbfe5",
+      "bytes": 1148,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/product-work-counts.json": {
+      "gitBlob": "dbd52ef6d11330077dd108efdbf7f0c13ba530ef",
+      "sha256": "dbc10e636c51fc44b081ee862f03ea4695a73ea4bcdc232fd92da39a16813adf",
+      "bytes": 11321,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/source-before.json": {
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "bytes": 95551,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/source-after.json": {
+      "gitBlob": "d0c91d364011ea8668587e1ed053bb3942ee4915",
+      "sha256": "86cacc3ffccbac40956a6354ed183b8c9e023332eb7b5b71638e6bc76116e7d9",
+      "bytes": 95551,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/A/cleanup.json": {
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "bytes": 47,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/prepared-source-A.json": {
+      "gitBlob": "9a7cec8bfe21a160b57e16e6e8937d2e9dbc70cf",
+      "sha256": "5f9497bf74a02441e1fa4f1fe248055d41cb925a67b1324db5f8f71a7e00f6d1",
+      "bytes": 91092,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/report.json": {
+      "gitBlob": "df11ffdac7a76d192d26ccc33853fba4f54be7c7",
+      "sha256": "3f7008939014542b603f4d2d6579d49ceb3c51975546c0cf8a9725346e62f00b",
+      "bytes": 110503,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/field-calls.json": {
+      "gitBlob": "2aa8043a555045d8db555d5933c0dcd414525e9b",
+      "sha256": "fa44867da543c35bc1a46eb2e426c860586a306c697ab4c29dc863a3d755a901",
+      "bytes": 20010,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/owner-calls.json": {
+      "gitBlob": "ae89392dc7cabf87ed2ee92076d8f70c2650c659",
+      "sha256": "4ea375cc5aab8636c66c97b2b5440de9aa01ad73b047f8fef32a49ad9954721a",
+      "bytes": 19156,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/workers.json": {
+      "gitBlob": "7ce48a216f8ffeee145d761cded55d3d94270a92",
+      "sha256": "890da62e0b70fcb0c0b4d853e2739b33dc0b72ec71a8916e63067a4783ace723",
+      "bytes": 18682,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/assets.json": {
+      "gitBlob": "e3d933cb9281209234b5fc95d719174f18c25fee",
+      "sha256": "8a6cf0c29e9b9d507e77995ea9525af0b9e8827508aaf151f751b0374d7f50b8",
+      "bytes": 937,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/files.json": {
+      "gitBlob": "e59e302443c46d9a3a3a2bbfce4cca7751240e85",
+      "sha256": "157600d6a4ab268fb4520a7964dc0769ddc81cd70d4abd49b943cb3c3ece877f",
+      "bytes": 1148,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/product-work-counts.json": {
+      "gitBlob": "6845bbc24ce399024d28449901d83420d8cf6981",
+      "sha256": "9f0962f3be16ab4fd11e602bb07edfe1d285cb9c9db16a574770f5a878da9873",
+      "bytes": 11990,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/source-before.json": {
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "bytes": 96717,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/source-after.json": {
+      "gitBlob": "d15cc7e47b8cc64ef87e6fd9ae1891091c07529d",
+      "sha256": "6b16bed2cac808d4722f4e9cda76ef4a3098c490943f72d830ebe757b6471ead",
+      "bytes": 96717,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/B/cleanup.json": {
+      "gitBlob": "2240835a0da0fb51326b12138fcbf082f4e636c3",
+      "sha256": "9d30261115727a097aff98ece6d21668da62da449832c2e6e25dbe94a0bbcec1",
+      "bytes": 47,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/prepared-source-B.json": {
+      "gitBlob": "1238a37abdb43e51373dd5c7c6e11ae06473b597",
+      "sha256": "8af8fb24b0ad4c584d179e69abdacb2e280baa9bf8f15c558bd8ba686d88d689",
+      "bytes": 91722,
+      "kind": "original-artifact-member"
+    },
+    "corpus-full/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition/jmdict/comparison.json": {
+      "gitBlob": "63470457e6af7a22b7c87d134d8d6c807a5e01aa",
+      "sha256": "e1724aa698d99632f2d7b86a0a5e535655b9cbb70317baabf21ed1e89d49fa52",
+      "bytes": 14279,
+      "kind": "original-artifact-member"
+    }
+  },
+  "runtimeDigests": {
+    "A": "6119c7310002869af86be34026cd334550917b435674e18abb35a326604ed743",
+    "B": "3c3f78d0c2d6bd3fad7fe84c34f52dcbffa272ed48cf81e10fb168199d3f61d2",
+    "C": "4f5574893fcbf077d8f16c2b75c6fb4f5dc7c22b4e97c8a2f5ea0174bdcdd803"
+  },
+  "outputDigest": "92ce2fa7d8347c50217615eb0d8ed2ab307a242b984e95995cff6e7905cd74cf",
+  "workDigests": {
+    "A": "95b88cb6c53fe5c84130a863ac4f62ce76416d7bb3e3eea0b8f194c6d1d1acd1",
+    "B": "b162a35c174f375a439d40e9e9aeec9ae5a91769d342e805a1f8e4de2a2bd44e",
+    "C": "95b88cb6c53fe5c84130a863ac4f62ce76416d7bb3e3eea0b8f194c6d1d1acd1"
+  },
+  "rawInputsRetained": "Original immutable archive contains every used member; individual Git IDs identify contents, not separate remote fetch endpoints"
+}

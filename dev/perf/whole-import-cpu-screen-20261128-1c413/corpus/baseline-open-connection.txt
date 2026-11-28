@@ -1,0 +1,29 @@
+async _openConnection() {
+        this._sqlite3 = await getSqlite3();
+        let committedContent = await this._openSupportedDictionaryConnection();
+        if (await this._resumePersistentDictionaryPurge()) {
+            committedContent = await this._openSupportedDictionaryConnection();
+        }
+        // An interrupted rollback can leave gaps among unpublished segments.
+        // Reconcile its journal before preparing the corresponding store.
+        await this._recoverInterruptedImportSession();
+        await (committedContent.storageEpoch > 0 ? this._termContentStore.activateCommittedRoot(committedContent) : this._termContentStore.prepare());
+        await this._termRecordStore.prepare();
+        this._termContentBlockStore.clearCache();
+        this._clearTermsVtabCursorState();
+        this._termsVtabModuleRegistered = false;
+
+        this._applyRuntimePragmas();
+
+        await this._initializeSchema();
+        await this._runSchemaMigrations();
+        this.getOnlineContentStorageState();
+        this._restoreTermRecordDictionaryHealth();
+        if (!this._hasUnresolvedImportJournal()) {
+            try {
+                await this._generationMediaStore.removeOrphans(new Set(this._termRecordGenerationByStorage.values()));
+            } catch (error) {
+                reportDiagnostics('dictionary-generation-media-orphan-cleanup-failed', {error: toError(error).message});
+            }
+        }
+    }

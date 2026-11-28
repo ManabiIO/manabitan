@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "node": "v24.22.3",
+  "exitCode": 0,
+  "stdout": "{\n  \"evidenceKind\": \"synthetic-arithmetic-and-disabled-guard-checks\",\n  \"node\": \"v24.22.3\",\n  \"productCodeLoaded\": false,\n  \"dictionaryImports\": 0,\n  \"childProcessesLaunched\": 0,\n  \"timingAcquired\": false,\n  \"sourceSha256\": {\n    \"plan.json\": \"f586f2b3be55203518651a8a3eb170cca2ca7e2ea19f09ece114da63f596c108\",\n    \"test-plan.json\": \"7c4e3e0803afcf0fda0fe7db07502d492997f2177eb67482b2b9ca657e9e4e56\",\n    \"PROTOCOL.md\": \"7e59fa08b055df5eafc7588e2701004acc48f1a404248335c4d474fcd279c3cd\",\n    \"screen.mjs\": \"082f344bd158ac5092053e76c3590d1f18cc7986f24128cba83b65d9c053a4d2\",\n    \"screen-policy.mjs\": \"2da710ab0fc3274fc767da96b29b629d6804acb659dfe19385ac97ce3dca986c\",\n    \"test-screen.mjs\": \"88830bc23e2dd47607d9d7c4947c3ea84fcf5cc4a288355c180a30cdd293e371\"\n  },\n  \"tests\": 16,\n  \"passed\": 16,\n  \"failed\": 0,\n  \"results\": [\n    {\n      \"name\": \"all prescribed permutations and positions are balanced within blocks\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"exact 20ms and 1percent candidate boundaries pass independently\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"one microsecond under the absolute benefit floor fails\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"one microsecond under the relative benefit floor fails\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"both controls must pass with no pooled substitute\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"exact plus and minus 3percent paired and summed controls pass\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"one microsecond beyond either signed control boundary fails\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"exact summed control boundary passes while one unit beyond fails\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"no obsolete absolute millisecond control gate survives\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"ten faster pairs pass and nine fail; ties are not faster\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"median paired percentage is not a ratio of arm medians\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"a fast wall contrast cannot rescue a failed CPU gate\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"a failed second replication remains failed independently\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"missing duplicate failed or timed warmup records are rejected\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"raw process CPU snapshots are recomputed without a wall upper bound\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"explicit disabled fixture rejects before any child or product import, even when the real plan is sealed\",\n      \"passed\": true\n    }\n  ]\n}\n",
+  "stderr": "",
+  "sourceBindings": {
+    "PROTOCOL.md": {
+      "bytes": 25749,
+      "sha256": "7e59fa08b055df5eafc7588e2701004acc48f1a404248335c4d474fcd279c3cd"
+    },
+    "screen.mjs": {
+      "bytes": 16740,
+      "sha256": "082f344bd158ac5092053e76c3590d1f18cc7986f24128cba83b65d9c053a4d2"
+    },
+    "screen-policy.mjs": {
+      "bytes": 1652,
+      "sha256": "2da710ab0fc3274fc767da96b29b629d6804acb659dfe19385ac97ce3dca986c"
+    },
+    "workflow-prepare.mjs": {
+      "bytes": 4361,
+      "sha256": "ef335b7902c431acbebbda8bb09e69ee6950ba2f0da3715f88e5f51877c73977"
+    },
+    "project-reference.mjs": {
+      "bytes": 14592,
+      "sha256": "89bf88e3cdd1305a89011f5ae28f21418f26253cf933c2cca9737f8a1876ac96"
+    },
+    "copy-provenance.json": {
+      "bytes": 1948,
+      "sha256": "5c43993767ad600c24a374f22963297d1c8b791f9b834f560a84e9068cdfe307"
+    },
+    "test-screen.mjs": {
+      "bytes": 10630,
+      "sha256": "88830bc23e2dd47607d9d7c4947c3ea84fcf5cc4a288355c180a30cdd293e371"
+    },
+    "test-boundary.mjs": {
+      "bytes": 19844,
+      "sha256": "0a3c7e6eeaccba84726e9f58878b8638acbefd0f09d2bb60f837ceaf741b3b99"
+    },
+    "test-plan.json": {
+      "bytes": 5759,
+      "sha256": "7c4e3e0803afcf0fda0fe7db07502d492997f2177eb67482b2b9ca657e9e4e56"
+    },
+    "corpus/run.mjs": {
+      "bytes": 21269,
+      "sha256": "749848162c9b7b0b49e27788600f9d7a2e499d119af92bd9179f5365ad333531"
+    },
+    "corpus/cpu-boundary.mjs": {
+      "bytes": 2452,
+      "sha256": "8781603f8dbbab84a406795174605d45c844394abfe7bfc87f6f70a50bd3a703"
+    },
+    "corpus/receipt-adapter.mjs": {
+      "bytes": 29267,
+      "sha256": "1f10f925fa3af8d3123fea17406175d53ea4a6e6273a72e0787e8732a8f07272"
+    },
+    "corpus/owner-observer.mjs": {
+      "bytes": 15410,
+      "sha256": "6ebb47d2edf767be58ad25d341b72dd57afc5968a7cfbfd8fef06400ede925b8"
+    },
+    "corpus/node-runtime.mjs": {
+      "bytes": 8273,
+      "sha256": "6e1a4c57d3d881c1d9f6f570c56962b4473f7b5cd65ba0a3dff653709fb86fdd"
+    },
+    "corpus/node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+    },
+    "corpus/node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+    },
+    "corpus/baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0"
+    },
+    "corpus/baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c"
+    },
+    "corpus/baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4"
+    },
+    "corpus/run.correctness-source.txt": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b"
+    },
+    "workflow/native-whole-import-cpu-screen-1c413.yml": {
+      "bytes": 10968,
+      "sha256": "aa321df44a8cd0f938e6c465f5210d34c95669486b25239c0cadf2a68a57814c"
+    },
+    "plan.json": {
+      "bytes": 118202,
+      "sha256": "f586f2b3be55203518651a8a3eb170cca2ca7e2ea19f09ece114da63f596c108"
+    },
+    "references/preparation.json": {
+      "bytes": 316520,
+      "sha256": "04c60df5da6292dc1e7f83dec724f9ef2de30f52b605ee3bcf068efba614b77c"
+    },
+    "references/work.json": {
+      "bytes": 100604,
+      "sha256": "06b02c18439b05345517a0171ff52647d1268b030af2dfc3340eb89d537e1abc"
+    },
+    "references/output.json": {
+      "bytes": 8580,
+      "sha256": "c7740e29d818df166da020e65ed726a2e60f29a4b8ccd9c2ab27433343284eff"
+    },
+    "references/projection.json": {
+      "bytes": 10807,
+      "sha256": "61631a2067c0722508b5e861821148ab8d5aa6eefc10b061f2e57ab4374cdb94"
+    }
+  }
+}

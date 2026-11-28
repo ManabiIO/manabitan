@@ -1,0 +1,46 @@
+{
+  "sourceDirectory": "/workspace/scratch/1c4137568bc6/experiments/whole-record-fusion-correctness-20261128-1c413/staged/dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus",
+  "sourceStatus": "copied source-only, no product execution or performance observation",
+  "originalFiles": {
+    "run.mjs": {
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b",
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b"
+    },
+    "owner-observer.mjs": {
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03",
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c"
+    },
+    "node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83"
+    },
+    "node-runtime.mjs": {
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972"
+    },
+    "node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9"
+    },
+    "baseline-open-connection.txt": {
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0",
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab"
+    },
+    "baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c",
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e"
+    },
+    "baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4",
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1"
+    }
+  }
+}
