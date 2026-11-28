@@ -18,7 +18,7 @@
 import {readFile} from 'node:fs/promises';
 import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
-import {inflateCompressedTermBankSourcesWasm, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {inflateCompressedTermBankSourcesWasm, parseTermBankWithWasmColumnChunks, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 
 const encoder = new TextEncoder();
 const NativeDecompressionStream = DecompressionStream;
@@ -95,6 +95,29 @@ async function failure(sources) {
         throw error;
     }
     throw new Error('Expected source validation to reject');
+}
+
+/**
+ * @param {Parameters<typeof inflateCompressedTermBankSourcesWasm>[0]} sources
+ * @returns {Promise<{name: string, message: string, publishedChunks: number}>}
+ */
+async function transactionFailure(sources) {
+    let publishedChunks = 0;
+    try {
+        const preloadedSource = await inflateCompressedTermBankSourcesWasm(sources, {}, true);
+        await parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, () => { ++publishedChunks; }, 2048, {
+            preloadedSource,
+            singleChunk: true,
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            validateGlossaryTypes: true,
+        });
+    } catch (error) {
+        if (error instanceof Error) { return {name: error.name, message: error.message, publishedChunks}; }
+        throw error;
+    }
+    throw new Error('Expected the source transaction to reject');
 }
 
 beforeAll(async () => {
@@ -217,6 +240,55 @@ describe('native gzip validation of raw ZIP term banks', () => {
         expect(payload.reduce((sum, length) => sum + length, 0)).toBe(sources[0].compressedSize);
         expect(payload.every((length) => length * 1032 <= sources[0].uncompressedSize)).toBe(true);
     });
+
+    test('validates high-ratio banks natively before returning without a deferred CRC witness', async () => {
+        const bank = JSON.stringify([['a', '', '', '', 0, ['x'.repeat(2 * 1024 * 1024)], 1, '']]);
+        const sources = [source(bank), source(bank)];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources, {}, true);
+        expect(baseline.crcSignaturesPtr).toBeGreaterThan(0);
+        const expected = snapshot(baseline);
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        const constructors = vi.fn(function strictStream(/** @type {CompressionFormat} */ format) { return strictGzipStream(format); });
+        vi.stubGlobal('DecompressionStream', constructors);
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const result = await inflateCompressedTermBankSourcesWasm(sources, {}, true);
+        const actual = snapshot(result);
+        expect(Buffer.from(actual.bytes.buffer, actual.bytes.byteOffset, actual.bytes.byteLength).equals(expected.bytes)).toBe(true);
+        expect(actual.spans).toEqual(expected.spans);
+        expect(actual.count).toBe(expected.count);
+        expect(result.crcSignaturesPtr).toBe(0);
+        expect(result.crcStatsPtr).toBe(0);
+        expect(constructors).toHaveBeenCalledTimes(4);
+        expect(wasmInflate).not.toHaveBeenCalled();
+    });
+
+    test.each(['crc', 'earlier-crc-later-deflate', 'earlier-deflate-later-crc', 'syntax-and-crc'])(
+        'preserves high-ratio %s failure precedence without publishing rows',
+        async (kind) => {
+            const bank = JSON.stringify([['a', '', '', '', 0, ['x'.repeat(2 * 1024 * 1024)], 1, '']]);
+            const badCrc = source(kind === 'syntax-and-crc' ? `[${' '.repeat(2 * 1024 * 1024)}not-json]` : bank);
+            badCrc.signature = (badCrc.signature ^ 1) >>> 0;
+            const second = source(bank);
+            if (kind.includes('deflate')) {
+                second.bytes = second.bytes.slice(0, -2);
+                second.compressedSize = second.bytes.length;
+            }
+            const sources = kind === 'earlier-deflate-later-crc' ? [second, badCrc] : [badCrc, second];
+            expect(sources.reduce((sum, item) => sum + item.uncompressedSize, 0)).toBeGreaterThanOrEqual(4 * 1024 * 1024);
+            expect(sources.every((item) => item.compressedSize * 32 <= item.uncompressedSize)).toBe(true);
+            const expected = await transactionFailure(sources);
+            expect(expected.name).toBe('DictionarySourceIntegrityError');
+            expect(expected.publishedChunks).toBe(0);
+            const {wasm} = await inflateCompressedTermBankSourcesWasm([source(paddedEmptyBank)]);
+            const wasmInflate = vi.spyOn(wasm, 'inflate_and_join_term_banks');
+            const constructors = vi.fn(function strictStream(/** @type {CompressionFormat} */ format) { return strictGzipStream(format); });
+            vi.stubGlobal('DecompressionStream', constructors);
+            vi.stubGlobal('__manabitanTermBankParserWorker', true);
+            expect(await transactionFailure(sources)).toEqual(expected);
+            expect(constructors.mock.calls.length).toBeGreaterThan(2);
+            expect(wasmInflate).toHaveBeenCalledTimes(kind.includes('deflate') ? 2 : 1);
+        },
+    );
 
     test.each(['unsupported', 'mixed', 'outside-worker', 'expanding-deflate'])('retains the WASM route for %s sources', async (kind) => {
         const sources = [source(paddedEmptyBank), source(kind === 'expanding-deflate' ? '[]' : paddedEmptyBank, kind === 'mixed' ? 0 : 8)];

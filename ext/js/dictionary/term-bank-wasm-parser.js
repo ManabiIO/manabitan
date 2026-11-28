@@ -259,9 +259,9 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     }
 
     const wasm = await getWasm();
-    // Reuse is profitable only for highly repetitive source groups. Every other
-    // caller keeps immediate whole-bank CRC validation, including standalone
-    // inflation and source groups without the fused glossary witness proof.
+    // The WASM fallback reuses CRCs only for highly repetitive source groups.
+    // Every other fallback keeps immediate whole-bank CRC validation, including
+    // standalone inflation and groups without the fused glossary witness proof.
     const deferCrc = reuseGlossaryCrc && sources.length > 1 &&
     experiments.experimentalValidatedGlossaryReuse && !experiments.experimentalSkipFusedParse &&
     uncompressedBytes >= CRC_REUSE_MIN_SOURCE_BYTES &&
@@ -271,7 +271,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     // can therefore fill that heap across awaits without retaining a second
     // decoded source buffer. Other callers keep the synchronous WASM operation.
     if (
-        !deferCrc && Reflect.get(globalThis, '__manabitanTermBankParserWorker') === true &&
+        Reflect.get(globalThis, '__manabitanTermBankParserWorker') === true &&
         typeof DecompressionStream === 'function' && sources.every((source) => (
             source.compressionMethod === 8 && source.compressedSize <= source.uncompressedSize
         ))

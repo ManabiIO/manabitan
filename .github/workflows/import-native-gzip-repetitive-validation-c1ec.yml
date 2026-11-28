@@ -1,0 +1,70 @@
+name: Repetitive native gzip integrity validation c1ec
+
+on:
+  push:
+    branches:
+      - research/import-native-gzip-repetitive-c1ec
+    paths:
+      - ext/js/dictionary/term-bank-wasm-parser.js
+      - test/term-bank-native-inflate.test.js
+      - dev/perf/native-gzip-repetitive-canary-c1ec.mjs
+      - .github/workflows/import-native-gzip-repetitive-validation-c1ec.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-native-gzip-repetitive-validation-c1ec-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/research/import-native-gzip-repetitive-c1ec'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Lint changed runtime and integrity tests
+        run: npx eslint ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-native-inflate.test.js
+      - name: Main source types
+        if: ${{ !cancelled() }}
+        run: npm run test:ts:main
+      - name: Test source types
+        if: ${{ !cancelled() }}
+        run: npm run test:ts:test
+      - name: Full unit suite
+        if: ${{ !cancelled() }}
+        run: npm run test:unit
+      - name: Release build validation
+        if: ${{ !cancelled() }}
+        run: npm run test:build
+      - name: Install matching Chromium
+        if: ${{ !cancelled() }}
+        run: npx playwright install --with-deps chromium
+      - name: Validate native gzip semantics and actual baseline/candidate parser modules
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/native-gzip-baseline"
+          git worktree add --detach "$baseline" "$PERF_BASELINE"
+          cmp dev/data/dictionary-wasm/term-bank-parser.wasm "$baseline/dev/data/dictionary-wasm/term-bank-parser.wasm"
+          cmp ext/lib/term-bank-parser.wasm dev/data/dictionary-wasm/term-bank-parser.wasm
+          mkdir -p "$baseline/ext/lib"
+          cp "$baseline/dev/data/dictionary-wasm/term-bank-parser.wasm" "$baseline/ext/lib/term-bank-parser.wasm"
+          node dev/perf/native-gzip-repetitive-canary-c1ec.mjs "$baseline" "$GITHUB_WORKSPACE" builds/perf/native-gzip-repetitive-canary-c1ec/report.json
+      - name: Preserve capability, parity, and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-gzip-repetitive-canary-c1ec-${{ github.sha }}
+          path: builds/perf/native-gzip-repetitive-canary-c1ec
+          if-no-files-found: warn
+          retention-days: 30
