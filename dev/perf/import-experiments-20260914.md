@@ -733,3 +733,59 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-28: opt-in reference-table fields (4d9f)
+
+This candidate stores the already-owned content-reference table once and retains the original per-row reference and score-key IDs. It selects fields format 4 only when every reference is representable and the exact encoded size is smaller than format 2. Whole-table bounds, padding, checksum, sentinel and unused-reference checks remain mandatory. The new online content-reference iterator keeps the existing 262,144-byte input-page budget, row order, cursor and ownership rules.
+
+The `experimentalReferenceTableFields` flag remains off by default. Actual persisted format 4 promotes the minimum reader schema to 13, preserving the online-Zstd meaning of schema 12. Later packed-media and online promotions cannot lower 13. Default-off and all-fallback imports leave the floor unchanged. Schema 13 accepts unpublished legacy epoch zero or a valid positive online epoch; positive epochs still require the real validated content root.
+
+The final runtime source is `85a8aa49f76fbabd2dc494aad247f74774ff2573`, full tree `ae7323d19d6da0cc500ff231a0dcd469ce4f31af`, based on `a300da36d00df8e353c5679b1528b50a1299b75f`. Its one-file delta from `16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97` changes only equivalent iterator conditional/read-call formatting. The full source review, previous-reader proof and [machine-readable checkpoint](../../builds/perf/20261128-4d9f-reference-fields-latest/qualification-checkpoint.json) retain the exact source boundaries.
+
+### Measured stored bytes
+
+Complete original off/on corpus replays independently expand format 4 back to format 2 and reproduce every original row, field, frame and normalized final file. The original runtime was on f28 with the old experimental schema 12; those results are not relabeled as compatibility proof for a300.
+
+- JMdict: 43,315,677 to 43,274,673 term-file bytes, saving 41,004 bytes. Five of 12 chunks use format 4, covering 210,000 of 528,299 rows.
+- Jitendex: 61,977,692 term-file bytes in both modes. All 22 chunks retain format 2 across 436,555 rows.
+- VNDB: 409,433,345 to 385,022,101 term-file bytes, saving 24,411,244 bytes (23.280 MiB; 5.962% of term files). The reference/score field sections fall from 53,191,776 to 28,780,532 bytes, a 45.893% reduction. Content payload bytes remain 7,533,449. Format 4 covers 162 of 192 chunks and 6,328,310 of 6,648,310 rows; ten chunks fall back on size and twenty on an unused reference before the split base.
+
+These figures exclude SQLite and media. No elapsed-time, lookup-latency or process-memory improvement is established. No parser worker, cache, batching, compression or admission threshold is changed.
+
+### Current-source browser and compatibility verification
+
+[The independently audited original four JMdict/Jitendex cells](../../builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/README.md) pass all eight complete imports on source16c, reproducing the stored bytes above. Each import uses a fresh profile, all media, orderly restart and 72 lookup observations. Actual field headers and SQLite floors are read separately after the ordinary semantic checks. JMdict enabled selects five format 4 chunks and floor 13; Jitendex enabled selects no format 4 chunks and stays at floor 10.
+
+The two original latest VNDB cells failed the inherited f28 expectation of 37 aligned SQLite allocation units before activation qualification. Both raw imports and failures remain retained; neither is reclassified. A separate default-flag a300 parent import then measured seven empty 4,096-byte files and one 315,392-byte active file (77 units). A new source-bound contract froze exactly 77 before the next VNDB cohort and rejects widened ranges.
+
+[Both final85 VNDB orders](../../builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/README.md) pass all four complete imports and independent raw audits, reproducing exactly 24,411,244 saved term bytes. Enabled has 162 format 4 chunks and floor 13; disabled has 192 format 2 chunks and floor 11. Both hosts have identical 582-entry release payload inventories. Exactly one entry differs from the audited16c package, `js/dictionary/term-record-opfs-store.js`, and its payload equals the published85 source blob. The JP16c and VN85 observations remain separately attributed. No timing or process-memory acquisition is inferred from these functional cohorts.
+
+[Source validation](../../builds/perf/20261128-4d9f-reference-fields-latest/source-gates/README.md) passes 15,952 unit tests (47 skipped; 699 files), all four TypeScript configurations, dry build and pinned native regeneration on16c. Its eleven style findings are retained. The equivalent final85 follow-up passes scoped lint and all 44 iterator tests. Five Node and five Python observer contracts pass. The portable verifier passes 20 Node contracts, five Python contracts, 18 syntax checks and scoped lint after a separately retained missing-tooling-bundle setup failure.
+
+The actual a300 previous reader rejects schema 13 before all eight recovery/prepare/schema/purge hooks. Its 16,384-byte SQLite export and both real format 4 files remain byte-identical. This uses the real writer, SQLite and old connection-opening implementation; it is not an older-browser restart measurement. Runtime tests separately cover large reference tables, sparse gathers, paused ownership, malformed or unused references, checksums, cursor reuse, schema/epoch combinations, online promotion and publication failures.
+
+### Reproduction and remaining corpus gate
+
+For the exact final-source VNDB browser verification, start from a clean repository with the pinned Node22.22.0/toolchain environment and use a new evidence directory for every intentional reproduction:
+
+```sh
+git fetch origin
+git worktree add --detach /tmp/manabitan-reference-browser-4d9f 6650e56034b7c4e92451a7032fbf93ffd76d999f
+cd /tmp/manabitan-reference-browser-4d9f
+npm ci
+npm run build:libs
+npx playwright install --with-deps chromium
+python dev/perf/reference-format-browser-4d9f/run-reference-format-browser-v2.py \
+  --repo-root . \
+  --source 85a8aa49f76fbabd2dc494aad247f74774ff2573 \
+  --dictionary vndb --order off-on \
+  --overlay test/perf/record-reference-table-verification/activation_overlay.py \
+  --contract builds/perf/20261128-4d9f-reference-browser/storage-contract-a300-vndb.json \
+  --evidence builds/perf/reproduce-vndb-off-on
+```
+
+The runner verifies exact source tree, fixture archive, toolchain, package, observer and contract identities; builds the ordinary release package; uses one package for both flag modes; and retains all failures. Use `--order on-off` with another fresh output directory for the opposite order. Do not replace an unchanged failed timing or memory observation.
+
+Fresh full-corpus verification on final85 remains gated on the shared full-schema public-sink harness. Attaching only content-root tables exposed ordinary glossary invalidation; full production schema initialization fixes that scope. The next nonempty-public-sink control initially observed resident size before loading persisted indexes. Its prospective correction uses the real persisted loader and exact decoded fields, retaining the one/two-row and cold-deduplication assertions. Scoped lint and all actual-I/O controls must pass before any new format corpus acquisition. All failed metadata-harness attempts and the original format observer/floor failures remain retained, with their actual source identities. No latest-format corpus result is claimed yet.
+
+[The narrow compatibility review](../../builds/perf/20261128-4d9f-reference-fields-latest/metadata-format-source-compatibility.json) finds no shared changed methods or overlapping base hunks with metadata source86. The only shared runtime file is `dictionary-database.js`; logical offset, length, row-ID and dictionary-name interfaces remain intact. This is source compatibility, not combined-source execution qualification.
