@@ -32,7 +32,7 @@
     "parserPolicy": {
         "jmdict": {
             "parserWorkerCount": 3,
-            "parserPipelineGroupsPerWorker": 3,
+            "parserPipelineGroupsPerWorker": 4,
             "parserGroupCount": 12
         },
         "jitendex": {
@@ -118,5 +118,7 @@
                 "js/dictionary/dictionary-database.js": "c7f82399b22cc70dd80e94a07d312e8bd8e0b17365d347c9e8c8033ad3c60c4d"
             }
         }
-    }
+    },
+    "acquisitionStage": 2,
+    "supersededStage1": "dev/perf/import-qualification-81585d-stage1-disposition.json"
 }

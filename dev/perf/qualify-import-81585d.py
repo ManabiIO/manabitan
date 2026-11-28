@@ -233,10 +233,12 @@ def main():
     shutil.copyfile(PROTOCOL_PATH, output / "protocol.json")
     shutil.copyfile(Path(__file__), output / "executed-runner.py")
     shutil.copyfile(WORKFLOW_PATH, output / "executed-workflow.yml")
+    shutil.copyfile(ROOT / protocol["supersededStage1"], output / "superseded-stage1.json")
     schedule = make_schedule(protocol, args.replica)
     write_json(output / "schedule.json", schedule)
     write_json(output / "execution.json", {
         "candidate": args.candidate, "dictionary": args.dictionary, "replica": args.replica,
+        "acquisitionStage": protocol["acquisitionStage"],
         "workflowCommit": command(["git", "rev-parse", "HEAD"]).stdout.strip(),
         "workflowTree": command(["git", "rev-parse", "HEAD^{tree}"]).stdout.strip(),
         "protocolSha256": sha256(PROTOCOL_PATH), "runnerSha256": sha256(Path(__file__)),

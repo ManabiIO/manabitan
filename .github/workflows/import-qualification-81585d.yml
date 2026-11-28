@@ -11,11 +11,18 @@ on:
 permissions:
   contents: read
 
+# Acquisition revisions share this study group. Bookkeeping commits use their
+# unique run ID, so their skipped jobs cannot cancel an active acquisition.
+concurrency:
+  group: >-
+    import-qualification-81585d-${{ github.ref }}-${{ github.event.head_commit.message == 'test: acquire import qualification 81585d stage 2' && 'acquisition' || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   preflight:
     # Only this deliberately named acquisition commit can start the fixed study.
     # Evidence and scaffold follow-ups use different commit messages.
-    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 2'"
     name: Package preflight (${{ matrix.candidate }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -59,7 +66,7 @@ jobs:
           compression-level: 9
 
   validate:
-    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 2'"
     needs: preflight
     name: Source validation (${{ matrix.candidate }})
     runs-on: ubuntu-26.04
@@ -147,7 +154,7 @@ jobs:
 
 
   qualify:
-    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 2'"
     needs: preflight
     name: ${{ matrix.candidate }} ${{ matrix.dictionary }} host ${{ matrix.replica }}
     runs-on: ubuntu-latest
