@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/83b3b3bfba02/columnar-media-round3/builds/perf/round3-columnar-media-83b3/screen-controller.py", line 255, in <module>
+    commands[sys.argv[1]]()
+  File "/workspace/scratch/83b3b3bfba02/columnar-media-round3/builds/perf/round3-columnar-media-83b3/screen-controller.py", line 246, in smoke
+    a = run_child(BASE, archive, fixture_path, 'qualify', 'smoke-A')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/83b3b3bfba02/columnar-media-round3/builds/perf/round3-columnar-media-83b3/screen-controller.py", line 101, in run_child
+    raise RuntimeError('Insufficient starting memory headroom; observation not started')
+RuntimeError: Insufficient starting memory headroom; observation not started

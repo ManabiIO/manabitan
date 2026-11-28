@@ -1,0 +1,12 @@
+{
+  "started": false,
+  "availableBytes": 3201724416,
+  "limits": {
+    "rssBytes": 2147483648,
+    "minimumStartAvailableBytes": 3221225472,
+    "minimumAvailableBytes": 1073741824,
+    "realmOldSpaceMiB": 384,
+    "timeoutSeconds": 180,
+    "sampleSeconds": 0.1
+  }
+}
