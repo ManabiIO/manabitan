@@ -24,7 +24,7 @@ jobs:
       - name: Verify frozen product identity
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_PRODUCT_SHA"
-          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_PRODUCT_TREE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EXPECTED_PRODUCT_TREE"
           test -z "$(git status --porcelain)"
       - uses: ./.github/actions/setup
       - name: Complete unit suite
