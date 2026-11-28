@@ -1612,6 +1612,9 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
         let cancelled = false;
+        /** @type {() => TermBankColumnChunk|null} */
+        // eslint-disable-next-line @stylistic/semi
+        let peekNextChunk = () => null
         const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
         /** @implements {WorkerMock} */
         class BorrowingWorker {
@@ -1672,6 +1675,13 @@ describe('term-bank WASM parser', () => {
                 async (_chunk, progress) => {
                     if (progress.chunkIndex !== 1) { return; }
                     firstSinkStarted();
+                    /* eslint-disable @stylistic/semi */
+                    if (typeof _chunk.peekNextChunk !== 'function') { throw new Error('Expected a next-chunk control hook') }
+                    peekNextChunk = _chunk.peekNextChunk
+                    expect(Object.getOwnPropertyDescriptor(_chunk, 'peekNextChunk')).toMatchObject({configurable: true, enumerable: false})
+                    expect({..._chunk}).not.toHaveProperty('peekNextChunk')
+                    if (ownership === 'owned') { expect(structuredClone(_chunk)).toEqual({..._chunk}) }
+                    /* eslint-enable @stylistic/semi */
                     await firstSinkGate;
                 },
                 {emitContentSlab: true, mediaHintFastScan: media},
@@ -1680,7 +1690,15 @@ describe('term-bank WASM parser', () => {
             await firstSinkStart;
             const leadGroups = workerCount * (media ? 3 : 4);
             await vi.waitFor(() => { expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount); });
+            /* eslint-disable @stylistic/semi */
+            const next = peekNextChunk()
+            expect(next?.rowCount).toBe(1)
+            for (let i = 0; i < 10; ++i) { expect(peekNextChunk()).toBe(next) }
+            expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount)
+            /* eslint-enable @stylistic/semi */
             cancelled = cancel;
+            // eslint-disable-next-line @stylistic/semi
+            if (cancel) { expect(peekNextChunk).toThrow(/cancel/i) }
             releaseFirstSink();
             if (cancel) {
                 await expect(parsing).rejects.toThrow(/cancel/i);

@@ -1,0 +1,56 @@
+name: Import content-lookahead-gates validation 20261128 63aba8
+
+on:
+  push:
+    branches: [study/content-lookahead-gates-20261128-63aba8]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-content-lookahead-gates-checks-63aba8-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Frozen source validation
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+        id: setup
+      - name: Install the pinned native test toolchain
+        id: compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Record source and runtime identity
+        run: |
+          mkdir -p builds/perf/import-content-lookahead-gates-checks
+          git rev-parse HEAD > builds/perf/import-content-lookahead-gates-checks/source.txt
+          git rev-parse HEAD^{tree} >> builds/perf/import-content-lookahead-gates-checks/source.txt
+          node --version > builds/perf/import-content-lookahead-gates-checks/node.txt
+          clang-21 --version > builds/perf/import-content-lookahead-gates-checks/clang.txt
+          wasm-ld-21 --version > builds/perf/import-content-lookahead-gates-checks/linker.txt
+      - name: JavaScript lint
+        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
+        run: npm run test:js 2>&1 | tee builds/perf/import-content-lookahead-gates-checks/lint.log
+      - name: All TypeScript projects
+        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
+        run: npm run test:ts 2>&1 | tee builds/perf/import-content-lookahead-gates-checks/types.log
+      - name: Complete unit suite
+        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
+        run: npm run test:unit -- --maxWorkers=2 --reporter=default --reporter=json --outputFile.json=builds/perf/import-content-lookahead-gates-checks/unit.json 2>&1 | tee builds/perf/import-content-lookahead-gates-checks/unit.log
+      - name: Every dry-build target
+        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
+        run: npm run test:build 2>&1 | tee builds/perf/import-content-lookahead-gates-checks/build.log
+      - name: Preserve all validation receipts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: import-content-lookahead-gates-checks-63aba8-${{ github.run_id }}
+          path: builds/perf/import-content-lookahead-gates-checks
+          if-no-files-found: error
+          retention-days: 7

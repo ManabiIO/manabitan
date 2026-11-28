@@ -180,6 +180,8 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentMetaList?: Uint32Array,
  *   contentMetaByUniqueIndex?: boolean,
  *   releaseBorrowedContent?: () => void,
+ *   peekNextContentChunk?: () => DirectTermChunk|null,
+ *   peekNextChunk?: () => import('./term-bank-wasm-parser.js').TermBankColumnChunk|null,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
  *   termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null,
@@ -5184,7 +5186,8 @@ export class DictionaryImporter {
                 if (useDirectArtifactChunkImport) {
                     const tMaterializationStart = Date.now();
                     const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
-                    const {mediaRows, ...columnPayload} = columnChunk;
+                    // eslint-disable-next-line @stylistic/semi
+                    const {mediaRows, peekNextChunk, ...columnPayload} = columnChunk
                     if (requirementsForChunk !== null) {
                         const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
                         let diagnosticIndex = 0;
@@ -5234,15 +5237,31 @@ export class DictionaryImporter {
                         }
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
+                    /* eslint-disable @stylistic/semi */
+                    const directChunk = {
+                        ...columnPayload,
+                        dictionary: dictionaryTitle,
+                        dictionaryTotalRows: chunkProgress.totalRows,
+                        contentDictNameList: null,
+                        uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                    }
+                    if (requirementsForChunk === null && typeof peekNextChunk === 'function') {
+                        directChunk.peekNextContentChunk = () => {
+                            const next = peekNextChunk()
+                            if (next === null) { return null }
+                            return {
+                                ...next,
+                                dictionary: dictionaryTitle,
+                                dictionaryTotalRows: chunkProgress.totalRows,
+                                contentDictNameList: null,
+                                uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                            }
+                        }
+                    }
+                    /* eslint-enable @stylistic/semi */
                     const tChunkSinkStart = Date.now();
                     await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
-                        {
-                            ...columnPayload,
-                            dictionary: dictionaryTitle,
-                            dictionaryTotalRows: chunkProgress.totalRows,
-                            contentDictNameList: null,
-                            uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
-                        },
+                        directChunk,
                         requirementsForChunk,
                         chunkProgress,
                     );
