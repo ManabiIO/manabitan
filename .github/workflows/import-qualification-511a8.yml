@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: import-qualification-511a8-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   plan:

@@ -20,7 +20,7 @@ import time
 import zipfile
 
 BASELINE = "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
-CANDIDATE = "c208846fccb076823beb9e323d283fd35fcc70cb"
+CANDIDATE = "93db298f33f3ca3acb22b4d830789e0e5f5c563e"
 EXPECTED_PACKAGE_ENTRIES = (
     'js/dictionary/dictionary-database.js',
     'js/dictionary/term-index-hash.js',
