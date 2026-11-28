@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "vndb-raw-alias-component-da6c4",
+  "status": "Frozen prospectively by root before acquisition; not yet executed",
+  "scope": "Immutable captured native-input storage component only; no production integration, complete-import latency claim, or browser peak-memory claim.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "node": "22.22.0",
+  "fixtureBinding": {
+    "lockPath": "test/perf/dictionaries.lock.json",
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dictionary": "vndb",
+    "rows": 6648310,
+    "parserGroups": 170,
+    "selectedGroups": [
+      0,
+      1,
+      2,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "selectedRows": 400000,
+    "affectedGroups": [
+      1,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "affectedRows": 320000,
+    "baselineFinalRuns": 32,
+    "candidateExpectedFinalRuns": 10,
+    "existingFallbackRuns": 30,
+    "unchangedPreparedControlRuns": 2
+  },
+  "retainedCapture": {
+    "manifestSha256": "9b0e9360aa091613674d6288491d5f9f7c520e8bb2801b9bfc83a18393c09460",
+    "binaryPayloadBytes": 43338896,
+    "totalBytes": 43508543,
+    "availability": "Local original volume unavailable; root auditing archived checkpoint. Regeneration must independently reproduce retained structural and binary source witnesses."
+  },
+  "contentSeed": {
+    "bytes": 7533449,
+    "sha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+    "boundary": "Complete baseline corpus content tail, not each group's real import-time tail.",
+    "adapter": "Fresh lazy file-backed adapter each observation; reads occur on slice().arrayBuffer(), not during prepare; fresh ordinary read caches."
+  },
+  "arms": {
+    "A": "Unchanged frozen record sink on original complete native chunks/resolved references.",
+    "B": "Same sink; for immutable captured mixed groups only, canonical raw reads, real existing-latch compressed aliases, private record-only reference overlay, original whole native prepared lookup payload. No global canonical metadata/cache promotion.",
+    "C": "Identical source and behavior to A; independent fresh process."
+  },
+  "schedule": {
+    "blocks": 12,
+    "permutations": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC",
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ],
+    "observations": 36,
+    "passesPerObservation": 1,
+    "groupsPerPass": 10,
+    "freshChildProcessPerObservation": true,
+    "componentWarmups": 0,
+    "retries": 0,
+    "outlierDeletion": false
+  },
+  "setupOutsideTiming": [
+    "Hash and validate source, lock, runtime and exact captured binary inputs; preserve original object/buffer aliases.",
+    "Create fresh content and record stores using normal production-derived geometry/budgets; copy exact complete content seed to private output; initialize empty ordinary read caches.",
+    "Initialize normal codec lifecycle equally for every arm. No candidate-only codec calls, cached alias reads, record-encoder warmups or tiny-append prewarm.",
+    "Restore exact original firstId gaps before each selected group without changing persisted row IDs; source/capture loading and explicit GC remain outside timing."
+  ],
+  "primaryEndpoint": "One monotonic elapsed interval covering all10 real record sink calls plus mandatory recordStore.endImportSession() and contentStore.endImportSession(). B includes all candidate selection/validation, canonical reads, tiny compression/append, overlays and physical write drainage. No parallel cohorts or background heavy study.",
+  "codecScope": "Existing wrapped batch implementation uses the initialized owner-thread codec for a one-block alias. Do not force a different worker path, change codec/level/block targets or bypass the dictionary selection latch.",
+  "diagnostics": [
+    "Per-group append elapsed; alias logical read requests/returned bytes; actual lazy file read calls/bytes; alias pack/compress/envelope/reference/append counters; record encode/lookup/field/validation counters; finalization elapsed; process CPU delta; bounded buffer/copy byte accounting.",
+    "Counters with overlapping lifetimes are not summed as a serial budget. Memory receipts and allocation counts are not browser peak memory."
+  ],
+  "witnesses": {
+    "logicalRawReferences": 175,
+    "distinctRawRecords": 2,
+    "rawRecordLengths": [
+      617,
+      338
+    ],
+    "perGroupAliasEntries": 8,
+    "aliasRawInputBytes": 2983,
+    "aliasFixedEnvelopeAndReferenceBytes": 256,
+    "aliasFixedBytesRule": "Eight one-entry blocks; each12-byte envelope +20-byte compact reference. Zstd frame bytes are additional and measured.",
+    "baselineAffectedLookupPayloadBytes": 17306784,
+    "candidateAffectedLookupPayloadBytes": 16876960,
+    "grossLookupPayloadReductionBytes": 429824,
+    "semantic": "Every400000 row retains original global ID, expression/reading bytes and equality sentinel, score, normalized sequence, full definition bytes and lookup/posting behavior; compare full decoded sidecars and cold reopened reads outside timing.",
+    "physical": "A/C whole physical outputs must be deterministic and equal. B is allowed a distinct explicitly recorded layout; each whole prepared lookup payload must match the original native map bytes exactly; completed seed prefix stays byte-identical; actual alias bytes/frames and record/header sizes reconcile. No A/B physical-byte-equality claim.",
+    "ownership": "All source columns/bytes/maps are hash-guarded before and after every observation; generic callers and post-await mutation semantics are outside this immutable experiment and remain a blocking production design gate."
+  },
+  "eligibilityRules": [
+    "No dictionary-name or two-entry special case in implementation.",
+    "Only an actually mixed group with existing compressed target descriptor and supported raw descriptors; uniform raw/target groups keep A behavior.",
+    "Only validated captured native whole prepared map/owned stable columns; no generic map-shape shortcut or factory-origin-as-immutability claim.",
+    "Use existing selected-dictionary latch and source/format bounds; retain ordinary4GiB offset-span fallback without forcing whole maps.",
+    "No alias changes to canonical dedup IDs, hash tables, cache mappings or logical dedup counters; snapshot/check any available seeded metadata outside timing.",
+    "Apply the frozen aliasAdmissionBounds; reject other formats or larger sets without partially appending any aliases."
+  ],
+  "failurePolicy": "Preserve exact commands, sources, seed/capture identities, stdout/stderr, observations acquired so far and failure. No selective rerun; setup/correctness/route failure invalidates performance qualification. Finish or drain every initiated read/append before close/rollback.",
+  "reporting": {
+    "statistics": [
+      "All36 raw observations and per-group durations.",
+      "Within each block B/A and B/C ratios and absolute differences; medians, faster-pair counts, equal-work sums and same-code C/A separately.",
+      "No pooling with previous subset, other hosts, old profiles, or future complete-import cohorts."
+    ],
+    "decision": "Advance only to consider production implementation and a separate fixed complete-browser qualification if every mechanical screen gate below passes. This component never qualifies a PR speed claim."
+  },
+  "frozenAtUtc": "2026-11-28 05:25:02 UTC",
+  "advanceCriteria": {
+    "complete": "All36 prescribed observations and all source, route, semantic, lookup and storage checks must pass. An incomplete or failed cohort supports no performance conclusion.",
+    "pairedComparisons": [
+      "B/A",
+      "B/C"
+    ],
+    "medianDeltaMsAtMost": -10,
+    "medianDeltaPercentAtMost": -10,
+    "bootstrap": {
+      "replicates": 20000,
+      "seed": 894660,
+      "seedHex": "0x000da6c4",
+      "generator": "xorshift32: x^=x<<13; x^=x>>>17; x^=x<<5; state=x>>>0; u=state/4294967296",
+      "sampling": "Resample12 complete ABC blocks with replacement, choosing floor(u*12). Use the same resampled block indexes for all statistics in each replicate; preserve within-block pairing.",
+      "statistic": "Median paired differences and median paired percentage changes, calculated separately against A and C; paired C/A percentage drift retained.",
+      "interval": "Descriptive95% percentile interval with type7 linear interpolation at0.025 and0.975 over sorted bootstrap medians.",
+      "upperBounds": "Strictly negative for both millisecond and percentage intervals against each control.",
+      "interpretation": "Descriptive sensitivity of this fixed12-block cohort, not a claim of population generality."
+    },
+    "fasterBlocksMinimum": 9,
+    "equalWork": "Sum of B endpoint durations must be strictly lower than sum of A and strictly lower than sum of C.",
+    "controlDrift": "abs(median(100*(C-A)/A)) must be strictly less than0.5*min(abs(median(100*(B-A)/A)),abs(median(100*(B-C)/C))).",
+    "otherEvidence": "Retain every order effect, tail, group duration and A/C observation; no favorable-only reruns or outlier deletion.",
+    "classification": "Any missing validation or observation: failed/incomplete, no performance conclusion. A complete cohort failing any mechanical advance gate: inconclusive for advancement, even if another statistic is favorable. Clear regression may additionally be reported descriptively.",
+    "endpoint": "All thresholds use the same primary10-group pass endpoint including both store finalizations, never selected subphase clocks."
+  },
+  "protocolRevision": 2,
+  "supersedesUnreferencedBlob": "88d6456d3c54ea822e13678d036aeae3a614f8c0",
+  "aliasAdmissionBounds": {
+    "maximumDistinctCanonicalRawV6EntriesPerMixedGroup": 64,
+    "maximumAliasInputBytesPerMixedGroup": 65536,
+    "rawDescriptor": "raw-v6",
+    "target": "One existing target compact-block family in this mixed group.",
+    "latch": "The existing dictionary compression session must already be selected; baseline selection/savings/block settings remain unchanged.",
+    "scope": "Prospective immutable component bounds only; not a proposed production policy. No dictionary-name or two-entry special case and no tuning after acquisition."
+  },
+  "sourceBindingRule": "Before acquisition, freeze a companion manifest containing the exact experiment commit/tree, this protocol blob SHA, runner/adapter/promotion/capture-helper/test hashes, frozen production runtime hashes, fixture/seed/capture hashes and generated support hashes. Refuse any mismatch. No source selection from a mutable branch name. Harness source correction before acquisition must preserve prior source and failed receipts; no mutation after observations begin."
+}

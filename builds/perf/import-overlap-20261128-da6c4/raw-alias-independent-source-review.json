@@ -1,0 +1,46 @@
+{
+  "schema": "manabitan.raw-alias-final-source-review.v1",
+  "reviewer": "import_history",
+  "result": "No remaining concrete source-level blocker found after requested setup-binding fixes. Runtime gates remain mandatory and unexecuted.",
+  "bindings": {
+    "handoff": "3916655ac01a1fc2364518164c3aa9a72841ba25",
+    "orchestrator": "896c49967a816fd1c2974506a9e7903f7bd1f8c5",
+    "sourceManifest": "434940a4e0e54045f4a8cfe56598ffcc9981c5be",
+    "arm": "1e95ab3096359ea7361dc94620fb63af9c4d5f15",
+    "bridge": "9d7dedefd42c68d60d6b4f99f9d40af9b4eeb79a",
+    "workflow": "412e9c801f4e073b24c3a64c4f8857e9747ae4a2",
+    "reporter": "f7dfe6cd4576bf9a9e0b842f1fb3eae2d720fe44",
+    "analysis": "eed55f4c848a9eb3d92e22bed092c7e2fed4060f",
+    "verifier": "35885a2397bd5ed41eb65424d375a45ed7a3f511",
+    "protocol": "83930b97ad2fc05697dbf83455229fe148962010",
+    "adapter": "07cee5410f4ed1d10bfcea434ef83be19828f59f",
+    "adapterTests": "29201b35055422b180b15a31515bf3d548581f33",
+    "ownershipAudit": "db1329b6a84425d6de8609b3c9b28d9666ac59ce",
+    "productionCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  },
+  "checks": [
+    "Research HEAD must match GITHUB_SHA when supplied; exact experiment tree, workflow SHA256 and protocol Git blob are recorded before fixture acquisition.",
+    "All harness/workflow/protocol paths must be tracked and clean at the research HEAD; frozen runtime commit/tree, generated support, package lock and fixture/evidence identities are separately checked.",
+    "The unchanged fixed 36 fresh-child observations use all six ABC permutations twice, zero component warmups and no retry.",
+    "B selection, canonical raw reads, actual existing-latch compression/append, overlay construction and record sink are inside the endpoint. Both stores are finalized via allSettled inside the same primary clock.",
+    "All started workers are ultimately awaited in finally. Successful observations reject unexpected worker failures/exits and assert parent-resource plus filesystem lock/staging quiescence after worker termination.",
+    "Source/capture ownership hashes, complete decoded row/content checks, exact native B payloads and normalized A/C physical equality remain outside the clock. Reopened lookup probes are additional checks, not an exhaustive per-key query benchmark.",
+    "Fixed arithmetic requires both 10ms and 10% median paired savings, 9/12 faster blocks against each control, lower B equal-work totals, negative upper bootstrap interval endpoints in ms and percent, and the prescribed C/A drift bound.",
+    "The workflow pins checkout/setup-node/upload-artifact actions, disables persisted credentials, and always attempts both compact stdout reporting and complete/partial artifact retention.",
+    "The compact reporter exposes actual endpoint and group durations, identity/proof fields, worker and cleanup failures, and bounded failed-phase log tails, without fabricating absent values."
+  ],
+  "unchangedTimedRegion": {
+    "priorArm": "060c7e4f98e9b4334f6e14d3a18255910ab16e15",
+    "currentArm": "1e95ab3096359ea7361dc94620fb63af9c4d5f15",
+    "comparison": "Exact string equality from operationsStart declaration through the timed endpoint/report assignments before memoryAfterTiming.",
+    "characters": 2244,
+    "identical": true
+  },
+  "limits": [
+    "No Node real-file/worker tests, corpus regeneration, artifact decoding or timing executed by this review.",
+    "Filesystem operation diagnostics are owner-thread observations and Node API invocation counts, not total cross-thread or kernel-syscall counts.",
+    "Lazy File/Blob subclasses support the actual overridden read path; native Blob composition/cloning of those views is unsupported.",
+    "The component uses immutable captured inputs and appends at the completed baseline content tail. It does not establish a production cross-await ownership capability or real import-time alias placement.",
+    "A passing component only earns consideration of separately measured ownership implementation and whole-browser qualification. It is not a PR speed or product-readiness claim."
+  ]
+}

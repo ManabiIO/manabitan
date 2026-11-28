@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "status": "Prospective source handoff; no Node, corpus or timing execution has occurred",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "protocolSha256": "bed962679c7b0b86d96d9ebcd1c47d62a8f667ed05afe8828b7c1d0399f6f962",
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+    "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+    "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+    "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+    "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+    "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+    "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+    "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+    "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+    "ext/js/dictionary/term-record-opfs-store.js": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+    "ext/js/dictionary/term-content-opfs-store.js": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+    "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+    "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+    "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+    "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+    "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+    "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+    "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+    "ext/js/dictionary/term-record-import-index-worker-client.js": "789cc3e561b3d0dee8b2392686e3d8fb5bc4ee9c37b79d71968685b7f9168afd",
+    "ext/js/dictionary/term-record-import-index-worker.js": "b3c37ab9f128e4ffda68720f48612874acacf0ae520c7b6d968d063f12b69974",
+    "ext/js/dictionary/term-record-import-index-writer.js": "ec650fdf525642cf5340ca1da7a928d65b9a68e770847c3b08b17a2d3a5c1585"
+  },
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true
+  },
+  "harnessHashes": {
+    "raw-alias-capture.mjs": "9fa3e0af02e3854ca88b800647fb4e2a5d56ffc4069c709919de5f433b3dafb5",
+    "raw-alias-capture-route.mjs": "b48f1cbe31647ee32dd8c299116f58166014aaad788cdc9ab457b21e9cca777b",
+    "raw-alias-promotion.mjs": "e7ea9c85db4963188c8631689715b0c12dc108234d9192bf6f72af70fbd73928",
+    "raw-alias-verify.mjs": "8326cdfbc082ff4da138c2b171bdf2500ba08c26697a64e358cd7fa8e9114b16",
+    "raw-alias-arm.mjs": "7ff1090cec71b0bacb90c888f49a29fc75dfa7006619f9b3a2e8abf11570c290",
+    "raw-alias-worker-bridge.mjs": "78b65a1d699f3373476f6bd0fd7b9a8a8ee4c479d196dd090e9e48144551799a",
+    "raw-alias-analysis.mjs": "09d5e86946c0d272847c86d96fd788eceeec07c623c6e9493be482233617d68c",
+    "raw-alias-analysis.test.mjs": "5112cf54dc4bc130a6ae37429bccdd54994faa9f7203134b56b558b56030a78d",
+    "raw-alias-node-opfs.mjs": "6591a3b882169007f7825a7e242a3264c87fac75c278bbf80e2920b073c6f92b",
+    "raw-alias-node-opfs.test.mjs": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39",
+    "run.py": "ed7e0e92a8d56b1af04bf4c30d95d3b1909d8903fafa61f907c8f9381b7155fb",
+    "README.md": "24198e1f0a788b48e3d0135023ecd39d388917377f1ea52119b5b32a1e34a125",
+    "report.py": "5a377ab896add0a82ea6235804add345e43b219b5dbcaa542c845cd3a6bd3897"
+  },
+  "archives": [
+    {
+      "path": "builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz",
+      "sha256": "0b10131113eab3c5a627c5a009d1c2cbcaa222abdff2989b7fc306ba6e123bc1",
+      "members": [
+        {
+          "path": "profiling/compression-groups/vndb/manifest.json",
+          "bytes": 1014890,
+          "sha256": "df0bba78956b41c2949c5b6baa95853c60ec55c10aa9ea2ff3e2ccbcc3a7862e"
+        },
+        {
+          "path": "profiling/production-group-loader.mjs",
+          "bytes": 3745,
+          "sha256": "1f4ed0a2c36c8160fac7ae413bc9d73cbc3b0a7fac25395795f287329f1abbe5"
+        },
+        {
+          "path": "profiling/compression-worker-node-bridge.mjs",
+          "bytes": 1143,
+          "sha256": "7b2dcf0346a78bb5070d3b43fa513f3f9ebd150c1c9f0416df45a5b99f1a0315"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-overlap-20261128-da6c4/components-v2.tar.gz",
+      "sha256": "8d426c47c2921d0f66d7b963ce66cefde4c26a8330ce87419aeec743d2112fae",
+      "members": [
+        {
+          "path": "profiling/vndb-record-route-replay.mjs",
+          "bytes": 20466,
+          "sha256": "fa2fa3ee97cbd07c3a41bd5fdb7ccdf67c3db084bac9e81ca4c52558537e7b4f"
+        },
+        {
+          "path": "profiling/vndb-record-route-full.json",
+          "bytes": 1079719,
+          "sha256": "7a109633b54fe5a10fc86f83bb28e83de8dbc4bd9b43c24d733b74a732cdfd02"
+        }
+      ]
+    }
+  ],
+  "captureRouteAdaptation": {
+    "originalSourceSha256": "fa2fa3ee97cbd07c3a41bd5fdb7ccdf67c3db084bac9e81ca4c52558537e7b4f",
+    "scope": "Eleven explicit environment-path/capture-hook substitutions, plus failure completeness clearing and all-settled worker termination. Native parser, dedup, compression, metadata publication and record routing logic remain unchanged.",
+    "expectedRouteWitnessSha256": "569d56dd9e4fb94ef3c33561f43439d61c2858ab360116d9657a1bcfe9a74a82",
+    "maximumRetainedCaptureBytes": 67108864
+  },
+  "workflowSha256": "3719b3d09996993a0c638061ec1e51e9ded1840c40c653a411b9b3f51bf4f6eb",
+  "workflowPath": ".github/workflows/perf-raw-alias-component.yml",
+  "protocolBlob": "83930b97ad2fc05697dbf83455229fe148962010"
+}

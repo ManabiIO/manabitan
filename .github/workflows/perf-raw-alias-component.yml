@@ -1,0 +1,52 @@
+name: Raw alias component research
+
+on:
+  push:
+    branches:
+      - perf/vndb-raw-alias-component-20261128-da6c4
+    paths:
+      - dev/perf/raw-alias-da6c4/**
+      - .github/workflows/perf-raw-alias-component.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  component:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout immutable research source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up fixed Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Syntax-check orchestration
+        run: python3 -m py_compile dev/perf/raw-alias-da6c4/run.py dev/perf/raw-alias-da6c4/report.py
+      - name: Fixed acquisition and component cohort
+        run: |
+          python3 dev/perf/raw-alias-da6c4/run.py \
+            --repository "$GITHUB_WORKSPACE" \
+            --workspace "$RUNNER_TEMP/raw-alias-work" \
+            --output "$RUNNER_TEMP/raw-alias-output"
+      - name: Report compact complete and partial receipts
+        if: always()
+        run: python3 dev/perf/raw-alias-da6c4/report.py "$RUNNER_TEMP/raw-alias-output"
+      - name: Preserve complete and partial evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: raw-alias-component-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/raw-alias-output
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6

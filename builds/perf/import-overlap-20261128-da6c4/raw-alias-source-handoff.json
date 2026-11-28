@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "status": "Source-reviewable hosted research study; unexecuted",
+  "proposedBranch": "perf/vndb-raw-alias-component-20261128-da6c4",
+  "runtimeCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "artifactPrefix": "raw-alias-component",
+  "files": [
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-capture.mjs",
+      "blob": "73d232c74adcbd156c8f030734cc31acb084e645",
+      "sha256": "9fa3e0af02e3854ca88b800647fb4e2a5d56ffc4069c709919de5f433b3dafb5",
+      "bytes": 12787,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-capture-route.mjs",
+      "blob": "a3260c86a7696cad143c082e58665bad06855265",
+      "sha256": "b48f1cbe31647ee32dd8c299116f58166014aaad788cdc9ab457b21e9cca777b",
+      "bytes": 21811,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-promotion.mjs",
+      "blob": "1b3ab5230f1857ddc19d6649e532a46777f27b95",
+      "sha256": "e7ea9c85db4963188c8631689715b0c12dc108234d9192bf6f72af70fbd73928",
+      "bytes": 5725,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-verify.mjs",
+      "blob": "35885a2397bd5ed41eb65424d375a45ed7a3f511",
+      "sha256": "8326cdfbc082ff4da138c2b171bdf2500ba08c26697a64e358cd7fa8e9114b16",
+      "bytes": 20104,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-arm.mjs",
+      "blob": "1e95ab3096359ea7361dc94620fb63af9c4d5f15",
+      "sha256": "7ff1090cec71b0bacb90c888f49a29fc75dfa7006619f9b3a2e8abf11570c290",
+      "bytes": 17750,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-worker-bridge.mjs",
+      "blob": "9d7dedefd42c68d60d6b4f99f9d40af9b4eeb79a",
+      "sha256": "78b65a1d699f3373476f6bd0fd7b9a8a8ee4c479d196dd090e9e48144551799a",
+      "bytes": 1802,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-analysis.mjs",
+      "blob": "9dff7517b2e958eab38727c11f09923fffa4e813",
+      "sha256": "09d5e86946c0d272847c86d96fd788eceeec07c623c6e9493be482233617d68c",
+      "bytes": 9725,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-analysis.test.mjs",
+      "blob": "f1fe6d5bbc6b8bf58a97b018441cc60a3e3374f8",
+      "sha256": "5112cf54dc4bc130a6ae37429bccdd54994faa9f7203134b56b558b56030a78d",
+      "bytes": 2239,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-node-opfs.mjs",
+      "blob": "07cee5410f4ed1d10bfcea434ef83be19828f59f",
+      "sha256": "6591a3b882169007f7825a7e242a3264c87fac75c278bbf80e2920b073c6f92b",
+      "bytes": 27551,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/raw-alias-node-opfs.test.mjs",
+      "blob": "29201b35055422b180b15a31515bf3d548581f33",
+      "sha256": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39",
+      "bytes": 17037,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/run.py",
+      "blob": "896c49967a816fd1c2974506a9e7903f7bd1f8c5",
+      "sha256": "ed7e0e92a8d56b1af04bf4c30d95d3b1909d8903fafa61f907c8f9381b7155fb",
+      "bytes": 20170,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/README.md",
+      "blob": "f0c080b9ca485442bc9a99c9af64866d5863c878",
+      "sha256": "24198e1f0a788b48e3d0135023ecd39d388917377f1ea52119b5b32a1e34a125",
+      "bytes": 6180,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/protocol.json",
+      "blob": "83930b97ad2fc05697dbf83455229fe148962010",
+      "sha256": "bed962679c7b0b86d96d9ebcd1c47d62a8f667ed05afe8828b7c1d0399f6f962",
+      "bytes": 10891,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/source-manifest.json",
+      "blob": "434940a4e0e54045f4a8cfe56598ffcc9981c5be",
+      "sha256": "3ee27d924d622ff4b1ce21f8169c38e7b98d7466596c886e2a2df56192fe60e7",
+      "bytes": 7156,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": ".github/workflows/perf-raw-alias-component.yml",
+      "blob": "412e9c801f4e073b24c3a64c4f8857e9747ae4a2",
+      "sha256": "3719b3d09996993a0c638061ec1e51e9ded1840c40c653a411b9b3f51bf4f6eb",
+      "bytes": 1798,
+      "status": "authored source; no Node or corpus execution"
+    },
+    {
+      "path": "dev/perf/raw-alias-da6c4/report.py",
+      "blob": "f7dfe6cd4576bf9a9e0b842f1fb3eae2d720fe44",
+      "sha256": "5a377ab896add0a82ea6235804add345e43b219b5dbcaa542c845cd3a6bd3897",
+      "bytes": 4783,
+      "status": "authored source; no Node or corpus execution"
+    }
+  ],
+  "reviews": [
+    {
+      "reviewer": "critical_path",
+      "scope": "Graph capture/loader, immutable boundary and semantic arm/verifier",
+      "outcome": "No semantic blocker found; requested full64MiB JSON bound and unexpected worker-exit latch/final assertion; both applied."
+    },
+    {
+      "reviewer": "import_history",
+      "scope": "Promotion boundary, original route adaptation, lazy file adapter and quiescence",
+      "outcome": "No immutable promotion blocker; requested failure completeness clearing/all-settled capture cleanup; applied. Authored adapter has18 deterministic Node tests, not executed."
+    },
+    {
+      "reviewer": "baseline_profile",
+      "scope": "Adapter lifecycle and fixed arithmetic",
+      "outcome": "Actual store paths match lazy range reads/incremental writes and worker-handle revival. Arbitrary Blob composition/read-only browser concurrency remain outside scope. Six synthetic arithmetic cases passed in V8 only; Node gates remain pending."
+    }
+  ],
+  "gatePolicy": "No corpus acquisition until exact source/protocol binding and Node syntax/adapter/arithmetic gates pass. No timing retry, warmup, data deletion, product implementation or PR is included.",
+  "evidenceScope": "Fresh36 observations over ten actual groups. Canonical raw reads, physical alias writes at completed seed tail, record sink and both finalizations included. Separate private production ownership and whole-browser qualification required after any component advance.",
+  "sourceBindingNote": "Original post-v2 capture is inaccessible. New source-bound170-group native/route reconstruction must match original route/prepared-map receipts and exact content seed; it produces a new capture identity.",
+  "revision": "Pre-acquisition source binding and connector-visible reporting repairs; endpoint/criteria unchanged",
+  "sourceSetupCorrections": [
+    "Immutable action SHAs, persist-credentials:false, github.sha ref, full history and30-day evidence retention",
+    "Verify researchHEAD/tree, GITHUB_SHA, all tracked clean experiment files, exact workflow bytes and exact committed protocol Git blob before corpus acquisition",
+    "Carry research/workflow/protocol identity into pre-acquisition receipt and each observation",
+    "Always-run compact source/setup/route/capture/observation/analysis/failure-log output, including partial/invalid receipts",
+    "Initialization/source binding errors are inside setup failure reporting; full64MiB guard additionally includes original/new route and source-manifest proof metadata"
+  ]
+}

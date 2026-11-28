@@ -1,0 +1,127 @@
+{
+  "schema": "manabitan.raw-alias-production-ownership-audit.v1",
+  "inspectedAtUtc": "2026-11-28 05:38:48 UTC",
+  "scope": "Read-only production feasibility audit. No new protocol, product implementation, execution, or performance claim.",
+  "conclusion": "No existing capability in frozen 9e10 safely attests to native whole-map and all relevant record/reference columns across the proposed canonical-read and alias-compression awaits. The immutable-capture component does not resolve this production requirement.",
+  "baseline": {
+    "repository": "ManabiIO/manabitan",
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "sourceBaseUrl": "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/"
+  },
+  "findings": [
+    {
+      "module": "ext/js/dictionary/term-content-ownership.js",
+      "symbols": [
+        "ownedContentBuffers",
+        "registerOwnedTermContent",
+        "takeOwnedTermContent"
+      ],
+      "lines": "24-25, 71-102",
+      "contract": "A one-use WeakSet association for a complete owned content backing buffer, consumed when a recent-source cache adopts it. The producer comments promise that the worker-owned compact content slab is immutable after publication.",
+      "limit": "It covers content bytes only. It does not bind the native prepared lookup payload, key arena, key/row columns, scores, sequences, resolved offsets/lengths, chunk identity, or their lifetime. The registration API itself is exported and relies on its intended internal worker-result call site."
+    },
+    {
+      "module": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "symbols": [
+        "runParallelParserJob",
+        "copyWasmBackedColumnChunk"
+      ],
+      "lines": "3717-3758, 4111-4225",
+      "contract": "The worker receive path registers only owned content. The copy helper constructs stable independent record columns and retains/copies prepared payloads as required for worker transfer.",
+      "limit": "There is no receiver-side lookup/record ownership capability or immutable cross-await lease. Physical ArrayBuffer transfer and detachment prevent the sending worker from mutating its former buffers; they do not prevent recipient code or a generic callback from mutating received arrays."
+    },
+    {
+      "module": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "symbols": [
+        "parse",
+        "collectChunkTransferables"
+      ],
+      "lines": "127-184, 209-239, 249-296",
+      "contract": "The worker immediately copies native-backed fields and transfers ordinary ArrayBuffer columns and prepared bytes, with shared content handled separately.",
+      "limit": "The result message carries content ownership and borrowed-memory flags, but no native whole-lookup producer capability that is validated and retained by the receiver."
+    },
+    {
+      "module": "ext/js/dictionary/term-record-opfs-store.js",
+      "symbols": [
+        "resolvedContentReferenceOrigins",
+        "createArtifactTermRecordChunkWithResolvedContent",
+        "getSynchronousResolvedContentReferences",
+        "appendBatchFromArtifactChunkResolvedContent",
+        "_encodeAndAppendArtifactChunkForState"
+      ],
+      "lines": "116, 341-410, 2165-2372, 2456-2578",
+      "contract": "The private factory-origin WeakMap proves object identity only. Plain native nonshared columns can be read consistently within a synchronous scan; current columns and values are rechecked for every run after awaits.",
+      "limit": "The factory is exported, and its result/columns remain mutable. The sink awaits next-ID readiness and shard readiness before encoding and awaits each append. The ordinary 4-GiB offset-delta fallback can create later runs. A gate at alias admission cannot replace these current post-await semantics."
+    },
+    {
+      "module": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "symbols": [
+        "compactTermRecordPreinternedPlanRuns"
+      ],
+      "lines": "404-439",
+      "contract": "Validates one source arena and compacts bounded runs synchronously.",
+      "limit": "The explicit contract says that no validation token survives a call or crosses an await; it does not establish an immutable source capability."
+    },
+    {
+      "module": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "symbols": [
+        "isCompletePreparedTermLookupIndex",
+        "hasCompletePreparedTermLookupIndexes"
+      ],
+      "lines": "212-249",
+      "contract": "Checks dimensions, coverage, plan completeness and nonempty payload before trusting a worker result's route.",
+      "limit": "The source explicitly defers prepared payload integrity validation until sidecar load. It is not a native-producer or immutable-content witness. Generic mixed-content callers currently discard prepared bytes and regenerate from columns; aliasing them to a uniform family would newly consume bytes that the old route ignored."
+    }
+  ],
+  "existingWork": [
+    {
+      "kind": "pull-request",
+      "url": "https://github.com/ManabiIO/manabitan/pull/820",
+      "state": "open draft, unmerged; current description remains HOLD",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "tree": "9c34079709e7b8f6cae6b61c9ef537bb965ebcee",
+      "branch": "perf/r2-transfer-20261123-fcff",
+      "symbols": [
+        "ownedWholeChunkLookupSources",
+        "getOwnedWholeChunkLookupColumns"
+      ],
+      "modules": [
+        "ext/js/dictionary/term-bank-wasm-parser.js",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "actualScope": "Worker-local native-producer and descriptor association used for immediate transfer-boundary reuse of owned key bytes, key lengths and Uint16 expression IDs. Reading IDs still copy; generic calls retain the ordinary copying path; retained materialized records copy a tightly sized key arena.",
+      "lifetimeLimit": "The helper's own comment explicitly says the private ownership association does not survive worker transfer and does not cache validation of an external prepared plan. Descriptor identity does not make in-place bytes immutable. This is not a receiver-to-sink cross-await capability.",
+      "qualificationUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280"
+    },
+    {
+      "kind": "active-independent-experiment",
+      "branch": "perf/owned-whole-lookup-plan-20261128-92c09",
+      "head": "9eef39ef86e1fc41d0f6e8ed64fa685d0fc4abbc",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "compareUrl": "https://github.com/ManabiIO/manabitan/compare/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2...9eef39ef86e1fc41d0f6e8ed64fa685d0fc4abbc",
+      "symbols": [
+        "activeOwnedWholeLookupPlanReceipt",
+        "createOwnedWholeLookupPlanReceipt",
+        "takeOwnedWholeLookupPlan"
+      ],
+      "actualScope": "One-use capability for the worker's synchronous, unmodified native callback result, allowing owned key/length/expression subviews in the outgoing result.",
+      "lifetimeLimit": "The parser sets the active receipt only around the direct onChunk invocation and clears both active and local receipts in finally before awaiting the callback result. The copy helper consumes it once. No receipt survives to receiving import worker or to asynchronous sink continuation.",
+      "noveltyBoundary": "This and #820 already cover copy-elision at the worker boundary. Do not duplicate either or relabel its producer receipt as an alias-promotion lifetime solution."
+    }
+  ],
+  "requiredBoundaryIfComponentEarnsFurtherWork": {
+    "currentAction": "Do not design or implement a production ownership protocol before the frozen cost-inclusive component demonstrates a material gain.",
+    "requirement": "A new narrowly private producer/receive-to-sink ownership contract or private immutable snapshot would be required. Its allocation, validation, transfer/lifetime and cleanup costs must enter subsequent qualification rather than being assumed free.",
+    "genericFallback": "All generic, caller-supplied, factory-created-without-producer-proof, shared, accessor-backed, replaced, partial or otherwise unproven inputs retain the existing mixed-content split, fresh validation and lookup rebuilding behavior. Do not treat prepared-map shape, exported factory origin, descriptor identity, or a one-time mutable-input check as immutable ownership.",
+    "asyncRisk": "Keep all relevant columns and prepared bytes safe across canonical raw reads, alias append/compression, sink setup, and every actual record append until settled. Preserve ordinary 4-GiB split/error behavior and old post-await mutation observations on generic paths.",
+    "componentInterpretation": "A passing immutable-capture component would establish only a cost/semantic result for those immutable captured inputs and its documented physical layout. It would not establish production provenance, generic-call parity, real import-time alias placement, whole-browser gain, or product readiness."
+  },
+  "validation": {
+    "method": "Primary repository source and current PR/branch metadata read through GitHub connector.",
+    "executedTests": false,
+    "productEdits": false
+  }
+}
