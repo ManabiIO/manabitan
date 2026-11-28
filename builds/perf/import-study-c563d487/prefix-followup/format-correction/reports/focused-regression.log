@@ -1,0 +1,13 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/preflight-root
+
+(node:22) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  1 passed (1)
+      Tests  73 passed (73)
+   Start at  01:55:52
+   Duration  814ms (transform 276ms, setup 29ms, import 326ms, tests 272ms, environment 0ms)
+

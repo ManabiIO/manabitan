@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "complete": true,
+  "scope": "One excluded JMdict mechanics rehearsal; unchanged baseline JavaScript plus an explicitly supplied instrumented module. No product-build, speed, complete-import or memory qualification.",
+  "timingPolicy": "The unchanged runner emits incidental duration fields; every duration from this child is excluded from all comparisons. Zero warmups; one excluded full-corpus pass; zero measured observations.",
+  "recordedAtUtc": "2026-11-28T07:04:20.718942+00:00",
+  "acquisitionCount": 1,
+  "measuredObservations": 0,
+  "childExitCode": 0,
+  "originalDriverFailure": {
+    "type": "postprocessing schema mismatch",
+    "message": "'recentContentDedupHitCount'",
+    "reason": "The earlier numeric component receipt does not contain per-group or recent-content counters. Its all-row semantic/index/dedup/media digest and supported workload fields still provide the unchanged baseline oracle. Every new diagnostic total and group is checked against the frozen prospective observer values.",
+    "receipt": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-jmdict-rehearsal/result.json",
+    "sha256": "9063cc5a6ce784359636def109f778af7fd9e2ba82d803dadac303886f8808fc",
+    "driverSha256": "dacf33e1ec16e1f7fc43d8c37a6a99af2e0f24458424c45868cfb4effd303125",
+    "preservedUnchanged": true
+  },
+  "rawReceipt": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-jmdict-rehearsal/diagnostic.stdout.json",
+  "rawReceiptSha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+  "rawStderrSha256": "4a8a4aa028bd629215455e068f1f1bc675b0fe00d3ce9ce98b3400b3d9ea6666",
+  "auditorSha256": "7ed72143521a4f3ddb87da14c2bd155614a135c92f9fc26d9502e50e6e36baf4",
+  "sourceRoot": "/workspace/scratch/c563d487c718/manabitan",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineCMetadataSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "externalDiagnosticWasmSha256": "f1b146a3ba7fc77b226dbeea384b100a71317293515163cf5bcf9da82c66f942",
+  "externalDiagnosticProductCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "externalDiagnosticInstrumentedCSourceSha256": "71cd3b168a7014a4bbbeb01553a8eb623eb45a67e657084e1e903c8d4b16c6dc",
+  "runnerSha256": "8519bfea747260803f87c1358a34f1d4a1ff431de891ffa3603ca70a422a19fa",
+  "expectedMechanicsSha256": "83df64e419d9e72f4af1d799b326b6ee0acf9497bcb4837c2f6d6ee86cee4e83",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "archiveBytes": 15645766,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "diagnosticFieldsSha256": "98f5cc1e64388648fa30c6d12a0f0c41da5f809febecfc9b44a9a914f7bd0eb8",
+  "baselineComparisonReceipt": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-corrected-evidence/jmdict/pair-0-A.stdout.json",
+  "baselineComparisonReceiptSha256": "49060c291cb0e6020f34f5122848c3d73796d4e49fd484a38bac86da8c9d4ba9",
+  "nodeSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "heapMiB": 256,
+  "rows": 528299,
+  "digest": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+  "fullOutputBaselineParity": true,
+  "baselineParityFields": [
+    "rows",
+    "digest",
+    "indexBytes",
+    "archiveSha256",
+    "lockSha256",
+    "flags",
+    "filesPerGroup"
+  ],
+  "sourceHashMapMatchesBaseline": true,
+  "allFrozenExpectedMechanicsMatch": true,
+  "expectedTotalFieldsChecked": 38,
+  "mechanicalCounts": {
+    "keyIdentityRows": 353880,
+    "admissions": 153260,
+    "candidateRecordsInspected": 451418,
+    "noPrefixCandidate": 52900,
+    "selected": 100360,
+    "selectedDistance1": 442,
+    "selectedDistance2": 70219,
+    "selectedDistance3": 19850,
+    "selectedDistance4": 9849,
+    "selectedBytes": 20532360,
+    "selectedAtLeast512": 15206,
+    "selectedAtLeast512Bytes": 10606757,
+    "boundsRejected": 1,
+    "openerRejected": 0,
+    "tailRejected": 19898,
+    "middleRejected": 201,
+    "fullRejected": 158,
+    "hits": 80102,
+    "hitBytes": 18252047,
+    "fullBytesOffered": 18296287,
+    "failedFullBytesOffered": 44240,
+    "maxSelectedBytes": 4522,
+    "maxFailedFullBytes": 786,
+    "originalLookbackZeroRows": 353880,
+    "originalLookbackPositiveRows": 174411,
+    "originalGlossaryReuses": 54629,
+    "totalGlossaryReuses": 134731,
+    "priorStreakRows": 154409,
+    "recentContentHits": 154413,
+    "rows": 528299,
+    "budgetPositiveRows": 116643,
+    "budgetRefreshByRecentStreak": 26837,
+    "definitionLengthRejected": 286451,
+    "rulesLengthRejected": 4523,
+    "definitionSignatureRejected": 59653,
+    "rulesSignatureRejected": 431,
+    "hitDistance1": 18,
+    "hitDistance2": 59529,
+    "hitDistance3": 14397,
+    "hitDistance4": 6158
+  },
+  "groups": [
+    {
+      "group": 0,
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 1,
+      "banks": [
+        "term_bank_8.json",
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json",
+        "term_bank_13.json",
+        "term_bank_14.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 2,
+      "banks": [
+        "term_bank_15.json",
+        "term_bank_16.json",
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json",
+        "term_bank_21.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 3,
+      "banks": [
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json",
+        "term_bank_28.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 4,
+      "banks": [
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json",
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 5,
+      "banks": [
+        "term_bank_36.json",
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json",
+        "term_bank_41.json",
+        "term_bank_42.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 6,
+      "banks": [
+        "term_bank_43.json",
+        "term_bank_44.json",
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json",
+        "term_bank_49.json"
+      ],
+      "rows": 70000,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    },
+    {
+      "group": 7,
+      "banks": [
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ],
+      "rows": 38299,
+      "allExpectedMechanicsMatch": true,
+      "expectedFieldsChecked": 38
+    }
+  ]
+}

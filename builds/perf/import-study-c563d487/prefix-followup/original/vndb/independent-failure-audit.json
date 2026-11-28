@@ -1,0 +1,99 @@
+{
+  "completeAudit": true,
+  "qualificationComplete": false,
+  "run": 46110806989,
+  "jobId": 140873688868,
+  "scope": "Original failed route assertion; no measured timing observation or speed conclusion",
+  "toolingHead": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "timedObservations": 0,
+  "failure": {
+    "file": "hosted/run.py",
+    "line": 45,
+    "assertion": "fusedFallbacks == 0 and fusedAttempts == len(groupReceipts)",
+    "actualFusedAttempts": 166,
+    "actualGroupCount": 167,
+    "cause": "The final unchanged singleton bank uses the ordinary nonfused strict route."
+  },
+  "productFiles": {
+    "dev/data/dictionary-wasm/manifest.json": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68"
+  },
+  "wasmBytes": 69209,
+  "smokeModes": 6,
+  "nativeOracle": {
+    "syntheticCases": 1112,
+    "syntheticExportComparisons": 2224,
+    "corpus": {
+      "parse_term_bank": {
+        "banks": 665,
+        "rows": 6648310,
+        "digest": "9a2cd5caec85cf8789eabc7263bb05ea8c6cca940ca519230c6ecd536d55c1be"
+      },
+      "parse_term_bank_with_media_hints": {
+        "banks": 665,
+        "rows": 6648310,
+        "digest": "ff077fb299a9115e608a971f4bb7c66442199561478f90bc744995037fc00c4e"
+      }
+    },
+    "recordsSha256": "2a0decbc96401edd279c78dd842f91c03f662dd284852ec71048cdec041a03e7",
+    "comparisons": 3554
+  },
+  "diagnosticRows": 6648310,
+  "fusedRows": 6640000,
+  "digest": "5dcd5e0ef85feb32eda261441814f369c31950c96590ebd534b4c7a3f4643694",
+  "mechanicalCounts": {
+    "keyIdentityRows": 152,
+    "admissions": 8,
+    "candidateRecordsInspected": 8,
+    "noPrefixCandidate": 0,
+    "selected": 8,
+    "selectedDistance1": 8,
+    "selectedDistance2": 0,
+    "selectedDistance3": 0,
+    "selectedDistance4": 0,
+    "selectedBytes": 3657,
+    "selectedAtLeast512": 0,
+    "selectedAtLeast512Bytes": 0,
+    "boundsRejected": 0,
+    "openerRejected": 0,
+    "tailRejected": 0,
+    "middleRejected": 0,
+    "fullRejected": 0,
+    "hits": 8,
+    "hitBytes": 3657,
+    "fullBytesOffered": 3657,
+    "failedFullBytesOffered": 0,
+    "maxSelectedBytes": 488,
+    "maxFailedFullBytes": 0,
+    "originalLookbackZeroRows": 152,
+    "originalLookbackPositiveRows": 6639682,
+    "originalGlossaryReuses": 6482137,
+    "totalGlossaryReuses": 6482145,
+    "priorStreakRows": 6482124,
+    "recentContentHits": 6482289,
+    "rows": 6640000,
+    "budgetPositiveRows": 6639551,
+    "budgetRefreshByRecentStreak": 6009176,
+    "definitionLengthRejected": 0,
+    "rulesLengthRejected": 0,
+    "definitionSignatureRejected": 0,
+    "rulesSignatureRejected": 0,
+    "hitDistance1": 8,
+    "hitDistance2": 0,
+    "hitDistance3": 0,
+    "hitDistance4": 0
+  },
+  "singleBankGroup": {
+    "group": 166,
+    "banks": [
+      "term_bank_665.json"
+    ],
+    "rows": 8310,
+    "fusedAttempts": 0,
+    "fusedFallbacks": 0
+  },
+  "rawReportSha256": "fbcf86cb12afe2667c319760d35191619a869f073d945bf18eba018798a98d38",
+  "diagnosticReceiptSha256": "2fda72e0f7b3625e1a5aa210f08786d51b8b536f73672c1d90e4595f06720118",
+  "auditScriptSha256": "2837754cd6b4045b9339c8691bdbceb7563d4794674d7e26522dd3be36090de4"
+}

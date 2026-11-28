@@ -1,0 +1,33 @@
+{
+  "gate": "full-scoped-eslint",
+  "scope": "Separate untimed local QA on corrected copies; no original cohort rerun",
+  "command": [
+    "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+    "--max-old-space-size=256",
+    "/workspace/scratch/c563d487c718/manabitan/node_modules/eslint/bin/eslint.js",
+    "test/term-bank-prefix-selector-fixtures.js",
+    "test/term-bank-prefix-selector-reuse.test.js",
+    "--format",
+    "json",
+    "--output-file",
+    "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/reports/full-scoped-eslint.json"
+  ],
+  "cwd": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/preflight-root",
+  "sourceHashes": {
+    "test/term-bank-prefix-selector-fixtures.js": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b",
+    "test/term-bank-prefix-selector-reuse.test.js": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a",
+    "eslint.config.js": "8416562e333cf51626b49c8de2b28ab8dd3240ad98f9ff7581bbe0aac4915156",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/jsconfig.json": "1bb01002aa47d6e8d6c96856ce2fd8fb69de2f86ac72375c85020ddf5428f5fc",
+    "test/jsconfig.typecheck.json": "e556336c0b6acd7910030a17923f73be3b640ff3629cb09d13cec9e0a8963b9f",
+    "test/jsconfig.prefix-selector.json": "2ad0b6479b3fe6db2bc3a38948052236122608b56808833ba7dbb35caa1be948",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "ext/lib/term-bank-parser.wasm": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de"
+  },
+  "status": "passed",
+  "startedAtUtc": "2026-11-28T06:54:52.583752+00:00",
+  "exitCode": 0,
+  "sourceHashesUnchanged": true,
+  "finishedAtUtc": "2026-11-28T06:54:57.925937+00:00",
+  "logSha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+}

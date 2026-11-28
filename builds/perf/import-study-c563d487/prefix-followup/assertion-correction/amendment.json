@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T06:58:15.461262+00:00",
+  "phase": "Before separate corrected JMdict/VNDB/negative acquisition; original failures retained",
+  "originalRun": 46110806989,
+  "originalToolingHead": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "candidateWasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+  "files": [
+    {
+      "file": "run.py",
+      "originalSha256": "d588799caf81481305639d21dfda3ba6b6e36d87bf01353e4f534fb845469741",
+      "correctedSha256": "38c9539f00d5be2fa9afca4e92ffc33eab29922ebec1f62444f60d51e382aa4e",
+      "patchSha256": "3f6973154ae50acb70ff0663a19f6101e650184be2d4a56fffd61fba92f43e4f"
+    },
+    {
+      "file": "negative-run.py",
+      "originalSha256": "075b04bb33ea5471fac876fb6249ab5a6856cdea184255f2a8c1ef4db6188e18",
+      "correctedSha256": "236e1e3aa4157a4e62f91f831f636cd44cc719686a97c1d990d5a5c62a8b7444",
+      "patchSha256": "c49c7d6dccd999efda0403b7f970f6f10012b3f010a40029cb4c042c46162dc3"
+    }
+  ],
+  "combinedPatchSha256": "263adbb82cd716aa58ee4ee93664a6c6f63c967580cf2ecdb79a0cc7b8401007",
+  "replayChecksSha256": "676fa620e4a593276aff131102f146e3b1e56873df1902d2e83a4d425b39e228",
+  "observedFailures": [
+    {
+      "jobId": 140873688868,
+      "kind": "VNDB route assertion",
+      "acceptedObservations": 0,
+      "artifactId": 15252438227,
+      "artifactSha256": "2be5d9d0392f4cb54276affa4c73b018ef3f9beeb43d54df4bdffffcc9e825ee",
+      "auditSha256": "66b4fcdb35db5f92c90968819655dc5b420746ed9c4e53ad017f0a2079be5d07",
+      "cause": "166 multi-bank fused groups plus an unchanged singleton group were incorrectly asserted to be167 fused attempts."
+    },
+    {
+      "jobId": 140873688923,
+      "kind": "Negative exact floating-point sum",
+      "acceptedObservations": 0,
+      "completedBaselineChildren": 1,
+      "completedCandidatePairs": 0,
+      "artifactId": 15252871807,
+      "artifactSha256": "7e872786c7a2488f336b420b6d039c7ee70bb0bd04e48fa9c86978513706a515",
+      "auditSha256": "257de31e17986dc47526cdaac9cdd175221389854220aaadb0eb4e848bb4d600",
+      "cause": "Python compensated sum193.118 differs from the unchanged JS sequential binary64 sum193.11800000000002."
+    }
+  ],
+  "corrections": [
+    "Per-group expected fused attempt is1 exactly when banks>1, otherwise0; each fallback remains0 and aggregate must equal the exact expected sum.",
+    "Nine aggregate fields are checked with explicit sequential binary64 addition initialized at0.0, without type coercion, matching unchanged JS reduce; exact equality and all raw values retained, no tolerance."
+  ],
+  "unchanged": [
+    "Candidate C, compiled WASM, instrumentation and numerical/source correctness",
+    "Fixed167VNDBgroups, all locked inputs, flags and single-bank nonfused route",
+    "Timed screen code, fixed schedules, warmups, repetition counts, paired units, child launches and rejection thresholds",
+    "All original failed/incomplete cohorts and successful original Jitendex observations"
+  ],
+  "downstreamReview": "Existing per-group public reuse counters correctly compare with diagnostic deltas, including zero delta for VNDB singleton. Existing row/digest comparisons use all parsed rows; no further demonstrated harness correction needed.",
+  "correctedPlan": "New separately named cohort: JMdict+VNDB32dictionary observations and all48fresh negative children; original Jitendex and all original failures preserved. Publication remains root-owned.",
+  "prepublicationReviewCorrection": {
+    "reason": "Independent review found float(item[key]) would accept numeric strings unlike the original sum; removed coercion while preserving binary64 order.",
+    "preservedFiles": [
+      "negative-run.py.patch.pre-review",
+      "harness-expectations.patch.pre-review",
+      "amendment.json.pre-review",
+      "negative-run.py.pre-review",
+      "replay-checks.json.pre-review"
+    ],
+    "previousNegativeRunnerSha256": "402d1765adc3e15c8b2a85c065b10cfcaeab9aabd325f0473a7576dd2021fbf8",
+    "previousAmendmentSha256": "ad25db8c94fcb491d9fbc5f0acb3386a69360efeef747f304e22e18483af7d0a",
+    "additionalNegativeChecks": 27
+  }
+}

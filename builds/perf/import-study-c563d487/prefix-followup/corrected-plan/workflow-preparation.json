@@ -1,0 +1,22 @@
+{
+  "originalSha256": "f0a76467b2cf6bc68af8f4848b3091cad9335c07f74e3e41ac202a6efdb5a692",
+  "correctedSha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec",
+  "changes": {
+    "name: JMdict prefix selector fixed component screen c563d487": "name: JMdict prefix selector corrected component screen c563d487",
+    "branches: [perf/jmdict-prefix-selector-screen-20261128-c563d487]": "branches: [perf/jmdict-prefix-selector-corrected-20261128-c563d487]",
+    "dictionary: [jmdict, jitendex, vndb]": "dictionary: [jmdict, vndb]",
+    "name: jmdict-prefix-selector-component-${{ matrix.dictionary }}-${{ github.run_attempt }}": "name: jmdict-prefix-selector-corrected-component-${{ matrix.dictionary }}-${{ github.run_attempt }}",
+    "name: jmdict-prefix-selector-negative-${{ github.run_attempt }}": "name: jmdict-prefix-selector-corrected-negative-${{ github.run_attempt }}"
+  },
+  "scope": "Separate corrected cohort: JMdict and VNDB each acquire all16 fresh children; all3 negative cases acquire all48 fresh children. Original Jitendex16 observations are retained and not rerun. Original negative first baseline child remains an incomplete original cohort and is never pooled.",
+  "unchanged": [
+    "runner image",
+    "compiler and Node pins",
+    "all build, smoke, lint, type, focused test and native oracle gates",
+    "all dictionary options and fixed grouping",
+    "all timers and output checks in screen.mjs and negative-screen.mjs",
+    "pair schedule",
+    "negative rejection criteria",
+    "full-import promotion criteria"
+  ]
+}

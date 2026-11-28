@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:06:25.007717+00:00",
+  "scope": "Read-only final corrected prefix publication review; no new product execution or acquired timing",
+  "approvedForParentPublication": true,
+  "manifestSha256": "a13fe84899f28886a5abd17ffb4932339bb548de31980cef7d53129039b80fb2",
+  "correctionRecordSha256": "7f7c945c8bb0318a4e568ac88579cb5b52fe3947a102e671afe4005022b35f7a",
+  "parentCommit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "parentTree": "38e40facc1abf6a013587c8873e3b92498013c2f",
+  "fileCount": 17,
+  "totalBytes": 132433,
+  "allFileSha256SizesAndGitBlobIdentitiesMatch": true,
+  "unchangedRuntimeSourceOracleTimerGeneratorAndCriteriaFilesChecked": 16,
+  "reviewedModifiedToolingFilesUnchanged": 6,
+  "newEvidenceReceipts": {
+    "negative": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428",
+    "jmdict": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76"
+  },
+  "jmdictExistingRawReplay": {
+    "sha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+    "totalFieldsChecked": 38,
+    "groupFieldsChecked": 304,
+    "maximaPolicy": "Cumulative maximum is checked against max(previous observed maximum, frozen per-group expected maximum); it does not independently reveal lower per-group maxima. Other counters use exact deltas from zero for the first group.",
+    "rows": 528299,
+    "groups": 8,
+    "digest": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+    "baselineWorkloadAndFullDigestParity": true,
+    "adHocReviewCorrections": [
+      "Initial read-only replay was corrected for the null initial diagnosticBefore state.",
+      "Initial read-only replay was corrected to distinguish cumulative maxima from additive counters. No acquired receipt or frozen tooling was changed."
+    ]
+  },
+  "excludedLocalChildren": 7,
+  "newMeasuredObservations": 0,
+  "preservedOriginalDriverFailureSha256": "9063cc5a6ce784359636def109f778af7fd9e2ba82d803dadac303886f8808fc",
+  "correctedPlan": {
+    "dictionaryChildren": 32,
+    "negativeChildren": 48,
+    "completedJitendexNotRepeated": true,
+    "originalIncompleteBaselineChildNotPooled": true
+  },
+  "previousIndependentAssertionReviewSha256": "d78ee392451c36c41c9381aff4663d42acefd8067006378882d7af30c5ac4bd1",
+  "limitations": "Mechanics rehearsal is excluded validation with baseline JS plus explicitly supplied instrumented module; no speed, memory, complete-import or candidate product-build claim."
+}

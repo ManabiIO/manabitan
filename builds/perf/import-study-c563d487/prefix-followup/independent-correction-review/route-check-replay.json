@@ -1,0 +1,54 @@
+{
+  "recordedAtUtc": "2026-11-28 06:55:39 UTC",
+  "scope": "Read-only corrected route audit against the existing original VNDB diagnostic; no product or corpus execution",
+  "originalRunId": 46110806989,
+  "originalJobId": 140873688868,
+  "auditorSha256": "631959502f4409b82a0e567d9c6e3772a981e2a631bec8c52ea7b261f2eb2f8b",
+  "savedDiagnosticPassesExplicitRouteCheck": true,
+  "groups": 167,
+  "fusedGroups": 166,
+  "normalSingletonGroups": 1,
+  "completeRows": 6648310,
+  "fusedDiagnosticRows": 6640000,
+  "mutations": [
+    {
+      "name": "missing fused attempt",
+      "rejected": true,
+      "errors": [
+        "saved diagnostic explicit per-group fused/normal route 0",
+        "saved diagnostic exact aggregate route counts"
+      ]
+    },
+    {
+      "name": "singleton falsely fused",
+      "rejected": true,
+      "errors": [
+        "saved diagnostic explicit per-group fused/normal route 166",
+        "saved diagnostic exact aggregate route counts"
+      ]
+    },
+    {
+      "name": "fallback introduced",
+      "rejected": true,
+      "errors": [
+        "saved diagnostic explicit per-group fused/normal route 166",
+        "saved diagnostic exact aggregate route counts"
+      ]
+    },
+    {
+      "name": "singleton changes fused diagnostics",
+      "rejected": true,
+      "errors": [
+        "saved diagnostic singleton leaves fused diagnostic counters unchanged 166"
+      ]
+    },
+    {
+      "name": "diagnostic counts include singleton rows",
+      "rejected": true,
+      "errors": [
+        "saved diagnostic fused diagnostic row domain"
+      ]
+    }
+  ],
+  "interpretation": "This validates the prospective assertion correction only; the original acquisition remains failed with zero timed observations."
+}

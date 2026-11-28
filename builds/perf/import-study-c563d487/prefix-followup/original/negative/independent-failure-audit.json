@@ -1,0 +1,248 @@
+{
+  "completeAudit": true,
+  "qualificationComplete": false,
+  "run": 46110806989,
+  "jobId": 140873688923,
+  "scope": "Original first-child aggregate assertion failure, no completed candidate pair or performance assessment",
+  "toolingHead": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "acceptedObservations": 0,
+  "completedMeasuredChildren": 1,
+  "completedCandidatePairs": 0,
+  "completedControlPairs": 0,
+  "firstChildMeasuredRepetitions": 16,
+  "firstChildExcludedWarmups": 2,
+  "failedGate": "negative-run.py aggregate equality using Python compensated sum against JavaScript sequential reduce",
+  "productFiles": {
+    "dev/data/dictionary-wasm/manifest.json": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68"
+  },
+  "wasmBytes": 69209,
+  "smokeModes": 6,
+  "nativeSyntheticCases": 1112,
+  "nativeSyntheticComparisons": 2224,
+  "fixtureManifestSha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+  "fixtureByteVerification": [
+    {
+      "case": 1,
+      "bank": "case-1/term_bank_1.json",
+      "rawSha256": "5bb07c139b5c2176a1ed793ec72c60939787394ec70ffb479b725d966a0017f6",
+      "compressedSha256": "938a017e1a28dc96f0060b3a0dd33cd9a5a143160b79a4df8a1999907bc6993e",
+      "rawBytes": 2710001,
+      "compressedBytes": 61141,
+      "crc32": 3790676514
+    },
+    {
+      "case": 1,
+      "bank": "case-1/term_bank_2.json",
+      "rawSha256": "caf34ed0882476de6bf32b03db24b489c7fda56bf499448ca3f32e987f048ab4",
+      "compressedSha256": "83d76e11afea3899a86570f314b2611c2070aa4064300aa8d6b4dfa35e718f36",
+      "rawBytes": 2710001,
+      "compressedBytes": 61142,
+      "crc32": 722769397
+    },
+    {
+      "case": 2,
+      "bank": "case-2/term_bank_1.json",
+      "rawSha256": "313919eb11461456cc381dfe92c6fa675e4eeba71c86dba5573a7d2309479423",
+      "compressedSha256": "40a8b54dae6d6c61098e1551c287f997a0a52c56122c3c7a719377e3d5cf6bac",
+      "rawBytes": 2700001,
+      "compressedBytes": 37374,
+      "crc32": 558818720
+    },
+    {
+      "case": 2,
+      "bank": "case-2/term_bank_2.json",
+      "rawSha256": "8d4ba8b9dc6e4ff467d7865c983708e3bc66d78508776a82bf502008d7bb12e7",
+      "compressedSha256": "cb188ccb8ae24b05a972708e3799ba3a30050f3f16a4d9e42217ae80e2a029eb",
+      "rawBytes": 2700001,
+      "compressedBytes": 37396,
+      "crc32": 270405730
+    },
+    {
+      "case": 3,
+      "bank": "case-3/term_bank_1.json",
+      "rawSha256": "fab1eebccac2a8a6bbac425ac4bca0c3d0e3ecea1e6fa26d702786187ff33e1e",
+      "compressedSha256": "675f798e1537e5f668a67d07c6a62f4a401fd0fd4cd25efcce4df023427efade",
+      "rawBytes": 21980001,
+      "compressedBytes": 65785,
+      "crc32": 3847112808
+    },
+    {
+      "case": 3,
+      "bank": "case-3/term_bank_2.json",
+      "rawSha256": "2f8704bda110c8267995f0bbc830ceb842aebba440d1e2897881bafdc09f6e29",
+      "compressedSha256": "fc586503cc24091cd84eedcd1bbb1feda9916ccd7fdf8ff89c4b8fa04fc20d28",
+      "rawBytes": 21980001,
+      "compressedBytes": 65801,
+      "crc32": 1098449885
+    }
+  ],
+  "children": [
+    {
+      "label": "baseline-verification",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "warmups": 0,
+      "aggregates": {
+        "elapsedMs": {
+          "reported": 42.65422,
+          "sequentialBinary64": 42.65422,
+          "pythonSum": 42.65422
+        },
+        "cpuMs": {
+          "reported": 92.718,
+          "sequentialBinary64": 92.718,
+          "pythonSum": 92.718
+        },
+        "inflateMs": {
+          "reported": 5.514622000000003,
+          "sequentialBinary64": 5.514622000000003,
+          "pythonSum": 5.514622000000003
+        },
+        "inflateCpuMs": {
+          "reported": 8.913,
+          "sequentialBinary64": 8.913,
+          "pythonSum": 8.913
+        },
+        "parseMs": {
+          "reported": 37.123645,
+          "sequentialBinary64": 37.123645,
+          "pythonSum": 37.123645
+        },
+        "lookupMs": {
+          "reported": 1.1919680000000028,
+          "sequentialBinary64": 1.1919680000000028,
+          "pythonSum": 1.1919680000000028
+        },
+        "nativeParseMs": {
+          "reported": 31,
+          "sequentialBinary64": 31.0,
+          "pythonSum": 31
+        },
+        "rows": {
+          "reported": 20000,
+          "sequentialBinary64": 20000.0,
+          "pythonSum": 20000
+        },
+        "indexBytes": {
+          "reported": 516480,
+          "sequentialBinary64": 516480.0,
+          "pythonSum": 516480
+        }
+      },
+      "rawSha256": "5ddedf319767859270c9a05e6e46d3a54f5ce68c3ee0a55900adfbeac4b2ed84"
+    },
+    {
+      "label": "diagnostic",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "warmups": 0,
+      "aggregates": {
+        "elapsedMs": {
+          "reported": 43.410924,
+          "sequentialBinary64": 43.410924,
+          "pythonSum": 43.410924
+        },
+        "cpuMs": {
+          "reported": 104.214,
+          "sequentialBinary64": 104.214,
+          "pythonSum": 104.214
+        },
+        "inflateMs": {
+          "reported": 5.035851999999998,
+          "sequentialBinary64": 5.035851999999998,
+          "pythonSum": 5.035851999999998
+        },
+        "inflateCpuMs": {
+          "reported": 7.671,
+          "sequentialBinary64": 7.671,
+          "pythonSum": 7.671
+        },
+        "parseMs": {
+          "reported": 38.355622,
+          "sequentialBinary64": 38.355622,
+          "pythonSum": 38.355622
+        },
+        "lookupMs": {
+          "reported": 1.2864689999999968,
+          "sequentialBinary64": 1.2864689999999968,
+          "pythonSum": 1.2864689999999968
+        },
+        "nativeParseMs": {
+          "reported": 32,
+          "sequentialBinary64": 32.0,
+          "pythonSum": 32
+        },
+        "rows": {
+          "reported": 20000,
+          "sequentialBinary64": 20000.0,
+          "pythonSum": 20000
+        },
+        "indexBytes": {
+          "reported": 516480,
+          "sequentialBinary64": 516480.0,
+          "pythonSum": 516480
+        }
+      },
+      "rawSha256": "629d7f176e59de5bbb8fd1dfa8073c7d51d219145af54f82a44f8528813784e7"
+    },
+    {
+      "label": "pair-0-A",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "warmups": 2,
+      "aggregates": {
+        "elapsedMs": {
+          "reported": 187.41467700000007,
+          "sequentialBinary64": 187.41467700000007,
+          "pythonSum": 187.41467700000007
+        },
+        "cpuMs": {
+          "reported": 193.11800000000002,
+          "sequentialBinary64": 193.11800000000002,
+          "pythonSum": 193.118
+        },
+        "inflateMs": {
+          "reported": 11.308126999999985,
+          "sequentialBinary64": 11.308126999999985,
+          "pythonSum": 11.308126999999985
+        },
+        "inflateCpuMs": {
+          "reported": 13.525,
+          "sequentialBinary64": 13.525,
+          "pythonSum": 13.525
+        },
+        "parseMs": {
+          "reported": 176.00523000000015,
+          "sequentialBinary64": 176.00523000000015,
+          "pythonSum": 176.00523000000015
+        },
+        "lookupMs": {
+          "reported": 7.390495999999985,
+          "sequentialBinary64": 7.390495999999985,
+          "pythonSum": 7.390495999999985
+        },
+        "nativeParseMs": {
+          "reported": 161,
+          "sequentialBinary64": 161.0,
+          "pythonSum": 161
+        },
+        "rows": {
+          "reported": 320000,
+          "sequentialBinary64": 320000.0,
+          "pythonSum": 320000
+        },
+        "indexBytes": {
+          "reported": 8263680,
+          "sequentialBinary64": 8263680.0,
+          "pythonSum": 8263680
+        }
+      },
+      "rawSha256": "f90aaaea230a8b3cfd503d69d4111e3c4f40fb0edb66169ecf7b2c092bb2bafb"
+    }
+  ],
+  "digest": "295552e0c005fe3a7a17201d88e6aa70b931490fee3da5cce71fe3e56d722fd9",
+  "rawReportSha256": "c2ec3b71996b786b1a30d148b9ebfd6a31729faa4ca4d24b8344bd7833540829",
+  "auditScriptSha256": "aa50f4233ce3b5e4ae7bced19a463ef67843ceb9ef36cff68c831273bbf16cd9"
+}

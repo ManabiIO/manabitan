@@ -1,0 +1,126 @@
+{
+  "parentCommit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "baseTree": "38e40facc1abf6a013587c8873e3b92498013c2f",
+  "branch": "perf/jmdict-prefix-selector-corrected-20261128-c563d487",
+  "files": [
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/test/term-bank-prefix-selector-fixtures.js",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/qualification/term-bank-prefix-selector-fixtures.js",
+      "sha256": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b",
+      "bytes": 21049,
+      "gitBlobSha": "297c9826793764bc8cfbf61320ee9485c5e35560"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/test/term-bank-prefix-selector-reuse.test.js",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/qualification/term-bank-prefix-selector-reuse.test.js",
+      "sha256": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a",
+      "bytes": 13843,
+      "gitBlobSha": "ac0577e3ac6c9173fe7539bc3ca9899451bd1cdb"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-route-correction/run.py",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/run.py",
+      "sha256": "38c9539f00d5be2fa9afca4e92ffc33eab29922ebec1f62444f60d51e382aa4e",
+      "bytes": 7612,
+      "gitBlobSha": "19f486e0c0a4bd826112d3c184447ee9beb0bada"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-route-correction/negative-run.py",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/negative-run.py",
+      "sha256": "236e1e3aa4157a4e62f91f831f636cd44cc719686a97c1d990d5a5c62a8b7444",
+      "bytes": 9157,
+      "gitBlobSha": "70dc651085887df9a6821cffd052f3303f77abff"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-corrected/workflow.yml",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/workflow.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec",
+      "bytes": 6545,
+      "gitBlobSha": "d3e4d048c0c1034c84018e915bbba20922a1ce80"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-corrected/workflow.yml",
+      "path": ".github/workflows/jmdict-prefix-selector-component-c563d487.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec",
+      "bytes": 6545,
+      "gitBlobSha": "d3e4d048c0c1034c84018e915bbba20922a1ce80"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/qualification-formatting.patch",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-formatting.patch",
+      "sha256": "dfdaa86f24bec58c4252f26fbd9cd41cee2072d5cde7f1dd4fe7642e66fb2892",
+      "bytes": 15584,
+      "gitBlobSha": "ef94f37dcb0be6e6e34c246db344bd763ad2ccc6"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/correction-manifest.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-formatting-manifest.json",
+      "sha256": "4f9ca3cdd90e7e028e7364eea06c6aaaadbc23f69c793907254b67daaa35f5e1",
+      "bytes": 2434,
+      "gitBlobSha": "eabeeee7661989cd1826d2bcdf1818961631a34e"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/reports/semantic-identity.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-semantics.json",
+      "sha256": "40d8a013044929678f2b9031fc1646d484d530c6e3c298cb20206feec86812aa",
+      "bytes": 1263,
+      "gitBlobSha": "4ead21556907a83c2182c5a263a69ce103ccbc61"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/reports/local-corrected-preflight.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/local-corrected-preflight.json",
+      "sha256": "1926a412a1e3ff6d156ec12668e95dbfad244c462421a395e6b67674e019b507",
+      "bytes": 3604,
+      "gitBlobSha": "7273f6b04816a3a6e83b66b34836dbb8ff3063e2"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-route-correction/harness-expectations.patch",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/harness-expectations.patch",
+      "sha256": "263adbb82cd716aa58ee4ee93664a6c6f63c967580cf2ecdb79a0cc7b8401007",
+      "bytes": 1976,
+      "gitBlobSha": "2d118b72b1ae7a343bb945ccdacaadcd065d8533"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-route-correction/amendment.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/harness-amendment.json",
+      "sha256": "16c9b84c7148d2841134e8e90e351626b220890f401b7a9367ee579f89cf4afa",
+      "bytes": 4246,
+      "gitBlobSha": "34767b262efa36f37e07da523a0461849fa5647d"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-route-correction/replay-checks.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/replay-checks.json",
+      "sha256": "676fa620e4a593276aff131102f146e3b1e56873df1902d2e83a4d425b39e228",
+      "bytes": 9179,
+      "gitBlobSha": "a9bba4984f581f478827bda2412b8f959208c943"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-corrected/workflow-preparation.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/workflow-preparation.json",
+      "sha256": "4e3d12bbe96085dd3edc7fcf084da112f67f42f81dd865ddeee1b0c28d5cd079",
+      "bytes": 1563,
+      "gitBlobSha": "1bcf194587c83b58fc44bf1269c11b8bfecaba1d"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-negative-rehearsal/result.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/excluded-negative-mechanics.json",
+      "sha256": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428",
+      "bytes": 11149,
+      "gitBlobSha": "a1389b8571dfd9254d3cdd69dca2844c22100721"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-jmdict-rehearsal/audit.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/excluded-jmdict-mechanics.json",
+      "sha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76",
+      "bytes": 7576,
+      "gitBlobSha": "1732bf81646056a552e420a3dc66aae6277046c1"
+    },
+    {
+      "local": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-corrected/correction-record.json",
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/record.json",
+      "sha256": "7f7c945c8bb0318a4e568ac88579cb5b52fe3947a102e671afe4005022b35f7a",
+      "bytes": 9108,
+      "gitBlobSha": "d919499e57a29cd18622d223ce3cd081bd70c0df"
+    }
+  ]
+}

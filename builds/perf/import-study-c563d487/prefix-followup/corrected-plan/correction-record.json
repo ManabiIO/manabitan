@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:04:48.816978+00:00",
+  "scope": "Prospective separately named recovery cohort. Original completed and failed jobs remain immutable; no previously acquired child is pooled with new measurements.",
+  "originalToolingCommit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "originalToolingTree": "38e40facc1abf6a013587c8873e3b92498013c2f",
+  "originalRun": 46110806989,
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "candidateWasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+  "candidateManifestSha256": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+  "corrections": [
+    "52 demonstrated test formatting findings only; AST and fixture exports unchanged",
+    "Expected fused attempts match each unchanged multi-bank or singleton group",
+    "Exact parent aggregate validation uses the unchanged JavaScript child addition order, without tolerance or numeric coercion"
+  ],
+  "localPreflight": {
+    "fullRepositoryConfigScopedEslint": "pass: zero errors and warnings",
+    "targetedStrictTestTypes": "pass: two entry files, same strict options, ambient types and transitive imports",
+    "newPrefixRegressionSuite": "73/73 pass against exact hosted production WASM",
+    "fullHostedTypesAndSevenFocusedSuites": "Remain gates in the corrected workflow"
+  },
+  "excludedMechanicsPreflights": {
+    "scope": "Unchanged baseline JavaScript with externally supplied, exactly recovered instrumented candidate WASM. Baseline C metadata is retained honestly; this is not a timed product comparison.",
+    "negative": {
+      "receiptSha256": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428",
+      "children": 6,
+      "cases": 3,
+      "expectedCountersAndBaselineOutputDigestsMatch": true
+    },
+    "jmdict": {
+      "receiptSha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76",
+      "children": 1,
+      "rows": 528299,
+      "groups": 8,
+      "totalCounterChecks": 38,
+      "perGroupCounterChecks": 304,
+      "newGlossaryProofs": 80102,
+      "newGlossaryProofBytes": 18252047,
+      "baselineOutputDigestMatches": true,
+      "postprocessorFailure": "A first local report comparison requested fields absent from an older baseline receipt. The completed raw child was retained and audited against the frozen mechanics without executing another child; failure receipt remains preserved."
+    },
+    "measuredObservations": 0,
+    "allDurationsExcluded": true
+  },
+  "originalDispositions": {
+    "jmdict": {
+      "job": 140873688700,
+      "acceptedObservations": 0,
+      "failure": "Test formatting lint before type, focused suite, corpus oracle or measurement"
+    },
+    "jitendex": {
+      "job": 140873688877,
+      "acceptedObservations": 16,
+      "complete": true,
+      "repeated": false,
+      "elapsedMedianChangePercent": 3.6411862733960687,
+      "allFourCandidatePairsSlower": true,
+      "controlRangePercent": [
+        -2.873385815627394,
+        7.65450066864124
+      ],
+      "decision": "No useful reuse; non-target component concern with overlapping control variation. No full-import claim."
+    },
+    "vndb": {
+      "job": 140873688868,
+      "acceptedObservations": 0,
+      "failure": "Expected167 fused attempts, observed166 multi-bank groups plus valid8310-row singleton"
+    },
+    "negative": {
+      "job": 140873688923,
+      "acceptedObservations": 0,
+      "completedBaselineChildren": 1,
+      "completedMeasuredRepetitionsWithinThatChild": 16,
+      "completedCandidatePairs": 0,
+      "failure": "Exact parent sum check differed from JavaScript addition order; original child remains incomplete-cohort evidence"
+    }
+  },
+  "newPlan": {
+    "branch": "perf/jmdict-prefix-selector-corrected-20261128-c563d487",
+    "dictionaryCells": [
+      "jmdict",
+      "vndb"
+    ],
+    "freshDictionaryChildren": 32,
+    "negativeCases": [
+      1,
+      2,
+      3
+    ],
+    "freshNegativeChildren": 48,
+    "pairsPerCase": 4,
+    "identicalControlPairsPerCase": 4,
+    "schedule": "ABCD, DCBA, ABCD, DCBA; C and D both baseline",
+    "negativePairedUnit": "Sum of16 complete passes per fresh child after2 excluded warmups"
+  },
+  "unchangedToolingSha256": {
+    "candidate.patch": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+    "prepare.py": "a5dcda6da32ff1177aac38a133aecb96ab53203921db65102ce44c09865b3193",
+    "cohort_tools.py": "a0c9e8799b5b1be3b50e1f1e400b926c4d311b427e7bd8ccbed757c52710e42e",
+    "diagnostic-fields.json": "98f5cc1e64388648fa30c6d12a0f0c41da5f809febecfc9b44a9a914f7bd0eb8",
+    "expected-mechanics.json": "83df64e419d9e72f4af1d799b326b6ee0acf9497bcb4837c2f6d6ee86cee4e83",
+    "screen.mjs": "8519bfea747260803f87c1358a34f1d4a1ff431de891ffa3603ca70a422a19fa",
+    "smoke.mjs": "7bcd48905549d0ff67e214165f299806da11fc13600584ad056eb41e30b342c0",
+    "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+    "preflight.py": "501f6a8a6a19c544f1e513b5de90ea19ca79f9da746a20ec627f3e989c1996c3",
+    "setup.sh": "8857d03bd17a046a639de830ade1118ae45db1d68ba7cc64b652d54b6a4e77ec",
+    "negative-fixtures.mjs": "ebb80da2dcd7308795b67174f3b415ac6e404fd39f261909ef7dc086931334ff",
+    "negative-screen.mjs": "00b0ff9df8fbbca349e51bf18195ebbaa5af28d33e3be46130c52a5b72d728a3",
+    "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+    "negative-control-protocol-review.json": "6eea529265b02787b4e956105dc9a4722a8c56bb7a65777d18d6b58e958e87d5",
+    "prospective-complete-import-criteria.json": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+    "preparation-record.json": "5523ef6bdbc65973d5b8466349971d43457152e063d118e4dad2866b3e06ab93"
+  },
+  "changedAndAddedFiles": [
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/qualification/term-bank-prefix-selector-fixtures.js",
+      "sha256": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/qualification/term-bank-prefix-selector-reuse.test.js",
+      "sha256": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/run.py",
+      "sha256": "38c9539f00d5be2fa9afca4e92ffc33eab29922ebec1f62444f60d51e382aa4e"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/negative-run.py",
+      "sha256": "236e1e3aa4157a4e62f91f831f636cd44cc719686a97c1d990d5a5c62a8b7444"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/hosted/workflow.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec"
+    },
+    {
+      "path": ".github/workflows/jmdict-prefix-selector-component-c563d487.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-formatting.patch",
+      "sha256": "dfdaa86f24bec58c4252f26fbd9cd41cee2072d5cde7f1dd4fe7642e66fb2892"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-formatting-manifest.json",
+      "sha256": "4f9ca3cdd90e7e028e7364eea06c6aaaadbc23f69c793907254b67daaa35f5e1"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/test-semantics.json",
+      "sha256": "40d8a013044929678f2b9031fc1646d484d530c6e3c298cb20206feec86812aa"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/local-corrected-preflight.json",
+      "sha256": "1926a412a1e3ff6d156ec12668e95dbfad244c462421a395e6b67674e019b507"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/harness-expectations.patch",
+      "sha256": "263adbb82cd716aa58ee4ee93664a6c6f63c967580cf2ecdb79a0cc7b8401007"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/harness-amendment.json",
+      "sha256": "16c9b84c7148d2841134e8e90e351626b220890f401b7a9367ee579f89cf4afa"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/replay-checks.json",
+      "sha256": "676fa620e4a593276aff131102f146e3b1e56873df1902d2e83a4d425b39e228"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/workflow-preparation.json",
+      "sha256": "4e3d12bbe96085dd3edc7fcf084da112f67f42f81dd865ddeee1b0c28d5cd079"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/excluded-negative-mechanics.json",
+      "sha256": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428"
+    },
+    {
+      "path": "dev/perf/jmdict-prefix-selector-c563d487/correction/excluded-jmdict-mechanics.json",
+      "sha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76"
+    }
+  ],
+  "qualification": "No PR or full-import qualification from these component measurements; original source, memory, storage, media, restart and full-import criteria remain unchanged."
+}

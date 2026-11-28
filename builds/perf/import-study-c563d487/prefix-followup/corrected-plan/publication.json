@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-28 07:06:47 UTC",
+  "branch": "perf/jmdict-prefix-selector-corrected-20261128-c563d487",
+  "commit": "59530bb6db9320063c955d0a42219690bcabb47d",
+  "tree": "529d684d8dba22d82bb538d5a9d7e6fd6f47b59c",
+  "parent": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+  "files": 17,
+  "bytes": 132433,
+  "allGitBlobIdsVerified": true,
+  "manifestSha256": "a13fe84899f28886a5abd17ffb4932339bb548de31980cef7d53129039b80fb2",
+  "recordSha256": "7f7c945c8bb0318a4e568ac88579cb5b52fe3947a102e671afe4005022b35f7a",
+  "finalIndependentReviewSha256": "57525bd6ebbfd7f8feb970aba9f6996cb15e4e3ec9980c2e4a1c899c9bacd1ba",
+  "expectedFreshObservations": 80,
+  "run": {
+    "id": 46119683668,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46119683668",
+    "createdAt": "2026-11-28T07:06:48Z",
+    "status": "queued"
+  },
+  "pullRequestOpened": false
+}

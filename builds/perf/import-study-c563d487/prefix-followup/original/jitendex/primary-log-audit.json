@@ -1,0 +1,691 @@
+{
+  "schemaVersion": 1,
+  "scope": "Locked dictionary one-host native component screen",
+  "dictionary": "jitendex",
+  "negative": false,
+  "complete": true,
+  "allLogChecksPass": true,
+  "errors": [],
+  "measuredObservationCount": 16,
+  "rawChildReceiptCount": 17,
+  "mechanics": {
+    "jitendex": {
+      "keyIdentityRows": 24302,
+      "admissions": 1,
+      "candidateRecordsInspected": 1,
+      "noPrefixCandidate": 0,
+      "selected": 1,
+      "selectedDistance1": 1,
+      "selectedDistance2": 0,
+      "selectedDistance3": 0,
+      "selectedDistance4": 0,
+      "selectedBytes": 243,
+      "selectedAtLeast512": 0,
+      "selectedAtLeast512Bytes": 0,
+      "boundsRejected": 0,
+      "openerRejected": 0,
+      "tailRejected": 1,
+      "middleRejected": 0,
+      "fullRejected": 0,
+      "hits": 0,
+      "hitBytes": 0,
+      "fullBytesOffered": 0,
+      "failedFullBytesOffered": 0,
+      "maxSelectedBytes": 243,
+      "maxFailedFullBytes": 0,
+      "originalLookbackZeroRows": 24302,
+      "originalLookbackPositiveRows": 412231,
+      "originalGlossaryReuses": 85998,
+      "totalGlossaryReuses": 85998,
+      "priorStreakRows": 73243,
+      "recentContentHits": 73244,
+      "rows": 436555,
+      "budgetPositiveRows": 221635,
+      "budgetRefreshByRecentStreak": 2389,
+      "definitionLengthRejected": 0,
+      "rulesLengthRejected": 0,
+      "definitionSignatureRejected": 0,
+      "rulesSignatureRejected": 0,
+      "hitDistance1": 0,
+      "hitDistance2": 0,
+      "hitDistance3": 0,
+      "hitDistance4": 0
+    }
+  },
+  "statistics": {
+    "jitendex": {
+      "candidate.elapsedMs": {
+        "firstValues": [
+          1009.735290999999,
+          1011.0629209999993,
+          997.6021629999996,
+          987.8487819999996
+        ],
+        "secondValues": [
+          1017.3782359999991,
+          1057.072475999999,
+          1043.6922389999995,
+          1014.8344410000009
+        ],
+        "pairedChangesPercent": [
+          0.7569256089317022,
+          4.550612434139456,
+          4.620085812704877,
+          2.7317601126526814
+        ],
+        "medianPairedChangePercent": 3.6411862733960687,
+        "equalWorkChangePercent": 3.1632639417489283,
+        "fasterPairs": 0,
+        "slowerPairs": 4,
+        "minimumChangePercent": 0.7569256089317022,
+        "maximumChangePercent": 4.620085812704877,
+        "largestAbsoluteChangePercent": 4.620085812704877
+      },
+      "identicalControl.elapsedMs": {
+        "firstValues": [
+          1043.5328940000013,
+          1010.6292669999998,
+          1038.1564999999996,
+          1073.6916299999993
+        ],
+        "secondValues": [
+          1020.5808279999992,
+          1087.9878909999989,
+          1048.3339620000002,
+          1042.8403270000008
+        ],
+        "pairedChangesPercent": [
+          -2.199457835202856,
+          7.65450066864124,
+          0.9803398620536141,
+          -2.873385815627394
+        ],
+        "medianPairedChangePercent": -0.6095589865746209,
+        "equalWorkChangePercent": 0.8097127621809586,
+        "fasterPairs": 2,
+        "slowerPairs": 2,
+        "minimumChangePercent": -2.873385815627394,
+        "maximumChangePercent": 7.65450066864124,
+        "largestAbsoluteChangePercent": 7.65450066864124
+      },
+      "candidate.cpuMs": {
+        "firstValues": [
+          1042.62,
+          1044.7499999999998,
+          1029.2790000000002,
+          1021.8389999999999
+        ],
+        "secondValues": [
+          1050.5620000000001,
+          1092.392,
+          1080.523,
+          1047.5490000000002
+        ],
+        "pairedChangesPercent": [
+          0.7617348602559249,
+          4.560134003350114,
+          4.9786306725386975,
+          2.5160519416464133
+        ],
+        "medianPairedChangePercent": 3.5380929724982635,
+        "equalWorkChangePercent": 3.202570600663801,
+        "fasterPairs": 0,
+        "slowerPairs": 4,
+        "minimumChangePercent": 0.7617348602559249,
+        "maximumChangePercent": 4.9786306725386975,
+        "largestAbsoluteChangePercent": 4.9786306725386975
+      },
+      "identicalControl.cpuMs": {
+        "firstValues": [
+          1079.9669999999996,
+          1043.642,
+          1075.228,
+          1110.812
+        ],
+        "secondValues": [
+          1056.443,
+          1132.8670000000002,
+          1093.7289999999998,
+          1077.8069999999998
+        ],
+        "pairedChangesPercent": [
+          -2.1782147047085365,
+          8.549387625258476,
+          1.7206583161896605,
+          -2.9712498604624438
+        ],
+        "medianPairedChangePercent": -0.22877819425943802,
+        "equalWorkChangePercent": 1.187962175109858,
+        "fasterPairs": 2,
+        "slowerPairs": 2,
+        "minimumChangePercent": -2.9712498604624438,
+        "maximumChangePercent": 8.549387625258476,
+        "largestAbsoluteChangePercent": 8.549387625258476
+      },
+      "candidate.parseMs": {
+        "firstValues": [
+          633.4170999999988,
+          627.2861010000006,
+          623.1829450000009,
+          614.236914000001
+        ],
+        "secondValues": [
+          642.9403279999992,
+          668.8336840000002,
+          668.686384000001,
+          640.5504549999996
+        ],
+        "pairedChangesPercent": [
+          1.503468725426016,
+          6.623386511157459,
+          7.3017786133412255,
+          4.283940023832322
+        ],
+        "medianPairedChangePercent": 5.453663267494891,
+        "equalWorkChangePercent": 4.919204860948634,
+        "fasterPairs": 0,
+        "slowerPairs": 4,
+        "minimumChangePercent": 1.503468725426016,
+        "maximumChangePercent": 7.3017786133412255,
+        "largestAbsoluteChangePercent": 7.3017786133412255
+      },
+      "identicalControl.parseMs": {
+        "firstValues": [
+          660.556345,
+          636.4929670000001,
+          661.6983419999988,
+          684.6289530000004
+        ],
+        "secondValues": [
+          645.6832360000003,
+          678.3585950000006,
+          661.9392359999983,
+          668.3972369999992
+        ],
+        "pairedChangesPercent": [
+          -2.2516033813890113,
+          6.577547619626789,
+          0.03640541085103699,
+          -2.3708778205880465
+        ],
+        "medianPairedChangePercent": -1.1075989852689871,
+        "equalWorkChangePercent": 0.4161986215231339,
+        "fasterPairs": 2,
+        "slowerPairs": 2,
+        "minimumChangePercent": -2.3708778205880465,
+        "maximumChangePercent": 6.577547619626789,
+        "largestAbsoluteChangePercent": 6.577547619626789
+      },
+      "candidate.nativeParseMs": {
+        "firstValues": [
+          612,
+          608,
+          603,
+          595
+        ],
+        "secondValues": [
+          623,
+          650,
+          652,
+          621
+        ],
+        "pairedChangesPercent": [
+          1.7973856209150263,
+          6.907894736842102,
+          8.126036484245436,
+          4.3697478991596705
+        ],
+        "medianPairedChangePercent": 5.638821318000886,
+        "equalWorkChangePercent": 5.2936311000827185,
+        "fasterPairs": 0,
+        "slowerPairs": 4,
+        "minimumChangePercent": 1.7973856209150263,
+        "maximumChangePercent": 8.126036484245436,
+        "largestAbsoluteChangePercent": 8.126036484245436
+      },
+      "identicalControl.nativeParseMs": {
+        "firstValues": [
+          638,
+          615,
+          639,
+          662
+        ],
+        "secondValues": [
+          624,
+          657,
+          641,
+          647
+        ],
+        "pairedChangesPercent": [
+          -2.1943573667711602,
+          6.829268292682933,
+          0.3129890453834161,
+          -2.26586102719033
+        ],
+        "medianPairedChangePercent": -0.9406841606938721,
+        "equalWorkChangePercent": 0.587314017227869,
+        "fasterPairs": 2,
+        "slowerPairs": 2,
+        "minimumChangePercent": -2.26586102719033,
+        "maximumChangePercent": 6.829268292682933,
+        "largestAbsoluteChangePercent": 6.829268292682933
+      },
+      "candidate.lookupMs": {
+        "firstValues": [
+          11.644249999999829,
+          11.670657000001938,
+          11.587555999997676,
+          11.687311000000136
+        ],
+        "secondValues": [
+          11.706186999999773,
+          11.72007799999892,
+          11.630928000000495,
+          11.670632999999725
+        ],
+        "pairedChangesPercent": [
+          0.5319105996517193,
+          0.4234637347064085,
+          0.374298083244029,
+          -0.1427017728920732
+        ],
+        "medianPairedChangePercent": 0.3988809089752188,
+        "equalWorkChangePercent": 0.296313950781002,
+        "fasterPairs": 1,
+        "slowerPairs": 3,
+        "minimumChangePercent": -0.1427017728920732,
+        "maximumChangePercent": 0.5319105996517193,
+        "largestAbsoluteChangePercent": 0.5319105996517193
+      },
+      "identicalControl.lookupMs": {
+        "firstValues": [
+          12.302887000002102,
+          11.81646900000078,
+          11.629997000000458,
+          12.136923000000024
+        ],
+        "secondValues": [
+          11.740540000000692,
+          12.087010000001555,
+          11.834780000000137,
+          11.833203999999569
+        ],
+        "pairedChangesPercent": [
+          -4.57085397924335,
+          2.2895248995343565,
+          1.7608173071727462,
+          -2.5024382209597573
+        ],
+        "medianPairedChangePercent": -0.37081045689350556,
+        "equalWorkChangePercent": -0.8159790917994569,
+        "fasterPairs": 2,
+        "slowerPairs": 2,
+        "minimumChangePercent": -4.57085397924335,
+        "maximumChangePercent": 2.2895248995343565,
+        "largestAbsoluteChangePercent": 4.57085397924335
+      }
+    }
+  },
+  "failures": [],
+  "limits": [
+    "Original artifact byte/hash and native oracle audits are separate responsibilities.",
+    "No complete browser import or memory qualification.",
+    "No pooling hosts/corpora, timing-directed trimming, substitution or retuning."
+  ],
+  "jobId": 140873688877,
+  "runId": 46110806989,
+  "auditedAtUtc": "2026-11-28 06:48:10 UTC",
+  "source": {
+    "baseline": {
+      "root": "/home/runner/work/manabitan/prefix-selector-baseline",
+      "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "trackedChanges": "",
+      "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+      "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "candidate": {
+      "root": "/home/runner/work/manabitan/prefix-selector-candidate",
+      "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+      "cSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+      "wasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+      "trackedWasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+      "manifestSha256": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+      "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "tooling": {
+      "head": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+      "hashes": {
+        "candidate.patch": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+        "diagnostic-fields.json": "98f5cc1e64388648fa30c6d12a0f0c41da5f809febecfc9b44a9a914f7bd0eb8",
+        "expected-mechanics.json": "83df64e419d9e72f4af1d799b326b6ee0acf9497bcb4837c2f6d6ee86cee4e83",
+        "prepare.py": "a5dcda6da32ff1177aac38a133aecb96ab53203921db65102ce44c09865b3193",
+        "cohort_tools.py": "a0c9e8799b5b1be3b50e1f1e400b926c4d311b427e7bd8ccbed757c52710e42e",
+        "run.py": "d588799caf81481305639d21dfda3ba6b6e36d87bf01353e4f534fb845469741",
+        "screen.mjs": "8519bfea747260803f87c1358a34f1d4a1ff431de891ffa3603ca70a422a19fa",
+        "smoke.mjs": "7bcd48905549d0ff67e214165f299806da11fc13600584ad056eb41e30b342c0",
+        "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+        "preflight.py": "501f6a8a6a19c544f1e513b5de90ea19ca79f9da746a20ec627f3e989c1996c3",
+        "setup.sh": "8857d03bd17a046a639de830ade1118ae45db1d68ba7cc64b652d54b6a4e77ec",
+        "negative-fixtures.mjs": "ebb80da2dcd7308795b67174f3b415ac6e404fd39f261909ef7dc086931334ff",
+        "negative-screen.mjs": "00b0ff9df8fbbca349e51bf18195ebbaa5af28d33e3be46130c52a5b72d728a3",
+        "negative-run.py": "075b04bb33ea5471fac876fb6249ab5a6856cdea184255f2a8c1ef4db6188e18",
+        "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+        "workflow.yml": "f0a76467b2cf6bc68af8f4848b3091cad9335c07f74e3e41ac202a6efdb5a692",
+        "negative-control-protocol-review.json": "6eea529265b02787b4e956105dc9a4722a8c56bb7a65777d18d6b58e958e87d5",
+        "prospective-complete-import-criteria.json": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+        "preparation-record.json": "5523ef6bdbc65973d5b8466349971d43457152e063d118e4dad2866b3e06ab93",
+        "../qualification/term-bank-prefix-selector-fixtures.js": "e9ba39733ee4008812434056087641bf338e33b9dfcd758aaeca0d751e93d36a",
+        "../qualification/term-bank-prefix-selector-reuse.test.js": "1f3b9c64f75bf1f22fe9ecdb44da111edf22e7ab30d9074fd2965f79cfb7e0eb"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "runtime": {
+      "node": "v22.22.0",
+      "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+      "browser": null,
+      "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+      "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.27\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+      "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+      "linker": "Ubuntu LLD 21.1.8\n"
+    }
+  },
+  "rawTimings": [
+    {
+      "pair": 0,
+      "arm": "A",
+      "elapsedMs": 1009.735290999999,
+      "cpuMs": 1042.62,
+      "inflateMs": 375.99442499999986,
+      "parseMs": 633.4170999999988,
+      "lookupMs": 11.644249999999829,
+      "nativeParseMs": 612,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 0,
+      "arm": "B",
+      "elapsedMs": 1017.3782359999991,
+      "cpuMs": 1050.5620000000001,
+      "inflateMs": 374.09407699999974,
+      "parseMs": 642.9403279999992,
+      "lookupMs": 11.706186999999773,
+      "nativeParseMs": 623,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 0,
+      "arm": "C",
+      "elapsedMs": 1043.5328940000013,
+      "cpuMs": 1079.9669999999996,
+      "inflateMs": 382.6530750000011,
+      "parseMs": 660.556345,
+      "lookupMs": 12.302887000002102,
+      "nativeParseMs": 638,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 0,
+      "arm": "D",
+      "elapsedMs": 1020.5808279999992,
+      "cpuMs": 1056.443,
+      "inflateMs": 374.5854040000004,
+      "parseMs": 645.6832360000003,
+      "lookupMs": 11.740540000000692,
+      "nativeParseMs": 624,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 1,
+      "arm": "D",
+      "elapsedMs": 1087.9878909999989,
+      "cpuMs": 1132.8670000000002,
+      "inflateMs": 409.3100140000006,
+      "parseMs": 678.3585950000006,
+      "lookupMs": 12.087010000001555,
+      "nativeParseMs": 657,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 1,
+      "arm": "C",
+      "elapsedMs": 1010.6292669999998,
+      "cpuMs": 1043.642,
+      "inflateMs": 373.8208049999985,
+      "parseMs": 636.4929670000001,
+      "lookupMs": 11.81646900000078,
+      "nativeParseMs": 615,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 1,
+      "arm": "B",
+      "elapsedMs": 1057.072475999999,
+      "cpuMs": 1092.392,
+      "inflateMs": 387.9211049999976,
+      "parseMs": 668.8336840000002,
+      "lookupMs": 11.72007799999892,
+      "nativeParseMs": 650,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 1,
+      "arm": "A",
+      "elapsedMs": 1011.0629209999993,
+      "cpuMs": 1044.7499999999998,
+      "inflateMs": 383.46744700000136,
+      "parseMs": 627.2861010000006,
+      "lookupMs": 11.670657000001938,
+      "nativeParseMs": 608,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 2,
+      "arm": "A",
+      "elapsedMs": 997.6021629999996,
+      "cpuMs": 1029.2790000000002,
+      "inflateMs": 374.1480139999994,
+      "parseMs": 623.1829450000009,
+      "lookupMs": 11.587555999997676,
+      "nativeParseMs": 603,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 2,
+      "arm": "B",
+      "elapsedMs": 1043.6922389999995,
+      "cpuMs": 1080.523,
+      "inflateMs": 374.67556900000045,
+      "parseMs": 668.686384000001,
+      "lookupMs": 11.630928000000495,
+      "nativeParseMs": 652,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 2,
+      "arm": "C",
+      "elapsedMs": 1038.1564999999996,
+      "cpuMs": 1075.228,
+      "inflateMs": 376.13517299999967,
+      "parseMs": 661.6983419999988,
+      "lookupMs": 11.629997000000458,
+      "nativeParseMs": 639,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 2,
+      "arm": "D",
+      "elapsedMs": 1048.3339620000002,
+      "cpuMs": 1093.7289999999998,
+      "inflateMs": 386.087626,
+      "parseMs": 661.9392359999983,
+      "lookupMs": 11.834780000000137,
+      "nativeParseMs": 641,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 3,
+      "arm": "D",
+      "elapsedMs": 1042.8403270000008,
+      "cpuMs": 1077.8069999999998,
+      "inflateMs": 374.13290400000005,
+      "parseMs": 668.3972369999992,
+      "lookupMs": 11.833203999999569,
+      "nativeParseMs": 647,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 3,
+      "arm": "C",
+      "elapsedMs": 1073.6916299999993,
+      "cpuMs": 1110.812,
+      "inflateMs": 388.7042069999984,
+      "parseMs": 684.6289530000004,
+      "lookupMs": 12.136923000000024,
+      "nativeParseMs": 662,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 3,
+      "arm": "B",
+      "elapsedMs": 1014.8344410000009,
+      "cpuMs": 1047.5490000000002,
+      "inflateMs": 373.96889399999964,
+      "parseMs": 640.5504549999996,
+      "lookupMs": 11.670632999999725,
+      "nativeParseMs": 621,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    },
+    {
+      "pair": 3,
+      "arm": "A",
+      "elapsedMs": 987.8487819999996,
+      "cpuMs": 1021.8389999999999,
+      "inflateMs": 373.32662600000003,
+      "parseMs": 614.236914000001,
+      "lookupMs": 11.687311000000136,
+      "nativeParseMs": 595,
+      "rows": 436555,
+      "indexBytes": 20078148,
+      "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+      "maxWasmHeapBytes": 73531392,
+      "fusedAttempts": 22,
+      "fusedFallbacks": 0,
+      "glossaryReuseCount": 85998,
+      "recentContentDedupHitCount": 73244
+    }
+  ],
+  "completeRawRecordsFile": "primary-log-records.jsonl",
+  "interpretation": "All four candidate elapsed and CPU pairs are slower, with zero extra glossary proofs. Identical-code control spread overlaps the component effect. Retain as non-target component concern; not a replicated full-import regression or candidate qualification.",
+  "originalArtifactAuditOwner": "/root/row_suffix_experiment; separate original ZIP/source/runtime/oracle reconciliation"
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "runId": 46110806989,
+  "jobId": 140873688923,
+  "status": "failed-parent-preflight-aggregation",
+  "failingLocation": "hosted/negative-run.py:70",
+  "exitCode": 1,
+  "plannedMeasuredChildren": 48,
+  "acceptedMeasuredObservations": 0,
+  "completedRawMeasuredChildren": 1,
+  "completedCandidatePairs": 0,
+  "completedExcludedPreflightChildren": 2,
+  "completedMeasuredRepetitions": 16,
+  "completedExcludedWarmupsInMeasuredChild": 2,
+  "failingAssertion": "data[key] == sum(item[key] for item in data['repetitions']), key",
+  "failureMetric": "cpuMs",
+  "recordedJavascriptSequentialSum": 193.11800000000002,
+  "python314CompensatedSumReportedByRoot": 193.118,
+  "independentJavascriptAllNineMetricProof": {
+    "elapsedMs": {
+      "recorded": 187.41467700000007,
+      "sequentialBinary64": 187.41467700000007,
+      "exact": true
+    },
+    "cpuMs": {
+      "recorded": 193.11800000000002,
+      "sequentialBinary64": 193.11800000000002,
+      "exact": true
+    },
+    "inflateMs": {
+      "recorded": 11.308126999999985,
+      "sequentialBinary64": 11.308126999999985,
+      "exact": true
+    },
+    "inflateCpuMs": {
+      "recorded": 13.525,
+      "sequentialBinary64": 13.525,
+      "exact": true
+    },
+    "parseMs": {
+      "recorded": 176.00523000000015,
+      "sequentialBinary64": 176.00523000000015,
+      "exact": true
+    },
+    "lookupMs": {
+      "recorded": 7.390495999999985,
+      "sequentialBinary64": 7.390495999999985,
+      "exact": true
+    },
+    "nativeParseMs": {
+      "recorded": 161,
+      "sequentialBinary64": 161,
+      "exact": true
+    },
+    "rows": {
+      "recorded": 320000,
+      "sequentialBinary64": 320000,
+      "exact": true
+    },
+    "indexBytes": {
+      "recorded": 8263680,
+      "sequentialBinary64": 8263680,
+      "exact": true
+    }
+  },
+  "originalFailureReceipt": {
+    "complete": false,
+    "completedObservations": 0,
+    "error": "cpuMs"
+  },
+  "source": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tooling": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+    "childLabel": "negative-case-1-pair-0-A",
+    "gitHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "fixtureManifestSha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1"
+  },
+  "interpretation": "The first baseline child completed all fixed repetitions; its parent rejected the tiny difference between Python3.14 compensated sum and the child's unchanged JavaScript sequential binary64 sum. Preserve all per-pass values. No candidate observation or candidate/control pair exists, so there is no comparative performance conclusion.",
+  "independentAuditorStatus": "The frozen JavaScript auditor already requires exact sequential-reduce equality on all nine fields. It does not need a tolerance change.",
+  "failurePolicy": "Preserve the failed original run and raw child. Any corrected cohort is separately registered and acquires all fresh children; never substitute this baseline child or relabel the old failure.",
+  "rawRecordsFile": "primary-log-records.jsonl",
+  "rawJobLogFile": "primary-job.log",
+  "originalArtifactAuditOwner": "/root/row_suffix_experiment"
+}

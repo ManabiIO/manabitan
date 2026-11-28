@@ -1,0 +1,1300 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "recordedAtUtc": "2026-11-28T07:08:17.154381+00:00",
+  "statusCutoffs": {
+    "originalPrefix": "All four original jobs terminal; owner artifacts and independent primary logs audited before this staging snapshot.",
+    "correctionReview": "2026-11-28T06:59:17Z",
+    "correctedPublication": "2026-11-28T07:06:48Z; run created queued, accepted observations still pending.",
+    "numericFullCorrectness": "2026-11-28T07:06:52Z"
+  },
+  "stagingOnly": true,
+  "previousImmutableCheckpoint": {
+    "commit": "0e45c4408c908d2d5e74f437943bda905f297f3f",
+    "tree": "69d67f5f082ca0cf1b01816f8713d51037097b69",
+    "branch": "perf/import-study-evidence-20261128-c563d487",
+    "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "fileCount": 66,
+    "totalBytes": 1851476,
+    "canonicalDocument": {
+      "path": "dev/perf/import-experiments-20260914.md",
+      "sha256": "9fb71560fb236975cf49379a7044d7a0c6753d2a068aaf5922278e6ccf769cca",
+      "bytes": 109723
+    },
+    "evidenceIndex": {
+      "path": "builds/perf/import-study-c563d487/evidence-index.json",
+      "sha256": "f859b20a816d76c04cac89692984e3ef463eaebc40a436c14b7bdf4049ff2775",
+      "bytes": 225893
+    },
+    "allPreviousFilesRetainedThroughGitParent": true,
+    "allPreviousLocalStagingBytesUnchanged": true
+  },
+  "canonicalUpdate": {
+    "path": "dev/perf/import-experiments-20260914.md",
+    "sha256": "16bdf70e04c895d56dc7215fbd204c6dbaee65dca890140cc6dfd2c4b0c82624",
+    "bytes": 116659,
+    "change": "One insertion after H1; the entire previous canonical document reconstructs byte for byte after removing the insertion.",
+    "insertionBytes": 6936,
+    "previousReconstructionSha256": "9fb71560fb236975cf49379a7044d7a0c6753d2a068aaf5922278e6ccf769cca",
+    "previousPublishedBodyPreservedVerbatim": true
+  },
+  "runtimeBaseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "modified": false
+  },
+  "fixtureLock": {
+    "path": "test/perf/dictionaries.lock.json",
+    "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "selected": {
+      "jmdict": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "jitendex": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "vndb": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      }
+    }
+  },
+  "originalPrefix": {
+    "runId": 46110806989,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989",
+    "toolingCommit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+    "workflowPath": ".github/workflows/jmdict-prefix-selector-component-c563d487.yml",
+    "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "candidateWasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+    "candidateWasmBytes": 69209,
+    "candidateManifestSha256": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+    "sourcePatchSha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+    "allJobsTerminal": true,
+    "plannedAcceptedObservations": 96,
+    "acceptedObservations": 16,
+    "completedAcceptedCells": 1,
+    "failedOriginalJobs": 3,
+    "cells": [
+      {
+        "name": "jmdict",
+        "jobId": 140873688700,
+        "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/job/140873688700",
+        "allJobsTerminal": true,
+        "plannedAcceptedObservations": 16,
+        "acceptedObservations": 0,
+        "artifact": {
+          "id": 15252152901,
+          "sha256": "5400984f61fd9d6dca019f0ab35cbefcb50a5088fbe487a1fa09b380cb41ab6b",
+          "bytes": 327357,
+          "apiDigestVerified": true,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/artifacts/15252152901",
+          "rawArchiveCopiedIntoFollowup": false
+        },
+        "independentArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/independent-preflight-audit.json",
+          "sha256": "c699d570792f790661266efee765deaf15afb7a0a7f70e76b3efdb7303dfb808",
+          "bytes": 4460
+        },
+        "primaryLogAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/primary-log-failure.json",
+          "sha256": "2fc1e21d88662b5aeba347f6e052f9748a5a1e9d87fbb91b3e0b2ad51426e82e",
+          "bytes": 7001
+        },
+        "downloadReceipt": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/download-receipt.json",
+          "sha256": "aa05422712c613f9c4e6be8ea6dd054ce65d71c7e18da6bdafdefd2d4145f2ad",
+          "bytes": 1192
+        },
+        "status": "Failed scoped ESLint after C build and six smoke modes; zero accepted timing.",
+        "errors": 52,
+        "fixtureErrors": 48,
+        "regressionFileErrors": 4,
+        "failedGate": "Scoped regression fixture/test ESLint",
+        "notRun": [
+          "strict test types",
+          "focused tests",
+          "raw native corpus oracle",
+          "dictionary diagnostic mechanics",
+          "timing cohort"
+        ],
+        "eslintReport": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/scoped-eslint.json",
+          "sha256": "1f504d204d141762def0f5a0659963a47b6bc62ed69c0ac04745caa8416c85f7",
+          "bytes": 51862
+        }
+      },
+      {
+        "name": "jitendex",
+        "jobId": 140873688877,
+        "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/job/140873688877",
+        "allJobsTerminal": true,
+        "plannedAcceptedObservations": 16,
+        "acceptedObservations": 16,
+        "artifact": {
+          "id": 15252372462,
+          "sha256": "5c2f9e7ca53dba9acc0a96e4ca338db07c428f582f5fde75a317ca2c4dd2c41a",
+          "bytes": 500524,
+          "apiDigestVerified": true,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/artifacts/15252372462",
+          "rawArchiveCopiedIntoFollowup": false
+        },
+        "independentArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/independent-artifact-audit.json",
+          "sha256": "a52137ea5d0e99ad309a711fb55871020e2796a43f0e6b1d98c443f76a1e776a",
+          "bytes": 8748
+        },
+        "primaryLogAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/primary-log-audit.json",
+          "sha256": "5d8259c8110d6fd835b1e51b6119de7106d17be7496d715d4249f7757af7bf73",
+          "bytes": 27183
+        },
+        "downloadReceipt": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/download-receipt.json",
+          "sha256": "b1bcf2a4241df2c31807d4eb7987ddf83ab0e5b929c82d54682f0722cac63974",
+          "bytes": 2793
+        },
+        "status": "Complete accepted component cell; non-target concern, no full-import inference.",
+        "rowsPerObservation": 436555,
+        "digest": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+        "metrics": {
+          "candidate.elapsedMs": {
+            "baselineValues": [
+              1009.735290999999,
+              1011.0629209999993,
+              997.6021629999996,
+              987.8487819999996
+            ],
+            "comparisonValues": [
+              1017.3782359999991,
+              1057.072475999999,
+              1043.6922389999995,
+              1014.8344410000009
+            ],
+            "pairedChangesPercent": [
+              0.7569256089317038,
+              4.550612434139464,
+              4.620085812704876,
+              2.731760112652679
+            ],
+            "medianPairedChangePercent": 3.6411862733960714,
+            "equalWorkChangePercent": 3.1632639417489306,
+            "fasterPairs": 0
+          },
+          "identicalControl.elapsedMs": {
+            "baselineValues": [
+              1043.5328940000013,
+              1010.6292669999998,
+              1038.1564999999996,
+              1073.6916299999993
+            ],
+            "comparisonValues": [
+              1020.5808279999992,
+              1087.9878909999989,
+              1048.3339620000002,
+              1042.8403270000008
+            ],
+            "pairedChangesPercent": [
+              -2.1994578352028524,
+              7.654500668641242,
+              0.9803398620536079,
+              -2.873385815627395
+            ],
+            "medianPairedChangePercent": -0.6095589865746223,
+            "equalWorkChangePercent": 0.8097127621809552,
+            "fasterPairs": 2
+          },
+          "candidate.cpuMs": {
+            "baselineValues": [
+              1042.62,
+              1044.7499999999998,
+              1029.2790000000002,
+              1021.8389999999999
+            ],
+            "comparisonValues": [
+              1050.5620000000001,
+              1092.392,
+              1080.523,
+              1047.5490000000002
+            ],
+            "pairedChangesPercent": [
+              0.7617348602559163,
+              4.560134003350112,
+              4.978630672538706,
+              2.5160519416464107
+            ],
+            "medianPairedChangePercent": 3.5380929724982613,
+            "equalWorkChangePercent": 3.2025706006638286,
+            "fasterPairs": 0
+          },
+          "identicalControl.cpuMs": {
+            "baselineValues": [
+              1079.9669999999996,
+              1043.642,
+              1075.228,
+              1110.812
+            ],
+            "comparisonValues": [
+              1056.443,
+              1132.8670000000002,
+              1093.7289999999998,
+              1077.8069999999998
+            ],
+            "pairedChangesPercent": [
+              -2.1782147047085387,
+              8.549387625258483,
+              1.7206583161896591,
+              -2.9712498604624464
+            ],
+            "medianPairedChangePercent": -0.2287781942594398,
+            "equalWorkChangePercent": 1.1879621751098552,
+            "fasterPairs": 2
+          },
+          "candidate.parseMs": {
+            "baselineValues": [
+              633.4170999999988,
+              627.2861010000006,
+              623.1829450000009,
+              614.236914000001
+            ],
+            "comparisonValues": [
+              642.9403279999992,
+              668.8336840000002,
+              668.686384000001,
+              640.5504549999996
+            ],
+            "pairedChangesPercent": [
+              1.503468725426025,
+              6.623386511157456,
+              7.301778613341224,
+              4.283940023832332
+            ],
+            "medianPairedChangePercent": 5.453663267494894,
+            "equalWorkChangePercent": 4.919204860948631,
+            "fasterPairs": 0
+          },
+          "identicalControl.parseMs": {
+            "baselineValues": [
+              660.556345,
+              636.4929670000001,
+              661.6983419999988,
+              684.6289530000004
+            ],
+            "comparisonValues": [
+              645.6832360000003,
+              678.3585950000006,
+              661.9392359999983,
+              668.3972369999992
+            ],
+            "pairedChangesPercent": [
+              -2.2516033813890104,
+              6.577547619626794,
+              0.03640541085103269,
+              -2.3708778205880425
+            ],
+            "medianPairedChangePercent": -1.107598985268989,
+            "equalWorkChangePercent": 0.4161986215231435,
+            "fasterPairs": 2
+          },
+          "candidate.nativeParseMs": {
+            "baselineValues": [
+              612,
+              608,
+              603,
+              595
+            ],
+            "comparisonValues": [
+              623,
+              650,
+              652,
+              621
+            ],
+            "pairedChangesPercent": [
+              1.7973856209150325,
+              6.907894736842106,
+              8.12603648424544,
+              4.369747899159663
+            ],
+            "medianPairedChangePercent": 5.638821318000884,
+            "equalWorkChangePercent": 5.293631100082713,
+            "fasterPairs": 0
+          },
+          "identicalControl.nativeParseMs": {
+            "baselineValues": [
+              638,
+              615,
+              639,
+              662
+            ],
+            "comparisonValues": [
+              624,
+              657,
+              641,
+              647
+            ],
+            "pairedChangesPercent": [
+              -2.19435736677116,
+              6.829268292682928,
+              0.3129890453834116,
+              -2.2658610271903323
+            ],
+            "medianPairedChangePercent": -0.9406841606938741,
+            "equalWorkChangePercent": 0.5873140172278779,
+            "fasterPairs": 2
+          },
+          "candidate.lookupMs": {
+            "baselineValues": [
+              11.644249999999829,
+              11.670657000001938,
+              11.587555999997676,
+              11.687311000000136
+            ],
+            "comparisonValues": [
+              11.706186999999773,
+              11.72007799999892,
+              11.630928000000495,
+              11.670632999999725
+            ],
+            "pairedChangesPercent": [
+              0.5319105996517115,
+              0.423463734706404,
+              0.37429808324402075,
+              -0.14270177289207742
+            ],
+            "medianPairedChangePercent": 0.3988809089752124,
+            "equalWorkChangePercent": 0.2963139507809915,
+            "fasterPairs": 1
+          },
+          "identicalControl.lookupMs": {
+            "baselineValues": [
+              12.302887000002102,
+              11.81646900000078,
+              11.629997000000458,
+              12.136923000000024
+            ],
+            "comparisonValues": [
+              11.740540000000692,
+              12.087010000001555,
+              11.834780000000137,
+              11.833203999999569
+            ],
+            "pairedChangesPercent": [
+              -4.5708539792433545,
+              2.2895248995343542,
+              1.7608173071727469,
+              -2.5024382209597533
+            ],
+            "medianPairedChangePercent": -0.3708104568935032,
+            "equalWorkChangePercent": -0.8159790917994594,
+            "fasterPairs": 2
+          }
+        },
+        "mechanicalCounts": {
+          "keyIdentityRows": 24302,
+          "admissions": 1,
+          "candidateRecordsInspected": 1,
+          "noPrefixCandidate": 0,
+          "selected": 1,
+          "selectedDistance1": 1,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 243,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 1,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 0,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 243,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 24302,
+          "originalLookbackPositiveRows": 412231,
+          "originalGlossaryReuses": 85998,
+          "totalGlossaryReuses": 85998,
+          "priorStreakRows": 73243,
+          "recentContentHits": 73244,
+          "rows": 436555,
+          "budgetPositiveRows": 221635,
+          "budgetRefreshByRecentStreak": 2389,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0
+        },
+        "maxWasmHeapBytesByArm": {
+          "A": [
+            73531392
+          ],
+          "B": [
+            73531392
+          ],
+          "C": [
+            73531392
+          ],
+          "D": [
+            73531392
+          ]
+        },
+        "nativeOracle": {
+          "syntheticCases": 1112,
+          "syntheticExportComparisons": 2224,
+          "corpus": {
+            "parse_term_bank": {
+              "banks": 219,
+              "rows": 436555,
+              "digest": "5c523c196502e6af5ff38cb64b0ec96db6b550f1aa2f1191156b9bb2564dbd18"
+            },
+            "parse_term_bank_with_media_hints": {
+              "banks": 219,
+              "rows": 436555,
+              "digest": "afaebcadb1bf5258684ac09be1cb97f34c5c25e4713ba5272579c88b25d631d0"
+            }
+          },
+          "recordsSha256": "9b22066ece1ab68048a77a65afb09f8f5cae594dd542c05961b49fc9484fa907",
+          "comparisons": 2662
+        },
+        "rerunInCorrectedCohort": false
+      },
+      {
+        "name": "vndb",
+        "jobId": 140873688868,
+        "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/job/140873688868",
+        "allJobsTerminal": true,
+        "plannedAcceptedObservations": 16,
+        "acceptedObservations": 0,
+        "artifact": {
+          "id": 15252438227,
+          "sha256": "2be5d9d0392f4cb54276affa4c73b018ef3f9beeb43d54df4bdffffcc9e825ee",
+          "bytes": 507425,
+          "apiDigestVerified": true,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/artifacts/15252438227",
+          "rawArchiveCopiedIntoFollowup": false
+        },
+        "independentArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/independent-failure-audit.json",
+          "sha256": "66b4fcdb35db5f92c90968819655dc5b420746ed9c4e53ad017f0a2079be5d07",
+          "bytes": 3353
+        },
+        "primaryLogAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/primary-log-failure.json",
+          "sha256": "abd56a02ce251e905d6ef0531b50361534ce592a6acfd5234bd91afd9d9edd38",
+          "bytes": 6721
+        },
+        "downloadReceipt": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/download-receipt.json",
+          "sha256": "ac5de9d3844b274a045b71b0a76a17a7b9aa9dd3d889a48ffc4239b8983d15ae",
+          "bytes": 1369
+        },
+        "status": "Failed observer route assertion after native oracle and six smoke modes; zero timing.",
+        "expectedByOriginalObserver": 167,
+        "actualFusedGroups": 166,
+        "actualSingletonGroups": 1,
+        "singletonRows": 8310,
+        "totalRows": 6648310,
+        "fusedRows": 6640000,
+        "singleBankGroup": {
+          "group": 166,
+          "banks": [
+            "term_bank_665.json"
+          ],
+          "rows": 8310,
+          "fusedAttempts": 0,
+          "fusedFallbacks": 0
+        },
+        "failure": {
+          "file": "hosted/run.py",
+          "line": 45,
+          "assertion": "fusedFallbacks == 0 and fusedAttempts == len(groupReceipts)",
+          "actualFusedAttempts": 166,
+          "actualGroupCount": 167,
+          "cause": "The final unchanged singleton bank uses the ordinary nonfused strict route."
+        },
+        "nativeOracle": {
+          "syntheticCases": 1112,
+          "syntheticExportComparisons": 2224,
+          "corpus": {
+            "parse_term_bank": {
+              "banks": 665,
+              "rows": 6648310,
+              "digest": "9a2cd5caec85cf8789eabc7263bb05ea8c6cca940ca519230c6ecd536d55c1be"
+            },
+            "parse_term_bank_with_media_hints": {
+              "banks": 665,
+              "rows": 6648310,
+              "digest": "ff077fb299a9115e608a971f4bb7c66442199561478f90bc744995037fc00c4e"
+            }
+          },
+          "recordsSha256": "2a0decbc96401edd279c78dd842f91c03f662dd284852ec71048cdec041a03e7",
+          "comparisons": 3554
+        },
+        "digest": "5dcd5e0ef85feb32eda261441814f369c31950c96590ebd534b4c7a3f4643694"
+      },
+      {
+        "name": "negative",
+        "jobId": 140873688923,
+        "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/job/140873688923",
+        "allJobsTerminal": true,
+        "plannedAcceptedObservations": 48,
+        "acceptedObservations": 0,
+        "artifact": {
+          "id": 15252871807,
+          "sha256": "7e872786c7a2488f336b420b6d039c7ee70bb0bd04e48fa9c86978513706a515",
+          "bytes": 762213,
+          "apiDigestVerified": true,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110806989/artifacts/15252871807",
+          "rawArchiveCopiedIntoFollowup": false
+        },
+        "independentArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/independent-failure-audit.json",
+          "sha256": "257de31e17986dc47526cdaac9cdd175221389854220aaadb0eb4e848bb4d600",
+          "bytes": 8160
+        },
+        "primaryLogAudit": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/primary-log-failure.json",
+          "sha256": "04e80bc34d53c8b5de4df97b99dd09c77252847f20f6c27bf362d204486ae6ea",
+          "bytes": 3248
+        },
+        "downloadReceipt": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/download-receipt.json",
+          "sha256": "365f76ba3c336e58ce250c96b911f795fc8a8ac16c39c58ec5fd252a6127cc91",
+          "bytes": 3979
+        },
+        "status": "Failed exact aggregate assertion; one completed baseline child is retained but not accepted or pooled.",
+        "completedRawMeasuredChildren": 1,
+        "firstChildMeasuredRepetitions": 16,
+        "firstChildExcludedWarmups": 2,
+        "completedCandidatePairs": 0,
+        "completedControlPairs": 0,
+        "pythonCompensatedSumReported": "193.118",
+        "javascriptSequentialSumReported": "193.11800000000002",
+        "partialRawChild": {
+          "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/negative-case-1-pair-0-A.stdout.json",
+          "sha256": "f90aaaea230a8b3cfd503d69d4111e3c4f40fb0edb66169ecf7b2c092bb2bafb",
+          "bytes": 13527
+        },
+        "partialChildPooledIntoCorrectedCohort": false
+      }
+    ],
+    "scopeLimit": "Native compressed inflate/CRC/strict parse/completed-lookup components; no browser/full-import speed or process-memory qualification.",
+    "promotion": "No prefix product PR; original successful non-target cell is a concern and failed cells supply no performance estimate."
+  },
+  "formattingCorrection": {
+    "manifest": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/correction-manifest.json",
+      "sha256": "4f9ca3cdd90e7e028e7364eea06c6aaaadbc23f69c793907254b67daaa35f5e1",
+      "bytes": 2434
+    },
+    "patch": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/qualification-formatting.patch",
+      "sha256": "dfdaa86f24bec58c4252f26fbd9cd41cee2072d5cde7f1dd4fe7642e66fb2892",
+      "bytes": 15584
+    },
+    "semanticIdentity": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/semantic-identity.json",
+      "sha256": "40d8a013044929678f2b9031fc1646d484d530c6e3c298cb20206feec86812aa",
+      "bytes": 1263
+    },
+    "localPreflight": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/local-corrected-preflight.json",
+      "sha256": "1926a412a1e3ff6d156ec12668e95dbfad244c462421a395e6b67674e019b507",
+      "bytes": 3604
+    },
+    "localGateReceipts": [
+      {
+        "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/full-scoped-eslint-receipt.json",
+        "sha256": "4375dca996db5d276f21fcc56aaf29877bd05cbdd648a689db9f0295ebaa4016",
+        "bytes": 1975
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/targeted-types-receipt.json",
+        "sha256": "794f85b9215d596580915edc71127efedc214886407eeb55d16ad0f10ea500e6",
+        "bytes": 1932
+      },
+      {
+        "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/focused-regression-receipt.json",
+        "sha256": "1406974d9af2bc944bba821e9b7a3d1942d95b09c69ef2e3796b89f364474e9e",
+        "bytes": 1778
+      }
+    ],
+    "regressionTestsPassed": 73,
+    "runtimeAndFixtureSemanticsChanged": false,
+    "limit": "Targeted strict test-type check and one new regression suite; not the all-tests CI type lane or complete hosted qualification."
+  },
+  "assertionCorrection": {
+    "amendment": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/amendment.json",
+      "sha256": "16c9b84c7148d2841134e8e90e351626b220890f401b7a9367ee579f89cf4afa",
+      "bytes": 4246
+    },
+    "patch": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/harness-expectations.patch",
+      "sha256": "263adbb82cd716aa58ee4ee93664a6c6f63c967580cf2ecdb79a0cc7b8401007",
+      "bytes": 1976
+    },
+    "runner": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/run.py",
+      "sha256": "38c9539f00d5be2fa9afca4e92ffc33eab29922ebec1f62444f60d51e382aa4e",
+      "bytes": 7612
+    },
+    "negativeRunner": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/negative-run.py",
+      "sha256": "236e1e3aa4157a4e62f91f831f636cd44cc719686a97c1d990d5a5c62a8b7444",
+      "bytes": 9157
+    },
+    "replayChecks": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/replay-checks.json",
+      "sha256": "676fa620e4a593276aff131102f146e3b1e56873df1902d2e83a4d425b39e228",
+      "bytes": 9179
+    },
+    "independentReview": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/parent-assertion-review.json",
+      "sha256": "d78ee392451c36c41c9381aff4663d42acefd8067006378882d7af30c5ac4bd1",
+      "bytes": 2873
+    },
+    "routeReplay": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/route-check-replay.json",
+      "sha256": "ea6a5779d71d7102373785e5944462e3f5a945831c1dd02e0487e88a57b6bcc6",
+      "bytes": 1736
+    },
+    "independentAuditor": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/independent-prefix-corrected-log-audit.js",
+      "sha256": "631959502f4409b82a0e567d9c6e3772a981e2a631bec8c52ea7b261f2eb2f8b",
+      "bytes": 23863
+    },
+    "acceptedExistingAggregateFields": 27,
+    "rejectedAggregatePerturbations": 81,
+    "routeReplayedFusedGroups": 166,
+    "routeReplayedSingletonGroups": 1,
+    "tolerance": 0,
+    "typeCoercion": false,
+    "earlierReviewVersionsPreserved": true,
+    "scope": "Only parent assertions and independent receipt auditing; no changed timed code, product bytes, workloads or thresholds."
+  },
+  "correctedPrefixPlan": {
+    "status": "Published separate corrected cohort; run queued at creation, zero accepted corrected observations recorded at this checkpoint.",
+    "proposedBranch": "perf/jmdict-prefix-selector-corrected-20261128-c563d487",
+    "toolingCommit": "59530bb6db9320063c955d0a42219690bcabb47d",
+    "tree": "529d684d8dba22d82bb538d5a9d7e6fd6f47b59c",
+    "runId": 46119683668,
+    "jobIds": null,
+    "workflow": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/workflow.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec",
+      "bytes": 6545
+    },
+    "workflowPreparation": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/workflow-preparation.json",
+      "sha256": "4e3d12bbe96085dd3edc7fcf084da112f67f42f81dd865ddeee1b0c28d5cd079",
+      "bytes": 1563
+    },
+    "newAcceptedObservationsPlanned": 80,
+    "cells": [
+      {
+        "name": "jmdict",
+        "planned": 16
+      },
+      {
+        "name": "vndb",
+        "planned": 16
+      },
+      {
+        "name": "negative",
+        "planned": 48
+      }
+    ],
+    "acceptedObservations": 0,
+    "originalJitendexRerun": false,
+    "originalNegativePartialChildPooled": false,
+    "changes": [
+      "Exactly reported test formatting",
+      "Explicit fused versus singleton route assertion",
+      "Exact sequential binary64 aggregate assertions without coercion",
+      "Separate cohort name/branch/artifact labels and no rerun of completed Jitendex"
+    ],
+    "unchanged": [
+      "Native C, generated WASM and manifest",
+      "Fixtures and generation",
+      "Flags and fixed groups",
+      "Timers, warmups and repetitions",
+      "Fresh child schedule and paired units",
+      "Statistical and rejection criteria",
+      "All original records and failures"
+    ],
+    "noFutureResultInferred": true,
+    "publicationPayloadManifest": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/publication-manifest.json",
+      "sha256": "a13fe84899f28886a5abd17ffb4932339bb548de31980cef7d53129039b80fb2",
+      "bytes": 6993
+    },
+    "correctionRecord": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/correction-record.json",
+      "sha256": "7f7c945c8bb0318a4e568ac88579cb5b52fe3947a102e671afe4005022b35f7a",
+      "bytes": 9108
+    },
+    "finalPublicationReview": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/final-publication-review.json",
+      "sha256": "57525bd6ebbfd7f8feb970aba9f6996cb15e4e3ec9980c2e4a1c899c9bacd1ba",
+      "bytes": 2486
+    },
+    "payloadFiles": 17,
+    "payloadBytes": 132433,
+    "plannedToolingParent": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+    "plannedBaseTree": "38e40facc1abf6a013587c8873e3b92498013c2f",
+    "workflowRepositoryPath": ".github/workflows/jmdict-prefix-selector-component-c563d487.yml",
+    "branch": "perf/jmdict-prefix-selector-corrected-20261128-c563d487",
+    "parent": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46119683668",
+    "createdAtUtc": "2026-11-28T07:06:48Z",
+    "statusAtCreation": "queued",
+    "publicationReceipt": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/publication.json",
+      "sha256": "fb7686dd8e26c1a5fc52ce22be417c5c6df8fb3edbc886ad94f605f9b7e46aa9",
+      "bytes": 863
+    },
+    "allGitBlobIdsVerified": true,
+    "pullRequestOpened": false,
+    "independentPrimaryPublicationBinding": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/primary-publication-binding.json",
+      "sha256": "fd36ab9d3573b2e3f0f6b43a582b59cf21c44f18256ab28e6398764aca6cb1fe",
+      "bytes": 1816
+    },
+    "independentExpectedIdentities": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/independent-prefix-corrected-expected.json",
+      "sha256": "1965e8ede2ffbf30819f8bb9f3c8a1d6b458e14413d92ab019817a3812a752fa",
+      "bytes": 34776
+    }
+  },
+  "excludedNegativeRehearsal": {
+    "result": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-negative-rehearsal/result.json",
+      "sha256": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428",
+      "bytes": 11149
+    },
+    "children": 6,
+    "cases": 3,
+    "baselineParity": true,
+    "allExpectedMechanicsMatch": true,
+    "warmupsPerChild": 0,
+    "measuredRepetitionsPerChild": 0,
+    "acceptedPerformanceObservations": 0,
+    "scope": "Existing baseline JavaScript with external instrumented candidate WASM; mechanics only, not a product build or timing/memory qualification."
+  },
+  "numericFullQualificationStatus": {
+    "productCommit": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "toolingCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+    "runId": 46113243549,
+    "correctnessJobId": 140881240942,
+    "statusAtSuppliedCutoff": "Correctness queued",
+    "statusCutoffUtc": "2026-11-28T07:06:52Z",
+    "fullObservationsAtSuppliedCutoff": 0,
+    "pr": null,
+    "provenance": "Exact source, tooling, workflow, criteria, amendments and auditor identities remain bound by the previous immutable evidence index.",
+    "statusSource": "benchmark_setup primary GitHub jobs query at 07:06:52 UTC; root independently reported queued at 07:05:53 UTC."
+  },
+  "evidenceFiles": [
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/amendment.json",
+      "sha256": "16c9b84c7148d2841134e8e90e351626b220890f401b7a9367ee579f89cf4afa",
+      "bytes": 4246,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/amendment.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/harness-expectations.patch",
+      "sha256": "263adbb82cd716aa58ee4ee93664a6c6f63c967580cf2ecdb79a0cc7b8401007",
+      "bytes": 1976,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/harness-expectations.patch",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/history/amendment.json.pre-review",
+      "sha256": "ad25db8c94fcb491d9fbc5f0acb3386a69360efeef747f304e22e18483af7d0a",
+      "bytes": 3531,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/amendment.json.pre-review",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/history/harness-expectations.patch.pre-review",
+      "sha256": "c5e1578ad8470a5ae67ad1f4e79efaffad1aaf55b770ff4985f75af575602f69",
+      "bytes": 1983,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/harness-expectations.patch.pre-review",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/history/negative-run.py.patch.pre-review",
+      "sha256": "3ac2f9518b80695033212c16a1f191eb3e3cefaa5ed920fdee653d5b9a0173d3",
+      "bytes": 983,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/negative-run.py.patch.pre-review",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/history/negative-run.py.pre-review",
+      "sha256": "402d1765adc3e15c8b2a85c065b10cfcaeab9aabd325f0473a7576dd2021fbf8",
+      "bytes": 9164,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/negative-run.py.pre-review",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/history/replay-checks.json.pre-review",
+      "sha256": "cf63769eade801bd2862a31ce9bf76cfe48ca12ede2bd0d87c62648f1960fdbf",
+      "bytes": 7991,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/replay-checks.json.pre-review",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/negative-run.py",
+      "sha256": "236e1e3aa4157a4e62f91f831f636cd44cc719686a97c1d990d5a5c62a8b7444",
+      "bytes": 9157,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/negative-run.py",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/replay-checks.json",
+      "sha256": "676fa620e4a593276aff131102f146e3b1e56873df1902d2e83a4d425b39e228",
+      "bytes": 9179,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/replay-checks.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/assertion-correction/run.py",
+      "sha256": "38c9539f00d5be2fa9afca4e92ffc33eab29922ebec1f62444f60d51e382aa4e",
+      "bytes": 7612,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-route-correction/run.py",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/correction-record.json",
+      "sha256": "7f7c945c8bb0318a4e568ac88579cb5b52fe3947a102e671afe4005022b35f7a",
+      "bytes": 9108,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected/correction-record.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/publication-manifest.json",
+      "sha256": "a13fe84899f28886a5abd17ffb4932339bb548de31980cef7d53129039b80fb2",
+      "bytes": 6993,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected/publication-manifest.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/publication.json",
+      "sha256": "fb7686dd8e26c1a5fc52ce22be417c5c6df8fb3edbc886ad94f605f9b7e46aa9",
+      "bytes": 863,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected/publication.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/workflow-preparation.json",
+      "sha256": "4e3d12bbe96085dd3edc7fcf084da112f67f42f81dd865ddeee1b0c28d5cd079",
+      "bytes": 1563,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected/workflow-preparation.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/corrected-plan/workflow.yml",
+      "sha256": "d69bd8517ef01c41681c3fd73cebdd901a802977b783fdcccacb5b3e8b9ba9ec",
+      "bytes": 6545,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected/workflow.yml",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/audit.json",
+      "sha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76",
+      "bytes": 7576,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-jmdict-rehearsal/audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/audit.py",
+      "sha256": "7ed72143521a4f3ddb87da14c2bd155614a135c92f9fc26d9502e50e6e36baf4",
+      "bytes": 7802,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-jmdict-rehearsal/audit.py",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/diagnostic.stdout.json",
+      "sha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+      "bytes": 21816,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-jmdict-rehearsal/diagnostic.stdout.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/result.json",
+      "sha256": "9063cc5a6ce784359636def109f778af7fd9e2ba82d803dadac303886f8808fc",
+      "bytes": 3041,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-jmdict-rehearsal/result.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-negative-rehearsal/result.json",
+      "sha256": "feb797569be912c111c9f2abea0c7465c6eeb65adfdbfc199e0749ea134de428",
+      "bytes": 11149,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-negative-rehearsal/result.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/correction-manifest.json",
+      "sha256": "4f9ca3cdd90e7e028e7364eea06c6aaaadbc23f69c793907254b67daaa35f5e1",
+      "bytes": 2434,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/correction-manifest.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/qualification-formatting.patch",
+      "sha256": "dfdaa86f24bec58c4252f26fbd9cd41cee2072d5cde7f1dd4fe7642e66fb2892",
+      "bytes": 15584,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/qualification-formatting.patch",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/focused-regression-receipt.json",
+      "sha256": "1406974d9af2bc944bba821e9b7a3d1942d95b09c69ef2e3796b89f364474e9e",
+      "bytes": 1778,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/focused-regression-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/focused-regression.log",
+      "sha256": "65a17262a0dbf5deb9c7bcb2d9c2c412d987eebaa1b0f3e0f1c90b079d874641",
+      "bytes": 640,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/focused-regression.log",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/full-scoped-eslint-receipt.json",
+      "sha256": "4375dca996db5d276f21fcc56aaf29877bd05cbdd648a689db9f0295ebaa4016",
+      "bytes": 1975,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/full-scoped-eslint-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/local-corrected-preflight.json",
+      "sha256": "1926a412a1e3ff6d156ec12668e95dbfad244c462421a395e6b67674e019b507",
+      "bytes": 3604,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/local-corrected-preflight.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/semantic-identity.json",
+      "sha256": "40d8a013044929678f2b9031fc1646d484d530c6e3c298cb20206feec86812aa",
+      "bytes": 1263,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/semantic-identity.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/reports/targeted-types-receipt.json",
+      "sha256": "794f85b9215d596580915edc71127efedc214886407eeb55d16ad0f10ea500e6",
+      "bytes": 1932,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/reports/targeted-types-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/test/term-bank-prefix-selector-fixtures.js",
+      "sha256": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b",
+      "bytes": 21049,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/test/term-bank-prefix-selector-fixtures.js",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/format-correction/test/term-bank-prefix-selector-reuse.test.js",
+      "sha256": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a",
+      "bytes": 13843,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-regression-correction/test/term-bank-prefix-selector-reuse.test.js",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/final-publication-review.json",
+      "sha256": "57525bd6ebbfd7f8feb970aba9f6996cb15e4e3ec9980c2e4a1c899c9bacd1ba",
+      "bytes": 2486,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/final-publication-review.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/independent-prefix-corrected-expected.json",
+      "sha256": "1965e8ede2ffbf30819f8bb9f3c8a1d6b458e14413d92ab019817a3812a752fa",
+      "bytes": 34776,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/independent-prefix-corrected-expected.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/independent-prefix-corrected-log-audit.js",
+      "sha256": "631959502f4409b82a0e567d9c6e3772a981e2a631bec8c52ea7b261f2eb2f8b",
+      "bytes": 23863,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/independent-prefix-corrected-log-audit.js",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/parent-assertion-review.json",
+      "sha256": "d78ee392451c36c41c9381aff4663d42acefd8067006378882d7af30c5ac4bd1",
+      "bytes": 2873,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/parent-assertion-review.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/primary-publication-binding.json",
+      "sha256": "fd36ab9d3573b2e3f0f6b43a582b59cf21c44f18256ab28e6398764aca6cb1fe",
+      "bytes": 1816,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/primary-publication-binding.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/independent-correction-review/route-check-replay.json",
+      "sha256": "ea6a5779d71d7102373785e5944462e3f5a945831c1dd02e0487e88a57b6bcc6",
+      "bytes": 1736,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-corrected-audit/route-check-replay.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/download-receipt.json",
+      "sha256": "b1bcf2a4241df2c31807d4eb7987ddf83ab0e5b929c82d54682f0722cac63974",
+      "bytes": 2793,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jitendex/download-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/independent-artifact-audit.json",
+      "sha256": "a52137ea5d0e99ad309a711fb55871020e2796a43f0e6b1d98c443f76a1e776a",
+      "bytes": 8748,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jitendex/independent-artifact-audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jitendex/primary-log-audit.json",
+      "sha256": "5d8259c8110d6fd835b1e51b6119de7106d17be7496d715d4249f7757af7bf73",
+      "bytes": 27183,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jitendex/primary-log-audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/download-receipt.json",
+      "sha256": "aa05422712c613f9c4e6be8ea6dd054ce65d71c7e18da6bdafdefd2d4145f2ad",
+      "bytes": 1192,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jmdict/download-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/independent-preflight-audit.json",
+      "sha256": "c699d570792f790661266efee765deaf15afb7a0a7f70e76b3efdb7303dfb808",
+      "bytes": 4460,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jmdict/independent-preflight-audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/primary-log-failure.json",
+      "sha256": "2fc1e21d88662b5aeba347f6e052f9748a5a1e9d87fbb91b3e0b2ad51426e82e",
+      "bytes": 7001,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jmdict/primary-log-failure.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/jmdict/scoped-eslint.json",
+      "sha256": "1f504d204d141762def0f5a0659963a47b6bc62ed69c0ac04745caa8416c85f7",
+      "bytes": 51862,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/jmdict/scoped-eslint.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/download-receipt.json",
+      "sha256": "365f76ba3c336e58ce250c96b911f795fc8a8ac16c39c58ec5fd252a6127cc91",
+      "bytes": 3979,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/negative/download-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/independent-failure-audit.json",
+      "sha256": "257de31e17986dc47526cdaac9cdd175221389854220aaadb0eb4e848bb4d600",
+      "bytes": 8160,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/negative/independent-failure-audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/negative-case-1-pair-0-A.stdout.json",
+      "sha256": "f90aaaea230a8b3cfd503d69d4111e3c4f40fb0edb66169ecf7b2c092bb2bafb",
+      "bytes": 13527,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/negative/negative-case-1-pair-0-A.stdout.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/negative/primary-log-failure.json",
+      "sha256": "04e80bc34d53c8b5de4df97b99dd09c77252847f20f6c27bf362d204486ae6ea",
+      "bytes": 3248,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/negative/primary-log-failure.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/download-receipt.json",
+      "sha256": "ac5de9d3844b274a045b71b0a76a17a7b9aa9dd3d889a48ffc4239b8983d15ae",
+      "bytes": 1369,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/vndb/download-receipt.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/independent-failure-audit.json",
+      "sha256": "66b4fcdb35db5f92c90968819655dc5b420746ed9c4e53ad017f0a2079be5d07",
+      "bytes": 3353,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/vndb/independent-failure-audit.json",
+      "preservation": "Exact source bytes; no normalization."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/original/vndb/primary-log-failure.json",
+      "sha256": "abd56a02ce251e905d6ef0531b50361534ce592a6acfd5234bd91afd9d9edd38",
+      "bytes": 6721,
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "jmdict-prefix-selector-evidence/vndb/primary-log-failure.json",
+      "preservation": "Exact source bytes; no normalization."
+    }
+  ],
+  "preservationPolicy": {
+    "exactCopiesOnly": true,
+    "largeRawArchivesOrTracesCopied": false,
+    "originalFailuresPreserved": true,
+    "partialReceiptsNotPooled": true,
+    "newBuildsTestsOrAcquisitionsPerformedForStaging": false,
+    "noPublicationByStagingAgent": true,
+    "noNewProseFileBesidesCanonicalDocument": true,
+    "previousDocumentAndIndexUnmodified": true,
+    "newFilesFormAnOverlayOnCommit": "0e45c4408c908d2d5e74f437943bda905f297f3f"
+  },
+  "excludedJmdictRehearsal": {
+    "audit": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/audit.json",
+      "sha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76",
+      "bytes": 7576
+    },
+    "originalPostprocessingFailure": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/result.json",
+      "sha256": "9063cc5a6ce784359636def109f778af7fd9e2ba82d803dadac303886f8808fc",
+      "bytes": 3041
+    },
+    "rawChild": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/diagnostic.stdout.json",
+      "sha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+      "bytes": 21816
+    },
+    "auditor": {
+      "path": "builds/perf/import-study-c563d487/prefix-followup/excluded-jmdict-rehearsal/audit.py",
+      "sha256": "7ed72143521a4f3ddb87da14c2bd155614a135c92f9fc26d9502e50e6e36baf4",
+      "bytes": 7802
+    },
+    "acquisitionCount": 1,
+    "measuredObservations": 0,
+    "warmups": 0,
+    "rows": 528299,
+    "banks": 53,
+    "groups": 8,
+    "expectedTotalAndEachGroupFieldsChecked": 38,
+    "allFrozenExpectedMechanicsMatch": true,
+    "digest": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+    "fullOutputBaselineParity": true,
+    "newHits": 80102,
+    "originalGlossaryReuses": 54629,
+    "totalGlossaryReuses": 134731,
+    "initialPostprocessingFailurePreserved": true,
+    "corpusRerunAfterPostprocessingFailure": false,
+    "scope": "Unchanged baseline JavaScript/C metadata plus an explicit external instrumented candidate module; one excluded mechanics pass, no product-build, speed, complete-import or memory qualification."
+  }
+}
