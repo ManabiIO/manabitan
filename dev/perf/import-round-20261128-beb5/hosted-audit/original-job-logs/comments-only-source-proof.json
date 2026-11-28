@@ -1,0 +1,14 @@
+{
+  "original": "570ccc3968046269cb00d2053e49d3c32367031a",
+  "corrected": "ee903e032650430839468fef391b8d820196e61d",
+  "identicalAfterRemovingExactly": [
+    "/** @type {unknown} */\n",
+    "/** @type {(this: WeakMap<WebAssembly.Memory, CanonicalInstance>, key: WebAssembly.Memory) => CanonicalInstance|undefined} */\n"
+  ],
+  "uniqueCounts": [
+    1,
+    1
+  ],
+  "originalLength": 28877,
+  "correctedLength": 29026
+}

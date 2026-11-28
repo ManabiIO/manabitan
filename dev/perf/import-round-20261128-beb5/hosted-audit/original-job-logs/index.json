@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+  "runtimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a",
+  "runId": 46112170828,
+  "note": "Full decoded GitHub job logs, including original static and VNDB qualification failures. These do not substitute for raw-artifact audits. Native/output/timing attribution remains to the original measured runtime.",
+  "files": [
+    {
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/original-job-logs/canonical-jmdict.log",
+      "gitBlobSha": "f9e9c91b9818ae446abba2f5cca1d2ba6fdbd249",
+      "bytes": 323461,
+      "jobId": 140877908946,
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "source": "Complete decoded GitHub job log fetched through connector"
+    },
+    {
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/original-job-logs/canonical-jitendex.log",
+      "gitBlobSha": "050453c6466f18c9a3afb96a7d5961d9a1f0c7aa",
+      "bytes": 322785,
+      "jobId": 140877908866,
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "source": "Complete decoded GitHub job log fetched through connector"
+    },
+    {
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/original-job-logs/canonical-vndb.log",
+      "gitBlobSha": "48d27e034ff12f64d433c5936c47a997b9a983f9",
+      "bytes": 325180,
+      "jobId": 140877908947,
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "source": "Complete decoded GitHub job log fetched through connector"
+    },
+    {
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/original-job-logs/canonical-original-static-failure.log",
+      "gitBlobSha": "81e9ecba134a09c869e5a1fd053b7f55864053a9",
+      "bytes": 25055,
+      "jobId": 140877908726,
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "source": "Complete decoded GitHub job log fetched through connector"
+    },
+    {
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/original-job-logs/canonical-full-unit-suite.log",
+      "gitBlobSha": "0afde86424fb04d82d1f3ee3bec1ca203277a974",
+      "bytes": 783247,
+      "jobId": 140877908913,
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "source": "Complete decoded GitHub job log fetched through connector"
+    }
+  ]
+}
