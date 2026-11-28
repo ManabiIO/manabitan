@@ -120,7 +120,15 @@ int main(int argc, char** argv) {
       const auto& result = results[i]; bool hydrated = false;
       for (const auto& glossary : result.term.glossaries) if (glossary.dict_name == expected_title && !glossary.glossary.empty()) hydrated = true;
       std::cout << "{\"expression\":\"" << json_escape(result.term.expression) << "\",\"reading\":\"" << json_escape(result.term.reading)
-                << "\",\"matched\":\"" << json_escape(result.matched) << "\",\"hydrated\":" << (hydrated ? "true" : "false") << '}';
+                << "\",\"matched\":\"" << json_escape(result.matched) << "\",\"hydrated\":" << (hydrated ? "true" : "false") << ",\"glossaryRawHashes\":[";
+      bool first_hash = true;
+      for (const auto& glossary : result.term.glossaries) {
+        if (glossary.dict_name != expected_title || glossary.glossary.empty()) continue;
+        if (!first_hash) std::cout << ',';
+        first_hash = false;
+        std::cout << '\"' << sha256(glossary.glossary) << '\"';
+      }
+      std::cout << "]}";
     }
     std::cout << "],\"exactHeadword\":" << (exact_headword ? "true" : "false") << ",\"dictionaryMatched\":" << (matching_dictionary ? "true" : "false")
       << ",\"nonemptyGlossary\":" << (nonempty_glossary ? "true" : "false") << ",\"importMs\":" << elapsed_ms(total_start, import_end)

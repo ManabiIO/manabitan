@@ -50,6 +50,21 @@ function coverage(pairs, expected) {
     const keys = new Set(pairs.map(pairKey))
     return {expected: expected.length, matched: expected.filter((p) => keys.has(pairKey(p))), missing: expected.filter((p) => !keys.has(pairKey(p)))}
 }
+function nativeGlossaryCoverage(results, glossaryOracle) {
+    const actual = new Map()
+    for (const result of results) {
+        const key = pairKey(result.expression, result.reading)
+        if (!actual.has(key)) actual.set(key, [])
+        actual.get(key).push(...(result.glossaryRawHashes ?? []))
+    }
+    const groups = [...glossaryOracle.rowsByKey.entries()].map(([key, rows]) => {
+        const expected = rows.map(({glossaryRawSha256}) => glossaryRawSha256).sort()
+        const observed = (actual.get(key) ?? []).sort()
+        return {headword: JSON.parse(key), expected, observed,
+            equal: JSON.stringify(expected) === JSON.stringify(observed)}
+    })
+    return {equal: groups.length > 0 && groups.every(({equal}) => equal), groups}
+}
 
 async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
     const output = await mkdtemp(path.join(scratch, `cap-default-${dataset}-${pair}-hoshi-`))
@@ -60,7 +75,8 @@ async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
         const result = JSON.parse(stdout)
         const expectedPairs = sourcePairs(oracle)
         const sourceCoverage = coverage(result.headwordPairs, expectedPairs)
-        const glossaryValidation = validateNativeGlossaries(result.resultSha256, glossaryOracle)
+        const resultDigestMatchesOracle = validateNativeGlossaries(result.resultSha256, glossaryOracle).equal
+        const glossaryValidation = nativeGlossaryCoverage(result.orderedResults, glossaryOracle)
         const errors = []
         if (result.engine !== 'hoshidicts' || result.termCount !== spec.terms || result.query !== spec.query ||
             result.title !== spec.title || result.exactHeadword !== true || result.dictionaryMatched !== true ||
@@ -72,7 +88,7 @@ async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
             result.resultCount >= LOOKUP_CAP) {
             errors.push('Hoshidicts lookup did not verify an unsaturated common result cap and scan length')
         }
-        if (!glossaryValidation.equal) errors.push('Hoshidicts result digest differs from the reconstructed pinned source')
+        if (!glossaryValidation.equal) errors.push('Hoshidicts per-headword glossary content differs from pinned source rows')
         const eligible = errors.length === 0
         return {
             engine: 'hoshidicts', dataset, pair, position, arm, runnerSha256,
@@ -90,7 +106,7 @@ async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
             lookupStageMs: result.lookupStageMs, totalMs: result.totalMs,
             hostBefore: before, hostAfter: hostSnapshot(), hoshidictsRunId: result.runId,
             driverStdout: stdout.trim(), driverStderr: stderr,
-            glossaryValidation, validation: {eligible, errors}, status: eligible ? 'passed' : 'failed',
+            glossaryValidation, resultDigestMatchesOracle, validation: {eligible, errors}, status: eligible ? 'passed' : 'failed',
         }
     } finally {
         // The coordinator retires the task-owned scratch directory after qualification.
