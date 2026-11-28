@@ -1,0 +1,299 @@
+{
+  "schema": "manabitan.native-record-alias.full-browser-protocol.v2",
+  "status": "prospective procedure frozen; acquisition requires a separate complete immutable source/layout binding",
+  "frozenUtc": "2026-11-28 08:27:06 UTC",
+  "repository": "ManabiIO/manabitan",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": {
+    "source": "the clean tested native-record-alias product commit ported onto exact dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16; never PR977 or a stale9e10 runtime",
+    "bindingRequired": [
+      "fullCommit",
+      "fullTree",
+      "allRuntimeFileHashes",
+      "packageMembersAndHashes",
+      "candidateTests",
+      "workflowHash",
+      "runnerAndVerifierHashes",
+      "thisProtocolBlob",
+      "naturalReplayWitnessHash",
+      "browserLayoutWitnessHashes",
+      "ordinaryHashOverlaySha256",
+      "layoutExporterSha256",
+      "receiptAdapterSha256",
+      "generationNormalizationSchema",
+      "currentBaseNaturalReplayWitnessHash"
+    ]
+  },
+  "existingHarnessReference": {
+    "source": "c4330b235eaa31a62c48837578f230038dc48226",
+    "runner": "dev/perf/import-qualification-20261125-a7f7.py",
+    "perObservationValidator": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+    "memoryProtocol": "dev/perf/import-memory-20261125-a7f7/protocol.py"
+  },
+  "fixtures": [
+    {
+      "dictionary": "jmdict",
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    {
+      "dictionary": "jitendex",
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    }
+  ],
+  "immutableProductBoundary": {
+    "expectedChangedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/dictionary-importer.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/term-content-block-store.js",
+      "js/dictionary/term-import-metrics.js"
+    ],
+    "expectedAddedPackageEntries": [
+      "js/dictionary/native-term-record-ownership.js",
+      "js/dictionary/native-term-record-alias.js"
+    ],
+    "expectedRemovedPackageEntries": [],
+    "rules": [
+      "Exact package-member delta, not a minimum list.",
+      "Unchanged dependency lock, fixture lock, current dcfc native WASM/assets, codec settings, workers and grouping policy between A and B.",
+      "All ordinary browser harness/dependency bytes identical between A/B/C, including the prospectively frozen identical post-endpoint hash hook.",
+      "Build both release Chrome packages before acquisition; keep source/package guards before and after all phases.",
+      "No product overlays, no variant experiment flags, no PR977 runtime composition. Test-harness overlays are explicit and exact-hashed; they run after the import timing endpoint."
+    ]
+  },
+  "readiness": [
+    "Full required JavaScript lint, main/test TypeScript, complete unit inventory, all build targets and new focused ownership/lifecycle/route tests pass on exact candidate.",
+    "Fresh current-dcfc natural-offset170-group VNDB A/B replay uses the real three-worker receiver, real importer private callback and production source planner, actual canonical dedup, content compression and record/index stores. Historical9e10 inputs/layouts are not silently reused as current source witnesses.",
+    "Natural replay preserves every source row/key/score/sequence/definition and all original canonical identities; verify physical relocation, every alias, all prepared lookup payloads, store drainage and exact file inventories.",
+    "The standalone alias-specific comparator, export/hash hook and generation-linkage validation pass adversarial unit cases before ordinary timing acquisition.",
+    "All unmeasured browser layout preflights pass and are bound before warmups/timed pairs. A failed preflight is a validation/source issue, never a timing result."
+  ],
+  "naturalReplayExpectedActivation": {
+    "dictionary": "vndb",
+    "rows": 6648310,
+    "parserGroups": 170,
+    "parserWorkers": 3,
+    "parserGroupsPerWorker": 3,
+    "borrowedGroups": 0,
+    "promotedGroups": [
+      1,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "promotedGroupRows": 320000,
+    "affectedRawReferences": 175,
+    "expectedAliasEntries": 8,
+    "expectedAliasInputBytes": 2983,
+    "note": "These are historical9e10 route expectations, retained as strict prospective checks rather than claimed current-source observations. Fresh current-base natural replay must re-establish them and source/group/definition/layout identities before acquisition. Any mismatch stops for explicit source/design review; no timing-based adaptation."
+  },
+  "browserLayoutPreflight": {
+    "authoritativeTiming": false,
+    "appliesTo": "VNDB, one A and one B full import per independent host before its ordinary warmups",
+    "order": "the host's assigned initial AB or BA order",
+    "commandBoundary": "Existing benchmark + all-media validation, with an identical source-bound test-only hook that runs after the existing timed interval and restart checks. Product package is untouched. All automatic timings in this phase are retained and excluded.",
+    "hook": "A unique checked source replacement invokes the external post-endpoint helper immediately after report.benchmark.validation is populated and before quick-mode return/context cleanup. Same hook bytes run in every A/B/C arm. Preflight mode exports bytes; ordinary mode hashes bounded ranges without retaining whole file copies. Original/overlay hashes and exact replacement are retained; all observations declare the explicit overlay source hash/dirty state.",
+    "export": {
+      "files": [
+        "manabitan-term-content.bin",
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+      ],
+      "io": "Read-only OPFS File snapshots exported in fixed<=256KiB chunks via Playwright, incrementally written and SHA256-hashed by Node. Check exact offsets, lengths, per-chunk SHA256, base64 round trips and expected file sizes. Never materialize a complete large file in the browser or one CDP message.",
+      "proof": [
+        "Run the unchanged production reader/decoder on the exported browser files and compare every logical row against the frozen natural-replay oracle.",
+        "Enumerate every new alias envelope/reference. Each must be in the prospectively recorded group and decode byte-for-byte to its original canonical raw-v6 definition; verify all175 affected row references.",
+        "Verify the entire original canonical content stream is preserved through the explicit relocation map, rather than broadly ignoring content bytes.",
+        "Verify all unaffected lookup payloads retain their expected native bytes; the eight promoted groups retain their complete original native prepared payloads. Decode all lookup/record rows, key/sequence postings, score/length values and ID ordering.",
+        "Canonical metadata must preserve IDs, hashes, logical lengths, dictionary families, dedup counts and original canonical targets after physical relocation; no canonical entry may be promoted to a new record-only alias.",
+        "Retain the raw pre/post-restart probe structures in this preflight and recompute the original physical probe digest plus a separate offset-independent semantic projection. Prove all intentional physical differences; do not replace the original digest silently.",
+        "Acquire and close exclusive sync-access handles for each term file after reads settle in a test-owned dedicated worker using the unchanged existing term-record-import-index-worker.js entry. No production worker protocol request is sent: in particular never send its destructive open action. The test evaluates only read-only handle acquisition/getSize/close in that worker and joins its termination. Existing SQLite runtime handles are outside this assertion.",
+        "Inventory before/after export and handle checks must be identical. Unexpected files, changed sizes during snapshotting, parser/import errors or cleanup warnings fail the preflight."
+      ],
+      "unrelatedStorage": "Retain the complete normalized inventory and all available raw hashes. Media bytes and all-media digest remain exact. Stock SQLite SAH inventory/allocation checks remain exact (prospective current bound37 units), and unrelated semantic rows/metadata remain exact. Raw SQLite hashes contain permitted runtime metadata and are retained without claiming cross-run byte identity; no new normalization is allowed."
+    },
+    "bindings": "Complete current-base natural replay plus full browser layout proof establishes immutable per-arm host normalized five-term-file hashes/sizes and physical probe digest before ordinary warmups. Raw hashes and generation IDs are retained. Only the declared16-byte generation fields may normalize; all deterministic bytes must match the current natural replay oracle. Any discrepancy stops preflight."
+  },
+  "comparator": {
+    "stockPerObservationValidator": "Call unchanged validate_import_summary with exact source/package/browser/fixture hashes, full strict success, no fallback, fresh profile and production defaults. All post-endpoint hash-hook observations explicitly pass source_dirty=true and the exact overlay hash; memory overlays compose with the same checked hook.",
+    "withinArm": "Use unchanged require_matching_receipts within A/C and within B, including exact normalized sizes and original physical outputDigestSha256. Also require every observation's full normalized term-file hash vector and sizes to equal the frozen per-arm layout witness (VNDB), or the shared cross-arm first-warmup vector(non-targets). Retain every raw hash/generation/probe receipt.",
+    "crossArmNonTargets": "JMdict and Jitendex use the unchanged exact comparator across A/B/C; candidate alias count and input bytes must both be zero.",
+    "crossArmVndb": [
+      "Require exact browser/fixture/options/title/revision/row counts, complete cold/warm termsFind results and all72 lookup hashes, media verification and every semantic field.",
+      "The only intentional cross-arm receipt differences are the five enumerated term-file byte sizes/total and the original physical probe digest. Each value must equal its frozen verified arm witness; never delete unknown fields or accept a free-form tolerance.",
+      "The separate full browser-file proof replaces cross-arm equality only of those declared physical fields; every ordinary observation must reproduce its verified arm's complete normalized term-file hash vector. All alias envelopes, complete affected records, decoded row/lookup semantics and canonical/dedup invariants pass in the current-base oracle.",
+      "Every non-enumerated normalized storage path and size, including media and SQLite allocation, remains exact. Reject additions/removals/reclassification and sum total bytes from the exact inventory.",
+      "Require actual candidate activation counts8/2983 and baseline absence-or-zero under the frozen baseline schema. Require unchanged parser/source grouping and all logical dedup/canonical counters; physical write/lookup chunk counters may differ only as predicted by the complete replay witness."
+    ],
+    "adversarialTests": [
+      "unexpected file/path/field",
+      "changed unrelated/media/SQLite allocation",
+      "one-byte corruption in an alias or original frame",
+      "alias points to wrong canonical definition",
+      "canonical metadata promoted to alias",
+      "changed row/key/score/sequence/lookup posting",
+      "wrong prepared payload",
+      "missing/extra alias",
+      "wrong affected-row set",
+      "unclosed term writer",
+      "source/package/hash mismatch",
+      "physical digest changed within arm",
+      "mixed or missing source identity",
+      "incomplete observations",
+      "same-size whole-file corruption outside sampled probes",
+      "wrong/missing/mismatched generation header",
+      "normalization outside the exact16-byte range",
+      "short/repeated/out-of-order export range",
+      "stale9e10 oracle against current native source",
+      "read-only worker accidentally using destructive open protocol"
+    ]
+  },
+  "ordinaryAcquisition": {
+    "matrix": {
+      "dictionary": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "initialOrder": [
+        "AB",
+        "BA"
+      ]
+    },
+    "hostBoundary": "Six distinct fresh hosted job VMs; preserve host/browser/Node identities and never pool across hosts/orders. Exactly Node22.22.0, pinned Playwright Chromium binary, strict headless and no headed/storage fallback.",
+    "perHostSchedule": "Two excluded warmup pairs in initial then opposite order. Twelve measured A/B pairs alternate initial/opposite order. After pairs3,6,9,12 insert one unchanged A/C control pair, alternating AC/CA with the initial-order offset. Thus24 candidate observations +8 controls +4 excluded warmups per host.",
+    "timing": "Unchanged page file-input-change to post-UI import-complete monotonic endpoint. Fresh browser profile each observation, one complete pinned corpus, no phase tracing/screenshots/process sampling during ordinary import. Identical explicit bounded hash hook runs after existing restart/lookup/media validation; its work is excluded from the timing endpoint.",
+    "media": "Sampled media checks in every ordinary observation, followed by independent all-media A and B imports. No timing from exhaustive-media imports enters statistics.",
+    "sourcePolicy": "No retries, replacements, exclusions, extra blocks, trimmed tails or adapted flags. Stop on first failed required observation and preserve every attempted result."
+  },
+  "statistics": {
+    "resampling": "10000 complete-pair bootstrap draws with random.Random(897); resample paired indices jointly for millisecond differences and percent ratios, report sorted indices249 and9749 as descriptive95% bounds. Keep all raw pair vectors. No population-general confidence claim.",
+    "vndbAdvanceEachHost": {
+      "medianPairedSavingMsAtLeast": 100,
+      "medianPairedSavingPercentAtLeast": 1,
+      "upper95MsStrictlyBelow": 0,
+      "upper95PercentStrictlyBelow": 0,
+      "fasterPairsAtLeast": 9,
+      "candidateEqualWorkTotal": "strictly lower than baseline",
+      "controls": "Both |median paired C/A percent| and |equal-work C/A percent| must be strictly less than half the smaller absolute candidate median-paired/equal-work percent saving."
+    },
+    "nonTargetEachHost": {
+      "medianPairedChangePercentAtMost": 1,
+      "equalWorkChangePercentAtMost": 1,
+      "upper95PairedPercentAtMost": 3,
+      "controls": "Both absolute median paired and equal-work C/A changes must be <=1%."
+    },
+    "globalDecision": "Both VNDB hosts and all four non-target cells must pass every semantic/source/memory gate. Any incomplete cohort, contrary equal-work result or failed control condition is inconclusive/hold regardless of a favorable statistic. A qualified timing pass may support a PR claim limited to these exact corpora/source/hosts; no pooling with d0 component results or PR977."
+  },
+  "memory": {
+    "sequence": "After all ordinary and all-media observations, existing four-observation ABBA/BAAB instrumented memory schedule per host. Compose exact memory overlay with the same post-validation hash hook; import-window sampling gates remain unchanged and hash work is outside that interval.",
+    "gates": "Keep all existing process-tree PSS/private-byte coverage/scan-gap requirements, every observation qualified, median paired increase <=5%, maximum paired increase <=10% for both metrics. No observer-gap waiver.",
+    "interpretation": "Separate diagnostic memory screen, no timing contribution and no process-peak savings claim from operation counts."
+  },
+  "reporting": [
+    "Always print source bindings, every raw ordinary duration/control, per-arm physical witness digest, semantic/alias counts, memory qualification and all failure phase tails to job logs.",
+    "Retain original summary/raw report/probe/export/witness data and the complete source/command manifests. Pack binary trees containing native '|' filenames into archives before upload; upload archives plus safe-name JSON/logs only.",
+    "Retain all failed attempts. A packaging repair must not rerun unchanged timing acquisition to replace missing artifacts. Final review requires auditable retained raw evidence, not only a passing stdout summary.",
+    "No numeric result exists for this product protocol at freeze time.",
+    "Do not describe historical9e10 component/source/layout receipts as current-dcfc qualification. Keep old protocol/source/evidence immutable and identify this amendment before any acquisition."
+  ],
+  "supersedes": {
+    "protocolBlob": "789930b794b5bfc00e61938049e2498ca59cdeb6",
+    "historicalBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "reasons": [
+      "Develop advanced through PR972 before any product acquisition. Current native parser/source must be requalified; no old layout witness is silently reused.",
+      "Stronger per-observation bounded full-file hash proof is now required after the unchanged timed endpoint. Ordinary observations use an explicitly bound identical test-harness overlay.",
+      "Fresh-import random generation IDs require the exact existing16-byte schema normalization, with header/linkage validation and raw hashes retained."
+    ]
+  },
+  "generationNormalization": {
+    "records": {
+      "magic": "MBTRD16X",
+      "rangeHalfOpen": [
+        8,
+        24
+      ]
+    },
+    "indexes": {
+      "magic": "MBTIDX11",
+      "rangeHalfOpen": [
+        24,
+        40
+      ]
+    },
+    "validation": "Before accepting normalized hashes, require exact header magic/version, complete header lengths, sidecar record-file-length linkage and same16-byte generation in each descriptor/index pair. Retain raw header generation IDs and raw hashes. Normalize exactly the schema-declared16 bytes to zero; no other header/content/index bytes, offsets or allocations normalize.",
+    "source": "Existing term-record-opfs-store generation/header format and prior a204 parity exception; this is not a new permissive tolerance."
+  },
+  "perObservationHashHook": {
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "placement": "After the unchanged file-input-change→post-UI import-complete endpoint and existing restart/lookup/media checks; never during the measured import.",
+    "modes": {
+      "preflight": "Bounded streaming export plus raw/normalized hashes, full storage/probe capture and exclusive term-handle closure proof.",
+      "ordinary": "Bounded streaming raw/normalized hashes and header/linkage validation only; no retained whole-file copies. Identical A/B/C hook, including warmups/controls/all-media/memory observations."
+    },
+    "guards": "Require exact expected term-file set (3JMdict,3Jitendex,5VNDB), inventory before/after unchanged, offset/length/size checks, per-chunk integrity and no helper/source drift.",
+    "comparisons": "VNDB each arm must match its frozen full-layout witness. JMdict/Jitendex require exact normalized file hashes and sizes across every A/B/C observation; first warmup anchors the shared hash vector, with all later arms required equal. Keep stock receipt equality and require zero candidate alias activation on non-targets.",
+    "scope": "Hash work is outside the measured endpoint but is real fixed post-validation harness work. No claim that the ordinary harness source is unchanged."
+  }
+}

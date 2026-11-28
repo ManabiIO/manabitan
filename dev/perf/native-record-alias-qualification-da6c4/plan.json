@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-record-alias-current-browser-qualification",
+  "status": "prospective; no browser observations acquired",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "naturalCoreBlob": "008adf754595f36087bad627099208ca241d0773",
+  "naturalCoreSha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+  "naturalComparisonBlob": "43c25201ae2953b519e6b215f98e5568f7cf3b6a",
+  "naturalComparisonSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+  "expectedChangedPackageEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-block-store.js",
+    "js/dictionary/term-import-metrics.js"
+  ],
+  "expectedAddedPackageEntries": [
+    "js/dictionary/native-term-record-ownership.js",
+    "js/dictionary/native-term-record-alias.js"
+  ],
+  "expectedRemovedPackageEntries": [],
+  "termFiles": {
+    "jmdict": [
+      "manabitan-term-content.bin",
+      "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+    ],
+    "jitendex": [
+      "manabitan-term-content.bin",
+      "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+      "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+    ],
+    "vndb": [
+      "manabitan-term-content.bin",
+      "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+    ]
+  },
+  "fixtures": [
+    {
+      "dictionary": "jmdict",
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    {
+      "dictionary": "jitendex",
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    }
+  ],
+  "node": "22.22.0",
+  "nativeToolchain": {
+    "source": "current repository build:dictionary-wasm -- --check",
+    "compiler": "clang-21",
+    "linker": "lld-21"
+  },
+  "ordinaryAcquisition": {
+    "matrix": {
+      "dictionary": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "initialOrder": [
+        "AB",
+        "BA"
+      ]
+    },
+    "hostBoundary": "Six distinct fresh hosted job VMs; preserve host/browser/Node identities and never pool across hosts/orders. Exactly Node22.22.0, pinned Playwright Chromium binary, strict headless and no headed/storage fallback.",
+    "perHostSchedule": "Two excluded warmup pairs in initial then opposite order. Twelve measured A/B pairs alternate initial/opposite order. After pairs3,6,9,12 insert one unchanged A/C control pair, alternating AC/CA with the initial-order offset. Thus24 candidate observations +8 controls +4 excluded warmups per host.",
+    "timing": "Unchanged page file-input-change to post-UI import-complete monotonic endpoint. Fresh browser profile each observation, one complete pinned corpus, no phase tracing/screenshots/process sampling during ordinary import. Identical explicit bounded hash hook runs after existing restart/lookup/media validation; its work is excluded from the timing endpoint.",
+    "media": "Sampled media checks in every ordinary observation, followed by independent all-media A and B imports. No timing from exhaustive-media imports enters statistics.",
+    "sourcePolicy": "No retries, replacements, exclusions, extra blocks, trimmed tails or adapted flags. Stop on first failed required observation and preserve every attempted result."
+  },
+  "statistics": {
+    "resampling": "10000 complete-pair bootstrap draws with random.Random(897); resample paired indices jointly for millisecond differences and percent ratios, report sorted indices249 and9749 as descriptive95% bounds. Keep all raw pair vectors. No population-general confidence claim.",
+    "vndbAdvanceEachHost": {
+      "medianPairedSavingMsAtLeast": 100,
+      "medianPairedSavingPercentAtLeast": 1,
+      "upper95MsStrictlyBelow": 0,
+      "upper95PercentStrictlyBelow": 0,
+      "fasterPairsAtLeast": 9,
+      "candidateEqualWorkTotal": "strictly lower than baseline",
+      "controls": "Both |median paired C/A percent| and |equal-work C/A percent| must be strictly less than half the smaller absolute candidate median-paired/equal-work percent saving."
+    },
+    "nonTargetEachHost": {
+      "medianPairedChangePercentAtMost": 1,
+      "equalWorkChangePercentAtMost": 1,
+      "upper95PairedPercentAtMost": 3,
+      "controls": "Both absolute median paired and equal-work C/A changes must be <=1%."
+    },
+    "globalDecision": "Both VNDB hosts and all four non-target cells must pass every semantic/source/memory gate. Any incomplete cohort, contrary equal-work result or failed control condition is inconclusive/hold regardless of a favorable statistic. A qualified timing pass may support a PR claim limited to these exact corpora/source/hosts; no pooling with d0 component results or PR977."
+  },
+  "memory": {
+    "sequence": "After all ordinary and all-media observations, existing four-observation ABBA/BAAB instrumented memory schedule per host. Compose exact memory overlay with the same post-validation hash hook; import-window sampling gates remain unchanged and hash work is outside that interval.",
+    "gates": "Keep all existing process-tree PSS/private-byte coverage/scan-gap requirements, every observation qualified, median paired increase <=5%, maximum paired increase <=10% for both metrics. No observer-gap waiver.",
+    "interpretation": "Separate diagnostic memory screen, no timing contribution and no process-peak savings claim from operation counts."
+  },
+  "orchestrationAmendment": {
+    "prospective": true,
+    "reason": "Root authorized independent prerequisites to avoid serial hosted queue delays before any browser acquisition.",
+    "verify": "Run exact clean candidate full JavaScript/main-dev-test-bench TypeScript/CSS/HTML/Markdown/JSON/unit/options/current WASM rebuild/all-target build once.",
+    "globalPreflight": "In a separate job, run current baseline and candidate full-media browser exports, bounded I/O and complete persisted decode tied to the current natural A6/B7 oracle. Its automatic import timings are retained but excluded.",
+    "ordinaryGate": "All six fresh-host ordinary cells depend on successful completion of BOTH verify and globalPreflight, including evidence packaging.",
+    "perHostVndbPreflight": "Each VNDB AB/BA cell additionally repeats its own mandated full A/B exports and full proof before warmups, in that cell's assigned initial order. Its per-arm files must match the global proof.",
+    "unchanged": "Every numerical threshold, warmup/pair/control schedule, separate media and memory schedule, source identity, no-retry rule and proof requirement remains unchanged.",
+    "globalDecision": "A workflow-level pass requires both prerequisites and all six cells. A partial, skipped, failed or held cell cannot qualify the product. Root independently audits complete retained observations before a PR claim."
+  },
+  "toolingBoundary": {
+    "authoritativeStockSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "strategy": "Compare all selected A/B stock dev/perf/test/chromium/test/e2e tooling directly against exact baseline Git blobs; import and run stock validator/memory/fixture/host commands from A. Research checkout tooling is not assumed equal.",
+    "researchControlBinding": "Actual clean research HEAD/tree and GITHUB_SHA plus the exact manifest/workflow/protocol/plan/control hashes before and after acquisition.",
+    "explicitOverlay": "Only the identical checked post-endpoint layout hook, plus the existing identical memory markers during the separate memory phase. No product overrides or PR977 composition."
+  },
+  "artifactTransport": {
+    "safeDirectNamesOnly": true,
+    "originalOpfsNamesRetainedInsideArchive": true,
+    "archive": "Complete original evidence tree in tar.gz; SHA256 and size for every member, full read-back verification, original inventories rehashed after archive, archive SHA256/size retained.",
+    "noOriginalDeletion": true,
+    "alwaysReport": "Every attempted observation's original endpoint, source/layout/semantic receipt, all gate results and failed phase log tails are printed independently of artifact upload.",
+    "retentionDays": 30,
+    "priorFailure": "Historical d0 component artifact upload rejected pipe-character OPFS filenames. This transport-only repair never reruns its unchanged timing cohort."
+  },
+  "pendingGates": [
+    "Latest glue Python syntax and Node/helper/packaging tests must execute on the hosted runner; source-only V8 parse is not a Node gate.",
+    "Exact current candidate complete repository gates.",
+    "Actual full-browser all-media term-file equality and complete cold decode.",
+    "All six fixed ordinary/media/memory cells and independent retained-result audit."
+  ],
+  "localOutage": {
+    "executionEnvironment": "Unavailable while final controls were authored and checkpointed.",
+    "attemptedLocalRunnerPatch": "Interrupted tool call; local write state unknown; no acquisition used it.",
+    "fixtureMove": "Root attempted a verified byte-preserving tmpfs-to-disk fixture move but no successful command receipt was returned. State unknown; no memory improvement or path change assumed.",
+    "sourceOfTruth": "These exact uploaded blobs and the frozen source manifest, not inaccessible possibly partial local files."
+  }
+}

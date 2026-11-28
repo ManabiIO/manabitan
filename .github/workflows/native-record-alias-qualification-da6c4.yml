@@ -1,0 +1,182 @@
+name: Native record alias qualification
+
+on:
+  push:
+    branches: ['perf/native-record-alias-qualification-20261128-da6c4']
+    paths:
+      - 'dev/perf/native-record-alias-qualification-da6c4/**'
+      - '.github/workflows/native-record-alias-qualification-da6c4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CONTROL: dev/perf/native-record-alias-qualification-da6c4
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  verify:
+    name: Exact candidate repository gates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 75
+    env:
+      EVIDENCE: ${{ runner.temp }}/alias-native-verify-${{ github.run_id }}-${{ github.run_attempt }}
+      UPLOAD: ${{ runner.temp }}/alias-native-verify-upload-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci
+      - name: Install current pinned WASM compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Check qualification control syntax and artifact transport
+        run: |
+          python - <<'PY'
+          import ast
+          import os
+          from pathlib import Path
+          for path in Path(os.environ['CONTROL']).rglob('*.py'):
+              ast.parse(path.read_text(), filename=str(path))
+          PY
+          node --check "$CONTROL/browser-verify.mjs"
+          python -m unittest discover -s "$CONTROL" -p test_pack_artifacts.py -v
+      - name: Run every required candidate gate once
+        run: |
+          python "$CONTROL/run.py" --mode verify --repository "$GITHUB_WORKSPACE" --evidence "$EVIDENCE"
+      - name: Report original results and failure tails
+        if: always()
+        run: python "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive exact evidence including unsafe native filenames
+        if: always()
+        run: python "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Retain verified complete evidence or partial failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alias-native-verify-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  preflight:
+    name: Untimed complete browser layout proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      EVIDENCE: ${{ runner.temp }}/alias-native-preflight-${{ github.run_id }}-${{ github.run_attempt }}
+      UPLOAD: ${{ runner.temp }}/alias-native-preflight-upload-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install frozen dependencies and Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Check qualification control syntax
+        run: |
+          python - <<'PY'
+          import ast
+          import os
+          from pathlib import Path
+          for path in Path(os.environ['CONTROL']).rglob('*.py'):
+              ast.parse(path.read_text(), filename=str(path))
+          PY
+          node --check "$CONTROL/browser-verify.mjs"
+      - name: Prove actual full-media browser A and B files
+        run: |
+          python "$CONTROL/run.py" --mode preflight --dictionary vndb --initial-order AB \
+            --repository "$GITHUB_WORKSPACE" --evidence "$EVIDENCE"
+      - name: Report original results and failure tails
+        if: always()
+        run: python "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive exact exported trees and all receipts
+        if: always()
+        run: python "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Retain verified complete evidence or partial failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alias-native-preflight-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish the successful immutable prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alias-native-preflight-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}/preflight-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  qualify:
+    name: ${{ matrix.dictionary }} ${{ matrix.order }} fixed ordinary and memory cell
+    needs: [verify, preflight]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      EVIDENCE: ${{ runner.temp }}/alias-native-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+      UPLOAD: ${{ runner.temp }}/alias-native-upload-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Download only the verified global preflight receipt
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: alias-native-preflight-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/alias-native-prerequisite
+      - name: Install frozen dependencies and Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run the prospectively fixed cell without retries
+        run: |
+          python "$CONTROL/run.py" --mode cell --dictionary "${{ matrix.dictionary }}" \
+            --initial-order "${{ matrix.order }}" --repository "$GITHUB_WORKSPACE" \
+            --preflight-gate "$RUNNER_TEMP/alias-native-prerequisite/preflight-gate.json" --evidence "$EVIDENCE"
+      - name: Report every original observation and failure tail
+        if: always()
+        run: python "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive exact evidence including any full preflight files
+        if: always()
+        run: python "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Retain every observation and all partial failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alias-native-cell-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

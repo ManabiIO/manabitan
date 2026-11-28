@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound-current-native-record-alias-browser-controls",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "workflowPath": ".github/workflows/native-record-alias-qualification-da6c4.yml",
+  "workflowSha256": "33bb11835fa90eaf047fafc1525bc588851fece3814b4571723e29983300a308",
+  "stockHarnessSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+  "files": {
+    "dev/perf/native-record-alias-qualification-da6c4/run.py": "283f97cdffa6fb2e1ef8b471947854b487dda2d8f4ad808348a31f730e72113e",
+    "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs": "fdce472d8206f4ecac23baa9927a52761d331efcaac5684fe236544ca30a4eee",
+    "dev/perf/native-record-alias-qualification-da6c4/browser_proof.py": "a44391645e5677692eda1b1e0d88078d1985a48b7d795f08343348751eb9a0d1",
+    "dev/perf/native-record-alias-qualification-da6c4/qualification_stats.py": "9aba4cfad039e815cedfc821b61e9fee923cf5b41f34969b11cb5660dc89dc20",
+    "dev/perf/native-record-alias-qualification-da6c4/test_qualification_stats.py": "cc5ca5e5a7f4e53fe3ff925118d4619131146509a7f898a3152239d3e4d5643e",
+    "dev/perf/native-record-alias-qualification-da6c4/test_browser_proof.py": "b8a22693f65804d6bc181b50ed0a020ba3f1355bf3a7b078f16fadbdc2204514",
+    "dev/perf/native-record-alias-qualification-da6c4/pack_artifacts.py": "a74effd61a687a4ab4176b9ec93f5d135cae135fcf838d9a7854f742a701bf83",
+    "dev/perf/native-record-alias-qualification-da6c4/test_pack_artifacts.py": "ae76f916b732b5caf4a46721594821817105e77c4bbc8ed628b38e6df78923a2",
+    "dev/perf/native-record-alias-qualification-da6c4/report_results.py": "0512d71e5970585d3dca34d01d08f312b7dedaf3109dc9a4397cab5356b87fb9",
+    "dev/perf/native-record-alias-qualification-da6c4/product-common.mjs": "350ed8ef03a560c9b20943556c18360a1a02e600dd20435ecce08da55f6376be",
+    "dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.mjs": "6591a3b882169007f7825a7e242a3264c87fac75c278bbf80e2920b073c6f92b",
+    "dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.test.mjs": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39",
+    "dev/perf/native-record-alias-qualification-da6c4/browser-layout-export.mjs": "300bfdf6f0dddb9cd545b5c2b6aee779480a352b4f2369e2666193966a6fc022",
+    "dev/perf/native-record-alias-qualification-da6c4/test-browser-layout-export.mjs": "64d61a1d6de5c2a34e00af32c5411faf41455215dd12acb5163aba41b51192b4",
+    "dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py": "00436c3a81419c2af64d4ae0ca026889f2a9caaa7a60fe228008961bc2c1cdea",
+    "dev/perf/native-record-alias-qualification-da6c4/test_receipt_adapter.py": "2103e4cc147f6d70e4ac5954f2bdaf3f46b43e8cc47124049c011a62a8eb6fd6",
+    "dev/perf/native-record-alias-qualification-da6c4/harness_overlay.py": "e98b5d457dff320fecb5ed4a8df8bd5419ff18eab1ce676b797c408d02d418f0",
+    "dev/perf/native-record-alias-qualification-da6c4/README.md": "b3131569c50a18f178924c47fcb85d1e985fb0c26442986c8fc7f7e504991aa6",
+    "dev/perf/native-record-alias-qualification-da6c4/protocol.json": "7fd1da46b56c7579c4369a0dcc32cc4c6cd46acb31d19335328b9204fd500389",
+    "dev/perf/native-record-alias-qualification-da6c4/plan.json": "8d903dc73b9b38324e800e3c573755622d3d12b328abe03fbe68ddbb04e1c48e",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/core.json": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/comparison.json": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+    ".github/workflows/native-record-alias-qualification-da6c4.yml": "33bb11835fa90eaf047fafc1525bc588851fece3814b4571723e29983300a308",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-A.json.gz": "1004ab908b381a828175ccad8f894636778e2afaa9e8ce345c7537c4fd4a689b",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-A.json.gz": "64efd018a8b2c4d6922ffab379d35791a08832f538e79c7334a09cfaad47c3f2",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-B.json.gz": "c347ca3481cc3e38339fdd2a8ac46def28ddb8e1f505952365153c5364cce5c3",
+    "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-B.json.gz": "3934222b1ff44758e5080dd5d1bfd621287577ed6144dd2ab42965a9b288e4b3"
+  },
+  "oracles": {
+    "pipeline-A": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-A.json.gz",
+      "gzip": true,
+      "bytes": 956767,
+      "sha256": "4571a33abcf884341389e39d87e123a3a5de6b769045a55d158e72044c4cd321",
+      "storedBytes": 141649,
+      "storedSha256": "1004ab908b381a828175ccad8f894636778e2afaa9e8ce345c7537c4fd4a689b"
+    },
+    "verification-A": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-A.json.gz",
+      "gzip": true,
+      "bytes": 114112,
+      "sha256": "3b7cef17e4603172ef10bbeafddb4a3c6f150a997119caf40bfb36b6b1f6377a",
+      "storedBytes": 18378,
+      "storedSha256": "64efd018a8b2c4d6922ffab379d35791a08832f538e79c7334a09cfaad47c3f2"
+    },
+    "pipeline-B": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/pipeline-B.json.gz",
+      "gzip": true,
+      "bytes": 976566,
+      "sha256": "c5a49eac7551f74415d2d48a8c2c54dc582b715819c4ee84f376eaf8b158536e",
+      "storedBytes": 142157,
+      "storedSha256": "c347ca3481cc3e38339fdd2a8ac46def28ddb8e1f505952365153c5364cce5c3"
+    },
+    "verification-B": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/verification-B.json.gz",
+      "gzip": true,
+      "bytes": 107913,
+      "sha256": "6a9842f3bb21d570a51cdb6d5922e15b693ada1bfe1ffa6bf0ae4321dcaabb70",
+      "storedBytes": 17647,
+      "storedSha256": "3934222b1ff44758e5080dd5d1bfd621287577ed6144dd2ab42965a9b288e4b3"
+    },
+    "core": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/core.json",
+      "gzip": false,
+      "bytes": 11958,
+      "sha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+      "storedBytes": 11958,
+      "storedSha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490"
+    },
+    "comparison": {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/comparison.json",
+      "gzip": false,
+      "bytes": 41340,
+      "sha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+      "storedBytes": 41340,
+      "storedSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964"
+    }
+  },
+  "selfBinding": "This manifest is held by its initial SHA256; its exact Git blob is part of the clean research HEAD/tree and GITHUB_SHA. It excludes its own hash to avoid a circular digest.",
+  "status": "Prospectively frozen source controls; no browser observations acquired. Hosted syntax/helper/product/proof gates remain required."
+}
