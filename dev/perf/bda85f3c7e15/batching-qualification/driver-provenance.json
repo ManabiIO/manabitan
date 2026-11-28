@@ -1,0 +1,55 @@
+{
+  "status": "draft-not-run-or-published",
+  "source": "dev/perf/import-qualification-20261125-a7f7.py",
+  "sourceSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "draftDestination": "dev/perf/import-qualification-bda85f3c7e15.py",
+  "draftSha256": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22",
+  "helperDestination": "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+  "testDestination": "dev/perf/bda85f3c7e15/test_import_qualification_controls.py",
+  "changes": [
+    "Exact prospective package-member addition allowlist",
+    "Separate baseline/candidate flags; C selects baseline flags for every observation type",
+    "Validate and retain each arm-specific canonical receipt, normalize only validated flags in semantic comparison view",
+    "Require zero inactive claims, positive active JMdict preparation/compression, and recorded eligibility-dependent active-other counts; validate present counts for every arm",
+    "Descriptive medianPairedDeltaMs reports median(right_i-left_i), never difference of arm medians; no new acceptance gate"
+  ],
+  "preserved": "Candidate/control timing order and counts, source/harness identities, semantic fields, exhaustive media/restart, memory observer/coverage/limits, existing percentage/bootstrap statistics and failure retention remain unchanged; acquisition command construction and arm-specific validation differ explicitly. The new paired millisecond field is descriptive only.",
+  "helperSha256": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43",
+  "previousDraftSha256": "6eed40b09061f8bc4a167aef7261e7156173941bb3dc17a06b86d8f1e6dc2063",
+  "workflowRegistrationRefresh": {
+    "status": "draft only; no acquisition, publication or default promotion",
+    "workflow": "import-qualification-bda85f3c7e15.yml",
+    "workflowSha256": "21f11aef97068ab48a370d0dd4552d2a8e8c4321bca851d0b443d955659789ed",
+    "sourceProof": "variant-registration-source-proof.json",
+    "sourceProofSha256": "0406f1d237ad5b07d9f40b619341281f59cbbaa95edf616def0ed9d77bd1e1e4",
+    "checks": "variant-registration-checks.json",
+    "checksSha256": "7a80ee727ce0026851e54f9e95be08360ce98432079269a999daf7d85ecee90c",
+    "unchangedDriver": true,
+    "unchangedHelper": true,
+    "unchangedControlTests": true,
+    "scope": "Refresh exact candidate source pins; register preload and batching package allowlists; keep source-overhead exclusive to opt-in lookahead. All acquisition schedules, semantic/statistical gates and memory limits are unchanged.",
+    "historicalDraft": "before-variant-registration-refresh/",
+    "preservedSnapshot": "before-per-cell-protocol/"
+  },
+  "perCellProtocolInfrastructure": {
+    "status": "unpublished infrastructure-only template; 58 lightweight checks and artifact-scope inventory checks passed; no acquisition",
+    "provenance": "per-cell-protocol-provenance.json",
+    "provenanceSha256": "0024efd81a93e1eecf99cddc0218f4b8000824a9c5413d4cc9597f65ddc62b34",
+    "workflowSha256": "f96899184e0e4d335d72e9b9f4215f3decc5f1e19a97f2edc18411787d55ef7e",
+    "originalWorkflowSha256": "21f11aef97068ab48a370d0dd4552d2a8e8c4321bca851d0b443d955659789ed",
+    "driverSha256Unchanged": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22",
+    "checksSha256": "413a205158464adf0c9b9ff1232a7c29c5ff8893671ef17a3e95aa59eea7e24b",
+    "acquisitionShellByteIdentical": true,
+    "sourcePackageRegistrationsUnchanged": true,
+    "protocolStatisticalChange": false,
+    "scope": "Move the same protocol checks into each qualification cell, guard registration before setup, freeze explicit valid modes, retain sibling logs and remove only the serial protocol-job queue dependency."
+  },
+  "artifactScopeFollowup": {
+    "provenance": "artifact-scope-provenance.json",
+    "provenanceSha256": "2b94d7691356cc587ce79f6deed649222576a0c690736299d99c914e2ff863a9",
+    "beforeWorkflowSha256": "32e424682d55e0c5344eefdf6529e9623f94c719b730ded29767727aef11cb5e",
+    "workflowSha256": "f96899184e0e4d335d72e9b9f4215f3decc5f1e19a97f2edc18411787d55ef7e",
+    "acquisitionShellByteIdentical": true,
+    "protocolStatisticalChange": false
+  }
+}

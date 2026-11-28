@@ -1,0 +1,180 @@
+# Frozen batching qualification: six cells, 252 imports; no adaptive extensions.
+# Runtime and acquisition protocol are unchanged from the reviewed source/draft.
+# Existing protocol checks run in every cell; no serial protocol job is queued.
+# Lookahead: e2a08fcd6beb41e6d203b14cc0e475e8a4c5ee9e
+# Singleton: 97507171211448d1c9a88e3f9437b9d0b07a488a
+# Preload: e974ec194f320da0cf3cd9f4525982722ce7836b
+# Batching: 83b0bafd51fff334a2f2e94beaf67cfa68e85eea
+name: Batching import qualification bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-batching-qualification-bda85f3c7e15
+    paths:
+      - .github/workflows/import-batching-qualification-bda85f3c7e15.yml
+      - dev/perf/import-qualification-bda85f3c7e15.py
+      - dev/perf/bda85f3c7e15/import_qualification_controls.py
+      - dev/perf/bda85f3c7e15/test_import_qualification_controls.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-batching-qualification-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMPORT_QUAL_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  IMPORT_QUAL_CANDIDATE: 83b0bafd51fff334a2f2e94beaf67cfa68e85eea
+  IMPORT_QUAL_VARIANT: batching
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  qualification:
+    name: ${{ matrix.mode }} / ${{ matrix.dictionary }} / ${{ matrix.initial_order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        initial_order: [AB, BA]
+        # Frozen with the exact batching source above.
+        mode: [active]
+    env:
+      IMPORT_QUAL_DICTIONARY: ${{ matrix.dictionary }}
+      IMPORT_QUAL_ORDER: ${{ matrix.initial_order }}
+      IMPORT_QUAL_MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Guard the frozen source and qualification cell
+        run: |
+          set -euo pipefail
+          protocol_evidence="builds/perf/import-qualification-bda85f3c7e15/protocol"
+          mkdir -p "$protocol_evidence"
+          {
+            printf 'baseline=%s\ncandidate=%s\nvariant=%s\nmode=%s\ndictionary=%s\norder=%s\n' \
+              "$IMPORT_QUAL_BASELINE" "$IMPORT_QUAL_CANDIDATE" "$IMPORT_QUAL_VARIANT" \
+              "$IMPORT_QUAL_MODE" "$IMPORT_QUAL_DICTIONARY" "$IMPORT_QUAL_ORDER"
+            if [ "$IMPORT_QUAL_BASELINE" != 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 ]; then
+              echo 'Unregistered qualification baseline' >&2
+              exit 1
+            fi
+            case "$IMPORT_QUAL_VARIANT:$IMPORT_QUAL_CANDIDATE:$IMPORT_QUAL_MODE" in
+              lookahead:e2a08fcd6beb41e6d203b14cc0e475e8a4c5ee9e:active|lookahead:e2a08fcd6beb41e6d203b14cc0e475e8a4c5ee9e:source-overhead) ;;
+              singleton:97507171211448d1c9a88e3f9437b9d0b07a488a:active) ;;
+              preload:e974ec194f320da0cf3cd9f4525982722ce7836b:active) ;;
+              batching:83b0bafd51fff334a2f2e94beaf67cfa68e85eea:active) ;;
+              *) echo 'Unregistered source, variant or mode' >&2; exit 1 ;;
+            esac
+            case "$IMPORT_QUAL_DICTIONARY" in
+              jmdict|jitendex|vndb) ;;
+              *) echo 'Unregistered qualification dictionary' >&2; exit 1 ;;
+            esac
+            case "$IMPORT_QUAL_ORDER" in
+              AB|BA) ;;
+              *) echo 'Unregistered qualification order' >&2; exit 1 ;;
+            esac
+          } 2>&1 | tee "$protocol_evidence/registration.log"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check the unchanged observation protocol in this cell
+        run: |
+          set -euo pipefail
+          protocol_evidence="builds/perf/import-qualification-bda85f3c7e15/protocol"
+          mkdir -p "$protocol_evidence"
+          trap 'protocol_status=$?; printf "%s\n" "$protocol_status" > "$protocol_evidence/exit-code.txt"' EXIT
+          python3 -m py_compile dev/perf/import-qualification-bda85f3c7e15.py \
+            2>&1 | tee "$protocol_evidence/py-compile.log"
+          python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v \
+            2>&1 | tee "$protocol_evidence/memory-protocol.log"
+          python3 -m unittest discover -s dev/perf/bda85f3c7e15 -p 'test_import_qualification_controls.py' -v \
+            2>&1 | tee "$protocol_evidence/qualification-controls.log"
+      - name: Fetch the frozen source revisions
+        run: |
+          git fetch --no-tags --depth=1 origin "$IMPORT_QUAL_BASELINE" "$IMPORT_QUAL_CANDIDATE"
+      - name: Install pinned Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run fixed comparisons, controls and separate qualification
+        run: |
+          set -euo pipefail
+          extra_args=()
+          case "$IMPORT_QUAL_VARIANT:$IMPORT_QUAL_CANDIDATE" in
+            lookahead:e2a08fcd6beb41e6d203b14cc0e475e8a4c5ee9e)
+              if [ "$IMPORT_QUAL_MODE" = active ]; then
+                extra_args+=(--candidate-flags '{"experimentalTermContentLookahead":true}')
+              elif [ "$IMPORT_QUAL_MODE" != source-overhead ]; then
+                echo 'Unregistered lookahead qualification mode' >&2
+                exit 1
+              fi
+              extra_args+=(--expected-package-entry js/dictionary/dictionary-database.js)
+              extra_args+=(--expected-package-entry js/dictionary/dictionary-importer.js)
+              extra_args+=(--expected-package-entry js/dictionary/term-bank-experiments.js)
+              extra_args+=(--expected-package-entry js/dictionary/term-bank-wasm-parser.js)
+              extra_args+=(--expected-package-entry js/dictionary/term-content-lookahead.js)
+              extra_args+=(--expected-package-entry js/dictionary/term-content-ownership.js)
+              extra_args+=(--expected-package-entry js/dictionary/term-import-metrics.js)
+              extra_args+=(--expected-added-package-entry js/dictionary/term-content-lookahead.js)
+              ;;
+            singleton:97507171211448d1c9a88e3f9437b9d0b07a488a)
+              if [ "$IMPORT_QUAL_MODE" != active ]; then
+                echo 'Unregistered singleton qualification mode' >&2
+                exit 1
+              fi
+              extra_args+=(--expected-package-entry js/dictionary/zstd-term-content.js)
+              ;;
+            preload:e974ec194f320da0cf3cd9f4525982722ce7836b)
+              if [ "$IMPORT_QUAL_MODE" != active ]; then
+                echo 'Unregistered preload qualification mode' >&2
+                exit 1
+              fi
+              extra_args+=(--expected-package-entry js/dictionary/dictionary-importer.js)
+              ;;
+            batching:83b0bafd51fff334a2f2e94beaf67cfa68e85eea)
+              if [ "$IMPORT_QUAL_MODE" != active ]; then
+                echo 'Unregistered batching qualification mode' >&2
+                exit 1
+              fi
+              extra_args+=(--expected-package-entry js/dictionary/zstd-term-content.js)
+              extra_args+=(--expected-package-entry js/dictionary/zstd-term-content-compression-worker.js)
+              ;;
+            *)
+              echo 'Unregistered source and variant combination' >&2
+              exit 1
+              ;;
+          esac
+          if [ "$IMPORT_QUAL_DICTIONARY" = vndb ]; then
+            # Frozen current-source allocation evidence: exactly 37 units.
+            # This is registered before acquisition; historical bounds stay unchanged.
+            extra_args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-bda85f3c7e15.py \
+            --baseline "$IMPORT_QUAL_BASELINE" \
+            --candidate "$IMPORT_QUAL_CANDIDATE" \
+            --dictionary "$IMPORT_QUAL_DICTIONARY" \
+            --initial-order "$IMPORT_QUAL_ORDER" \
+            --pairs 12 \
+            "${extra_args[@]}" \
+            --evidence "builds/perf/import-qualification-bda85f3c7e15/$IMPORT_QUAL_VARIANT-$IMPORT_QUAL_MODE-$IMPORT_QUAL_DICTIONARY-$IMPORT_QUAL_ORDER"
+      - name: Retain all evidence, including failed slots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: qualification-bda85f3c7e15-${{ env.IMPORT_QUAL_VARIANT }}-${{ matrix.mode }}-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+          path: |
+            builds/perf/import-qualification-bda85f3c7e15/${{ env.IMPORT_QUAL_VARIANT }}-${{ matrix.mode }}-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+            builds/perf/import-qualification-bda85f3c7e15/protocol
+          if-no-files-found: error
+          retention-days: 90

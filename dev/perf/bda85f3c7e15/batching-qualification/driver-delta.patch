@@ -1,0 +1,168 @@
+--- dev/perf/import-qualification-20261125-a7f7.py
++++ dev/perf/import-qualification-bda85f3c7e15.py
+@@ -26,9 +26,12 @@
+ parser.add_argument("--initial-order", required=True, choices=("AB", "BA"))
+ parser.add_argument("--pairs", type=int, default=12)
+ parser.add_argument("--evidence", type=pathlib.Path, required=True)
+-parser.add_argument("--flags", default="{}")
++parser.add_argument("--baseline-flags", default="{}")
++parser.add_argument("--candidate-flags", default="{}")
+ parser.add_argument("--expected-workers", type=int)
+ parser.add_argument("--expected-package-entry", action="append", required=True)
++parser.add_argument("--expected-added-package-entry", action="append", default=[],
++                    help="Exact prospective allowlist of new packaged members; each must also be an expected changed entry")
+ parser.add_argument("--vndb-sah-allocation-units", type=int, nargs=2, metavar=("MIN", "MAX"),
+                     help="Prospective VNDB active SAH allocation range in 4096-byte units; default: historical 129–131")
+ args = parser.parse_args()
+@@ -37,11 +40,19 @@
+         parser.error("Source IDs must be complete lowercase commit hashes")
+ if not 1 <= args.pairs <= 24:
+     parser.error("Pairs must be between 1 and 24")
+-flags = json.loads(args.flags)
+-if not isinstance(flags, dict):
+-    parser.error("Flags must be an object")
++if not set(args.expected_added_package_entry).issubset(args.expected_package_entry):
++    parser.error("Every expected added package member must be an expected changed member")
+ 
+ root = pathlib.Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(root / "dev/perf/bda85f3c7e15"))
++from import_qualification_controls import (
++    import_command, parse_arm_flags, select_arm_flags, semantic_receipt,
++    validate_lookahead_participation,
++)
++try:
++    flags_by_arm = parse_arm_flags(args.baseline_flags, args.candidate_flags)
++except ValueError as error:
++    parser.error(str(error))
+ sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
+ from chromium_memory import run_with_sampling, summarize_import_window
+ from protocol import memory_overlay, memory_comparison, schedule as memory_schedule
+@@ -157,14 +168,21 @@
+         raise RuntimeError(f"Unexpected source changes after building arm {label}")
+     sources[label] = target
+     shutil.copyfile(archive, evidence / f"package-{label}.zip")
+-if identities["A"]["entries"].keys() != identities["B"]["entries"].keys():
+-    raise RuntimeError("Candidate changes the set of packaged files")
+-changed_entries = [
+-    name for name in identities["A"]["entries"]
+-    if identities["A"]["entries"][name] != identities["B"]["entries"][name]
+-]
++baseline_entries = identities["A"]["entries"]
++candidate_entries = identities["B"]["entries"]
++added_entries = sorted(candidate_entries.keys() - baseline_entries.keys())
++removed_entries = sorted(baseline_entries.keys() - candidate_entries.keys())
++if removed_entries:
++    raise RuntimeError(f"Candidate removes packaged files: {removed_entries}")
++if set(added_entries) != set(args.expected_added_package_entry):
++    raise RuntimeError(f"Unexpected added packaged files: {added_entries}")
++changed_entries = sorted(
++    name for name in baseline_entries.keys() | candidate_entries.keys()
++    if baseline_entries.get(name) != candidate_entries.get(name)
++)
+ write_json(evidence / "source-identities.json", {
+     "arms": identities, "changedPackageEntries": changed_entries,
++    "addedPackageEntries": added_entries, "removedPackageEntries": removed_entries,
+     "controlC": "Same A source, package, runtime, and flags under a distinct observation label",
+ })
+ if not changed_entries:
+@@ -189,12 +207,16 @@
+             schedule.append({"id": f"control-{control_pair:02d}-{arm}", "kind": "control", "pair": control_pair, "arm": arm})
+ write_json(evidence / "registered-plan.json", {
+     "baseline": args.baseline, "candidate": args.candidate, "dictionary": args.dictionary,
+-    "initialOrder": first, "pairs": args.pairs, "flags": flags, "schedule": schedule,
++    "initialOrder": first, "pairs": args.pairs,
++    "flagsByArm": {arm: select_arm_flags(flags_by_arm, arm) for arm in "ABC"},
++    "activationPolicy": "Inactive arms require zero claims (absent legacy counters count as zero); active JMdict requires positive preparation and compression; active other dictionaries retain eligibility-dependent counts",
++    "schedule": schedule,
+     "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+     "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+     "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+     "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+     "expectedPackageEntries": args.expected_package_entry,
++    "expectedAddedPackageEntries": args.expected_added_package_entry,
+     "expectedWorkers": args.expected_workers,
+     "vndbSahAllocationPolicy": {
+         "unitBytes": SAH_ALLOCATION_UNIT_BYTES,
+@@ -208,6 +230,7 @@
+ reference = None
+ 
+ def validate_observation(output, arm, media_check="sample", overlay=None):
++    expected_flags = select_arm_flags(flags_by_arm, arm)
+     summary = json.loads((output / "summary.json").read_text())
+     report = json.loads((output / "run-1.json").read_text())
+     identity = identities[arm]
+@@ -217,7 +240,7 @@
+     receipt = validate_import_summary(
+         summary, report, dictionary=args.dictionary, fixture=fixture,
+         source_sha=identity["sha"], package_sha256=identity["packageSha256"],
+-        browser_version=browser_version, import_flags=flags if flags else None,
++        browser_version=browser_version, import_flags=expected_flags,
+         source_hashes=hashes, source_dirty=overlay is not None, media_check=media_check,
+         vndb_sah_allocation_units=vndb_sah_allocation_units,
+     )
+@@ -226,7 +249,9 @@
+         if actual != args.expected_workers:
+             raise RuntimeError(f"Existing parser policy did not execute: expected {args.expected_workers}, observed {actual}")
+     write_json(output / "canonical-receipt.json", receipt)
+-    return summary, receipt
++    activation = validate_lookahead_participation(summary, args.dictionary, expected_flags)
++    write_json(output / "activation-receipt.json", activation)
++    return summary, semantic_receipt(receipt, expected_flags)
+ 
+ for item in schedule:
+     target = sources["B" if item["arm"] == "B" else "A"]
+@@ -235,12 +260,7 @@
+     if digest(target / "builds/manabitan-chrome.zip") != identities["B" if item["arm"] == "B" else "A"]["packageSha256"]:
+         raise RuntimeError("Package changed during cohort")
+     run(["node", str(root / "dev/perf/host-environment.js")], root, output / "host-before.json")
+-    command = [
+-        "node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1",
+-        "--no-build", "--build-target", "chrome", "--media-check", "sample", "--output", str(output),
+-    ]
+-    if flags:
+-        command.extend(("--flags", args.flags))
++    command = import_command(args.dictionary, output, select_arm_flags(flags_by_arm, item["arm"]), "sample")
+     run(command, target, output / "run.log")
+     result, receipt = validate_observation(output, "B" if item["arm"] == "B" else "A")
+     if reference is None:
+@@ -259,12 +279,7 @@
+     target = sources[arm]
+     output = evidence / f"exhaustive-media-{arm}"
+     output.mkdir()
+-    command = [
+-        "node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1",
+-        "--no-build", "--build-target", "chrome", "--media-check", "all", "--output", str(output),
+-    ]
+-    if flags:
+-        command.extend(("--flags", args.flags))
++    command = import_command(args.dictionary, output, select_arm_flags(flags_by_arm, arm), "all")
+     run(command, target, output / "run.log")
+     _, receipt = validate_observation(output, arm, "all")
+     require_matching_receipts(reference, receipt, compare_media=False)
+@@ -284,6 +299,7 @@
+ (memory_root / "harness-instrumented.js").write_text(instrumented_harness)
+ write_json(memory_root / "plan.json", {
+     "schedule": memory_plan, "replication": replication, "dictionary": args.dictionary,
++    "flagsByArm": {arm: select_arm_flags(flags_by_arm, arm) for arm in "ABC"},
+     "authoritativeTiming": False, "sourceHashes": identities,
+     "overlaySha256": hashlib.sha256(instrumented_harness.encode()).hexdigest(),
+ })
+@@ -299,9 +315,7 @@
+         target = sources[arm]
+         output = memory_root / item["name"]
+         output.mkdir()
+-        command = ["node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1", "--no-build", "--build-target", "chrome", "--media-check", "sample", "--output", str(output)]
+-        if flags:
+-            command.extend(("--flags", args.flags))
++        command = import_command(args.dictionary, output, select_arm_flags(flags_by_arm, arm), "sample")
+         if digest(target / "builds/manabitan-chrome.zip") != identities[arm]["packageSha256"]:
+             raise RuntimeError("Product package changed before memory observation")
+         try:
+@@ -359,6 +373,7 @@
+     return {
+         "count": len(complete), "ratios": ratios,
+         "medianPairedChangePercent": (statistics.median(ratios) - 1) * 100,
++        "medianPairedDeltaMs": statistics.median(v[right] - v[left] for v in complete),
+         "equalWorkChangePercent": (sum(v[right] for v in complete) / sum(v[left] for v in complete) - 1) * 100,
+         "worstPairChangePercent": (max(ratios) - 1) * 100,
+         "descriptiveBootstrap95Percent": [(resampled[index] - 1) * 100 for index in (249, 9749)],

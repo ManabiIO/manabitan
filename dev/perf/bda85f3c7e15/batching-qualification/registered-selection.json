@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "frozenAtUtc": "2026-11-28T07:18:20.786521+00:00",
+  "purpose": "Confirm the completed batching Jitendex screen on independent hosts and check global worker-path regression and memory across all three dictionaries.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "83b0bafd51fff334a2f2e94beaf67cfa68e85eea",
+  "variant": "batching",
+  "mode": [
+    "active"
+  ],
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "initialOrders": [
+    "AB",
+    "BA"
+  ],
+  "hosts": 6,
+  "importsPerHost": 42,
+  "importsTotal": 252,
+  "candidatePairsPerHost": 12,
+  "excludedWarmupsPerHost": 4,
+  "identicalControlPairsPerHost": 4,
+  "controlAfterCandidatePairs": [
+    3,
+    6,
+    9,
+    12
+  ],
+  "exhaustiveMediaImportsPerHost": 2,
+  "separateMemoryImportsPerHost": 4,
+  "requestedFlags": {
+    "A": null,
+    "B": null,
+    "C": null
+  },
+  "expectedChangedPackageEntries": [
+    "js/dictionary/zstd-term-content.js",
+    "js/dictionary/zstd-term-content-compression-worker.js"
+  ],
+  "expectedAddedPackageEntries": [],
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ],
+  "sourceGate": {
+    "runId": 46107223100,
+    "jobId": 140862563217,
+    "conclusion": "success",
+    "fullTestsPassed": 15141,
+    "skipped": 47,
+    "files": 669,
+    "logSha256": "8a0636635c236b9b0941c4bba43ba73b2ada63b1dc128c1df649f6f51724fcf2"
+  },
+  "screen": {
+    "dictionary": "jitendex",
+    "runId": 46107223100,
+    "jobId": 140882949698,
+    "artifactId": 15253327200,
+    "artifactSha256": "eeafe5152e15045585b087c9835c416748b900ee31cde8d69d15bd61c7fcfb8d",
+    "observations": 18,
+    "candidatePairs": 6,
+    "fasterPairs": 5,
+    "medianPairedUiPercentRounded": -1.8524,
+    "equalWorkUiPercentRounded": -1.8821,
+    "limits": "One host, current same-code control pending, no peak-memory qualification. Every pair retained including pair 5 regression. No PR justified yet."
+  },
+  "memory": {
+    "minimumFullyCoveredScans": 5,
+    "maximumCoveredScanGapMs": 250,
+    "maximumBracketGapMs": 250,
+    "medianPairedIncreasePercent": 5,
+    "eachPairedIncreasePercent": 10,
+    "metrics": [
+      "PSS",
+      "private"
+    ],
+    "bothHostsIndependentlyRequired": true
+  },
+  "statistics": {
+    "pairedMedianPercent": true,
+    "medianPairedDeltaMs": true,
+    "equalWorkRatio": true,
+    "fasterPairs": true,
+    "worstPair": true,
+    "allRatiosRetained": true,
+    "descriptiveBootstrapResamples": 10000,
+    "descriptiveBootstrapSeed": 897,
+    "intervalPercent": 95,
+    "minimumSpeedPercent": null
+  },
+  "failurePolicy": "Retain all observations, exclusions and failures. No dropped outliers, replacement slots, adaptive pair increases, host pooling or control-median subtraction. Coverage failures remain inconclusive.",
+  "protocolSourceWorkflowSha256": "f96899184e0e4d335d72e9b9f4215f3decc5f1e19a97f2edc18411787d55ef7e",
+  "driverSha256": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22",
+  "controlsSha256": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43"
+}
