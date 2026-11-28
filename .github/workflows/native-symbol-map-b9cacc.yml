@@ -1,0 +1,62 @@
+name: Frozen dictionary WASM symbol map
+
+on:
+  push:
+    branches: ['perf/native-symbol-map-20261128-b9cacc']
+    paths:
+      - '.github/workflows/native-symbol-map-b9cacc.yml'
+      - 'dev/perf/native-symbol-map-b9cacc/**'
+
+permissions:
+  contents: read
+
+jobs:
+  symbols:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Freeze tooling and check out exact product baseline
+        shell: bash
+        env:
+          TOOLING_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          cp -R dev/perf/native-symbol-map-b9cacc "$RUNNER_TEMP/native-symbol-map-tools"
+          cp .github/workflows/native-symbol-map-b9cacc.yml "$RUNNER_TEMP/native-symbol-map-tools/workflow.yml"
+          git checkout --detach "$PERF_BASELINE"
+          mkdir -p builds/perf/native-symbol-map-b9cacc
+          printf '%s\n' "$TOOLING_COMMIT" > builds/perf/native-symbol-map-b9cacc/tooling-commit.txt
+          cp -R "$RUNNER_TEMP/native-symbol-map-tools" builds/perf/native-symbol-map-b9cacc/tooling
+          git rev-parse HEAD > builds/perf/native-symbol-map-b9cacc/product-commit.txt
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Validate proof parser without compiling
+        run: python -m unittest discover -s "$RUNNER_TEMP/native-symbol-map-tools" -p 'test_*.py' -v
+      - name: Install repository-pinned dictionary WASM toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Reproduce locked modules, retain names, and prove executable identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/native-symbol-map-tools/symbol_map.py" \
+            --root "$GITHUB_WORKSPACE" --output builds/perf/native-symbol-map-b9cacc
+      - name: Preserve source, commands, tool versions, section proofs, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-symbol-map-b9cacc
+          path: builds/perf/native-symbol-map-b9cacc
+          if-no-files-found: error
+          retention-days: 90
