@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "study": "81585d-stage2",
+  "snapshotAtUtc": "2026-11-28 05:06:18 UTC",
+  "status": "pending",
+  "promotionEligible": false,
+  "productPrOpened": false,
+  "reason": "All twelve browser cells and both corrected source-validation jobs are queued; local executor is unavailable.",
+  "elapsedWorkBeforeExecutorLoss": "Approximately 2 hours 16 minutes; requested several-hour investigation was interrupted.",
+  "workModeUsed": false,
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+  },
+  "acquisition": {
+    "runId": 46104094289,
+    "attempt": 1,
+    "commit": "bc8b16e0228c71e12b0cb560182bdbc2bc83ca73",
+    "tree": "f46516d61e6f6a7c6cdb850adf3e263b48cfbc29",
+    "requiredBrowserCells": 12,
+    "startedBrowserCells": 0,
+    "completedBrowserCells": 0
+  },
+  "authoritativeSourceValidation": {
+    "runId": 46106649952,
+    "attempt": 1,
+    "commit": "2cfa2db591105847bcb8b0bfe9e8c3ad7438ff34",
+    "tree": "bad9ef6f7fce89128dd5a88691cb7514b832328a",
+    "requiredJobs": 2,
+    "requiredGatesPerCandidate": 15,
+    "startedJobs": 0,
+    "completedJobs": 0
+  },
+  "candidates": {
+    "lazy-signatures": {
+      "commit": "71a29d3c82575919d4571cf7f62717b563837f7f",
+      "tree": "d2045d91480a106321a6d59f1a88b1679501f33d",
+      "branch": "perf/lazy-content-signatures-20261128-81585d",
+      "target": "jmdict",
+      "promotionEligible": false,
+      "completedPackagePreflight": true,
+      "completedTimingCells": 0,
+      "requiredTimingCells": 6,
+      "correctedSourceValidationComplete": false,
+      "preflightArtifactId": 15247733779
+    },
+    "early-borrowed-release": {
+      "commit": "1de603b81a377391529c9e518a824ff00ac4cc04",
+      "tree": "6cb01b38cd873bce30921fc67412831c3dd9f9e8",
+      "branch": "perf/early-content-release-20261128-81585d",
+      "target": "jitendex",
+      "promotionEligible": false,
+      "completedPackagePreflight": true,
+      "completedTimingCells": 0,
+      "requiredTimingCells": 6,
+      "correctedSourceValidationComplete": false,
+      "preflightArtifactId": 15247777302,
+      "portedExistingPr": 955
+    }
+  },
+  "aggregateChecker": {
+    "location": "/workspace/scratch/81585d0a2901/qualification/promotion-checker",
+    "remotelyUploaded": false,
+    "currentlyAccessible": false,
+    "freezeTimeUtc": "2026-11-28 04:58:28 UTC",
+    "adversarialTestsPassed": 32,
+    "lastExitCode": 2,
+    "lastDisposition": {
+      "eachCandidatePassedArtifacts": 1,
+      "eachCandidateRequiredArtifacts": 8,
+      "eachCandidatePassedTimingCells": 0,
+      "eachCandidateRequiredTimingCells": 6,
+      "pendingArtifacts": 14,
+      "rejectedPresentArtifacts": 0
+    },
+    "lastVerifiedSha256": {
+      "check.py": "4e62bbdd4d4945b167c716778cbea76371b68cc34373676b379c65b521b03292",
+      "test_check.py": "8b431981f1dd0748c17c60e9dd0bc48546d4dac9020566f9f391b8b1be0e549d",
+      "freeze.json": "bf94bbcf30e7dc2a458abceb7d8aaa653a4ea8ca2e00b44f6a2842b338a03369"
+    },
+    "provenance": "Last observed verified local state; not an executable replacement or authenticated copy of the frozen checker."
+  },
+  "composition": {
+    "remote": false,
+    "committed": false,
+    "staged": false,
+    "testsStarted": false,
+    "path": "/workspace/scratch/81585d0a2901/manabitan-lazy-early-composition",
+    "branch": "perf/lazy-signatures-early-release-compose-20261128-81585d",
+    "head": "c3287e31ffabeae8dd85e2eb9801b7dc0594b11f",
+    "mergeHead": "dd7401e09877537247eb29807ade5bacfd6f3a5a",
+    "textConflictsResolved": 2,
+    "preparedTests": 11,
+    "addedTestLines": 320,
+    "completedChecks": [
+      "git diff --check",
+      "node --check ext/js/dictionary/dictionary-database.js",
+      "node --check test/dictionary-database-content-dedup.test.js"
+    ],
+    "runtimePreparationState": "Unknown after executor transport disconnection; inspect before resuming.",
+    "qualificationInherited": false
+  },
+  "localFullUnitAttempt": {
+    "source": "c3287e31ffabeae8dd85e2eb9801b7dc0594b11f",
+    "command": "npm run test:unit -- --maxWorkers=1 --no-file-parallelism",
+    "nodeOptions": "--max-old-space-size=1024",
+    "exitCode": 137,
+    "completedTestFiles": 0,
+    "elapsedSeconds": 12,
+    "assertionReported": false,
+    "causeEstablished": false,
+    "retried": false
+  },
+  "preservation": {
+    "researchRawArchiveUploaded": false,
+    "localExperimentArchivesCurrentlyAccessible": false,
+    "providerArtifactsArePermanent": false,
+    "preflightExpiryUtc": {
+      "earlyRelease": "2026-12-12T04:16:10Z",
+      "lazySignatures": "2026-12-12T04:28:04Z"
+    },
+    "researchDocumentFormattingCheckRun": false,
+    "reasonFormattingNotRun": "Local executor unavailable; no product source changed by this research handoff."
+  },
+  "nextActions": [
+    "Inspect the existing frozen runs without replacing observations.",
+    "Recover exact local archives and checker, verify hashes, and inspect interrupted composition preparation if the environment returns.",
+    "Ingest provider artifacts with exact run/head/attempt/archive/member checks before their expiry.",
+    "Apply independent frozen source/correctness/timing/memory gates; a successful acquisition job alone is insufficient.",
+    "Consider a product PR only after a demonstrated review-worthy gain and all required gates."
+  ]
+}
