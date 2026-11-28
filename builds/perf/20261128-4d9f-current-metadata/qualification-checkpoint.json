@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-28T11:10:00Z",
+  "claim": "Exact additional typed-array/native-arena backing avoided at the completed term-ingestion checkpoint; not elapsed time or browser process memory.",
+  "latestSource": {
+    "publicCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "localEquivalent": "5b178ff002216d74cc8a09336c375832fc4dd994",
+    "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
+    "extTree": "6882b13827d4bb648a4a9297f293e55f055b74ed",
+    "qualification": "Source review complete; own hosted validation and distinct corpus verification pending. Prior observations remain bound to their original sources."
+  },
+  "corpusAcquisition": {
+    "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "candidate": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+    "localEquivalent": "81e203e084c009e79057a36d0e2106ef669ab168",
+    "candidateTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+    "helper": "fb9d9612f34bdb002d846364ef089f25ed188b29",
+    "allSixPassedFirstAttempt": true,
+    "oracleScope": "All rows, parser outputs, record fields, encoded frames, normalized final files and independently decoded logical metadata; linked random generation IDs are the only file normalization.",
+    "excluded": "SQLite/media persistence, worker-thread concurrency, browser UI, timing and process peak memory are outside these in-process corpus acquisitions.",
+    "results": [
+      {
+        "dictionary": "jmdict",
+        "rows": 528299,
+        "groups": 12,
+        "denseEntries": 362032,
+        "metadataCapacity": 524288,
+        "nativeBefore": 26214400,
+        "nativeAfter": 24117248,
+        "nameIdBefore": 2097152,
+        "nameIdAfter": 0,
+        "backingBytesAvoided": 4194304,
+        "normalizedFileOracle": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+      },
+      {
+        "dictionary": "jitendex",
+        "rows": 436555,
+        "groups": 22,
+        "denseEntries": 363243,
+        "metadataCapacity": 524288,
+        "nativeBefore": 26214400,
+        "nativeAfter": 24117248,
+        "nameIdBefore": 2097152,
+        "nameIdAfter": 0,
+        "backingBytesAvoided": 4194304,
+        "normalizedFileOracle": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+      },
+      {
+        "dictionary": "vndb",
+        "rows": 6648310,
+        "groups": 170,
+        "denseEntries": 157150,
+        "nativeBefore": 17301504,
+        "nativeAfter": 16252928,
+        "backingBytesAvoided": 1048576,
+        "nameIdSaving": 0,
+        "nameIdMaterializationGroup": 2,
+        "normalizedFileOracle": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+      }
+    ],
+    "upstreamImplicitFloat64RecordIdSavingsExcluded": true,
+    "archive": {
+      "path": "experiments/implicit-metadata-columns/current-corpus/current-corpus-raw.tar.gz",
+      "bytes": 1092839,
+      "members": 94,
+      "sha256": "16cf0777466bf11b15582887e8430e304c22d9ec589e3299b4851ed584c0415b",
+      "status": "Verified in checkpointed local workspace before execution outage; portable helper/evidence commit a2214153fc7bc239935d2b1852b22ad80184dbaf not yet uploaded at this checkpoint."
+    }
+  },
+  "sourceValidation": {
+    "runId": 46136278240,
+    "candidate": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+    "unitTests": {
+      "passed": 15246,
+      "pending": 47,
+      "failed": 0
+    },
+    "dryBuild": "passed",
+    "nativeAssets": "passed",
+    "types": "One test-helper JSDoc error; fixed by public90a0e7d7f93582b0f20d97c057b553a5194f5774 with executable runtime unchanged. Latest hosted validation pending.",
+    "artifact": {
+      "id": 15260350679,
+      "bytes": 532193,
+      "sha256": "bb275845887c5f730c9da7ee5e585c404e53afdaac74adcb36503929af851186"
+    },
+    "localFocusedTestsPassed": 318,
+    "helperContractsPassed": 26,
+    "localResourceFailuresRetained": true
+  },
+  "releasePackage": {
+    "scope": "f28 vs81e",
+    "entryNames": 554,
+    "unchangedEntryBytes": 549,
+    "changedEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-content-canonical-scan.js",
+      "js/dictionary/term-content-metadata-arena.js",
+      "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "zipBytesDelta": 2416,
+    "wasmBytesDelta": 458
+  },
+  "browser": {
+    "runId": 46135718522,
+    "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "candidate": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+    "pairsPerCell": 12,
+    "identicalCodeControlPairsPerCell": 4,
+    "warmupImportsPerCell": 4,
+    "completedIndependentAuditCells": [
+      {
+        "dictionary": "jmdict",
+        "order": "AB",
+        "semanticReceipts": 42,
+        "memoryScreen": true,
+        "pairedMedianPercent": 1.33,
+        "equalWorkPercent": 0.097
+      },
+      {
+        "dictionary": "jmdict",
+        "order": "BA",
+        "semanticReceipts": 42,
+        "memoryScreen": true,
+        "pairedMedianPercent": -0.335,
+        "equalWorkPercent": -6.339,
+        "retainedFastRatio": 0.6208
+      },
+      {
+        "dictionary": "jitendex",
+        "order": "AB",
+        "semanticReceipts": 42,
+        "memoryScreen": true,
+        "pairedMedianPercent": 0.291,
+        "equalWorkPercent": 2.041
+      },
+      {
+        "dictionary": "jitendex",
+        "order": "BA",
+        "semanticReceipts": 42,
+        "memoryScreen": true,
+        "pairedMedianPercent": -0.19,
+        "equalWorkPercent": -0.617
+      }
+    ],
+    "speedClaim": false,
+    "allFourIntervalsIncludeZero": true,
+    "vndb": "AB job passed, independent audit pending; BA still pending at this checkpoint.",
+    "olderFailedMemoryCoverageCellsRetained": [
+      {
+        "runId": 46133384380,
+        "dictionary": "jmdict",
+        "order": "BA",
+        "baselineObservation": "A2",
+        "maxCoveredGapMs": 369.7
+      },
+      {
+        "runId": 46133384380,
+        "dictionary": "vndb",
+        "order": "AB",
+        "baselineObservation": "A2",
+        "maxCoveredGapMs": 256.299311
+      }
+    ]
+  },
+  "limits": [
+    "Rare generic S1 materialization can exceed the old integrated layout by less than one 64 KiB native page at some capacities.",
+    "4/4/1 MiB is backing at a specific import checkpoint, not whole-process or steady-state memory.",
+    "No repeatable elapsed-time improvement was established; native checksum candidate remains unpromoted."
+  ]
+}

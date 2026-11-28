@@ -733,3 +733,25 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-28: implicit import metadata columns (4d9f)
+
+This candidate removes redundant physical backing for the common MBR6 first signature word and a uniform dictionary-name prefix. Exceptional writes materialize the original Uint32 representations before publication. Exact signatures, collision checks, stale/free entries, physical aliases, rollback and the existing implicit Float64 record IDs retain their behavior. The persisted format and import policy are unchanged.
+
+The completed full-corpus comparison uses parent `f28c2801fcfd9416f220b46b9cbafeee901c1cb2` and public candidate `68b29e5a959470e76ff67a93ec8b300cc53f1254`, exact tree `167af1110023e4febad62921e13244b2c8bcb93c`. All six acquisitions passed on their first attempt. Every parser row, field, frame, normalized final file and independently reconstructed logical metadata column matched. The only final-file normalization is the linked random generation identifier.
+
+| Corpus | Rows | Groups | S1 backing avoided | Name-ID backing avoided | Total backing avoided |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| JMdict | 528,299 | 12 | 2 MiB | 2 MiB | 4 MiB |
+| Jitendex | 436,555 | 22 | 2 MiB | 2 MiB | 4 MiB |
+| VNDB | 6,648,310 | 170 | 1 MiB | 0 | 1 MiB |
+
+These figures describe allocated backing retained at the completed term-ingestion checkpoint. They are not elapsed-time, process-peak or steady-state memory improvements. VNDB materializes its name-ID column in group two. The upstream implicit record-ID saving is excluded. Generic S1 materialization can use less than one additional 64 KiB page at some capacities; this is not a universal allocation-neutral change.
+
+[Hosted source validation](https://github.com/ManabiIO/manabitan/actions/runs/46136278240) passed 15,246 unit tests (47 pending), dry build and native asset regeneration on public68. Its single test-helper type annotation error was corrected in public `90a0e7d7f93582b0f20d97c057b553a5194f5774` without changing executable code. The source package audit found identical 554 entry names, 549 identical entry payloads and exactly the five expected changed entries. The native module grows by 458 bytes and the release ZIP by 2,416 bytes.
+
+[The frozen browser cohort](https://github.com/ManabiIO/manabitan/actions/runs/46135718522) uses 12 paired imports and four interleaved identical-code controls per dictionary/order cell, plus separate all-media and sampled-memory verification. The four independently audited JMdict/Jitendex cells pass all 168 semantic receipts and the preset memory screens. Their timing intervals all cross zero; no elapsed-time gain is claimed. The unusually fast JMdict BA pair remains in the raw evidence. VNDB AB has completed its hosted job; its independent audit and the BA cell remain pending at this checkpoint. Older dcfc cohort memory-coverage failures remain retained and are not replaced.
+
+The candidate has been integrated onto online-Zstd parent `a300da36d00df8e353c5679b1528b50a1299b75f` at public `86cd5c18d325488b0ecb04c552d1dc83567de9d2`, exact full tree `525583edb6429008801d181ee03b3e9e5c519eae`. All 19 optimized methods and the other 13 changed files are byte-identical to the reviewed candidate; upstream non-constructor methods remain byte-identical. The constructor additions occupy separate regions. [The source review](../../builds/perf/20261128-4d9f-current-metadata/independent-source-review.md) records the caller/alias/failure analysis. The older outcomes are not relabeled as validation of this integration. Its own hosted gates and new corpus verification remain pending.
+
+[The machine-readable checkpoint](../../builds/perf/20261128-4d9f-current-metadata/qualification-checkpoint.json) records identities, archive hashes and boundaries. The local helper/evidence package was verified and committed before the execution environment went offline, but had not yet been uploaded; this pending publication is explicit. Hosted evidence remains available in the linked Actions runs and is being preserved separately.
