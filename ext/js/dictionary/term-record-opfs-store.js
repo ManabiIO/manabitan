@@ -435,6 +435,25 @@ function getSynchronousRecordFieldReferences(chunk, count) {
     } catch { return null }
     return references
 }
+
+/**
+ * Writes final compact columns from the already selected private references.
+ * @param {ResolvedContentReferences} directReferences
+ * @param {number} count
+ * @param {number} contentOffsetBase
+ * @param {Uint32Array} outputOffsets
+ * @param {Uint16Array} outputLengths
+ * @returns {void}
+ */
+function writeResolvedRecordFieldColumns(directReferences, count, contentOffsetBase, outputOffsets, outputLengths) {
+    const {uniqueIndexList, offsets: resolvedOffsets, lengths: resolvedLengths} = directReferences
+    for (let i = 0; i < count; ++i) {
+        const unique = uniqueIndexList[i]
+        const offset = resolvedOffsets[unique]
+        outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase
+        outputLengths[i] = resolvedLengths[unique]
+    }
+}
 /* eslint-enable @stylistic/semi */
 
 /**
@@ -5943,13 +5962,7 @@ view.chunks :
             // No await or caller-controlled getter separates these passes.
             // Write final columns directly instead of allocating and copying
             // another six bytes per row of offset/length staging.
-            const {uniqueIndexList, offsets: resolvedOffsets, lengths: resolvedLengths} = directReferences
-            for (let i = 0; i < count; ++i) {
-                const unique = uniqueIndexList[i]
-                const offset = resolvedOffsets[unique]
-                outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase
-                outputLengths[i] = resolvedLengths[unique]
-            }
+            writeResolvedRecordFieldColumns(directReferences, count, contentOffsetBase, outputOffsets, outputLengths)
         } else if (offsets !== null && lengths !== null) {
             outputOffsets.set(offsets)
             outputLengths.set(lengths)
