@@ -1,0 +1,125 @@
+name: Frozen import baseline profile a7c4
+
+on:
+  push:
+    branches: [test/import-profile-20261127-a7c4]
+    paths: [.github/workflows/import-profile-20261127-a7c4.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-profile-a7c4-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PROFILE_SOURCE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+
+jobs:
+  profile:
+    name: Baseline / ${{ matrix.dictionary }}
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/test/import-profile-20261127-a7c4'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          persist-credentials: false
+
+      - name: Record frozen diagnostic scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PROFILE_SOURCE_SHA"
+          mkdir -p "builds/perf/import-20261127-a7c4/$DICTIONARY"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          folder = pathlib.Path('builds/perf/import-20261127-a7c4') / os.environ['DICTIONARY']
+          paths = ['package-lock.json', 'test/perf/dictionaries.lock.json',
+                   'dev/data/dictionary-wasm/manifest.json',
+                   'dev/perf/import-benchmark.js', 'dev/perf/benchmark-support.js',
+                   'test/chromium/extension-two-dictionary-import.e2e.js']
+          receipt = {
+              'scope': 'One ordinary baseline import and one separate CPU trace. Diagnostic evidence only; no A/B speedup, peak-memory, or promotion claim.',
+              'sourceSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'workflowCommit': os.environ['GITHUB_SHA'],
+              'workflowRef': os.environ['GITHUB_WORKFLOW_REF'],
+              'dictionary': os.environ['DICTIONARY'],
+              'mediaCheck': 'sample',
+              'checkerPolicy': 'Use the exact frozen source checker unchanged. Its native-image eligibility threshold is 1 GiB. The separate historical 129-131-unit VNDB SAH qualification policy is not invoked by this diagnostic. All raw storage observations remain in the reports.',
+              'sha256': {name: hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() for name in paths},
+          }
+          (folder / 'scope.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Prepare locked fixture and release package
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_root="builds/perf/import-20261127-a7c4/$DICTIONARY"
+          node dev/perf/prepare-dictionaries.js "$DICTIONARY" 2>&1 | tee "$output_root/fixture.log"
+          node dev/bin/build.js --target chrome 2>&1 | tee "$output_root/build.log"
+          node --version > "$output_root/node-version.txt"
+          git status --porcelain=v1 > "$output_root/source-status.txt"
+          sha256sum builds/manabitan-chrome.zip > "$output_root/release-package.sha256"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, zipfile
+          folder = pathlib.Path('builds/perf/import-20261127-a7c4') / os.environ['DICTIONARY']
+          with zipfile.ZipFile('builds/manabitan-chrome.zip') as archive:
+              names = archive.namelist()
+              assert len(names) == len(set(names)), 'Duplicate package members'
+              members = {name: hashlib.sha256(archive.read(name)).hexdigest() for name in sorted(names) if not name.endswith('/')}
+          (folder / 'release-members.json').write_text(json.dumps(members, indent=2) + '\n')
+          PY
+
+      - name: Install lockfile Chromium
+        id: browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Ordinary import with profiling disabled
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' && steps.browser.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_root="builds/perf/import-20261127-a7c4/$DICTIONARY"
+          node dev/perf/import-benchmark.js "$DICTIONARY" \
+            --runs 1 --no-build --build-target chrome --media-check sample \
+            --output "$output_root/ordinary" 2>&1 | tee "$output_root/ordinary.log"
+
+      - name: Separate diagnostic CPU trace
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' && steps.browser.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_root="builds/perf/import-20261127-a7c4/$DICTIONARY"
+          node dev/perf/import-benchmark.js "$DICTIONARY" \
+            --runs 1 --trace --no-build --build-target chrome --media-check sample \
+            --output "$output_root/trace" 2>&1 | tee "$output_root/trace.log"
+
+      - name: Retain every diagnostic receipt and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-profile-a7c4-${{ matrix.dictionary }}
+          path: builds/perf/import-20261127-a7c4
+          if-no-files-found: error
+          retention-days: 14
