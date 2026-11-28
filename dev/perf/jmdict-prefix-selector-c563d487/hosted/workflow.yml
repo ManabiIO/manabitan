@@ -1,0 +1,152 @@
+name: JMdict prefix selector fixed component screen c563d487
+
+on:
+  push:
+    branches: [perf/jmdict-prefix-selector-screen-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  TOOL_ROOT: dev/perf/jmdict-prefix-selector-c563d487/hosted
+
+jobs:
+  dictionary:
+    name: ${{ matrix.dictionary }} fixed component cohort
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      BASE_ROOT: ${{ github.workspace }}/../prefix-selector-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../prefix-selector-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/jmdict-prefix-selector
+    steps:
+      - name: Check out the frozen experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up frozen baseline dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install pinned compiler and reproduce baseline artifacts
+        run: |
+          mkdir -p "$OUTPUT_ROOT"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npm run build:dictionary-wasm -- --check
+          node --version
+          uname -a
+          lscpu
+          clang-21 --version
+          wasm-ld-21 --version
+
+      - name: Prepare isolated source-bound candidate and diagnostic builds
+        run: bash "$TOOL_ROOT/setup.sh"
+
+      - name: Verify six guarded production-path smoke modes
+        run: python3 "$TOOL_ROOT/preflight.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT"
+
+      - name: Lint frozen regression fixtures and check test types
+        if: matrix.dictionary == 'jmdict'
+        working-directory: ${{ env.CANDIDATE_ROOT }}
+        run: |
+          npx eslint test/term-bank-prefix-selector-fixtures.js test/term-bank-prefix-selector-reuse.test.js --format json --output-file "$OUTPUT_ROOT/scoped-eslint.json"
+          npm run test:ts:test > "$OUTPUT_ROOT/test-types.log" 2>&1
+
+      - name: Run focused production, parser, and field-validation tests
+        if: matrix.dictionary == 'jmdict'
+        working-directory: ${{ env.CANDIDATE_ROOT }}
+        run: npx vitest run test/term-bank-prefix-selector-reuse.test.js test/term-bank-wasm-parser.test.js test/dictionary-importer-term-bank-field-validation.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js test/term-bank-source-crc-reuse.test.js --maxWorkers=2
+
+      - name: Fetch and verify only the locked selected dictionary
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY]);"
+
+      - name: Compare every native metadata word and synthetic partial failures
+        run: |
+          node --max-old-space-size=512 "$TOOL_ROOT/native-oracle.mjs" --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --dictionary "$DICTIONARY" --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --output "$OUTPUT_ROOT/native-oracle"
+
+      - name: Run frozen mechanics and four candidate plus four A-A pairs
+        run: python3 "$TOOL_ROOT/run.py" "$DICTIONARY" "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT"
+
+      - name: Preserve all raw observations, failures, source, and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-prefix-selector-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: builds/jmdict-prefix-selector
+          if-no-files-found: warn
+          retention-days: 14
+
+  negative:
+    name: Three fixed synthetic negative-control cohorts
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    env:
+      BASE_ROOT: ${{ github.workspace }}/../prefix-selector-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../prefix-selector-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/jmdict-prefix-negative
+    steps:
+      - name: Check out the frozen experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up frozen baseline dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install pinned compiler and reproduce baseline artifacts
+        run: |
+          mkdir -p "$OUTPUT_ROOT"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npm run build:dictionary-wasm -- --check
+          node --version
+          uname -a
+          lscpu
+          clang-21 --version
+          wasm-ld-21 --version
+
+      - name: Prepare isolated source-bound candidate and diagnostic builds
+        run: bash "$TOOL_ROOT/setup.sh"
+
+      - name: Verify six guarded production-path smoke modes
+        run: python3 "$TOOL_ROOT/preflight.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT"
+
+      - name: Check both strict native routes and partial error metadata
+        run: |
+          node --max-old-space-size=512 "$TOOL_ROOT/native-oracle.mjs" --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --synthetic-only --output "$OUTPUT_ROOT/native-oracle"
+
+      - name: Generate and bind all three fixed negative fixtures
+        run: node --max-old-space-size=512 "$TOOL_ROOT/negative-fixtures.mjs" "$OUTPUT_ROOT/negative-fixtures"
+
+      - name: Run serial fixed negative cohorts with separate mechanics
+        run: python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT"
+
+      - name: Preserve every repetition, failure, fixture, source, and criterion
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-prefix-selector-negative-${{ github.run_attempt }}
+          path: builds/jmdict-prefix-negative
+          if-no-files-found: warn
+          retention-days: 14

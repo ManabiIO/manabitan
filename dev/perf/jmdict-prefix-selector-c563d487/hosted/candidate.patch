@@ -1,0 +1,166 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -32,6 +32,11 @@
+ #define VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET 4u
+ #define VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES 4u
+ #define VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES 512u
++/* Private row-local key state; the low two bits retain escape detection. */
++#define KEY_IDENTITY_CHECKED 4u
++#define KEY_READING_EQUALS_EXPRESSION 8u
++#define KEY_ADJACENT_EXPRESSION_MATCH 16u
++#define KEY_ADJACENT_READING_MATCH 32u
+ /* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
+ #define MAX_INTERNED_KEY_BYTES 0xffffu
+ #ifndef RECENT_CONTENT_DEDUP_WINDOW
+@@ -1436,6 +1441,33 @@
+ 
+ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+ 
++/* Move only the interner's existing raw-key comparisons before the glossary.
++ * The reading shortcut must precede its adjacent-key comparison here too. */
++static uint32_t adjacent_key_identity(
++    const uint8_t* src, const TermRowMeta* current, const TermRowMeta* previous
++) {
++    uint32_t result = KEY_IDENTITY_CHECKED;
++    if ((current->reading_length == 2u &&
++            src[current->reading_start] == '"' && src[current->reading_start + 1u] == '"') ||
++        (current->expression_length == current->reading_length && content_bytes_equal_between(
++            src, current->expression_start, src, current->reading_start, current->expression_length))) {
++        result |= KEY_READING_EQUALS_EXPRESSION;
++    }
++    for (uint32_t field = 0u; field < 2u; ++field) {
++        if (field == 1u && (result & KEY_READING_EQUALS_EXPRESSION) != 0u) { continue; }
++        const uint32_t length = field == 0u ? current->expression_length : current->reading_length;
++        if (length < 2u || length > 34u) { continue; }
++        const uint32_t previous_length = field == 0u ? previous->expression_length : previous->reading_length;
++        if (length != previous_length) { continue; }
++        const uint32_t start = field == 0u ? current->expression_start : current->reading_start;
++        const uint32_t previous_start = field == 0u ? previous->expression_start : previous->reading_start;
++        if (content_bytes_equal_between(src, start + 1u, src, previous_start + 1u, length - 2u)) {
++            result |= KEY_ADJACENT_EXPRESSION_MATCH << field;
++        }
++    }
++    return result;
++}
++
+ /* Samples only reject candidates. Only full equality with a successful earlier
+  * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
+  * A witness also lets content dedup avoid comparing this same glossary twice. */
+@@ -1506,7 +1538,12 @@
+     if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+     meta->reading_start = i;
+     meta->reading_length = end - i;
+-    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
++    if (key_escape_mask != 0) {
++        *key_escape_mask = expression_escaped | (reading_escaped << 1u);
++        if (glossary_witness != 0 && glossary_lookback == 0u && prior_count > 0u) {
++            *key_escape_mask |= adjacent_key_identity(src, meta, &prior_rows[prior_count - 1u]);
++        }
++    }
+     i = end;
+     if (!next_format3_field(src, len, &i)) { return 0; }
+ 
+@@ -1536,8 +1573,27 @@
+     meta->glossary_may_contain_media = 0u;
+     meta->glossary_requires_normalization = 0u;
+     meta->glossary_requires_text_normalization = 0u;
++    if (glossary_lookback == 0u && key_escape_mask != 0 &&
++        (*key_escape_mask & (KEY_ADJACENT_EXPRESSION_MATCH | KEY_ADJACENT_READING_MATCH)) != 0u) {
++        const uint32_t tags_prefix = read_content_signature(src + meta->definition_tags_start, meta->definition_tags_length, 0u);
++        const uint32_t rules_prefix = read_content_signature(src + meta->rules_start, meta->rules_length, 0u);
++        const uint32_t first = prior_count > RECENT_CONTENT_DEDUP_WINDOW ? prior_count - RECENT_CONTENT_DEDUP_WINDOW : 0u;
++        for (uint32_t k = prior_count; k > first;) {
++            const TermRowMeta* prior = &prior_rows[--k];
++            if (meta->definition_tags_length == prior->definition_tags_length &&
++                meta->rules_length == prior->rules_length &&
++                tags_prefix == read_content_signature(src + prior->definition_tags_start, prior->definition_tags_length, 0u) &&
++                rules_prefix == read_content_signature(src + prior->rules_start, prior->rules_length, 0u)) {
++                // Probe only the first prefix match, even if its glossary fails.
++                // These local bounds do not change the caller's probe policy.
++                prior_count = k + 1u;
++                glossary_lookback = 1u;
++                break;
++            }
++        }
++    }
+     if (
+-        !(glossary_witness != 0 && reuse_validated_glossary(
++        !(glossary_witness != 0 && glossary_lookback > 0u && reuse_validated_glossary(
+             src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+         )) &&
+         !parse_value_span_with_glossary_hints(
+@@ -3379,13 +3435,14 @@
+         }
+         uint32_t key_escape_mask;
+         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
++                rows, row_count, glossary_lookback > 0u || (validated_glossary_reuse_enabled && validate_glossary_types != 0u && row_count > 0u) ?
++                    &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+             return -1;
+         }
+         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
+         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+         if (validated_glossary_reuse_enabled && row_count > 0u) {
+-            if (glossary_witness != 0xffffffffu) {
++            if (glossary_witness != 0xffffffffu && glossary_lookback > 0u) {
+                 glossary_reuse_probe_budget = VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET;
+             } else if (glossary_reuse_probe_budget > 0u) {
+                 --glossary_reuse_probe_budget;
+@@ -3403,13 +3460,14 @@
+             parsed_row->reading_length,
+         };
+         uint32_t string_indexes[2] = {0u, 0u};
+-        int reading_equals_expression = (
++        int reading_equals_expression = (key_escape_mask & KEY_IDENTITY_CHECKED) != 0u ?
++            (key_escape_mask & KEY_READING_EQUALS_EXPRESSION) != 0u : (
+             token_lengths[1] == 2u &&
+             src[token_starts[1]] == '"' &&
+             src[token_starts[1] + 1u] == '"'
+         );
+         if (
+-            !reading_equals_expression &&
++            (key_escape_mask & KEY_IDENTITY_CHECKED) == 0u && !reading_equals_expression &&
+             token_lengths[0] == token_lengths[1] &&
+             content_bytes_equal_between(
+                 src,
+@@ -3428,8 +3486,9 @@
+             }
+             const uint32_t token_start = token_starts[field];
+             const uint32_t token_length = token_lengths[field];
++            int adjacent_key_match = (key_escape_mask & (KEY_ADJACENT_EXPRESSION_MATCH << field)) != 0u;
+             // Cap the extra equality scan at 32 raw token-body bytes.
+-            if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
++            if ((key_escape_mask & KEY_IDENTITY_CHECKED) == 0u && row_count > 0u && token_length >= 2u && token_length <= 34u) {
+                 const TermRowMeta* previous_row = &rows[row_count - 1u];
+                 const uint32_t previous_start = field == 0u ?
+                     previous_row->expression_start : previous_row->reading_start;
+@@ -3438,10 +3497,13 @@
+                 // Reuse only a validated adjacent raw key, keeping reading equality independent.
+                 if (token_length == previous_length && content_bytes_equal_between(
+                         src, token_start + 1u, src, previous_start + 1u, token_length - 2u)) {
+-                    string_indexes[field] = field == 0u ?
+-                        expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+-                    continue;
++                    adjacent_key_match = 1;
+                 }
++            }
++            if (adjacent_key_match) {
++                string_indexes[field] = field == 0u ?
++                    expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
++                continue;
+             }
+             if (token_length < 2u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+             const uint8_t* value_source = src;
+@@ -3565,8 +3627,9 @@
+             }
+         } else {
+ #if RECENT_CONTENT_DEDUP_WINDOW > 0
+-            // The glossary witness is the newest matching raw glossary. If the
+-            // remaining fields match too, it is the newest full-content match.
++            // Newer rows skipped by prefix selection fail a necessary content
++            // condition. If the remaining fields match, this witness is still
++            // the newest full-content match.
+             if (
+                 glossary_witness != 0xffffffffu &&
+                 raw_term_content_tokens_equal(src, parsed_row, &rows[glossary_witness], 1)

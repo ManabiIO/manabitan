@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T05:07:49.809558+00:00",
+  "scope": "Pre-acquisition preparation only. No local candidate compilation/execution, benchmark, full synthetic generation or corpus download. Syntax/geometry checks do not establish native correctness or speed.",
+  "candidateCSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+  "candidatePatchSha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+  "checks": [
+    {
+      "file": "cohort_tools.py",
+      "check": "Python syntax",
+      "ok": true
+    },
+    {
+      "file": "negative-run.py",
+      "check": "Python syntax",
+      "ok": true
+    },
+    {
+      "file": "preflight.py",
+      "check": "Python syntax",
+      "ok": true
+    },
+    {
+      "file": "prepare.py",
+      "check": "Python syntax",
+      "ok": true
+    },
+    {
+      "file": "run.py",
+      "check": "Python syntax",
+      "ok": true
+    },
+    {
+      "file": "screen.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "native-oracle.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "negative-fixtures.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "negative-screen.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "output-digest.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "smoke.mjs",
+      "check": "Node syntax",
+      "ok": true
+    },
+    {
+      "file": "setup.sh",
+      "check": "Bash syntax",
+      "ok": true
+    },
+    {
+      "file": "workflow.yml",
+      "check": "YAML structure and frozen hosts/cells",
+      "ok": true
+    }
+  ],
+  "fixtureGeometryOnlySelfTest": {
+    "passed": true,
+    "receiptSha256": "97a83936c91df6ff38706ba288259c13e8328dc1eea39ae45cab0efb0b2d640e"
+  },
+  "instrumentationSourceOnly": {
+    "scope": "Instrumented selector mechanics only; never timed",
+    "productSourceSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "diagnosticSourceSha256": "71cd3b168a7014a4bbbeb01553a8eb623eb45a67e657084e1e903c8d4b16c6dc",
+    "fields": [
+      "keyIdentityRows",
+      "admissions",
+      "candidateRecordsInspected",
+      "noPrefixCandidate",
+      "selected",
+      "selectedDistance1",
+      "selectedDistance2",
+      "selectedDistance3",
+      "selectedDistance4",
+      "selectedBytes",
+      "selectedAtLeast512",
+      "selectedAtLeast512Bytes",
+      "boundsRejected",
+      "openerRejected",
+      "tailRejected",
+      "middleRejected",
+      "fullRejected",
+      "hits",
+      "hitBytes",
+      "fullBytesOffered",
+      "failedFullBytesOffered",
+      "maxSelectedBytes",
+      "maxFailedFullBytes",
+      "originalLookbackZeroRows",
+      "originalLookbackPositiveRows",
+      "originalGlossaryReuses",
+      "totalGlossaryReuses",
+      "priorStreakRows",
+      "recentContentHits",
+      "rows",
+      "budgetPositiveRows",
+      "budgetRefreshByRecentStreak",
+      "definitionLengthRejected",
+      "rulesLengthRejected",
+      "definitionSignatureRejected",
+      "rulesSignatureRejected",
+      "hitDistance1",
+      "hitDistance2",
+      "hitDistance3",
+      "hitDistance4"
+    ],
+    "fieldsSha256": "98f5cc1e64388648fa30c6d12a0f0c41da5f809febecfc9b44a9a914f7bd0eb8",
+    "preparerSha256": "a5dcda6da32ff1177aac38a133aecb96ab53203921db65102ce44c09865b3193",
+    "sourceOnly": true
+  },
+  "baselineSmoke": {
+    "defaultReportSha256": "524c8ebe913bf69fa2bf3912b06fd979fea046484bef6529706ab2b57dcd19f1",
+    "disabledReportSha256": "164d8ce9d7b8b1548a5a6b6b35c9e7e7b533dc76593117822157955dd8f27b86",
+    "validCases": 50,
+    "malformedCases": 16,
+    "fallbackCases": 3,
+    "semanticResultRecords": 56,
+    "bothPassed": true
+  },
+  "localScopedLint": {
+    "recordedAtUtc": "2026-11-28T04:57:53.643380+00:00",
+    "scope": "isolated copies of two prefix qualification JS files, unmodified baseline ESLint config and node_modules",
+    "node": "22.22.0",
+    "exitCode": 137,
+    "result": "environment termination; lint report absent, no lint conclusion",
+    "sourceEdited": false,
+    "candidateExecuted": false,
+    "retry": "none"
+  },
+  "pendingHostedGates": [
+    "pinned Clang21.1.8 baseline artifact reproduction",
+    "candidate product and diagnostic compilation",
+    "six default/disabled production-path smoke modes",
+    "scoped regression lint and test types",
+    "focused Vitest including source-CRC reuse",
+    "both raw native strict exports/all17words and partial failures",
+    "exact separate diagnostic mechanics",
+    "fixed dictionary and negative-control timing cohorts"
+  ]
+}
