@@ -1,3 +1,4 @@
+# Supersede the unmeasured first run after test-only lint repair; runtime bytes are unchanged.
 name: Canonical scanner preload screen bda85f3c7e15
 
 on:
@@ -18,7 +19,7 @@ permissions:
 
 concurrency:
   group: import-preload-bda85f3c7e15-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validation:

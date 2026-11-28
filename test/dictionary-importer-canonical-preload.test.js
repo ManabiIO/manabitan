@@ -26,12 +26,21 @@ async function setup() {
         import('../ext/js/dictionary/dictionary-database.js'),
     ]);
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
-    /** @param {{dedup?: boolean, stream?: boolean, storage?: 'baseline'|'raw-bytes', media?: boolean, skipImageMetadata?: boolean, sink?: () => void}} [options] */
+    /**
+     * @param {{dedup?: boolean, stream?: boolean, storage?: 'baseline'|'raw-bytes', media?: boolean, skipImageMetadata?: boolean, sink?: () => void}} [options]
+     * @returns {ReturnType<import('../ext/js/dictionary/dictionary-importer.js').DictionaryImporter['_readTermBankFileFast']>}
+     */
     const parse = (options = {}) => {
         Reflect.set(importer, '_skipImageMetadata', options.skipImageMetadata ?? false);
         return Reflect.get(importer, '_readTermBankFileFast').call(
-            importer, {filename: 'term_bank_1.json'}, 3, 'Preload', false,
-            options.media ?? false, options.dedup ?? true, options.storage ?? 'raw-bytes',
+            importer,
+            {filename: 'term_bank_1.json'},
+            3,
+            'Preload',
+            false,
+            options.media ?? false,
+            options.dedup ?? true,
+            options.storage ?? 'raw-bytes',
             options.stream === false ? void 0 : options.sink ?? (() => {}),
             new TextEncoder().encode('[["term","","","",1,["definition"],1,""]]'),
         );
@@ -39,7 +48,10 @@ async function setup() {
     return {parse, canonical, DictionaryDatabase};
 }
 
-/** @param {() => Promise<Response>} canonicalFetch @param {() => void} [parserFetch] */
+/**
+ * @param {() => Promise<Response>} canonicalFetch
+ * @param {() => void} [parserFetch]
+ */
 function provideAssets(canonicalFetch, parserFetch = () => {}) {
     vi.stubGlobal('fetch', async (/** @type {URL|string} */ url) => {
         if (String(url).endsWith('/term-content-canonical-scan-v1.wasm')) { return await canonicalFetch(); }
@@ -51,23 +63,40 @@ function provideAssets(canonicalFetch, parserFetch = () => {}) {
     });
 }
 
-/** @param {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} database */
+/**
+ * @param {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} database
+ * @returns {ReturnType<import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase['_resolveArtifactTermContentDedup']>}
+ */
 async function resolveOne(database) {
     const plan = {
-        uniqueCount: 1, sourceRowCount: 1,
-        uniqueRowIndexes: Uint32Array.of(0), uniqueSignatures: new Uint32Array(3),
-        resolvedFlags: new Uint8Array(1), resolvedOffsets: new Float64Array(1),
-        resolvedLengths: new Uint32Array(1), resolvedDictNames: null,
-        pendingEpochs: null, pendingIndexes: null, nextEpoch: 1,
-        nextUnresolvedUniqueIndex: 0, persistedLookupRequired: true,
+        uniqueCount: 1,
+        sourceRowCount: 1,
+        uniqueRowIndexes: Uint32Array.of(0),
+        uniqueSignatures: new Uint32Array(3),
+        resolvedFlags: new Uint8Array(1),
+        resolvedOffsets: new Float64Array(1),
+        resolvedLengths: new Uint32Array(1),
+        resolvedDictNames: null,
+        pendingEpochs: null,
+        pendingIndexes: null,
+        nextEpoch: 1,
+        nextUnresolvedUniqueIndex: 0,
+        persistedLookupRequired: true,
     };
     const chunk = {
-        rowCount: 1, contentRowStart: 0, contentBytesList: [],
-        contentHash1List: [], contentHash2List: [],
-        contentBytesBuffer: Uint8Array.of(1, 2, 3, 4), contentBytesBaseOffset: 0,
-        contentMetaList: Uint32Array.of(0, 4, 1, 2), contentUniqueIndexList: Uint32Array.of(0),
-        contentDedupPlan: plan, contentDictNameList: null,
-        uniformContentDictName: 'raw', useResolvedContentReferences: true,
+        rowCount: 1,
+        contentRowStart: 0,
+        contentBytesList: [],
+        contentHash1List: [],
+        contentHash2List: [],
+        contentBytesBuffer: Uint8Array.of(1, 2, 3, 4),
+        contentBytesBaseOffset: 0,
+        contentMetaList: Uint32Array.of(0, 4, 1, 2),
+        contentUniqueIndexList: Uint32Array.of(0),
+        contentDedupPlan: plan,
+        contentDictNameList: null,
+        uniformContentDictName: 'raw',
+        useResolvedContentReferences: true,
     };
     return await Reflect.get(database, '_resolveArtifactTermContentDedup').call(database, chunk, true);
 }
@@ -96,7 +125,9 @@ describe('canonical helper preload at direct native import admission', () => {
     });
 
     test.each([
-        {dedup: false}, {stream: false}, {storage: /** @type {const} */ ('baseline')},
+        {dedup: false},
+        {stream: false},
+        {storage: /** @type {const} */ ('baseline')},
         {media: true, skipImageMetadata: false},
     ])('skips unused routes: %j', async (options) => {
         const fetch = vi.fn(async () => new Response(wasm));
