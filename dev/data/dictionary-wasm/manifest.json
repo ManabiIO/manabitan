@@ -4,8 +4,8 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
-    "sourceFileCount": 14,
+    "sourceDigest": "17a812f20848cd5013895fb56d8407074ec233a16199c34dbbb264e554d45e6b",
+    "sourceFileCount": 15,
     "targets": [
         {
             "name": "term-content-canonical-scan-v1.wasm",
@@ -60,6 +60,26 @@
                 "-Wl,--strip-all"
             ],
             "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+        },
+        {
+            "name": "term-record-checksum.wasm",
+            "sources": [
+                "ext/js/dictionary/wasm/term-record-checksum.c"
+            ],
+            "arguments": [
+                "--target=wasm32",
+                "-O3",
+                "-msimd128",
+                "-nostdlib",
+                "-Wl,--no-entry",
+                "-Wl,--import-memory",
+                "-Wl,--max-memory=16908288",
+                "-Wl,--export=hash_lookup_index_bytes",
+                "-Wl,--export=__heap_base",
+                "-Wl,-z,stack-size=65536",
+                "-Wl,--strip-all"
+            ],
+            "sha256": "8a72dd1c196cd1d108340990c5bfe5cb175fba6046dc25f0859f930d192c7e81"
         }
     ]
 }
