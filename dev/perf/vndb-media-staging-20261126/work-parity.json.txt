@@ -1,0 +1,87 @@
+{
+  "scope": "Full pinned VNDB media validation component: JS metadata admission, WASM input staging, CRC and decoded-length checks. Excludes archive reads, parsing, workers, OPFS, database and visible readiness.",
+  "runtime": {
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33",
+    "cpus": 9,
+    "model": "INTEL(R) XEON(R) PLATINUM 8573C"
+  },
+  "provenance": {
+    "baselineCodeSha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+    "candidateCodeSha256": "695a50ee6fb8a85d14d2c260c2eb7fce15def793644ab6cfbf9020f7922fa91f",
+    "wasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "scriptSha256": "622838eaffe2596febe14129d7774b70b9c34eb8d57243d39f27a50748114ebd"
+  },
+  "fixture": {
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "batches": 144,
+    "rangeReadCount": 144,
+    "rangeReadBytes": 195649882,
+    "sourcesSha256": "339c94876bf129cf0f2ff75a2d1f32d52cce399cede3da8607935e7849872c73"
+  },
+  "work": {
+    "A": {
+      "copies": 146570,
+      "copiedBytes": 188864129,
+      "maxCopiedSpanBytes": 4269,
+      "maxDestinationBufferBytes": 1638400
+    },
+    "B": {
+      "copies": 144,
+      "copiedBytes": 195643218,
+      "maxCopiedSpanBytes": 1537894,
+      "maxDestinationBufferBytes": 1703936
+    },
+    "C": {
+      "copies": 146570,
+      "copiedBytes": 188864129,
+      "maxCopiedSpanBytes": 4269,
+      "maxDestinationBufferBytes": 1638400
+    }
+  },
+  "observations": [],
+  "parity": {
+    "A": {
+      "records": 146570,
+      "recordsSha256": "574f3e1a71ab6aa82b1156f0594df46e65212c496616a3ef673924f85133f9b4",
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "packedSpanBytes": 195649882,
+      "packedSpanSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "rangeReadCount": 144,
+      "rangeReadBytes": 195649882,
+      "compressedBytes": 188864129,
+      "uncompressedBytes": 188131284
+    },
+    "B": {
+      "records": 146570,
+      "recordsSha256": "574f3e1a71ab6aa82b1156f0594df46e65212c496616a3ef673924f85133f9b4",
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "packedSpanBytes": 195649882,
+      "packedSpanSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "rangeReadCount": 144,
+      "rangeReadBytes": 195649882,
+      "compressedBytes": 188864129,
+      "uncompressedBytes": 188131284
+    }
+  }
+}

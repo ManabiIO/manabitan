@@ -1,0 +1,2242 @@
+[
+  {
+    "authoritativeTiming": false,
+    "name": "B1",
+    "receipt": {
+      "authoritativeTiming": false,
+      "browserVersion": "153.0.8010.12",
+      "lookup": [
+        [
+          0,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          0,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          0,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          0,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          0,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          0,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          0,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          0,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          0,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          0,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          0,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          0,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          1,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          1,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          1,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          1,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          1,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          1,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          1,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          1,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          1,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          1,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          1,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          1,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          2,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          2,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          2,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          2,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          2,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          2,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          2,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          2,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          2,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          2,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          2,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          2,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          3,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          3,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          3,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          3,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          3,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          3,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          3,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          3,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          3,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          3,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          3,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          3,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          4,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          4,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          4,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          4,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          4,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          4,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          4,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          4,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          4,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          4,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          4,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          4,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          5,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          5,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          5,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          5,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          5,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          5,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          5,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          5,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          5,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          5,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          5,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          5,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ]
+      ],
+      "media": {
+        "bytes": 86256,
+        "files": 64,
+        "mode": "sample",
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "storage": {
+        "dictionary": "vndb",
+        "nonSahBytes": 608996555,
+        "nonSahFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/{generation}.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/d0c7ba71-95e5-4d06-a226-0277017f43f0.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2g891xblgz"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/7zklfrm40d6"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/898dgw7rgmb"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ac0k3bluo7h"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/axy2xllwtgn"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/kxuvis9pvxn"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/yf75m9zrai8"
+          },
+          {
+            "bytes": 528384,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/z3hztzq2m9t"
+          }
+        ],
+        "rawStorageBytes": 609553611,
+        "sahPool": {
+          "activeAllocationUnits": 129,
+          "activeFileBytes": 528384,
+          "allocationUnitBytes": 4096,
+          "emptyFileBytes": 4096,
+          "emptyFileCount": 7,
+          "fileCount": 8,
+          "sortedFileBytes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            528384
+          ],
+          "totalBytes": 557056
+        }
+      }
+    },
+    "status": "passed"
+  },
+  {
+    "authoritativeTiming": false,
+    "name": "A1",
+    "receipt": {
+      "authoritativeTiming": false,
+      "browserVersion": "153.0.8010.12",
+      "lookup": [
+        [
+          0,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          0,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          0,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          0,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          0,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          0,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          0,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          0,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          0,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          0,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          0,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          0,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          1,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          1,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          1,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          1,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          1,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          1,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          1,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          1,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          1,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          1,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          1,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          1,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          2,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          2,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          2,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          2,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          2,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          2,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          2,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          2,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          2,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          2,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          2,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          2,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          3,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          3,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          3,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          3,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          3,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          3,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          3,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          3,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          3,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          3,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          3,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          3,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          4,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          4,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          4,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          4,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          4,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          4,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          4,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          4,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          4,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          4,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          4,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          4,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          5,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          5,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          5,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          5,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          5,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          5,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          5,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          5,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          5,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          5,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          5,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          5,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ]
+      ],
+      "media": {
+        "bytes": 86256,
+        "files": 64,
+        "mode": "sample",
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "storage": {
+        "dictionary": "vndb",
+        "nonSahBytes": 608996555,
+        "nonSahFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/{generation}.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/c5ee6883-3742-4ff4-8b8f-3dba650c465c.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/3umqn1bsu89"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/5s7ty4d0x8t"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/7akwv2j2os"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/9uacgzb8qe4"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ogyn9c6o6v"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/u1r1tpu6h4g"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/w5yg430g6is"
+          },
+          {
+            "bytes": 528384,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/wze4nmlkbzc"
+          }
+        ],
+        "rawStorageBytes": 609553611,
+        "sahPool": {
+          "activeAllocationUnits": 129,
+          "activeFileBytes": 528384,
+          "allocationUnitBytes": 4096,
+          "emptyFileBytes": 4096,
+          "emptyFileCount": 7,
+          "fileCount": 8,
+          "sortedFileBytes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            528384
+          ],
+          "totalBytes": 557056
+        }
+      }
+    },
+    "status": "passed"
+  },
+  {
+    "authoritativeTiming": false,
+    "name": "A2",
+    "receipt": {
+      "authoritativeTiming": false,
+      "browserVersion": "153.0.8010.12",
+      "lookup": [
+        [
+          0,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          0,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          0,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          0,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          0,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          0,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          0,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          0,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          0,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          0,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          0,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          0,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          1,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          1,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          1,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          1,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          1,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          1,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          1,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          1,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          1,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          1,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          1,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          1,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          2,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          2,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          2,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          2,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          2,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          2,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          2,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          2,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          2,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          2,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          2,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          2,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          3,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          3,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          3,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          3,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          3,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          3,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          3,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          3,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          3,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          3,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          3,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          3,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          4,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          4,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          4,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          4,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          4,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          4,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          4,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          4,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          4,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          4,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          4,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          4,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          5,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          5,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          5,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          5,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          5,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          5,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          5,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          5,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          5,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          5,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          5,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          5,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ]
+      ],
+      "media": {
+        "bytes": 86256,
+        "files": 64,
+        "mode": "sample",
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "storage": {
+        "dictionary": "vndb",
+        "nonSahBytes": 608996555,
+        "nonSahFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/{generation}.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/7fad496a-8136-41d0-b46f-41bfb2bd536d.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2uiecqbsnw3"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/4zq62861hc8"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/6uzj9dszfi8"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ar49d3cwbk7"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/cm5bknfh9dq"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/nq5w9bf1fnm"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/rq45kriu9ah"
+          },
+          {
+            "bytes": 528384,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/y0pzhd88vmf"
+          }
+        ],
+        "rawStorageBytes": 609553611,
+        "sahPool": {
+          "activeAllocationUnits": 129,
+          "activeFileBytes": 528384,
+          "allocationUnitBytes": 4096,
+          "emptyFileBytes": 4096,
+          "emptyFileCount": 7,
+          "fileCount": 8,
+          "sortedFileBytes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            528384
+          ],
+          "totalBytes": 557056
+        }
+      }
+    },
+    "status": "passed"
+  },
+  {
+    "authoritativeTiming": false,
+    "name": "B2",
+    "receipt": {
+      "authoritativeTiming": false,
+      "browserVersion": "153.0.8010.12",
+      "lookup": [
+        [
+          0,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          0,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          0,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          0,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          0,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          0,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          0,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          0,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          0,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          0,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          0,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          0,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          1,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          1,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          1,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          1,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          1,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          1,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          1,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          1,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          1,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          1,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          1,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          1,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          2,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          2,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          2,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          2,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          2,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          2,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          2,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          2,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          2,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          2,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          2,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          2,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          3,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          3,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          3,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          3,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          3,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          3,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          3,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          3,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          3,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          3,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          3,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          3,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          4,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          4,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          4,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          4,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          4,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          4,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          4,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          4,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          4,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          4,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          4,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          4,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ],
+        [
+          5,
+          "Kamala Copperheart",
+          1,
+          "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+        ],
+        [
+          5,
+          "Lynrd Skynrd\u305f\u3093",
+          1,
+          "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+        ],
+        [
+          5,
+          "Osamu\u535a\u58eb",
+          1,
+          "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+        ],
+        [
+          5,
+          "RestaurantOwner\u3061\u3083\u3093",
+          2,
+          "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+        ],
+        [
+          5,
+          "Tyler\u535a\u58eb",
+          1,
+          "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+        ],
+        [
+          5,
+          "\u3042\u3044\u3053\u5148\u751f",
+          1,
+          "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+        ],
+        [
+          5,
+          "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+          1,
+          "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+        ],
+        [
+          5,
+          "\u30d5\u30a9\u30fc\u30cb",
+          1,
+          "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+        ],
+        [
+          5,
+          "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+          1,
+          "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+        ],
+        [
+          5,
+          "\u698a\u4e9c\u5b9f\u5148\u8f29",
+          1,
+          "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+        ],
+        [
+          5,
+          "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+          1,
+          "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+        ],
+        [
+          5,
+          "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+          1,
+          "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+        ]
+      ],
+      "media": {
+        "bytes": 86256,
+        "files": 64,
+        "mode": "sample",
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "storage": {
+        "dictionary": "vndb",
+        "nonSahBytes": 608996555,
+        "nonSahFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/{generation}.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawFiles": [
+          {
+            "bytes": 199563210,
+            "path": "manabitan-dictionary-media-v1/772d586c-c50d-40b7-851e-a571a4c016a5.bin"
+          },
+          {
+            "bytes": 7533449,
+            "path": "manabitan-term-content.bin"
+          },
+          {
+            "bytes": 38,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+          },
+          {
+            "bytes": 399513708,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+          },
+          {
+            "bytes": 26,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+          },
+          {
+            "bytes": 2386124,
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/1v30mmbbfwx"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2p68273to4"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/71jm38m1d45"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/9b64x4r550i"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/bf3ralh7yl5"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/frdxk96jfw"
+          },
+          {
+            "bytes": 4096,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/h0fe6rzpinn"
+          },
+          {
+            "bytes": 528384,
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/hupqqzg7h4k"
+          }
+        ],
+        "rawStorageBytes": 609553611,
+        "sahPool": {
+          "activeAllocationUnits": 129,
+          "activeFileBytes": 528384,
+          "allocationUnitBytes": 4096,
+          "emptyFileBytes": 4096,
+          "emptyFileCount": 7,
+          "fileCount": 8,
+          "sortedFileBytes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            528384
+          ],
+          "totalBytes": 557056
+        }
+      }
+    },
+    "status": "passed"
+  }
+]

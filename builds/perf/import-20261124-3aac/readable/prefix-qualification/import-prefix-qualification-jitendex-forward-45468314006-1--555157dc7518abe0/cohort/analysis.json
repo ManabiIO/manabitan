@@ -1,0 +1,140 @@
+{
+  "allTimingsMs": {
+    "A": [
+      1752.5,
+      1774.8999999999942,
+      1761.1000000000058,
+      1743.7999999999884,
+      1868.100000000035,
+      1695.9000000000233,
+      1804.7000000000116,
+      1698.7000000000116,
+      1722.7999999999884,
+      1818.9000000000233,
+      1691,
+      1753.6999999999534
+    ],
+    "B": [
+      1854.1000000000058,
+      2021.1000000000058,
+      1723.4000000000233,
+      1709.3000000000175,
+      1853.7000000000116,
+      1851.5,
+      1723.9000000000233,
+      1713.6999999999534,
+      1707.7999999999884,
+      1767.899999999965,
+      1678.2000000000116,
+      1688.7999999999884
+    ],
+    "C": [
+      1937.8000000000175,
+      1764.1000000000058,
+      1779.3999999999942,
+      1737.5999999999767,
+      1716.8999999999942,
+      1682.5,
+      1715.5,
+      1701.2999999999884,
+      1982,
+      1745.4000000000233,
+      1693.2999999999884,
+      1762.2999999999884
+    ]
+  },
+  "browserVersion": "153.0.8010.12",
+  "candidate": {
+    "baselineMedianMs": 1753.0999999999767,
+    "bestPairPercent": -4.477198426330576,
+    "candidateMedianMs": 1723.6500000000233,
+    "equalWorkPercent": 0.9831120975427377,
+    "fasterPairs": 8,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      5.7974322396579625,
+      13.87120401149431,
+      -2.140707512349238,
+      -1.9784378942522718,
+      -0.7708366789798693,
+      9.175069284744053,
+      -4.477198426330576,
+      0.8830281980303667,
+      -0.8706756442999786,
+      -2.803892462480484,
+      -0.7569485511524698,
+      -3.7007469920720126
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -2.472299987414861,
+      3.3402302188441646
+    ],
+    "pairedMedianPercent": -0.8207561616399239,
+    "pairs": 12,
+    "worstPairPercent": 13.87120401149431
+  },
+  "candidateVsSecondBaseline": {
+    "baselineMedianMs": 1741.5,
+    "bestPairPercent": -13.834510595358807,
+    "candidateMedianMs": 1723.6500000000233,
+    "equalWorkPercent": 0.3548856872199524,
+    "fasterPairs": 6,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -4.319331200330834,
+      14.56833512839404,
+      -3.147128245474373,
+      -1.628683241249984,
+      7.967849030229934,
+      10.044576523031212,
+      0.48965316234470535,
+      0.7288544054526058,
+      -13.834510595358807,
+      1.2891027844586622,
+      -0.8917498375938582,
+      -4.170686035294812
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -3.658907140384593,
+      4.628475907344298
+    ],
+    "pairedMedianPercent": -0.2010483376245764,
+    "pairs": 12,
+    "worstPairPercent": 14.56833512839404
+  },
+  "dictionary": "jitendex",
+  "identicalProductControl": {
+    "baselineMedianMs": 1753.0999999999767,
+    "bestPairPercent": -8.093785129277764,
+    "candidateMedianMs": 1741.5,
+    "equalWorkPercent": 0.6260048088548409,
+    "fasterPairs": 6,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      10.5734664764632,
+      -0.6084849850689245,
+      1.03912327522504,
+      -0.3555453607071768,
+      -8.093785129277764,
+      -0.7901409281221294,
+      -4.942649747881145,
+      0.1530582209911424,
+      15.045275133504376,
+      -4.040903842981969,
+      0.13601419278463922,
+      0.49039174317357936
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -2.415522385552049,
+      0.7647575091993097
+    ],
+    "pairedMedianPercent": -0.10976558396126879,
+    "pairs": 12,
+    "worstPairPercent": 15.045275133504376
+  },
+  "independentQualificationRequired": false,
+  "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+  "screeningOnly": false,
+  "stage": "qualification",
+  "status": "complete"
+}

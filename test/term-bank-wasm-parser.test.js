@@ -27,7 +27,7 @@ import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionarySourceIntegrityError} from '../ext/js/dictionary/dictionary-source-integrity-error.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
-import {hasCompletePreparedTermLookupIndexes, prepareTermLookupIndexesFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index-preparation.js';
+import {prepareTermLookupIndexesFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index-preparation.js';
 import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
@@ -473,72 +473,6 @@ describe('term-bank WASM parser', () => {
     maybeTest('rejects inflated JSON which is not an array', async () => {
         const source = createCompressedTermBankSource('{"term":"a"}', 8);
         await expect(inflateCompressedTermBankSourcesWasm([source])).rejects.toThrow('not a JSON array');
-    });
-
-    test.each([
-        {shared: false, ownedLookup: true},
-        {shared: true, ownedLookup: true},
-        {shared: false, ownedLookup: false},
-        {shared: true, ownedLookup: false},
-    ])('ignores foreign lookup key ownership hints across heap reuse and transfer: %j', ({shared, ownedLookup}) => {
-        const heap = new Uint8Array(shared ? new SharedArrayBuffer(2048) : new ArrayBuffer(2048));
-        const plan = {
-            stringLengths: new Uint16Array(heap.buffer, 0, 2),
-            stringOffsets: new Uint32Array(heap.buffer, 4, 2),
-            stringsBuffer: heap.subarray(12, 18),
-            expressionIndexes: new Uint32Array(heap.buffer, 20, 2),
-            readingIndexes: new Uint32Array(heap.buffer, 28, 2),
-        };
-        plan.stringLengths.set([3, 3]);
-        plan.stringOffsets.set([0, 3]);
-        plan.stringsBuffer.set(textEncoder.encode('onetwo'));
-        plan.expressionIndexes.set([0, 1]);
-        plan.readingIndexes.set([0, 0]);
-        const readingEqualsExpressionList = new Uint8Array(heap.buffer, 36, 2);
-        readingEqualsExpressionList.set([1, 0]);
-        const sequenceList = new Int32Array(heap.buffer, 40, 2);
-        sequenceList.set([3, -1]);
-        const expectedBytes = encodePersistedTermLookupIndexFromPreinternedPlan(plan, readingEqualsExpressionList, sequenceList, 2);
-        // Include a nonzero sidecar view offset. A forged public hint points
-        // at header bytes instead of keys and must not replace the source keys.
-        const arena = ownedLookup ? new Uint8Array(expectedBytes.length + 8) : heap;
-        const bytes = arena.subarray(ownedLookup ? 4 : 128, (ownedLookup ? 4 : 128) + expectedBytes.length);
-        bytes.set(expectedBytes);
-        const copy = copyWasmBackedColumnChunk({
-            rowCount: 2,
-            expressionBytesList: [],
-            readingBytesList: [],
-            readingEqualsExpressionList,
-            scoreList: new Int32Array(2),
-            sequenceList,
-            contentBytesList: [],
-            contentHash1List: new Uint32Array(0),
-            contentHash2List: new Uint32Array(0),
-            contentUniqueIndexList: null,
-            contentDedupPlan: null,
-            termRecordPreinternedPlan: plan,
-            preparedLookupIndexes: new Map([['0:2', {
-                bytes,
-                preinternedPlan: plan,
-                ownedStringsBuffer: bytes.subarray(0, 6),
-            }]]),
-            mediaRows: [],
-        });
-        heap.fill(0xff);
-        const prepared = copy.preparedLookupIndexes?.get('0:2');
-        if (typeof prepared === 'undefined') { throw new Error('Expected copied lookup index'); }
-        expect(prepared.bytes).toStrictEqual(expectedBytes);
-        expect(Reflect.get(prepared, 'ownedStringsBuffer')).toBeUndefined();
-        expect(copy.termRecordPreinternedPlan.stringsBuffer).toStrictEqual(textEncoder.encode('onetwo'));
-        expect(copy.termRecordPreinternedPlan.stringsBuffer.buffer).not.toBe(prepared.bytes.buffer);
-        expect(encodePersistedTermLookupIndexFromPreinternedPlan(copy.termRecordPreinternedPlan, copy.readingEqualsExpressionList, copy.sequenceList, 2)).toStrictEqual(expectedBytes);
-        const transfer = [...new Set([prepared.bytes.buffer, copy.termRecordPreinternedPlan.stringsBuffer.buffer])];
-        const cloned = structuredClone(copy, {transfer});
-        expect(prepared.bytes.byteLength).toBe(0);
-        expect(copy.termRecordPreinternedPlan.stringsBuffer.byteLength).toBe(0);
-        expect(cloned.termRecordPreinternedPlan.stringsBuffer).toStrictEqual(textEncoder.encode('onetwo'));
-        expect(cloned.preparedLookupIndexes?.get('0:2')?.bytes).toStrictEqual(expectedBytes);
-        expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).not.toBe(cloned.preparedLookupIndexes?.get('0:2')?.bytes.buffer);
     });
 
     test('copies every WASM-backed column before a parser heap can be reused', () => {
@@ -1765,7 +1699,12 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
+    maybeTest.each([
+        {sourceCount: 31, outcome: 'complete'},
+        {sourceCount: 32, outcome: 'complete'},
+        {sourceCount: 33, outcome: 'cancel'},
+        {sourceCount: 33, outcome: 'read-error'},
+    ])('keeps lazy source activation bounded across $sourceCount groups on $outcome', async ({sourceCount, outcome}) => {
         /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
@@ -1803,36 +1742,66 @@ describe('term-bank WASM parser', () => {
             terminate() {}
         }
 
+        const originalNavigator = globalThis.navigator;
+        vi.stubGlobal('navigator', {hardwareConcurrency: 2, deviceMemory: 8});
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {(value?: void|PromiseLike<void>) => void} */
-        let releaseSink = () => {};
-        const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
-        let loadCount = 0;
+        /** @type {PromiseWithResolvers<void>} */
+        const firstSink = Promise.withResolvers();
+        /** @type {PromiseWithResolvers<void>} */
+        const secondSink = Promise.withResolvers();
+        const initialLead = 8;
+        const sourceOrder = Array.from({length: sourceCount}, (_, index) => index);
+        const readError = new DictionarySourceIntegrityError('Newly admitted ZIP read failed');
+        const emptyBank = textEncoder.encode('[]');
+        /** @type {number[]} */
+        const loadedSources = [];
+        let sinkIndex = 0;
+        let cancelled = false;
+        const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
+            sourceOrder.map((index) => async () => {
+                loadedSources.push(index);
+                if (outcome === 'read-error' && index === initialLead) { throw readError; }
+                return new Uint8Array(emptyBank);
+            }),
+            Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
+            3,
+            async (_chunk, progress) => {
+                sinkIndex = progress.chunkIndex;
+                if (sinkIndex === 1) { await firstSink.promise; }
+                if (sinkIndex === 2) { await secondSink.promise; }
+            },
+            {emitContentSlab: true},
+            () => cancelled,
+        );
+        void parsing.catch(() => {});
         try {
-            const sourceCount = 24;
-            const emptyBank = textEncoder.encode('[]');
-            const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
-                Array.from({length: sourceCount}, () => async () => {
-                    ++loadCount;
-                    return new Uint8Array(emptyBank);
-                }),
-                Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
-                3,
-                async (_chunk, progress) => {
-                    if (progress.chunkIndex === 1) { await sinkGate; }
-                },
-                {emitContentSlab: true},
-            );
-            await vi.waitFor(() => { expect(loadCount).toBeGreaterThan(0); });
-            await new Promise((resolve) => { setTimeout(resolve, 25); });
-            expect(loadCount).toBeLessThan(sourceCount);
-            expect(loadCount).toBeLessThanOrEqual(getParallelTermBankParserWorkerCount() * 4);
-            releaseSink();
-            await expect(parsing).resolves.toBe(true);
-            expect(loadCount).toBe(sourceCount);
+            await vi.waitFor(() => { expect(sinkIndex).toBe(1); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead));
+
+            firstSink.resolve();
+            await vi.waitFor(() => { expect(sinkIndex).toBe(2); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+
+            cancelled = outcome === 'cancel';
+            secondSink.resolve();
+            if (outcome === 'cancel') {
+                await expect(parsing).rejects.toThrow(/cancel/i);
+                expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+            } else if (outcome === 'read-error') {
+                await expect(parsing).rejects.toMatchObject({name: readError.name, message: readError.message});
+                expect(sinkIndex).toBeLessThanOrEqual(initialLead);
+            } else {
+                await expect(parsing).resolves.toBe(true);
+                expect(loadedSources).toEqual(sourceOrder);
+                expect(consumeLastTermBankWasmParseProfile()?.parallelGroupCount).toBe(sourceCount);
+            }
         } finally {
-            releaseSink();
+            cancelled = true;
+            firstSink.resolve();
+            secondSink.resolve();
+            await parsing.catch(() => {});
             await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
         }
     });
@@ -3141,7 +3110,94 @@ describe('term-bank WASM parser', () => {
         expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
     });
 
-    maybeTest.each([false, true])('encodes parser-owned lookup sidecars byte-identically in WASM: shared metadata=%s', async (sharedMetadata) => {
+    maybeTest.each([false, true])('compacts whole-group content metadata without changing row references (fallback=%s)', async (fallback) => {
+        const rows = Array.from({length: 18}, (_, i) => [
+            `word-${i}`,
+i % 2 === 0 ? '' : `reading-${i}`,
+'',
+'',
+fallback ? i + 0.5 : i,
+            i % 3 === 0 ? [{type: 'image', path: 'image.png', width: 10, height: 20}] : [`meaning-${i % 3}`],
+            i + 100,
+            '',
+        ]);
+        const sources = [textEncoder.encode(JSON.stringify(rows.slice(0, 9))), textEncoder.encode(JSON.stringify(rows.slice(9)))];
+        /**
+         * @param {boolean} compactContentMetadata
+         * @param {boolean} [singleChunk]
+         * @returns {Promise<TermBankColumnChunk[]>}
+         */
+        const parse = async (compactContentMetadata, singleChunk = true) => {
+            /** @type {TermBankColumnChunk[]} */
+            const chunks = [];
+            await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+                chunks.push(copyWasmBackedColumnChunk(chunk));
+            }, 6, {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                mediaHintFastScan: true,
+                singleChunk,
+                compactContentMetadata,
+                prepareLookupIndexes: true,
+            });
+            return chunks;
+        };
+        const [baseline] = await parse(false);
+        const [compact] = await parse(true);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(compact.contentMetaByUniqueIndex).toBe(true);
+        expect(compact.contentMetaList).toHaveLength(3 * 4);
+        expect(compact.contentDedupPlan.pendingEpochs).toBeNull();
+        expect(compact.contentDedupPlan.pendingIndexes).toBeNull();
+        expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined();
+        expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined();
+        expect(profile?.compactContentMetadataGroups).toBe(1);
+        expect(profile?.compactContentMetadataBytesAvoided).toBe((18 - 3) * 16);
+        expect(profile?.fusedParseFallbacks).toBe(fallback ? 1 : 0);
+        for (const field of ['rowCount', 'scoreList', 'sequenceList', 'readingEqualsExpressionList', 'contentUniqueIndexList', 'contentBytesBuffer', 'mediaRows', 'termRecordPreinternedPlan', 'preparedLookupIndexes']) {
+            expect(Reflect.get(compact, field), field).toStrictEqual(Reflect.get(baseline, field));
+        }
+        const compactMetas = compact.contentMetaList;
+        const baselineMetas = baseline.contentMetaList;
+        const ids = compact.contentUniqueIndexList;
+        if (!(compactMetas instanceof Uint32Array) || !(baselineMetas instanceof Uint32Array) || ids === null) {
+            throw new Error('Missing content metadata');
+        }
+        for (let row = 0; row < rows.length; ++row) {
+            expect(compactMetas.subarray(ids[row] * 4, ids[row] * 4 + 4)).toStrictEqual(baselineMetas.subarray(row * 4, row * 4 + 4));
+        }
+        const expected = new Uint32Array(compactMetas);
+        // Worker transfer and the next parse must not retain the reusable heap.
+        const transferred = structuredClone(compact, {transfer: [(compactMetas.buffer)]});
+        expect(compactMetas.byteLength).toBe(0);
+        expect(transferred.contentMetaByUniqueIndex).toBe(true);
+        const split = await parse(true, false);
+        expect(split).toHaveLength(3);
+        for (const chunk of split) {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(chunk.rowCount * 4);
+        }
+        expect(transferred.contentMetaList).toStrictEqual(expected);
+    });
+
+    maybeTest('keeps dense content metadata row-indexed when compacting would save less than half', async () => {
+        const source = textEncoder.encode(JSON.stringify([
+            ['first', '', '', '', 0, ['one'], 1, ''],
+            ['second', '', '', '', 0, ['two'], 2, ''],
+            ['third', '', '', '', 0, ['one'], 3, ''],
+        ]));
+        await parseTermBankWithWasmColumnChunks([source, source], 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).toBe(true);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        await parseTermBankWithWasmColumnChunks(source, 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(12);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        expect(consumeLastTermBankWasmParseProfile()?.compactContentMetadataGroups).toBe(0);
+    });
+
+    maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {
         const sources = [
             textEncoder.encode(JSON.stringify([
                 ['first', '', '', '', 1, ['one'], 10, ''],
@@ -3156,15 +3212,7 @@ describe('term-bank WASM parser', () => {
         await parseTermBankWithWasmColumnChunks(
             sources,
             3,
-            (chunk) => {
-                if (!sharedMetadata) {
-                    chunk.termRecordPreinternedPlan.expressionIndexes = new Uint32Array(chunk.termRecordPreinternedPlan.expressionIndexes);
-                    chunk.termRecordPreinternedPlan.readingIndexes = new Uint32Array(chunk.termRecordPreinternedPlan.readingIndexes);
-                }
-                result = copyWasmBackedColumnChunk(chunk);
-                chunk.termRecordPreinternedPlan.expressionIndexes.fill(0xffffffff);
-                chunk.termRecordPreinternedPlan.readingIndexes.fill(0xffffffff);
-            },
+            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
             8,
             {
                 emitContentSlab: true,
@@ -3184,99 +3232,12 @@ describe('term-bank WASM parser', () => {
         );
 
         expect(nativeBytes).toStrictEqual(javascriptBytes);
-        expect(chunk.termRecordPreinternedPlan.stringsBuffer.buffer).toBe(nativeBytes?.buffer);
-        expect(chunk.termRecordPreinternedPlan.stringLengths.buffer).toBe(nativeBytes?.buffer);
         expect(chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.preinternedPlan).toBe(
             chunk.termRecordPreinternedPlan,
         );
         expect(chunk.termRecordPreinternedPlan.stringOffsets).toBeUndefined();
         expect(chunk.termRecordPreinternedPlan.stringHashes).toBeUndefined();
         expect(consumeLastTermBankWasmParseProfile()?.lookupIndexEncodeMs).toBeGreaterThanOrEqual(0);
-        const expectedStrings = Uint8Array.from(chunk.termRecordPreinternedPlan.stringsBuffer);
-        const expectedLengths = Uint16Array.from(chunk.termRecordPreinternedPlan.stringLengths);
-        await parseRows([['replacement', 'different', '', '', 0, ['other'], 1, '']]);
-        expect(chunk.termRecordPreinternedPlan.stringsBuffer).toStrictEqual(expectedStrings);
-        expect(chunk.termRecordPreinternedPlan.stringLengths).toStrictEqual(expectedLengths);
-        expect(nativeBytes).toStrictEqual(javascriptBytes);
-        if (!(nativeBytes?.buffer instanceof ArrayBuffer)) { throw new Error('Expected an owned native lookup buffer'); }
-        const cloned = structuredClone(chunk, {transfer: [nativeBytes.buffer]});
-        const clonedIndexBytes = cloned.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.bytes;
-        expect(nativeBytes.byteLength).toBe(0);
-        expect(chunk.termRecordPreinternedPlan.stringsBuffer.byteLength).toBe(0);
-        expect(clonedIndexBytes).toStrictEqual(javascriptBytes);
-        expect(cloned.termRecordPreinternedPlan.stringsBuffer).toStrictEqual(expectedStrings);
-        expect(cloned.termRecordPreinternedPlan.stringLengths).toStrictEqual(expectedLengths);
-        expect(cloned.termRecordPreinternedPlan.stringsBuffer.buffer).toBe(clonedIndexBytes?.buffer);
-        expect(cloned.termRecordPreinternedPlan.stringLengths.buffer).toBe(clonedIndexBytes?.buffer);
-    });
-
-    maybeTest.each(['bytes', 'stringsBuffer', 'stringLengths'])('copies native key views when the %s descriptor is replaced', async (field) => {
-        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify([
-            ['first', '', '', '', 1, ['one'], 1, ''],
-            ['second', 'reading', '', '', 2, ['two'], 2, ''],
-        ])), 3, (chunk) => {
-            const prepared = chunk.preparedLookupIndexes?.get('0:2');
-            if (typeof prepared === 'undefined') { throw new Error('Expected native lookup index'); }
-            const plan = chunk.termRecordPreinternedPlan;
-            if (field === 'bytes') {
-                prepared.bytes = new Uint8Array(prepared.bytes);
-            } else if (field === 'stringsBuffer') {
-                plan.stringsBuffer = new Uint8Array(plan.stringsBuffer);
-            } else {
-                plan.stringLengths = new Uint16Array(plan.stringLengths);
-            }
-            const expectedStrings = new Uint8Array(plan.stringsBuffer);
-            const expectedLengths = new Uint16Array(plan.stringLengths);
-            const copied = copyWasmBackedColumnChunk(chunk);
-            const copiedIndex = copied.preparedLookupIndexes?.get('0:2');
-            expect(copied.termRecordPreinternedPlan.stringsBuffer.buffer).not.toBe(copiedIndex?.bytes.buffer);
-            expect(copied.termRecordPreinternedPlan.stringLengths.buffer).not.toBe(copiedIndex?.bytes.buffer);
-            if (field !== 'stringLengths') { plan.stringsBuffer.fill(0xff); }
-            if (field !== 'stringsBuffer') { plan.stringLengths.fill(0xffff); }
-            expect(copied.termRecordPreinternedPlan.stringsBuffer).toStrictEqual(expectedStrings);
-            expect(copied.termRecordPreinternedPlan.stringLengths).toStrictEqual(expectedLengths);
-        }, 8, {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, prepareLookupIndexes: true, singleChunk: true});
-    });
-
-    maybeTest.each(['plan', 'sidecar'])('preserves in-place %s key edits for later admission validation', async (target) => {
-        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify([
-            ['first', '', '', '', 1, ['one'], 1, ''],
-            ['second', 'reading', '', '', 2, ['two'], 2, ''],
-        ])), 3, (chunk) => {
-            const prepared = chunk.preparedLookupIndexes?.get('0:2');
-            if (typeof prepared === 'undefined') { throw new Error('Expected native lookup index'); }
-            const plan = chunk.termRecordPreinternedPlan;
-            if (target === 'plan') {
-                plan.stringsBuffer[0] = 0x78;
-                plan.stringLengths[0] = 0;
-            } else {
-                prepared.bytes[plan.stringsBuffer.byteOffset - prepared.bytes.byteOffset] = 0x78;
-                new DataView(prepared.bytes.buffer).setUint16(plan.stringLengths.byteOffset, 0, true);
-            }
-            const copied = copyWasmBackedColumnChunk(chunk);
-            expect(copied.termRecordPreinternedPlan.stringsBuffer[0]).toBe(0x78);
-            expect(copied.termRecordPreinternedPlan.stringLengths[0]).toBe(0);
-            expect(hasCompletePreparedTermLookupIndexes(copied.preparedLookupIndexes, 2)).toBe(false);
-        }, 8, {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, prepareLookupIndexes: true, singleChunk: true});
-    });
-
-    maybeTest('preserves emitted row-byte aliases before copying native lookup keys', async () => {
-        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify([
-            ['first', '', '', '', 1, ['one'], 1, ''],
-            ['second', 'reading', '', '', 2, ['two'], 2, ''],
-        ])), 3, (chunk) => {
-            const plan = chunk.termRecordPreinternedPlan;
-            const expression = chunk.expressionBytesList[0];
-            const offset = plan.stringOffsets?.[plan.expressionIndexes[0]];
-            if (typeof offset !== 'number') { throw new Error('Expected native key offsets'); }
-            expect(expression.buffer).toBe(plan.stringsBuffer.buffer);
-            expect(expression.byteOffset).toBe(plan.stringsBuffer.byteOffset + offset);
-            const copied = copyWasmBackedColumnChunk(chunk);
-            expression[0] = 0x78;
-            expect(plan.stringsBuffer[offset]).toBe(0x78);
-            expect(copied.termRecordPreinternedPlan.stringsBuffer[offset]).toBe(0x66);
-            expect(copied.termRecordPreinternedPlan.stringsBuffer.buffer).not.toBe(copied.preparedLookupIndexes?.get('0:2')?.bytes.buffer);
-        }, 8, {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: true, prepareLookupIndexes: true, singleChunk: true});
     });
 
     maybeTest('encodes single-source native plans and leaves escaped plans to the fallback', async () => {

@@ -1,0 +1,344 @@
+[
+  {
+    "id": 15040370626,
+    "name": "import-screen-summary-ef009-single-image-projection-vndb-0",
+    "size_in_bytes": 5063,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040370626",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040370626/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:56:36Z",
+    "expires_at": "2026-12-09T15:56:35Z",
+    "updated_at": "2026-11-25T15:56:36Z",
+    "digest": "sha256:39fddd6306d20d5a82dcb3b879d894ec3dd4b37eae9bc9122fce98cc517004d5",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039655653,
+    "name": "import-screen-ef009-integer-fields-jitendex-0",
+    "size_in_bytes": 34394731,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:45:16Z",
+    "expires_at": "2026-12-09T15:45:13Z",
+    "updated_at": "2026-11-25T15:45:16Z",
+    "digest": "sha256:47a2d5e4306cfc120f3c160469b0dcfa629038c01fc76997e52f541df3e5cd89",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039646568,
+    "name": "import-screen-summary-ef009-integer-fields-vndb-0",
+    "size_in_bytes": 5061,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039646568",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039646568/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:51:36Z",
+    "expires_at": "2026-12-09T15:51:35Z",
+    "updated_at": "2026-11-25T15:51:36Z",
+    "digest": "sha256:6b05c4388b7aa79093cb7aae0cd9703e34d2168ad8d125a3954914f5f3add029",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039530444,
+    "name": "import-screen-ef009-single-image-projection-jitendex-0",
+    "size_in_bytes": 34389905,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:42:08Z",
+    "expires_at": "2026-12-09T15:42:06Z",
+    "updated_at": "2026-11-25T15:42:08Z",
+    "digest": "sha256:cbc91743688d4f75e92008d2ad25ae332b214687deb6dafa7559ec1010ee8c0d",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039486089,
+    "name": "import-screen-summary-ef009-integer-fields-jitendex-0",
+    "size_in_bytes": 5095,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039486089",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039486089/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:45:13Z",
+    "expires_at": "2026-12-09T15:45:12Z",
+    "updated_at": "2026-11-25T15:45:13Z",
+    "digest": "sha256:266173e81222c9bcba15502e59dffae3b6abb7399c08eaed56daff285cd1e5fd",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039267652,
+    "name": "import-screen-ef009-integer-fields-vndb-0",
+    "size_in_bytes": 34411202,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:51:39Z",
+    "expires_at": "2026-12-09T15:51:36Z",
+    "updated_at": "2026-11-25T15:51:39Z",
+    "digest": "sha256:66626e676c87bb097142af69275813ba9ae2ce6724ffde17e8b44c95a7c1320c",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039191309,
+    "name": "import-screen-summary-ef009-integer-fields-jmdict-0",
+    "size_in_bytes": 4907,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039191309",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039191309/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:42:35Z",
+    "expires_at": "2026-12-09T15:42:34Z",
+    "updated_at": "2026-11-25T15:42:35Z",
+    "digest": "sha256:a0a2d2715381a765d04072c1e800a871ef8e409b28cce4131911e24c8b9c30ec",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15039172946,
+    "name": "import-screen-ef009-single-image-projection-vndb-0",
+    "size_in_bytes": 34406934,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:56:39Z",
+    "expires_at": "2026-12-09T15:56:36Z",
+    "updated_at": "2026-11-25T15:56:39Z",
+    "digest": "sha256:5bab8ea36b653d3a28c9176eca2ca18350370880b0872320729ee083b92e58c1",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038926711,
+    "name": "import-screen-ef009-integer-fields-jmdict-0",
+    "size_in_bytes": 34385374,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:42:39Z",
+    "expires_at": "2026-12-09T15:42:36Z",
+    "updated_at": "2026-11-25T15:42:39Z",
+    "digest": "sha256:365e7b32343c62c211b7653ae7ad063bda23c2074d6e50f72f4a496d87665a11",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038894600,
+    "name": "import-screen-ef009-structured-metadata-keys-vndb-0",
+    "size_in_bytes": 34405456,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600/zip",
+    "expired": false,
+    "created_at": "2026-11-25T16:00:05Z",
+    "expires_at": "2026-12-09T16:00:02Z",
+    "updated_at": "2026-11-25T16:00:05Z",
+    "digest": "sha256:45c6a4ced90fcad9d1ab4f1bb7dc6fbdc0f6b27847304241c2083ea536490496",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038862082,
+    "name": "import-screen-summary-ef009-structured-metadata-keys-jitendex-0",
+    "size_in_bytes": 5115,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038862082",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038862082/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:45:07Z",
+    "expires_at": "2026-12-09T15:45:06Z",
+    "updated_at": "2026-11-25T15:45:07Z",
+    "digest": "sha256:ec69ada5a426eab2808fbe05456d8201ecd3562e20e1c09b1365e1c56abef466",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038701018,
+    "name": "import-screen-summary-ef009-single-image-projection-jmdict-0",
+    "size_in_bytes": 4899,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038701018",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038701018/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:37:25Z",
+    "expires_at": "2026-12-09T15:37:24Z",
+    "updated_at": "2026-11-25T15:37:25Z",
+    "digest": "sha256:d08ae185a5a6004579e7ec2697d8f6e61e422f754ff4e48673b81bfb16d221cd",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038674659,
+    "name": "import-screen-summary-ef009-structured-metadata-keys-vndb-0",
+    "size_in_bytes": 5062,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038674659",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038674659/zip",
+    "expired": false,
+    "created_at": "2026-11-25T16:00:01Z",
+    "expires_at": "2026-12-09T16:00:00Z",
+    "updated_at": "2026-11-25T16:00:01Z",
+    "digest": "sha256:250afb417ff90e69eccc9995b8fcaa59586899c670599a592ba1f44eb72ba3e6",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038376389,
+    "name": "import-screen-ef009-single-image-projection-jmdict-0",
+    "size_in_bytes": 34380710,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:37:28Z",
+    "expires_at": "2026-12-09T15:37:25Z",
+    "updated_at": "2026-11-25T15:37:28Z",
+    "digest": "sha256:e38b50578caf8577e35c311d03613dd98d3610a451a7ee391932bb55700106a3",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038236275,
+    "name": "import-screen-ef009-structured-metadata-keys-jmdict-0",
+    "size_in_bytes": 34376362,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:34:41Z",
+    "expires_at": "2026-12-09T15:34:39Z",
+    "updated_at": "2026-11-25T15:34:41Z",
+    "digest": "sha256:660c395e2eb3b4dc64bb23d12cd717d10388d0a9999c8861d3c42e0ddeeeb457",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15038063317,
+    "name": "import-screen-ef009-structured-metadata-keys-jitendex-0",
+    "size_in_bytes": 34387947,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:45:09Z",
+    "expires_at": "2026-12-09T15:45:07Z",
+    "updated_at": "2026-11-25T15:45:09Z",
+    "digest": "sha256:472397312b2775fcd83bb6f8d2917e37dfe8f6c4f79ffbc592dbac5bfc77a576",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15037683351,
+    "name": "import-screen-summary-ef009-structured-metadata-keys-jmdict-0",
+    "size_in_bytes": 4904,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037683351",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037683351/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:34:38Z",
+    "expires_at": "2026-12-09T15:34:38Z",
+    "updated_at": "2026-11-25T15:34:38Z",
+    "digest": "sha256:71b10fa8b35332f62dd3b19a7ef61fde7007213a57786311705dee325e7bc1fe",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  },
+  {
+    "id": 15037208841,
+    "name": "import-screen-summary-ef009-single-image-projection-jitendex-0",
+    "size_in_bytes": 5115,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037208841",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037208841/zip",
+    "expired": false,
+    "created_at": "2026-11-25T15:42:06Z",
+    "expires_at": "2026-12-09T15:42:05Z",
+    "updated_at": "2026-11-25T15:42:06Z",
+    "digest": "sha256:25c14dcfc8486981931a2750a26323c0f8dc8d928d1704e07fa7a1197c6b3248",
+    "workflow_run": {
+      "id": 45644488882,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "codex/import-qualification-20261125-ef009",
+      "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+    }
+  }
+]

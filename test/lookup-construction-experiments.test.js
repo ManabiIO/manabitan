@@ -24,7 +24,8 @@ import {
     parseTermBankWithWasmColumnChunks, copyWasmBackedColumnChunk, consumeLastTermBankWasmParseProfile, inflateCompressedTermBankSourcesWasm,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {prepareTermLookupIndexesFromPreinternedPlan, hasCompletePreparedTermLookupIndexes} from '../ext/js/dictionary/term-lookup-index-preparation.js'
-import {compactTermRecordPreinternedPlanRuns} from '../ext/js/dictionary/term-record-preinterned-plan.js'
+import {compactTermRecordPreinternedPlan, compactTermRecordPreinternedPlanRuns} from '../ext/js/dictionary/term-record-preinterned-plan.js'
+import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js'
 import {createRetiredLookupScratchAllocator} from '../ext/js/dictionary/term-lookup-scratch.js'
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
@@ -86,7 +87,9 @@ function digestIndexes(indexes) {
             plan.stringOffsets ?? offsets,
             plan.stringHashes ?? hashes,
             plan.stringsBuffer,
-            plan.expressionIndexes,
+            // Owned compact expression columns have the same values as the
+            // uint32 source plan. Persisted bytes remain compared above.
+            Uint32Array.from(plan.expressionIndexes),
             plan.readingIndexes]) {
             hash.update(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))
         }
@@ -221,17 +224,18 @@ describe('lookup construction experiments', () => {
         for (const {bytes, preinternedPlan} of candidate.indexes.values()) {
             expect(bytes).toBeInstanceOf(Uint8Array)
             expect(preinternedPlan.stringLengths).toBeInstanceOf(Uint16Array)
-            for (const view of [preinternedPlan.stringOffsets,
-                preinternedPlan.stringHashes,
-                preinternedPlan.expressionIndexes,
+            expect(preinternedPlan.stringLengths.buffer).toBe(bytes.buffer)
+            expect(preinternedPlan.stringLengths.byteOffset).toBe(bytes.byteOffset + 48 + Math.ceil(preinternedPlan.stringsBuffer.byteLength / 4) * 4)
+            expect(preinternedPlan.stringOffsets).toBeUndefined()
+            expect(preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
+            expect(preinternedPlan.expressionIndexes.buffer).toBe(bytes.buffer)
+            expect(preinternedPlan.expressionIndexes.byteOffset).toBe(preinternedPlan.stringLengths.byteOffset + preinternedPlan.stringLengths.byteLength)
+            for (const view of [preinternedPlan.stringHashes,
                 preinternedPlan.readingIndexes]) {
                 expect(view).toBeInstanceOf(Uint32Array)
             }
             for (const view of [bytes,
-                preinternedPlan.stringLengths,
-                preinternedPlan.stringOffsets,
                 preinternedPlan.stringHashes,
-                preinternedPlan.expressionIndexes,
                 preinternedPlan.readingIndexes]) {
                 if (!ArrayBuffer.isView(view)) { throw new Error('Missing owned lookup column') }
                 expect(view.buffer).toBeInstanceOf(ArrayBuffer)
@@ -420,14 +424,57 @@ describe('lookup construction experiments', () => {
         expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 90001)).toBe(true)
         expect(digestIndexes(candidate.indexes)).toBe(expected)
         for (const [key, value] of candidate.indexes) {
+            const start = Number(key.split(':')[0])
             const count = Number(key.split(':')[1])
             expect(value.preinternedPlan.expressionIndexes.length).toBe(count)
             expect(value.preinternedPlan.stringsBuffer.buffer).toBe(value.bytes.buffer)
+            expect(value.preinternedPlan.stringLengths.buffer).toBe(value.bytes.buffer)
+            expect(value.preinternedPlan.expressionIndexes.buffer).toBe(value.bytes.buffer)
+            expect(value.preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
+            expect(value.preinternedPlan.stringOffsets).toBeUndefined()
             expect(value.bytes.buffer).toBeInstanceOf(ArrayBuffer)
+            // A sink can re-encode any subset if content-offset or dictionary
+            // boundaries split a prepared segment. Check every row in two runs,
+            // including the final one-row segment, against explicit offsets.
+            const reference = baseline.indexes.get(key)
+            if (!reference) { throw new Error('Missing reference segment') }
+            const equals = candidate.chunk.readingEqualsExpressionList.subarray(start, start + count)
+            const runSize = Math.max(1, Math.ceil(count / 2))
+            for (let runStart = 0; runStart < count; runStart += runSize) {
+                const rows = Math.min(runSize, count - runStart)
+                const encodeRun = (/** @type {typeof value.preinternedPlan} */ plan) => {
+                    const compacted = compactTermRecordPreinternedPlan(plan, runStart, rows, new Uint32Array(plan.stringLengths.length), equals)
+                    if (!compacted) { throw new Error('Missing compacted segment') }
+                    const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                        compacted,
+                        equals.subarray(runStart, runStart + rows),
+                        candidate.chunk.sequenceList.subarray(start + runStart, start + runStart + rows),
+                        rows,
+                    )
+                    return digestIndexes(new Map([['run', {bytes, preinternedPlan: compacted}]]))
+                }
+                expect(encodeRun(value.preinternedPlan)).toBe(encodeRun(reference.preinternedPlan))
+            }
         }
         await parse(makeBanks(24))
         expect(digestIndexes(candidate.indexes)).toBe(expected)
         expect(digestIndexes(baseline.indexes)).toBe(expected)
+        const transferred = structuredClone(candidate.indexes, {transfer: [...candidate.indexes.values()].map(({bytes}) => bytes.buffer)})
+        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 90001)).toBe(false)
+        expect(hasCompletePreparedTermLookupIndexes(transferred, 90001)).toBe(true)
+        expect(digestIndexes(transferred)).toBe(expected)
+        const late = transferred.get('60000:30000')
+        if (!late) { throw new Error('Missing late segment') }
+        expect(late.preinternedPlan.stringLengths.buffer).toBe(late.bytes.buffer)
+        expect(late.preinternedPlan.expressionIndexes.buffer).toBe(late.bytes.buffer)
+        const lengths = late.preinternedPlan.stringLengths
+        const lastLength = lengths[lengths.length - 1]
+        lengths[lengths.length - 1] = lastLength + 1
+        expect(hasCompletePreparedTermLookupIndexes(transferred, 90001)).toBe(false)
+        expect(() => compactTermRecordPreinternedPlan(late.preinternedPlan, 0, 1, new Uint32Array(lengths.length))).toThrow()
+        lengths[lengths.length - 1] = lastLength
+        expect(hasCompletePreparedTermLookupIndexes(transferred, 90001)).toBe(true)
+        expect(digestIndexes(transferred)).toBe(expected)
     })
     test.each([65534, 65535, 65536])('preserves uint16 sentinel boundaries: rows=%i', async (count) => {
         const banks = makeBanks(count)
@@ -475,12 +522,16 @@ describe('lookup construction experiments', () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(`import {parentPort} from 'node:worker_threads'
             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
-                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
+                postMessage: (data, transfer = []) => {
+                    const lookupTransferCounts = [...(data.chunk?.preparedLookupIndexes?.values() ?? [])]
+                        .map(({bytes}) => transfer.filter(buffer => buffer === bytes.buffer).length)
+                    parentPort.postMessage({...data, lookupTransferCounts}, transfer)
+                }}
             await import(${JSON.stringify(workerUrl)})
             parentPort.postMessage({type: 'loaded'})`)}`))
         /**
          * @param {unknown} message
-         * @returns {Promise<{type: string, chunk: Chunk, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
+         * @returns {Promise<{type: string, chunk: Chunk, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>, lookupTransferCounts: number[]}>}
          */
         const request = (message) => new Promise((resolve, reject) => {
             const timer = setTimeout(() => reject(new Error('Worker request timed out')), 15000)
@@ -512,9 +563,23 @@ describe('lookup construction experiments', () => {
                         emitTokenBinaryContent: true,
                         prepareLookupIndexes: true}})
                 expect(reply.type).toBe('result')
+                expect(reply.chunk.contentDedupPlan.pendingEpochs).toBeNull()
+                expect(reply.chunk.contentDedupPlan.pendingIndexes).toBeNull()
+                expect(reply.chunk.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined()
+                expect(reply.chunk.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined()
                 expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled === false ? 0 : 3)
                 expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled === false ? 0 : 1)
                 expect(hasCompletePreparedTermLookupIndexes(reply.chunk.preparedLookupIndexes, 70001)).toBe(true)
+                if (enabled !== false) {
+                    expect(reply.lookupTransferCounts).toEqual([1, 1, 1])
+                    for (const {bytes, preinternedPlan} of reply.chunk.preparedLookupIndexes?.values() ?? []) {
+                        expect(preinternedPlan.stringLengths.buffer).toBe(bytes.buffer)
+                        expect(preinternedPlan.stringsBuffer.buffer).toBe(bytes.buffer)
+                        expect(preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
+                        expect(preinternedPlan.expressionIndexes.buffer).toBe(bytes.buffer)
+                        expect(preinternedPlan.stringOffsets).toBeUndefined()
+                    }
+                }
                 const current = digestIndexes(/** @type {NonNullable<Chunk['preparedLookupIndexes']>} */ (reply.chunk.preparedLookupIndexes))
                 if (prior) { expect(current).toBe(prior) }
                 prior = current

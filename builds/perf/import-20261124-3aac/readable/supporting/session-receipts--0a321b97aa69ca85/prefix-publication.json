@@ -1,0 +1,121 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/content-overlap",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "1b48960d2d6abc907d271be61b108d7573e60a4e",
+  "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+  "files": [
+    {
+      "path": "dev/lib/zstd-wasm.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d565ee3ade67e3ff81e05ff95896b506f5b58ee4",
+      "size": 20865
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fad4ee8067fd303684e499cf94425225281db89c",
+      "size": 73137
+    },
+    {
+      "path": "ext/js/dictionary/term-content-opfs-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "096e9254abb919cbd3f169297e87eb9a85bd47c2",
+      "size": 104719
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5edeceee4525c7f3e5e973b57ea18b01c6d0c97e",
+      "size": 3613
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cc1cadd56e577bcd4b745a305ca293cd6bce4bb",
+      "size": 40563
+    },
+    {
+      "path": "test/term-content-ownership.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d2355eb9b03cd688b1e2cb160842a4513d75d0a",
+      "size": 3344
+    },
+    {
+      "path": "test/term-content-private-codec.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "638138089caaeaa032c4b90772c3b91f01a8b24d",
+      "size": 4519
+    },
+    {
+      "path": "test/term-content-private-reservation.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "556e7e55dd404aeec418389057b0bb6cdd28c7c1",
+      "size": 13607
+    },
+    {
+      "path": "test/term-content-reservation-limits.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe35abb250ca6d8ef07e101a177174690b6f5b44",
+      "size": 7677
+    },
+    {
+      "path": "test/term-record-opfs-store.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "081eef97b7c6778228b8bd71a4fee0da57f8e54e",
+      "size": 336192
+    }
+  ],
+  "remoteCommit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+  "branch": "perf/accepted-private-content-overlap-20261124-3aac",
+  "title": "perf: overlap accepted private content compression with record writes",
+  "body": "## Problem\n\nJitendex's owned private content batches wait for compression before publishing references and encoding records. The current baseline already overlaps shared-buffer imports, but the private path still has this barrier.\n\n## Change\n\nAfter block compression has been selected, reuse the existing reserved-reference path for complete immutable private parser slabs. Metadata publication and record persistence can proceed while the same admitted batch compresses. The original source remains available for exact collision checks, cache adoption and worker-failure recovery, and the producer still waits for both operations before advancing.\n\nThe codec's compression bound is checked under the exclusive append owner. If the final cursor cannot be proved to fit below the existing 32-bit record representation limit, the same compression result uses the original suffix layout. The first private batch keeps measured compression selection. Worker counts, batch sizes, cache limits, compression settings and persistence formats are unchanged.\n\nAccepted prefix placement intentionally relocates content references and resolved offset fields. Compressed frames, canonical content, prepared lookup keys, record partitions and total stored size remain unchanged. High-offset fallback preserves the original file bytes.\n\n## Validation\n\n- 521 focused tests across 10 suites; corrected reservation-table coverage also passes.\n- Actual codec parity, canonical readback, mixed old/new references, record partitions and storage sizes; explicit >4 GiB suffix parity.\n- Ownership, concurrent failure/drain, malformed reference callbacks, compression worker failures and terminal barriers.\n- Main, test and dev TypeScript checks; scoped ESLint; all seven target dry builds.\n- One concurrent typecheck was killed by the local host; its standalone rerun passed.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Complete-import source comparisons and a separate process-tree memory study are being acquired. JMdict and VNDB are unchanged-path controls for this candidate. No full-import speedup is claimed yet; this remains a draft pending those results.\n\nOriginal implementation; no third-party implementation code was copied.",
+  "pr": {
+    "url": "https://github.com/ManabiIO/manabitan/pull/874",
+    "number": 874,
+    "state": "open",
+    "merged": false,
+    "mergeable": false,
+    "draft": true,
+    "body": "## Problem\n\nJitendex's owned private content batches wait for compression before publishing references and encoding records. The current baseline already overlaps shared-buffer imports, but the private path still has this barrier.\n\n## Change\n\nAfter block compression has been selected, reuse the existing reserved-reference path for complete immutable private parser slabs. Metadata publication and record persistence can proceed while the same admitted batch compresses. The original source remains available for exact collision checks, cache adoption and worker-failure recovery, and the producer still waits for both operations before advancing.\n\nThe codec's compression bound is checked under the exclusive append owner. If the final cursor cannot be proved to fit below the existing 32-bit record representation limit, the same compression result uses the original suffix layout. The first private batch keeps measured compression selection. Worker counts, batch sizes, cache limits, compression settings and persistence formats are unchanged.\n\nAccepted prefix placement intentionally relocates content references and resolved offset fields. Compressed frames, canonical content, prepared lookup keys, record partitions and total stored size remain unchanged. High-offset fallback preserves the original file bytes.\n\n## Validation\n\n- 521 focused tests across 10 suites; corrected reservation-table coverage also passes.\n- Actual codec parity, canonical readback, mixed old/new references, record partitions and storage sizes; explicit >4 GiB suffix parity.\n- Ownership, concurrent failure/drain, malformed reference callbacks, compression worker failures and terminal barriers.\n- Main, test and dev TypeScript checks; scoped ESLint; all seven target dry builds.\n- One concurrent typecheck was killed by the local host; its standalone rerun passed.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Complete-import source comparisons and a separate process-tree memory study are being acquired. JMdict and VNDB are unchanged-path controls for this candidate. No full-import speedup is claimed yet; this remains a draft pending those results.\n\nOriginal implementation; no third-party implementation code was copied.",
+    "title": "perf: overlap accepted private content compression with record writes",
+    "base": "develop",
+    "base_sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "head": "perf/accepted-private-content-overlap-20261124-3aac",
+    "head_sha": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+    "head_repo_id": 1165902460,
+    "head_repo_full_name": "ManabiIO/manabitan",
+    "merge_commit_sha": null,
+    "user": {
+      "login": "aehlke",
+      "name": "aehlke",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "id": 71601
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-24T18:56:56Z",
+    "updated_at": "2026-11-24T18:56:56Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 1,
+    "changed_files": 10,
+    "additions": 751,
+    "deletions": 67,
+    "display_url": "https://github.com/ManabiIO/manabitan/pull/874",
+    "display_title": "perf: overlap accepted private content compression with record writes"
+  }
+}

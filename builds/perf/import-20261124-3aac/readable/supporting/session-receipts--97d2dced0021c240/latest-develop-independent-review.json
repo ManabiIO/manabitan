@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "scope": "Read-only GitHub API comparison, exact per-file patch and commit/PR metadata review. No rebase, source changes, tests or studies.",
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "latestDevelop": "9a677aec40f81256dd84233de84ff6a0c43aed43",
+  "mergeBase": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "aheadBy": 2,
+  "behindBy": 0,
+  "merge": {
+    "pr": 883,
+    "url": "https://github.com/ManabiIO/manabitan/pull/883",
+    "sourceCommit": "b39efc79014333c53420885f5bb7702df2daf247",
+    "mergeCommit": "9a677aec40f81256dd84233de84ff6a0c43aed43",
+    "mergedAt": "2026-11-24T20:10:06Z",
+    "sourceCommitCreatedAt": "2026-11-24T20:02:47Z",
+    "title": "perf: use message tasks for import index yields"
+  },
+  "changedFiles": [
+    {
+      "filename": "ext/js/dictionary/term-record-import-index-writer.js",
+      "status": "modified",
+      "additions": 45,
+      "deletions": 1,
+      "changes": 46,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/term-record-import-index-writer.test.js",
+      "status": "modified",
+      "additions": 72,
+      "deletions": 7,
+      "changes": 79,
+      "previous_filename": null
+    }
+  ],
+  "candidates": {
+    "prefix": {
+      "pr": 874,
+      "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "changedFiles": [
+        "dev/lib/zstd-wasm.js",
+        "ext/js/dictionary/term-content-block-store.js",
+        "ext/js/dictionary/term-content-opfs-store.js",
+        "ext/js/dictionary/term-content-ownership.js",
+        "ext/js/dictionary/zstd-term-content.js",
+        "test/term-content-ownership.test.js",
+        "test/term-content-private-codec.test.js",
+        "test/term-content-private-reservation.test.js",
+        "test/term-content-reservation-limits.test.js",
+        "test/term-record-opfs-store.test.js"
+      ],
+      "overlapWithLatestDevelop": []
+    },
+    "media": {
+      "pr": 875,
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "changedFiles": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "ext/js/dictionary/term-bank-wasm-parser.js",
+        "ext/js/dictionary/wasm/term-bank-parser.c",
+        "test/term-bank-experiments.test.js",
+        "test/term-bank-media-projection.test.js"
+      ],
+      "overlapWithLatestDevelop": []
+    },
+    "canonical": {
+      "pr": 880,
+      "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+      "changedFiles": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+        "test/term-content-canonical-inputs.test.js"
+      ],
+      "overlapWithLatestDevelop": []
+    }
+  },
+  "runtimeFinding": "SyncImportIndexWriter replaces setTimeout(0) task yields after the existing 6 ms active-work budget with one lazily created reusable MessageChannel per writer. Unavailable/failed channel setup or posting retains timer fallback. Ports close after queued writes drain.",
+  "executedScope": "The unchanged call graph uses this writer for local import sidecars and inside the dedicated import-index worker. The scheduler change therefore affects the import write/finalization path for the studied corpora despite no candidate file overlap.",
+  "unchangedFromExactDelta": [
+    "512 KiB maximum write slice",
+    "16 MiB periodic-flush threshold and dedicated-worker opt-in",
+    "6 ms active-work budget",
+    "Ordered write queue and durable flush/close operations",
+    "Persisted formats, parser/compressor algorithms, fixture lock, harness, dependencies and worker admission thresholds"
+  ],
+  "qualificationImplications": [
+    "All existing cohorts and controls remain valid for their exact frozen bbcc-based source/package identities.",
+    "The current-develop import schedule and channel lifetime differ from every package in those cohorts. Timing and memory qualification cannot be relabeled as measurements of 9a677aec40f81256dd84233de84ff6a0c43aed43.",
+    "There is no textual changed-file overlap with PR874, PR875 or PR880. This alone does not prove integration behavior or transfer the observed performance/memory results.",
+    "The independent change does not remove any existing held candidate's failure disposition, justify pooling cohorts, or imply a rerun."
+  ],
+  "externalPrEvidenceLimit": "PR883 describes a Node component experiment with 20 forced yields per sample and 21 samples; it explicitly reports no real JMdict/browser import timing. That evidence is not a whole-import result.",
+  "artifacts": [
+    "jmdict-audit/develop-scope-compare.json",
+    "jmdict-audit/develop-scope-merge-commit.json",
+    "jmdict-audit/develop-scope-source-commit.json",
+    "jmdict-audit/develop-scope-pr883.json",
+    "jmdict-audit/develop-scope-candidate-paths.json",
+    "jmdict-audit/develop-scope-exact-diff.patch"
+  ]
+}

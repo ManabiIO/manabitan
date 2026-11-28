@@ -1,0 +1,86 @@
+[
+  {
+    "cell": "import-cache-screen-jitendex-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      5459968
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-cache-screen-jmdict-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      176128
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-cache-screen-vndb-forward-45465463257-1",
+    "observations": 4,
+    "activeSahBytes": [
+      528384,
+      536576
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-media-screen-jitendex-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      5459968
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-media-screen-jmdict-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      176128
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-media-screen-vndb-forward-45465463257-1",
+    "observations": 8,
+    "activeSahBytes": [
+      528384,
+      536576
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-prefix-screen-jitendex-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      5459968
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-prefix-screen-jmdict-forward-45465463257-1",
+    "observations": 23,
+    "activeSahBytes": [
+      176128
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  },
+  {
+    "cell": "import-prefix-screen-vndb-forward-45465463257-1",
+    "observations": 12,
+    "activeSahBytes": [
+      528384,
+      536576
+    ],
+    "prospectiveNormalizationOnly": true,
+    "originalStatusUnchanged": true
+  }
+]

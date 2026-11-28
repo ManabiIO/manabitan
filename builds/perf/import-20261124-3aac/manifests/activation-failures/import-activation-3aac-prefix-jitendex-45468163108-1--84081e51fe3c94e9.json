@@ -1,0 +1,177 @@
+{
+  "name": "import-activation-3aac-prefix-jitendex-45468163108-1",
+  "omittedBuiltProducts": [],
+  "originalArchiveLocallyVerifiedSha256": "8db4405f1c0386b583e370d0c3989fa541f0dffc08b74b9d699f8c97b52724df",
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955817640/zip",
+      "created_at": "2026-11-24T19:17:49Z",
+      "digest": "sha256:8db4405f1c0386b583e370d0c3989fa541f0dffc08b74b9d699f8c97b52724df",
+      "expired": false,
+      "expires_at": "2026-12-24T19:17:49Z",
+      "id": 14955817640,
+      "name": "import-activation-3aac-prefix-jitendex-45468163108-1",
+      "size_in_bytes": 12337,
+      "updated_at": "2026-11-24T19:17:49Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955817640",
+      "workflow_run": {
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "81ebec7d94cea24c0b2b1ec88af78187b193905b",
+        "id": 45468163108,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45468163108/artifacts/14955817640",
+    "metadataReceipt": "provenance/github-artifacts-45468163108.json",
+    "metadataReceiptSha256": "ed090cc80d9f4281bb9a849b4a8fffdef5c3bccd831db5ce0b1a29a7a5cc5bda",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45468163108,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45468163108"
+  },
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 32302,
+  "retainedFiles": [
+    {
+      "bytes": 5137,
+      "path": "actual-source.patch",
+      "sha256": "6a73ac09aac27564f29cf6be90321cb544fa70e60c6f16feb54437c539565632"
+    },
+    {
+      "bytes": 3557,
+      "path": "diagnostic/run-1.html",
+      "sha256": "9a07afa01d310d488a20201485637803fda3c43f7344fa0227b86db8c0ee9d25"
+    },
+    {
+      "bytes": 1454,
+      "path": "diagnostic/run-1.json",
+      "sha256": "ab53df270c43f408ef539efee45ac3bdf2036889421d983268f08b5615a8e201"
+    },
+    {
+      "bytes": 1642,
+      "path": "diagnostic.log",
+      "sha256": "cd4cf013a8998a61c28d3993467b789f93aa17e39125cb3a86c881dc717a90b3"
+    },
+    {
+      "bytes": 3047,
+      "path": "dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "bytes": 5137,
+      "path": "instrumentation.patch",
+      "sha256": "6a73ac09aac27564f29cf6be90321cb544fa70e60c6f16feb54437c539565632"
+    },
+    {
+      "bytes": 130,
+      "path": "instrumentation.sha256",
+      "sha256": "803f687af5faf610e0077e0b531f12bdc83782335cce9ead459ee798b1842afc"
+    },
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1f6e186ea0380a51488255ec1f823a5093c21995c3b35802395bddacff8af7be"
+    },
+    {
+      "bytes": 82,
+      "path": "source-identity.txt",
+      "sha256": "cd928d0334b2bc7962077c6ece7eeb49b5517155a5062084caeb36a569b855bd"
+    },
+    {
+      "bytes": 6096,
+      "path": "summarize.py",
+      "sha256": "55c627f24ae17e238eba75433076e24e6d0383c33f03a3842aa55b8209e7c4be"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "4800c58eb4ff05c88bb92ed4567734cff6eb8ecdbfaa5a4958b410f7ee87b363"
+    },
+    {
+      "bytes": 5876,
+      "path": "workflow.yml",
+      "sha256": "0a9f0d7bd91ad18cfb4827d25356ce50df37eca9d45f4c5b5e409ae8db67c3ba"
+    }
+  ],
+  "runId": 45468163108,
+  "schemaVersion": 1,
+  "sourceBytes": 32302,
+  "sourceFileCount": 13,
+  "sourceInventory": [
+    {
+      "bytes": 5137,
+      "path": "actual-source.patch",
+      "sha256": "6a73ac09aac27564f29cf6be90321cb544fa70e60c6f16feb54437c539565632"
+    },
+    {
+      "bytes": 3557,
+      "path": "diagnostic/run-1.html",
+      "sha256": "9a07afa01d310d488a20201485637803fda3c43f7344fa0227b86db8c0ee9d25"
+    },
+    {
+      "bytes": 1454,
+      "path": "diagnostic/run-1.json",
+      "sha256": "ab53df270c43f408ef539efee45ac3bdf2036889421d983268f08b5615a8e201"
+    },
+    {
+      "bytes": 1642,
+      "path": "diagnostic.log",
+      "sha256": "cd4cf013a8998a61c28d3993467b789f93aa17e39125cb3a86c881dc717a90b3"
+    },
+    {
+      "bytes": 3047,
+      "path": "dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "bytes": 5137,
+      "path": "instrumentation.patch",
+      "sha256": "6a73ac09aac27564f29cf6be90321cb544fa70e60c6f16feb54437c539565632"
+    },
+    {
+      "bytes": 130,
+      "path": "instrumentation.sha256",
+      "sha256": "803f687af5faf610e0077e0b531f12bdc83782335cce9ead459ee798b1842afc"
+    },
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1f6e186ea0380a51488255ec1f823a5093c21995c3b35802395bddacff8af7be"
+    },
+    {
+      "bytes": 82,
+      "path": "source-identity.txt",
+      "sha256": "cd928d0334b2bc7962077c6ece7eeb49b5517155a5062084caeb36a569b855bd"
+    },
+    {
+      "bytes": 6096,
+      "path": "summarize.py",
+      "sha256": "55c627f24ae17e238eba75433076e24e6d0383c33f03a3842aa55b8209e7c4be"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "4800c58eb4ff05c88bb92ed4567734cff6eb8ecdbfaa5a4958b410f7ee87b363"
+    },
+    {
+      "bytes": 5876,
+      "path": "workflow.yml",
+      "sha256": "0a9f0d7bd91ad18cfb4827d25356ce50df37eca9d45f4c5b5e409ae8db67c3ba"
+    }
+  ],
+  "sourceInventorySha256": "84081e51fe3c94e9cf40d6dfef1dc286e411a6ec4db457c6d53389d068433bb5",
+  "sourceRoot": "activation-failures-45468163108/artifact-14955817640",
+  "stage": "activation-failures"
+}

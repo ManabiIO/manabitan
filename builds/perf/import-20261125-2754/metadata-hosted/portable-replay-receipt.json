@@ -1,0 +1,50 @@
+{
+  "scope": "Saved-evidence replay only; no browser acquisition or observation replacement",
+  "candidate": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+  "archive": {
+    "bytes": 7442713,
+    "path": "metadata-hosted-20261125-2754.text.tar.gz",
+    "sha256": "8452048da897cfe77fa9479cd7d699588610edb779e6e39137ea3c09eac61ed3"
+  },
+  "commands": [
+    {
+      "kind": "timing",
+      "command": [
+        "python3",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_timing.py",
+        "--auditor",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_cohort_original.py",
+        "--repository",
+        "/tmp/manabitan-2754-evidence-tree",
+        "--node",
+        "/workspace/scratch/2754d3e3fa09/runtime/node_modules/node/bin/node",
+        "--candidate",
+        "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/timing/15037874732/cohort",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/timing/15039675829/cohort",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/timing/15039728256/cohort"
+      ],
+      "exitCode": 0,
+      "resultRows": 3,
+      "outputSha256": "3bd31906ee237f607758c39803892244a616c6b67fe6a98d30378a67799d18e1"
+    },
+    {
+      "kind": "memory",
+      "command": [
+        "python3",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_memory_saved.py",
+        "--candidate",
+        "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15037254596",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15037619386",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15037893794",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15038054396",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15039057891",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-metadata-archive/artifacts/memory/15039715853"
+      ],
+      "exitCode": 0,
+      "resultRows": 6,
+      "outputSha256": "907e12f869326102c8ae3769ed16a5cc9501f2ec7e7c78237703ed7db5d115e2"
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 
 /** @typedef {import('../../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} Plan */
 
-/** @returns {Plan} */
+/** @returns {Plan & {expressionIndexes: Uint32Array}} */
 function makePlan() {
     return {
         stringLengths: new Uint16Array([1, 1, 1]),

@@ -1,0 +1,27 @@
+from pathlib import Path
+import gzip,hashlib,json,urllib.request,zipfile,io
+import sys
+request=json.loads(sys.argv[1])
+root=Path('/workspace/scratch/ef009a302ea8/vndb-evidence-work/builds/perf/import-vndb-20261125-ef009/memory')
+(root/'raw').mkdir(parents=True,exist_ok=True)
+a=request['artifact']
+data=urllib.request.urlopen(request['url']).read()
+assert len(data)==a['size_in_bytes']
+assert 'sha256:'+hashlib.sha256(data).hexdigest()==a['digest']
+with zipfile.ZipFile(io.BytesIO(data)) as archive:
+    assert archive.namelist()==['summary.json'],archive.namelist()
+    raw=archive.read('summary.json')
+s=json.loads(raw)
+name=s['candidate']+'-'+s['dictionary']+'-'+str(s['replication'])+'.json.gz'
+packed=gzip.compress(raw,mtime=0)
+(root/'raw'/name).write_bytes(packed)
+record={'artifact':a,'rawPath':'raw/'+name,'originalBytes':len(raw),'originalSha256':hashlib.sha256(raw).hexdigest(),'compressedBytes':len(packed),'compressedSha256':hashlib.sha256(packed).hexdigest(),'artifactZipDigestVerified':True}
+meta_path=root/'retrieved-artifacts.json'
+items=json.loads(meta_path.read_text()) if meta_path.exists() else []
+prior=next((x for x in items if x['artifact']['id']==a['id']),None)
+if prior is not None:
+    assert prior['originalSha256']==record['originalSha256'] and prior['artifact']['digest']==a['digest']
+    items=[x for x in items if x['artifact']['id']!=a['id']]
+items.append(record)
+meta_path.write_text(json.dumps(items,indent=2)+'\n')
+print(json.dumps({'dictionary':s['dictionary'],'replication':s['replication'],'artifact':a['id'],'zipDigestVerified':True,'originalBytes':len(raw),'summarySha256':record['originalSha256'],'status':s['status'],'error':s['error'],'observations':len(s['observations']),'metrics':s['metrics'],'passesProspectiveMemoryScreen':s['passesProspectiveMemoryScreen'],'sources':{k:v['sourceCommit'] for k,v in s['packages'].items() if v is not None}}))

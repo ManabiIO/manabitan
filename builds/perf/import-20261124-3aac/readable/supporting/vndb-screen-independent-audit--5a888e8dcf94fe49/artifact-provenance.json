@@ -1,0 +1,19 @@
+{
+  "workflowRun": 45469432793,
+  "toolingCommit": "f44fbe93a4cb2da44cf94cc2a03236acde8755a8",
+  "hashScope": "GitHub API-reported artifact ZIP digests. This audit used root-downloaded extracted artifacts; it did not independently rehash the original artifact ZIPs.",
+  "artifacts": [
+    {
+      "id": 14958616835,
+      "name": "import-prefix-screen-storage-v1-vndb-forward-45469432793-1",
+      "sizeInBytes": 1078782,
+      "digest": "sha256:4aea174f182d779a4f227fa2f6770e941de18802f53b228e8488340b5cde87bf"
+    },
+    {
+      "id": 14958292893,
+      "name": "import-media-screen-storage-v1-vndb-forward-45469432793-1",
+      "sizeInBytes": 1078371,
+      "digest": "sha256:2a137cc729d8237c48b640dc4c3d9eeb0faa72bcb22f703d7e4e3936c55eb495"
+    }
+  ]
+}

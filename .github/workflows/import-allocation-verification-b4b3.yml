@@ -1,0 +1,165 @@
+name: Import allocation verification b4b3
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/import-allocation-verification-b4b3.yml
+      - dev/perf/compact-media-corpus-replay.py
+      - test/perf/compact-media-corpus-replay.mjs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-allocation-b4b3-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+  EXPRESSION_SHA: f6d685c0b2511257da4a9a83e7bd977087a42176
+  MEDIA_SHA: cc9fad4a3a528304f546e12e76ebb9afbe1cde6d
+  COMBINED_SHA: e4803e96d581e64eddfc496d847f397ac79bac34
+
+jobs:
+  verify:
+    if: github.head_ref == 'test/import-allocation-verification-20261126-b4b3' && github.event.pull_request.head.repo.full_name == github.repository
+    name: ${{ matrix.kind }} / ${{ matrix.dictionary }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: browser
+            dictionary: jitendex
+          - kind: corpus
+            dictionary: vndb
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      VERIFICATION_KIND: ${{ matrix.kind }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare exact source checkouts and fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY])"
+          for import_ref in base expression media combined; do
+            case "$import_ref" in
+              base) import_sha="$BASE_SHA" ;;
+              expression) import_sha="$EXPRESSION_SHA" ;;
+              media) import_sha="$MEDIA_SHA" ;;
+              combined) import_sha="$COMBINED_SHA" ;;
+            esac
+            git fetch --no-tags --depth 1 origin "$import_sha"
+            import_source_root="$RUNNER_TEMP/import-$import_ref"
+            git worktree add --detach "$import_source_root" "$import_sha"
+            cmp package-lock.json "$import_source_root/package-lock.json"
+            cmp test/perf/dictionaries.lock.json "$import_source_root/test/perf/dictionaries.lock.json"
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$import_source_root/node_modules"
+            mkdir -p "$import_source_root/builds"
+            ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$import_source_root/builds/e2e-dictionary-cache"
+            (cd "$import_source_root" && npm run build:libs)
+          done
+          if [[ "$VERIFICATION_KIND" == browser ]]; then
+            # Frozen import sources predate the repaired 1 GiB eligibility
+            # check. Apply the same current checker to both browser arms after
+            # their product packages have been built.
+            for import_ref in base combined; do
+              cp "$GITHUB_WORKSPACE/dev/perf/benchmark-support.js" \
+                "$RUNNER_TEMP/import-$import_ref/dev/perf/benchmark-support.js"
+            done
+          fi
+          mkdir -p "builds/perf/20261126-b4b3/$VERIFICATION_KIND/$DICTIONARY"
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          folder = pathlib.Path("builds/perf/20261126-b4b3") / os.environ["VERIFICATION_KIND"] / os.environ["DICTIONARY"]
+          data = {
+              "scope": "Correctness and deterministic work-count verification; no controlled latency or browser-memory qualification",
+              "tooling": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "sources": {key: os.environ[key] for key in ["BASE_SHA", "EXPRESSION_SHA", "MEDIA_SHA", "COMBINED_SHA"]},
+              "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+          }
+          (folder / "scope.json").write_text(json.dumps(data, indent=2) + "\n")
+          PY
+      - name: Verify every native parser and lookup output
+        if: matrix.kind == 'corpus' && matrix.dictionary != 'vndb'
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_root="$GITHUB_WORKSPACE/builds/perf/20261126-b4b3/corpus/$DICTIONARY"
+          for import_ref in base expression; do
+            node --expose-gc --max-old-space-size=1536 \
+              "$RUNNER_TEMP/import-expression/dev/perf/import-lookup-screen.js" \
+              "$DICTIONARY" --child --source-root "$RUNNER_TEMP/import-$import_ref" \
+              --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --flags '{}' \
+              > "$output_root/expression-$import_ref.json"
+          done
+          python3 - <<'PY'
+          import json, os, pathlib
+          folder = pathlib.Path("builds/perf/20261126-b4b3/corpus") / os.environ["DICTIONARY"]
+          baseline = json.loads((folder / "expression-base.json").read_text())
+          candidate = json.loads((folder / "expression-expression.json").read_text())
+          for key in ["rows", "digest", "indexBytes", "archiveSha256", "lockSha256", "wasmSha256", "runnerSha256", "validateGlossaryTypes"]:
+              assert baseline[key] == candidate[key], key
+          for report in [baseline, candidate]:
+              assert report["dictionary"] == os.environ["DICTIONARY"]
+              assert type(report["ownedCompactExpressionRows"]) is int
+              assert 0 <= report["ownedCompactExpressionRows"] <= report["rows"]
+          assert candidate["validateGlossaryTypes"] is True
+          assert baseline["ownedCompactExpressionRows"] == 0
+          if os.environ["DICTIONARY"] == "jmdict":
+              assert candidate["ownedCompactExpressionRows"] > 0
+          result = {
+              "status": "passed",
+              "rows": candidate["rows"],
+              "outputDigest": candidate["digest"],
+              "ownedCompactExpressionRows": candidate["ownedCompactExpressionRows"],
+              "uint32AllocationAndCopyBytesAvoided": 4 * candidate["ownedCompactExpressionRows"],
+              "scope": "Complete parser and lookup component output equality; counts are cumulative work, not peak memory or complete-import latency",
+          }
+          (folder / "expression-parity.json").write_text(json.dumps(result, indent=2) + "\n")
+          PY
+      - name: Verify complete source media and catalog behavior
+        if: matrix.kind == 'corpus'
+        run: |
+          python3 dev/perf/compact-media-corpus-replay.py \
+            --base "$RUNNER_TEMP/import-base" \
+            --candidate "$RUNNER_TEMP/import-media" \
+            --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --fixtures "$DICTIONARY" \
+            --out "builds/perf/20261126-b4b3/corpus/$DICTIONARY/media"
+      - name: Install locked Chromium
+        if: matrix.kind == 'browser'
+        run: npx playwright install --with-deps chromium
+      - name: Verify actual release imports and every referenced image
+        if: matrix.kind == 'browser'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for import_ref in base combined; do
+            (
+              cd "$RUNNER_TEMP/import-$import_ref"
+              node dev/perf/import-benchmark.js "$DICTIONARY" \
+                --runs 1 --build-target chrome --media-check all \
+                --output "$GITHUB_WORKSPACE/builds/perf/20261126-b4b3/browser/$DICTIONARY/$import_ref"
+            )
+          done
+      - name: Retain every receipt and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-allocation-b4b3-${{ matrix.kind }}-${{ matrix.dictionary }}
+          path: builds/perf/20261126-b4b3
+          if-no-files-found: error
+          retention-days: 14

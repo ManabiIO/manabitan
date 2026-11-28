@@ -1,0 +1,2752 @@
+{
+  "action-popup.html": {
+    "bytes": 3138,
+    "compressedBytes": 844,
+    "sha256": "3c3c640532af8838a9793258ea22f331d6dea338973fb0bf8b045e585d7a08c5"
+  },
+  "css/action-popup.css": {
+    "bytes": 8252,
+    "compressedBytes": 2257,
+    "sha256": "a707cf94582fd1e78c0a5cc847f1f2ed9f3340bb51889439a98c6d21e77816c3"
+  },
+  "css/background.css": {
+    "bytes": 1169,
+    "compressedBytes": 572,
+    "sha256": "22d6ab0dfd65ced523634247f60ee7153d2d599a90590f2b90c8d1838a43642c"
+  },
+  "css/display-pronunciation.css": {
+    "bytes": 3502,
+    "compressedBytes": 1070,
+    "sha256": "875248e329fba680e0939c55908b7fa78515475b8b8c07f7c790fdce8e7496ed"
+  },
+  "css/display.css": {
+    "bytes": 79222,
+    "compressedBytes": 11203,
+    "sha256": "15bdf1d6adf879fa69c1129014ad2a9a0f7bca6448fa4f6890d26c60a636406c"
+  },
+  "css/material.css": {
+    "bytes": 45705,
+    "compressedBytes": 6188,
+    "sha256": "8241ddf49ac273a5fb88ec86c1e98bdbacae0266902c74cf5d055f94ea8576a4"
+  },
+  "css/permissions.css": {
+    "bytes": 1143,
+    "compressedBytes": 598,
+    "sha256": "6f5b62dd739c7f097412e4b4f730c249434983cf2606d734ef96a2204498d65a"
+  },
+  "css/popup-outer.css": {
+    "bytes": 2896,
+    "compressedBytes": 988,
+    "sha256": "5773a0021f75d87bb01b1e1ed1368e88791b2abc92064b9c5f5a6a719648af3a"
+  },
+  "css/popup-preview.css": {
+    "bytes": 5754,
+    "compressedBytes": 1646,
+    "sha256": "b3f8d1af345e1a6da5984da6a0764156e922a375abc4104ba09d289d74a6adce"
+  },
+  "css/search-settings.css": {
+    "bytes": 15926,
+    "compressedBytes": 2681,
+    "sha256": "68b6467e2809564d1759c68276547a56434331356b409cf77648fc59c2ba22b1"
+  },
+  "css/search.css": {
+    "bytes": 7631,
+    "compressedBytes": 1960,
+    "sha256": "0ebbd85630e5c28363885b1b1837fe2d153efc2672a2b40887a2758e2eae015f"
+  },
+  "css/settings.css": {
+    "bytes": 75630,
+    "compressedBytes": 11619,
+    "sha256": "87b9c59b482f46826cfefd16e8a8d13945932780cce21baa42c8a41463d5b5a7"
+  },
+  "css/structured-content.css": {
+    "bytes": 8795,
+    "compressedBytes": 2063,
+    "sha256": "0aad3cd0d970b1dcb5f63beb89dbbd6562d14bed3ccd5cfd4feeaa2a75d24770"
+  },
+  "css/visibility-modifiers.css": {
+    "bytes": 649,
+    "compressedBytes": 163,
+    "sha256": "8f763882f040fc3a9803db9751c39a3a43f89c032ea8bd8774e0dd50e7b53fa1"
+  },
+  "data/anki-compact-gloss-style.js": {
+    "bytes": 1209,
+    "compressedBytes": 662,
+    "sha256": "5b7f14767d878446c6cd4f77402debd8518377b33e024cf3e18f1ddd4094cc76"
+  },
+  "data/audio/fallback-bloop.mp3": {
+    "bytes": 13355,
+    "compressedBytes": 12489,
+    "sha256": "724f3a77f5160505a317ee44bff956114775c62fdb0ddc0b4fe89495aa62e595"
+  },
+  "data/audio/fallback-click.mp3": {
+    "bytes": 17735,
+    "compressedBytes": 9562,
+    "sha256": "558550f1ce345178454a77328af2e3fe5ea49fbc5478917217aab14503c26077"
+  },
+  "data/fonts/kanji-stroke-orders.ttf": {
+    "bytes": 17999116,
+    "compressedBytes": 9379241,
+    "sha256": "bef60e6782b31bfd4f090153e19afce0aa2f637b45175a847b16ab27217a4378"
+  },
+  "data/pronunciation-style.json": {
+    "bytes": 4610,
+    "compressedBytes": 688,
+    "sha256": "373f045340226603571fabf697146ad1a3ee722e5906d918d997bf7fb8b11a1e"
+  },
+  "data/recommended-dictionaries.json": {
+    "bytes": 63393,
+    "compressedBytes": 4154,
+    "sha256": "69aea9ce16ff9255e214287ca5ad2632347a2418b1f1761f3819b99973f27169"
+  },
+  "data/recommended-settings.json": {
+    "bytes": 27795,
+    "compressedBytes": 912,
+    "sha256": "21ffb16b24851a75f34234788d8814fe507105ebf92044c0f8df6ede838c49b0"
+  },
+  "data/schemas/custom-audio-list-schema.json": {
+    "bytes": 831,
+    "compressedBytes": 243,
+    "sha256": "bd42b6666720ac3884fe42a97db07a4ceb2130d3fc78ee4ed0beca805e57db3e"
+  },
+  "data/schemas/dictionary-index-schema.json": {
+    "bytes": 4534,
+    "compressedBytes": 1096,
+    "sha256": "dde43ca9ef1580ab638f49bb13bd7d5c55646afd655ff99cf429492598feb69b"
+  },
+  "data/schemas/dictionary-kanji-bank-v1-schema.json": {
+    "bytes": 1254,
+    "compressedBytes": 333,
+    "sha256": "7479975f1f996be81e051d30d5bf60b53b49d72a484b71240cfa9ec8e085aca2"
+  },
+  "data/schemas/dictionary-kanji-bank-v3-schema.json": {
+    "bytes": 1681,
+    "compressedBytes": 385,
+    "sha256": "03c1691377314ae80d86982f1ae446d3ea786d9864f8fb225e127cd9701dc027"
+  },
+  "data/schemas/dictionary-kanji-meta-bank-v3-schema.json": {
+    "bytes": 1501,
+    "compressedBytes": 446,
+    "sha256": "21fb4f4ddb9698f888683323b987ca65c908944407dbc91dcda22aaa1d679a2c"
+  },
+  "data/schemas/dictionary-tag-bank-v3-schema.json": {
+    "bytes": 1120,
+    "compressedBytes": 365,
+    "sha256": "4f537818b3d4be4c40f92c991578f74d73f2239002b608eb10169ab1d63aee0b"
+  },
+  "data/schemas/dictionary-term-bank-v1-schema.json": {
+    "bytes": 1631,
+    "compressedBytes": 550,
+    "sha256": "83c77c15f4c3444a2d20d89b3cce595861ecdfb1b797e560fd8aa2f1e02c99b4"
+  },
+  "data/schemas/dictionary-term-bank-v3-schema.json": {
+    "bytes": 28220,
+    "compressedBytes": 2868,
+    "sha256": "665904fcaac715a018a7df6b49d3ace08390d614a9da4f62222bce32c8030b87"
+  },
+  "data/schemas/dictionary-term-meta-bank-v3-schema.json": {
+    "bytes": 10652,
+    "compressedBytes": 1194,
+    "sha256": "7236ea5627731175c9cb3b2d22785598ae005be050e538f8fa331a6d27262369"
+  },
+  "data/schemas/options-schema.json": {
+    "bytes": 83416,
+    "compressedBytes": 5706,
+    "sha256": "a3818fd44bd57acb02f1ca04f07128558da040b865a5012e36167883f7d7fb82"
+  },
+  "data/schemas/recommended-dictionaries-schema.json": {
+    "bytes": 2266,
+    "compressedBytes": 389,
+    "sha256": "4e9ae8dbdaf7cd55b03b207502cf8fc9c68600918f681e46776f7a65f8adea22"
+  },
+  "data/schemas/recommended-settings-schema.json": {
+    "bytes": 7019,
+    "compressedBytes": 564,
+    "sha256": "8147e81efb81cfe5085463a9a6447f694085f57de9f7a1b059eaa3e8a2b0812e"
+  },
+  "data/structured-content-style.json": {
+    "bytes": 11069,
+    "compressedBytes": 1407,
+    "sha256": "0320ad3f2effeebc73d986a47bba1da61b66a818be8b5cb6b3654929b0f335de"
+  },
+  "data/templates/anki-field-templates-upgrade-v10.handlebars": {
+    "bytes": 1123,
+    "compressedBytes": 353,
+    "sha256": "e35dd329b769997e3a6ea2539d3222db8e6ce8bf4cb4d3bcb1dc1963906e6476"
+  },
+  "data/templates/anki-field-templates-upgrade-v12.handlebars": {
+    "bytes": 96,
+    "compressedBytes": 77,
+    "sha256": "585a4385b1fbc735a41cf0cc3b7fef293f4c56513470cb56647e7f5dde425ba8"
+  },
+  "data/templates/anki-field-templates-upgrade-v13.handlebars": {
+    "bytes": 6691,
+    "compressedBytes": 1459,
+    "sha256": "6dd7b3d1a7f132e4d53e522153b669f5b476dc9e447f01cb185b3943476a41e4"
+  },
+  "data/templates/anki-field-templates-upgrade-v2.handlebars": {
+    "bytes": 5611,
+    "compressedBytes": 1265,
+    "sha256": "ebce4cb6fcd323e74d660af60739f6e35ddb7903aac3d4100e2cf7c39fd215e8"
+  },
+  "data/templates/anki-field-templates-upgrade-v21.handlebars": {
+    "bytes": 3280,
+    "compressedBytes": 537,
+    "sha256": "3df4e5e5c8f97196a0566c038cf2d57ef3b410d9e4cac5f35464261606663cf9"
+  },
+  "data/templates/anki-field-templates-upgrade-v24.handlebars": {
+    "bytes": 2888,
+    "compressedBytes": 595,
+    "sha256": "8af147e158e45f63dde3b5ed9da25c8d7fd6f0ddec007cde7f426fe061172b97"
+  },
+  "data/templates/anki-field-templates-upgrade-v27.handlebars": {
+    "bytes": 675,
+    "compressedBytes": 164,
+    "sha256": "8f7174089e5e2a3b8c4f0ddc02de792df44901cd57e520b194da8b3768da8f53"
+  },
+  "data/templates/anki-field-templates-upgrade-v28.handlebars": {
+    "bytes": 213,
+    "compressedBytes": 93,
+    "sha256": "40d3d18f829589751b68aa57eac5bae693fbf19a321fddea93cfbf92d7807ff6"
+  },
+  "data/templates/anki-field-templates-upgrade-v29.handlebars": {
+    "bytes": 318,
+    "compressedBytes": 99,
+    "sha256": "569cf5c77f02905802963a9bfb03761557e1a1f7542a3f6028e599ec0d4cdca1"
+  },
+  "data/templates/anki-field-templates-upgrade-v33.handlebars": {
+    "bytes": 1791,
+    "compressedBytes": 242,
+    "sha256": "f0d161b84ebcc3394177d8246e5e3175578b7016649f64fa514c21f6a030cc34"
+  },
+  "data/templates/anki-field-templates-upgrade-v34.handlebars": {
+    "bytes": 2861,
+    "compressedBytes": 434,
+    "sha256": "5aab505724ab5fd1c3b3a7e5729c41daeb93b447b978dccdf3fd228db3ea57da"
+  },
+  "data/templates/anki-field-templates-upgrade-v35.handlebars": {
+    "bytes": 1174,
+    "compressedBytes": 325,
+    "sha256": "2c6be1e7706a49f4990bb1fe31d136ef8fce31222205da37fd0b5415abcf595c"
+  },
+  "data/templates/anki-field-templates-upgrade-v36.handlebars": {
+    "bytes": 129,
+    "compressedBytes": 99,
+    "sha256": "7e0b7e3d3257baf5137b42188cc1dc0b358209b45664ff5c36add4b13c54d389"
+  },
+  "data/templates/anki-field-templates-upgrade-v37.handlebars": {
+    "bytes": 1215,
+    "compressedBytes": 212,
+    "sha256": "8f52c445bc209f4afe914758b00212b01cca5737cbec0d621c3521e7ce2f671b"
+  },
+  "data/templates/anki-field-templates-upgrade-v38.handlebars": {
+    "bytes": 1750,
+    "compressedBytes": 254,
+    "sha256": "01a87b28cfad377ae007992e91a4e7e34ccd1e62199118463b3fc30227154d02"
+  },
+  "data/templates/anki-field-templates-upgrade-v4.handlebars": {
+    "bytes": 284,
+    "compressedBytes": 130,
+    "sha256": "013039ce94759ab840defbbbda4ae974d46a4c9209c54bd45b5c84c25fc1328f"
+  },
+  "data/templates/anki-field-templates-upgrade-v41.handlebars": {
+    "bytes": 6185,
+    "compressedBytes": 620,
+    "sha256": "6f1b98c1edfde6f1084c5f828dace8867b46a141b442fd7f5c89ea8cc805233d"
+  },
+  "data/templates/anki-field-templates-upgrade-v45.handlebars": {
+    "bytes": 291,
+    "compressedBytes": 115,
+    "sha256": "b90ab3793a1241e07159f58f851e765967116c8e4bcd8117b4e82ba5c53c3cab"
+  },
+  "data/templates/anki-field-templates-upgrade-v49.handlebars": {
+    "bytes": 4241,
+    "compressedBytes": 622,
+    "sha256": "fadbc03e017021d9b2f4dad7a8e3ebdd151e8b36ef56f2bf685101a848383213"
+  },
+  "data/templates/anki-field-templates-upgrade-v6.handlebars": {
+    "bytes": 809,
+    "compressedBytes": 297,
+    "sha256": "9b5e297998cddbf20377688037fd96333a4c9190233cbd4e17eb7116eeb552f7"
+  },
+  "data/templates/anki-field-templates-upgrade-v61.handlebars": {
+    "bytes": 337,
+    "compressedBytes": 147,
+    "sha256": "4a0c90d7ade292e46699816629ed9ccaa7ce2a75ec2424e99f843d475bab3c59"
+  },
+  "data/templates/anki-field-templates-upgrade-v63.handlebars": {
+    "bytes": 1639,
+    "compressedBytes": 292,
+    "sha256": "e8c09da6ba9d6eb91d3230e609a3a4c6d000e84ec5451fbe7edf9f363a6b80ee"
+  },
+  "data/templates/anki-field-templates-upgrade-v64.handlebars": {
+    "bytes": 1782,
+    "compressedBytes": 276,
+    "sha256": "76b36992eaa6affbca2ca6b3990078073fea325bdb92152c4f7a72816cee1efb"
+  },
+  "data/templates/anki-field-templates-upgrade-v66.handlebars": {
+    "bytes": 651,
+    "compressedBytes": 247,
+    "sha256": "39822fa6256a621496831cec6460075ed15685a5d1018ab88ead32ff97992d89"
+  },
+  "data/templates/anki-field-templates-upgrade-v67.handlebars": {
+    "bytes": 1715,
+    "compressedBytes": 373,
+    "sha256": "eb2f879e8efda9a93ccbabfd875b8dfb790b47139a07953c74423b79292500a3"
+  },
+  "data/templates/anki-field-templates-upgrade-v68.handlebars": {
+    "bytes": 413,
+    "compressedBytes": 143,
+    "sha256": "35c5430cf915c4a16c8de5230b7ea29693e82e96968b886a6adfa487799f0bc5"
+  },
+  "data/templates/anki-field-templates-upgrade-v71.handlebars": {
+    "bytes": 3920,
+    "compressedBytes": 542,
+    "sha256": "20466cdab732a7df3121be4b0e01ac5f1d43c3ee750fa46443edc4095ed2b009"
+  },
+  "data/templates/anki-field-templates-upgrade-v74.handlebars": {
+    "bytes": 1674,
+    "compressedBytes": 337,
+    "sha256": "382ec815171a25b160beeb4e109ff8728914a7fcfd5cce65b851ca53767068f2"
+  },
+  "data/templates/anki-field-templates-upgrade-v76.handlebars": {
+    "bytes": 1654,
+    "compressedBytes": 214,
+    "sha256": "940beb65ad5273c83658c37475065ee2f3ab0cbc5b0de0e992b10ccb03fda4f5"
+  },
+  "data/templates/anki-field-templates-upgrade-v78.handlebars": {
+    "bytes": 64,
+    "compressedBytes": 56,
+    "sha256": "d174e25d5ae321f1d540ac33ddc82ed8947081ac4c76a675465931fdeb83d3bf"
+  },
+  "data/templates/anki-field-templates-upgrade-v8.handlebars": {
+    "bytes": 5434,
+    "compressedBytes": 926,
+    "sha256": "f0b329b468728695d61d8bf7becd3c4b59884c91b02d30426d9e72ebc1ddd0ba"
+  },
+  "data/templates/default-anki-field-templates.handlebars": {
+    "bytes": 16842,
+    "compressedBytes": 2772,
+    "sha256": "27c168e1853662a4023fe6de7345288d09bdac8d194a6ffc3c64541996fcc2f4"
+  },
+  "fonts/NotoSansJP-Regular.ttf": {
+    "bytes": 5733060,
+    "compressedBytes": 3300609,
+    "sha256": "7c8597677e9fac0f54d7848ad18bc6a708dfb5baa4ebf4bd91e66efcca313bf3"
+  },
+  "images/accessibility.svg": {
+    "bytes": 877,
+    "compressedBytes": 456,
+    "sha256": "274488e17e68c2c398b23cf88e63c3584be89187f0ca9d892cae63da3f44f541"
+  },
+  "images/add-duplicate-big-circle-blue.svg": {
+    "bytes": 2011,
+    "compressedBytes": 745,
+    "sha256": "9ff419a0ff0f3a1cee3b97d0b136391e476a4383796cd615f272e8edabdec69a"
+  },
+  "images/add-duplicate-big-circle.svg": {
+    "bytes": 2017,
+    "compressedBytes": 747,
+    "sha256": "718b53c02725ef352be7f92f234370d261ccfa8b43aea0558b439d814e47dcb1"
+  },
+  "images/add-duplicate-big-diamond.svg": {
+    "bytes": 2013,
+    "compressedBytes": 765,
+    "sha256": "5039a3a4bfd6711ad1d882fff1b190a1302ff9a32d4d158b95742e8adf306819"
+  },
+  "images/add-duplicate-big-square.svg": {
+    "bytes": 2108,
+    "compressedBytes": 777,
+    "sha256": "e7f456a51f8daf42452506e5efd57c016974f7579fb7fa1cff4f33cd084aff3f"
+  },
+  "images/add-duplicate-small-circle-blue.svg": {
+    "bytes": 1820,
+    "compressedBytes": 707,
+    "sha256": "9c0624a6176b892d99de1c32765f83c482e6ab220d353bb043ac5b178ac87cee"
+  },
+  "images/add-duplicate-small-circle.svg": {
+    "bytes": 1826,
+    "compressedBytes": 709,
+    "sha256": "7a2bce295e33470c1b56e367147eccd747559a2fc2e9132dcac602f1e23a588e"
+  },
+  "images/backup.svg": {
+    "bytes": 195,
+    "compressedBytes": 164,
+    "sha256": "34a43d06a02cfe868ebb39925721583d932e7688eb7b1bf152ddfbdef8dbc2c7"
+  },
+  "images/big-circle.svg": {
+    "bytes": 1406,
+    "compressedBytes": 551,
+    "sha256": "3cbc6a136b8c55909cdfc93e72a49b76e28fc98e378ed3349c298c7f2bc38a9e"
+  },
+  "images/big-diamond.svg": {
+    "bytes": 1416,
+    "compressedBytes": 574,
+    "sha256": "ede0dabbac4a1054f393488dd2d4cf777548e63aa68a665cdada34c25201b092"
+  },
+  "images/big-square.svg": {
+    "bytes": 1497,
+    "compressedBytes": 578,
+    "sha256": "c645964f146dae8caa408cf77fda793959cbd9a00107b232e497a7296893cab8"
+  },
+  "images/book.svg": {
+    "bytes": 185,
+    "compressedBytes": 157,
+    "sha256": "3628a05b9c8618f44cff1d17ac154572491ff6fc84fb87d7265b5f97b95d3128"
+  },
+  "images/browser-action-popup.webp": {
+    "bytes": 5568,
+    "compressedBytes": 5573,
+    "sha256": "add51a8a279a1da07073b958dc19c49749fdade7f90a3f4e78bad7cd61ec730f"
+  },
+  "images/checkbox-border.svg": {
+    "bytes": 235,
+    "compressedBytes": 169,
+    "sha256": "b1ef5a938c340a9f5be681acd36921abf4c387ee27fe9ff349ebeebef7803f0a"
+  },
+  "images/checkbox-check.svg": {
+    "bytes": 155,
+    "compressedBytes": 134,
+    "sha256": "d54780e5ad5fce35549a00e502c762b546a1e97011142bbb01c5baf253965f9e"
+  },
+  "images/checkbox-fill.svg": {
+    "bytes": 144,
+    "compressedBytes": 127,
+    "sha256": "9a98a28599b04a28a5129f31dbcf1d9130160f5a5f91f084a536ff167fcaa029"
+  },
+  "images/checkmark.svg": {
+    "bytes": 147,
+    "compressedBytes": 127,
+    "sha256": "83cbe9ef347a96d42e4c75ff10397edb635d16037c24627a8e9437e7f492f054"
+  },
+  "images/clipboard.svg": {
+    "bytes": 415,
+    "compressedBytes": 264,
+    "sha256": "40e979bc81bf774c647f8c45fc0cbcb6d41c4bc43161b7d9508ba85cce956225"
+  },
+  "images/cog.svg": {
+    "bytes": 1986,
+    "compressedBytes": 868,
+    "sha256": "d765946deb47f62d0070973e3655a82c0251114d8bec0127a4717cc1f4346103"
+  },
+  "images/collapse.svg": {
+    "bytes": 181,
+    "compressedBytes": 151,
+    "sha256": "26129bef985a4d3532d34ab2678a16d1e65a3ee9f0465cd7fd71b5dda0e81f46"
+  },
+  "images/connection.svg": {
+    "bytes": 981,
+    "compressedBytes": 488,
+    "sha256": "1b82532cf46384ca99a0e6d388399fde3af9f82b6ed4f7a457f34e064f165afb"
+  },
+  "images/cross.svg": {
+    "bytes": 187,
+    "compressedBytes": 150,
+    "sha256": "7fbfbd2082e41e48eaaed780d2251b1422f3750ca5f99a9735653fef4cc380f4"
+  },
+  "images/double-down-chevron.svg": {
+    "bytes": 180,
+    "compressedBytes": 136,
+    "sha256": "5303fd5c8dfa5a34610a0347208d60520bb2dac406bceb6889ac2ec323258b96"
+  },
+  "images/down-chevron.svg": {
+    "bytes": 236,
+    "compressedBytes": 166,
+    "sha256": "d7c011fd19c78dcf4e9b8ada80bd7b06b7bca1c0d6249ba73d731d3ec4c12ba4"
+  },
+  "images/entry-current.svg": {
+    "bytes": 1018,
+    "compressedBytes": 480,
+    "sha256": "e44fd6d1b08487daba1e5feb0b8690b2b681d7517ac6dab6ff40b7d5a101d057"
+  },
+  "images/exclamation-point-short.svg": {
+    "bytes": 406,
+    "compressedBytes": 200,
+    "sha256": "0f1b68b007918265203bcb09d99d904a9d176af240ee4ac35b57b61baf262484"
+  },
+  "images/expand.svg": {
+    "bytes": 186,
+    "compressedBytes": 150,
+    "sha256": "af86f2612b6caa64a25bfc28f960b9d67f489120546056a9057e4f5112e8c0e9"
+  },
+  "images/external-link.svg": {
+    "bytes": 194,
+    "compressedBytes": 160,
+    "sha256": "6fc35b2d99d8232a7bf8cc99fdb4e0d3bd6eeabcdb3da4ee821ad50695be7392"
+  },
+  "images/flag.svg": {
+    "bytes": 740,
+    "compressedBytes": 434,
+    "sha256": "459fba2b98a87d2678587d30105e7b814c63f460ce276a198d4f7a297433d7da"
+  },
+  "images/hamburger-menu.svg": {
+    "bytes": 606,
+    "compressedBytes": 211,
+    "sha256": "3674d9aa6f93447f065a55066731aee2dc4ac6a61b637939bc33fdac6a85e50b"
+  },
+  "images/hiragana-a.svg": {
+    "bytes": 475,
+    "compressedBytes": 324,
+    "sha256": "39898a436d5fc2bdef5dd46888dd0da3fa858f477ea536cab249371cfeaaa24f"
+  },
+  "images/icon128.png": {
+    "bytes": 3399,
+    "compressedBytes": 3378,
+    "sha256": "0f18db0009770987f2e0432553ef4281cd87dcba05f4b08f786506bbf066565f"
+  },
+  "images/icon16.png": {
+    "bytes": 475,
+    "compressedBytes": 480,
+    "sha256": "3840a2301b263551b519f2c5731c7914be3e802cf0559d0f3ca42f8ed91742fe"
+  },
+  "images/icon19.png": {
+    "bytes": 570,
+    "compressedBytes": 575,
+    "sha256": "d9d097d640870e239156354e6c685fc3897b89baa77a90c4606a12291e71a1d2"
+  },
+  "images/icon32.png": {
+    "bytes": 857,
+    "compressedBytes": 862,
+    "sha256": "41bc20479d4997ea2b68ede05d9fc5c2b3493937087791f3dd63abff0b03a41f"
+  },
+  "images/icon38.png": {
+    "bytes": 1017,
+    "compressedBytes": 1022,
+    "sha256": "b4b6ecd844f7e86b574d6689a4c3705298eae30cc93e1640761dcc567730f02b"
+  },
+  "images/icon48.png": {
+    "bytes": 1285,
+    "compressedBytes": 1290,
+    "sha256": "5fa5d1d260f19191ecd64fb65c2377c3d6672e747376379f7bcf93f851f2c460"
+  },
+  "images/icon64.png": {
+    "bytes": 1667,
+    "compressedBytes": 1672,
+    "sha256": "da98cdfca1e97142142f332d428a34c549d4c5d9a7f8f6d23fff9bab6d291e61"
+  },
+  "images/kebab-menu.svg": {
+    "bytes": 237,
+    "compressedBytes": 137,
+    "sha256": "f9e218822965c195ff69de5007854cbdcb30afa60927ad7b6f97c9f1bac47be4"
+  },
+  "images/key.svg": {
+    "bytes": 520,
+    "compressedBytes": 299,
+    "sha256": "7321a2646d7f43ec4c5cb9483687debb26bb90e5e742da6d52994d1cdcd25fb3"
+  },
+  "images/keyboard.svg": {
+    "bytes": 426,
+    "compressedBytes": 192,
+    "sha256": "960dc72af4bd60eb59e62ac97dda19163bc26cd46cd6cfefbaad2eb86cf8aa60"
+  },
+  "images/left-chevron.svg": {
+    "bytes": 214,
+    "compressedBytes": 164,
+    "sha256": "02c47f9adeb57d866f8d8309341356693615274bc724c5fa9650ea19c50dfb82"
+  },
+  "images/lock.svg": {
+    "bytes": 399,
+    "compressedBytes": 250,
+    "sha256": "2863a169e627ed2b5722fab4cf4bc51abd2ce991e1e4f6a134c1e8760141ae36"
+  },
+  "images/magnifying-glass.svg": {
+    "bytes": 414,
+    "compressedBytes": 256,
+    "sha256": "6d6f375efca31c958fdcad0ac0153f93b60423d7ec3b36213f02097107e9c1e6"
+  },
+  "images/material-down-arrow.svg": {
+    "bytes": 145,
+    "compressedBytes": 128,
+    "sha256": "f2abd97dbef4164f1f28120d62fff0c56eb913d34066d43e860f26eca3113124"
+  },
+  "images/material-right-arrow.svg": {
+    "bytes": 145,
+    "compressedBytes": 128,
+    "sha256": "1acc8eddc48ab48383c1b2cab4cdde678b7e7a458c2c070720fb96eaada7f048"
+  },
+  "images/monitor.svg": {
+    "bytes": 306,
+    "compressedBytes": 227,
+    "sha256": "a75084d68e98a78ce0b665c7b356ccdfcfcca67f93c2ec75915c60ee50538bed"
+  },
+  "images/mouse.svg": {
+    "bytes": 314,
+    "compressedBytes": 224,
+    "sha256": "f6ae8ec429907acfc386273210cc00bedcd27a6fef55316bcb62a8c637f52c3f"
+  },
+  "images/note-card.svg": {
+    "bytes": 626,
+    "compressedBytes": 369,
+    "sha256": "467c46a6eb9638e7da1ad38e037230dd2c9e50a1a0f0415157be94678904e603"
+  },
+  "images/overwrite-big-circle.svg": {
+    "bytes": 2225,
+    "compressedBytes": 960,
+    "sha256": "d80e4cc0426c5ca8873ce572d72f18c3d29fb02f119983efbc40d07cc1352469"
+  },
+  "images/overwrite-big-diamond.svg": {
+    "bytes": 2236,
+    "compressedBytes": 966,
+    "sha256": "4b41536e49a7870c0e01e0cc06749b62994c920c58ae9b7b0a59ebc9d4a789c8"
+  },
+  "images/overwrite-big-square.svg": {
+    "bytes": 2299,
+    "compressedBytes": 975,
+    "sha256": "6dd8dc546aa65c6665d37b04126dc1b19e4357f7afa1dc680a5d36bcb855abfe"
+  },
+  "images/overwrite-small-circle.svg": {
+    "bytes": 2164,
+    "compressedBytes": 951,
+    "sha256": "02da52dc7db5930644820c58182b1cfaea3b404cc63af6065418a58f5e1e5f85"
+  },
+  "images/palette.svg": {
+    "bytes": 717,
+    "compressedBytes": 352,
+    "sha256": "5dfd19cd696541e92c36623a9c7244cc18c74fc2983676fc6b2e5345a6493a32"
+  },
+  "images/play-audio.svg": {
+    "bytes": 1940,
+    "compressedBytes": 690,
+    "sha256": "9db49d6be29b815eb0c879e601e519dbb0e4ab59fa57f06b8734c310520bce25"
+  },
+  "images/plus-circle-large.svg": {
+    "bytes": 229,
+    "compressedBytes": 169,
+    "sha256": "4b093a54c9b54785e5be0540ad94d8049889e779b047fce582d8213478d4a6ed"
+  },
+  "images/plus-circle-small.svg": {
+    "bytes": 239,
+    "compressedBytes": 184,
+    "sha256": "9e6554770a147400cfd0e612578fef5cbf9d285b2b6ce9bcceb257625a32d27f"
+  },
+  "images/plus-thick.svg": {
+    "bytes": 150,
+    "compressedBytes": 130,
+    "sha256": "bce0ca2f12bc0820d6a56fcbf697fe948e8eb94fccbe5dd88d87e0116545bb2a"
+  },
+  "images/popup-size.svg": {
+    "bytes": 451,
+    "compressedBytes": 263,
+    "sha256": "bd98bd54f64a649782c0e00deb8a89988aa2589c5aebdd59ae7397f3bd3e8509"
+  },
+  "images/popup.svg": {
+    "bytes": 305,
+    "compressedBytes": 209,
+    "sha256": "182711bb1f2ab45f4742dbb081634c65e1859a22e10474a5ecf746cdd6a4f183"
+  },
+  "images/profile.svg": {
+    "bytes": 456,
+    "compressedBytes": 290,
+    "sha256": "6dea5f61cb861e37fc6ae84ca0c94582d4dc5cc142cc29f9491cb0a740094487"
+  },
+  "images/question-mark-circle.svg": {
+    "bytes": 941,
+    "compressedBytes": 460,
+    "sha256": "6a397b6999dd5d1dbda1173e3b00abded638dca698b71a88353656c3fd26db98"
+  },
+  "images/question-mark-thick.svg": {
+    "bytes": 757,
+    "compressedBytes": 396,
+    "sha256": "8c5148e97af51c891e9d067a672f969d7982d4ee1388850e125fbf919e11f257"
+  },
+  "images/question-mark.svg": {
+    "bytes": 777,
+    "compressedBytes": 401,
+    "sha256": "6bb579f56f447c8a6c120937eaca4cf7fab41efcc1361d184ffd314f63fe52ed"
+  },
+  "images/radio-button-dot.svg": {
+    "bytes": 157,
+    "compressedBytes": 129,
+    "sha256": "1559f7c8d9fbe070c98f78d51cab21ff191d33a07063e0439b4cb8a816f8f0d4"
+  },
+  "images/radio-button.svg": {
+    "bytes": 179,
+    "compressedBytes": 141,
+    "sha256": "97a65cd946988d8433ed19135b0ddb36bec6b8e7eef657b4e9a663e4bead07c7"
+  },
+  "images/right-chevron.svg": {
+    "bytes": 215,
+    "compressedBytes": 163,
+    "sha256": "ae775942fe0e1a53e7bd253796cc7c0042f8cad2f56032fc1de101093bd65942"
+  },
+  "images/scanning-popup.webp": {
+    "bytes": 131356,
+    "compressedBytes": 131115,
+    "sha256": "58397859030453bef5e35311ff0d1adb5e02e02b3d51ad1b26fe8787df4f47a2"
+  },
+  "images/scanning.svg": {
+    "bytes": 608,
+    "compressedBytes": 361,
+    "sha256": "938cecd4e2ce608848f9dba220d77e1df060860d13b56b8255126b86d59f33bb"
+  },
+  "images/sentence-parsing.svg": {
+    "bytes": 741,
+    "compressedBytes": 373,
+    "sha256": "1ec00bf78870684d9aa9eac5aeca8a458cfcc0990a69ee88421cee221b23a99e"
+  },
+  "images/settings-dictionaries-popup.webp": {
+    "bytes": 24960,
+    "compressedBytes": 24685,
+    "sha256": "61964d7a85e51676f637337609588ba2a085214ad62ce68e169e97496f3b43d8"
+  },
+  "images/small-circle.svg": {
+    "bytes": 1287,
+    "compressedBytes": 520,
+    "sha256": "afbd03a7d704ad042dc4d8342d81ab190dc3429aed7109de64b91374a1dcf76f"
+  },
+  "images/source-term.svg": {
+    "bytes": 1988,
+    "compressedBytes": 656,
+    "sha256": "d65724a46bb6ec16b41b4ca6273f5f1713ee67460d76e3975981fc2e753feaf1"
+  },
+  "images/speaker.svg": {
+    "bytes": 491,
+    "compressedBytes": 305,
+    "sha256": "3addc2603813b190421b6b8481d051ccf1d7f089a5f3062a5b82cbd2d7a3724a"
+  },
+  "images/spinner.svg": {
+    "bytes": 794,
+    "compressedBytes": 366,
+    "sha256": "f46a05c528b406e2f8a9f877c2e8a9ff7a5a3798ef44d3efc73907671a2dd990"
+  },
+  "images/tag.svg": {
+    "bytes": 385,
+    "compressedBytes": 237,
+    "sha256": "82caa4cd5df436c7f6992c4fd064887419c58863e4cdfbc53e24547c4c21d778"
+  },
+  "images/text-parsing.svg": {
+    "bytes": 357,
+    "compressedBytes": 211,
+    "sha256": "4752ebb5005ffde2012c1a64798a045ca00df685a4f4e50e0bb0c640c0a4a3f8"
+  },
+  "images/translation.svg": {
+    "bytes": 526,
+    "compressedBytes": 338,
+    "sha256": "8897ccaa2e065d96839d00e94155b7c5ccf7db5b7b3ca11d8fd6f90dd5bead4f"
+  },
+  "images/up-arrow.svg": {
+    "bytes": 163,
+    "compressedBytes": 142,
+    "sha256": "9551948d65c2769c15edc60d0b0f5b8671f541146ca85ad91eefba08adfead6a"
+  },
+  "images/up-chevron.svg": {
+    "bytes": 235,
+    "compressedBytes": 167,
+    "sha256": "880abeb90f3aeadf1d06c31c354156938b7eb3289d27cf510f8622c0dda50b1b"
+  },
+  "images/view-note-buried.svg": {
+    "bytes": 2946,
+    "compressedBytes": 969,
+    "sha256": "dc0c0c255018267839a7d1627341b44c3715ad02c657d20cab4e1098a0c7d3f9"
+  },
+  "images/view-note-learning.svg": {
+    "bytes": 2935,
+    "compressedBytes": 963,
+    "sha256": "b709fd69edd0a0659b863e59376db15fcb657b9681929d7923ffb6ea210582f1"
+  },
+  "images/view-note-review.svg": {
+    "bytes": 2933,
+    "compressedBytes": 958,
+    "sha256": "e8b8f02b1fd45fb854aae40215b8fc4b7b2f8a42009118ed0e241e9601fe426d"
+  },
+  "images/view-note-suspended.svg": {
+    "bytes": 2825,
+    "compressedBytes": 944,
+    "sha256": "9a04a3d0f70003db4c20c3375ed26daed33a455d454e1ec60e37f68ece8e025c"
+  },
+  "images/view-note.svg": {
+    "bytes": 1213,
+    "compressedBytes": 522,
+    "sha256": "c3bb69b9b6b42ac7429a9f64e285867c9841e646ec1945a2e4abb860c793712f"
+  },
+  "images/window.svg": {
+    "bytes": 220,
+    "compressedBytes": 169,
+    "sha256": "d20ed5b1daa631c33dde59cdc20df97621a7dce4dc14ee719d7bfef5015409cf"
+  },
+  "images/yomitan-icon.svg": {
+    "bytes": 1406,
+    "compressedBytes": 785,
+    "sha256": "85d5c526c0c9feda232df40c420e12850673b6627283da7ccba7562727efd3aa"
+  },
+  "info.html": {
+    "bytes": 5300,
+    "compressedBytes": 1276,
+    "sha256": "daf5c22cdf4a6fc2f6e56b463e22a4530986aeb493b2db3a1bc76062ee650a74"
+  },
+  "issues.html": {
+    "bytes": 4345,
+    "compressedBytes": 1318,
+    "sha256": "c561128caaedd4081575c13be7d76a7de177ea01e28679c23a71d274e500fbd5"
+  },
+  "js/accessibility/accessibility-controller.js": {
+    "bytes": 4593,
+    "compressedBytes": 1425,
+    "sha256": "d9059d429a6b700cb8ba5f5bc6d6c063c0399626638779469e3a909c9dc9c462"
+  },
+  "js/accessibility/google-docs-util.js": {
+    "bytes": 6506,
+    "compressedBytes": 2205,
+    "sha256": "0389341d9c776ad1a7cf2274b2f8176cb726a60a44196502227978289149709c"
+  },
+  "js/accessibility/google-docs-xray.js": {
+    "bytes": 1228,
+    "compressedBytes": 720,
+    "sha256": "f863db89d2372617846af5bd91b1f51ae0425260cdd392ee66bcb4b7bef5fb6d"
+  },
+  "js/accessibility/google-docs.js": {
+    "bytes": 973,
+    "compressedBytes": 587,
+    "sha256": "cfdd2e60da06ff1503d3ebd7ee2f7f17de94a8222742589b6238e2c2d11aa825"
+  },
+  "js/app/content-script-main.js": {
+    "bytes": 3118,
+    "compressedBytes": 1297,
+    "sha256": "5a45df4db4530521deb86724a48e99595b36e65fd2ed75db450d7a5c645423f1"
+  },
+  "js/app/content-script-wrapper.js": {
+    "bytes": 917,
+    "compressedBytes": 544,
+    "sha256": "b451d74498a4c63148c535cff786617db66fd5832031627489125397bff4179a"
+  },
+  "js/app/frontend.js": {
+    "bytes": 70839,
+    "compressedBytes": 13394,
+    "sha256": "dedf6dc4b073e487494ce971a852040f26ad2f4d6787ec580ac55160a977c996"
+  },
+  "js/app/popup-factory.js": {
+    "bytes": 18660,
+    "compressedBytes": 3926,
+    "sha256": "3d5db7e7114bbad67512dfa86c5786b4d51813f14e49d389acbdc1fb0a9d6836"
+  },
+  "js/app/popup-proxy.js": {
+    "bytes": 15726,
+    "compressedBytes": 3720,
+    "sha256": "32cf1651a94e50380d2aacd52f5efcb98a3da93c80d225142a8d97159473adaf"
+  },
+  "js/app/popup-window.js": {
+    "bytes": 14080,
+    "compressedBytes": 3525,
+    "sha256": "74df00c4cda2bad4ef3fe0b118d80d1cac0a9dd4a9eb76ba62f5aca3294cb91b"
+  },
+  "js/app/popup.js": {
+    "bytes": 56302,
+    "compressedBytes": 11400,
+    "sha256": "77407ca56e08759c67372664d6c939dcdb8a8a9251946797b34805b5593bee3b"
+  },
+  "js/app/reader-lookup-bridge.js": {
+    "bytes": 18008,
+    "compressedBytes": 5223,
+    "sha256": "3151009adadcbbb0245cda9928ab779cebfabfe0ad1913243f3cc91f3b7e1461"
+  },
+  "js/app/reader-lookup-integration.js": {
+    "bytes": 3723,
+    "compressedBytes": 1525,
+    "sha256": "2a0a4706645d277b8de18e17555cbf7a8fbd4fea79f2ba0126e3967db483f01c"
+  },
+  "js/app/theme-controller.js": {
+    "bytes": 8660,
+    "compressedBytes": 2414,
+    "sha256": "d3e32c6d08c6fc9a9c5ce9946424e1dc0666b8b51967a13791e0b1b156a78cd7"
+  },
+  "js/application.js": {
+    "bytes": 22727,
+    "compressedBytes": 5602,
+    "sha256": "1329ade81cbb3669868fb6a3fa7b6a6441046af88f45c5019d18b218c082ccac"
+  },
+  "js/background/backend.js": {
+    "bytes": 292626,
+    "compressedBytes": 53438,
+    "sha256": "2fb474bbfb09b254a8dffba1c8015b0fcb73dccf6e703322afef563504c1a1cc"
+  },
+  "js/background/background-main.js": {
+    "bytes": 3360,
+    "compressedBytes": 1138,
+    "sha256": "4e034371836715a070f16bc64a2a5f428d7a1557750267f56e52a5bb63428af9"
+  },
+  "js/background/dictionary-runtime-action-policy.js": {
+    "bytes": 6423,
+    "compressedBytes": 1740,
+    "sha256": "f23c8d3aebe13d54480df2d92049eabed1559d4a1c7739a6d86931d0f10374d0"
+  },
+  "js/background/dictionary-worker-client.js": {
+    "bytes": 16450,
+    "compressedBytes": 3846,
+    "sha256": "9f732f584878b341ee1bb5b94878b6a063c03c00ec80a7e89c8cc76c19502643"
+  },
+  "js/background/offscreen-dictionary-worker.js": {
+    "bytes": 45245,
+    "compressedBytes": 8653,
+    "sha256": "93e257e21b52a269a5a91df308ebf8ef49105abda339d850c9e2b50a3abf487e"
+  },
+  "js/background/offscreen-main.js": {
+    "bytes": 903,
+    "compressedBytes": 516,
+    "sha256": "0a02bfc186d7296e4a11a792f2e01a65611ce4a9b08c99d679d893d21a02c23e"
+  },
+  "js/background/offscreen-proxy.js": {
+    "bytes": 34317,
+    "compressedBytes": 7418,
+    "sha256": "8580fe56f86cc915ab0f30b1a8ba2c5acc1c8def8418f0e91f945ade72688af6"
+  },
+  "js/background/offscreen.js": {
+    "bytes": 23107,
+    "compressedBytes": 4831,
+    "sha256": "0d8b6a83923b8f899008c746059e7d40c33587f9489b826a7b3a15ed6c0445b2"
+  },
+  "js/background/profile-conditions-util.js": {
+    "bytes": 11493,
+    "compressedBytes": 2424,
+    "sha256": "11627fe629746158dc8c064e0d41428b5d8ed0d6513672da62a28ebacfd796bc"
+  },
+  "js/background/request-builder.js": {
+    "bytes": 13308,
+    "compressedBytes": 3472,
+    "sha256": "93f3ac69aacdc11199f0b281653f7037e01f687350c433edf10e198f10fd7518"
+  },
+  "js/background/script-manager.js": {
+    "bytes": 5778,
+    "compressedBytes": 1793,
+    "sha256": "8da3f3a17ab5fd68317993e2161d71b97f8e0915b499eeacdb35f23e655dc326"
+  },
+  "js/comm/anki-connect.js": {
+    "bytes": 34033,
+    "compressedBytes": 6022,
+    "sha256": "42992c21b7e90c0139118c55ddccd14cd1a6a425d800d2f509350548301d012d"
+  },
+  "js/comm/api.js": {
+    "bytes": 56592,
+    "compressedBytes": 9682,
+    "sha256": "38470100d3389150ca34f55b725f1ca548e74161bd3d589a8538cf1fc4c84fda"
+  },
+  "js/comm/clipboard-monitor.js": {
+    "bytes": 4498,
+    "compressedBytes": 1517,
+    "sha256": "1342d949d8f5abb40951378f6bf7e4f0c5fa3e5175ff573bb7009119b755450b"
+  },
+  "js/comm/clipboard-reader.js": {
+    "bytes": 8244,
+    "compressedBytes": 2384,
+    "sha256": "e13aae7016abc6ba3b142dd5bc6c344df418a35dd5fa2e5a061dc7e6dabd2363"
+  },
+  "js/comm/cross-frame-api.js": {
+    "bytes": 17562,
+    "compressedBytes": 3632,
+    "sha256": "8f55aafead0d3136680bd956e8085a9a224aa8c337a359f105ae1bbc545fbe5a"
+  },
+  "js/comm/dictionary-import-owner-client.js": {
+    "bytes": 4332,
+    "compressedBytes": 1588,
+    "sha256": "11c6b14e6548c74dffd9e62bb9cc87b468490641ba702823c1986b4ada4d840a"
+  },
+  "js/comm/dictionary-worker-backend.js": {
+    "bytes": 4256,
+    "compressedBytes": 1476,
+    "sha256": "c49de0c378a778fc60cb12237744820cfcb9caf22449db342513cf058bab1499"
+  },
+  "js/comm/firefox-backend-port.js": {
+    "bytes": 1930,
+    "compressedBytes": 892,
+    "sha256": "a4e90c46e8b53ad17d31ab9023d3846e3261352cfed7f25e5f4be478d3f0f96e"
+  },
+  "js/comm/frame-ancestry-handler.js": {
+    "bytes": 12504,
+    "compressedBytes": 3415,
+    "sha256": "cbc6dc76d32569577a95d86b394c69af5ef5c08bda8accd79a61386a10379653"
+  },
+  "js/comm/frame-client.js": {
+    "bytes": 9012,
+    "compressedBytes": 2306,
+    "sha256": "3302c0b7edcf81fc4ce80608d93a1e47f3669bcc0c5e233277d36077008c5756"
+  },
+  "js/comm/frame-endpoint.js": {
+    "bytes": 5405,
+    "compressedBytes": 1672,
+    "sha256": "c86dbbe86ac7939f5eca58a0cdb6dd4dc11b929bd5bf469c3b42d033d1b5524a"
+  },
+  "js/comm/frame-offset-forwarder.js": {
+    "bytes": 3250,
+    "compressedBytes": 1171,
+    "sha256": "652d389708d6c9c4491c187a607aa0d2550cde389be93946e54ec04e7c0673f1"
+  },
+  "js/comm/mdx.js": {
+    "bytes": 15903,
+    "compressedBytes": 4120,
+    "sha256": "ee15d1cfc9f3db6d9b1a7f0b0f19b768795f6c9755b16796d4bb17a1abcbc418"
+  },
+  "js/comm/mecab.js": {
+    "bytes": 18334,
+    "compressedBytes": 4296,
+    "sha256": "f21ecead1b6201f9ed8b1420ea1dbda6e68538bc14c11481f1f75b059818bda9"
+  },
+  "js/comm/shared-worker-bridge.js": {
+    "bytes": 6951,
+    "compressedBytes": 2113,
+    "sha256": "2bf313ec1b8f70764ffc81fde5d998097c084a62399fd021bb524e6258e9c939"
+  },
+  "js/comm/yomitan-api.js": {
+    "bytes": 33395,
+    "compressedBytes": 6896,
+    "sha256": "1b7063da8477f0e4010b520fb1ec4e71846430185797488afaa5eb3130dd2f53"
+  },
+  "js/core/api-map.js": {
+    "bytes": 5260,
+    "compressedBytes": 1626,
+    "sha256": "efb6a5fe7e6f020ced6ac25c73099d7c9d394c2639708ed097e46f2b21e8263e"
+  },
+  "js/core/diagnostics-reporter.js": {
+    "bytes": 20089,
+    "compressedBytes": 4166,
+    "sha256": "79f9e7da62604b281e18556a27bfd1583bfa25db9349cf55793f4b555512a633"
+  },
+  "js/core/dictionary-import-busy-error.js": {
+    "bytes": 1348,
+    "compressedBytes": 709,
+    "sha256": "fb953e215efffe7b14e09a64ced9dbd6573751375e6874e0cc0f45ddf5856562"
+  },
+  "js/core/dictionary-storage-unavailable-error.js": {
+    "bytes": 1384,
+    "compressedBytes": 705,
+    "sha256": "3c76fc64f7b18817e1f76b489f71263371ad5d6d29da2f7c096256f7facc4daf"
+  },
+  "js/core/dynamic-property.js": {
+    "bytes": 4760,
+    "compressedBytes": 1612,
+    "sha256": "0bf0d0d81e8179067f7e3e35ad7a8b76fb703da189c2921e3d65c06b38e1faf0"
+  },
+  "js/core/event-dispatcher.js": {
+    "bytes": 4435,
+    "compressedBytes": 1425,
+    "sha256": "e6c3ad40c2ff50bb3d5350c61d0de5a33481993db8a8b902b7b58200fb9a294a"
+  },
+  "js/core/event-listener-collection.js": {
+    "bytes": 4690,
+    "compressedBytes": 1449,
+    "sha256": "eef85a815fd2bd15d8f6a89ee6e22124971d64ac5a48db256e4009080eba3947"
+  },
+  "js/core/extension-error.js": {
+    "bytes": 3827,
+    "compressedBytes": 1451,
+    "sha256": "73980b7372ea23ef3bdb809b03602210ced1f45b988079c82d3a3081bd764284"
+  },
+  "js/core/fetch-utilities.js": {
+    "bytes": 2918,
+    "compressedBytes": 1297,
+    "sha256": "d43ca34b3f053ddbd53f3f125ea2b89767b9d8725464b0cd4132d9470985759f"
+  },
+  "js/core/json.js": {
+    "bytes": 1504,
+    "compressedBytes": 737,
+    "sha256": "b06cc571c7640fc18772599dfa20c84955463997bc35bfea2b9878a3ccb3458f"
+  },
+  "js/core/log-utilities.js": {
+    "bytes": 953,
+    "compressedBytes": 535,
+    "sha256": "e1be1b754ec876c75d38221964584f098e4d2aa8573843fbbac2ef9dc1cf7896"
+  },
+  "js/core/log.js": {
+    "bytes": 5703,
+    "compressedBytes": 1846,
+    "sha256": "f2974071c8fe45070f9fcbf7a33353805c254d53c35042999714eb3ce14e7791"
+  },
+  "js/core/object-utilities.js": {
+    "bytes": 1096,
+    "compressedBytes": 558,
+    "sha256": "8abb0fc0960e5fe57a0c3d2fe7a9fd39da78c3eaa3fecf87263afb6ec37e4bf9"
+  },
+  "js/core/promise-animation-frame.js": {
+    "bytes": 2611,
+    "compressedBytes": 1079,
+    "sha256": "c9147722c98aabf61fd3ef308e749ab476a9573394a85703f07b8503caaeb4cc"
+  },
+  "js/core/retryable-promise-cache.js": {
+    "bytes": 1350,
+    "compressedBytes": 653,
+    "sha256": "7d54a27eb7fcd7bdc8ecb6b1529264a8dc59d9678c2d4c4c8a1a57955cb932e6"
+  },
+  "js/core/safe-performance.js": {
+    "bytes": 2386,
+    "compressedBytes": 949,
+    "sha256": "492fe81d7671ba8755d2da06a56289355307d5949c9017df42156d1d0af5a6a2"
+  },
+  "js/core/to-error.js": {
+    "bytes": 1337,
+    "compressedBytes": 707,
+    "sha256": "4878316377cf5022df944cc6e389a3c7e5f8ea2d9bcf630ca2ab0ea33120818f"
+  },
+  "js/core/utilities.js": {
+    "bytes": 12427,
+    "compressedBytes": 3590,
+    "sha256": "e1e7544a5369e1af43d89b7758a305221455315935c167e4043071c8785786b6"
+  },
+  "js/core/weighted-lru-map.js": {
+    "bytes": 2976,
+    "compressedBytes": 1088,
+    "sha256": "4b95bbed3ba12e343304d3a1fa2b5e89873edf169727ae1cc4f382692908f812"
+  },
+  "js/data/anki-note-builder.js": {
+    "bytes": 32132,
+    "compressedBytes": 6681,
+    "sha256": "9d023666bd0696a0a18dfe99b453fd648126e805107a621c7f99dc990ef080ef"
+  },
+  "js/data/anki-note-data-creator.js": {
+    "bytes": 40773,
+    "compressedBytes": 6315,
+    "sha256": "22f6ebe9354a70133cfa44decda6123475e7cd426fce1def032fcc71a66272b7"
+  },
+  "js/data/anki-note-query-util.js": {
+    "bytes": 6711,
+    "compressedBytes": 1803,
+    "sha256": "cbb68217e6c8e361b1a5663b2c757854a4c73fa93bfee16d6f34cbc313b57bfa"
+  },
+  "js/data/anki-note-type-field-util.js": {
+    "bytes": 8972,
+    "compressedBytes": 2573,
+    "sha256": "46cbb8dcf31f13dd533ac8272bdaebb7439d11da7e3187ecc50d2202070e0940"
+  },
+  "js/data/anki-template-util.js": {
+    "bytes": 8843,
+    "compressedBytes": 2156,
+    "sha256": "8d89429a41a1398129668a258b01e8089a2215994c6d8caf838315e0c07f12cb"
+  },
+  "js/data/anki-util.js": {
+    "bytes": 5891,
+    "compressedBytes": 2153,
+    "sha256": "d0058c1830109c4bfb0e42c089b70463159969e1130e8f15d0aade5c471a5c5d"
+  },
+  "js/data/array-buffer-util.js": {
+    "bytes": 2933,
+    "compressedBytes": 1083,
+    "sha256": "81dea241ddd2c49ea77df8e10171e16cd2e1413d988eb44b37b38e62bf623a88"
+  },
+  "js/data/data-transmission-consent-util.js": {
+    "bytes": 2518,
+    "compressedBytes": 946,
+    "sha256": "0ea59ab5773b7d3cb065c89b7990ce975205bc0bd361c5e4c3f1b2a64edd9ecc"
+  },
+  "js/data/database.js": {
+    "bytes": 24029,
+    "compressedBytes": 4645,
+    "sha256": "195040108b15f9471a21a939b8687cd68c6df95de00b3d4b8fe69c76262ff891"
+  },
+  "js/data/dictionary-replacement.js": {
+    "bytes": 3496,
+    "compressedBytes": 1345,
+    "sha256": "1f6b00dc755eddc62a7985e70ee83c5525a355cfec9e64cbff9c836b6c52d085"
+  },
+  "js/data/json-schema.js": {
+    "bytes": 45188,
+    "compressedBytes": 6993,
+    "sha256": "cf503c4001281433f0d9459d679212bd29550774a2b1876793cf88fcdb30ad09"
+  },
+  "js/data/options-util.js": {
+    "bytes": 74234,
+    "compressedBytes": 12755,
+    "sha256": "840fa2cbe3a9c99e7a338928f25ae40d269b1d70c411f43d17d2a4e028319232"
+  },
+  "js/data/permissions-util.js": {
+    "bytes": 4924,
+    "compressedBytes": 1472,
+    "sha256": "f3bad915a830a1a44ffbf1da987fd720cf9033bc8418c2235401b5cce07e5080"
+  },
+  "js/data/profiles-util.js": {
+    "bytes": 3132,
+    "compressedBytes": 1330,
+    "sha256": "0f7a74672d39636e8fe3e9d5e37650e58422e9c401499f7576ca276e4525b0f8"
+  },
+  "js/data/string-util.js": {
+    "bytes": 3427,
+    "compressedBytes": 1087,
+    "sha256": "9242742478450ae80c151cc838c210d169e458cf83ddac6c7e13f8b7bfb1ec86"
+  },
+  "js/dictionary/dense-zip-directory.js": {
+    "bytes": 7022,
+    "compressedBytes": 2154,
+    "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+  },
+  "js/dictionary/dictionary-auto-update-util.js": {
+    "bytes": 5845,
+    "compressedBytes": 1480,
+    "sha256": "bbe652dc81f3c3ee2c2e34d1bba61154ac4688106f1996d4f424f577fa2732aa"
+  },
+  "js/dictionary/dictionary-data-util.js": {
+    "bytes": 17541,
+    "compressedBytes": 3716,
+    "sha256": "52ccbcef81ba0e9f50373bb334683f1678189d9de48fd5b76594ec56509c3277"
+  },
+  "js/dictionary/dictionary-database-worker-handler.js": {
+    "bytes": 2802,
+    "compressedBytes": 1125,
+    "sha256": "e3abbfac99fe6253616581182306d963c63c29d1ae7a8860156f84ff54a997a3"
+  },
+  "js/dictionary/dictionary-database-worker-main.js": {
+    "bytes": 1076,
+    "compressedBytes": 575,
+    "sha256": "5a99419488b80f5d2d96c87696e34143dd57f6fc2d3cf05b877370e0994ad775"
+  },
+  "js/dictionary/dictionary-database.js": {
+    "bytes": 606791,
+    "compressedBytes": 101650,
+    "sha256": "a971553aea3e32e287e4dc96afc247c48ad8e82dba3290a762ba1fe08c16eb02"
+  },
+  "js/dictionary/dictionary-generation-media-store.js": {
+    "bytes": 25951,
+    "compressedBytes": 6330,
+    "sha256": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583"
+  },
+  "js/dictionary/dictionary-image-references.js": {
+    "bytes": 2694,
+    "compressedBytes": 991,
+    "sha256": "dd461816f58678ee25ef244cab0ad5ddadfd1a5b6ff2106e6c3995b9d8164c51"
+  },
+  "js/dictionary/dictionary-import-journal.js": {
+    "bytes": 9156,
+    "compressedBytes": 2677,
+    "sha256": "9158be7ff523c14f1fb75a7118f5cc3b72a9fa1250b84adc2a1275b572baca5c"
+  },
+  "js/dictionary/dictionary-import-session.js": {
+    "bytes": 10534,
+    "compressedBytes": 2529,
+    "sha256": "738c27011ee4b48ccc510bbc420a100ba2434a668b4e35624a68ae30730a5263"
+  },
+  "js/dictionary/dictionary-importer-media-loader.js": {
+    "bytes": 5230,
+    "compressedBytes": 1555,
+    "sha256": "09acc28bb11af7957130902d6be082cff1fbd3a4719727434209c7ddb3a921a7"
+  },
+  "js/dictionary/dictionary-importer.js": {
+    "bytes": 342327,
+    "compressedBytes": 57426,
+    "sha256": "fd334be027b74c951ffc61a80bee68f40fe5acc9350ea5e2fab7f343b5b53184"
+  },
+  "js/dictionary/dictionary-media-renderer.js": {
+    "bytes": 4488,
+    "compressedBytes": 1585,
+    "sha256": "3a18f71077066b70f8f027dd5183ae32850c9e3741a8b08023621f68a30d3d5d"
+  },
+  "js/dictionary/dictionary-source-integrity-error.js": {
+    "bytes": 1008,
+    "compressedBytes": 568,
+    "sha256": "50888da9c9e084d3c17a2baf9e5ce2bea36d2ad266b3b909826920d323504059"
+  },
+  "js/dictionary/dictionary-worker-handler.js": {
+    "bytes": 23478,
+    "compressedBytes": 5137,
+    "sha256": "4bd2bf8c7c1a62aa158679019ab4f925039e1cdb3358d0932664b5d8c6befdf3"
+  },
+  "js/dictionary/dictionary-worker-main.js": {
+    "bytes": 1214,
+    "compressedBytes": 616,
+    "sha256": "e05325296ee9cabec5710f27cf48c848a6b08f8284a53da330c82324670d4971"
+  },
+  "js/dictionary/dictionary-worker-media-loader.js": {
+    "bytes": 4319,
+    "compressedBytes": 1592,
+    "sha256": "87bce441dc57d52416f13f357ab258829d70c843a1b79305a6d5c1ee312118c9"
+  },
+  "js/dictionary/dictionary-worker.js": {
+    "bytes": 19426,
+    "compressedBytes": 4309,
+    "sha256": "5eb659db89b469a16aa9f89bd27ec891e7ee0a1a07b60103d8433253dccb4524"
+  },
+  "js/dictionary/dictionary-zip-read-scope.js": {
+    "bytes": 3411,
+    "compressedBytes": 1220,
+    "sha256": "1658bd775e585cdb0ad81e966414ec95e0ffd269ea8a2fd28e151a7c5d09f9b5"
+  },
+  "js/dictionary/mdict-import-sources.js": {
+    "bytes": 6450,
+    "compressedBytes": 2335,
+    "sha256": "ed413aa160cc1f1fd2fd1ab6c85774dbbf3304a233e600458580ea7a3b578414"
+  },
+  "js/dictionary/mdx-worker-main.js": {
+    "bytes": 3524,
+    "compressedBytes": 1257,
+    "sha256": "3c9d7364ea47a80892a5ff44cea2c08d62d41ea9348df9afe81ec91d0a228d0e"
+  },
+  "js/dictionary/mdx/browser-util.js": {
+    "bytes": 1821,
+    "compressedBytes": 839,
+    "sha256": "85b777b416c697d271bd13d17679bc3cca00ef885907c4f3e2c68bacac947320"
+  },
+  "js/dictionary/mdx/mdx-converter.js": {
+    "bytes": 93657,
+    "compressedBytes": 19439,
+    "sha256": "b01f100c37f75ec603cd50047b4e64099e1ffe93df46685cb1455be0df06ec91"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/latins.js": {
+    "bytes": 269,
+    "compressedBytes": 170,
+    "sha256": "c3075cc5f432fe719fe03e4cf6717842899b3736cbcf3f6702e535b6464f244a"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/lzo1x-wrapper.js": {
+    "bytes": 897,
+    "compressedBytes": 449,
+    "sha256": "00aec3e8288c0e89f3a10d1077f0cd0c547e3fcc187fbb3c29103272a741b8a1"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/lzo1x.js": {
+    "bytes": 23753,
+    "compressedBytes": 4269,
+    "sha256": "cc962f070b38e3ca112b662f6a6033a097d1463fc5976994ade5bc86cfc7987a"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/mdd.js": {
+    "bytes": 951,
+    "compressedBytes": 370,
+    "sha256": "5d433d655e696addbfb7c7384c604c826a293fbaabef510d22af7e270e744ec8"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/mdict-base.js": {
+    "bytes": 46943,
+    "compressedBytes": 10812,
+    "sha256": "0d693ab61dea3a2c9050ba22d65c8f908fac49d8d3a5cfb543e0638903b07b05"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/mdict.js": {
+    "bytes": 16123,
+    "compressedBytes": 4407,
+    "sha256": "8d12ad75b861471adf99e7041bd4483626fea0370a89e4584e69e44026eb8228"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/mdx.js": {
+    "bytes": 4165,
+    "compressedBytes": 1015,
+    "sha256": "2333d68b056f579d8a67cb3736932a20c0a62c299f99788c944dd9009f9b2dda"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/ripemd128.js": {
+    "bytes": 4837,
+    "compressedBytes": 1823,
+    "sha256": "c76262ffe381fd7fb52c2924d9b1b926ec46c1b3767223f70537aea12f779c28"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/scanner.js": {
+    "bytes": 1593,
+    "compressedBytes": 570,
+    "sha256": "0d9ae005ebe91ea9a2bcea64977b5ca4beba1deb6f724fe367a4c72e6480d793"
+  },
+  "js/dictionary/mdx/vendor/js-mdict/utils.js": {
+    "bytes": 13536,
+    "compressedBytes": 4454,
+    "sha256": "dbbb106ed448b750d68b6f6c347633d1a8eb6015b925c8c82640ced92762fb31"
+  },
+  "js/dictionary/mdx/vendor/pako-inflate.js": {
+    "bytes": 108680,
+    "compressedBytes": 25829,
+    "sha256": "af8083e0623ee1525fb66e1889d875efb18e8630e70e1b79b1f4b98cd07075ea"
+  },
+  "js/dictionary/mdx/vendor/pako.js": {
+    "bytes": 3366,
+    "compressedBytes": 1435,
+    "sha256": "75601726e1ff1abd5f49ee7cf239a60147ab86d94328f8962c7c7d17b59e0d7c"
+  },
+  "js/dictionary/raw-term-content.js": {
+    "bytes": 26429,
+    "compressedBytes": 4311,
+    "sha256": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db"
+  },
+  "js/dictionary/source-zip-media-pack.js": {
+    "bytes": 10725,
+    "compressedBytes": 3271,
+    "sha256": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d"
+  },
+  "js/dictionary/source-zip-media-preparation-worker.js": {
+    "bytes": 2542,
+    "compressedBytes": 1131,
+    "sha256": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722"
+  },
+  "js/dictionary/source-zip-media-preparation.js": {
+    "bytes": 3362,
+    "compressedBytes": 1387,
+    "sha256": "ddbb0787758644ecf8f5b1c3df7b66bc3ebbe3bd7108b7a5e1e60340f8fab613"
+  },
+  "js/dictionary/sqlite-wasm.js": {
+    "bytes": 20018,
+    "compressedBytes": 4059,
+    "sha256": "87faa573e4cb1cfcf36a304ea4eb6ff18f56f85b481c680a20d98661d451da14"
+  },
+  "js/dictionary/term-bank-experiments.js": {
+    "bytes": 3523,
+    "compressedBytes": 1213,
+    "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb"
+  },
+  "js/dictionary/term-bank-source-crc.js": {
+    "bytes": 3073,
+    "compressedBytes": 1319,
+    "sha256": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3"
+  },
+  "js/dictionary/term-bank-source-pipeline.js": {
+    "bytes": 46722,
+    "compressedBytes": 10071,
+    "sha256": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8"
+  },
+  "js/dictionary/term-bank-wasm-parser-worker.js": {
+    "bytes": 15334,
+    "compressedBytes": 3948,
+    "sha256": "802c71c1dce71d3c68931eb2fd52f651d2ffe03b4b2ac86136cb031aaa7d5257"
+  },
+  "js/dictionary/term-bank-wasm-parser.js": {
+    "bytes": 204189,
+    "compressedBytes": 37757,
+    "sha256": "bcf95af0cd0fbc9eb8bb933d812e8de4a3c5d4538a8e28be267d5991e44224ed"
+  },
+  "js/dictionary/term-content-block-envelope.js": {
+    "bytes": 2041,
+    "compressedBytes": 900,
+    "sha256": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018"
+  },
+  "js/dictionary/term-content-block-store.js": {
+    "bytes": 69699,
+    "compressedBytes": 11781,
+    "sha256": "cfc5bd1877325515cb904a2f23e4d1e297279a2f13857b474188bb9c399f1fd0"
+  },
+  "js/dictionary/term-content-canonical-layout.js": {
+    "bytes": 1827,
+    "compressedBytes": 799,
+    "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c"
+  },
+  "js/dictionary/term-content-canonical-scan.js": {
+    "bytes": 19536,
+    "compressedBytes": 5163,
+    "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+  },
+  "js/dictionary/term-content-metadata-arena.js": {
+    "bytes": 4748,
+    "compressedBytes": 1529,
+    "sha256": "9aa2d546bb46cd0073b33bd31c43d76f421f158b529995dc94ee583dee54e14c"
+  },
+  "js/dictionary/term-content-opfs-store.js": {
+    "bytes": 101919,
+    "compressedBytes": 16928,
+    "sha256": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1"
+  },
+  "js/dictionary/term-content-ownership.js": {
+    "bytes": 3094,
+    "compressedBytes": 1290,
+    "sha256": "f4e1ff01ef9be198dbf55f7456b52f9981868cef9bff3162164c6c757c26fcba"
+  },
+  "js/dictionary/term-entry-content-hash.js": {
+    "bytes": 5729,
+    "compressedBytes": 1634,
+    "sha256": "99429f2a812ccac6538c914555775895c5a1115325dd9b0eb42886d23fbca23d"
+  },
+  "js/dictionary/term-import-metrics.js": {
+    "bytes": 3043,
+    "compressedBytes": 1174,
+    "sha256": "419e9d3deeeb6d2599550dc72b3b1ece4476a5f410040d338614456697e763b1"
+  },
+  "js/dictionary/term-key-hash.js": {
+    "bytes": 5175,
+    "compressedBytes": 1473,
+    "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208"
+  },
+  "js/dictionary/term-lookup-index-preparation.js": {
+    "bytes": 11107,
+    "compressedBytes": 2980,
+    "sha256": "1a60e1f06859a125e812d168ce252366f40153be502bc7da9120c2e916c9dac9"
+  },
+  "js/dictionary/term-lookup-index.js": {
+    "bytes": 67571,
+    "compressedBytes": 12247,
+    "sha256": "55e2107131752f0f1bb4af36b1b2cb18d2ab00954b505c3c81e98db5bfa85bb2"
+  },
+  "js/dictionary/term-lookup-scratch.js": {
+    "bytes": 2970,
+    "compressedBytes": 1219,
+    "sha256": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1"
+  },
+  "js/dictionary/term-record-import-index-worker-client.js": {
+    "bytes": 15400,
+    "compressedBytes": 4233,
+    "sha256": "789cc3e561b3d0dee8b2392686e3d8fb5bc4ee9c37b79d71968685b7f9168afd"
+  },
+  "js/dictionary/term-record-import-index-worker.js": {
+    "bytes": 3877,
+    "compressedBytes": 1353,
+    "sha256": "b3c37ab9f128e4ffda68720f48612874acacf0ae520c7b6d968d063f12b69974"
+  },
+  "js/dictionary/term-record-import-index-writer.js": {
+    "bytes": 11446,
+    "compressedBytes": 3163,
+    "sha256": "f09b504275ee71a60c96fad6d953aa16d8cc0033a85cfd6840fff01f9cce5f29"
+  },
+  "js/dictionary/term-record-opfs-store.js": {
+    "bytes": 346801,
+    "compressedBytes": 54774,
+    "sha256": "811956daac4b85050d9ef6745ae3d1e0de22d134854eb289b7435825199a63ca"
+  },
+  "js/dictionary/term-record-preinterned-plan.js": {
+    "bytes": 25232,
+    "compressedBytes": 5139,
+    "sha256": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b"
+  },
+  "js/dictionary/wasm/term-bank-inflate.c": {
+    "bytes": 1234,
+    "compressedBytes": 628,
+    "sha256": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc"
+  },
+  "js/dictionary/wasm/term-bank-parser.c": {
+    "bytes": 149389,
+    "compressedBytes": 26907,
+    "sha256": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4"
+  },
+  "js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+    "bytes": 7626,
+    "compressedBytes": 2726,
+    "sha256": "fee76ae817358be978aa75f0f5638b5902ef9f26a0c644e37ec581be504583d0"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/COPYING": {
+    "bytes": 1078,
+    "compressedBytes": 631,
+    "sha256": "4ad69099cb4374836fd27583d9991e2838cd86b6e4666ab26b2d32582c91e73a"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/README.md": {
+    "bytes": 3338,
+    "compressedBytes": 1641,
+    "sha256": "1aa68185f1fc2cb9a6e25612ebb07f6527a6695fbe17d60b0c43011b0e578ac9"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/common_defs.h": {
+    "bytes": 21674,
+    "compressedBytes": 5941,
+    "sha256": "00ff4bdc24e0003fb9a3f18e692d21cc59200f09920d327fa1341a33915bbc71"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": {
+    "bytes": 25048,
+    "compressedBytes": 6966,
+    "sha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/lib/deflate_constants.h": {
+    "bytes": 1747,
+    "compressedBytes": 684,
+    "sha256": "72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/lib/deflate_decompress.c": {
+    "bytes": 49357,
+    "compressedBytes": 14835,
+    "sha256": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/lib/lib_common.h": {
+    "bytes": 3624,
+    "compressedBytes": 1582,
+    "sha256": "e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea"
+  },
+  "js/dictionary/wasm/vendor/libdeflate/libdeflate.h": {
+    "bytes": 17157,
+    "compressedBytes": 4401,
+    "sha256": "1bb50a3ff8c6980c1031c0e9bb324cf99df51379fdca77a358644cca841765cc"
+  },
+  "js/dictionary/wasm/vendor/miniz/LICENSE": {
+    "bytes": 1162,
+    "compressedBytes": 672,
+    "sha256": "6f20fa7672b00e2e975c291df737cf227addf3ad32e36fef3fe0f416e4664d3d"
+  },
+  "js/dictionary/wasm/vendor/miniz/miniz.h": {
+    "bytes": 28333,
+    "compressedBytes": 8124,
+    "sha256": "619fbff2e98605a83f327a2879d52f219b5edaa579036a657937910f0707a43b"
+  },
+  "js/dictionary/wasm/vendor/miniz/miniz_common.h": {
+    "bytes": 2469,
+    "compressedBytes": 847,
+    "sha256": "e015eb5bc667062cbd53451438dd49bb9904c6a7765c806b765f6f735cf01a06"
+  },
+  "js/dictionary/wasm/vendor/miniz/miniz_export.h": {
+    "bytes": 34,
+    "compressedBytes": 36,
+    "sha256": "195259dc89fb3f83a96426a90ee03dc45acef113150cd3475ea9cfbf1f7784f3"
+  },
+  "js/dictionary/wasm/vendor/miniz/miniz_tinfl.c": {
+    "bytes": 41234,
+    "compressedBytes": 7813,
+    "sha256": "05930a45b5d9fdd5786c4e631373cdfec32b7be50ec0906d3b98caa503e068f3"
+  },
+  "js/dictionary/wasm/vendor/miniz/miniz_tinfl.h": {
+    "bytes": 8695,
+    "compressedBytes": 2957,
+    "sha256": "da4850920fdf09f8877d9affabe1ebba1852ce4b1ebbd121f2ba7a7ea8e57e5d"
+  },
+  "js/dictionary/zstd-resource-error.js": {
+    "bytes": 1847,
+    "compressedBytes": 766,
+    "sha256": "f13bfe2afa25d35455f78cbd7928160de5de6f9d793a620108d48778c8fd03cb"
+  },
+  "js/dictionary/zstd-term-content-compression-worker.js": {
+    "bytes": 4055,
+    "compressedBytes": 1444,
+    "sha256": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247"
+  },
+  "js/dictionary/zstd-term-content.js": {
+    "bytes": 40213,
+    "compressedBytes": 7968,
+    "sha256": "6b4ccd44191ecc84d29eb5641ed1da087c8497373ee64229824ca54727a99ae9"
+  },
+  "js/display/dictionary-css-media-resolver.js": {
+    "bytes": 15155,
+    "compressedBytes": 4062,
+    "sha256": "51808f08de6b104f54e580e2a01cc82f063062d7c26d02913273cb161a04ae8e"
+  },
+  "js/display/dictionary-css-media-targets.js": {
+    "bytes": 4100,
+    "compressedBytes": 1511,
+    "sha256": "05ca784bc85a5495d8c6564f0baa1e1828043b617d1c4e11fe66a59cf358d265"
+  },
+  "js/display/display-anki.js": {
+    "bytes": 89667,
+    "compressedBytes": 17070,
+    "sha256": "6a86dcf44a15494de0ea3751829273d943ada8f504ffb737b5c607969ac0aab5"
+  },
+  "js/display/display-audio.js": {
+    "bytes": 54907,
+    "compressedBytes": 10413,
+    "sha256": "43f9607c93bc63edb49d926699380fb28b5774db275ac1a9b86f60190a303aee"
+  },
+  "js/display/display-content-manager.js": {
+    "bytes": 5304,
+    "compressedBytes": 1913,
+    "sha256": "a140f3b61a761f2614a664da8695ce193e7101665c9665d0cd4bc6984b1e7119"
+  },
+  "js/display/display-generator.js": {
+    "bytes": 50571,
+    "compressedBytes": 8801,
+    "sha256": "e98692638240f078b06eb86d52e69c3f15b2ac8ced3d016ad8581ddb1a38714c"
+  },
+  "js/display/display-history.js": {
+    "bytes": 10438,
+    "compressedBytes": 2425,
+    "sha256": "fd43e45273e0252f74cc91a04cdc2d09e387d49a3a33b6eedc87f23317db0ebe"
+  },
+  "js/display/display-notification.js": {
+    "bytes": 4034,
+    "compressedBytes": 1305,
+    "sha256": "f24995b607722d5f83dc0eb3c85bab8373c0048dcc38a20050293e948ba707e5"
+  },
+  "js/display/display-profile-selection.js": {
+    "bytes": 10966,
+    "compressedBytes": 3087,
+    "sha256": "e64b9defbeb16267cb9f59f49c62478c3bd66b618fd5aed2fa2ff6a266bacde8"
+  },
+  "js/display/display-resizer.js": {
+    "bytes": 8978,
+    "compressedBytes": 2090,
+    "sha256": "5736fc831ddeb3ca41c5a9879a824c5490eb9b396195fd2702d7882be8df9bfe"
+  },
+  "js/display/display.js": {
+    "bytes": 113715,
+    "compressedBytes": 22121,
+    "sha256": "da4280310fb3d0d64281841ec24f8bdf916c2675e812d75ceda937f9d7a25459"
+  },
+  "js/display/element-overflow-controller.js": {
+    "bytes": 7370,
+    "compressedBytes": 2011,
+    "sha256": "9abd9a456fd3189c082194f01b8c714b9a7d8ec8b51b8b06af6de53621e1ab9e"
+  },
+  "js/display/media-drawing-worker.js": {
+    "bytes": 7316,
+    "compressedBytes": 2025,
+    "sha256": "fb30962877d2422ec5e6f2b67cbf09b3229d8a2f74732c82a9275b7076ea508c"
+  },
+  "js/display/option-toggle-hotkey-handler.js": {
+    "bytes": 8303,
+    "compressedBytes": 2165,
+    "sha256": "daf67910e770c5606312fe830189f2bb0cd6e66f575ab3eeda52fad280f27503"
+  },
+  "js/display/popup-frequency-blur-controller.js": {
+    "bytes": 11330,
+    "compressedBytes": 2522,
+    "sha256": "d4d43e4cd84488d3ee054332afa8249d881a47e710d085bde5555960c851afb5"
+  },
+  "js/display/popup-main.js": {
+    "bytes": 2627,
+    "compressedBytes": 971,
+    "sha256": "f8e946d45fc6e97ffcd1539e45a5028691857737ca336b4e0716c5e5f53f7232"
+  },
+  "js/display/pronunciation-generator.js": {
+    "bytes": 15960,
+    "compressedBytes": 3498,
+    "sha256": "2d0aff0d1a7592f964642e217ddb895ab71d4e27868603395c6d6ef647807699"
+  },
+  "js/display/query-parser.js": {
+    "bytes": 21935,
+    "compressedBytes": 5108,
+    "sha256": "b6a80a0714cb8253b179d934aaedf6ea15dd786325b09aa69d1b96b462461521"
+  },
+  "js/display/search-action-popup-controller.js": {
+    "bytes": 1732,
+    "compressedBytes": 770,
+    "sha256": "80f10b2cd783aca2042a9803e1bf021f590a69fed982159ec5f78780063066f2"
+  },
+  "js/display/search-display-controller.js": {
+    "bytes": 45457,
+    "compressedBytes": 9131,
+    "sha256": "85f5b518cc4599dbac12c1a844d068a830bf48670ec06e1d465db8d3888f77fb"
+  },
+  "js/display/search-main.js": {
+    "bytes": 6488,
+    "compressedBytes": 1822,
+    "sha256": "37f7d3c6388383a77e3563853675d8d1c3f37364f5f9db58b1323f27551abb2b"
+  },
+  "js/display/search-persistent-state-controller.js": {
+    "bytes": 2630,
+    "compressedBytes": 1034,
+    "sha256": "bc4c80da57432a95c3849b2b93c10b761819155a7148a6464a206ff22e497ed2"
+  },
+  "js/display/structured-content-generator.js": {
+    "bytes": 24940,
+    "compressedBytes": 5036,
+    "sha256": "e0032246a2a42f8ad14ef8f4b5ab35770faa9885bbeb81807484ae9634f2945a"
+  },
+  "js/dom/css-style-applier.js": {
+    "bytes": 8213,
+    "compressedBytes": 2685,
+    "sha256": "c86d92835df3bc703a9351ae1628204dd7bb26bcebc39e8a6340b0b1f4b0e7b3"
+  },
+  "js/dom/document-focus-controller.js": {
+    "bytes": 5319,
+    "compressedBytes": 1793,
+    "sha256": "27c2aef46f361b33df30f2503f97e6331986912067b6485394440cf8f5a71d99"
+  },
+  "js/dom/document-util.js": {
+    "bytes": 19880,
+    "compressedBytes": 5360,
+    "sha256": "1affbaa69701f3b0df39f73b3670ec215c82cad705320f5146c65d2cd715ceb7"
+  },
+  "js/dom/dom-data-binder.js": {
+    "bytes": 13323,
+    "compressedBytes": 3078,
+    "sha256": "07d4ef7dee0bf23cb55b9e7765f2052d3a5fe4931cb87ab5f1fb9204940293a5"
+  },
+  "js/dom/dom-text-scanner.js": {
+    "bytes": 24959,
+    "compressedBytes": 5562,
+    "sha256": "e2c22f7c5b013b11ef3ee427973a5b86de25f9529f4b7a9b96392fb9d2032f51"
+  },
+  "js/dom/html-template-collection.js": {
+    "bytes": 3833,
+    "compressedBytes": 1391,
+    "sha256": "9ce757a62cab3c89f14c129da5b8a62f21dc2a388cfbe56215ec2a4e6f31f042"
+  },
+  "js/dom/native-simple-dom-parser.js": {
+    "bytes": 3320,
+    "compressedBytes": 952,
+    "sha256": "b10042edbc2f253b4826eea6dba9ecdf1cb37d069c8f02744ae5a901cc44f4ed"
+  },
+  "js/dom/panel-element.js": {
+    "bytes": 4598,
+    "compressedBytes": 1407,
+    "sha256": "913feb89be47a9451ab2db9912b25bd44bb4f9bc96db9c5f0ca5b82717978585"
+  },
+  "js/dom/popup-menu.js": {
+    "bytes": 9385,
+    "compressedBytes": 2474,
+    "sha256": "e7e68a79c73f7c9042377f198bcc7c0d9dc3cf79af2c500323854523f9d88e28"
+  },
+  "js/dom/query-selector.js": {
+    "bytes": 1477,
+    "compressedBytes": 705,
+    "sha256": "44ee6a5e7c00ff9c72761ddd721ba7e68181e9347857ddda8e32f888dd6e68f5"
+  },
+  "js/dom/scroll-element.js": {
+    "bytes": 4992,
+    "compressedBytes": 1323,
+    "sha256": "d9ab1143f4c18d1236ca67417117629d0a3dc509259dc906e43edefb64470dce"
+  },
+  "js/dom/selector-observer.js": {
+    "bytes": 10438,
+    "compressedBytes": 2553,
+    "sha256": "64da8c227448bc8e270cc775101ffc505719a4266d7f394e26c878fff21bb3b6"
+  },
+  "js/dom/simple-dom-parser.js": {
+    "bytes": 6220,
+    "compressedBytes": 1642,
+    "sha256": "e193abd3325fee93281096d092ecd4f6ca9dfe92d4e7b6d3b3d52770df518595"
+  },
+  "js/dom/style-util.js": {
+    "bytes": 4597,
+    "compressedBytes": 1540,
+    "sha256": "96e997b87e4637e19abd8ba7b86a440ec4bcc57c2baf92958a3f9572600791ad"
+  },
+  "js/dom/text-source-element.js": {
+    "bytes": 8335,
+    "compressedBytes": 2255,
+    "sha256": "30257b3a0a66b9088aed12684649dffb84edb33b5e975eae6c081a2312082d6e"
+  },
+  "js/dom/text-source-generator.js": {
+    "bytes": 27960,
+    "compressedBytes": 5844,
+    "sha256": "9fb8e55ea235caa5d928dfed8e32527a77b5160f13f459d30dae4a91cb1e6f62"
+  },
+  "js/dom/text-source-range.js": {
+    "bytes": 12919,
+    "compressedBytes": 3216,
+    "sha256": "4a1e4453a3d9e2e8496eb6ab2a8c15496a9449c0ad652338d68a30ed9645c340"
+  },
+  "js/extension/environment.js": {
+    "bytes": 5185,
+    "compressedBytes": 1607,
+    "sha256": "3e13a61fff81e8f908bd341545d04ad134718ae67c068de86a4a1c1e53f0ca51"
+  },
+  "js/extension/web-extension.js": {
+    "bytes": 6809,
+    "compressedBytes": 1896,
+    "sha256": "9502e01b29d78f2792206ff7234a3cf76b627e6b33e16badc73c4e5d4c2a650f"
+  },
+  "js/general/cache-map.js": {
+    "bytes": 5954,
+    "compressedBytes": 1706,
+    "sha256": "ec9b8a1a7bf99738916959d514e29b76f176d1bc5962e03b8068eb019d8564b3"
+  },
+  "js/general/object-property-accessor.js": {
+    "bytes": 15108,
+    "compressedBytes": 3143,
+    "sha256": "edc0cf9707150c2f4898a7bab655b4a341cb4e1197a86aa6ba382b0d997b0ff4"
+  },
+  "js/general/regex-util.js": {
+    "bytes": 3274,
+    "compressedBytes": 1222,
+    "sha256": "0a5dce0d997906ee3e35edf1117aaef31715d61e9f548aefa6b7f84b2f8cd5ff"
+  },
+  "js/general/task-accumulator.js": {
+    "bytes": 4058,
+    "compressedBytes": 1245,
+    "sha256": "6bb81c97d90cdaffb7d6b2b38bfeff2b85469c7e64f89f60b5c30b4aba8bc951"
+  },
+  "js/input/hotkey-handler.js": {
+    "bytes": 12399,
+    "compressedBytes": 3129,
+    "sha256": "c8c5a5ebc19730aa846ebdf52015d40a25ba5eaa1f6012808b89f08e9efd14d0"
+  },
+  "js/input/hotkey-help-controller.js": {
+    "bytes": 7698,
+    "compressedBytes": 2135,
+    "sha256": "21504135721ee2767a9cafe5aff9fda21964cfabde0033c17cf51045197c3ec7"
+  },
+  "js/input/hotkey-util.js": {
+    "bytes": 11495,
+    "compressedBytes": 2732,
+    "sha256": "70912d405c3c735750bb03f5f52b2f585ec3d2e40e068e945a0c31f2cd63b6d0"
+  },
+  "js/language/CJK-util.js": {
+    "bytes": 5088,
+    "compressedBytes": 1400,
+    "sha256": "68f7128e343dbc3c8deb4bd3747a46eb9403be5f9b8a09004b3d97d4328d562a"
+  },
+  "js/language/aii/assyrian-neo-aramaic-text-preprocessors.js": {
+    "bytes": 1401,
+    "compressedBytes": 747,
+    "sha256": "23963a3ab2881ef2739e1ba97d40acac253ed736afea87e1fc36a9146517c36a"
+  },
+  "js/language/ar/arabic-text-preprocessors.js": {
+    "bytes": 2800,
+    "compressedBytes": 1066,
+    "sha256": "fb6e21fe39cf174ac0812637c640ae5cdfa0aebd242e98334efbfdfe82126116"
+  },
+  "js/language/ar/arabic-transforms.js": {
+    "bytes": 33029,
+    "compressedBytes": 4213,
+    "sha256": "a5b2ac11c5b28e8f75c8be2dea11e8445b5f65624fad5d95c7c4b6d5798e962d"
+  },
+  "js/language/de/german-text-preprocessors.js": {
+    "bytes": 1037,
+    "compressedBytes": 610,
+    "sha256": "17a258304ca3e2c6b5bd5cf2d23bd5e098400f872a45b7ea909f10434b44a09f"
+  },
+  "js/language/de/german-transforms.js": {
+    "bytes": 6225,
+    "compressedBytes": 1914,
+    "sha256": "679f4d6578058a845d0e2b9484c61c0d97dcabf555d269832ac768b7b915c2ae"
+  },
+  "js/language/el/modern-greek-processors.js": {
+    "bytes": 1357,
+    "compressedBytes": 758,
+    "sha256": "a381760c01444d2f145e429496d8fd0ebb4554d4f1599554125e27b1a0b1e601"
+  },
+  "js/language/el/modern-greek-transforms.js": {
+    "bytes": 2281,
+    "compressedBytes": 1012,
+    "sha256": "d58d97ac83625f8112ab54a980473babbae6d188a119d60976f3c5e8aeb86ee7"
+  },
+  "js/language/en/english-transforms.js": {
+    "bytes": 11600,
+    "compressedBytes": 2600,
+    "sha256": "2fea24ca321c0ccc2c4ed505195f4ab6b70fc618e2850fc72e82c43650b4aeb4"
+  },
+  "js/language/eo/esperanto-transforms.js": {
+    "bytes": 10429,
+    "compressedBytes": 2159,
+    "sha256": "8cfe6f598357d764afb73c6b3adddf342678882c7fec5e335c3944001a14bf7f"
+  },
+  "js/language/es/spanish-transforms.js": {
+    "bytes": 51708,
+    "compressedBytes": 4720,
+    "sha256": "d41a8045f54de8b5d4858300c52b858f793ece281c04e40dc663794a4ac90fd9"
+  },
+  "js/language/eu/basque-transforms.js": {
+    "bytes": 14048,
+    "compressedBytes": 1648,
+    "sha256": "dd9c9472b5d106f5dc0839dda66f2fb0a8fb1c384a8933615225dec79dd92774"
+  },
+  "js/language/find-terms-response.js": {
+    "bytes": 1090,
+    "compressedBytes": 596,
+    "sha256": "55a1e734ba29c69103224ebab190d77571fb9226036a7e9e6ee53d9a1206f4c8"
+  },
+  "js/language/fr/french-text-preprocessors.js": {
+    "bytes": 1002,
+    "compressedBytes": 586,
+    "sha256": "2cf17a7d5745e47ad70e18135b3affeead0e76ca4957e48080e2794877fde1e2"
+  },
+  "js/language/fr/french-transforms.js": {
+    "bytes": 208885,
+    "compressedBytes": 17359,
+    "sha256": "2c4f2c10dc412fac5d8584e5907d8adfb6dc4ad7fe10c4f8ffd24e99dcbd9df5"
+  },
+  "js/language/ga/irish-transforms.js": {
+    "bytes": 2268,
+    "compressedBytes": 875,
+    "sha256": "7e0d8bd238c461584d45d8fe70131cb1453fac02decb99c93ee2ffa7ea93fe73"
+  },
+  "js/language/grc/ancient-greek-processors.js": {
+    "bytes": 2432,
+    "compressedBytes": 1104,
+    "sha256": "9ea2fc8ae541b73f30526d6b8401a65b78bd61408c845443361b96e91de5cd3c"
+  },
+  "js/language/grc/ancient-greek-transforms.js": {
+    "bytes": 7728,
+    "compressedBytes": 1249,
+    "sha256": "50c3b66346644228d15af28bfbe417768560011fca4dfc2b607f99988139b18a"
+  },
+  "js/language/ime-utilities.js": {
+    "bytes": 1759,
+    "compressedBytes": 883,
+    "sha256": "f1d3cbfc4f315677b7e1c85d59ca0d2b55c46bf5df603f624f3df2f8d364399e"
+  },
+  "js/language/it/italian-processors.js": {
+    "bytes": 1182,
+    "compressedBytes": 671,
+    "sha256": "82f62bc1461f0fd1d8a22c64c2712c8b8ef621c1795fdf58cc70e11e6b790665"
+  },
+  "js/language/ja/japanese-kana-romaji-dicts.js": {
+    "bytes": 12690,
+    "compressedBytes": 3813,
+    "sha256": "7033507222695ac9a497bf2ff15ba54027d68389881e7ffae87b5b69006d9674"
+  },
+  "js/language/ja/japanese-text-preprocessors.js": {
+    "bytes": 4355,
+    "compressedBytes": 1300,
+    "sha256": "9160be1f7ebd0323f9230e60367eb9b3247b446140d5b5804019bce17efd4cd9"
+  },
+  "js/language/ja/japanese-transforms.js": {
+    "bytes": 95408,
+    "compressedBytes": 11765,
+    "sha256": "9e928202a2f8f8ed1a17961b3cd93b56cddaf9cdda98b8625dc689f8acdaf2a1"
+  },
+  "js/language/ja/japanese-wanakana.js": {
+    "bytes": 6512,
+    "compressedBytes": 2101,
+    "sha256": "19ef24c15b41a3340dc3205fbbc694c11bd1edb0fffa4860c5e62274a1dfbbcd"
+  },
+  "js/language/ja/japanese.js": {
+    "bytes": 25944,
+    "compressedBytes": 6543,
+    "sha256": "009a945293769b12693579b28cddf2c3579d3f7a785e7f68371e7b81fd74e1c4"
+  },
+  "js/language/ka/georgian-transforms.js": {
+    "bytes": 2849,
+    "compressedBytes": 1056,
+    "sha256": "77c3af6decb58bfe7943146e5bba0b5471473c7251e849f7c1b728e37bc38d93"
+  },
+  "js/language/ko/korean-text-processors.js": {
+    "bytes": 1220,
+    "compressedBytes": 608,
+    "sha256": "eeb29872ba2df204274f8b837a57f27e541993be1fc6df092ab8a59444654702"
+  },
+  "js/language/ko/korean-transforms.js": {
+    "bytes": 272352,
+    "compressedBytes": 16346,
+    "sha256": "386ac9c8e62719a616cf1d81e9be9a005a3a41bd8ec60ad729531b64df3b12e6"
+  },
+  "js/language/ko/korean.js": {
+    "bytes": 2046,
+    "compressedBytes": 853,
+    "sha256": "de3ef1c27220357c247bba6507efb7943fab2459801673f404bb2f7bfedc9944"
+  },
+  "js/language/la/latin-text-preprocessors.js": {
+    "bytes": 1196,
+    "compressedBytes": 637,
+    "sha256": "4c9fc2b4a53a46daea33e08cb786adcf432a036b5dc18f6bb074f0a2b741077c"
+  },
+  "js/language/la/latin-transforms.js": {
+    "bytes": 4539,
+    "compressedBytes": 1066,
+    "sha256": "5daa9f2bc936be86fdb0ac168485ee93c155ec2f7a049e13948d2d851f873c3a"
+  },
+  "js/language/language-descriptors.js": {
+    "bytes": 17881,
+    "compressedBytes": 3407,
+    "sha256": "de1719b9b22469f1815181394962463fd9382dca65863db0fa4718eeb77e9814"
+  },
+  "js/language/language-transformer.js": {
+    "bytes": 10855,
+    "compressedBytes": 2563,
+    "sha256": "f45db85ae6c5628b65ef0c45d48a47f6091f43109d723f81826dc4a1ce3ae198"
+  },
+  "js/language/language-transforms.js": {
+    "bytes": 2569,
+    "compressedBytes": 786,
+    "sha256": "e454f0a7333170aa1e96e42e546a316aee9c31b8b1d8056d45c034e1470c8a14"
+  },
+  "js/language/languages.js": {
+    "bytes": 3314,
+    "compressedBytes": 990,
+    "sha256": "4221bbc4862d67498f4bbb8d9e1fc250d3b45a6dc061953222d8928dc5c548b0"
+  },
+  "js/language/multi-language-transformer.js": {
+    "bytes": 3599,
+    "compressedBytes": 1002,
+    "sha256": "f47d1577d18d6d8f0ce8b4089ef6292652e6a8976d4f5b17cccacf047eca4479"
+  },
+  "js/language/ru/russian-text-preprocessors.js": {
+    "bytes": 1250,
+    "compressedBytes": 671,
+    "sha256": "399bbd93f6193e1a4ed2465139fe0c6549654e62211462c6a1e78a14cd7827a0"
+  },
+  "js/language/sga/old-irish-transforms.js": {
+    "bytes": 8203,
+    "compressedBytes": 1517,
+    "sha256": "861d06cdec648a343b42a4e3c2590187e6fb9e75aea4ff72de0bfd6df80456a9"
+  },
+  "js/language/sh/serbo-croatian-text-preprocessors.js": {
+    "bytes": 3065,
+    "compressedBytes": 1328,
+    "sha256": "308b8053721d65ce8faf1d6f4bfba9d02faf8f54d524fb743f757ddb7952976d"
+  },
+  "js/language/sq/albanian-transforms.js": {
+    "bytes": 14674,
+    "compressedBytes": 1829,
+    "sha256": "5ed6f49846cea5c3d75889f50ce4eaac13c36bf31013bec2caffa163cfe6dc69"
+  },
+  "js/language/text-processors.js": {
+    "bytes": 1742,
+    "compressedBytes": 874,
+    "sha256": "a5b244b8995fda8c7603358fc0ea517f57eb0e7966e586a518b5cb3fd3224ab1"
+  },
+  "js/language/text-scanner.js": {
+    "bytes": 74761,
+    "compressedBytes": 12965,
+    "sha256": "d7a74d450d86bfe4c01f6e1ed5720b96c58b2fa311e1aa89bdd1f3aadafac87e"
+  },
+  "js/language/text-utilities.js": {
+    "bytes": 1425,
+    "compressedBytes": 719,
+    "sha256": "e5e884aa08e9e60c3a9afced8e8bcaa46b6ebcb8d0633798e7f5d9c939522127"
+  },
+  "js/language/tl/tagalog-transforms.js": {
+    "bytes": 31970,
+    "compressedBytes": 2952,
+    "sha256": "ce25bc2d10708c81cf70647d7b8497eeeb3c3f9d6b4af73749c14abdf75c7168"
+  },
+  "js/language/translator.js": {
+    "bytes": 121487,
+    "compressedBytes": 19098,
+    "sha256": "510b7152dc2841ea647b91ab2c4193530f30280fe0d190e90a98b52e9c1120c8"
+  },
+  "js/language/uk/ukrainian-text-preprocessors.js": {
+    "bytes": 2212,
+    "compressedBytes": 1141,
+    "sha256": "b1a5e324c945050df49888c3c35c5d16f29b45460cee4b4df6ed2b5bfeb336fb"
+  },
+  "js/language/uk/ukrainian-transforms.js": {
+    "bytes": 117267,
+    "compressedBytes": 19836,
+    "sha256": "c122eeb4b044821cc893b6c4f3c78b46ed49e97a26607e752d6fdb439a735ef4"
+  },
+  "js/language/uk/ukrainian.js": {
+    "bytes": 1369,
+    "compressedBytes": 745,
+    "sha256": "d2e9125ac3d08f14c21b2fa19a9d1bf54792a9a8507296f2742f501b3dadfd06"
+  },
+  "js/language/vi/viet-text-preprocessors.js": {
+    "bytes": 2675,
+    "compressedBytes": 1228,
+    "sha256": "06e51e6cee4886f571c785e4e1be3b8ea780e5ee47c5429d73cb913805707a23"
+  },
+  "js/language/yi/yiddish-text-postprocessors.js": {
+    "bytes": 2361,
+    "compressedBytes": 1015,
+    "sha256": "668acb1c280941e8266074966aebd99b3d3a97b56e39a297c587ffeb5af3930c"
+  },
+  "js/language/yi/yiddish-text-preprocessors.js": {
+    "bytes": 1738,
+    "compressedBytes": 824,
+    "sha256": "2885adc0d16cdb65988070e803565c96a19740d1d648a9b824f07db787d929f0"
+  },
+  "js/language/yi/yiddish-transforms.js": {
+    "bytes": 7156,
+    "compressedBytes": 1677,
+    "sha256": "75a9b9e070c0ec4495f7883a2c32f41cf0d6d2d5f3839e99d86af05a691d8925"
+  },
+  "js/language/zh/chinese.js": {
+    "bytes": 2394,
+    "compressedBytes": 1032,
+    "sha256": "44d05c84c1442e657df77194f941797d012cb36d38cd7425040b30bba4a097f3"
+  },
+  "js/media/audio-downloader.js": {
+    "bytes": 29568,
+    "compressedBytes": 6906,
+    "sha256": "1cfdcdea54f6d2f9e548ad806895e563fbcc220519888d3bdffb77efc7801e8d"
+  },
+  "js/media/audio-system.js": {
+    "bytes": 8627,
+    "compressedBytes": 2513,
+    "sha256": "7e2530475c9f546b919fd7b0f15a47a5793828a0784fbf94d127089301932edf"
+  },
+  "js/media/media-util.js": {
+    "bytes": 5905,
+    "compressedBytes": 1560,
+    "sha256": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa"
+  },
+  "js/media/text-to-speech-audio.js": {
+    "bytes": 4930,
+    "compressedBytes": 1557,
+    "sha256": "7dc06661c012a8c9671dd3769bae3eab6c6b412e648492034c92b7a766f80418"
+  },
+  "js/media/web-audio-local-audio.js": {
+    "bytes": 5677,
+    "compressedBytes": 1752,
+    "sha256": "8e67039018f4af862d44755b8c1c7dd4f7de9ed84ffd1f6e6c99b4267f238be5"
+  },
+  "js/pages/action-popup-controller.js": {
+    "bytes": 17609,
+    "compressedBytes": 4095,
+    "sha256": "2fe813310378cabcd908878b7ebc943fbca08a339c317d6b998660020914a30c"
+  },
+  "js/pages/action-popup-dictionary-warnings.js": {
+    "bytes": 2418,
+    "compressedBytes": 835,
+    "sha256": "c775cab67bc1a2e10954e0728d3da6924d3988e5f7f81a0c24c67464ccdb9c7f"
+  },
+  "js/pages/action-popup-main.js": {
+    "bytes": 1069,
+    "compressedBytes": 578,
+    "sha256": "4a147bff7871241513df6f343eac90e74d04d689ed8e9442dcb5f9eb38e4f620"
+  },
+  "js/pages/common/extension-content-controller.js": {
+    "bytes": 4890,
+    "compressedBytes": 1519,
+    "sha256": "3539478fc43b0a807672eff03262f9d88b2033d55f29852d0027993a7b483f1c"
+  },
+  "js/pages/generic-page-main.js": {
+    "bytes": 2229,
+    "compressedBytes": 882,
+    "sha256": "1edc3aef492036958c85e6e18de419896c373f116f101b416df423016fd12477"
+  },
+  "js/pages/info-dictionary-info.js": {
+    "bytes": 2693,
+    "compressedBytes": 1043,
+    "sha256": "c6c2e102e779797446411ad5576562fb2621be7305ed0d5f056ffbb30898da77"
+  },
+  "js/pages/info-main.js": {
+    "bytes": 6048,
+    "compressedBytes": 1878,
+    "sha256": "2adf58e351c09e959d46630324e13cd49265d6089428f109c8014202d5c1dc12"
+  },
+  "js/pages/permissions-main.js": {
+    "bytes": 5416,
+    "compressedBytes": 1667,
+    "sha256": "8d5c4a1d10d91a43fc2e093db191c41d0b78dbcdb5ab7d2a194f71852e12ebe7"
+  },
+  "js/pages/settings/anki-controller.js": {
+    "bytes": 70858,
+    "compressedBytes": 12175,
+    "sha256": "ab338eb48f68845d8c4b81be1689f7c1b31ea36450ac68fad9450102d0da1caa"
+  },
+  "js/pages/settings/anki-deck-generator-controller.js": {
+    "bytes": 51712,
+    "compressedBytes": 9431,
+    "sha256": "0402b2d2889d81a32f092e00069aa3d7602c7fa0c0192d4149403c46983a1a09"
+  },
+  "js/pages/settings/anki-templates-controller.js": {
+    "bytes": 22901,
+    "compressedBytes": 4496,
+    "sha256": "21faeb8f7cd64ed7c77bba2abba548bbdc4d1d612428216e005baeffcaf66cdd"
+  },
+  "js/pages/settings/audio-controller.js": {
+    "bytes": 34752,
+    "compressedBytes": 6869,
+    "sha256": "aed5f7bd1228e91f45741414b16b0acffa7b759f7a882e68fe0ef2e43cc55318"
+  },
+  "js/pages/settings/backup-controller.js": {
+    "bytes": 25273,
+    "compressedBytes": 5478,
+    "sha256": "f83e113c3b7733f1516ec00fa3e9c6494f9e3a6adcfb586c654bc342c0548c9d"
+  },
+  "js/pages/settings/collapsible-dictionary-controller.js": {
+    "bytes": 13137,
+    "compressedBytes": 3155,
+    "sha256": "8967f8cab1cd4382ad692353b4d55084bad17ea5e75eb84f6e00c21686f49ed1"
+  },
+  "js/pages/settings/data-transmission-consent-controller.js": {
+    "bytes": 6910,
+    "compressedBytes": 2052,
+    "sha256": "71db5d22bba8f96177c01a860f46e0ee8b82b1e749e0cb762e5200bbd16bd3bb"
+  },
+  "js/pages/settings/dictionary-controller.js": {
+    "bytes": 103091,
+    "compressedBytes": 17529,
+    "sha256": "b2a475a83b679b9bc65c6291ddf2545eace1346c94a7985fbb83d2f6dca8428f"
+  },
+  "js/pages/settings/dictionary-import-controller.js": {
+    "bytes": 187268,
+    "compressedBytes": 31052,
+    "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+  },
+  "js/pages/settings/dictionary-row-ownership.js": {
+    "bytes": 4029,
+    "compressedBytes": 1326,
+    "sha256": "ca7bac2ecf036115e76b00864111bc4c55c9d9477a107c4372dba0b1e832d7f3"
+  },
+  "js/pages/settings/extension-keyboard-shortcuts-controller.js": {
+    "bytes": 17601,
+    "compressedBytes": 3699,
+    "sha256": "69f34d092e74c1d331ecd1e0ad1e32daa3feea2a3660239447fab1bf792e2027"
+  },
+  "js/pages/settings/generic-setting-controller.js": {
+    "bytes": 24455,
+    "compressedBytes": 4811,
+    "sha256": "03b1141f33fa2f00500cd882ec58379f0b81a9a322e692cd040fba1aa0d684d9"
+  },
+  "js/pages/settings/keyboard-mouse-input-field.js": {
+    "bytes": 10269,
+    "compressedBytes": 2565,
+    "sha256": "ead78e15d7f865f04d4bde0914f8ab4ec5998f18613bf6f177ec10ab59aedc80"
+  },
+  "js/pages/settings/keyboard-shortcuts-controller.js": {
+    "bytes": 45391,
+    "compressedBytes": 8190,
+    "sha256": "66d75709f6890a7a2e33570a78c656e1c72e766fa92fed0aff85848352bf6a52"
+  },
+  "js/pages/settings/languages-controller.js": {
+    "bytes": 2294,
+    "compressedBytes": 964,
+    "sha256": "e5ebaef8844ec99db893f592474e3764e3d3a326ba80b33e743fdd5653d3ad42"
+  },
+  "js/pages/settings/mdict-import-feedback.js": {
+    "bytes": 4053,
+    "compressedBytes": 1679,
+    "sha256": "4aa02fd0713171df098c163ecba4c3ab0fadc78f820ee8841ebb924e1b821ff1"
+  },
+  "js/pages/settings/mecab-controller.js": {
+    "bytes": 2762,
+    "compressedBytes": 1026,
+    "sha256": "2532cceb10082810f0a9f9ed86d841513cce9c7da142edeb518d0ec90159b6da"
+  },
+  "js/pages/settings/modal-controller.js": {
+    "bytes": 2761,
+    "compressedBytes": 1092,
+    "sha256": "ee9bdbc6755825b7c6fcc4e7c6acfd1e049a3a2fff66ec6a1b403032d19de5a8"
+  },
+  "js/pages/settings/modal.js": {
+    "bytes": 4563,
+    "compressedBytes": 1499,
+    "sha256": "3cd02f2c55824639cf42f824dd9ad6cb758591da3c8006089b4e15e46dcf40de"
+  },
+  "js/pages/settings/nested-popups-controller.js": {
+    "bytes": 4239,
+    "compressedBytes": 1269,
+    "sha256": "31b9b0d0a9f6847931211eae98087db661a9a0c0697719fe2d4e84c71896e453"
+  },
+  "js/pages/settings/permissions-origin-controller.js": {
+    "bytes": 8936,
+    "compressedBytes": 2320,
+    "sha256": "2b2a4326bca7d4d6acfb74c68fe88f2fda9072c2cea2dbf76d581733413e9ca1"
+  },
+  "js/pages/settings/permissions-toggle-controller.js": {
+    "bytes": 10032,
+    "compressedBytes": 2434,
+    "sha256": "ade3c8739a4562165248461cb8723bfbef8230daeace7fd3527f618d3ce1a4ae"
+  },
+  "js/pages/settings/persistent-storage-controller.js": {
+    "bytes": 4364,
+    "compressedBytes": 1334,
+    "sha256": "b1a88130e6b2623ae91186ea667aa836face78f63b4cf3e375115ee9c8f36035"
+  },
+  "js/pages/settings/popup-frequency-blur-controller.js": {
+    "bytes": 5129,
+    "compressedBytes": 1574,
+    "sha256": "6ab8ec96aa4eca39928e8ba92a02d7ddf44bcd2aab37eeed871efe732684af7f"
+  },
+  "js/pages/settings/popup-preview-controller.js": {
+    "bytes": 5474,
+    "compressedBytes": 1612,
+    "sha256": "84c40d9db3fdfdd46a5740b6748b77b8066b54731749f4ab28eab833a46977b6"
+  },
+  "js/pages/settings/popup-preview-frame-main.js": {
+    "bytes": 1387,
+    "compressedBytes": 666,
+    "sha256": "f2da5dd4b0da66b379b4260cd1be600aff7b8aee8e9b26cc99541f194bb2eff0"
+  },
+  "js/pages/settings/popup-preview-frame.js": {
+    "bytes": 14395,
+    "compressedBytes": 3589,
+    "sha256": "da467dddc640029a73101f47399a437a4d2197e61e0785291f8f606e8f82d0d8"
+  },
+  "js/pages/settings/popup-window-controller.js": {
+    "bytes": 1882,
+    "compressedBytes": 848,
+    "sha256": "332e47bc726b6235e2b0361b894a84e54e0766215376fdd77c06e4738b925969"
+  },
+  "js/pages/settings/profile-conditions-ui.js": {
+    "bytes": 37709,
+    "compressedBytes": 6175,
+    "sha256": "60016acf6f54717871ccd6a183f43f1201ded32b3abb1222ee52fac66c17521e"
+  },
+  "js/pages/settings/profile-controller.js": {
+    "bytes": 44615,
+    "compressedBytes": 7895,
+    "sha256": "0b02f87c462dd5ae8424e855b6896b0b61978bb11628143d77e18c7a3be1057f"
+  },
+  "js/pages/settings/recommended-permissions-controller.js": {
+    "bytes": 6934,
+    "compressedBytes": 1715,
+    "sha256": "b106bff34bcea169f36dfef9f9fdd6bc9004f104f15de4000ebfcf328c506d8a"
+  },
+  "js/pages/settings/recommended-settings-controller.js": {
+    "bytes": 11214,
+    "compressedBytes": 2469,
+    "sha256": "690063c541e70a67d73b0a36f973d6ae8cba5a8f78edfc5408287aae68fdaea9"
+  },
+  "js/pages/settings/scan-inputs-controller.js": {
+    "bytes": 31697,
+    "compressedBytes": 6367,
+    "sha256": "62ac5fb8a9da8403fb96e37611a668f8588c0a20f11723a2ac3b189036decc97"
+  },
+  "js/pages/settings/scan-inputs-simple-controller.js": {
+    "bytes": 18462,
+    "compressedBytes": 4067,
+    "sha256": "05df7a0fda9f79cd626a607fa2f6a5d46df23ee4af70421f30f562f59e31f122"
+  },
+  "js/pages/settings/secondary-search-dictionary-controller.js": {
+    "bytes": 7231,
+    "compressedBytes": 2113,
+    "sha256": "1c7b7761d130829b6aa6d45c0edb19e4faeec781d832d1054314f935c159fd25"
+  },
+  "js/pages/settings/sentence-termination-characters-controller.js": {
+    "bytes": 25555,
+    "compressedBytes": 5158,
+    "sha256": "67ba9141f04cb07a2a86441c1e7efddae0c59d6776d2965421859280fdecb92f"
+  },
+  "js/pages/settings/settings-controller.js": {
+    "bytes": 22254,
+    "compressedBytes": 4341,
+    "sha256": "707a1376a20f24dd16800bab02512e8c812055506a90758a28a04e4cecd6f749"
+  },
+  "js/pages/settings/settings-display-controller.js": {
+    "bytes": 15403,
+    "compressedBytes": 3522,
+    "sha256": "432d5810bc822abb7087ffe9fdd23bb73e9f5e51abc9ea3e37cd2feac8d70df8"
+  },
+  "js/pages/settings/settings-main.js": {
+    "bytes": 20255,
+    "compressedBytes": 3344,
+    "sha256": "70c9bc09eb869ec7d84eb0046a97f9d4abf28a3d9afb5954b98ecc4878c4d1c2"
+  },
+  "js/pages/settings/sort-frequency-dictionary-controller.js": {
+    "bytes": 17295,
+    "compressedBytes": 3630,
+    "sha256": "cce13132ab0d312e7f04ee3ed5bf99f4bbef95676f82db2fc0f297b2758ab2f6"
+  },
+  "js/pages/settings/status-footer.js": {
+    "bytes": 3161,
+    "compressedBytes": 1124,
+    "sha256": "4aef9868886a278e11b4e5d28b2e70c8c161fddb610dcf45cd9c850d5a6b7186"
+  },
+  "js/pages/settings/storage-controller.js": {
+    "bytes": 12283,
+    "compressedBytes": 2902,
+    "sha256": "97c2d71f79271ddc7b1a9ed6ae03a1ffdc43c6e517f721d6c80436fa36f68052"
+  },
+  "js/pages/settings/translation-text-replacements-controller.js": {
+    "bytes": 22164,
+    "compressedBytes": 4742,
+    "sha256": "cccd05e41badd1bc1eccd391a1e21989e57ca063517011b2b3b141dbff35ab9e"
+  },
+  "js/pages/settings/yomitan-api-controller.js": {
+    "bytes": 3789,
+    "compressedBytes": 1224,
+    "sha256": "001f5372dd225c0baaf2a4ba7874f6e1cfda10ae9ec4374d9c9a55d1724152ca"
+  },
+  "js/pages/support-main.js": {
+    "bytes": 1801,
+    "compressedBytes": 797,
+    "sha256": "c9cf05775da2b0025170b5905676fcba605d7b416ac9098b9eb54b2f166a67c5"
+  },
+  "js/pages/welcome-main.js": {
+    "bytes": 5468,
+    "compressedBytes": 1474,
+    "sha256": "c41f0f5bbba1042d89712bf5e87e0604359b883d0b7e129404416e1784ce97fc"
+  },
+  "js/search/dictionary-preview.js": {
+    "bytes": 4897,
+    "compressedBytes": 1852,
+    "sha256": "d707bab027ed52301b5882a1368ea09335f3937e1d7b06ce018ed9492facc00c"
+  },
+  "js/search/glossary-search.js": {
+    "bytes": 10256,
+    "compressedBytes": 3315,
+    "sha256": "d2adaa8d2797766a4da1b28a102eccb7abed0db8529fd508b351fb775b1b9ff7"
+  },
+  "js/search/japanese-search.js": {
+    "bytes": 6383,
+    "compressedBytes": 2457,
+    "sha256": "03a76067bf9d422980f138868707f153ac0db46afd45786db931344a64a50846"
+  },
+  "js/templates/anki-template-renderer-content-manager.js": {
+    "bytes": 3159,
+    "compressedBytes": 1230,
+    "sha256": "d1c72eb31a2e381d835519b010c1a60833ca09d1592f7bda9a56ad655199252c"
+  },
+  "js/templates/anki-template-renderer.js": {
+    "bytes": 40081,
+    "compressedBytes": 7235,
+    "sha256": "86cca81f444c35aec141f7399ee2694eb9b34f9a3ba704de410ab2e6701c0476"
+  },
+  "js/templates/template-patcher.js": {
+    "bytes": 3845,
+    "compressedBytes": 1250,
+    "sha256": "e31418427541069dc70477525ab538f4540a7332ef06da58cedc91f178062040"
+  },
+  "js/templates/template-renderer-frame-api.js": {
+    "bytes": 3690,
+    "compressedBytes": 1238,
+    "sha256": "6796a93a56e52c0902a8adedf1f1e44e4519e5f9afc5d39ce95ce0e29335f995"
+  },
+  "js/templates/template-renderer-frame-main.js": {
+    "bytes": 1215,
+    "compressedBytes": 597,
+    "sha256": "bb6a53b452982f6a0e0a712208955f2d745a06d14399f367c33ca20162275524"
+  },
+  "js/templates/template-renderer-media-provider.js": {
+    "bytes": 7121,
+    "compressedBytes": 1773,
+    "sha256": "e816469d4df8d5cf165e630979289de1a0b1d95e156d5e84d4dc85648a6be318"
+  },
+  "js/templates/template-renderer-proxy.js": {
+    "bytes": 9631,
+    "compressedBytes": 2415,
+    "sha256": "8ae98b60482351c9871f48a2b3aa78fbbcbae328c61584f717b0b3c3279442d2"
+  },
+  "js/templates/template-renderer.js": {
+    "bytes": 8134,
+    "compressedBytes": 2074,
+    "sha256": "c8c3f8dc56f5963ace30708bb305a2c68c0243e9afc9994273813c16691e3786"
+  },
+  "legal-npm.html": {
+    "bytes": 2788,
+    "compressedBytes": 749,
+    "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+  },
+  "legal.html": {
+    "bytes": 3860,
+    "compressedBytes": 1215,
+    "sha256": "da0ab03de6452a33c7952167594dc9b53396fc3c9cb5c0661d2579d1af732c46"
+  },
+  "lib/handlebars.js": {
+    "bytes": 258561,
+    "compressedBytes": 50882,
+    "sha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2"
+  },
+  "lib/handlebars.js.map": {
+    "bytes": 456262,
+    "compressedBytes": 103395,
+    "sha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706"
+  },
+  "lib/hangul-js.js": {
+    "bytes": 19816,
+    "compressedBytes": 3468,
+    "sha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62"
+  },
+  "lib/hangul-js.js.map": {
+    "bytes": 38207,
+    "compressedBytes": 6813,
+    "sha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1"
+  },
+  "lib/kanji-processor.js": {
+    "bytes": 151595,
+    "compressedBytes": 21060,
+    "sha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a"
+  },
+  "lib/kanji-processor.js.map": {
+    "bytes": 418612,
+    "compressedBytes": 23639,
+    "sha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446"
+  },
+  "lib/linkedom.js": {
+    "bytes": 462324,
+    "compressedBytes": 114573,
+    "sha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e"
+  },
+  "lib/linkedom.js.map": {
+    "bytes": 658516,
+    "compressedBytes": 132551,
+    "sha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c"
+  },
+  "lib/parse5.js": {
+    "bytes": 298992,
+    "compressedBytes": 59607,
+    "sha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7"
+  },
+  "lib/parse5.js.map": {
+    "bytes": 448119,
+    "compressedBytes": 62455,
+    "sha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6"
+  },
+  "lib/resvg-wasm.js": {
+    "bytes": 17105,
+    "compressedBytes": 4023,
+    "sha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988"
+  },
+  "lib/resvg-wasm.js.map": {
+    "bytes": 29304,
+    "compressedBytes": 6423,
+    "sha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3"
+  },
+  "lib/resvg.wasm": {
+    "bytes": 2478606,
+    "compressedBytes": 947424,
+    "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70"
+  },
+  "lib/sqlite/index.d.mts": {
+    "bytes": 284888,
+    "compressedBytes": 67012,
+    "sha256": "e3dea737552877bf3d0ef4a1381ba2a3b358043ea726dbeb3c81c9f9690c426b"
+  },
+  "lib/sqlite/index.mjs": {
+    "bytes": 373254,
+    "compressedBytes": 81998,
+    "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+  },
+  "lib/sqlite/node.mjs": {
+    "bytes": 316057,
+    "compressedBytes": 69343,
+    "sha256": "30ae528ed7f6f36c6dd6e542080dacb49820e3b85ba67023959229cac169c38d"
+  },
+  "lib/sqlite/sqlite3-opfs-async-proxy.js": {
+    "bytes": 18411,
+    "compressedBytes": 5464,
+    "sha256": "eddca1c43e34e0f69c477d1e1154ad229c3bfcb33dc49392b70201402bec2dc7"
+  },
+  "lib/sqlite/sqlite3-worker1.mjs": {
+    "bytes": 370128,
+    "compressedBytes": 81219,
+    "sha256": "40b871be67f36d7912b00ce493cc85b2a735920c5e6544f7e16361a1668d7503"
+  },
+  "lib/sqlite/sqlite3.wasm": {
+    "bytes": 859730,
+    "compressedBytes": 396658,
+    "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+  },
+  "lib/term-bank-parser.wasm": {
+    "bytes": 62783,
+    "compressedBytes": 23781,
+    "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+  },
+  "lib/term-content-canonical-scan-v1.wasm": {
+    "bytes": 1667,
+    "compressedBytes": 969,
+    "sha256": "5e16593eb74b04513eb06b08ff98111853cc6bec51e45292feed92f424d732ae"
+  },
+  "lib/ucs2length.js": {
+    "bytes": 2305,
+    "compressedBytes": 957,
+    "sha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513"
+  },
+  "lib/ucs2length.js.map": {
+    "bytes": 2087,
+    "compressedBytes": 1064,
+    "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f"
+  },
+  "lib/validate-schemas.js": {
+    "bytes": 468823,
+    "compressedBytes": 47103,
+    "sha256": "876821eca8cbf74e295dae3c974e56fe9b49551d4e201c7098888aa7250aca60"
+  },
+  "lib/z-worker.js": {
+    "bytes": 136716,
+    "compressedBytes": 28136,
+    "sha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c"
+  },
+  "lib/z-worker.js.map": {
+    "bytes": 322119,
+    "compressedBytes": 66562,
+    "sha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a"
+  },
+  "lib/zip.js": {
+    "bytes": 191228,
+    "compressedBytes": 47802,
+    "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+  },
+  "lib/zip.js.map": {
+    "bytes": 337267,
+    "compressedBytes": 74370,
+    "sha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb"
+  },
+  "lib/zstd-dicts/jmdict.zdict": {
+    "bytes": 16384,
+    "compressedBytes": 2605,
+    "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+  },
+  "lib/zstd-simd-module.d.ts": {
+    "bytes": 62,
+    "compressedBytes": 64,
+    "sha256": "05eaf8b24ed5457f0848d3742d57caa8343d67ac41b60d625b0902d6754380ad"
+  },
+  "lib/zstd-simd-module.d.ts.map": {
+    "bytes": 93,
+    "compressedBytes": 63,
+    "sha256": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+  },
+  "lib/zstd-simd-module.js": {
+    "bytes": 12116,
+    "compressedBytes": 3484,
+    "sha256": "79a18a4a7c88a0e97663e11c80f5754e82b9f6514f0014f02a250b8a25802fa9"
+  },
+  "lib/zstd-simd-module.js.map": {
+    "bytes": 16912,
+    "compressedBytes": 4964,
+    "sha256": "d254f9e0c518c8b6d22cdccf89ca69db4b623e01928adb23f354035cf87bbbf7"
+  },
+  "lib/zstd-wasm.js": {
+    "bytes": 26041,
+    "compressedBytes": 5959,
+    "sha256": "3537cf854294b7eb6926410caabb7504d1f1546f602cb4179f5648bcdcdc0e06"
+  },
+  "lib/zstd-wasm.js.map": {
+    "bytes": 46246,
+    "compressedBytes": 10876,
+    "sha256": "e01b96309a920801d0d7a540d44e5687a8cf50ee4647838c8c38ffb40f4829d3"
+  },
+  "lib/zstd.wasm": {
+    "bytes": 433631,
+    "compressedBytes": 113023,
+    "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+  },
+  "manifest.json": {
+    "bytes": 3571,
+    "compressedBytes": 1061,
+    "sha256": "808a74cb7fd69d3704f089b3913606e609eab385e1d1af7e451c89213ad62129"
+  },
+  "mdict.html": {
+    "bytes": 6951,
+    "compressedBytes": 2570,
+    "sha256": "b6cdc80e58c7b94813169ccfc5be275d9dd8281605ba1f6dc586f2a548f0f499"
+  },
+  "offscreen.html": {
+    "bytes": 1371,
+    "compressedBytes": 566,
+    "sha256": "fa5d298a243ccdacaedb3914cf865710f6cfccc2ec60e998010c09edaa2a61c8"
+  },
+  "permissions.html": {
+    "bytes": 14627,
+    "compressedBytes": 2770,
+    "sha256": "b3e3c493bc80b34674095f273c3eccbc724d8cf76355f6815be107101dc74031"
+  },
+  "popup-preview.html": {
+    "bytes": 1673,
+    "compressedBytes": 563,
+    "sha256": "3a9ad48d28f6bc86310c299c883a2b71d58b79750eb53eaf81a7689a4730e107"
+  },
+  "popup.html": {
+    "bytes": 6218,
+    "compressedBytes": 1502,
+    "sha256": "34b7603c83ac9a42336a3d0914cc5a067789a7b86779bc01ba7f51e902f2a064"
+  },
+  "quick-start-guide.html": {
+    "bytes": 9754,
+    "compressedBytes": 2171,
+    "sha256": "43163c7eec3047e7ca2328b6a3ef7566efdcf9f2af770e6ccabe5117bee7b242"
+  },
+  "search.html": {
+    "bytes": 8102,
+    "compressedBytes": 1662,
+    "sha256": "5a4ea4b14cb0567d6a3e37047840f0719dd21d119dba52762732f291d7a2ee90"
+  },
+  "settings.html": {
+    "bytes": 165435,
+    "compressedBytes": 20778,
+    "sha256": "02fb8b2f14fcab5e127723245a711a6516308d8151b74a76066ef3fbe6e67389"
+  },
+  "support.html": {
+    "bytes": 2319,
+    "compressedBytes": 883,
+    "sha256": "431b37c255a86f7e9f0cb2435198ecf1000c13cfa6b1e537fd8dd9649d967ef7"
+  },
+  "sw.js": {
+    "bytes": 746,
+    "compressedBytes": 445,
+    "sha256": "0b17c8f0d51cc6f8a19320e5289a6e560d3065ba45f5b7e5790148fbd8352a95"
+  },
+  "template-renderer.html": {
+    "bytes": 863,
+    "compressedBytes": 318,
+    "sha256": "795ef718c8dd4632fe512b6b871a8c842f6a5235e5648565c1c39178ef6b1cd9"
+  },
+  "templates-display.html": {
+    "bytes": 15543,
+    "compressedBytes": 2422,
+    "sha256": "8492755abde995de6cf82235cc78d622010ac7697c3030d0d024167cffc1f10a"
+  },
+  "templates-modals.html": {
+    "bytes": 108834,
+    "compressedBytes": 13939,
+    "sha256": "f94abf8e36af33cc6ffb1abae6a3efd0fb1a272ddb3a0de04d0d92c57307dec7"
+  },
+  "templates-settings.html": {
+    "bytes": 40791,
+    "compressedBytes": 4809,
+    "sha256": "430cb14d7bc2f102b121b2f552b7e0822631b832f2ddcd0b6a1cd4edf19368a1"
+  },
+  "web/client.ts": {
+    "bytes": 11653,
+    "compressedBytes": 3371,
+    "sha256": "b830366d2a007d102dfada5a2f372e52e935c29fef1be44856a48776e2c778ae"
+  },
+  "web/media-response.ts": {
+    "bytes": 802,
+    "compressedBytes": 469,
+    "sha256": "df6475366243d367fef809ffa1ba70be76225a2e9a0bb20c5f7d3e9b1cdc282c"
+  },
+  "web/preferences.ts": {
+    "bytes": 1337,
+    "compressedBytes": 482,
+    "sha256": "50668fa5ed33e9220f643b0e01744269526ca34dbf596908e03d3a914c4221be"
+  },
+  "web/presets.ts": {
+    "bytes": 7454,
+    "compressedBytes": 2758,
+    "sha256": "db3efe688ac95fd4e87956e6554fd28b0e2a3ab7cfee08d22610b3c17dc2726b"
+  },
+  "web/protocol.ts": {
+    "bytes": 3435,
+    "compressedBytes": 1319,
+    "sha256": "57ff4e83361a29ad29cbe7364c397a2a48f1cc884ffddea34b6061f6b178ffca"
+  },
+  "web/render.ts": {
+    "bytes": 12874,
+    "compressedBytes": 3909,
+    "sha256": "876847bf8e66c4c293ae61fd88f2b53f9b25ca27fda4b816229af8080d919a11"
+  },
+  "web/scanner.ts": {
+    "bytes": 4193,
+    "compressedBytes": 1550,
+    "sha256": "99125b6e9ea14df6069644a32158b2c287d81943732828a55d366517ecd65e83"
+  },
+  "web/storage-diagnostics.ts": {
+    "bytes": 1283,
+    "compressedBytes": 611,
+    "sha256": "dc697691d6e11ef35c2993adb196b61d9966fa25e9a39b885f0fdbf0d8887fc4"
+  },
+  "web/worker.ts": {
+    "bytes": 16434,
+    "compressedBytes": 4873,
+    "sha256": "ff9bcafb6bf7c81575a9cca58f5fd3aebd7cbf001cee8b059b7f62d9585ed03a"
+  },
+  "welcome.html": {
+    "bytes": 14818,
+    "compressedBytes": 2652,
+    "sha256": "d7a565df7144b51091858f52102f88ee2294170d2a907d8aaba177efb285b167"
+  }
+}

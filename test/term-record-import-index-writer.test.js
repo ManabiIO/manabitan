@@ -58,7 +58,50 @@ async function writerFor(file) {
     return writer;
 }
 
-afterEach(() => { vi.restoreAllMocks(); });
+/** @returns {{messages: number, channelCount: number, closeCount: number}} */
+function trackMessageChannels() {
+    let messages = 0;
+    let channelCount = 0;
+    let closeCount = 0;
+    const NativeMessageChannel = MessageChannel;
+    vi.stubGlobal('MessageChannel', class {
+        /** @type {MessageChannel['port1']} */
+        port1;
+        /** @type {MessageChannel['port2']} */
+        port2;
+
+        constructor() {
+            ++channelCount;
+            const channel = new NativeMessageChannel();
+            this.port1 = channel.port1;
+            this.port2 = /** @type {MessageChannel['port2']} */ ({
+                postMessage(message) {
+                    ++messages;
+                    channel.port2.postMessage(message);
+                },
+                close() {
+                    ++closeCount;
+                    channel.port2.close();
+                },
+            });
+            const closePort = this.port1.close.bind(this.port1);
+            this.port1.close = () => {
+                ++closeCount;
+                closePort();
+            };
+        }
+    });
+    return {
+        get messages() { return messages; },
+        get channelCount() { return channelCount; },
+        get closeCount() { return closeCount; },
+    };
+}
+
+afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+});
 
 describe('fresh import index writer', () => {
     test('honors partial positional writes, queued seek, header rewrite and truncate', async () => {
@@ -104,7 +147,7 @@ describe('fresh import index writer', () => {
             clock += 7;
             return clock;
         });
-        const timer = vi.spyOn(globalThis, 'setTimeout');
+        const yields = trackMessageChannels();
         const file = memoryFile();
         const writer = await writerFor(file);
         const expected = Uint8Array.from({length: 9 * 1024 * 1024 + 31}, (_, i) => (i ^ (i >>> 9)) & 255);
@@ -115,7 +158,73 @@ describe('fresh import index writer', () => {
         await writer.close();
         expect(Buffer.compare(file.bytes, expected)).toBe(0);
         expect(file.calls.writes.every((x) => x.bytes.length <= 512 * 1024)).toBe(true);
-        expect(timer).toHaveBeenCalled();
+        expect(yields.messages).toBeGreaterThan(0);
+        expect(yields.channelCount).toBe(1);
+        expect(yields.closeCount).toBe(2);
+    });
+
+    test('does not charge idle time to the bounded writer work budget', async () => {
+        let clock = 0;
+        vi.spyOn(safePerformance, 'now').mockImplementation(() => clock);
+        const yields = trackMessageChannels();
+        const file = memoryFile();
+        const write = file.access.write;
+        file.access.write = (bytes, position) => {
+            clock += 1;
+            return write(bytes, position);
+        };
+        const writer = await writerFor(file);
+        clock += 1000;
+        await writer.write(new Uint8Array([1, 2]));
+        clock += 1000;
+        await writer.seek(0);
+        clock += 1000;
+        await writer.write(new Uint8Array([3]));
+        await writer.close();
+        expect(yields.messages).toBe(0);
+        expect(yields.channelCount).toBe(0);
+        expect([...file.bytes]).toEqual([3, 2]);
+        expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+    });
+
+    test('accumulates short writes across queue drains without starving other tasks', async () => {
+        let clock = 0;
+        vi.spyOn(safePerformance, 'now').mockImplementation(() => clock);
+        const yields = trackMessageChannels();
+        const file = memoryFile();
+        const write = file.access.write;
+        file.access.write = (bytes, position) => {
+            clock += 2;
+            return write(bytes, position);
+        };
+        const writer = await writerFor(file);
+        for (let i = 0; i < 7; ++i) {
+            clock += 100;
+            await writer.write(new Uint8Array([i]));
+            expect(yields.messages).toBe(Math.floor((i + 1) / 3));
+        }
+        await writer.close();
+        expect([...file.bytes]).toEqual([0, 1, 2, 3, 4, 5, 6]);
+        expect(yields.channelCount).toBe(1);
+        expect(yields.closeCount).toBe(2);
+    });
+
+    test('falls back to a timer task when MessageChannel is unavailable', async () => {
+        let clock = 0;
+        vi.spyOn(safePerformance, 'now').mockImplementation(() => {
+            clock += 7;
+            return clock;
+        });
+        vi.stubGlobal('MessageChannel', null);
+        const timer = vi.spyOn(globalThis, 'setTimeout');
+        const file = memoryFile();
+        const writer = await writerFor(file);
+        await writer.write(Uint8Array.of(4, 2));
+        await writer.close();
+        expect(timer).toHaveBeenCalledTimes(1);
+        expect([...file.bytes]).toEqual([4, 2]);
+        expect(file.calls.closes).toBe(1);
     });
 
     test('uses owned views for complete blocks and coalesces only crossing blocks', async () => {

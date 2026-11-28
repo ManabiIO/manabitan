@@ -1,0 +1,2065 @@
+{
+  "frozenWorkflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+  "workflowRunId": "45644488882",
+  "auditRunnerSha256": "7259c6f64a1dfb6193df5cecc0f6f0baf8a7172e4c06ed36013c63ecfe0ecf6a",
+  "workflow": {
+    "runStatus": "completed",
+    "runConclusion": "success",
+    "runAttempt": 1,
+    "headCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+    "headTree": "3418f3b5f3daffed97b10dd19cd6a2070d51d83f",
+    "completedWorkflowVerified": true,
+    "artifactCount": 18
+  },
+  "retrievalMetadataSha256": {
+    "retrieved-artifacts.json": "1e41178011930d25a4e368c674f91e4e338f86214c4413389738187a035a18c4",
+    "full-evidence-index.json": "e1588a6210cd9ebcf007150569bbb9199873a7b768ba6043e0dafe2bf6ff4b72",
+    "workflow-jobs.json": "2b678e9a7f53a5abc36da544b8b9c596a493abb021a68783ad8687044095e19d",
+    "workflow-run.json": "75b50b7b617d2ecb76896f6b36b1538acceb0f0be473a80ba46e02046372951e",
+    "workflow-artifacts.json": "0bd70151b6b45fa5778495f81db9f8c91b8adbef557ce6973f3f2aeaeaa4828b"
+  },
+  "retrievedCellCount": 9,
+  "auditedCellCount": 9,
+  "allNineCellsPresent": true,
+  "failures": [],
+  "cells": [
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "jmdict",
+      "summarySha256": "2cefc8e063fa1e994e75aaf2d5495fe344355d82e8e1cbe88c7733cea7eccb57",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          0.34104525762717053,
+          -2.4905799099352754,
+          3.1860702046886846,
+          0.5548763284082492,
+          3.58783008036736,
+          -1.145073413977793
+        ],
+        "BvsC": [
+          0.8056301509382857,
+          -1.5038989973990669,
+          3.9175450051301075,
+          -3.8748539063233167,
+          -6.607435521433402,
+          4.643206256109478
+        ],
+        "CvsA": [
+          -0.46087196976546396,
+          -1.0017461630386193,
+          -0.7038992312658032,
+          4.6082949308754895,
+          10.916570991195517,
+          -5.531443346566345
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": 0.44796079301770986,
+        "BvsC": -0.34913442323039057,
+        "CvsA": -0.5823856005156336
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 2,
+        "BvsC": 3
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -5.531443346566345,
+        10.916570991195517
+      ],
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "90b88fcc00bbf0c8106e7b82a2238e57443f6d85290bc18c7f85a6ad301d794a",
+        "all": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "c8cb7aeb979a0c59497005d54a3a5559e1cd44386521846360b756c2d6120c30",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665595,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087784,
+          "runner_name": "GitHub Actions 1000087784",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:32:36Z",
+          "completed_at": "2026-11-25T15:37:32Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16758394880
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16793851,
+          "BminusA": 2865,
+          "BvsAPercent": 0.017062726393790584
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            204800
+          ],
+          "B": [
+            204800
+          ],
+          "C": [
+            204800
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              19566680
+            ],
+            "B": [
+              19566680
+            ],
+            "C": [
+              19566680
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23748952
+            ],
+            "B": [
+              23748952
+            ],
+            "C": [
+              23748952
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "jmdict",
+      "summarySha256": "482d2d43d172ed1a24941fa4f735f214ba77d42bbc8a6c68ced03ad104e07223",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          -1.2514978032173274,
+          -4.2687098098249665,
+          -8.2684700778343,
+          -9.038208168639883,
+          -2.226963595139908,
+          -3.521603684139296
+        ],
+        "BvsC": [
+          -0.8555006015269373,
+          0.47386559449262844,
+          0.5313942105982683,
+          -16.879364314953737,
+          1.1589403973542245,
+          -0.780052932168096
+        ],
+        "CvsA": [
+          -0.39941419250990595,
+          -4.720207962793421,
+          -8.753349495977503,
+          9.4334650856436,
+          -3.347112948390174,
+          -2.7631044290891804
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": -3.8951567469821313,
+        "BvsC": -0.1530936688377338,
+        "CvsA": -3.0551086887396774
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 6,
+        "BvsC": 3
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -8.753349495977503,
+        9.4334650856436
+      ],
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "90b88fcc00bbf0c8106e7b82a2238e57443f6d85290bc18c7f85a6ad301d794a",
+        "all": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "f7c2c30222dde39a8f2bb677da283171d4cfebd8e8b1475610737ca5d822f828",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665003,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087762,
+          "runner_name": "GitHub Actions 1000087762",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:31:17Z",
+          "completed_at": "2026-11-25T15:34:45Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791472,
+          "BminusA": 486,
+          "BvsAPercent": 0.0028944101317263105
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "4762fd8cdf1fc66b1068ce7e8ad7ab0e28c0442882f524fd7e295b0038ebc4b4"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            204800
+          ],
+          "B": [
+            204800
+          ],
+          "C": [
+            204800
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              19566680
+            ],
+            "B": [
+              19566680
+            ],
+            "C": [
+              19566680
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23748952
+            ],
+            "B": [
+              23748952
+            ],
+            "C": [
+              23748952
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "integer-fields",
+      "dictionary": "jmdict",
+      "summarySha256": "0d68fb3dff75186835aba7a9e1fc81fa2f2d85587127695555511fbc4853b31a",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          -1.149795830648137,
+          -18.18340458947676,
+          0.6533192834574875,
+          -4.180967238690759,
+          -2.7293722443837765,
+          1.814383109739448
+        ],
+        "BvsC": [
+          -2.8616684266109638,
+          0.331692702761166,
+          -0.010467915838563435,
+          -2.445997458704574,
+          0.5971121485212505,
+          -3.360818286189682
+        ],
+        "CvsA": [
+          1.7623038899628352,
+          -18.453887095366806,
+          0.663856691255793,
+          -1.7784711388461605,
+          -3.306739449929552,
+          5.355179239053465
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": -1.9395840375159568,
+        "BvsC": -1.2282326872715688,
+        "CvsA": -0.5573072237951837
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 4,
+        "BvsC": 4
+      },
+      "recomputedFrozenGatePasses": false,
+      "controlRangePercent": [
+        -18.453887095366806,
+        5.355179239053465
+      ],
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "90b88fcc00bbf0c8106e7b82a2238e57443f6d85290bc18c7f85a6ad301d794a",
+        "all": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "1a2344c8db6484b73c5ece14e57e988b90f89a780b3477b19f1f5cf23790de28",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665680,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087846,
+          "runner_name": "GitHub Actions 1000087846",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:38:00Z",
+          "completed_at": "2026-11-25T15:42:43Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791593,
+          "BminusA": 607,
+          "BvsAPercent": 0.0036150348764474316
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "d5c57a46c11b8303199fcfcc4fedf6f0ac8473c3ad8916a270c69604898965ae"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 43520477,
+            "maximum": 43520477,
+            "distinct": [
+              43520477
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            204800
+          ],
+          "B": [
+            204800
+          ],
+          "C": [
+            204800
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              19566680
+            ],
+            "B": [
+              19566680
+            ],
+            "C": [
+              19566680
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23748952
+            ],
+            "B": [
+              23748952
+            ],
+            "C": [
+              23748952
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "jitendex",
+      "summarySha256": "b754310b599c3011d43b1f4a0ab6237932ae2f02a7cb35691aae964e1c2910a3",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          -40.27789992085032,
+          -0.9282947152973287,
+          0.16904306923331003,
+          -4.403889515221948,
+          3.9610840861746155,
+          6.270773321512935
+        ],
+        "BvsC": [
+          -6.130347639782308,
+          -0.47727439606432,
+          0.5978742249783009,
+          -3.258699372507201,
+          1.653454133637089,
+          13.371680718615453
+        ],
+        "CvsA": [
+          -36.3776272975097,
+          -0.4531832468374075,
+          -0.4262825224178646,
+          -1.1837655016902926,
+          2.2700949733629683,
+          -6.263387251642438
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": -0.3796258230320093,
+        "BvsC": 0.060299914456990455,
+        "CvsA": -0.8184743742638501
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 3,
+        "BvsC": 3
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -36.3776272975097,
+        2.2700949733629683
+      ],
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "172ca102441c272a72b628fdc7a2740b082aab27c69ca895294c0e491077df0a",
+        "all": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 64,
+          "bytes": 1302012,
+          "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 236,
+          "bytes": 4992155,
+          "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "bdbb81ea260088d7b5eaa2c6bbc73360432e3ebdd52475f1b87c2143ccd463b8",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665786,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087842,
+          "runner_name": "GitHub Actions 1000087842",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:37:37Z",
+          "completed_at": "2026-11-25T15:42:12Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16793851,
+          "BminusA": 2865,
+          "BvsAPercent": 0.017062726393790584
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            5488640
+          ],
+          "B": [
+            5488640
+          ],
+          "C": [
+            5488640
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              38386795
+            ],
+            "B": [
+              38386795
+            ],
+            "C": [
+              38386795
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23590852
+            ],
+            "B": [
+              23590852
+            ],
+            "C": [
+              23590852
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "integer-fields",
+      "dictionary": "jitendex",
+      "summarySha256": "295efeffc16ba6923ad21bc2a57a293646d6fe226b24a52f30cd38e1d8186455",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          -2.2540603964676276,
+          -1.3251719568372677,
+          -2.4575848303371672,
+          -2.553296975707209,
+          -1.8995929443701431,
+          1.911938718320405
+        ],
+        "BvsC": [
+          -0.33373213273832913,
+          -2.164800100106745,
+          -1.349987383293294,
+          -1.3921986705137113,
+          -0.6247657128594986,
+          1.892901618930476
+        ],
+        "CvsA": [
+          -1.926758475883572,
+          0.8582066006187938,
+          -1.1227544910179743,
+          -1.1774913237481366,
+          -1.2828419884043707,
+          0.01868344024702484
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": -2.0768266704188854,
+        "BvsC": -0.9873765480763963,
+        "CvsA": -1.1501229073830554
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 5,
+        "BvsC": 5
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -1.926758475883572,
+        0.8582066006187938
+      ],
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "172ca102441c272a72b628fdc7a2740b082aab27c69ca895294c0e491077df0a",
+        "all": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 64,
+          "bytes": 1302012,
+          "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 236,
+          "bytes": 4992155,
+          "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "9e3b284ab82cbb55cfd8fe278dd63409f41b8e8c07aa9528f17019d4763c7c4f",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665751,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087880,
+          "runner_name": "GitHub Actions 1000087880",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:40:09Z",
+          "completed_at": "2026-11-25T15:45:20Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791593,
+          "BminusA": 607,
+          "BvsAPercent": 0.0036150348764474316
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "d5c57a46c11b8303199fcfcc4fedf6f0ac8473c3ad8916a270c69604898965ae"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            5488640
+          ],
+          "B": [
+            5488640
+          ],
+          "C": [
+            5488640
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              38386795
+            ],
+            "B": [
+              38386795
+            ],
+            "C": [
+              38386795
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23590852
+            ],
+            "B": [
+              23590852
+            ],
+            "C": [
+              23590852
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "jitendex",
+      "summarySha256": "50100fa67bf401b7d0f6c2547a2f6c1cff2ed7a99e593cfe921609dd44df3f00",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          6.16790751165146,
+          -1.1917530687641453,
+          -0.2962694237858554,
+          0.3272132339571021,
+          -1.2933886783372484,
+          0.5156493584383526
+        ],
+        "BvsC": [
+          8.425542436793165,
+          -0.5099898002039915,
+          -3.2617622902737065,
+          1.1546920821110973,
+          -14.794620138132707,
+          3.5517944283191882
+        ],
+        "CvsA": [
+          -2.0821984141401018,
+          -0.6852580145393805,
+          3.065481588972241,
+          -0.8180330848936657,
+          15.845515249956389,
+          -2.9320062357610976
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": 0.01547190508562335,
+        "BvsC": 0.3223511409535529,
+        "CvsA": -0.7516455497165231
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 3,
+        "BvsC": 3
+      },
+      "recomputedFrozenGatePasses": false,
+      "controlRangePercent": [
+        -2.9320062357610976,
+        15.845515249956389
+      ],
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "172ca102441c272a72b628fdc7a2740b082aab27c69ca895294c0e491077df0a",
+        "all": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 64,
+          "bytes": 1302012,
+          "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 236,
+          "bytes": 4992155,
+          "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "23bc92dad326cc40127b1aa4569968b00d7734296e45a164325114129b81a5c1",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665754,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087878,
+          "runner_name": "GitHub Actions 1000087878",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:39:57Z",
+          "completed_at": "2026-11-25T15:45:12Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791472,
+          "BminusA": 486,
+          "BvsAPercent": 0.0028944101317263105
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "4762fd8cdf1fc66b1068ce7e8ad7ab0e28c0442882f524fd7e295b0038ebc4b4"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 67466332,
+            "maximum": 67466332,
+            "distinct": [
+              67466332
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            0
+          ],
+          "B": [
+            0
+          ],
+          "C": [
+            0
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            5488640
+          ],
+          "B": [
+            5488640
+          ],
+          "C": [
+            5488640
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              38386795
+            ],
+            "B": [
+              38386795
+            ],
+            "C": [
+              38386795
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr": {
+            "A": [
+              45
+            ],
+            "B": [
+              45
+            ],
+            "C": [
+              45
+            ]
+          },
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti": {
+            "A": [
+              23590852
+            ],
+            "B": [
+              23590852
+            ],
+            "C": [
+              23590852
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "integer-fields",
+      "dictionary": "vndb",
+      "summarySha256": "b70f4d94b8f877dbd3537a2d6e17eed07ceed34628be3890ba84859443102a24",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          1.2278625470217852,
+          0.8436121940303076,
+          0.06392734326829963,
+          -4.669932454304626,
+          -6.935514918190345,
+          16.27475657415467
+        ],
+        "BvsC": [
+          1.6640135837842296,
+          -7.295053072735092,
+          -9.582901760815476,
+          -1.9792753012184416,
+          8.15641708239272,
+          3.5104961081853014
+        ],
+        "CvsA": [
+          -0.429012215225022,
+          8.779105685860422,
+          10.669253152279424,
+          -2.7449880230477786,
+          -13.953801732435478,
+          12.33136826301038
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": 0.45376976864930363,
+        "BvsC": -0.15763085871710603,
+        "CvsA": 4.1750467353177
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 2,
+        "BvsC": 3
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -13.953801732435478,
+        12.33136826301038
+      ],
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "f466a7dee4518b253721bd23bf7f950b1982a7a16bbdaa9389bdeeafe1ed3be6",
+        "all": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "cdf307347729ab9066576344570190c1a7686fc908d8689e3ea87558f3d01796",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665813,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087807,
+          "runner_name": "GitHub Actions 1000087807",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:34:49Z",
+          "completed_at": "2026-11-25T15:51:43Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791593,
+          "BminusA": 607,
+          "BvsAPercent": 0.0036150348764474316
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "d5c57a46c11b8303199fcfcc4fedf6f0ac8473c3ad8916a270c69604898965ae"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            199563210
+          ],
+          "B": [
+            199563210
+          ],
+          "C": [
+            199563210
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            557056
+          ],
+          "B": [
+            557056
+          ],
+          "C": [
+            557056
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              7533449
+            ],
+            "B": [
+              7533449
+            ],
+            "C": [
+              7533449
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": {
+            "A": [
+              38
+            ],
+            "B": [
+              38
+            ],
+            "C": [
+              38
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": {
+            "A": [
+              399513708
+            ],
+            "B": [
+              399513708
+            ],
+            "C": [
+              399513708
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": {
+            "A": [
+              26
+            ],
+            "B": [
+              26
+            ],
+            "C": [
+              26
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": {
+            "A": [
+              2386124
+            ],
+            "B": [
+              2386124
+            ],
+            "C": [
+              2386124
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "vndb",
+      "summarySha256": "d68b4549b1ffacbc5e235a321137a736590a264298e7357a18c3306b6e8f241f",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          0.39814399042068516,
+          0.6359883809816003,
+          -1.2056429059719265,
+          -4.313367093158638,
+          -1.3192570991934383,
+          -0.40438776647254704
+        ],
+        "BvsC": [
+          0.2900630961996331,
+          1.9925627517819233,
+          -1.337470907680549,
+          -2.7588726990355306,
+          -1.6199493182844638,
+          -4.270979984083112
+        ],
+        "CvsA": [
+          0.10776829815870581,
+          -1.3300718544565049,
+          0.13361506432221226,
+          -1.5985976687743375,
+          0.305643488702656,
+          4.039101431277237
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": -0.8050153362222368,
+        "BvsC": -1.4787101129825064,
+        "CvsA": 0.12069168124045904
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 4,
+        "BvsC": 4
+      },
+      "recomputedFrozenGatePasses": false,
+      "controlRangePercent": [
+        -1.5985976687743375,
+        4.039101431277237
+      ],
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "f466a7dee4518b253721bd23bf7f950b1982a7a16bbdaa9389bdeeafe1ed3be6",
+        "all": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "1e283408b9c0b3f31c93e889220b14f8aba3fa1d5e5251518b22925e9c791460",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665835,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087779,
+          "runner_name": "GitHub Actions 1000087779",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:32:28Z",
+          "completed_at": "2026-11-25T15:56:44Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16758394880
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16793851,
+          "BminusA": 2865,
+          "BvsAPercent": 0.017062726393790584
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            199563210
+          ],
+          "B": [
+            199563210
+          ],
+          "C": [
+            199563210
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            557056
+          ],
+          "B": [
+            557056
+          ],
+          "C": [
+            557056
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": 0,
+          "maximumDifferenceBytes": 0,
+          "allObservedTotalsEqual": true
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              7533449
+            ],
+            "B": [
+              7533449
+            ],
+            "C": [
+              7533449
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": {
+            "A": [
+              38
+            ],
+            "B": [
+              38
+            ],
+            "C": [
+              38
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": {
+            "A": [
+              399513708
+            ],
+            "B": [
+              399513708
+            ],
+            "C": [
+              399513708
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": {
+            "A": [
+              26
+            ],
+            "B": [
+              26
+            ],
+            "C": [
+              26
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": {
+            "A": [
+              2386124
+            ],
+            "B": [
+              2386124
+            ],
+            "C": [
+              2386124
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "vndb",
+      "summarySha256": "8bc6dc423aedc4f85a3fcf466ba63bc551158f5552ac993b25a2c80b07259c13",
+      "observationCount": 23,
+      "proofCount": 23,
+      "timedObservationCount": 18,
+      "role": "non-target",
+      "recomputedPairsPercent": {
+        "BvsA": [
+          -0.14060534300303074,
+          2.0691319297823973,
+          -2.412534362840346,
+          3.163095183468534,
+          6.168329996486288,
+          1.6185195701871047
+        ],
+        "BvsC": [
+          1.0181164845036728,
+          1.5134016288935959,
+          -1.217991606348745,
+          2.232697729408395,
+          6.243022099871065,
+          1.5593260843592915
+        ],
+        "CvsA": [
+          -1.1470435876563267,
+          0.5474452554751652,
+          -1.2092715828689093,
+          0.9100781596537155,
+          -0.07030306735303915,
+          0.05828463826023089
+        ]
+      },
+      "recomputedMediansPercent": {
+        "BvsA": 1.843825749984751,
+        "BvsC": 1.5363638566264437,
+        "CvsA": -0.006009214546404129
+      },
+      "recomputedFasterPairCounts": {
+        "BvsA": 2,
+        "BvsC": 1
+      },
+      "recomputedFrozenGatePasses": true,
+      "controlRangePercent": [
+        -1.2092715828689093,
+        0.9100781596537155
+      ],
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "semanticReceiptSha256ByMediaMode": {
+        "sample": "f466a7dee4518b253721bd23bf7f950b1982a7a16bbdaa9389bdeeafe1ed3be6",
+        "all": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7"
+      },
+      "mediaReadbackByMode": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "sourceTreeAndHarnessReceiptsVerified": true,
+      "artifactZipDigestVerifiedByRetriever": true,
+      "pendingFullArtifactChecks": [],
+      "fullArtifactAudit": {
+        "archiveSha256": "6189933f0bd6df3be62fbcdcd45e3621ab45762f3ad1d840c74baa735aa6aaaa",
+        "allRetainedMemberHashesVerified": true,
+        "retainedMembers": 202,
+        "rawObservationsAndSemanticProofsVerified": 23,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "productionDefaultTimingConfigurationVerified": true,
+        "exactSourceHarnessPackageAndFixtureIdentitiesVerified": true,
+        "sourceDirtyValues": [
+          true
+        ],
+        "dirtyStatusLimitation": "Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.",
+        "runnerAssignment": {
+          "id": 139311665973,
+          "status": "completed",
+          "conclusion": "success",
+          "runner_id": 1000087819,
+          "runner_name": "GitHub Actions 1000087819",
+          "runner_group_id": 0,
+          "runner_group_name": "GitHub Actions",
+          "started_at": "2026-11-25T15:35:59Z",
+          "completed_at": "2026-11-25T16:00:09Z"
+        },
+        "ciJobCompletionVerified": true,
+        "hostFingerprint": {
+          "nodeVersion": "v22.22.0",
+          "v8Version": "12.4.254.21-node.33",
+          "platform": "linux",
+          "arch": "x64",
+          "cpuModel": "AMD EPYC 7763 64-Core Processor",
+          "logicalCpuCount": 4,
+          "availableParallelism": 4,
+          "totalMemoryBytes": 16759431168
+        },
+        "hostIdentityLimitation": "CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.",
+        "packageBytes": {
+          "A": 16790986,
+          "B": 16791472,
+          "BminusA": 486,
+          "BvsAPercent": 0.0028944101317263105
+        },
+        "packageMemberMapSha256": {
+          "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+          "B": "4762fd8cdf1fc66b1068ce7e8ad7ab0e28c0442882f524fd7e295b0038ebc4b4"
+        },
+        "packageArchiveLimitation": "Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.",
+        "logicalOpfsBytes": {
+          "A": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609553611,
+            "distinct": [
+              609553611
+            ]
+          },
+          "B": {
+            "observations": 8,
+            "minimum": 609553611,
+            "maximum": 609561803,
+            "distinct": [
+              609553611,
+              609561803
+            ]
+          },
+          "C": {
+            "observations": 7,
+            "minimum": 609553611,
+            "maximum": 609561803,
+            "distinct": [
+              609553611,
+              609561803
+            ]
+          }
+        },
+        "logicalMediaArchiveBytes": {
+          "A": [
+            199563210
+          ],
+          "B": [
+            199563210
+          ],
+          "C": [
+            199563210
+          ]
+        },
+        "logicalSqlitePoolBytes": {
+          "A": [
+            557056
+          ],
+          "B": [
+            557056,
+            565248
+          ],
+          "C": [
+            557056,
+            565248
+          ]
+        },
+        "logicalOpfsObservationsAboveCellMinimum": [
+          {
+            "name": "cohort-1-B",
+            "arm": "B",
+            "bytes": 609561803,
+            "sqlitePoolBytes": 565248
+          },
+          {
+            "name": "cohort-1-C",
+            "arm": "C",
+            "bytes": 609561803,
+            "sqlitePoolBytes": 565248
+          }
+        ],
+        "candidateLogicalOpfsRangeVsControls": {
+          "minimumDifferenceBytes": -8192,
+          "maximumDifferenceBytes": 8192,
+          "allObservedTotalsEqual": false
+        },
+        "fixedLogicalFileSizes": {
+          "manabitan-term-content.bin": {
+            "A": [
+              7533449
+            ],
+            "B": [
+              7533449
+            ],
+            "C": [
+              7533449
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": {
+            "A": [
+              38
+            ],
+            "B": [
+              38
+            ],
+            "C": [
+              38
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": {
+            "A": [
+              399513708
+            ],
+            "B": [
+              399513708
+            ],
+            "C": [
+              399513708
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": {
+            "A": [
+              26
+            ],
+            "B": [
+              26
+            ],
+            "C": [
+              26
+            ]
+          },
+          "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": {
+            "A": [
+              2386124
+            ],
+            "B": [
+              2386124
+            ],
+            "C": [
+              2386124
+            ]
+          }
+        },
+        "storageLimitation": "Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality."
+      }
+    }
+  ],
+  "fullyAuditedCells": 9,
+  "distinctAssignedRunnerCount": 9,
+  "sourcePackageMemberMapsIdenticalAcrossAvailableCells": true,
+  "missingCells": [],
+  "scope": "Read-only independent audit of downloaded compact summaries and available archived full observations. No timings, thresholds or measurements changed.",
+  "completeIndependentAudit": true,
+  "totals": {
+    "successfulObservations": 207,
+    "semanticProofs": 207,
+    "timedObservations": 162,
+    "publicLookupObservations": 14904,
+    "fullMediaValidationObservations": 18,
+    "targetGatePasses": 0,
+    "nonTargetGatePasses": 6
+  },
+  "candidateDecisionsUnderFrozenScreen": {
+    "integer-fields": {
+      "cells": 3,
+      "passesAllRequiredCells": false
+    },
+    "structured-metadata-keys": {
+      "cells": 3,
+      "passesAllRequiredCells": false
+    },
+    "single-image-projection": {
+      "cells": 3,
+      "passesAllRequiredCells": false
+    }
+  }
+}

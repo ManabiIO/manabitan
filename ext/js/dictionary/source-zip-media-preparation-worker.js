@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {createGenerationMediaIndex} from './dictionary-generation-media-store.js';
 import {readDenseZipDirectory} from './dense-zip-directory.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
-import {preparePackedSourceZipMedia} from './source-zip-media-pack.js';
+// eslint-disable-next-line @stylistic/semi
+import {preparePackedSourceZipMediaIndex} from './source-zip-media-pack.js'
 import {RawZipPayloadReader} from './term-bank-source-pipeline.js';
 
 self.addEventListener('message', (event) => { void prepare(event.data); }, {once: true});
@@ -32,31 +32,18 @@ async function prepare(archive) {
             self.postMessage(null);
             return;
         }
-        /** @type {import('dictionary-importer').ArchiveFileMap} */
-        const fileMap = new Map();
-        /** @type {Array<{type: 'image', source: {path: string}}>} */
-        const requirements = [];
-        for (const entry of entries) {
-            if (getImageMediaTypeFromFileName(entry.filename) === null) { continue; }
-            if (fileMap.has(entry.filename)) {
-                self.postMessage(null);
-                return;
-            }
-            const {filename: path} = entry;
-            fileMap.set(path, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (entry)));
-            requirements.push({type: 'image', source: {path}});
-        }
-        const packed = await preparePackedSourceZipMedia(archive, requirements, fileMap, new RawZipPayloadReader(archive), () => {});
+        /* eslint-disable @stylistic/semi */
+        const imageEntries = /** @type {import('@zip.js/zip.js').Entry[]} */ (
+            /** @type {unknown} */ (entries.filter(({filename}) => getImageMediaTypeFromFileName(filename) !== null))
+        )
+        const packed = await preparePackedSourceZipMediaIndex(archive, imageEntries, new RawZipPayloadReader(archive), () => {})
+        /* eslint-enable @stylistic/semi */
         if (packed === null) {
             self.postMessage(null);
             return;
         }
-        const {blob, records, ...metrics} = packed;
-        const plan = createGenerationMediaIndex(records, blob.size);
-        if (plan === null) {
-            self.postMessage(null);
-            return;
-        }
+        // eslint-disable-next-line @stylistic/semi
+        const {blob, plan, ...metrics} = packed
         self.postMessage({blob, plan, metrics}, [plan.index.buffer]);
     } catch (_) {
         // A malformed or unreferenced image declines speculative preparation.

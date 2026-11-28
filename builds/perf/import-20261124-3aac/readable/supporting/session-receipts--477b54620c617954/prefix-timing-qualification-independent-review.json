@@ -1,0 +1,926 @@
+[
+  {
+    "artifact": "import-prefix-qualification-jitendex-forward-45468314006-1",
+    "observations": 41,
+    "allChecksPass": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      },
+      "C": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      }
+    },
+    "storage": {
+      "partition": [
+        [
+          "manabitan-term-content.bin",
+          38386795
+        ],
+        [
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+          45
+        ],
+        [
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+          23590852
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          5459968
+        ]
+      ],
+      "storageBytes": 67466332
+    },
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "offsetSensitiveDigests": {
+      "A": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723",
+      "B": "c94528a8aee9404f2a675d3b8165d1f92c0ef11bcf678a2d4985c66997b92e7e",
+      "C": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723"
+    },
+    "analysis": {
+      "allTimingsMs": {
+        "A": [
+          1752.5,
+          1774.8999999999942,
+          1761.1000000000058,
+          1743.7999999999884,
+          1868.100000000035,
+          1695.9000000000233,
+          1804.7000000000116,
+          1698.7000000000116,
+          1722.7999999999884,
+          1818.9000000000233,
+          1691,
+          1753.6999999999534
+        ],
+        "B": [
+          1854.1000000000058,
+          2021.1000000000058,
+          1723.4000000000233,
+          1709.3000000000175,
+          1853.7000000000116,
+          1851.5,
+          1723.9000000000233,
+          1713.6999999999534,
+          1707.7999999999884,
+          1767.899999999965,
+          1678.2000000000116,
+          1688.7999999999884
+        ],
+        "C": [
+          1937.8000000000175,
+          1764.1000000000058,
+          1779.3999999999942,
+          1737.5999999999767,
+          1716.8999999999942,
+          1682.5,
+          1715.5,
+          1701.2999999999884,
+          1982,
+          1745.4000000000233,
+          1693.2999999999884,
+          1762.2999999999884
+        ]
+      },
+      "browserVersion": "153.0.8010.12",
+      "candidate": {
+        "baselineMedianMs": 1753.0999999999767,
+        "bestPairPercent": -4.477198426330576,
+        "candidateMedianMs": 1723.6500000000233,
+        "equalWorkPercent": 0.9831120975427377,
+        "fasterPairs": 8,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          5.7974322396579625,
+          13.87120401149431,
+          -2.140707512349238,
+          -1.9784378942522718,
+          -0.7708366789798693,
+          9.175069284744053,
+          -4.477198426330576,
+          0.8830281980303667,
+          -0.8706756442999786,
+          -2.803892462480484,
+          -0.7569485511524698,
+          -3.7007469920720126
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -2.472299987414861,
+          3.3402302188441646
+        ],
+        "pairedMedianPercent": -0.8207561616399239,
+        "pairs": 12,
+        "worstPairPercent": 13.87120401149431
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 1741.5,
+        "bestPairPercent": -13.834510595358807,
+        "candidateMedianMs": 1723.6500000000233,
+        "equalWorkPercent": 0.3548856872199524,
+        "fasterPairs": 6,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -4.319331200330834,
+          14.56833512839404,
+          -3.147128245474373,
+          -1.628683241249984,
+          7.967849030229934,
+          10.044576523031212,
+          0.48965316234470535,
+          0.7288544054526058,
+          -13.834510595358807,
+          1.2891027844586622,
+          -0.8917498375938582,
+          -4.170686035294812
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -3.658907140384593,
+          4.628475907344298
+        ],
+        "pairedMedianPercent": -0.2010483376245764,
+        "pairs": 12,
+        "worstPairPercent": 14.56833512839404
+      },
+      "dictionary": "jitendex",
+      "identicalProductControl": {
+        "baselineMedianMs": 1753.0999999999767,
+        "bestPairPercent": -8.093785129277764,
+        "candidateMedianMs": 1741.5,
+        "equalWorkPercent": 0.6260048088548409,
+        "fasterPairs": 6,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          10.5734664764632,
+          -0.6084849850689245,
+          1.03912327522504,
+          -0.3555453607071768,
+          -8.093785129277764,
+          -0.7901409281221294,
+          -4.942649747881145,
+          0.1530582209911424,
+          15.045275133504376,
+          -4.040903842981969,
+          0.13601419278463922,
+          0.49039174317357936
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -2.415522385552049,
+          0.7647575091993097
+        ],
+        "pairedMedianPercent": -0.10976558396126879,
+        "pairs": 12,
+        "worstPairPercent": 15.045275133504376
+      },
+      "independentQualificationRequired": false,
+      "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+      "screeningOnly": false,
+      "stage": "qualification",
+      "status": "complete"
+    }
+  },
+  {
+    "artifact": "import-prefix-qualification-jitendex-reverse-45468314006-1",
+    "observations": 41,
+    "allChecksPass": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      },
+      "C": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      }
+    },
+    "storage": {
+      "partition": [
+        [
+          "manabitan-term-content.bin",
+          38386795
+        ],
+        [
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+          45
+        ],
+        [
+          "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+          23590852
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          5459968
+        ]
+      ],
+      "storageBytes": 67466332
+    },
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "offsetSensitiveDigests": {
+      "C": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723",
+      "B": "c94528a8aee9404f2a675d3b8165d1f92c0ef11bcf678a2d4985c66997b92e7e",
+      "A": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723"
+    },
+    "analysis": {
+      "allTimingsMs": {
+        "A": [
+          1338.5,
+          1353,
+          1368,
+          1356.8000000000175,
+          1631.7999999999884,
+          1329.5,
+          1307.4000000000233,
+          1350.5,
+          1341.5,
+          1336.7999999999884,
+          1323.399999999965,
+          1309.7000000000116
+        ],
+        "B": [
+          1316,
+          1341.0999999999767,
+          1357.2000000000116,
+          1321.5,
+          1354.8000000000175,
+          1325.3000000000175,
+          1312.1999999999825,
+          1305,
+          1316.4000000000233,
+          1315.7999999999884,
+          1297.5999999999767,
+          1343.5999999999767
+        ],
+        "C": [
+          1389.9000000000087,
+          1340.6999999999825,
+          1367.5,
+          1352.8999999999942,
+          1352.8000000000175,
+          1355.0999999999767,
+          1343.1999999999534,
+          1307.600000000035,
+          1380,
+          1318,
+          1334.4000000000233,
+          1311.2999999999884
+        ]
+      },
+      "browserVersion": "153.0.8010.12",
+      "candidate": {
+        "baselineMedianMs": 1340.0,
+        "bestPairPercent": -16.97511949993705,
+        "candidateMedianMs": 1318.9500000000116,
+        "equalWorkPercent": -2.6940887874766672,
+        "fasterPairs": 10,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -1.680986178558086,
+          -0.879526977089673,
+          -0.7894736842096739,
+          -2.601709905661631,
+          -16.97511949993705,
+          -0.3159082361776977,
+          0.36714089031353314,
+          -3.3691225472047392,
+          -1.8710398807287865,
+          -1.5709156193896012,
+          -1.9495239534524034,
+          2.5883790180930566
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -2.2756169295570174,
+          -0.5526909601936858
+        ],
+        "pairedMedianPercent": -1.6259508989738436,
+        "pairs": 12,
+        "worstPairPercent": 2.5883790180930566
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 1347.9999999999854,
+        "bestPairPercent": -5.316929275488036,
+        "candidateMedianMs": 1318.9500000000116,
+        "equalWorkPercent": -1.5284707863360558,
+        "fasterPairs": 9,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -5.316929275488036,
+          0.029835160736491062,
+          -0.7531992687377254,
+          -2.3209402025274772,
+          0.14784151389710676,
+          -2.1990996974363353,
+          -2.3079213817727817,
+          -0.19883756500725935,
+          -4.608695652172223,
+          -0.1669195751146879,
+          -2.7577937649914563,
+          2.463204453594803
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -2.539366983759467,
+          -0.06854220718909843
+        ],
+        "pairedMedianPercent": -1.4761494830870303,
+        "pairs": 12,
+        "worstPairPercent": 2.463204453594803
+      },
+      "dictionary": "jitendex",
+      "identicalProductControl": {
+        "baselineMedianMs": 1340.0,
+        "bestPairPercent": -17.0976835396478,
+        "candidateMedianMs": 1347.9999999999854,
+        "equalWorkPercent": -1.1837106729717273,
+        "fasterPairs": 6,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          3.840119536795572,
+          -0.9090909090922028,
+          -0.03654970760234022,
+          -0.2874410377375569,
+          -17.0976835396478,
+          1.9255359157560603,
+          2.738259140273014,
+          -3.176601258790457,
+          2.8699217294073875,
+          -1.4063435068812469,
+          0.8311923832596824,
+          0.12216538138327682
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.1577172079867248,
+          2.331897528014537
+        ],
+        "pairedMedianPercent": 0.0428078368904683,
+        "pairs": 12,
+        "worstPairPercent": 3.840119536795572
+      },
+      "independentQualificationRequired": false,
+      "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+      "screeningOnly": false,
+      "stage": "qualification",
+      "status": "complete"
+    }
+  },
+  {
+    "artifact": "import-prefix-qualification-jmdict-forward-45468314006-1",
+    "observations": 41,
+    "allChecksPass": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      },
+      "C": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      }
+    },
+    "storage": {
+      "partition": [
+        [
+          "manabitan-term-content.bin",
+          19566680
+        ],
+        [
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+          45
+        ],
+        [
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+          23748952
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          176128
+        ]
+      ],
+      "storageBytes": 43520477
+    },
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "offsetSensitiveDigests": {
+      "A": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "B": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "C": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d"
+    },
+    "analysis": {
+      "allTimingsMs": {
+        "A": [
+          861.5,
+          850.5999999999913,
+          921.5,
+          852.2999999999884,
+          867,
+          854.1000000000058,
+          865.7999999999884,
+          856.0999999999767,
+          848.5,
+          841,
+          862.2999999999884,
+          857.4000000000233
+        ],
+        "B": [
+          830.5999999999913,
+          845.1000000000058,
+          850.2000000000116,
+          843.8000000000175,
+          848.2000000000116,
+          854.8000000000175,
+          857.7999999999884,
+          847,
+          842.2000000000116,
+          845.9000000000233,
+          863.0999999999767,
+          845.7000000000116
+        ],
+        "C": [
+          843.8000000000029,
+          859.5,
+          850,
+          858.1000000000058,
+          847,
+          859,
+          853.3999999999942,
+          847.6000000000058,
+          866.9000000000233,
+          829.7000000000116,
+          849.7999999999884,
+          853.9000000000233
+        ]
+      },
+      "browserVersion": "153.0.8010.12",
+      "candidate": {
+        "baselineMedianMs": 856.75,
+        "bestPairPercent": -7.737384698859295,
+        "candidateMedianMs": 846.4500000000116,
+        "equalWorkPercent": -1.5834631121762754,
+        "fasterPairs": 9,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -3.5867672663968397,
+          -0.6466023983053737,
+          -7.737384698859295,
+          -0.9973014196845043,
+          -2.168396770471548,
+          0.08195761620555242,
+          -0.9240009240009339,
+          -1.0629599345843954,
+          -0.7424867413068137,
+          0.5826397146282192,
+          0.0927751362621354,
+          -1.3645906228144766
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.7664936966430123,
+          -0.28232239104991064
+        ],
+        "pairedMedianPercent": -0.9606511718427191,
+        "pairs": 12,
+        "worstPairPercent": 0.5826397146282192
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 851.6999999999971,
+        "bestPairPercent": -2.849232898836196,
+        "candidateMedianMs": 846.4500000000116,
+        "equalWorkPercent": -0.4335189407653428,
+        "fasterPairs": 7,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -1.5643517421203623,
+          -1.6753926701563948,
+          0.0235294117660656,
+          -1.6664724391082908,
+          0.1416765053142477,
+          -0.48894062863591436,
+          0.5155847199430852,
+          -0.07078810759860721,
+          -2.849232898836196,
+          1.952512956491681,
+          1.5650741350892616,
+          -0.9602998009147878
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.6154120906143266,
+          0.32863061262866644
+        ],
+        "pairedMedianPercent": -0.2798643681172608,
+        "pairs": 12,
+        "worstPairPercent": 1.952512956491681
+      },
+      "dictionary": "jmdict",
+      "identicalProductControl": {
+        "baselineMedianMs": 856.75,
+        "bestPairPercent": -7.759088442756379,
+        "candidateMedianMs": 851.6999999999971,
+        "equalWorkPercent": -1.154951103199886,
+        "fasterPairs": 8,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -2.0545560069642588,
+          1.0463202445343045,
+          -7.759088442756379,
+          0.6805115569655795,
+          -2.3068050749711633,
+          0.5737033134286529,
+          -1.4322014322007748,
+          -0.9928746641713726,
+          2.168532704775883,
+          -1.3436385255634176,
+          -1.449611504116921,
+          -0.40821087007230084
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.75208375554059,
+          0.6271074351971162
+        ],
+        "pairedMedianPercent": -1.168256594867395,
+        "pairs": 12,
+        "worstPairPercent": 2.168532704775883
+      },
+      "independentQualificationRequired": false,
+      "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+      "screeningOnly": false,
+      "stage": "qualification",
+      "status": "complete"
+    }
+  },
+  {
+    "artifact": "import-prefix-qualification-jmdict-reverse-45468314006-1",
+    "observations": 41,
+    "allChecksPass": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      },
+      "C": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      }
+    },
+    "storage": {
+      "partition": [
+        [
+          "manabitan-term-content.bin",
+          19566680
+        ],
+        [
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+          45
+        ],
+        [
+          "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+          23748952
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          4096
+        ],
+        [
+          "sqlite-opaque",
+          176128
+        ]
+      ],
+      "storageBytes": 43520477
+    },
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "offsetSensitiveDigests": {
+      "C": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "B": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "A": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d"
+    },
+    "analysis": {
+      "allTimingsMs": {
+        "A": [
+          949.0999999999913,
+          952.6999999999825,
+          947,
+          957.4000000000233,
+          936.1000000000058,
+          957.7000000000116,
+          932.4000000000233,
+          947.8000000000466,
+          925.2000000000116,
+          939,
+          929.5,
+          934.7999999999884
+        ],
+        "B": [
+          1082.8999999999942,
+          915.3999999999942,
+          945.3000000000175,
+          945.1000000000058,
+          950.9000000000233,
+          950.5,
+          944.3000000000466,
+          948.2999999999884,
+          968.4000000000233,
+          951,
+          931.7000000000116,
+          946.5
+        ],
+        "C": [
+          920.6999999999971,
+          948.2999999999884,
+          948,
+          960.5999999999767,
+          939.5,
+          955.8999999999942,
+          958.3999999999651,
+          931.2999999999884,
+          924.2000000000116,
+          946.6000000000349,
+          939.5,
+          925.5
+        ]
+      },
+      "browserVersion": "153.0.8010.12",
+      "candidate": {
+        "baselineMedianMs": 943.0,
+        "bestPairPercent": -3.9151884118808655,
+        "candidateMedianMs": 947.3999999999942,
+        "equalWorkPercent": 1.5174157949191303,
+        "fasterPairs": 4,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          14.097566115267535,
+          -3.9151884118808655,
+          -0.1795142555419793,
+          -1.2847294756650474,
+          1.5810276679860458,
+          -0.7518011903530963,
+          1.2762762762787316,
+          0.052753745509792616,
+          4.66926070039031,
+          1.2779552715654896,
+          0.23668639053380236,
+          1.2516046213106424
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -0.4656577229475378,
+          1.4294914697757677
+        ],
+        "pairedMedianPercent": 0.7441455059222224,
+        "pairs": 12,
+        "worstPairPercent": 14.097566115267535
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 943.0500000000175,
+        "bestPairPercent": -3.4693662343134646,
+        "candidateMedianMs": 947.3999999999942,
+        "equalWorkPercent": 1.6090631499769747,
+        "fasterPairs": 6,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          17.617030520256073,
+          -3.4693662343134646,
+          -0.28481012658043703,
+          -1.6135748490496815,
+          1.2134113890392095,
+          -0.5649126477659028,
+          -1.4712020033304518,
+          1.8254053473639287,
+          4.782514607229071,
+          0.4648214662967387,
+          -0.830228845129144,
+          2.269043760129663
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.150715424229798,
+          2.047224553746796
+        ],
+        "pairedMedianPercent": 0.09000566985815084,
+        "pairs": 12,
+        "worstPairPercent": 17.617030520256073
+      },
+      "dictionary": "jmdict",
+      "identicalProductControl": {
+        "baselineMedianMs": 943.0,
+        "bestPairPercent": -2.9923085027915297,
+        "candidateMedianMs": 943.0500000000175,
+        "equalWorkPercent": -0.09019604375505308,
+        "fasterPairs": 6,
+        "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+        "pairedChangesPercent": [
+          -2.9923085027915297,
+          -0.46184528182998674,
+          0.10559662090812161,
+          0.33423856276930675,
+          0.36320905886060295,
+          -0.18795029758978954,
+          2.788502788496472,
+          -1.7408736020318005,
+          -0.1080847384349326,
+          0.809371671995196,
+          1.075847229693383,
+          -0.994865211808782
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -0.7283552468193843,
+          0.5862903654278995
+        ],
+        "pairedMedianPercent": -0.0012440587634054978,
+        "pairs": 12,
+        "worstPairPercent": 2.788502788496472
+      },
+      "independentQualificationRequired": false,
+      "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+      "screeningOnly": false,
+      "stage": "qualification",
+      "status": "complete"
+    }
+  }
+]

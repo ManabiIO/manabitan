@@ -1,0 +1,71 @@
+{
+    "kind": "synthetic-correctness-differential",
+    "startedAtUtc": "2026-11-25T15:31:49.153638+00:00",
+    "command": [
+        "node",
+        "/workspace/scratch/ca3652ed5eb0/media-evidence-staging/review-media-projection-strict.mjs",
+        "/workspace/scratch/ca3652ed5eb0/vndb"
+    ],
+    "cwd": "/workspace/scratch/ca3652ed5eb0/vndb",
+    "exitCode": 0,
+    "repositoryHead": "5afd2e97ec2707b150acfde61115aee688547a78",
+    "repositoryTree": "a6981459853d7ea102afd801c1e447e49311db1e",
+    "repositoryStatus": "",
+    "runtime": {
+        "version": "v24.22.3",
+        "versions": {
+            "node": "24.22.3",
+            "acorn": "8.18.0",
+            "ada": "4.0.0",
+            "amaro": "1.1.11",
+            "ares": "1.34.9",
+            "brotli": "1.2.1",
+            "cldr": "48.0",
+            "icu": "78.3",
+            "llhttp": "9.4.4",
+            "merve": "1.2.2",
+            "modules": "137",
+            "napi": "10",
+            "nbytes": "0.1.4",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.70.0",
+            "nghttp3": "",
+            "ngtcp2": "",
+            "openssl": "3.5.9",
+            "simdjson": "4.6.11",
+            "simdutf": "6.4.0",
+            "sqlite": "3.54.1",
+            "tz": "2026e",
+            "undici": "7.30.2",
+            "unicode": "17.0",
+            "uv": "1.52.1",
+            "uvwasi": "0.0.23",
+            "v8": "13.6.233.17-node.63",
+            "zlib": "1.3.2.1-motley-285e94b",
+            "zstd": "1.5.7"
+        },
+        "platform": "linux",
+        "arch": "x64",
+        "execPath": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node"
+    },
+    "seed": "0xc365831",
+    "inputSha256": {
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "dev/data/dictionary-wasm/manifest.json": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+        "ext/js/dictionary/dictionary-image-references.js": "dd461816f58678ee25ef244cab0ad5ddadfd1a5b6ff2106e6c3995b9d8164c51",
+        "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa"
+    },
+    "scriptSha256": "84200c75ba15ac843212ea78bbec28e1f674ed2193b8970c0beff245211cfbee",
+    "originalScriptSha256": "8c64dad257f721126d5d4edfad22bc031986d59435269a87abff45e3fa37e260",
+    "assertions": [
+        "Every malformed source has raw native return span 0",
+        "Every projected token remains inside its input span",
+        "Every usable native projection decodes to a string and exactly matches the JavaScript collector"
+    ],
+    "limits": [
+        "Synthetic corpus only",
+        "No elapsed-time, memory, or whole-import performance claim",
+        "Valid cases returning fallback are counted; this replay does not execute the downstream worker fallback path"
+    ]
+}

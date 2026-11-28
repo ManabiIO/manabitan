@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {MIN_EXACT_LOOKUP_SOURCE_BYTES} from './term-lookup-route.js';
 import {
     BlobReader as BlobReader0,
     BlobWriter as BlobWriter0,
@@ -70,7 +71,9 @@ import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
-import {readDenseZipDirectory} from './dense-zip-directory.js';
+import {readDenseZipFileMap} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -92,6 +95,22 @@ const TERM_BANK_WASM_ROW_CHUNK_SIZE = 12000;
 const TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 48;
 const TERM_ARTIFACT_ROW_CHUNK_SIZE = 75000;
 const NO_MEDIA_FAST_PATH_TERM_BANK_WASM_ROW_CHUNK_SIZE = 8192;
+const MIN_NATIVE_IMAGE_PROJECTION_SOURCE_BYTES = 1024 * 1024 * 1024;
+
+/**
+ * Native single-image projection is admitted only for large ordinary source imports.
+ * Unknown or malformed source totals preserve the JavaScript collector path.
+ * @param {number|null} rawTermBankSourceBytes
+ * @returns {boolean}
+ */
+export function isNativeImageProjectionSourceSizeEligible(rawTermBankSourceBytes) {
+    return (
+        typeof rawTermBankSourceBytes === 'number' &&
+        Number.isSafeInteger(rawTermBankSourceBytes) &&
+        rawTermBankSourceBytes >= MIN_NATIVE_IMAGE_PROJECTION_SOURCE_BYTES
+    );
+}
+
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 262_144;
@@ -159,6 +178,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentBytesBuffer?: Uint8Array,
  *   contentBytesBaseOffset?: number,
  *   contentMetaList?: Uint32Array,
+ *   contentMetaByUniqueIndex?: boolean,
  *   releaseBorrowedContent?: () => void,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
@@ -833,6 +853,8 @@ export class DictionaryImporter {
         this._reverseStringCache = new Map();
         /** @type {boolean} */
         this._fastPrefixReverse = true;
+        /** @type {boolean} */
+        this._prepareExactLookupRoute = false;
         /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
         this._termBankExperiments = snapshotTermBankExperiments();
     }
@@ -1412,7 +1434,10 @@ export class DictionaryImporter {
             ) :
             null;
         const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
-        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
+        const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
+        const allowNativeImageProjection = isNativeImageProjectionSourceSizeEligible(rawTermBankSourceBytes);
+        this._prepareExactLookupRoute = (rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES;
+        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
             termContentStorageMode: effectiveTermContentStorageMode,
@@ -1424,6 +1449,9 @@ export class DictionaryImporter {
         }
         if (expectedTermRecordImportBytes !== null) {
             importOptimizationOptions.expectedTermRecordImportBytes = expectedTermRecordImportBytes;
+        }
+        if (rawTermBankSourceBytes !== null) {
+            importOptimizationOptions.rawTermBankSourceBytes = rawTermBankSourceBytes;
         }
         dictionaryDatabase.setImportOptimizationFlags(importOptimizationOptions);
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
@@ -1438,7 +1466,8 @@ export class DictionaryImporter {
             `termContentDedup=${String(enableTermEntryContentDedup)} ` +
             `preloadedTermArtifacts=${String(preloadedTermArtifactBytes !== null)} ` +
             `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)} ` +
-            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)}`,
+            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)} ` +
+            `rawTermBankSourceBytes=${String(rawTermBankSourceBytes)}`,
         );
 
         // Load and import data
@@ -1504,7 +1533,7 @@ export class DictionaryImporter {
             ),
             ...(rawZipPayloadReader === null ?
                 {} :
-                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal)}),
+                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal, true)}),
         });
         const uncompressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0);
         const compressedImportRunPlan = termBankSourcePipeline.createCompressedImportRunPlan(0);
@@ -1628,7 +1657,7 @@ export class DictionaryImporter {
                 `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)}`,
             );
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
-            /** @type {import('dictionary-importer').ImportRequirement[]} */
+            /** @type {import('dictionary-importer').DeferredMediaImportRequirement[]} */
             const deferredNoMetadataMediaRequirements = [];
 
             const canPackSourceMedia = (
@@ -1955,25 +1984,6 @@ export class DictionaryImporter {
                     }
 
                     const tMediaResolveStart = Date.now();
-                    const tResolveExisting = Date.now();
-                    if (alreadyAddedRequirements.length > 0) {
-                        if (this._skipImageMetadata) {
-                            for (const requirement of alreadyAddedRequirements) {
-                                this._assignRequirementNoMetadata(requirement);
-                            }
-                        } else {
-                            /** @type {import('dictionary-importer').ImportRequirement[]} */
-                            const unresolvedRequirements = [];
-                            for (const requirement of alreadyAddedRequirements) {
-                                if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
-                                    unresolvedRequirements.push(requirement);
-                                }
-                            }
-                            if (unresolvedRequirements.length > 0) {
-                                await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
-                            }
-                        }
-                    }
                     const tResolveNew = Date.now();
                     /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
                     let media = [];
@@ -1984,18 +1994,37 @@ export class DictionaryImporter {
                             }
                             /** @type {import('dictionary-importer').ImportRequirement[]} */
                             const prefetchRequirements = [];
-                            // Source reads have now populated any reusable archive cache.
-                            // Drain its media after term sinks release borrowed WASM views.
-                            const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
+                            // Let the speculative packer handle images it already reads.
+                            // Drain reusable archive bytes after term sinks release borrowed views.
+                            const deferArchiveImages = sourceMediaPreparation !== null || rawZipPayloadReader?.supportsCachedBatchReads() === true;
                             for (const requirement of notAddedRequirements) {
+                                if (mediaPrefetchRemainingEntries === 0 && !deferArchiveImages) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
+                                    continue;
+                                }
+                                /* eslint-disable @stylistic/semi */
+                                // Prepared media owns its own checked catalog. Keep
+                                // unopened image entries compact in this owner until
+                                // a real payload fallback needs their metadata.
+                                if (
+                                    deferArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                    fileMap instanceof DenseZipFileMap &&
+                                    fileMap.hasUnmaterializedEntry(requirement.source.path) &&
+                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement))
+                                    continue
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 const file = fileMap.get(requirement.source.path);
                                 if (
-                                    deferCachedArchiveImages &&
-                                    (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
+                                    deferArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
@@ -2003,7 +2032,7 @@ export class DictionaryImporter {
                                     typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
                                     size > mediaPrefetchRemainingBytes || mediaPrefetchRemainingEntries === 0
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 mediaPrefetchRemainingBytes -= size;
@@ -2025,13 +2054,34 @@ export class DictionaryImporter {
                             ({media} = await this._resolveAsyncRequirements(notAddedRequirements, fileMap));
                         }
                     }
+                    // Resolve first references before duplicates so their payloads
+                    // remain in the media batch and repeated targets use the cache.
+                    const tResolveExisting = Date.now();
+                    if (alreadyAddedRequirements.length > 0) {
+                        if (this._skipImageMetadata) {
+                            for (const requirement of alreadyAddedRequirements) {
+                                this._assignRequirementNoMetadata(requirement);
+                            }
+                        } else {
+                            /** @type {import('dictionary-importer').ImportRequirement[]} */
+                            const unresolvedRequirements = [];
+                            for (const requirement of alreadyAddedRequirements) {
+                                if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
+                                    unresolvedRequirements.push(requirement);
+                                }
+                            }
+                            if (unresolvedRequirements.length > 0) {
+                                await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
+                            }
+                        }
+                    }
                     const tResolved = Date.now();
                     importMetrics.mediaResolveMs += Math.max(0, tResolved - tMediaResolveStart);
                     step4TimingBreakdown.mediaResolveMs += importMetrics.mediaResolveMs;
                     this._logImport(
                         `term file ${termFile.filename}: resolve existing=${alreadyAddedRequirements.length} ` +
-                        `${tResolveNew - tResolveExisting}ms new=${notAddedRequirements.length} ` +
-                        `${tResolved - tResolveNew}ms`,
+                        `${tResolved - tResolveExisting}ms new=${notAddedRequirements.length} ` +
+                        `${tResolveExisting - tResolveNew}ms`,
                     );
                     this._logImport(`term file ${termFile.filename}: requirements=${requirements.length} newMedia=${media.length}`);
                     const tMediaWriteStart = Date.now();
@@ -2295,6 +2345,7 @@ export class DictionaryImporter {
                             },
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
+                            allowNativeImageProjection,
                         );
                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
@@ -2376,14 +2427,21 @@ export class DictionaryImporter {
                             parserEncodeContentMs: parserProfile.encodeContentMs ?? null,
                             parserRecentContentDedupHitCount: parserProfile.recentContentDedupHitCount ?? null,
                             parserRowDecodeMs: parserProfile.rowDecodeMs ?? null,
+                            parserMediaHintRowsSkipped: parserProfile.mediaHintRowsSkipped ?? 0,
                             parserChunkDispatchMs: parserProfile.chunkDispatchMs ?? null,
                             parserSourcePreparationMs: parserProfile.sourcePreparationMs ?? null,
                             parserSourceDeliveryMs: parserProfile.sourceDeliveryMs ?? null,
                             parserSourceTransferredBytes: parserProfile.sourceTransferredBytes ?? null,
                             parserSourceInflateMs: parserProfile.sourceInflateMs ?? null,
+                            parserSourceCrcMs: parserProfile.sourceCrcMs ?? null,
+                            parserSourceCrcScannedBytes: parserProfile.sourceCrcScannedBytes ?? null,
+                            parserSourceCrcReusedBytes: parserProfile.sourceCrcReusedBytes ?? null,
+                            parserSourceCrcReusedGlossaryCount: parserProfile.sourceCrcReusedGlossaryCount ?? null,
                             parserSourceCompressedBytes: parserProfile.sourceCompressedBytes ?? null,
                             parserSourceUncompressedBytes: parserProfile.sourceUncompressedBytes ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
+                            parserCompactContentMetadataGroups: parserProfile.compactContentMetadataGroups ?? 0,
+                            parserCompactContentMetadataBytesAvoided: parserProfile.compactContentMetadataBytesAvoided ?? 0,
                             parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
                             parserOrderedSinkWaitMs: parserProfile.orderedSinkWaitMs ?? null,
                             parserBorrowedContentResultCount: parserProfile.borrowedContentResultCount ?? null,
@@ -2680,6 +2738,7 @@ export class DictionaryImporter {
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
+            const sourceRangeReadCounts = rawZipPayloadReader?.getCoalescedRangeReadCounts() ?? {logicalRequests: 0, physicalRanges: 0};
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -2757,15 +2816,22 @@ export class DictionaryImporter {
                 fastPathParserEncodeContentMs: fastPathProfile?.encodeContentMs ?? null,
                 fastPathParserRecentContentDedupHitCount: fastPathProfile?.recentContentDedupHitCount ?? null,
                 fastPathParserRowDecodeMs: fastPathProfile?.rowDecodeMs ?? null,
+                fastPathParserMediaHintRowsSkipped: fastPathProfile?.mediaHintRowsSkipped ?? 0,
                 fastPathParserStringPlanMs: fastPathProfile?.nativeStringPlanMs ?? null,
                 fastPathParserChunkDispatchMs: fastPathProfile?.chunkDispatchMs ?? null,
                 fastPathParserSourcePreparationMs: fastPathProfile?.sourcePreparationMs ?? null,
                 fastPathParserSourceDeliveryMs: fastPathProfile?.sourceDeliveryMs ?? null,
                 fastPathParserSourceTransferredBytes: fastPathProfile?.sourceTransferredBytes ?? null,
                 fastPathParserSourceInflateMs: fastPathProfile?.sourceInflateMs ?? null,
+                fastPathParserSourceCrcMs: fastPathProfile?.sourceCrcMs ?? null,
+                fastPathParserSourceCrcScannedBytes: fastPathProfile?.sourceCrcScannedBytes ?? null,
+                fastPathParserSourceCrcReusedBytes: fastPathProfile?.sourceCrcReusedBytes ?? null,
+                fastPathParserSourceCrcReusedGlossaryCount: fastPathProfile?.sourceCrcReusedGlossaryCount ?? null,
                 fastPathParserSourceCompressedBytes: fastPathProfile?.sourceCompressedBytes ?? null,
                 fastPathParserSourceUncompressedBytes: fastPathProfile?.sourceUncompressedBytes ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
+                fastPathParserCompactContentMetadataGroups: fastPathProfile?.compactContentMetadataGroups ?? 0,
+                fastPathParserCompactContentMetadataBytesAvoided: fastPathProfile?.compactContentMetadataBytesAvoided ?? 0,
                 fastPathParserResultDeliveryMs: fastPathProfile?.resultDeliveryMs ?? null,
                 fastPathParserOrderedSinkWaitMs: fastPathProfile?.orderedSinkWaitMs ?? null,
                 fastPathParserBorrowedContentResultCount: fastPathProfile?.borrowedContentResultCount ?? null,
@@ -2780,6 +2846,8 @@ export class DictionaryImporter {
                 fastPathParserParallelOwnedContentBytes: fastPathProfile?.parallelOwnedContentBytes ?? null,
                 fastPathParserParallelPeakQueuedOwnedContentBytes: fastPathProfile?.parallelPeakQueuedOwnedContentBytes ?? null,
                 fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                sourceZipLogicalRangeReadCount: sourceRangeReadCounts.logicalRequests,
+                sourceZipPhysicalRangeReadCount: sourceRangeReadCounts.physicalRanges,
                 sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
                 sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
                 zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,
@@ -2969,45 +3037,39 @@ export class DictionaryImporter {
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
         try {
             if (archiveContent instanceof Blob) {
-                const entries = await readDenseZipDirectory(archiveContent, () => this._throwIfCancelled());
-                if (entries !== null) {
-                    const rawReader = new RawZipPayloadReader(archiveContent);
-                    const textDecoder = new TextDecoder();
-                    /** @type {Promise<Map<string, import('@zip.js/zip.js').Entry>>|null} */
-                    let fallback = null;
-                    /**
-                     * @this {import('./dense-zip-directory.js').DenseZipEntry}
-                     * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
-                     * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
-                     * @returns {Promise<unknown>}
-                     */
-                    const getData = async function getDenseEntryData(writer, options = {}) {
-                        if (
-                            this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
-                            this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
-                            (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
-                        ) {
-                            const signal = options.signal ?? new AbortController().signal;
-                            const bytes = await rawReader.read(this, signal);
-                            const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
-                            signal.throwIfAborted();
-                            return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
-                        }
-                        fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
-                        const entry = (await fallback).get(this.filename);
-                        if (typeof entry?.getData !== 'function') {
-                            throw new Error(`Cannot read ${this.filename}`);
-                        }
-                        return await entry.getData(writer, options);
-                    };
-                    /** @type {import('dictionary-importer').ArchiveFileMap} */
-                    const fileMap = new Map();
-                    for (const entry of entries) {
-                        if (fileMap.has(entry.filename)) {
-                            throw new Error(`Duplicate archive filename: '${entry.filename}'`);
-                        }
-                        fileMap.set(entry.filename, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (Object.assign(entry, {getData}))));
+                /** @type {RawZipPayloadReader|null} */
+                let rawReader = null;
+                const textDecoder = new TextDecoder();
+                /** @type {Promise<Map<string, import('@zip.js/zip.js').Entry>>|null} */
+                let fallback = null;
+                /**
+                 * @this {import('./dense-zip-directory.js').DenseZipEntry}
+                 * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
+                 * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
+                 * @returns {Promise<unknown>}
+                 */
+                const getData = async function getDenseEntryData(writer, options = {}) {
+                    if (
+                        this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                        this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                        (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
+                    ) {
+                        const signal = options.signal ?? new AbortController().signal;
+                        rawReader ??= new RawZipPayloadReader(archiveContent);
+                        const bytes = await rawReader.read(this, signal);
+                        const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
+                        signal.throwIfAborted();
+                        return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
                     }
+                    fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
+                    const entry = (await fallback).get(this.filename);
+                    if (typeof entry?.getData !== 'function') {
+                        throw new Error(`Cannot read ${this.filename}`);
+                    }
+                    return await entry.getData(writer, options);
+                };
+                const fileMap = await readDenseZipFileMap(archiveContent, getData, () => this._throwIfCancelled());
+                if (fileMap !== null) {
                     return {fileMap, zipReader, catalog: 'dense-zip'};
                 }
             }
@@ -3062,9 +3124,9 @@ export class DictionaryImporter {
      */
     _findRedundantDirectories(fileMap) {
         let indexPath = '';
-        for (const file of fileMap) {
-            if (file[0].replace(/.*\//, '') === INDEX_FILE_NAME) {
-                indexPath = file[0];
+        for (const filename of fileMap.keys()) {
+            if (filename.replace(/.*\//, '') === INDEX_FILE_NAME) {
+                indexPath = filename;
             }
         }
         const redundantDirectoriesRegex = new RegExp(`.*(?=${INDEX_FILE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`);
@@ -3352,16 +3414,79 @@ export class DictionaryImporter {
 
     /**
      * @param {string} path
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').MediaImportEntry} entry
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
      */
     _addFastMediaRequirement(path, entry, requirements) {
         requirements.push({
-            type: 'structured-content-image',
-            target: {tag: 'img', path: ''},
-            source: {tag: 'img', path},
+            type: 'image-reference',
+            source: {path},
             entry,
         });
+    }
+
+    /**
+     * Keep diagnostic keys in one owned arena per projected chunk. Successful
+     * image imports need neither decoded headwords nor one retained buffer per
+     * key. Copying the exact key bytes also releases borrowed source/WASM views.
+     * @param {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} chunk
+     * @returns {import('dictionary-importer').MediaImportDiagnosticKeys|null}
+     * @throws {TermBankWasmResourceError} If key offsets would exceed the arena's index width.
+     */
+    _createMediaReferenceDiagnostics(chunk) {
+        /** @type {Array<string|Uint8Array>} */
+        const keys = [];
+        const keyBytes = (/** @type {string} */ value, /** @type {Uint8Array|undefined} */ bytes) => (
+            value.length > 0 || typeof bytes === 'undefined' ? value : bytes
+        );
+        let byteLength = 0;
+        for (const {index, row, imagePaths} of chunk.mediaRows) {
+            if (typeof imagePaths === 'undefined') { continue; }
+            const expression = keyBytes(row.expression, row.expressionBytes ?? chunk.expressionBytesList[index]);
+            const reading = chunk.readingEqualsExpressionList[index] === 1 ?
+                expression :
+                keyBytes(row.reading, row.readingBytes ?? chunk.readingBytesList[index]);
+            keys.push(expression, reading);
+            if (typeof expression !== 'string') { byteLength += expression.byteLength; }
+            if (reading !== expression && typeof reading !== 'string') { byteLength += reading.byteLength; }
+        }
+        if (keys.length === 0) { return null; }
+        if (!Number.isSafeInteger(byteLength) || byteLength > 0xffffffff) {
+            throw new TermBankWasmResourceError('Media diagnostic keys exceed their offset budget');
+        }
+        const bytes = new Uint8Array(byteLength);
+        const spans = new Uint32Array(keys.length * 2);
+        /** @type {Map<number, string>|null} */
+        let decodedKeys = null;
+        let offset = 0;
+        for (let i = 0; i < keys.length; i += 2) {
+            const expression = keys[i];
+            const reading = keys[i + 1];
+            const expressionOffset = offset;
+            const expressionLength = typeof expression === 'string' ? 0 : expression.byteLength;
+            if (typeof expression === 'string') {
+                // Keep decoded strings verbatim, including lone surrogates
+                // that a UTF-8 encode/decode round trip would replace.
+                (decodedKeys ??= new Map()).set(i, expression);
+            } else {
+                bytes.set(expression, offset);
+                offset += expressionLength;
+            }
+            const readingOffset = reading === expression ? expressionOffset : offset;
+            const readingLength = typeof reading === 'string' ? 0 : reading.byteLength;
+            if (typeof reading === 'string') {
+                (decodedKeys ??= new Map()).set(i + 1, reading);
+            } else if (reading !== expression) {
+                bytes.set(reading, offset);
+                offset += readingLength;
+            }
+            const spanIndex = i * 2;
+            spans[spanIndex] = expressionOffset;
+            spans[spanIndex + 1] = expressionLength;
+            spans[spanIndex + 2] = readingOffset;
+            spans[spanIndex + 3] = readingLength;
+        }
+        return {bytes, spans, decodedKeys};
     }
 
     /**
@@ -3433,9 +3558,26 @@ export class DictionaryImporter {
     }
 
     /**
+     * No-metadata targets are already assigned before term serialization. Keep
+     * only the path and diagnostic text until the later media drain, so neither
+     * a full glossary nor its parser-backed content stays alive through here.
+     * @param {import('dictionary-importer').ImportRequirement} requirement
+     * @returns {import('dictionary-importer').DeferredMediaImportRequirement}
+     */
+    _createDeferredMediaRequirement({type, source: {path}, entry}) {
+        const {dictionary} = entry;
+        if ('diagnosticKeys' in entry) {
+            const {diagnosticKeys, diagnosticIndex} = entry;
+            return {type, source: {path}, dictionary, diagnosticKeys, diagnosticIndex};
+        }
+        const {expression, reading} = entry;
+        return {type, source: {path}, dictionary, expression, reading};
+    }
+
+    /**
      * Resolve and store bounded media batches in order. One raw ZIP read
      * may overlap the preceding batch’s write.
-     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @param {import('dictionary-importer').DeferredMediaImportRequirement[]} requirements
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[], processed: number, total: number) => Promise<void>} writeMedia
@@ -3479,7 +3621,7 @@ export class DictionaryImporter {
                 /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
                 const pathByFile = new Map();
                 for (const requirement of batchRequirements) {
-                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { continue; }
+                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { continue; }
                     const path = requirement.source.path;
                     if (
                         filesByPath.has(path) ||
@@ -3551,8 +3693,15 @@ export class DictionaryImporter {
                         mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
                     }
                 }
-                const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
+                /** @type {Map<string, import('dictionary-database').MediaDataArrayBufferContent>} */
+                const mediaByPath = new Map();
+                /** @type {import('dictionary-importer').ImportRequirementContext} */
+                const context = {fileMap, media: mediaByPath, ...(typeof rawMediaBytesByPath === 'undefined' ? {} : {rawMediaBytesByPath})};
+                await this._runWithConcurrencyLimit(batchRequirements, this._mediaResolutionConcurrency, async (requirement) => {
+                    await this._getImageMedia(context, requirement.source.path, requirement);
+                });
                 this._throwIfCancelled();
+                const media = [...mediaByPath.values()];
                 processed += end - start;
                 // Start only the next raw read. The current resolver has
                 // settled so its cache updates are visible to the next plan.
@@ -3628,6 +3777,9 @@ export class DictionaryImporter {
      */
     async _resolveAsyncRequirement(context, requirement) {
         switch (requirement.type) {
+            case 'image-reference':
+                await this._getImageMedia(context, requirement.source.path, requirement.entry);
+                break;
             case 'image':
                 await this._resolveDictionaryTermGlossaryImage(
                     context,
@@ -3661,6 +3813,8 @@ export class DictionaryImporter {
         }
 
         switch (requirement.type) {
+            case 'image-reference':
+                return true;
             case 'image':
                 this._assignResolvedImageData(requirement.target, requirement.source, cachedMetadata.width, cachedMetadata.height);
                 return true;
@@ -3783,7 +3937,7 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer').ImportRequirementContext} context
      * @param {string} path
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').MediaImportEntry} entry
      * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
      */
     async _getImageMedia(context, path, entry) {
@@ -3795,7 +3949,16 @@ export class DictionaryImporter {
          * @returns {Error}
          */
         const createError = (message) => {
-            const {expression, reading} = entry;
+            let expression;
+            let reading;
+            if ('diagnosticKeys' in entry) {
+                const {bytes, spans, decodedKeys} = entry.diagnosticKeys;
+                const index = entry.diagnosticIndex * 4;
+                expression = decodedKeys?.get(index / 2) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index], spans[index] + spans[index + 1]));
+                reading = decodedKeys?.get(index / 2 + 1) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index + 2], spans[index + 2] + spans[index + 3]));
+            } else {
+                ({expression, reading} = entry);
+            }
             const readingSource = reading.length > 0 ? ` (${reading})` : '';
             return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
         };
@@ -4243,10 +4406,10 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @param {import('dictionary-importer').QueryDetails} queryDetails
+     * @param {import('dictionary-importer').QueryDetails} [queryDetails]
      * @returns {import('dictionary-importer').QueryResult}
      */
-    _getArchiveFiles(fileMap, queryDetails) {
+    _getArchiveFiles(fileMap, queryDetails = ARCHIVE_BANK_QUERY_DETAILS) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
 
@@ -4254,13 +4417,21 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
-        for (const [fileName, fileEntry] of fileMap.entries()) {
+        const standardBankQueries = queryDetails === ARCHIVE_BANK_QUERY_DETAILS;
+        for (const fileName of fileMap.keys()) {
+            // Every built-in bank pattern starts with "t" or "k". Most media
+            // names cannot match; keep custom patterns on their original path.
+            if (standardBankQueries) {
+                const firstCharacter = fileName.charCodeAt(0);
+                if (firstCharacter !== 0x74 && firstCharacter !== 0x6b) { continue; }
+            }
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
 
                 if (typeof entries !== 'undefined') {
-                    entries.push(fileEntry);
+                    const fileEntry = fileMap.get(fileName);
+                    if (typeof fileEntry !== 'undefined') { entries.push(fileEntry); }
                     break;
                 }
             }
@@ -4293,9 +4464,10 @@ export class DictionaryImporter {
         if (manifest.termBanksByArtifact.size === 0) { return false; }
         /** @type {ImportFileEntry[]} */
         const termFiles = [];
-        for (const [filename, fileEntry] of fileMap.entries()) {
+        for (const filename of fileMap.keys()) {
             if (/^term_bank_(\d+)\.json$/.test(filename)) {
-                termFiles.push(fileEntry);
+                const fileEntry = fileMap.get(filename);
+                if (typeof fileEntry !== 'undefined') { termFiles.push(fileEntry); }
             }
         }
 
@@ -4661,6 +4833,33 @@ export class DictionaryImporter {
     }
 
     /**
+     * This is an eligibility hint from the selected raw term banks, not an
+     * output-size estimate. Check every entry even after the worker threshold
+     * is reached so missing or malformed metadata always declines the hint.
+     * @param {ImportFileEntry[]} termFiles
+     * @returns {number|null}
+     */
+    _getRawTermBankSourceBytes(termFiles) {
+        let total = 0;
+        try {
+            for (const file of termFiles) {
+                const size = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+                if (
+                    typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
+                    size > Number.MAX_SAFE_INTEGER - total
+                ) {
+                    return null;
+                }
+                total += size;
+            }
+        } catch (_) {
+            // A performance hint must not add a failure to the import path.
+            return null;
+        }
+        return total;
+    }
+
+    /**
      * @param {Uint8Array|null} packedTermArtifactBytes
      * @param {Uint8Array|null} sharedGlossaryArtifactBytes
      * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>}|null} termArtifactManifest
@@ -4874,9 +5073,10 @@ export class DictionaryImporter {
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
+     * @param {boolean} [allowNativeImageProjection]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null) {
+    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false) {
         this._lastFastTermBankReadProfile = null;
         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
         let deferredSourceBatch = null;
@@ -4986,7 +5186,14 @@ export class DictionaryImporter {
                     const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
+                        const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
+                        let diagnosticIndex = 0;
                         for (const {index, row, imagePaths} of mediaRows) {
+                            if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
+                                const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
+                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+                                continue;
+                            }
                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
@@ -5003,10 +5210,6 @@ export class DictionaryImporter {
                                 termTags: row.termTags ?? '',
                                 dictionary: dictionaryTitle,
                             };
-                            if (typeof imagePaths !== 'undefined') {
-                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
-                                continue;
-                            }
                             let glossaryList;
                             if (
                                 this._skipImageMetadata &&
@@ -5234,13 +5437,14 @@ export class DictionaryImporter {
                 skipTagRuleDecode: usePrecomputedContentForMediaRows,
                 lazyGlossaryDecode: useLazyGlossaryDecode,
                 mediaHintFastScan: useMediaHintFastScan,
-                projectImagePaths: useMediaDirectArtifactChunkImport,
+                projectImagePaths: useMediaDirectArtifactChunkImport && allowNativeImageProjection,
                 validateGlossaryTypes: true,
                 computeContentHashes: enableTermEntryContentDedup,
                 emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,
                 emitTokenBinaryContent: useDirectArtifactChunkImport,
                 emitTermByteLists: !useDirectArtifactChunkImport,
                 prepareLookupIndexes: useDirectArtifactChunkImport,
+                prepareLookupRoute: useDirectArtifactChunkImport && this._prepareExactLookupRoute,
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;

@@ -1,0 +1,306 @@
+{
+  "packages": {
+    "baseline": {
+      "path": "/workspace/scratch/a7f76505d50d/manabitan/builds/manabitan-chrome.zip",
+      "sizeBytes": 17272721,
+      "sha256": "241358ad80c263a0f130f7ce1e4d645389607c54146d400f720bfa0ec2c054f3",
+      "entryCount": 616
+    },
+    "candidate": {
+      "path": "/workspace/scratch/a7f76505d50d/vndb/builds/manabitan-chrome.zip",
+      "sizeBytes": 17275988,
+      "sha256": "d02974fea3910d5761b80b87d2e5c502c0e5b932ff94b240710ea647a6269e6d",
+      "entryCount": 616
+    }
+  },
+  "addedEntries": [],
+  "removedEntries": [],
+  "changedEntries": [
+    {
+      "path": "js/dictionary/term-bank-wasm-parser-worker.js",
+      "baseline": {
+        "sha256": "99afad5ad98cb1264d1acc8f15ab8f5c51246bbca25722eed6b89f8677301884",
+        "sizeBytes": 16820,
+        "compressedSizeBytes": 4210
+      },
+      "candidate": {
+        "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "sizeBytes": 16935,
+        "compressedSizeBytes": 4239
+      }
+    },
+    {
+      "path": "js/dictionary/term-bank-wasm-parser.js",
+      "baseline": {
+        "sha256": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "sizeBytes": 204483,
+        "compressedSizeBytes": 37826
+      },
+      "candidate": {
+        "sha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+        "sizeBytes": 206273,
+        "compressedSizeBytes": 38381
+      }
+    },
+    {
+      "path": "js/dictionary/wasm/term-bank-parser.c",
+      "baseline": {
+        "sha256": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d",
+        "sizeBytes": 150623,
+        "compressedSizeBytes": 27199
+      },
+      "candidate": {
+        "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+        "sizeBytes": 156075,
+        "compressedSizeBytes": 28197
+      }
+    },
+    {
+      "path": "lib/handlebars.js",
+      "baseline": {
+        "sha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2",
+        "sizeBytes": 258561,
+        "compressedSizeBytes": 50882
+      },
+      "candidate": {
+        "sha256": "564843c2cb26b564a471bdbf109096e0312c0218eff06b191412057fe65092fc",
+        "sizeBytes": 259731,
+        "compressedSizeBytes": 50937
+      }
+    },
+    {
+      "path": "lib/handlebars.js.map",
+      "baseline": {
+        "sha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706",
+        "sizeBytes": 456262,
+        "compressedSizeBytes": 103395
+      },
+      "candidate": {
+        "sha256": "9630cf0ebcc663517eecad8d357e4b0134237c07d61d0f5a0e4e9d38429ea409",
+        "sizeBytes": 456860,
+        "compressedSizeBytes": 103411
+      }
+    },
+    {
+      "path": "lib/hangul-js.js",
+      "baseline": {
+        "sha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62",
+        "sizeBytes": 19816,
+        "compressedSizeBytes": 3468
+      },
+      "candidate": {
+        "sha256": "36363ca2c00609b4bc0e2ca40e067ac21a216729eb255e2f1a6cf9cd0da06d13",
+        "sizeBytes": 19842,
+        "compressedSizeBytes": 3479
+      }
+    },
+    {
+      "path": "lib/hangul-js.js.map",
+      "baseline": {
+        "sha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1",
+        "sizeBytes": 38207,
+        "compressedSizeBytes": 6813
+      },
+      "candidate": {
+        "sha256": "c12e2a1b1c4ca596da3aea871b0bd96956ddc5b46721d89fdf3ace22ff7cf75b",
+        "sizeBytes": 38220,
+        "compressedSizeBytes": 6822
+      }
+    },
+    {
+      "path": "lib/kanji-processor.js",
+      "baseline": {
+        "sha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a",
+        "sizeBytes": 151595,
+        "compressedSizeBytes": 21060
+      },
+      "candidate": {
+        "sha256": "cbc709cad3698b5c93afbdc4c721a7298c0a61d8f6b9dffb8c8a9a66f43fa880",
+        "sizeBytes": 151634,
+        "compressedSizeBytes": 21090
+      }
+    },
+    {
+      "path": "lib/kanji-processor.js.map",
+      "baseline": {
+        "sha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446",
+        "sizeBytes": 418612,
+        "compressedSizeBytes": 23639
+      },
+      "candidate": {
+        "sha256": "09e901dbe3613c642f03bfb7259bd3a5d318c965b5dce1196f3f8ce32336c987",
+        "sizeBytes": 418651,
+        "compressedSizeBytes": 23651
+      }
+    },
+    {
+      "path": "lib/linkedom.js",
+      "baseline": {
+        "sha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e",
+        "sizeBytes": 462324,
+        "compressedSizeBytes": 114573
+      },
+      "candidate": {
+        "sha256": "127193e4654f8b9d8c81a86e33ba2a28acc3bb4c6c9bb0eb146eb255e62b205c",
+        "sizeBytes": 465197,
+        "compressedSizeBytes": 114705
+      }
+    },
+    {
+      "path": "lib/linkedom.js.map",
+      "baseline": {
+        "sha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c",
+        "sizeBytes": 658516,
+        "compressedSizeBytes": 132551
+      },
+      "candidate": {
+        "sha256": "d979ab457ef2f6d07058a0ba76bd19b1f759f3c1844222a4ea2d3a68a3dec6df",
+        "sizeBytes": 660635,
+        "compressedSizeBytes": 132598
+      }
+    },
+    {
+      "path": "lib/parse5.js",
+      "baseline": {
+        "sha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7",
+        "sizeBytes": 298992,
+        "compressedSizeBytes": 59607
+      },
+      "candidate": {
+        "sha256": "30b8f145adad2d844ef86ef772069b150864cfec0378f5524a94151afc3bb975",
+        "sizeBytes": 299239,
+        "compressedSizeBytes": 59658
+      }
+    },
+    {
+      "path": "lib/parse5.js.map",
+      "baseline": {
+        "sha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6",
+        "sizeBytes": 448119,
+        "compressedSizeBytes": 62455
+      },
+      "candidate": {
+        "sha256": "888091899e94b7115cf9704a23111134554438db8f6fbdce27b6207251c2b9d2",
+        "sizeBytes": 448301,
+        "compressedSizeBytes": 62469
+      }
+    },
+    {
+      "path": "lib/resvg-wasm.js",
+      "baseline": {
+        "sha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988",
+        "sizeBytes": 17105,
+        "compressedSizeBytes": 4023
+      },
+      "candidate": {
+        "sha256": "1215548adab348ab9ad0bf099124e29d2be88026c1ec5268520aafadf7d726da",
+        "sizeBytes": 17118,
+        "compressedSizeBytes": 4033
+      }
+    },
+    {
+      "path": "lib/resvg-wasm.js.map",
+      "baseline": {
+        "sha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3",
+        "sizeBytes": 29304,
+        "compressedSizeBytes": 6423
+      },
+      "candidate": {
+        "sha256": "e153bfe1202bd99456c41ed5991567adbf89d0cae36ac4700d2150f708d5a638",
+        "sizeBytes": 29317,
+        "compressedSizeBytes": 6432
+      }
+    },
+    {
+      "path": "lib/term-bank-parser.wasm",
+      "baseline": {
+        "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+        "sizeBytes": 63004,
+        "compressedSizeBytes": 23872
+      },
+      "candidate": {
+        "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "sizeBytes": 67550,
+        "compressedSizeBytes": 25042
+      }
+    },
+    {
+      "path": "lib/ucs2length.js",
+      "baseline": {
+        "sha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513",
+        "sizeBytes": 2305,
+        "compressedSizeBytes": 957
+      },
+      "candidate": {
+        "sha256": "d1276527719803fe78ca78d34af695bc479f322d2a0cc0a624987e666dde4435",
+        "sizeBytes": 2331,
+        "compressedSizeBytes": 967
+      }
+    },
+    {
+      "path": "lib/ucs2length.js.map",
+      "baseline": {
+        "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f",
+        "sizeBytes": 2087,
+        "compressedSizeBytes": 1064
+      },
+      "candidate": {
+        "sha256": "621f10f96ac05f2aaf34d467bc57883d7c00227af9a51f5594e2b73b0d6bacce",
+        "sizeBytes": 2100,
+        "compressedSizeBytes": 1070
+      }
+    },
+    {
+      "path": "lib/z-worker.js",
+      "baseline": {
+        "sha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c",
+        "sizeBytes": 136716,
+        "compressedSizeBytes": 28136
+      },
+      "candidate": {
+        "sha256": "91d1aa4af74d925fc25804d6d5ba6061f5538ab409813a42e2b287b9f02e3e53",
+        "sizeBytes": 136911,
+        "compressedSizeBytes": 28171
+      }
+    },
+    {
+      "path": "lib/z-worker.js.map",
+      "baseline": {
+        "sha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a",
+        "sizeBytes": 322119,
+        "compressedSizeBytes": 66562
+      },
+      "candidate": {
+        "sha256": "160a9206c80fce12b0aed6b1100c7d9108de834ddd8cb1ad94bda65d62ef5f37",
+        "sizeBytes": 322314,
+        "compressedSizeBytes": 66570
+      }
+    },
+    {
+      "path": "lib/zip.js",
+      "baseline": {
+        "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+        "sizeBytes": 191228,
+        "compressedSizeBytes": 47802
+      },
+      "candidate": {
+        "sha256": "c50d5f808eebb6d8ea0250717d78e78fe5bf5e1451e1bba4caa9d4a4592c8b40",
+        "sizeBytes": 191540,
+        "compressedSizeBytes": 47852
+      }
+    },
+    {
+      "path": "lib/zip.js.map",
+      "baseline": {
+        "sha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb",
+        "sizeBytes": 337267,
+        "compressedSizeBytes": 74370
+      },
+      "candidate": {
+        "sha256": "b174dbb088ed1bb32b1561fc74f31ccb9f91a33a9cbbdf67cf37adc4d8b9b6a4",
+        "sizeBytes": 337579,
+        "compressedSizeBytes": 74380
+      }
+    }
+  ]
+}

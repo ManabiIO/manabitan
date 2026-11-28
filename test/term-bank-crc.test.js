@@ -25,7 +25,7 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest'
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 import {findCompiler} from './util/wasm-compiler.js'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number}} Exports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
 /** @type {Exports} */
 let wasm
 /** @type {string | undefined} */
@@ -51,6 +51,7 @@ beforeAll(async () => {
         '-Wl,--export=wasm_alloc',
         '-Wl,--export=inflate_and_join_term_banks',
         '-Wl,--export=term_bank_crc32_test',
+        '-Wl,--export=term_bank_crc32_combine_test',
         '-DTERM_BANK_CRC_TEST',
         '-Wl,--strip-all',
         '-o',
@@ -117,6 +118,18 @@ function candidateCrc(bytes, alignment = 0) {
 }
 
 describe('term bank CRC32', () => {
+    test('combines exact source spans with the independent zlib CRC', () => {
+        const first = randomBytes(8192, 0x51a73b92)
+        for (const length of [0, 1, 2, 3, 4, 7, 8, 15, 16, 17, 31, 32, 63, 64, 255, 256, 257, 511, 512, 1023, 1024, 65535, 65536, 1048577]) {
+            const second = randomBytes(length, 0x4d595df4 ^ length)
+            for (const prefix of [0, 1, 13, 256, first.length]) {
+                const firstCrc = crc32(first.subarray(0, prefix))
+                expect(wasm.term_bank_crc32_combine_test(firstCrc, crc32(second), length) >>> 0)
+                    .toBe(crc32(second, firstCrc))
+            }
+        }
+    })
+
     test('matches published, short, alignment, threshold, and large-buffer vectors', () => {
         expect(candidateCrc(new TextEncoder().encode('123456789'))).toBe(0xcbf43926)
         expect(candidateCrc(new Uint8Array())).toBe(0)

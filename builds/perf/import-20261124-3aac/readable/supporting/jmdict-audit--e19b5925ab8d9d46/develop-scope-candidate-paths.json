@@ -1,0 +1,45 @@
+{
+  "prefix": {
+    "pr": 874,
+    "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+    "changedFiles": [
+      "dev/lib/zstd-wasm.js",
+      "ext/js/dictionary/term-content-block-store.js",
+      "ext/js/dictionary/term-content-opfs-store.js",
+      "ext/js/dictionary/term-content-ownership.js",
+      "ext/js/dictionary/zstd-term-content.js",
+      "test/term-content-ownership.test.js",
+      "test/term-content-private-codec.test.js",
+      "test/term-content-private-reservation.test.js",
+      "test/term-content-reservation-limits.test.js",
+      "test/term-record-opfs-store.test.js"
+    ],
+    "overlapWithLatestDevelop": []
+  },
+  "media": {
+    "pr": 875,
+    "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+    "changedFiles": [
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/wasm/term-bank-parser.c",
+      "test/term-bank-experiments.test.js",
+      "test/term-bank-media-projection.test.js"
+    ],
+    "overlapWithLatestDevelop": []
+  },
+  "canonical": {
+    "pr": 880,
+    "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+    "changedFiles": [
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+      "test/term-content-canonical-inputs.test.js"
+    ],
+    "overlapWithLatestDevelop": []
+  }
+}

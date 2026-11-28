@@ -1,0 +1,17 @@
+{
+  "dictionary": "jitendex",
+  "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+  "instrumentedWasmSha256": "1999f58a542df6e4036ea156975889d5a5a57f104e1446851f1c3846dca259cf",
+  "rows": 436555,
+  "expectedRows": 436555,
+  "instrumentationOnly": true,
+  "includesTiming": false,
+  "work": {
+    "comparisons": 201583,
+    "baselineGlossaryComparedBytes": 75441867,
+    "avoidedGlossaryComparedBytes": 1257876,
+    "avoidedGlossaryComparisons": 381,
+    "additionalShortFieldComparedBytes": 2313581,
+    "glossaryWitnessComparisons": 87336
+  }
+}

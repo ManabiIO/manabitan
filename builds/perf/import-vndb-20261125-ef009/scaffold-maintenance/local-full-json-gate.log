@@ -1,0 +1,39 @@
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/ef009a302ea8/memory-work
+
+(node:24) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/json.test.js (156 tests | 5 failed) 168919ms
+     × Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' 142903ms
+     × Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' 142903ms
+     × Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' 142903ms
+     × Validating file against TypeScript: 'ext/data/recommended-dictionaries.json' 142903ms
+     × Validating file against TypeScript: 'ext/data/recommended-settings.json' 142903ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/json.test.js > JSON validation > Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…'
+ FAIL  test/json.test.js > JSON validation > Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…'
+ FAIL  test/json.test.js > JSON validation > Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…'
+ FAIL  test/json.test.js > JSON validation > Validating file against TypeScript: 'ext/data/recommended-dictionaries.json'
+ FAIL  test/json.test.js > JSON validation > Validating file against TypeScript: 'ext/data/recommended-settings.json'
+Error: Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/json.test.js:164:40
+    162|         schemaValidationTargets1.push(info);
+    163|     }
+    164|     test.each(schemaValidationTargets1)('Validating file against TypeS…
+       |                                        ^
+    165|         const validate = createValidatorFunctionFromTypeScript(join(ro…
+    166|         const data = parseJson(readFileSync(join(rootDir, path), {enco…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 151 passed (156)
+   Start at  10:56:36
+   Duration  169.57s (transform 46ms, setup 0ms, import 477ms, tests 168.92s, environment 0ms)
+

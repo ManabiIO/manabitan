@@ -1,0 +1,100 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/media-critical",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "33594ec55b34b8c88fe2c50e30c1302d50ee5847",
+  "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103",
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cefac6158e83c37342aaec24675150db09567233",
+      "size": 2588
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "916a0d0883e97d297b1d4444b6a7905fe6adea63",
+      "size": 67329
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5db0c06f5d6dd017a5e5aad68563ccb199b15d63",
+      "size": 15449
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c22c2818f795f4941e4494e4959c99f69511d6a",
+      "size": 205979
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0520b1b7dc931a764b984a0f92732969575e563f",
+      "size": 154841
+    },
+    {
+      "path": "test/term-bank-experiments.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e51fdfdd873c0b80154d1710b0269e5d54b59c52",
+      "size": 48667
+    },
+    {
+      "path": "test/term-bank-media-projection.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf58f3703b10f665040c12e35096cb624a91607f",
+      "size": 11926
+    }
+  ],
+  "remoteCommit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+  "branch": "perf/native-media-projection-20261124-3aac",
+  "title": "perf: extract proven single-image paths without rebuilding glossary JSON",
+  "body": "## Problem\n\nAfter native term-bank validation, media extraction decodes and parses each media-hinted glossary again. On the pinned VNDB corpus this reconstructs 84,398,732 bytes of JSON across 146,725 projected rows.\n\n## Change\n\nAdd an allocation-free native semantic projection that returns a quoted path span only when the complete glossary yields exactly one image path. The worker decodes that token directly. Missing, empty, multiple-image, unsupported or unproven cases retain the existing JavaScript collector.\n\nThe projection follows the collector's nested-content edges, image-selector precedence, escaped keys and duplicate-last-key semantics. It reads only the worker's current bounded source span and introduces no per-row columns, heap arena, dictionary threshold, schema change or altered persisted content.\n\nThe source-bound WASM artifact was regenerated with pinned LLVM 21.1.8. Its size increases by 4,546 bytes; package and memory effects remain qualification gates.\n\n## Validation\n\n- 222 focused tests, including real compressed-worker transport, duplicate and escaped fields, malformed ignored fields, 256-level nesting, source bounds, fallback guards and stable results after heap reuse.\n- Main/test TypeScript and changed-file ESLint pass.\n- Complete 170-group VNDB differential: all 6,648,310 rows, every output column, content slab, key plan, prepared index and media row remain deeply equal.\n- With the browser's effective production flags, all 146,725 projected rows use the native path. All 146,570 unique image paths remain.\n- Full-glossary JSON.parse calls fall from 146,725 to zero; their 84,398,732 input bytes are eliminated. UTF-8 decoder input falls to 2,391,178 bytes of path tokens.\n- An independently retained replay with native escaped-key admission disabled exercised 429 conservative source-range fallbacks and produced identical outputs as well. It is fallback coverage, not the effective production route.\n- The release archive grows by 2,785 bytes (baseline 17,265,196 bytes), including the shipped C source and pinned WASM.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Fixed complete-import browser cohorts, independent media readback and separate process-tree memory checks are being acquired. The byte-work reduction above is correctness/component evidence, not a full-import speedup claim. This remains a draft until qualification finishes.\n\nOriginal implementation; no third-party implementation code was copied.",
+  "pr": {
+    "url": "https://github.com/ManabiIO/manabitan/pull/875",
+    "number": 875,
+    "state": "open",
+    "merged": false,
+    "mergeable": true,
+    "draft": true,
+    "body": "## Problem\n\nAfter native term-bank validation, media extraction decodes and parses each media-hinted glossary again. On the pinned VNDB corpus this reconstructs 84,398,732 bytes of JSON across 146,725 projected rows.\n\n## Change\n\nAdd an allocation-free native semantic projection that returns a quoted path span only when the complete glossary yields exactly one image path. The worker decodes that token directly. Missing, empty, multiple-image, unsupported or unproven cases retain the existing JavaScript collector.\n\nThe projection follows the collector's nested-content edges, image-selector precedence, escaped keys and duplicate-last-key semantics. It reads only the worker's current bounded source span and introduces no per-row columns, heap arena, dictionary threshold, schema change or altered persisted content.\n\nThe source-bound WASM artifact was regenerated with pinned LLVM 21.1.8. Its size increases by 4,546 bytes; package and memory effects remain qualification gates.\n\n## Validation\n\n- 222 focused tests, including real compressed-worker transport, duplicate and escaped fields, malformed ignored fields, 256-level nesting, source bounds, fallback guards and stable results after heap reuse.\n- Main/test TypeScript and changed-file ESLint pass.\n- Complete 170-group VNDB differential: all 6,648,310 rows, every output column, content slab, key plan, prepared index and media row remain deeply equal.\n- With the browser's effective production flags, all 146,725 projected rows use the native path. All 146,570 unique image paths remain.\n- Full-glossary JSON.parse calls fall from 146,725 to zero; their 84,398,732 input bytes are eliminated. UTF-8 decoder input falls to 2,391,178 bytes of path tokens.\n- An independently retained replay with native escaped-key admission disabled exercised 429 conservative source-range fallbacks and produced identical outputs as well. It is fallback coverage, not the effective production route.\n- The release archive grows by 2,785 bytes (baseline 17,265,196 bytes), including the shipped C source and pinned WASM.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Fixed complete-import browser cohorts, independent media readback and separate process-tree memory checks are being acquired. The byte-work reduction above is correctness/component evidence, not a full-import speedup claim. This remains a draft until qualification finishes.\n\nOriginal implementation; no third-party implementation code was copied.",
+    "title": "perf: extract proven single-image paths without rebuilding glossary JSON",
+    "base": "develop",
+    "base_sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "head": "perf/native-media-projection-20261124-3aac",
+    "head_sha": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+    "head_repo_id": 1165902460,
+    "head_repo_full_name": "ManabiIO/manabitan",
+    "merge_commit_sha": "3dda73783fa169fe5226cd86e105095faca96d78",
+    "user": {
+      "login": "aehlke",
+      "name": "aehlke",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "id": 71601
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-24T18:57:09Z",
+    "updated_at": "2026-11-24T19:01:03Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 1,
+    "changed_files": 7,
+    "additions": 411,
+    "deletions": 7,
+    "display_url": "https://github.com/ManabiIO/manabitan/pull/875",
+    "display_title": "perf: extract proven single-image paths without rebuilding glossary JSON"
+  }
+}

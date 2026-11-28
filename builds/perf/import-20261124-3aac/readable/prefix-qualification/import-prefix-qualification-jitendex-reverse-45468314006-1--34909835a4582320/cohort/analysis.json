@@ -1,0 +1,140 @@
+{
+  "allTimingsMs": {
+    "A": [
+      1338.5,
+      1353,
+      1368,
+      1356.8000000000175,
+      1631.7999999999884,
+      1329.5,
+      1307.4000000000233,
+      1350.5,
+      1341.5,
+      1336.7999999999884,
+      1323.399999999965,
+      1309.7000000000116
+    ],
+    "B": [
+      1316,
+      1341.0999999999767,
+      1357.2000000000116,
+      1321.5,
+      1354.8000000000175,
+      1325.3000000000175,
+      1312.1999999999825,
+      1305,
+      1316.4000000000233,
+      1315.7999999999884,
+      1297.5999999999767,
+      1343.5999999999767
+    ],
+    "C": [
+      1389.9000000000087,
+      1340.6999999999825,
+      1367.5,
+      1352.8999999999942,
+      1352.8000000000175,
+      1355.0999999999767,
+      1343.1999999999534,
+      1307.600000000035,
+      1380,
+      1318,
+      1334.4000000000233,
+      1311.2999999999884
+    ]
+  },
+  "browserVersion": "153.0.8010.12",
+  "candidate": {
+    "baselineMedianMs": 1340.0,
+    "bestPairPercent": -16.97511949993705,
+    "candidateMedianMs": 1318.9500000000116,
+    "equalWorkPercent": -2.6940887874766672,
+    "fasterPairs": 10,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -1.680986178558086,
+      -0.879526977089673,
+      -0.7894736842096739,
+      -2.601709905661631,
+      -16.97511949993705,
+      -0.3159082361776977,
+      0.36714089031353314,
+      -3.3691225472047392,
+      -1.8710398807287865,
+      -1.5709156193896012,
+      -1.9495239534524034,
+      2.5883790180930566
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -2.2756169295570174,
+      -0.5526909601936858
+    ],
+    "pairedMedianPercent": -1.6259508989738436,
+    "pairs": 12,
+    "worstPairPercent": 2.5883790180930566
+  },
+  "candidateVsSecondBaseline": {
+    "baselineMedianMs": 1347.9999999999854,
+    "bestPairPercent": -5.316929275488036,
+    "candidateMedianMs": 1318.9500000000116,
+    "equalWorkPercent": -1.5284707863360558,
+    "fasterPairs": 9,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -5.316929275488036,
+      0.029835160736491062,
+      -0.7531992687377254,
+      -2.3209402025274772,
+      0.14784151389710676,
+      -2.1990996974363353,
+      -2.3079213817727817,
+      -0.19883756500725935,
+      -4.608695652172223,
+      -0.1669195751146879,
+      -2.7577937649914563,
+      2.463204453594803
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -2.539366983759467,
+      -0.06854220718909843
+    ],
+    "pairedMedianPercent": -1.4761494830870303,
+    "pairs": 12,
+    "worstPairPercent": 2.463204453594803
+  },
+  "dictionary": "jitendex",
+  "identicalProductControl": {
+    "baselineMedianMs": 1340.0,
+    "bestPairPercent": -17.0976835396478,
+    "candidateMedianMs": 1347.9999999999854,
+    "equalWorkPercent": -1.1837106729717273,
+    "fasterPairs": 6,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      3.840119536795572,
+      -0.9090909090922028,
+      -0.03654970760234022,
+      -0.2874410377375569,
+      -17.0976835396478,
+      1.9255359157560603,
+      2.738259140273014,
+      -3.176601258790457,
+      2.8699217294073875,
+      -1.4063435068812469,
+      0.8311923832596824,
+      0.12216538138327682
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -1.1577172079867248,
+      2.331897528014537
+    ],
+    "pairedMedianPercent": 0.0428078368904683,
+    "pairs": 12,
+    "worstPairPercent": 3.840119536795572
+  },
+  "independentQualificationRequired": false,
+  "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+  "screeningOnly": false,
+  "stage": "qualification",
+  "status": "complete"
+}

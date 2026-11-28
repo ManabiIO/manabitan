@@ -1,0 +1,7 @@
+{
+  "buildComplete": true,
+  "dictionary": "vndb",
+  "error": "Correctness receipt differs across arms/observations: storageBytes",
+  "stage": "screen",
+  "status": "failed"
+}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "retained-failed-diagnostic",
+  "tree": "retained-failed-diagnostic",
+  "dictionary": "jmdict",
+  "mode": "cache",
+  "packageSha256": "87b845e04a539e692ab198656cfdd2340c76b4f0110ff8482e512b34927a04d9",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "ef2af5b4614b694f51f80b3c0027ea8ee141d7694782cfc8365b8b69bf78c215",
+  "activationOwner": null,
+  "eventCounts": {},
+  "activation": {
+    "publisherCalls": 0,
+    "publisherProofTrueCalls": 0,
+    "receiverCalls": 0,
+    "receiverReusedProofCalls": 0,
+    "receiverReusedProofRows": 0,
+    "receiverReusedSourceBytes": 0
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": false,
+    "diagnosticOnly": false,
+    "productionOffscreenOwner": false,
+    "eventsObserved": false,
+    "publishersObserved": false,
+    "cacheReceiverObserved": false,
+    "synchronousProofActivated": false,
+    "receiverMatchesImmediatePublisher": true,
+    "reuseRequiresPublicationProof": true
+  },
+  "allChecksPass": false,
+  "events": []
+}

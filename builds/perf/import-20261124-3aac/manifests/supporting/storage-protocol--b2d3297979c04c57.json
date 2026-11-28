@@ -1,0 +1,140 @@
+{
+  "name": "storage-protocol",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 146992,
+  "retainedFiles": [
+    {
+      "bytes": 5118,
+      "path": "README.md",
+      "sha256": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37"
+    },
+    {
+      "bytes": 6589,
+      "path": "audit_vndb_failures.py",
+      "sha256": "bd1169bbd0eb017a4da82f375ce659a44409336334b6cd5abeb795a31b190930"
+    },
+    {
+      "bytes": 5941,
+      "path": "media-memory-manifest.json",
+      "sha256": "af27f5beac1e17318c10332e24475e229d167ef15d7dada5fd18702c24f92679"
+    },
+    {
+      "bytes": 14896,
+      "path": "media-memory-tests.log",
+      "sha256": "160b0ee93b9387cce1a3639d80acbfd74814bb44e7327409a253240844da0728"
+    },
+    {
+      "bytes": 2020,
+      "path": "retrospective-compatibility.json",
+      "sha256": "d867f4fbbd05a7cb4b257211edecd32b3a39e68c4f393edc014f2ea411aee3cd"
+    },
+    {
+      "bytes": 8497,
+      "path": "storage_receipts.py",
+      "sha256": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02"
+    },
+    {
+      "bytes": 8716,
+      "path": "test_storage_receipts.py",
+      "sha256": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69"
+    },
+    {
+      "bytes": 2469,
+      "path": "tests.log",
+      "sha256": "cbf7d61d9a922366401c4b27d55ac2aaa28dd936e464867f423e24a1e3d35715"
+    },
+    {
+      "bytes": 395,
+      "path": "vndb-failure-audit-complete.log",
+      "sha256": "c4147ed57714fd8cf1e07c2e53e79cbf2a4fcf9da9ba263d5e53d74cdf3fde9b"
+    },
+    {
+      "bytes": 498,
+      "path": "vndb-failure-audit-final.log",
+      "sha256": "6877f0c01dab1896cd6e276645b81d6791fb73909610541363a2c6596a489260"
+    },
+    {
+      "bytes": 91425,
+      "path": "vndb-failure-audit.json",
+      "sha256": "f4f904d7d9f3c3ccd459c5144486065806bfc96db8633af68e7f6dca7425ed11"
+    },
+    {
+      "bytes": 428,
+      "path": "vndb-failure-audit.log",
+      "sha256": "7499e56f2b38edf6da55449746c1373cd341947f122a0e5c4c448bdac9f8070c"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 146992,
+  "sourceFileCount": 12,
+  "sourceInventory": [
+    {
+      "bytes": 5118,
+      "path": "README.md",
+      "sha256": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37"
+    },
+    {
+      "bytes": 6589,
+      "path": "audit_vndb_failures.py",
+      "sha256": "bd1169bbd0eb017a4da82f375ce659a44409336334b6cd5abeb795a31b190930"
+    },
+    {
+      "bytes": 5941,
+      "path": "media-memory-manifest.json",
+      "sha256": "af27f5beac1e17318c10332e24475e229d167ef15d7dada5fd18702c24f92679"
+    },
+    {
+      "bytes": 14896,
+      "path": "media-memory-tests.log",
+      "sha256": "160b0ee93b9387cce1a3639d80acbfd74814bb44e7327409a253240844da0728"
+    },
+    {
+      "bytes": 2020,
+      "path": "retrospective-compatibility.json",
+      "sha256": "d867f4fbbd05a7cb4b257211edecd32b3a39e68c4f393edc014f2ea411aee3cd"
+    },
+    {
+      "bytes": 8497,
+      "path": "storage_receipts.py",
+      "sha256": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02"
+    },
+    {
+      "bytes": 8716,
+      "path": "test_storage_receipts.py",
+      "sha256": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69"
+    },
+    {
+      "bytes": 2469,
+      "path": "tests.log",
+      "sha256": "cbf7d61d9a922366401c4b27d55ac2aaa28dd936e464867f423e24a1e3d35715"
+    },
+    {
+      "bytes": 395,
+      "path": "vndb-failure-audit-complete.log",
+      "sha256": "c4147ed57714fd8cf1e07c2e53e79cbf2a4fcf9da9ba263d5e53d74cdf3fde9b"
+    },
+    {
+      "bytes": 498,
+      "path": "vndb-failure-audit-final.log",
+      "sha256": "6877f0c01dab1896cd6e276645b81d6791fb73909610541363a2c6596a489260"
+    },
+    {
+      "bytes": 91425,
+      "path": "vndb-failure-audit.json",
+      "sha256": "f4f904d7d9f3c3ccd459c5144486065806bfc96db8633af68e7f6dca7425ed11"
+    },
+    {
+      "bytes": 428,
+      "path": "vndb-failure-audit.log",
+      "sha256": "7499e56f2b38edf6da55449746c1373cd341947f122a0e5c4c448bdac9f8070c"
+    }
+  ],
+  "sourceInventorySha256": "b2d3297979c04c57cd79e2d09bd0f4f02a3e1eb394330c0aed73e8e64859cbbe",
+  "sourceRoot": "storage-protocol",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

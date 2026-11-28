@@ -21,12 +21,14 @@ import {hashTermKeyBytes} from './term-key-hash.js';
 const DEFAULT_INITIAL_STRING_CAPACITY = 16384;
 
 /**
+ * Prepared plans may reuse owned compact expression IDs. Reading IDs always
+ * name actual strings; they never use the persisted equal-reading sentinel.
  * @typedef {{
  *   stringLengths: Uint16Array,
  *   stringOffsets?: Uint32Array,
  *   stringHashes?: Uint32Array,
  *   stringsBuffer: Uint8Array,
- *   expressionIndexes: Uint32Array,
+ *   expressionIndexes: Uint16Array|Uint32Array,
  *   readingIndexes: Uint32Array,
  * }} PreinternedTermRecordPlan
  */
@@ -228,7 +230,7 @@ export function getTermRecordPreinternedPlan(rows) {
  */
 function validatePlanRowRange(plan, start, count) {
     if (
-        !(plan.expressionIndexes instanceof Uint32Array) ||
+        !(plan.expressionIndexes instanceof Uint16Array || plan.expressionIndexes instanceof Uint32Array) ||
         !(plan.readingIndexes instanceof Uint32Array) ||
         !Number.isSafeInteger(start) || start < 0 ||
         !Number.isSafeInteger(count) || count < 0 ||
@@ -523,18 +525,15 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
 function hasTermRecordPreinternedPlanShape(plan, count) {
     if (plan === null || !Number.isSafeInteger(count) || count < 0) { return false; }
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
-    if (
-        !(stringLengths instanceof Uint16Array) ||
-        !(stringsBuffer instanceof Uint8Array) ||
-        !(expressionIndexes instanceof Uint32Array) ||
-        !(readingIndexes instanceof Uint32Array) ||
-        expressionIndexes.length < count || readingIndexes.length < count ||
-        (stringHashes !== void 0 && (!(stringHashes instanceof Uint32Array) || stringHashes.length !== stringLengths.length)) ||
-        (stringOffsets !== void 0 && (!(stringOffsets instanceof Uint32Array) || stringOffsets.length !== stringLengths.length))
-    ) {
-        return false;
-    }
-    return true;
+    return (
+        stringLengths instanceof Uint16Array &&
+        stringsBuffer instanceof Uint8Array &&
+        (expressionIndexes instanceof Uint16Array || expressionIndexes instanceof Uint32Array) &&
+        readingIndexes instanceof Uint32Array &&
+        expressionIndexes.length >= count && readingIndexes.length >= count &&
+        (stringHashes === void 0 || (stringHashes instanceof Uint32Array && stringHashes.length === stringLengths.length)) &&
+        (stringOffsets === void 0 || (stringOffsets instanceof Uint32Array && stringOffsets.length === stringLengths.length))
+    );
 }
 
 /**

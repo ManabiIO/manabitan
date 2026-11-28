@@ -1,0 +1,50 @@
+{
+  "name": "media-memory-attribution",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "b33d0adfe55bc8ec03f34e8f1db1018f61d66488244829af9d5a2fe4ec1c1563",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 22685,
+  "retainedFiles": [
+    {
+      "bytes": 5439,
+      "path": "README.md",
+      "sha256": "03fa14b2b8877535ee59d3498474357135f36ae83e452ee397343567230cd8e1"
+    },
+    {
+      "bytes": 12585,
+      "path": "receipt.json",
+      "sha256": "35cfcc657274fe2e6f3605894a2b18c4a96d73532c2f37356e6599d97e70e187"
+    },
+    {
+      "bytes": 4661,
+      "path": "reconcile.py",
+      "sha256": "8f6a24511c285645d30843a1a179d605bc62cf5bf2fb4b79a947109339c5b132"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 22685,
+  "sourceFileCount": 3,
+  "sourceInventory": [
+    {
+      "bytes": 5439,
+      "path": "README.md",
+      "sha256": "03fa14b2b8877535ee59d3498474357135f36ae83e452ee397343567230cd8e1"
+    },
+    {
+      "bytes": 12585,
+      "path": "receipt.json",
+      "sha256": "35cfcc657274fe2e6f3605894a2b18c4a96d73532c2f37356e6599d97e70e187"
+    },
+    {
+      "bytes": 4661,
+      "path": "reconcile.py",
+      "sha256": "8f6a24511c285645d30843a1a179d605bc62cf5bf2fb4b79a947109339c5b132"
+    }
+  ],
+  "sourceInventorySha256": "6d7cd14c81a80db861d033412606fb119f7291ad218ca4ad64f3333a5e5c49d4",
+  "sourceRoot": "media-memory-attribution",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

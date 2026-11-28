@@ -1,0 +1,8 @@
+[
+  "js/dictionary/term-content-block-store.js",
+  "js/dictionary/term-content-opfs-store.js",
+  "js/dictionary/term-content-ownership.js",
+  "js/dictionary/zstd-term-content.js",
+  "lib/zstd-wasm.js",
+  "lib/zstd-wasm.js.map"
+]

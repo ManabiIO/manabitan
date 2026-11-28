@@ -1,0 +1,45 @@
+{
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "scope": "Static pinned-compiler work proof only; no elapsed-time or whole-import speed claim",
+  "compiler": "Clang21.1.8 -O3 --target=wasm32 -nostdlib -S",
+  "sources": {
+    "baseline": {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+      "wasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "wasmBytes": 1624
+    },
+    "inputs": {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "sha256": "fee76ae817358be978aa75f0f5638b5902ef9f26a0c644e37ec581be504583d0",
+      "wasmSha256": "5e16593eb74b04513eb06b08ff98111853cc6bec51e45292feed92f424d732ae",
+      "wasmBytes": 1667
+    }
+  },
+  "assembly": {
+    "baseline": {
+      "path": "canonical-baseline.s",
+      "sha256": "e3babb61d579bf22182d8e412c45641b154ff6378623a1726685bd5c50fdb447",
+      "rowLoopConfigLoadSites": 11,
+      "configLoadOffsets": [
+        1152,
+        1136,
+        1140,
+        1156,
+        1160,
+        1128,
+        1092,
+        1164,
+        1168,
+        1128,
+        1172
+      ]
+    },
+    "inputs": {
+      "path": "canonical-inputs.s",
+      "sha256": "b8dcd5a42f164ede4ef4a81dac10a3bf50230597f39c0b990b4c23b0271ea829",
+      "rowLoopConfigLoadSites": 0,
+      "configLoadOffsets": []
+    }
+  }
+}

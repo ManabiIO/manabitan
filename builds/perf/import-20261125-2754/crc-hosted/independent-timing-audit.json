@@ -1,0 +1,389 @@
+{
+  "allAuditsPassed": true,
+  "artifacts": [
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/timing/15038541229.zip",
+      "archiveSha256": "9391862e6e9333a94f13cfcfb6bb974632ed1969401ec7bc7693c3465728f775",
+      "audit": {
+        "analysisRecomputedIndependently": true,
+        "comparisons": {
+          "candidate": {
+            "baselineMedianMs": 1580.9000000000233,
+            "bestPairPercent": -1.7567224758975541,
+            "candidateMedianMs": 1570.8499999999767,
+            "equalWorkPercent": -1.046501902731689,
+            "fasterPairs": 5,
+            "pairedChangesPercent": [
+              -1.6810292511234226,
+              -0.9582898212442181,
+              -1.4130434782593793,
+              0.08953124000170565,
+              -1.7567224758975541,
+              -0.5299684542601435
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -1.7188758635104884,
+              -0.22021860712921892
+            ],
+            "pairedMedianPercent": -1.1856666497517987,
+            "pairs": 6,
+            "worstPairPercent": 0.08953124000170565
+          },
+          "candidateVsSecondBaseline": {
+            "baselineMedianMs": 1619.2000000000116,
+            "bestPairPercent": -5.020327707280947,
+            "candidateMedianMs": 1570.8499999999767,
+            "equalWorkPercent": -1.6020043246855131,
+            "fasterPairs": 4,
+            "pairedChangesPercent": [
+              -1.4177923816506177,
+              -0.16718266253942238,
+              -5.020327707280947,
+              0.08313083514068786,
+              0.12280248190428278,
+              -3.061977373342706
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -4.041152540311826,
+              0.10296665852248532
+            ],
+            "pairedMedianPercent": -0.79248752209502,
+            "pairs": 6,
+            "worstPairPercent": 0.12280248190428278
+          },
+          "identicalProductControl": {
+            "baselineMedianMs": 1580.9000000000233,
+            "bestPairPercent": -1.8772196854373369,
+            "candidateMedianMs": 1619.2000000000116,
+            "equalWorkPercent": 0.5645464809941991,
+            "fasterPairs": 3,
+            "pairedChangesPercent": [
+              -0.26702269692712166,
+              -0.7924319675669977,
+              3.797953964195866,
+              0.006395088570476659,
+              -1.8772196854373369,
+              2.611987381704939
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -1.3348258265021673,
+              3.2049706729504024
+            ],
+            "pairedMedianPercent": -0.1303138041783225,
+            "pairs": 6,
+            "worstPairPercent": 3.797953964195866
+          }
+        },
+        "dictionary": "jitendex",
+        "exhaustiveMedia": {
+          "bytes": 4992155,
+          "files": 236,
+          "mode": "all",
+          "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402",
+          "totalBytes": 4992155,
+          "totalFiles": 236
+        },
+        "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+        "observationsReopened": 23,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "rawReportValidator": "unchanged frozen benchmark-support.js",
+        "rawReportsRevalidated": true,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          },
+          "C": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          }
+        },
+        "stage": "screen",
+        "status": "passed",
+        "storageBytesRange": [
+          67466332,
+          67466332
+        ],
+        "timedObservations": 18
+      },
+      "dictionary": "jitendex",
+      "directory": "/tmp/manabitan-2754-crc-audit/timing/15038541229",
+      "id": 15038541229,
+      "kind": "timing",
+      "name": "exact-crc-screen-jitendex-2754",
+      "run": "45644628634",
+      "status": "passed"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/timing/15036814976.zip",
+      "archiveSha256": "fca19417c39b9a7f8caa481dc22452d51492f669548960493d98cd4a33ef9986",
+      "audit": {
+        "analysisRecomputedIndependently": true,
+        "comparisons": {
+          "candidate": {
+            "baselineMedianMs": 706.7500000000146,
+            "bestPairPercent": -1.1807703120639612,
+            "candidateMedianMs": 711.6999999999971,
+            "equalWorkPercent": 1.1615553509451093,
+            "fasterPairs": 1,
+            "pairedChangesPercent": [
+              0.964861751153756,
+              4.639100994094703,
+              -1.1807703120639612,
+              1.204307169165575,
+              1.2183303336588125,
+              0.19782393669551812
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -0.49147318768422155,
+              2.9287156638767575
+            ],
+            "pairedMedianPercent": 1.0845844601596655,
+            "pairs": 6,
+            "worstPairPercent": 4.639100994094703
+          },
+          "candidateVsSecondBaseline": {
+            "baselineMedianMs": 710.2999999999884,
+            "bestPairPercent": -2.415324819543907,
+            "candidateMedianMs": 711.6999999999971,
+            "equalWorkPercent": 0.2620679972866746,
+            "fasterPairs": 3,
+            "pairedChangesPercent": [
+              -0.7783753184221753,
+              2.831657935725529,
+              -2.415324819543907,
+              1.3766676128274868,
+              1.2884455527830685,
+              -0.6862745098031087
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -1.5968500689830412,
+              2.104162774276508
+            ],
+            "pairedMedianPercent": 0.3010855214899799,
+            "pairs": 6,
+            "worstPairPercent": 2.831657935725529
+          },
+          "identicalProductControl": {
+            "baselineMedianMs": 706.7500000000146,
+            "bestPairPercent": -0.1700198356491378,
+            "candidateMedianMs": 710.2999999999884,
+            "equalWorkPercent": 0.8971362466638766,
+            "fasterPairs": 2,
+            "pairedChangesPercent": [
+              1.756912442393821,
+              1.757671805212846,
+              1.2651110486323613,
+              -0.1700198356491378,
+              -0.06922331440826213,
+              0.8902077151318633
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -0.11962157502869997,
+              1.7572921238033334
+            ],
+            "pairedMedianPercent": 1.0776593818821123,
+            "pairs": 6,
+            "worstPairPercent": 1.757671805212846
+          }
+        },
+        "dictionary": "jmdict",
+        "exhaustiveMedia": {
+          "bytes": 0,
+          "files": 0,
+          "mode": "all",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "totalBytes": 0,
+          "totalFiles": 0
+        },
+        "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+        "observationsReopened": 23,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "rawReportValidator": "unchanged frozen benchmark-support.js",
+        "rawReportsRevalidated": true,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          },
+          "C": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          }
+        },
+        "stage": "screen",
+        "status": "passed",
+        "storageBytesRange": [
+          43520477,
+          43520477
+        ],
+        "timedObservations": 18
+      },
+      "dictionary": "jmdict",
+      "directory": "/tmp/manabitan-2754-crc-audit/timing/15036814976",
+      "id": 15036814976,
+      "kind": "timing",
+      "name": "exact-crc-screen-jmdict-2754",
+      "run": "45644628634",
+      "status": "passed"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/timing/15038993452.zip",
+      "archiveSha256": "8f7478ab11070dc5ae405d0485e2a65742cabeaf1e6dfdbd33de551c23e8e5e5",
+      "audit": {
+        "analysisRecomputedIndependently": true,
+        "comparisons": {
+          "candidate": {
+            "baselineMedianMs": 5387.29999999993,
+            "bestPairPercent": -8.024865283697945,
+            "candidateMedianMs": 5374.79999999993,
+            "equalWorkPercent": -0.06645011142020207,
+            "fasterPairs": 2,
+            "pairedChangesPercent": [
+              -8.024865283697945,
+              1.162680782682668,
+              0.5940372113884651,
+              1.1248532996265048,
+              -1.0476998561266049,
+              6.610299769411032
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -4.5362825699122755,
+              3.88649027604685
+            ],
+            "pairedMedianPercent": 0.859445255507485,
+            "pairs": 6,
+            "worstPairPercent": 6.610299769411032
+          },
+          "candidateVsSecondBaseline": {
+            "baselineMedianMs": 5490.650000000023,
+            "bestPairPercent": -8.787831159079861,
+            "candidateMedianMs": 5374.79999999993,
+            "equalWorkPercent": -1.5576096355036428,
+            "fasterPairs": 3,
+            "pairedChangesPercent": [
+              -8.787831159079861,
+              -8.55336238571307,
+              -4.007272986560029,
+              4.268826212413912,
+              4.646535580518774,
+              4.833427004402102
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -8.670596772396465,
+              4.739981292460438
+            ],
+            "pairedMedianPercent": 0.13077661292694165,
+            "pairs": 6,
+            "worstPairPercent": 4.833427004402102
+          },
+          "identicalProductControl": {
+            "baselineMedianMs": 5387.29999999993,
+            "bestPairPercent": -5.441398900648764,
+            "candidateMedianMs": 5490.650000000023,
+            "equalWorkPercent": 1.5147534700876486,
+            "fasterPairs": 2,
+            "pairedChangesPercent": [
+              0.8364737787482923,
+              10.624822762075814,
+              4.7933946050978005,
+              -3.0152568384941736,
+              -5.441398900648764,
+              1.694948658822626
+            ],
+            "pairedMedianBootstrap95Percent": [
+              -4.228327869571469,
+              7.709108683586807
+            ],
+            "pairedMedianPercent": 1.2657112187854591,
+            "pairs": 6,
+            "worstPairPercent": 10.624822762075814
+          }
+        },
+        "dictionary": "vndb",
+        "exhaustiveMedia": {
+          "bytes": 188131284,
+          "files": 146570,
+          "mode": "all",
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb",
+          "totalBytes": 188131284,
+          "totalFiles": 146570
+        },
+        "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+        "observationsReopened": 23,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "rawReportValidator": "unchanged frozen benchmark-support.js",
+        "rawReportsRevalidated": true,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          },
+          "C": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          }
+        },
+        "stage": "screen",
+        "status": "passed",
+        "storageBytesRange": [
+          609553611,
+          609553611
+        ],
+        "timedObservations": 18
+      },
+      "dictionary": "vndb",
+      "directory": "/tmp/manabitan-2754-crc-audit/timing/15038993452",
+      "id": 15038993452,
+      "kind": "timing",
+      "name": "exact-crc-screen-vndb-2754",
+      "run": "45644628634",
+      "status": "passed"
+    }
+  ],
+  "auditorSha256": "8838c00c63ee6b8fba8db084dd76d86d475b0c35ff32b1b003d9a3f685e2aee2",
+  "complete": true,
+  "expectedArtifacts": 3,
+  "receivedArtifacts": 3,
+  "schemaVersion": 1,
+  "scope": "Independent reopening and reconciliation only; no acquisitions, retries, exclusions, or pooling",
+  "sourceIdentities": {
+    "A": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "B": {
+      "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+      "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+    },
+    "C": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    }
+  },
+  "workflowRun": "45644628634"
+}

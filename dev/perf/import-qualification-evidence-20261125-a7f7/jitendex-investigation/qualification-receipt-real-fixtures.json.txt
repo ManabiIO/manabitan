@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "dictionary": "jmdict",
+      "ordinaryIdentityValidation": "passed",
+      "ordinaryTraceSemanticEquality": "passed",
+      "sourceSha": "798cb09f1d45294eeeb10e22d2cd3e5eac2f8079",
+      "browserVersion": "153.0.8010.12",
+      "inputs": {
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jmdict/ordinary/summary.json": "0136a044a26507b1af8930285ff0c18e8cdc49b9055cb57c6ce88f5c9411b14f",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jmdict/ordinary/run-1.json": "69ec12c62861616b8f5c253c55065728c29fc2adb5fb45163ba92699a269a3b5",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jmdict/trace/summary.json": "e49f0735428905189e512035eb3835b7e17439e8f1c50c5c7b5bf2ba9ce501dc"
+      },
+      "canonicalValidationSha256": "7040221bb3981bb5fb3903c2b30a429b6a7ddf5c7f7578da7f7c8f017a43e4b1"
+    },
+    {
+      "dictionary": "jitendex",
+      "ordinaryIdentityValidation": "passed",
+      "ordinaryTraceSemanticEquality": "passed",
+      "sourceSha": "798cb09f1d45294eeeb10e22d2cd3e5eac2f8079",
+      "browserVersion": "153.0.8010.12",
+      "inputs": {
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jitendex/ordinary/summary.json": "ad858305d547ac43812e54d040b064f35ee5a25211f8e4fa8d585f2fab7d4db8",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jitendex/ordinary/run-1.json": "67d4b0ecc9a6486f52e261257e5836a78525faf887adb102e1885b4f6b5f5e13",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-jitendex/trace/summary.json": "07b85c8dd23cb6482c326acc939882a5acf82b55ea7f70b6d16fcba7609bed74"
+      },
+      "canonicalValidationSha256": "9ff0fb23a78d598e6bd25cd23e3a83ee6a9c11ad29ca05baba2e3ad8c2353863"
+    },
+    {
+      "dictionary": "vndb",
+      "ordinaryIdentityValidation": "passed",
+      "ordinaryTraceSemanticEquality": "passed",
+      "sourceSha": "798cb09f1d45294eeeb10e22d2cd3e5eac2f8079",
+      "browserVersion": "153.0.8010.12",
+      "inputs": {
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-vndb/ordinary/summary.json": "ef8aee22db69b3d52478877316f914624fc130c48be9e81ec36f084dc1300fe1",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-vndb/ordinary/run-1.json": "e6cb94583ea6feb27562bdb9fcc9dce0be47af7582870c70f1a82ff58943b6a5",
+        "/workspace/scratch/a7f76505d50d/baseline-evidence/current-profile-vndb/trace/summary.json": "6019a99554c9a00279aaf1489d07928be07ead6bcbc71825ee1a7d73be62d91c"
+      },
+      "canonicalValidationSha256": "9539c8f486e4166f5bfdb30e413bf95258c2b84574cd1be90fcd2fd311135830"
+    }
+  ],
+  "scope": "Validation of existing diagnostic files, not a new timing or memory cohort"
+}

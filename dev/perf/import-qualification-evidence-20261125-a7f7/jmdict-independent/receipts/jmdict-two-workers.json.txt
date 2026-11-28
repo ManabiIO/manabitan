@@ -1,0 +1,449 @@
+{
+  "complete": true,
+  "error": null,
+  "node": "v22.22.0",
+  "dictionary": "jmdict",
+  "hardwareConcurrency": 2,
+  "deviceMemory": 8,
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "parserWasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+  "parentSourceSha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+  "candidateSourceSha256": "de10461786cedfbea211fd2acc96a6d2da62c7a51903a5bb9b06221aeb3699a7",
+  "scope": "Actual source planner and native worker output through record encoders, with deterministic native-content spans and intercepted persistence. No elapsed-time or full-database parity claim.",
+  "summary": {
+    "rows": 528299,
+    "runs": 18,
+    "parentCopyBytes": 3146392,
+    "candidateCopyBytes": 1056598,
+    "copyBytesAvoided": 2089794
+  },
+  "encodedByteSha256": "f4d7d0f6fdaaa5dae60fc077ae5c0289bdd0dcd6c89e57c50c097cc3fc9b04dd",
+  "groups": [
+    {
+      "rows": 70000,
+      "prepared": [
+        "0:30000",
+        "30000:30000",
+        "60000:10000"
+      ],
+      "runRows": [
+        30000,
+        30000,
+        10000
+      ],
+      "parentCopies": {
+        "u32": 280000,
+        "u16": 280000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 140000
+      }
+    },
+    {
+      "rows": 60000,
+      "prepared": [
+        "0:60000"
+      ],
+      "runRows": [
+        60000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 120000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 120000
+      }
+    },
+    {
+      "rows": 60000,
+      "prepared": [
+        "0:60000"
+      ],
+      "runRows": [
+        60000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 120000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 120000
+      }
+    },
+    {
+      "rows": 70000,
+      "prepared": [
+        "0:30000",
+        "30000:30000",
+        "60000:10000"
+      ],
+      "runRows": [
+        30000,
+        30000,
+        10000
+      ],
+      "parentCopies": {
+        "u32": 280000,
+        "u16": 280000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 140000
+      }
+    },
+    {
+      "rows": 70000,
+      "prepared": [
+        "0:30000",
+        "30000:30000",
+        "60000:10000"
+      ],
+      "runRows": [
+        30000,
+        30000,
+        10000
+      ],
+      "parentCopies": {
+        "u32": 280000,
+        "u16": 280000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 140000
+      }
+    },
+    {
+      "rows": 70000,
+      "prepared": [
+        "0:30000",
+        "30000:30000",
+        "60000:10000"
+      ],
+      "runRows": [
+        30000,
+        30000,
+        10000
+      ],
+      "parentCopies": {
+        "u32": 280000,
+        "u16": 280000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 140000
+      }
+    },
+    {
+      "rows": 60000,
+      "prepared": [
+        "0:60000"
+      ],
+      "runRows": [
+        60000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 120000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 120000
+      }
+    },
+    {
+      "rows": 68299,
+      "prepared": [
+        "0:30000",
+        "30000:30000",
+        "60000:8299"
+      ],
+      "runRows": [
+        30000,
+        30000,
+        8299
+      ],
+      "parentCopies": {
+        "u32": 273196,
+        "u16": 273196
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 136598
+      }
+    }
+  ],
+  "sourceGroups": [
+    {
+      "id": 1,
+      "files": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json"
+      ],
+      "bytes": [
+        232927,
+        201497,
+        204746,
+        200041,
+        261354,
+        285667,
+        290985
+      ]
+    },
+    {
+      "id": 2,
+      "files": [
+        "term_bank_8.json",
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json",
+        "term_bank_13.json"
+      ],
+      "bytes": [
+        286576,
+        290973,
+        285278,
+        294349,
+        288324,
+        293356
+      ]
+    },
+    {
+      "id": 3,
+      "files": [
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json",
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json"
+      ],
+      "bytes": [
+        294296,
+        249827,
+        219292,
+        259297,
+        283040,
+        278583
+      ]
+    },
+    {
+      "id": 4,
+      "files": [
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json",
+        "term_bank_26.json"
+      ],
+      "bytes": [
+        286687,
+        280559,
+        257038,
+        310787,
+        308587,
+        303992,
+        333406
+      ]
+    },
+    {
+      "id": 5,
+      "files": [
+        "term_bank_27.json",
+        "term_bank_28.json",
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json",
+        "term_bank_33.json"
+      ],
+      "bytes": [
+        327402,
+        319120,
+        293949,
+        303907,
+        268676,
+        195735,
+        337549
+      ]
+    },
+    {
+      "id": 6,
+      "files": [
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json",
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "bytes": [
+        284530,
+        185671,
+        303667,
+        336653,
+        325795,
+        341827,
+        327365
+      ]
+    },
+    {
+      "id": 7,
+      "files": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json",
+        "term_bank_45.json",
+        "term_bank_46.json"
+      ],
+      "bytes": [
+        327770,
+        343507,
+        328238,
+        340246,
+        339568,
+        345914
+      ]
+    },
+    {
+      "id": 8,
+      "files": [
+        "term_bank_47.json",
+        "term_bank_48.json",
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ],
+      "bytes": [
+        353697,
+        350718,
+        343674,
+        330347,
+        337477,
+        366750,
+        291633
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "experiments": {
+        "experimentalGenericSpanCompression": true,
+        "experimentalParserWorkers3": true,
+        "experimentalSkipFusedParse": false,
+        "experimentalLookupScratchReuse": true,
+        "experimentalNativeSegmentedLookup": true,
+        "experimentalDirectLookupArena": false,
+        "experimentalSinglePassLookupCompaction": false,
+        "experimentalTermBankSpans": false,
+        "experimentalNativeEscapedKeys": false,
+        "experimentalValidatedGlossaryReuse": true,
+        "experimentalFusedSingleBank": false,
+        "experimentalGlobalExactContentReuse": false,
+        "experimentalFastGlossaryNormalization": false
+      },
+      "fusedParseAttempts": 8,
+      "fusedParseFallbacks": 0,
+      "discardedFusedParseMs": 0,
+      "discardedFusedRows": 0,
+      "bankSpanCount": 53,
+      "escapedKeyDecodeCount": 0,
+      "validatedGlossaryReuseCount": 54647,
+      "globalExactContentReuseCount": 0,
+      "fastGlossaryNormalizationCount": 0,
+      "fastGlossaryNormalizationFallbackCount": 0,
+      "fusedSingleBankGroups": 0,
+      "maxWasmHeapBytes": 62259200,
+      "bufferSetupMs": 1232,
+      "allocationMs": 2,
+      "nativeStringPlanAllocationMs": 0,
+      "copyJsonMs": 0,
+      "parseBankMs": 1219,
+      "encodeContentMs": 0,
+      "recentContentDedupHitCount": 154415,
+      "rowDecodeMs": 0,
+      "nativeStringPlanMs": 0,
+      "nativeStringPlanChunkCount": 8,
+      "nativeStringPlanFallbackChunkCount": 0,
+      "chunkDispatchMs": 277,
+      "sourcePreparationMs": 0.4022029999998722,
+      "sourceDeliveryMs": 5,
+      "sourceTransferredBytes": 15632849,
+      "sourceInflateMs": 384.1363190000002,
+      "sourceCrcMs": 0,
+      "sourceCrcScannedBytes": 0,
+      "sourceCrcReusedBytes": 0,
+      "sourceCrcReusedGlossaryCount": 0,
+      "sourceCompressedBytes": 15632849,
+      "sourceUncompressedBytes": 171617523,
+      "resultCopyMs": 274.90675199999987,
+      "resultDeliveryMs": 140,
+      "orderedSinkWaitMs": 257.4911830000001,
+      "borrowedContentResultCount": 0,
+      "nativeLookupScratchReusedBytes": 30136432,
+      "compactContentMetadataGroups": 0,
+      "compactContentMetadataBytesAvoided": 0,
+      "nativeLookupScratchReuseGroups": 8,
+      "nativeLookupScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 15,
+      "nativeSegmentedLookupFallbacks": 0,
+      "directLookupArenaSegments": 0,
+      "directLookupArenaCopiedBytesAvoided": 0,
+      "lookupCompactionSourceValidationPasses": 0,
+      "lookupIndexPrepareMs": 92.06385800000044,
+      "lookupIndexCompactMs": 0,
+      "lookupIndexEncodeMs": 92.06385800000044,
+      "rowCount": 528299,
+      "metaCapacity": 530000,
+      "metaAllocatedBytes": 36040000,
+      "encodedContentBytes": 101081946,
+      "contentCapacity": 120000000,
+      "initialContentBytesPerRow": 48,
+      "chunkCount": 8,
+      "chunkSize": 0,
+      "maxPendingChunks": 1,
+      "minimalDecode": true,
+      "includeContentMetadata": true,
+      "copyContentBytes": false,
+      "reuseExpressionForReadingDecode": true,
+      "skipTagRuleDecode": true,
+      "lazyGlossaryDecode": true,
+      "mediaHintFastScan": false,
+      "parallelWorkerCount": 2,
+      "parallelPipelineGroupsPerWorker": 4,
+      "parallelGroupCount": 8,
+      "parallelWorkerWallMs": 1543.6153219999999,
+      "parallelSourceReadWallMs": 316.902421,
+      "parallelOwnedContentBytes": 101081946,
+      "parallelPeakQueuedOwnedContentBytes": 27175998
+    }
+  ]
+}

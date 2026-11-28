@@ -206,9 +206,10 @@ int32_t inflate_and_join_term_banks(
     uint32_t source_count,
     uint32_t output_ptr,
     uint32_t output_capacity,
-    uint32_t bank_spans_ptr
+    uint32_t bank_spans_ptr,
+    uint32_t defer_crc
 ) {
-    if (source_count == 0u || output_capacity < 2u) {
+    if (source_count == 0u || output_capacity < 2u || (defer_crc != 0u && bank_spans_ptr == 0u)) {
         return -1;
     }
     const uint8_t* input = (const uint8_t*)(uintptr_t)input_ptr;
@@ -248,7 +249,7 @@ int32_t inflate_and_join_term_banks(
         } else {
             return -1;
         }
-        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) {
+        if (defer_crc == 0u && crc32_bytes(inflated, uncompressed_length) != signatures[i]) {
             return -4;
         }
 
@@ -294,6 +295,31 @@ int32_t inflate_and_join_term_banks(
     return (int32_t)cursor;
 }
 
+/* A final stored DEFLATE block has an exact five-byte envelope. The unused
+ * padding bits may have any value, but LEN/NLEN, the complete source length,
+ * and the requested output length must all agree before its body is borrowed.
+ * Other encodings retain the full inflater's size and trailing-byte checks. */
+static const uint8_t* single_stored_deflate_body(
+    const uint8_t* input,
+    uint32_t compressed_length,
+    uint32_t uncompressed_length
+) {
+    if (
+        compressed_length < 5u ||
+        compressed_length - 5u != uncompressed_length ||
+        uncompressed_length > 0xffffu ||
+        (input[0] & 7u) != 1u
+    ) {
+        return 0;
+    }
+    const uint32_t length = (uint32_t)input[1] | ((uint32_t)input[2] << 8u);
+    const uint32_t inverted_length = (uint32_t)input[3] | ((uint32_t)input[4] << 8u);
+    return length == uncompressed_length && inverted_length == (length ^ 0xffffu) ? input + 5u : 0;
+}
+
+/* A null output-offset table requests validation only. Stored payloads are
+ * checked in place; other DEFLATE streams reuse the same bounded scratch span
+ * instead of retaining every decoded image in the batch. */
 __attribute__((visibility("default")))
 int32_t inflate_zip_media_batch(
     uint32_t input_ptr,
@@ -317,6 +343,7 @@ int32_t inflate_zip_media_batch(
     const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
     uint32_t* output_offsets = (uint32_t*)(uintptr_t)output_offsets_ptr;
+    const int retain_decoded_sources = output_offsets_ptr != 0u;
     uint32_t cursor = 0u;
 
     for (uint32_t i = 0u; i < source_count; ++i) {
@@ -326,23 +353,37 @@ int32_t inflate_zip_media_batch(
         if (
             input_offset > input_length ||
             compressed_length > input_length - input_offset ||
-            cursor > output_capacity ||
-            uncompressed_length > output_capacity - cursor
+            uncompressed_length > 0x7fffffffu - cursor ||
+            (retain_decoded_sources && (
+                cursor > output_capacity ||
+                uncompressed_length > output_capacity - cursor
+            ))
         ) {
             return -1;
         }
-        output_offsets[i] = cursor;
-        uint8_t* inflated = output + cursor;
+        if (retain_decoded_sources) { output_offsets[i] = cursor; }
+        uint8_t* inflated = output + (retain_decoded_sources ? cursor : 0u);
+        const uint8_t* verified = input + input_offset;
         if (compression_methods[i] == 0u) {
             if (compressed_length != uncompressed_length) { return -3; }
-            memcpy(inflated, input + input_offset, uncompressed_length);
+            if (retain_decoded_sources) {
+                memcpy(inflated, verified, uncompressed_length);
+                verified = inflated;
+            }
         } else if (compression_methods[i] == 8u) {
-            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
-            if (status != 0) { return status; }
+            const uint8_t* stored = retain_decoded_sources ? 0 : single_stored_deflate_body(verified, compressed_length, uncompressed_length);
+            if (stored != 0) {
+                verified = stored;
+            } else {
+                if (!retain_decoded_sources && uncompressed_length > output_capacity) { return -1; }
+                const int32_t status = term_bank_inflate(verified, compressed_length, inflated, uncompressed_length);
+                if (status != 0) { return status; }
+                verified = inflated;
+            }
         } else {
             return -1;
         }
-        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) { return -4; }
+        if (crc32_bytes(verified, uncompressed_length) != signatures[i]) { return -4; }
         cursor += uncompressed_length;
     }
     return (int32_t)cursor;
@@ -367,6 +408,156 @@ typedef struct {
     uint32_t glossary_requires_normalization;
     uint32_t glossary_requires_text_normalization;
 } TermRowMeta;
+
+/* Apply a polynomial operator in the reflected IEEE CRC representation. The
+ * identity is bit 31; one step multiplies by x modulo the CRC polynomial. */
+static uint32_t crc32_multiply_mod(uint32_t a, uint32_t b) {
+    uint32_t result = 0u;
+    for (uint32_t bit = 0x80000000u; bit != 0u; bit >>= 1u) {
+        if ((a & bit) != 0u) { result ^= b; }
+        b = (b >> 1u) ^ ((b & 1u) != 0u ? 0xedb88320u : 0u);
+    }
+    return result;
+}
+
+typedef struct {
+    uint32_t length;
+    uint32_t table[8][16];
+} Crc32Shift;
+
+static void crc32_prepare_shift(Crc32Shift* shift, uint32_t length) {
+    uint32_t power = 0x00800000u; /* x^8: advance one byte. */
+    uint32_t factor = 0x80000000u;
+    for (uint32_t remaining = length; remaining != 0u; remaining >>= 1u) {
+        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, power); }
+        power = crc32_multiply_mod(power, power);
+    }
+    uint32_t basis[32];
+    basis[31] = factor;
+    for (uint32_t i = 31u; i > 0u; --i) {
+        const uint32_t previous = basis[i];
+        basis[i - 1u] = (previous >> 1u) ^ ((previous & 1u) != 0u ? 0xedb88320u : 0u);
+    }
+    for (uint32_t nibble = 0u; nibble < 8u; ++nibble) {
+        shift->table[nibble][0] = 0u;
+        for (uint32_t value = 1u; value < 16u; ++value) {
+            const uint32_t bit = (uint32_t)__builtin_ctz(value);
+            shift->table[nibble][value] =
+                shift->table[nibble][value & (value - 1u)] ^ basis[nibble * 4u + bit];
+        }
+    }
+    shift->length = length;
+}
+
+static uint32_t crc32_shift(const Crc32Shift* shift, uint32_t crc) {
+    return shift->table[0][crc & 15u] ^ shift->table[1][(crc >> 4u) & 15u] ^
+        shift->table[2][(crc >> 8u) & 15u] ^ shift->table[3][(crc >> 12u) & 15u] ^
+        shift->table[4][(crc >> 16u) & 15u] ^ shift->table[5][(crc >> 20u) & 15u] ^
+        shift->table[6][(crc >> 24u) & 15u] ^ shift->table[7][crc >> 28u];
+}
+
+/* These gaps are usually short row fields, separators, or array wrappers.
+ * Both the initial and returned state use the ordinary complemented CRC. */
+static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t length) {
+    crc = ~crc;
+    uint32_t offset = 0u;
+    while (length - offset >= 16u) {
+        crc = crc32_step16(data + offset, crc);
+        offset += 16u;
+    }
+    while (offset < length) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
+    }
+    return ~crc;
+}
+
+#if defined(TERM_BANK_CRC_TEST)
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
+    Crc32Shift shift;
+    crc32_prepare_shift(&shift, second_length);
+    return crc32_shift(&shift, first) ^ second;
+}
+#endif
+
+/* The witness array comes only from reuse_validated_glossary: each ID proves
+ * full raw-byte equality with a previously parsed glossary in this invocation.
+ * Canonical content IDs MUST NOT be used here. Consume the IDs in source order,
+ * replacing them with CRCs; no content-dependent cache survives this call.
+ * Passing no rows performs the ordinary whole-bank verification for failures
+ * and non-fused fallback paths. */
+__attribute__((visibility("default")))
+int32_t verify_term_bank_source_crcs(
+    uint32_t json_ptr,
+    uint32_t json_length,
+    uint32_t bank_spans_ptr,
+    uint32_t bank_count,
+    uint32_t signatures_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t glossary_witnesses_ptr,
+    uint32_t stats_ptr
+) {
+    if (json_ptr == 0u || bank_spans_ptr == 0u || bank_count == 0u || signatures_ptr == 0u ||
+        (row_count != 0u && (metas_ptr == 0u || glossary_witnesses_ptr == 0u))) { return -1; }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    const uint32_t* spans = (const uint32_t*)(uintptr_t)bank_spans_ptr;
+    const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
+    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    uint32_t* witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
+    uint32_t* stats = (uint32_t*)(uintptr_t)stats_ptr;
+    uint32_t next_row = 0u;
+    uint32_t bank_end = 0u;
+    uint32_t reused_bytes = 0u;
+    uint32_t reused_glossaries = 0u;
+    Crc32Shift shift;
+    shift.length = 0xffffffffu;
+    /* Initialize the shared, input-independent slicing tables before gaps. */
+    (void)crc32_bytes(src, 0u);
+    for (uint32_t bank = 0u; bank < bank_count; ++bank) {
+        const uint32_t start = spans[bank * 2u];
+        const uint32_t length = spans[bank * 2u + 1u];
+        if (start != bank_end || start > json_length || length > json_length - start) { return -1; }
+        bank_end = start + length;
+        uint32_t crc;
+        if (row_count == 0u) {
+            crc = crc32_bytes(src + start, length);
+        } else {
+            uint32_t cursor = start;
+            crc = 0u;
+            while (next_row < row_count && rows[next_row].glossary_start < bank_end) {
+                const uint32_t glossary_start = rows[next_row].glossary_start;
+                const uint32_t glossary_length = rows[next_row].glossary_length;
+                if (glossary_start < cursor || glossary_length == 0u || glossary_length > bank_end - glossary_start) { return -1; }
+                crc = crc32_update_gap(crc, src + cursor, glossary_start - cursor);
+                const uint32_t witness = witnesses[next_row];
+                uint32_t glossary_crc;
+                if (witness == 0xffffffffu) {
+                    glossary_crc = crc32_bytes(src + glossary_start, glossary_length);
+                } else {
+                    if (witness >= next_row || rows[witness].glossary_length != glossary_length) { return -1; }
+                    glossary_crc = witnesses[witness];
+                    reused_bytes += glossary_length;
+                    ++reused_glossaries;
+                }
+                witnesses[next_row] = glossary_crc;
+                if (shift.length != glossary_length) { crc32_prepare_shift(&shift, glossary_length); }
+                crc = crc32_shift(&shift, crc) ^ glossary_crc;
+                cursor = glossary_start + glossary_length;
+                ++next_row;
+            }
+            crc = crc32_update_gap(crc, src + cursor, bank_end - cursor);
+        }
+        if (crc != signatures[bank]) { return -4; }
+    }
+    if (bank_end != json_length || next_row != row_count) { return -1; }
+    if (stats != 0) {
+        stats[0] = json_length - reused_bytes;
+        stats[1] = reused_bytes;
+        stats[2] = reused_glossaries;
+    }
+    return 0;
+}
 
 static uint32_t align8(uint32_t value) {
     return (value + 7u) & ~7u;
@@ -808,6 +999,20 @@ static int parse_composite_span_impl(
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
                     i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
+                    // A literal content key and its colon already establish
+                    // the parent state. Enter an adjacent child here without
+                    // dispatching its opener through the general token loop.
+                    if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
+                        i < len && (src[i] == '[' || src[i] == '{')) {
+                        if (depth >= MAX_JSON_NESTING) { return 0; }
+                        if (validate_top_level_objects && depth == 2u) {
+                            glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
+                        }
+                        parents[depth - 1u] = OBJECT_AFTER_VALUE;
+                        ++depth;
+                        state = src[i] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+                        ++i;
+                    }
                     continue;
                 }
                 state = OBJECT_COLON;
@@ -962,6 +1167,124 @@ static int parse_value_span(const uint8_t* src, uint32_t len, uint32_t start, ui
     if (c == '"') { return parse_string_span(src, len, start, out_end); }
     if (c == '[' || c == '{') { return parse_composite_span(src, len, start, out_end); }
     return parse_scalar_span(src, len, start, out_end);
+}
+
+typedef struct {
+    uint32_t count;
+    uint32_t start;
+    uint32_t length;
+} GlossaryImagePath;
+
+enum { MEDIA_GLOSSARY, MEDIA_GLOSSARY_ITEM, MEDIA_STRUCTURED_CONTENT };
+
+/* Project the same semantic edges as the JavaScript image collector. Objects
+ * retain only their last content/path/type/tag value. A later image selector
+ * replaces child paths, while an ordinary structured tag retains its content.
+ * Count saturates at two: multiple paths keep the general JavaScript path. */
+static int project_glossary_image_value(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t role,
+    uint32_t depth, uint32_t* out_end, GlossaryImagePath* out
+) {
+    *out = (GlossaryImagePath){0u, 0u, 0u};
+    if (start >= len) { return 0; }
+    const uint8_t first = src[start];
+    if (first != '[' && first != '{') {
+        return parse_value_span(src, len, start, out_end);
+    }
+    if (depth >= MAX_JSON_NESTING) { return 0; }
+    if (first == '[') {
+        if (role == MEDIA_GLOSSARY_ITEM) {
+            return parse_composite_span(src, len, start, out_end);
+        }
+        uint32_t i = skip_ws(src, len, start + 1u);
+        if (i < len && src[i] == ']') { *out_end = i + 1u; return 1; }
+        while (i < len) {
+            uint32_t end;
+            GlossaryImagePath item;
+            if (!project_glossary_image_value(src, len, i,
+                role == MEDIA_GLOSSARY ? MEDIA_GLOSSARY_ITEM : MEDIA_STRUCTURED_CONTENT,
+                depth + 1u, &end, &item)) { return 0; }
+            if (item.count != 0u) {
+                if (out->count == 0u) { *out = item; }
+                else { out->count = 2u; }
+            }
+            i = skip_ws(src, len, end);
+            if (i >= len) { return 0; }
+            if (src[i] == ']') { *out_end = i + 1u; return 1; }
+            if (src[i] != ',') { return 0; }
+            i = skip_ws(src, len, i + 1u);
+            if (i >= len || src[i] == ']') { return 0; }
+        }
+        return 0;
+    }
+    if (role == MEDIA_GLOSSARY) { return 0; }
+    uint32_t selector = 0u;
+    GlossaryImagePath path = {0u, 0u, 0u};
+    GlossaryImagePath content = {0u, 0u, 0u};
+    uint32_t i = skip_ws(src, len, start + 1u);
+    if (i < len && src[i] == '}') { *out_end = i + 1u; return 1; }
+    while (i < len) {
+        const uint32_t key_start = i;
+        uint32_t key_end;
+        if (!parse_string_span(src, len, key_start, &key_end)) { return 0; }
+        const int content_key = json_string_matches_ascii(src, key_start, key_end, "content", 7u);
+        const int path_key = json_string_matches_ascii(src, key_start, key_end, "path", 4u);
+        const int selector_key = role == MEDIA_GLOSSARY_ITEM ?
+            json_string_matches_ascii(src, key_start, key_end, "type", 4u) :
+            json_string_matches_ascii(src, key_start, key_end, "tag", 3u);
+        i = skip_ws(src, len, key_end);
+        if (i >= len || src[i] != ':') { return 0; }
+        const uint32_t value_start = skip_ws(src, len, i + 1u);
+        uint32_t value_end;
+        if (content_key) {
+            if (!project_glossary_image_value(src, len, value_start, MEDIA_STRUCTURED_CONTENT,
+                depth + 1u, &value_end, &content)) { return 0; }
+        } else {
+            if (!parse_value_span(src, len, value_start, &value_end)) { return 0; }
+        }
+        if (path_key) {
+            path = src[value_start] == '"' ?
+                (GlossaryImagePath){1u, value_start, value_end - value_start} :
+                (GlossaryImagePath){0u, 0u, 0u};
+        }
+        if (selector_key) {
+            if (role == MEDIA_GLOSSARY_ITEM) {
+                selector = json_string_matches_ascii(src, value_start, value_end, "image", 5u) ? 1u :
+                    json_string_matches_ascii(src, value_start, value_end, "structured-content", 18u) ? 2u : 0u;
+            } else {
+                selector = json_string_matches_ascii(src, value_start, value_end, "img", 3u) ? 1u : 0u;
+            }
+        }
+        i = skip_ws(src, len, value_end);
+        if (i >= len) { return 0; }
+        if (src[i] == '}') {
+            *out = selector == 1u ? path :
+                (role == MEDIA_STRUCTURED_CONTENT || selector == 2u ? content : (GlossaryImagePath){0u, 0u, 0u});
+            *out_end = i + 1u;
+            return 1;
+        }
+        if (src[i] != ',') { return 0; }
+        i = skip_ws(src, len, i + 1u);
+        if (i >= len || src[i] == '}') { return 0; }
+    }
+    return 0;
+}
+
+/* No arena allocation or row metadata is needed for the common single-image
+ * result. The caller decodes only this quoted token before parser memory can
+ * be reused. Empty, multiple-path, malformed and unsupported spans fall back. */
+__attribute__((visibility("default")))
+uint64_t project_single_glossary_image_path(uint32_t source_ptr, uint32_t source_length) {
+    const uint64_t memory_bytes = (uint64_t)__builtin_wasm_memory_size(0) * WASM_PAGE_SIZE;
+    if ((uint64_t)source_ptr + source_length > memory_bytes) { return 0u; }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)source_ptr;
+    const uint32_t start = skip_ws(src, source_length, 0u);
+    if (start >= source_length || src[start] != '[') { return 0u; }
+    GlossaryImagePath path;
+    uint32_t end;
+    if (!project_glossary_image_value(src, source_length, start, MEDIA_GLOSSARY, 0u, &end, &path) ||
+        skip_ws(src, source_length, end) != source_length || path.count != 1u) { return 0u; }
+    return ((uint64_t)path.start << 32u) | path.length;
 }
 
 static int parse_value_span_with_glossary_hints(
@@ -1142,6 +1465,112 @@ static int reuse_validated_glossary(
     return 0;
 }
 
+static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
+    uint32_t i = skip_ws(src, len, *position);
+    if (i >= len || src[i] != ',') { return 0; }
+    i = skip_ws(src, len, i + 1u);
+    if (i >= len) { return 0; }
+    *position = i;
+    return 1;
+}
+
+/* Strict source validation has exactly eight fields with known token types.
+ * Keep its grammar explicit instead of dispatching each field twice through
+ * the permissive row parser and set_field. Every metadata word is assigned
+ * before success; failed rows are never published. */
+static int parse_format3_row(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t row_start,
+    TermRowMeta* meta,
+    int media_hints,
+    uint32_t* out_next,
+    const TermRowMeta* prior_rows,
+    uint32_t prior_count,
+    uint32_t* glossary_witness,
+    uint32_t glossary_lookback,
+    uint32_t* key_escape_mask
+) {
+    if (row_start >= len || src[row_start] != '[') { return 0; }
+    uint32_t i = skip_ws(src, len, row_start + 1u);
+    uint32_t end = 0u;
+    uint32_t expression_escaped = 0u;
+    uint32_t reading_escaped = 0u;
+
+    if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
+    meta->expression_start = i;
+    meta->expression_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+    meta->reading_start = i;
+    meta->reading_length = end - i;
+    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (src[i] == 'n') {
+        if (len - i < 4u || !is_null_token(src, i, 4u)) { return 0; }
+        end = i + 4u;
+    } else if (!parse_string_span(src, len, i, &end)) {
+        return 0;
+    }
+    meta->definition_tags_start = i;
+    meta->definition_tags_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span(src, len, i, &end)) { return 0; }
+    meta->rules_start = i;
+    meta->rules_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }
+    meta->score_start = i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (src[i] != '[') { return 0; }
+    meta->glossary_may_contain_media = 0u;
+    meta->glossary_requires_normalization = 0u;
+    meta->glossary_requires_text_normalization = 0u;
+    if (
+        !(glossary_witness != 0 && reuse_validated_glossary(
+            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+        )) &&
+        !parse_value_span_with_glossary_hints(
+            src, len, i, &end,
+            media_hints ? &meta->glossary_may_contain_media : 0,
+            &meta->glossary_requires_normalization,
+            &meta->glossary_requires_text_normalization,
+            1
+        )) { return 0; }
+    meta->glossary_start = i;
+    meta->glossary_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!scan_scalar_span(src, len, i, &end)) { return 0; }
+    if (is_null_token(src, i, end - i)) {
+        meta->sequence_start = 0xffffffffu;
+    } else {
+        if (!is_valid_json_number(src, i, end)) { return 0; }
+        meta->sequence_start = i;
+    }
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span(src, len, i, &end)) { return 0; }
+    meta->term_tags_start = i;
+    meta->term_tags_length = end - i;
+    i = skip_ws(src, len, end);
+    if (i >= len || src[i] != ']') { return 0; }
+    *out_next = i + 1u;
+    return 1;
+}
+
 static int parse_row_single_pass(
     const uint8_t* src,
     uint32_t len,
@@ -1156,6 +1585,12 @@ static int parse_row_single_pass(
     int validate_glossary_types,
     uint32_t* key_escape_mask
 ) {
+    if (validate_glossary_types) {
+        return parse_format3_row(
+            src, len, row_start, out_meta, media_hints, out_next,
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+        );
+    }
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
     // Missing generic keys remain conservative; only validated literal keys
@@ -2101,20 +2536,34 @@ static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t lengt
         const uint8_t first = bytes[i++];
         output[i - 1u] = first;
         if (first < 0x80u) { continue; }
-        uint32_t width;
-        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
-        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
-        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
-        else { return 0; }
-        if (width - 1u > length - i) { return 0; }
-        const uint8_t second = bytes[i];
-        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
-            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
-        for (uint32_t j = 0u; j < width - 1u; ++j) {
-            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+        if (first >= 0xe0u && first <= 0xefu) {
+            if (length - i < 2u) { return 0; }
+            const uint8_t second = bytes[i];
+            const uint8_t third = bytes[i + 1u];
+            if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u ||
+                (first == 0xe0u && second < 0xa0u) ||
+                (first == 0xedu && second > 0x9fu)) { return 0; }
+            output[i] = second;
+            output[i + 1u] = third;
+            i += 2u;
+            continue;
         }
-        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
-        i += width - 1u;
+        if (first >= 0xc2u && first <= 0xdfu) {
+            if (i >= length || (bytes[i] & 0xc0u) != 0x80u) { return 0; }
+            output[i] = bytes[i];
+            ++i;
+            continue;
+        }
+        if (first < 0xf0u || first > 0xf4u || length - i < 3u) { return 0; }
+        const uint8_t second = bytes[i];
+        const uint8_t third = bytes[i + 1u];
+        const uint8_t fourth = bytes[i + 2u];
+        if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u || (fourth & 0xc0u) != 0x80u ||
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
+        output[i] = second;
+        output[i + 1u] = third;
+        output[i + 2u] = fourth;
+        i += 3u;
     }
     return 1;
 }
@@ -2458,7 +2907,7 @@ int32_t encode_term_lookup_index(
     uint32_t reading_posting_count = 0u;
     int32_t last_valid_sequence = -1;
     uint32_t last_valid_sequence_key = 0u;
-    memset(sequence_slots, 0, sequence_slots_count * sizeof(uint16_t));
+    int sequence_slots_ready = 0;
 
     for (uint32_t row = 0u; row < row_count; ++row) {
         const uint32_t expression_key = expression_indexes[row];
@@ -2480,19 +2929,38 @@ int32_t encode_term_lookup_index(
         if (sequence == last_valid_sequence) {
             key = last_valid_sequence_key;
         } else {
-            uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
-            for (;;) {
-                const uint16_t entry = sequence_slots[slot];
-                if (entry == 0u) {
-                    if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
-                    key = sequence_key_count++;
-                    sequence_keys[key] = sequence;
-                    sequence_slots[slot] = (uint16_t)(key + 1u);
-                    break;
+            if (!sequence_slots_ready && sequence > last_valid_sequence) {
+                // Strict increases cannot repeat an earlier key. Equal values
+                // already use the cache above, even across absent sequences.
+                if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
+                key = sequence_key_count++;
+                sequence_keys[key] = sequence;
+            } else {
+                if (!sequence_slots_ready) {
+                    // The first decrease ends the ordered prefix. Backfill its
+                    // distinct keys once, preserving their first-seen indexes.
+                    memset(sequence_slots, 0, sequence_slots_count * sizeof(uint16_t));
+                    for (uint32_t prior_key = 0u; prior_key < sequence_key_count; ++prior_key) {
+                        uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence_keys[prior_key]) & sequence_slot_mask;
+                        while (sequence_slots[slot] != 0u) { slot = (slot + 1u) & sequence_slot_mask; }
+                        sequence_slots[slot] = (uint16_t)(prior_key + 1u);
+                    }
+                    sequence_slots_ready = 1;
                 }
-                key = (uint32_t)entry - 1u;
-                if (sequence_keys[key] == sequence) { break; }
-                slot = (slot + 1u) & sequence_slot_mask;
+                uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
+                for (;;) {
+                    const uint16_t entry = sequence_slots[slot];
+                    if (entry == 0u) {
+                        if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
+                        key = sequence_key_count++;
+                        sequence_keys[key] = sequence;
+                        sequence_slots[slot] = (uint16_t)(key + 1u);
+                        break;
+                    }
+                    key = (uint32_t)entry - 1u;
+                    if (sequence_keys[key] == sequence) { break; }
+                    slot = (slot + 1u) & sequence_slot_mask;
+                }
             }
             last_valid_sequence = sequence;
             last_valid_sequence_key = key;
@@ -2527,7 +2995,9 @@ int32_t encode_term_lookup_index(
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    memset(output, 0, output_length);
+    // Every live output column below is overwritten or initialized for its
+    // accumulator role. Clear only padding/reserved bytes; zeroing the full
+    // container would write keys, postings and hash chains twice.
     uint32_t* container_header = (uint32_t*)output;
     container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
     container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
@@ -2541,7 +3011,10 @@ int32_t encode_term_lookup_index(
     base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
     base_header[4] = sequence_key_count;
     base_header[5] = reading_posting_count;
+    base_header[6] = 0u;
+    base_header[7] = 0u;
     __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
+    memset(base + TERM_LOOKUP_BASE_HEADER_BYTES + strings_length, 0, aligned_string_length - strings_length);
 
     uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
     uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
@@ -2552,6 +3025,7 @@ int32_t encode_term_lookup_index(
     cursor += row_count * (uint32_t)sizeof(uint16_t);
     uint16_t* persisted_sequence_row_keys = (uint16_t*)(base + cursor);
     cursor += row_count * (uint32_t)sizeof(uint16_t);
+    memset(base + cursor, 0, align4(cursor) - cursor);
     cursor = align4(cursor);
     int32_t* persisted_sequence_keys = (int32_t*)(base + cursor);
     __builtin_memcpy(
@@ -2603,10 +3077,12 @@ int32_t encode_term_lookup_index(
     cursor += (sequence_key_count + 1u) * (uint32_t)sizeof(uint16_t);
     uint16_t* sequence_rows = (uint16_t*)(derived + cursor);
     cursor += sequence_posting_count * (uint32_t)sizeof(uint16_t);
+    memset(derived + cursor, 0, derived_length - cursor);
     memset(key_heads, 0xff, key_slot_count * sizeof(uint16_t));
-    memset(key_next, 0xff, key_count * sizeof(uint16_t));
     memset(sequence_heads, 0xff, sequence_hash_slot_count * sizeof(uint16_t));
-    memset(sequence_next, 0xff, sequence_key_count * sizeof(uint16_t));
+    memset(expression_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
+    memset(reading_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
+    memset(sequence_offsets, 0, (sequence_key_count + 1u) * sizeof(uint16_t));
     for (uint32_t key = 0u; key < key_count; ++key) {
         term_lookup_insert_hash(key_heads, key_next, key, string_hashes[key], key_slot_count);
     }
@@ -2811,7 +3287,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_ptr,
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
-    uint32_t validate_glossary_types
+    uint32_t validate_glossary_types,
+    uint32_t glossary_witnesses_ptr,
+    uint32_t media_hint_present_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -2848,6 +3326,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t* raw_content_hashes = (uint32_t*)(uintptr_t)raw_content_hashes_ptr;
     uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
     uint32_t* unique_signatures = (uint32_t*)(uintptr_t)unique_signatures_ptr;
+    uint32_t* glossary_witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
     uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
     uint16_t* string_lengths = (uint16_t*)(uintptr_t)string_lengths_ptr;
     uint32_t* string_offsets = (uint32_t*)(uintptr_t)string_offsets_ptr;
@@ -2864,6 +3343,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t strings_cursor = 0u;
     uint32_t row_count = 0u;
     uint32_t recent_content_hits = 0u;
+    // Without hint detection, absence has not been established.
+    uint32_t media_hint_present = media_hints == 0u ? 1u : 0u;
     const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
     uint32_t glossary_reuse_probe_budget = 0u;
     uint32_t recent_content_match_streak = 0u;
@@ -2901,6 +3382,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
             return -1;
         }
+        if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
         if (validated_glossary_reuse_enabled && row_count > 0u) {
             if (glossary_witness != 0xffffffffu) {
@@ -2911,6 +3393,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
 
         const TermRowMeta* parsed_row = &rows[row_count];
+        media_hint_present |= parsed_row->glossary_may_contain_media;
         const uint32_t token_starts[2] = {
             parsed_row->expression_start,
             parsed_row->reading_start,
@@ -3201,6 +3684,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
     *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
     *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+    // Publish only after every bank has passed validation. Older callers omit
+    // this optional output pointer and retain their per-row hint scan.
+    if (media_hint_present_ptr != 0u) {
+        *(uint32_t*)(uintptr_t)media_hint_present_ptr = media_hint_present;
+    }
     return (int32_t)cursor;
 }
 

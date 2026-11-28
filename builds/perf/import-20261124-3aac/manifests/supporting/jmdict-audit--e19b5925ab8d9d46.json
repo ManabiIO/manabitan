@@ -1,0 +1,260 @@
+{
+  "name": "jmdict-audit",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "e4c2727eb2e9b4adcf8410606ded0e9d7e33d9e1779dec762e19c4f1f9fbc1a6",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 380283,
+  "retainedFiles": [
+    {
+      "bytes": 560,
+      "path": "build-libs.log",
+      "sha256": "add25ac457c4da34a4d73127d2a4d8d219cce35a6cbc8f5e20acb6a8a5cdb906"
+    },
+    {
+      "bytes": 18812,
+      "path": "canonical-baseline.s",
+      "sha256": "e3babb61d579bf22182d8e412c45641b154ff6378623a1726685bd5c50fdb447"
+    },
+    {
+      "bytes": 96364,
+      "path": "canonical-input-baseline-package-entries.json",
+      "sha256": "d12ec7f27304c64cce44a4f8dc4fef47a4c83002a0ba42dd59e0c72beb69a015"
+    },
+    {
+      "bytes": 96364,
+      "path": "canonical-input-candidate-package-entries.json",
+      "sha256": "24624792028d5734a843c5e39534618e176570dd65fc22688758ef0b1e94c7c3"
+    },
+    {
+      "bytes": 28851,
+      "path": "canonical-input-ci-receipt.json",
+      "sha256": "6fa5285c75ee225a2447b60bb137b040b1b24ae3248a8ea6bb05b19c5e2e83ec"
+    },
+    {
+      "bytes": 1783,
+      "path": "canonical-input-package-guard.json",
+      "sha256": "ed8cdafb25d16029eacb4bdcfcec896b76455aed351080f6fc3bb63cfe01e779"
+    },
+    {
+      "bytes": 2790,
+      "path": "canonical-input-receipt.json",
+      "sha256": "c16a312251111cb3948c86c3b07aae8dfab2b4934782e811f341e35218e9e9b1"
+    },
+    {
+      "bytes": 1427,
+      "path": "canonical-input-work-proof.json",
+      "sha256": "4a9c34cea4cf23a2537010703dce0f672029c92295497473edf8b80721c1c1e8"
+    },
+    {
+      "bytes": 20027,
+      "path": "canonical-inputs.s",
+      "sha256": "b8dcd5a42f164ede4ef4a81dac10a3bf50230597f39c0b990b4c23b0271ea829"
+    },
+    {
+      "bytes": 24922,
+      "path": "canonical-screen-two-cell-review.json",
+      "sha256": "ff8245871746cfaf1ee3cfb9f92ce54d2d4df7267b239174d04dc45e113ae224"
+    },
+    {
+      "bytes": 13500,
+      "path": "canonical-screen-two-cell-review.py",
+      "sha256": "40eaca02b6d200b15a82bee2317b20d5a6b369a4c72cd83e2bb47e9def8113c8"
+    },
+    {
+      "bytes": 628,
+      "path": "chrome-build.log",
+      "sha256": "4aab9d71e6dd46c26af4be046272ca8bfbd84a352fa0f6c4da34fe96858ff2f9"
+    },
+    {
+      "bytes": 1627,
+      "path": "develop-scope-candidate-paths.json",
+      "sha256": "1c4cb3bf1e918354a8dd4160ac202f1790d11b026eb6134b90a7203cfde50082"
+    },
+    {
+      "bytes": 1287,
+      "path": "develop-scope-compare.json",
+      "sha256": "31d94c25f5841266e101cc4b0c925589add945549444ae23ed1c4b5817fa598b"
+    },
+    {
+      "bytes": 8223,
+      "path": "develop-scope-exact-diff.patch",
+      "sha256": "6f1307de0ea709ef6e4fb1cf243218bf629b482bff9d0e6a082b3a4027da5f07"
+    },
+    {
+      "bytes": 25821,
+      "path": "develop-scope-merge-commit.json",
+      "sha256": "76b51c6710f7044f7a1a10b8b3e14e1292d225b10d450c9bdc9c51178d11754a"
+    },
+    {
+      "bytes": 2407,
+      "path": "develop-scope-pr883.json",
+      "sha256": "e56086cd5e2a25e1ab3d5bee35717527e7ac0d94ab715559f1beace1ab7b5d35"
+    },
+    {
+      "bytes": 25564,
+      "path": "develop-scope-source-commit.json",
+      "sha256": "248df180783e381c57b0f1ce8a30746a963de5a911626dfaf68d95c62f3b7323"
+    },
+    {
+      "bytes": 1627,
+      "path": "focused-tests.log",
+      "sha256": "5b306d1cdc661daf9ec73ace41ad71c22cb260de33e18d0ddc1888efe300c380"
+    },
+    {
+      "bytes": 584,
+      "path": "native-check.log",
+      "sha256": "f8ea6924056a0d4cb6cd0433bf1204afdfb9eb98d165e50d29a30d87fb8e732a"
+    },
+    {
+      "bytes": 584,
+      "path": "native-rebuild.log",
+      "sha256": "b3dedc9f89ef72de9fbdccfa8b9a0b8324859f377c320cd9e6ba39872446e84c"
+    },
+    {
+      "bytes": 1368,
+      "path": "scoped-lint-fixed.log",
+      "sha256": "1b469690b421d5bfc60e6ee1e741308fa0d2fe4c715caa7d481f27de31ac32e9"
+    },
+    {
+      "bytes": 4838,
+      "path": "scoped-lint.log",
+      "sha256": "59e541bd114f39618da5bc50164a251050254101c3df16e899db983dc9cd683e"
+    },
+    {
+      "bytes": 325,
+      "path": "test-types.log",
+      "sha256": "7e11f6439dd9144a328a87acb551ac17f1b51efc1c1497bc0b46cf5bbb71ee67"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 380283,
+  "sourceFileCount": 24,
+  "sourceInventory": [
+    {
+      "bytes": 560,
+      "path": "build-libs.log",
+      "sha256": "add25ac457c4da34a4d73127d2a4d8d219cce35a6cbc8f5e20acb6a8a5cdb906"
+    },
+    {
+      "bytes": 18812,
+      "path": "canonical-baseline.s",
+      "sha256": "e3babb61d579bf22182d8e412c45641b154ff6378623a1726685bd5c50fdb447"
+    },
+    {
+      "bytes": 96364,
+      "path": "canonical-input-baseline-package-entries.json",
+      "sha256": "d12ec7f27304c64cce44a4f8dc4fef47a4c83002a0ba42dd59e0c72beb69a015"
+    },
+    {
+      "bytes": 96364,
+      "path": "canonical-input-candidate-package-entries.json",
+      "sha256": "24624792028d5734a843c5e39534618e176570dd65fc22688758ef0b1e94c7c3"
+    },
+    {
+      "bytes": 28851,
+      "path": "canonical-input-ci-receipt.json",
+      "sha256": "6fa5285c75ee225a2447b60bb137b040b1b24ae3248a8ea6bb05b19c5e2e83ec"
+    },
+    {
+      "bytes": 1783,
+      "path": "canonical-input-package-guard.json",
+      "sha256": "ed8cdafb25d16029eacb4bdcfcec896b76455aed351080f6fc3bb63cfe01e779"
+    },
+    {
+      "bytes": 2790,
+      "path": "canonical-input-receipt.json",
+      "sha256": "c16a312251111cb3948c86c3b07aae8dfab2b4934782e811f341e35218e9e9b1"
+    },
+    {
+      "bytes": 1427,
+      "path": "canonical-input-work-proof.json",
+      "sha256": "4a9c34cea4cf23a2537010703dce0f672029c92295497473edf8b80721c1c1e8"
+    },
+    {
+      "bytes": 20027,
+      "path": "canonical-inputs.s",
+      "sha256": "b8dcd5a42f164ede4ef4a81dac10a3bf50230597f39c0b990b4c23b0271ea829"
+    },
+    {
+      "bytes": 24922,
+      "path": "canonical-screen-two-cell-review.json",
+      "sha256": "ff8245871746cfaf1ee3cfb9f92ce54d2d4df7267b239174d04dc45e113ae224"
+    },
+    {
+      "bytes": 13500,
+      "path": "canonical-screen-two-cell-review.py",
+      "sha256": "40eaca02b6d200b15a82bee2317b20d5a6b369a4c72cd83e2bb47e9def8113c8"
+    },
+    {
+      "bytes": 628,
+      "path": "chrome-build.log",
+      "sha256": "4aab9d71e6dd46c26af4be046272ca8bfbd84a352fa0f6c4da34fe96858ff2f9"
+    },
+    {
+      "bytes": 1627,
+      "path": "develop-scope-candidate-paths.json",
+      "sha256": "1c4cb3bf1e918354a8dd4160ac202f1790d11b026eb6134b90a7203cfde50082"
+    },
+    {
+      "bytes": 1287,
+      "path": "develop-scope-compare.json",
+      "sha256": "31d94c25f5841266e101cc4b0c925589add945549444ae23ed1c4b5817fa598b"
+    },
+    {
+      "bytes": 8223,
+      "path": "develop-scope-exact-diff.patch",
+      "sha256": "6f1307de0ea709ef6e4fb1cf243218bf629b482bff9d0e6a082b3a4027da5f07"
+    },
+    {
+      "bytes": 25821,
+      "path": "develop-scope-merge-commit.json",
+      "sha256": "76b51c6710f7044f7a1a10b8b3e14e1292d225b10d450c9bdc9c51178d11754a"
+    },
+    {
+      "bytes": 2407,
+      "path": "develop-scope-pr883.json",
+      "sha256": "e56086cd5e2a25e1ab3d5bee35717527e7ac0d94ab715559f1beace1ab7b5d35"
+    },
+    {
+      "bytes": 25564,
+      "path": "develop-scope-source-commit.json",
+      "sha256": "248df180783e381c57b0f1ce8a30746a963de5a911626dfaf68d95c62f3b7323"
+    },
+    {
+      "bytes": 1627,
+      "path": "focused-tests.log",
+      "sha256": "5b306d1cdc661daf9ec73ace41ad71c22cb260de33e18d0ddc1888efe300c380"
+    },
+    {
+      "bytes": 584,
+      "path": "native-check.log",
+      "sha256": "f8ea6924056a0d4cb6cd0433bf1204afdfb9eb98d165e50d29a30d87fb8e732a"
+    },
+    {
+      "bytes": 584,
+      "path": "native-rebuild.log",
+      "sha256": "b3dedc9f89ef72de9fbdccfa8b9a0b8324859f377c320cd9e6ba39872446e84c"
+    },
+    {
+      "bytes": 1368,
+      "path": "scoped-lint-fixed.log",
+      "sha256": "1b469690b421d5bfc60e6ee1e741308fa0d2fe4c715caa7d481f27de31ac32e9"
+    },
+    {
+      "bytes": 4838,
+      "path": "scoped-lint.log",
+      "sha256": "59e541bd114f39618da5bc50164a251050254101c3df16e899db983dc9cd683e"
+    },
+    {
+      "bytes": 325,
+      "path": "test-types.log",
+      "sha256": "7e11f6439dd9144a328a87acb551ac17f1b51efc1c1497bc0b46cf5bbb71ee67"
+    }
+  ],
+  "sourceInventorySha256": "e19b5925ab8d9d465cf2c7709c62282b8e13a2fdc3dfd9a466cf3d42847ae6b4",
+  "sourceRoot": "jmdict-audit",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

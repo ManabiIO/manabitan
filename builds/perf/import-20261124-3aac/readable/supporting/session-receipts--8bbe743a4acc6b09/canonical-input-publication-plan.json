@@ -1,0 +1,44 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/jmdict-canonical-inputs",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "c3a9e25814392b97d313fb7f6fe65797ed752b3c",
+  "tree": "64345e92fff3800b5035b6aab52dff06e20bc874",
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bde122e7b1983ca13b2e3a0196fa05f8e355c173",
+      "size": 2521
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e662b3db9ec358f1c0f02f3a3e06a66ceab9fd26",
+      "size": 1667
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c1f1104ce0f744c9f9f55a0c7fa5986e48272c3",
+      "size": 7626
+    },
+    {
+      "path": "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+      "size": 1624
+    },
+    {
+      "path": "test/term-content-canonical-inputs.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ebeabe4a40b6faf0a8378167ed8625339fb7e93",
+      "size": 8965
+    }
+  ]
+}

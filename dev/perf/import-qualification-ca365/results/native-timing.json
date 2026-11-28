@@ -1,0 +1,198 @@
+{
+    "runId": "45647030745",
+    "runAttempt": 1,
+    "workflowCommit": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770",
+    "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "candidateCommit": "5afd2e97ec2707b150acfde61115aee688547a78",
+    "updatedAtUtc": "2026-11-25T16:35:56.467289+00:00",
+    "plannedCells": 6,
+    "auditedCells": 6,
+    "complete": true,
+    "verifiedObservations": 132,
+    "allIntegrityAuditsPassed": true,
+    "knownPerformanceScreenFailures": [
+        {
+            "dictionary": "jitendex",
+            "replica": 1,
+            "screen": {
+                "role": "non-target",
+                "passes": false
+            }
+        },
+        {
+            "dictionary": "vndb",
+            "replica": 0,
+            "screen": {
+                "role": "target",
+                "passes": false
+            }
+        },
+        {
+            "dictionary": "vndb",
+            "replica": 1,
+            "screen": {
+                "role": "target",
+                "passes": false
+            }
+        }
+    ],
+    "allPerformanceScreensPassed": false,
+    "packageMemberIdentityAcrossHosts": true,
+    "publicSemanticIdentityAcrossHosts": {
+        "jmdict": true,
+        "jitendex": true,
+        "vndb": true
+    },
+    "noPooledTimingStatistics": true,
+    "memoryNotAssessedByTimingCohort": true,
+    "separateFromRuns": [
+        "45642169759",
+        "45642179064"
+    ],
+    "cells": [
+        {
+            "dictionary": "jmdict",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15041715419,
+                "artifactName": "import-qualification-ca365-native-projection-jmdict-0",
+                "artifactSha256": "3d88d61a76d38092317254d5b52ee1014f82bb5960bf90b0f07c2884fee50f1b",
+                "artifactBytes": 34382006
+            },
+            "verifiedObservations": 23,
+            "medians": {
+                "BvsA": -0.5454814260914709,
+                "BvsC": -0.0418377985245133,
+                "CvsA": 1.111623806398676
+            },
+            "fasterPairs": {
+                "BvsA": 4,
+                "BvsC": 3
+            },
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            }
+        },
+        {
+            "dictionary": "jmdict",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15042070631,
+                "artifactName": "import-qualification-ca365-native-projection-jmdict-1",
+                "artifactSha256": "446b94d251c539cbdf9c6c6ba4cc99c59763e1d232de0013366baafa9f9240a1",
+                "artifactBytes": 34312205
+            },
+            "verifiedObservations": 21,
+            "medians": {
+                "BvsA": 0.7808252605837951,
+                "BvsC": 0.5509432617885501,
+                "CvsA": 0.9423519777020051
+            },
+            "fasterPairs": {
+                "BvsA": 1,
+                "BvsC": 2
+            },
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            }
+        },
+        {
+            "dictionary": "jitendex",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15040016849,
+                "artifactName": "import-qualification-ca365-native-projection-jitendex-0",
+                "artifactSha256": "03682fc5d6dbdb08387f46bfb58043698dfd8818476dbad3c3928c0061dac7a2",
+                "artifactBytes": 34395872
+            },
+            "verifiedObservations": 23,
+            "medians": {
+                "BvsA": -0.9814526330759299,
+                "BvsC": 2.7873212305186135,
+                "CvsA": -1.602923973151943
+            },
+            "fasterPairs": {
+                "BvsA": 4,
+                "BvsC": 2
+            },
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            }
+        },
+        {
+            "dictionary": "jitendex",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15040525617,
+                "artifactName": "import-qualification-ca365-native-projection-jitendex-1",
+                "artifactSha256": "ac9e3e9b8f90abde6f0446d45b4e7b147850894c8baf6dfcc0eb0983674dbc0f",
+                "artifactBytes": 34317491
+            },
+            "verifiedObservations": 21,
+            "medians": {
+                "BvsA": 0.5773471067573754,
+                "BvsC": 3.8180124977376995,
+                "CvsA": 0.5985358718491485
+            },
+            "fasterPairs": {
+                "BvsA": 2,
+                "BvsC": 2
+            },
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": false
+            }
+        },
+        {
+            "dictionary": "vndb",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15041389623,
+                "artifactName": "import-qualification-ca365-native-projection-vndb-0",
+                "artifactSha256": "e90fdb3cd3b8617a3ed10e9ad4c502f0ee769049f0f79c4973ffe73981d8df53",
+                "artifactBytes": 34412987
+            },
+            "verifiedObservations": 23,
+            "medians": {
+                "BvsA": -3.666502917503467,
+                "BvsC": -5.650676911088809,
+                "CvsA": 0.8873793807165575
+            },
+            "fasterPairs": {
+                "BvsA": 6,
+                "BvsC": 6
+            },
+            "performanceScreen": {
+                "role": "target",
+                "passes": false
+            }
+        },
+        {
+            "dictionary": "vndb",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15041237580,
+                "artifactName": "import-qualification-ca365-native-projection-vndb-1",
+                "artifactSha256": "a52cdb6edff9cae2d591419d4cb715cab1693e6ab2b8ba5b8c0bd32d00ea0c8e",
+                "artifactBytes": 34336437
+            },
+            "verifiedObservations": 21,
+            "medians": {
+                "BvsA": -4.485031824271513,
+                "BvsC": -4.407118037316415,
+                "CvsA": -0.7252821596574754
+            },
+            "fasterPairs": {
+                "BvsA": 5,
+                "BvsC": 5
+            },
+            "performanceScreen": {
+                "role": "target",
+                "passes": false
+            }
+        }
+    ]
+}

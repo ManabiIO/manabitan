@@ -1,0 +1,164 @@
+[
+  {
+    "artifact": {
+      "id": 15039358218,
+      "name": "import-memory-summary-ef009-jitendex-2",
+      "size_in_bytes": 4378,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039358218",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039358218/zip",
+      "expired": false,
+      "created_at": "2026-11-25T15:55:53Z",
+      "expires_at": "2026-12-09T15:55:52Z",
+      "updated_at": "2026-11-25T15:55:53Z",
+      "digest": "sha256:74a2e21ca89c8e4ef5bb1a478c509fc27b040c389aff3ba32047b43b93d5649d",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-jitendex-2.json.gz",
+    "originalBytes": 17492,
+    "originalSha256": "2ad4af1961f205990f8a7dab9657850663b5a09de3f40c8256e0855bb8bbd639",
+    "compressedBytes": 4328,
+    "compressedSha256": "d10e941d483127ad134f2deacd84d0c230c065495c3cd3c4d2c62f2cc7f3973f",
+    "artifactZipDigestVerified": true
+  },
+  {
+    "artifact": {
+      "id": 15038273991,
+      "name": "import-memory-summary-ef009-jmdict-1",
+      "size_in_bytes": 4268,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038273991",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038273991/zip",
+      "expired": false,
+      "created_at": "2026-11-25T15:56:17Z",
+      "expires_at": "2026-12-09T15:56:16Z",
+      "updated_at": "2026-11-25T15:56:17Z",
+      "digest": "sha256:91cce912a3286a0b56e3abc4505d4d541320d758316f482a03cb6a582b963210",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-jmdict-1.json.gz",
+    "originalBytes": 16866,
+    "originalSha256": "394865f3b4ddec3e814dfea1789ad2842f0e939192f70e5a88b8746c032dcbd6",
+    "compressedBytes": 4202,
+    "compressedSha256": "9d8797fd2ba93301e37575014a31326ada9292530e8ccccdd085b16111302b3a",
+    "artifactZipDigestVerified": true
+  },
+  {
+    "artifact": {
+      "id": 15038264134,
+      "name": "import-memory-summary-ef009-jmdict-2",
+      "size_in_bytes": 4276,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038264134",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038264134/zip",
+      "expired": false,
+      "created_at": "2026-11-25T15:56:35Z",
+      "expires_at": "2026-12-09T15:56:34Z",
+      "updated_at": "2026-11-25T15:56:35Z",
+      "digest": "sha256:bc1f1b6da410328c8e2c6154ed8bb273d65a4897c2bf7856bc8eec1b4a4563f8",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-jmdict-2.json.gz",
+    "originalBytes": 16872,
+    "originalSha256": "c5ced52b9140a731ae9ed999788ac82e51a4c7ce56333a8ed408b014d2a72707",
+    "compressedBytes": 4203,
+    "compressedSha256": "affd0fd3958a1cda571fb8bcd85158cdcabe9614e355507db5b3992df5de20a2",
+    "artifactZipDigestVerified": true
+  },
+  {
+    "artifact": {
+      "id": 15038104755,
+      "name": "import-memory-summary-ef009-jitendex-1",
+      "size_in_bytes": 4371,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038104755",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038104755/zip",
+      "expired": false,
+      "created_at": "2026-11-25T15:58:12Z",
+      "expires_at": "2026-12-09T15:58:11Z",
+      "updated_at": "2026-11-25T15:58:12Z",
+      "digest": "sha256:b5971839fedef0fcb1bdb22375b9136663a486faef30eefd4cdd993afcf06327",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-jitendex-1.json.gz",
+    "originalBytes": 17491,
+    "originalSha256": "10f9552764211499e53a216fe12c65e4fb972285a04830e5871c5c911142179b",
+    "compressedBytes": 4314,
+    "compressedSha256": "3b9ac95ff813e453a2b77002f3295d774652ba89386b2e2448c8429066cf8f2f",
+    "artifactZipDigestVerified": true
+  },
+  {
+    "artifact": {
+      "id": 15039794809,
+      "name": "import-memory-summary-ef009-vndb-2",
+      "size_in_bytes": 4324,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039794809",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039794809/zip",
+      "expired": false,
+      "created_at": "2026-11-25T16:12:44Z",
+      "expires_at": "2026-12-09T16:12:44Z",
+      "updated_at": "2026-11-25T16:12:44Z",
+      "digest": "sha256:f17924e406db744ebc4cfc348357a4a9d66264427b89e45559976dc643e71415",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-vndb-2.json.gz",
+    "originalBytes": 17061,
+    "originalSha256": "4f5ebeec3ae68a0bcac5e959de74cad00f664b92e5dc8e38210d1f7a7d6a4c6f",
+    "compressedBytes": 4260,
+    "compressedSha256": "e1f3852904c5fa00a262dc3831c855d0c637404fc94fb0891c27d7f83f49d8ea",
+    "artifactZipDigestVerified": true
+  },
+  {
+    "artifact": {
+      "id": 15041851355,
+      "name": "import-memory-summary-ef009-vndb-1",
+      "size_in_bytes": 4338,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041851355",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041851355/zip",
+      "expired": false,
+      "created_at": "2026-11-25T16:18:36Z",
+      "expires_at": "2026-12-09T16:18:35Z",
+      "updated_at": "2026-11-25T16:18:36Z",
+      "digest": "sha256:66ffcb9dd804f9cbdf2d65fc2f9528e40880abf5eb8d41cd294beb4b6cb7aeb8",
+      "workflow_run": {
+        "id": 45646484626,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-memory-20261125-ef009",
+        "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+      }
+    },
+    "rawPath": "raw/single-image-projection-vndb-1.json.gz",
+    "originalBytes": 17066,
+    "originalSha256": "7b02a9ecd8f625479592edc31cefbfa08ec1b085fe5c205c67d7f786ad2e82cd",
+    "compressedBytes": 4277,
+    "compressedSha256": "c3992d87724c4b63904d75f11216e66905f90795ecac7d8c04d4131a066814cf",
+    "artifactZipDigestVerified": true
+  }
+]

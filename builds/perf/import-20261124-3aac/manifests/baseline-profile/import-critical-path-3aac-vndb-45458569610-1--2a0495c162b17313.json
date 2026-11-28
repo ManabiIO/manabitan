@@ -1,0 +1,188 @@
+{
+  "attempt": 1,
+  "dictionary": "vndb",
+  "name": "import-critical-path-3aac-vndb-45458569610-1",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952116936/zip",
+      "created_at": "2026-11-24T18:22:59Z",
+      "digest": "sha256:5e7830c4f0d5aa75be433cf01c642f48b95af902053ab615af5de4a9213e6c69",
+      "expired": false,
+      "expires_at": "2026-12-24T18:22:57Z",
+      "id": 14952116936,
+      "name": "import-critical-path-3aac-vndb-45458569610-1",
+      "size_in_bytes": 2483641,
+      "updated_at": "2026-11-24T18:22:59Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952116936",
+      "workflow_run": {
+        "head_branch": "perf/import-critical-path-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "d5ddb829542111e2067343ca16479d685eca3866",
+        "id": 45458569610,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610/artifacts/14952116936",
+    "metadataReceipt": "provenance/github-artifacts-45458569610.json",
+    "metadataReceiptSha256": "e2a013bf861939eb1fc93ff23e05782465c1ce0e37d5c954d09f774a60167e6d",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45458569610,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610"
+  },
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 23472004,
+  "retainedFiles": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 84311,
+      "path": "ordinary/run-1.html",
+      "sha256": "725c1c4de34d115a05d4304775eeb28e736cfa290604e8f2f42691f69658cdc1"
+    },
+    {
+      "bytes": 153170,
+      "path": "ordinary/run-1.json",
+      "sha256": "bc14703b4100d7d79df7355fdf2dacb28f3018796a0e34d6ff5cb60a9e4eae98"
+    },
+    {
+      "bytes": 60056,
+      "path": "ordinary/summary.json",
+      "sha256": "1e035cee087479c2e4344da3f552208780e36bd4778c99f9ed01c16e33a9f411"
+    },
+    {
+      "bytes": 1558,
+      "path": "ordinary.log",
+      "sha256": "33346126d37fb2c9b66bd34d78cd2ebecd872bee22c97fa80b67a5f557868d0d"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "42d6b293dbea1b494f19e1c2183db7ce71c438b363fbd1974e2c6c367f2cece9"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 85179,
+      "path": "trace/run-1.html",
+      "sha256": "311efade2788f983fcb6b7617790af1c0ee8d2c17bc5fb8463148c0b5bae272e"
+    },
+    {
+      "bytes": 153663,
+      "path": "trace/run-1.json",
+      "sha256": "c80fcc851eedc158674d316fff6bc0f7f89ef224b25523784e3f327f96efaa9d"
+    },
+    {
+      "bytes": 22867540,
+      "path": "trace/run-1.trace.json",
+      "sha256": "ffdd53b5157119e56f771c24bdc95221b741dcef48dcc38351b59258b8d5cdc7"
+    },
+    {
+      "bytes": 60143,
+      "path": "trace/summary.json",
+      "sha256": "7a0cd4b40aae62e5619bce1593af685ec07847d1db2cc42ff8205adad7bb8f5a"
+    },
+    {
+      "bytes": 1784,
+      "path": "trace.log",
+      "sha256": "a7f143431068991e99b0db78c2f5460e9b1a1e00ca6236eb7487c7d1dc215f7d"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "runId": 45458569610,
+  "schemaVersion": 1,
+  "sourceBytes": 23472004,
+  "sourceFileCount": 14,
+  "sourceInventory": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 84311,
+      "path": "ordinary/run-1.html",
+      "sha256": "725c1c4de34d115a05d4304775eeb28e736cfa290604e8f2f42691f69658cdc1"
+    },
+    {
+      "bytes": 153170,
+      "path": "ordinary/run-1.json",
+      "sha256": "bc14703b4100d7d79df7355fdf2dacb28f3018796a0e34d6ff5cb60a9e4eae98"
+    },
+    {
+      "bytes": 60056,
+      "path": "ordinary/summary.json",
+      "sha256": "1e035cee087479c2e4344da3f552208780e36bd4778c99f9ed01c16e33a9f411"
+    },
+    {
+      "bytes": 1558,
+      "path": "ordinary.log",
+      "sha256": "33346126d37fb2c9b66bd34d78cd2ebecd872bee22c97fa80b67a5f557868d0d"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "42d6b293dbea1b494f19e1c2183db7ce71c438b363fbd1974e2c6c367f2cece9"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 85179,
+      "path": "trace/run-1.html",
+      "sha256": "311efade2788f983fcb6b7617790af1c0ee8d2c17bc5fb8463148c0b5bae272e"
+    },
+    {
+      "bytes": 153663,
+      "path": "trace/run-1.json",
+      "sha256": "c80fcc851eedc158674d316fff6bc0f7f89ef224b25523784e3f327f96efaa9d"
+    },
+    {
+      "bytes": 22867540,
+      "path": "trace/run-1.trace.json",
+      "sha256": "ffdd53b5157119e56f771c24bdc95221b741dcef48dcc38351b59258b8d5cdc7"
+    },
+    {
+      "bytes": 60143,
+      "path": "trace/summary.json",
+      "sha256": "7a0cd4b40aae62e5619bce1593af685ec07847d1db2cc42ff8205adad7bb8f5a"
+    },
+    {
+      "bytes": 1784,
+      "path": "trace.log",
+      "sha256": "a7f143431068991e99b0db78c2f5460e9b1a1e00ca6236eb7487c7d1dc215f7d"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "sourceInventorySha256": "2a0495c162b17313e7539cf99be182200828e7b22d9a231516d5b90ddd77f0e1",
+  "sourceRoot": "artifacts/import-critical-path-3aac-vndb-45458569610-1",
+  "stage": "baseline-profile"
+}

@@ -1,0 +1,15 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict: 70000/528299 rows
+jmdict: 130000/528299 rows
+jmdict: 190000/528299 rows
+jmdict: 260000/528299 rows
+jmdict: 330000/528299 rows
+jmdict: 400000/528299 rows
+jmdict: 460000/528299 rows
+jmdict: 528299/528299 rows
+{"complete":true,"error":null,"rows":528299,"runs":18,"parentCopyBytes":3146392,"candidateCopyBytes":1056598,"copyBytesAvoided":2089794}

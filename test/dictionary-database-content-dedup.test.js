@@ -609,15 +609,22 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
     });
 
-    test('does not retain batches dominated by large definitions', () => {
+    /* eslint-disable @stylistic/semi */
+    test('retains a detached boundary snapshot for a large definition', () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array(513);
 
         const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
 
-        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
-        expect(Reflect.get(database, '_findRecentTermContentSource').call(database, meta)).toBeUndefined();
-    });
+        const retained = Reflect.get(database, '_findRecentTermContentSource').call(database, meta)
+        expect(retained?.length).toBe(source.length)
+        expect(retained?.buffer).toEqual(source)
+        expect(retained?.buffer.buffer).not.toBe(source.buffer)
+        source.fill(99)
+        expect(retained?.buffer).toEqual(new Uint8Array(513))
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(513)
+    })
+    /* eslint-enable @stylistic/semi */
 
     test('fails fast when metadata insertion is attempted without reserved capacity', () => {
         const database = new DictionaryDatabase();
@@ -3108,8 +3115,37 @@ describe('recent-source cache metadata mapping', () => {
         expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
     });
 
-    test('copies a partial retained range rather than changing cache byte coverage', () => {
+    test.each([false, true])('retains a partial immutable slab view with its full budget charge; shared=%s', async (shared) => {
         const database = new DictionaryDatabase();
+        const source = new Uint8Array(shared ? new SharedArrayBuffer(24) : new ArrayBuffer(24));
+        source.set([90, 91, ...Array.from({length: 20}, (_, i) => i + 1), 92, 93]);
+        registerOwnedTermContent(source);
+        const {meta, staged} = publishSlabMeta(database, source, 2, 20, 10, 20);
+        const cached = Reflect.get(database, '_findRecentTermContentSource').call(database, meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected retained content'); }
+        expect(cached.buffer.buffer).toBe(source.buffer);
+        expect(cached.buffer.byteOffset).toBe(2);
+        expect(cached.buffer.byteLength).toBe(20);
+        expect(cached.offset).toBe(0);
+        expect(cached.length).toBe(20);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(24);
+        expect(takeOwnedTermContent(source)).toBe(false);
+        const read = vi.fn(() => { throw new Error('Retained source must avoid a storage read'); });
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', read);
+        const match = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        expect(await match(10, 20, source.slice(2, 22))).toMatchObject(meta);
+        const collision = source.slice(2, 22);
+        collision[5] ^= 1; // Preserve all three sampled signatures; exact bytes must still differ.
+        expect(await match(10, 20, collision)).toBeUndefined();
+        expect(read).not.toHaveBeenCalled();
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, staged);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+    });
+
+    test('copies the retained range when the owned backing buffer exceeds the budget', () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 4);
         const source = Uint8Array.of(1, 2, 3, 4, 5, 6);
         registerOwnedTermContent(source);
         const {meta} = publishSlabMeta(database, source, 1, 4, 10, 20);
@@ -3118,6 +3154,41 @@ describe('recent-source cache metadata mapping', () => {
         expect(cached.buffer.buffer).not.toBe(source.buffer);
         expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
         expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4);
+        expect(takeOwnedTermContent(source)).toBe(true);
+        source.fill(0);
+        expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
+    });
+
+    test('evicts by the entire adopted backing buffer and releases that charge on rollback', () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 10);
+        const first = Uint8Array.of(1, 2, 3, 4);
+        registerOwnedTermContent(first);
+        const firstPublished = publishSlabMeta(database, first, 0, 4, 10, 20);
+        const source = Uint8Array.of(90, 91, 5, 6, 7, 8, 92, 93);
+        registerOwnedTermContent(source);
+        const published = publishSlabMeta(database, source, 2, 4, 30, 40);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        expect(findRecent(firstPublished.meta)).toBeUndefined();
+        expect(findRecent(published.meta)?.buffer.buffer).toBe(source.buffer);
+        expect(findRecent(published.meta)?.buffer).toEqual(Uint8Array.of(5, 6, 7, 8));
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(8);
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, published.staged);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+    });
+
+    test.each([false, true])('copies an unowned partial source without consuming a complete owner; shared=%s', (shared) => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array(shared ? new SharedArrayBuffer(8) : new ArrayBuffer(8));
+        source.set([90, 1, 2, 3, 4, 5, 6, 91]);
+        registerOwnedTermContent(source);
+        const borrowed = source.subarray(1, 7);
+        const {meta} = publishSlabMeta(database, borrowed, 1, 4, 10, 20);
+        const cached = Reflect.get(database, '_findRecentTermContentSource').call(database, meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected copied content'); }
+        expect(cached.buffer.buffer).not.toBe(source.buffer);
+        expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
         expect(takeOwnedTermContent(source)).toBe(true);
         source.fill(0);
         expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
@@ -3146,23 +3217,29 @@ describe('recent-source cache metadata mapping', () => {
         expect(takeOwnedTermContent(oversized)).toBe(true);
     });
 
-    test('joins in-flight storage readers before rolling back adopted content', async () => {
+    test.each([0, 2])('joins in-flight readers before rolling back adopted content with edge padding %s', async (padding) => {
         const harness = createArtifactOverlapHarness();
-        const source = new Uint8Array(new SharedArrayBuffer(3));
-        source.set([1, 2, 3]);
+        const source = new Uint8Array(new SharedArrayBuffer(3 + 2 * padding)).fill(90);
+        source.set([1, 2, 3], padding);
+        const expected = Uint8Array.from(source);
         registerOwnedTermContent(source);
         harness.chunk.contentBytesBuffer = source;
+        harness.chunk.contentBytesBaseOffset = padding;
         Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent');
         const outcome = harness.run().then(() => null, (error) => error);
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
-        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').get(1)).toBe(source);
+        const retained = Reflect.get(harness.database, '_recentTermContentSourceBatches').get(1);
+        expect(retained?.buffer).toBe(source.buffer);
+        expect(retained?.byteOffset).toBe(padding);
+        expect(retained).toEqual(Uint8Array.of(1, 2, 3));
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatchBytes')).toBe(source.byteLength);
         harness.rejectContent(new Error('cancelled owned content write'));
         let settled = false;
         void outcome.then(() => { settled = true; });
         await Promise.resolve();
         await Promise.resolve();
         expect(settled).toBe(false);
-        expect(source).toEqual(Uint8Array.of(1, 2, 3));
+        expect(source).toEqual(expected);
         harness.resolveRecords();
         expect(await outcome).toMatchObject({message: 'cancelled owned content write'});
         expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0);
@@ -3196,7 +3273,7 @@ describe('recent-source cache metadata mapping', () => {
         {name: 'permuted identifier wrap', indexes: [4, 2, 3], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 0, end: 10, wrap: true},
     ];
 
-    test.each(cases)('preserves owned bytes and exact mappings for $name', (fixture) => {
+    test.each(cases.flatMap((fixture) => [false, true].map((owned) => ({...fixture, owned}))))('preserves exact mappings for $name with owned=$owned', (fixture) => {
         const database = new DictionaryDatabase();
         const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
         const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
@@ -3218,11 +3295,14 @@ describe('recent-source cache metadata mapping', () => {
             _nextRecentTermContentSourceBatchId: fixture.wrap ? 0x100000000 : 1,
         };
         const source = Uint8Array.from({length: 20}, (_, i) => i + 1);
+        if (fixture.owned) { registerOwnedTermContent(source); }
         const expectedBytes = source.slice(fixture.minimum, fixture.end);
         const offsetBacking = new Uint32Array(fixture.offsets.length + 2).fill(9999);
         offsetBacking.set(fixture.offsets, 1);
         const spans = {buffer: source, offsets: offsetBacking.subarray(1, fixture.offsets.length + 1), lengths: Uint32Array.from(fixture.lengths)};
-        expect(cache.call(owner, {indexes: Int32Array.from(fixture.indexes), active: true}, spans)).toBe(expectedBytes.length);
+        /** @type {Record<string, number>} */
+        const metrics = {};
+        expect(cache.call(owner, {indexes: Int32Array.from(fixture.indexes), active: true}, spans, metrics)).toBe(expectedBytes.length);
         const expectedIds = new Uint32Array(8).fill(fixture.wrap ? 0 : 99);
         const expectedOffsets = new Uint32Array(8).fill(77);
         for (const [index, offset] of fixture.mapping) {
@@ -3232,9 +3312,16 @@ describe('recent-source cache metadata mapping', () => {
         expect(batchIds).toEqual(expectedIds);
         expect(offsets).toEqual(expectedOffsets);
         expect([...spans.offsets]).toEqual(fixture.offsets);
-        expect(owner._recentTermContentSourceBatchBytes).toBe(expectedBytes.length);
+        expect(owner._recentTermContentSourceBatchBytes).toBe(fixture.owned ? source.byteLength : expectedBytes.length);
         expect(owner._recentTermContentSourceBatches.size).toBe(1);
-        source.fill(0);
+        if (fixture.owned) {
+            expect(owner._recentTermContentSourceBatches.get(1)?.buffer).toBe(source.buffer);
+            expect(takeOwnedTermContent(source)).toBe(false);
+            expect(metrics).toEqual({dedupRecentSourceAdoptedBytes: expectedBytes.length});
+        } else {
+            source.fill(0);
+            expect(metrics).toEqual({});
+        }
         expect(owner._recentTermContentSourceBatches.get(1)).toEqual(expectedBytes);
     });
 

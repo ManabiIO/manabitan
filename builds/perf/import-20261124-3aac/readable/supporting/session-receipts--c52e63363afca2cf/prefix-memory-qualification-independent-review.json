@@ -1,0 +1,188 @@
+[
+  {
+    "artifact": "import-memory-3aac-prefix-jitendex-rep1-45468614083-1",
+    "allChecksPass": true,
+    "rawScans": 359,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      }
+    },
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": 4.575268978782243,
+        "medianPairedChangePercent": 0.8813531916891049
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": 3.3597386587960854,
+        "medianPairedChangePercent": 0.6794258416372212
+      }
+    },
+    "pairs": [
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1158232,
+          "candidate": 1125656,
+          "changePercent": -2.8125625954040334
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1386735,
+          "candidate": 1358988,
+          "changePercent": -2.000886975521643
+        },
+        "pair": 1,
+        "qualified": true
+      },
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1064768,
+          "candidate": 1113484,
+          "changePercent": 4.575268978782243
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1300369,
+          "candidate": 1344058,
+          "changePercent": 3.3597386587960854
+        },
+        "pair": 2,
+        "qualified": true
+      }
+    ],
+    "observations": [
+      {
+        "name": "A1",
+        "arm": "A",
+        "maxSampledPssKiB": 1386735,
+        "maxSampledPrivateKiB": 1158232,
+        "stableFullyReadImportSampleCount": 14,
+        "maximumCoveredSampleGapMs": 183.569361,
+        "confirmedExitedZombieObservationCount": 0
+      },
+      {
+        "name": "B1",
+        "arm": "B",
+        "maxSampledPssKiB": 1358988,
+        "maxSampledPrivateKiB": 1125656,
+        "stableFullyReadImportSampleCount": 16,
+        "maximumCoveredSampleGapMs": 175.441075,
+        "confirmedExitedZombieObservationCount": 0
+      },
+      {
+        "name": "B2",
+        "arm": "B",
+        "maxSampledPssKiB": 1344058,
+        "maxSampledPrivateKiB": 1113484,
+        "stableFullyReadImportSampleCount": 15,
+        "maximumCoveredSampleGapMs": 167.503105,
+        "confirmedExitedZombieObservationCount": 7
+      },
+      {
+        "name": "A2",
+        "arm": "A",
+        "maxSampledPssKiB": 1300369,
+        "maxSampledPrivateKiB": 1064768,
+        "stableFullyReadImportSampleCount": 14,
+        "maximumCoveredSampleGapMs": 177.277119,
+        "confirmedExitedZombieObservationCount": 0
+      }
+    ]
+  },
+  {
+    "artifact": "import-memory-3aac-prefix-jitendex-rep2-45468614083-1",
+    "allChecksPass": true,
+    "rawScans": 449,
+    "sourceIdentities": {
+      "A": {
+        "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+        "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+      },
+      "B": {
+        "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+        "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+      }
+    },
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": 5.569662299317213,
+        "medianPairedChangePercent": 4.2565693903695685
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": 4.901296142008782,
+        "medianPairedChangePercent": 3.6624836691130147
+      }
+    },
+    "pairs": [
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1083800,
+          "candidate": 1144164,
+          "changePercent": 5.569662299317213
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1314285,
+          "candidate": 1378702,
+          "changePercent": 4.901296142008782
+        },
+        "pair": 1,
+        "qualified": true
+      },
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1094624,
+          "candidate": 1126844,
+          "changePercent": 2.943476481421925
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1327284,
+          "candidate": 1359453,
+          "changePercent": 2.4236711962172475
+        },
+        "pair": 2,
+        "qualified": true
+      }
+    ],
+    "observations": [
+      {
+        "name": "B1",
+        "arm": "B",
+        "maxSampledPssKiB": 1378702,
+        "maxSampledPrivateKiB": 1144164,
+        "stableFullyReadImportSampleCount": 23,
+        "maximumCoveredSampleGapMs": 123.651678,
+        "confirmedExitedZombieObservationCount": 0
+      },
+      {
+        "name": "A1",
+        "arm": "A",
+        "maxSampledPssKiB": 1314285,
+        "maxSampledPrivateKiB": 1083800,
+        "stableFullyReadImportSampleCount": 16,
+        "maximumCoveredSampleGapMs": 182.592586,
+        "confirmedExitedZombieObservationCount": 0
+      },
+      {
+        "name": "A2",
+        "arm": "A",
+        "maxSampledPssKiB": 1327284,
+        "maxSampledPrivateKiB": 1094624,
+        "stableFullyReadImportSampleCount": 17,
+        "maximumCoveredSampleGapMs": 117.656733,
+        "confirmedExitedZombieObservationCount": 0
+      },
+      {
+        "name": "B2",
+        "arm": "B",
+        "maxSampledPssKiB": 1359453,
+        "maxSampledPrivateKiB": 1126844,
+        "stableFullyReadImportSampleCount": 15,
+        "maximumCoveredSampleGapMs": 127.138411,
+        "confirmedExitedZombieObservationCount": 0
+      }
+    ]
+  }
+]
