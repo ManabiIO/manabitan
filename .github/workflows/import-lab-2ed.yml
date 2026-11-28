@@ -30,40 +30,103 @@ jobs:
           from pathlib import Path
           file = Path('ext/js/dictionary/dictionary-database.js')
           source = file.read_text()
+          method_marker = '    _publishResolvedArtifactTermContentPlan(plan, pendingStart, pendingIndexes, pendingOffsets, pendingLengths, pendingDictNames) {'
+          assert source.count(method_marker) == 1
+          start = source.index(method_marker)
+          end_marker = '\n    }\n    /* eslint-enable @stylistic/semi */'
+          end = source.index(end_marker, start) + len(end_marker)
+          method = source[start:end]
           marker = '        let i = 0\n        if (canCopyRuns) {'
-          assert source.count(marker) == 1
-          observation = '''        Reflect.get(this, '__importLabPublicationPhases')?.push({
-              phase: 'import-lab-publication',
-              elapsedMs: 0,
-              details: {
-                  count, canCopyRuns, pendingStart,
-                  pendingIndexesConstructor: pendingIndexes.constructor.name,
-                  pendingOffsetsConstructor: pendingOffsets.constructor.name,
-                  pendingLengthsConstructor: pendingLengths.constructor.name,
-                  resolvedOffsetsConstructor: resolvedOffsets.constructor.name,
-                  resolvedLengthsConstructor: resolvedLengths.constructor.name,
-                  resolvedFlagsConstructor: resolvedFlags.constructor.name,
-                  pendingNamesAreString: typeof pendingDictNames === 'string',
-                  namesArray: Array.isArray(plan.resolvedDictNames),
-                  resolvedUniformDictName: plan.resolvedUniformDictName ?? null,
-                  pendingDictNames: typeof pendingDictNames === 'string' ? pendingDictNames : '<array>',
-                  codecCompatible: typeof plan.resolvedUniformDictName !== 'string' || plan.resolvedUniformDictName === pendingDictNames,
-                  hasCompatibleIndexes,
-                  pendingOffsetsAreFloat64: pendingOffsets instanceof Float64Array,
-                  pendingLengthsAreUint32: pendingLengths instanceof Uint32Array,
-                  pendingOffsetsHaveCount: pendingOffsets.length >= count,
-                  pendingLengthsHaveCount: pendingLengths.length >= count,
-                  resolvedOffsetsAreFloat64: resolvedOffsets instanceof Float64Array,
-                  resolvedLengthsAreUint32: resolvedLengths instanceof Uint32Array,
-                  resolvedFlagsAreUint8: resolvedFlags instanceof Uint8Array,
-                  outputBuffersDistinct: offsetBuffer !== lengthBuffer && offsetBuffer !== flagBuffer && lengthBuffer !== flagBuffer,
-                  pendingOffsetsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingOffsets.buffer),
-                  pendingLengthsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingLengths.buffer),
-                  pendingIndexesAliasOutput: pendingStart === null && [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingIndexes.buffer)
-              }
-          })
+          assert method.count(marker) == 1
+          observation = '''        const importLabRunLengthCounts = Object.create(null)
+                  const importLabPublication = {
+                      count, canCopyRuns, pendingStart,
+                      pendingIndexesConstructor: pendingIndexes.constructor.name,
+                      pendingOffsetsConstructor: pendingOffsets.constructor.name,
+                      pendingLengthsConstructor: pendingLengths.constructor.name,
+                      resolvedOffsetsConstructor: resolvedOffsets.constructor.name,
+                      resolvedLengthsConstructor: resolvedLengths.constructor.name,
+                      resolvedFlagsConstructor: resolvedFlags.constructor.name,
+                      pendingNamesAreString: typeof pendingDictNames === 'string',
+                      namesArray: Array.isArray(plan.resolvedDictNames),
+                      resolvedUniformDictName: plan.resolvedUniformDictName ?? null,
+                      pendingDictNames: typeof pendingDictNames === 'string' ? pendingDictNames : '<array>',
+                      codecCompatible: typeof plan.resolvedUniformDictName !== 'string' || plan.resolvedUniformDictName === pendingDictNames,
+                      hasCompatibleIndexes,
+                      pendingOffsetsAreFloat64: pendingOffsets instanceof Float64Array,
+                      pendingLengthsAreUint32: pendingLengths instanceof Uint32Array,
+                      pendingOffsetsHaveCount: pendingOffsets.length >= count,
+                      pendingLengthsHaveCount: pendingLengths.length >= count,
+                      resolvedOffsetsAreFloat64: resolvedOffsets instanceof Float64Array,
+                      resolvedLengthsAreUint32: resolvedLengths instanceof Uint32Array,
+                      resolvedFlagsAreUint8: resolvedFlags instanceof Uint8Array,
+                      outputBuffersDistinct: offsetBuffer !== lengthBuffer && offsetBuffer !== flagBuffer && lengthBuffer !== flagBuffer,
+                      pendingOffsetsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingOffsets.buffer),
+                      pendingLengthsAliasOutput: [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingLengths.buffer),
+                      pendingIndexesAliasOutput: pendingStart === null && [offsetBuffer, lengthBuffer, flagBuffer].includes(pendingIndexes.buffer),
+                      resolvedOffsetsLength: resolvedOffsets.length,
+                      resolvedLengthsLength: resolvedLengths.length,
+                      resolvedFlagsLength: resolvedFlags.length,
+                      capacity: Math.min(resolvedOffsets.length, resolvedLengths.length, resolvedFlags.length),
+                      pendingFirstUniqueIndex: pendingStart === null ? pendingIndexes[0] : pendingStart,
+                      pendingLastUniqueIndex: pendingStart === null ? pendingIndexes[count - 1] : pendingStart + count - 1,
+                      attemptedRuns: 0,
+                      acceptedRuns: 0,
+                      singletonRuns: 0,
+                      singletonRows: 0,
+                      multiRowRuns: 0,
+                      multiRowRows: 0,
+                      minimumRunLength: 0,
+                      maximumRunLength: 0,
+                      capacityRejected: false,
+                      capacityRejectedInputIndex: null,
+                      capacityRejectedRunStart: null,
+                      capacityRejectedRunLength: null,
+                      firstOutOfRangeUniqueIndex: null,
+                      firstOutOfRangeSourceIndex: null,
+                      bulkProcessedRows: 0,
+                      scalarRemainderRows: 0,
+                      runLengthHistogram: ''
+                  }
           '''
-          file.write_text(source.replace(marker, observation + marker))
+          method = method.replace(marker, observation + marker)
+          marker = '                if (uniqueIndex + length > capacity) { break }'
+          assert method.count(marker) == 1
+          run_observation = '''                ++importLabPublication.attemptedRuns
+                          if (uniqueIndex + length > capacity) {
+                              importLabPublication.capacityRejected = true
+                              importLabPublication.capacityRejectedInputIndex = i
+                              importLabPublication.capacityRejectedRunStart = uniqueIndex
+                              importLabPublication.capacityRejectedRunLength = length
+                              importLabPublication.firstOutOfRangeUniqueIndex = Math.max(uniqueIndex, capacity)
+                              importLabPublication.firstOutOfRangeSourceIndex = i + Math.max(0, capacity - uniqueIndex)
+                              break
+                          }
+                          ++importLabPublication.acceptedRuns
+                          if (length === 1) {
+                              ++importLabPublication.singletonRuns
+                              ++importLabPublication.singletonRows
+                          } else {
+                              ++importLabPublication.multiRowRuns
+                              importLabPublication.multiRowRows += length
+                          }
+                          importLabPublication.minimumRunLength = importLabPublication.minimumRunLength === 0 ? length : Math.min(importLabPublication.minimumRunLength, length)
+                          importLabPublication.maximumRunLength = Math.max(importLabPublication.maximumRunLength, length)
+                          importLabRunLengthCounts[length] = (importLabRunLengthCounts[length] ?? 0) + 1'''
+          method = method.replace(marker, run_observation)
+          marker = '        for (; i < count; ++i) {'
+          assert method.count(marker) == 1
+          receipt = '''        importLabPublication.bulkProcessedRows = i
+                  importLabPublication.scalarRemainderRows = count - i
+                  importLabPublication.runLengthHistogram = JSON.stringify(importLabRunLengthCounts)
+                  Reflect.get(this, '__importLabPublicationPhases')?.push({
+                      phase: 'import-lab-publication',
+                      elapsedMs: 0,
+                      details: importLabPublication
+                  })
+          '''
+          method = method.replace(marker, receipt + marker)
+          file.write_text(source[:start] + method + source[end:])
 
           importer = Path('ext/js/dictionary/dictionary-importer.js')
           source = importer.read_text()
@@ -73,7 +136,7 @@ jobs:
           importer.write_text(source)
 
           Path('builds/perf/lab-2ed').mkdir(parents=True, exist_ok=True)
-          Path('builds/perf/lab-2ed/BOUNDARY.txt').write_text('Temporary observations use the existing importer phase-debug transport. All timing is diagnostic and must not be compared as a speed measurement. No per-row counters are added.\n')
+          Path('builds/perf/lab-2ed/BOUNDARY.txt').write_text('Temporary observations use existing importer phase-debug transport. All timing is diagnostic and must not be compared as a speed measurement. Counters describe existing contiguous runs; the per-row run detector and scalar write loops are unchanged.\n')
           PY
           git diff -- ext/js/dictionary/dictionary-database.js ext/js/dictionary/dictionary-importer.js > builds/perf/lab-2ed/diagnostic-only.patch
       - name: Build diagnostic release package
@@ -99,12 +162,12 @@ jobs:
           ]
           assert observations, 'The importer report did not capture publication routing'
           result = {'headSha': summary['gitSha'], 'invocations': len(observations), 'observations': observations}
-          (directory / 'publication-routing-observations.json').write_text(json.dumps(result, indent=2) + '\n')
+          (directory / 'publication-run-observations.json').write_text(json.dumps(result, indent=2) + '\n')
           print(json.dumps(result))
           PY
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
-          name: import-lab-2ed-publication-routing-report
+          name: import-lab-2ed-publication-runs
           path: builds/perf/lab-2ed
           retention-days: 14
