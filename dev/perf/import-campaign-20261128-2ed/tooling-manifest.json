@@ -1,0 +1,505 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-28T08:06:13.705811+00:00",
+  "status": "ready-for-root-review-and-evidence-only-publication; no publication performed by this agent",
+  "repository": "ManabiIO/manabitan",
+  "targetBranch": "perf/import-campaign-checkpoint-20261128-2ed",
+  "reviewedCheckpointCommit": "f793f9419f7337006b10211044909e41acbfbc21",
+  "intendedPrefix": "dev/perf/import-campaign-20261128-2ed/",
+  "remoteCheckpointDirectoryReadback": {
+    "onlyEntry": "checkpoint.json",
+    "gitBlob": "1758f7f9b2d8c9cea93f5251af574e7952d7aa2a",
+    "bytes": 82187
+  },
+  "recommendation": "Publish the19 exact audit/replay/history/support files plus README.md and tooling-manifest.json, all beneath the existing evidence prefix. Original16 frozen files remain unchanged. Include the complete campaign bundle and its receipt, not the superseded origin-only bundle. No product/workflow change, PR, new benchmark or generated extension package.",
+  "core": [
+    {
+      "localPath": "audit-plain-hosted.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/audit-plain-hosted.py",
+      "bytes": 10715,
+      "sha256": "2aeb858794a87ed8a0ebb3848ce55c9f07a933512c2873a1074b3022e1986fe2",
+      "gitBlob": "7ac0ce3d458928bc99abc8d563fc3c57412318ba",
+      "role": "Plain glossary six-pair audit",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "baseline-verifiers",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "key-witness-evidence/audit-hosted.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/key-witness-evidence/audit-hosted.py",
+      "bytes": 10716,
+      "sha256": "20a9c398bdea2547e228efd65bff1cfa340a72442a49178be5c951b077295eb0",
+      "gitBlob": "719cf291504d08050a58a5f42f805c46202746b0",
+      "role": "Adjacent expression witness six-pair audit",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "baseline-verifiers",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "audit-score-hosted.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/audit-score-hosted.py",
+      "bytes": 10565,
+      "sha256": "46aecca51bba9669da53d29496098cb71ee5de282d557a85310ba24d8c232247",
+      "gitBlob": "2705c0d5e3a7ea6feb01e66f7b991e6c4b3ae5f3",
+      "role": "Exact score-cache first-screen audit",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "baseline-verifiers",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "audit-score-confirmation-v2.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/audit-score-confirmation-v2.py",
+      "bytes": 13065,
+      "sha256": "d5dd77afc27e5f71c822c46e2c4602515b9d983b1a940b3132da0046df385d5e",
+      "gitBlob": "4ea8d46eaae537e39d373f6fba293b97ab1c1c4a",
+      "role": "Exact score-cache final 42-observation confirmation audit; v2 is the used frozen version",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "baseline-verifiers-and-git",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "audit-indexed-hosted.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/audit-indexed-hosted.py",
+      "bytes": 13040,
+      "sha256": "3a45f052c8629125652275f7fe5730b38ea8e76aee9fea88a5d60108f0ab1c4c",
+      "gitBlob": "3adb4db29236a8927250ab28920729cae828a279",
+      "role": "Both indexed-validation cohorts, retained separately",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "baseline-verifiers-and-git",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/audit-hosted-native.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/audit-hosted-native.py",
+      "bytes": 20484,
+      "sha256": "664eadfa4445560a2b2756a4e25ef8c4f8e1e0fe7cabb833d3aff0845dd5a134",
+      "gitBlob": "98ca92719e0c2e1000cd1f864b02b5d80390362f",
+      "role": "Original native v1 frozen 26-observation audit",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "native-v1-contract-and-baseline",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/hosted-audit-contract.json",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/hosted-audit-contract.json",
+      "bytes": 6782,
+      "sha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
+      "gitBlob": "94881e4deb442ac532971b0f3bdd7283e4acafb8",
+      "role": "Exact adjacent contract required by original native auditor",
+      "cli": "Read by audit-hosted-native.py; preserve adjacent basename",
+      "dependencyGroup": "contract-data",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/audit-hosted-native-corrected.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/audit-hosted-native-corrected.py",
+      "bytes": 22916,
+      "sha256": "11605eca8ab07ef7131f5e56a55218bf63a23afdd335bb712b9e8f5cacd72076",
+      "gitBlob": "e52290cf60f5aab75ca5c3b3816c9016136b0d4d",
+      "role": "Corrected native frozen 42-observation audit",
+      "cli": "python3 FILE ORIGINAL_ZIP DICTIONARY ARTIFACT_SHA256 NEW_OUTPUT_DIR",
+      "dependencyGroup": "native-corrected-contract-and-baseline-and-git",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/hosted-corrected-audit-contract.json",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/hosted-corrected-audit-contract.json",
+      "bytes": 8398,
+      "sha256": "714846807a50457e2472bb41858a357366b26a3ac1e22f2eecdf05fd9fcd76b5",
+      "gitBlob": "42f2038189bd2245405384d88a6a5ed3d7b755c4",
+      "role": "Exact adjacent contract required by corrected native auditor",
+      "cli": "Read by audit-hosted-native-corrected.py; preserve adjacent basename",
+      "dependencyGroup": "contract-data",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/retain-audited-raw.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/retain-audited-raw.py",
+      "bytes": 3602,
+      "sha256": "7cd39824d33e6e86f4681db8ae5c1c55dbb86edcccc9d996e2319738a18ecee9",
+      "gitBlob": "08b6c9f7f781260f62e21f020419bf247ba01300",
+      "role": "Native full-audit gated retention; exact eight-entry/single-helper marker",
+      "cli": "python3 FILE ORIGINAL_ZIP AUDIT_DIRECTORY NEW_RETAINED_ZIP",
+      "dependencyGroup": "native-retention-inputs",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "score-cache-evidence/retain-confirmation-raw.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/score-cache-evidence/retain-confirmation-raw.py",
+      "bytes": 4586,
+      "sha256": "50b783a6cba5660104bc23cf2cbeb62f248dc7f7f8a3a9d370e4ea5f66c34cde",
+      "gitBlob": "30ad6a3c72ccec54c016e8a71e151e259e9325b3",
+      "role": "Score confirmation full-audit gated retention",
+      "cli": "python3 FILE ORIGINAL_ZIP AUDIT_DIRECTORY NEW_RETAINED_ZIP",
+      "dependencyGroup": "score-retention-inputs",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "retain-indexed-evidence.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/retain-indexed-evidence.py",
+      "bytes": 2627,
+      "sha256": "ffb743edb8d08d13adeb7787ef1fd19b8546610675ec06d23a0c27366fcefdd8",
+      "gitBlob": "07009013c6b7e65e61b648adea2690d61c73cb94",
+      "role": "Indexed original/duplicate full-audit gated retention",
+      "cli": "python3 FILE ORIGINAL_ZIP NEW_RETAINED_ZIP INDEPENDENT_AUDIT_JSON",
+      "dependencyGroup": "indexed-retention-inputs",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/profile-sample-summary.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/profile-sample-summary.py",
+      "bytes": 6383,
+      "sha256": "5074952e36836c5a4a6c7a2c84a5f82227c09b068e89d195c67324f3a565b488",
+      "gitBlob": "265e38d8d18cfe89a245bf961314716ee19f0c65",
+      "role": "Exact unweighted CPU sample analyzer used for original native A/B diagnostic",
+      "cli": "python3 FILE --zip RETAINED_ZIP --member TRACE_MEMBER --source-sha SOURCE_SHA --out NEW_JSON; alternatively --trace TRACE_JSON",
+      "dependencyGroup": "stdlib-only",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/production-options-bounded-oracle.mjs",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/production-options-bounded-oracle.mjs",
+      "bytes": 34533,
+      "sha256": "090bf98dec4f1c42cc5778d3ce0ec2e9e9ff7a88c89cf93610b422adbbe0ad08",
+      "gitBlob": "5b2b2aae5498d3077a77ede1826fb03465aecf1b",
+      "role": "Executed final bounded native/cache production-options byte-replay oracle",
+      "cli": "node FILE --baseline-root BASELINE --candidate-root CANDIDATE --cache-dir FIXTURES --parser-workers 3 --group-manifest MANIFEST [--require-plan] --group-start START --group-count COUNT --out NEW_JSON DICTIONARY",
+      "dependencyGroup": "node-locked-corpus-and-products",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/combine-production-options-parts.py",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/combine-production-options-parts.py",
+      "bytes": 9222,
+      "sha256": "fb61039d7cba16e52a2aa94fd5463e58fe0d11935c95705aed07e62f37dd6fa7",
+      "gitBlob": "99a8a804b7dfc2a9ce10cf19273be6160a5f9665",
+      "role": "Executed strict fixed-eight-part source/options/group-coverage combiner",
+      "cli": "python3 FILE --parts-dir DIR --runner RUNNER --manifest MANIFEST --out NEW_JSON",
+      "dependencyGroup": "bounded-oracle-and-group-manifest",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/production-options-group-manifest.json",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/production-options-group-manifest.json",
+      "bytes": 46357,
+      "sha256": "651c9331f0a4f17cfc90d557ad07b3c027875322879aa4ef733c3df4f3be2786",
+      "gitBlob": "cea7993636a5f558395f8598ec4a492cbace1ab1",
+      "role": "Exact executed locked-fixture/grouping manifest",
+      "cli": "Data input to combine-production-options-parts.py",
+      "dependencyGroup": "locked-corpus-metadata",
+      "provenance": "Exact existing local file; preserve byte-for-byte, do not adapt frozen source.",
+      "baselineBlobPresent": false,
+      "remoteRecoveryStatus": "No recovery location in the reviewed campaign publication manifests or checkpoint directory; exact blob absent from immutable baseline. Not an exhaustive search of unrelated repository branches.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/verify-origin-style-bridge.mjs",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/verify-origin-style-bridge.mjs",
+      "bytes": 5382,
+      "sha256": "96f92ffb93bbe56c24652fe2f2123f8a5d3fe61ce99e70667730b9fa265ce5b1",
+      "gitBlob": "50d943eabaa764681f170ca60c3dffc8ef3fb8d1",
+      "role": "Executed final runtime AST proof connecting parity49b to the later style/undefined spelling cleanup",
+      "cli": "node FILE in reconstructed original layout; output origin-style-ast-bridge.json must not exist",
+      "dependencyGroup": "ast-bridge-espree-and-history",
+      "kind": "audit-support",
+      "provenance": "Exact existing frozen file/history object; preserve bytes.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "/tmp/manabitan-2ed-campaign-history-9ewh9rom/campaign-local-history.bundle",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/campaign-local-history.bundle",
+      "bytes": 57536,
+      "sha256": "e71e9d067fb774789651f083ff40c9d16ec3e231533804ccb59fe4d3792c41fd",
+      "gitBlob": "d491ecc203d0cccdaec9b325d6af5cf5c1f470a0",
+      "role": "Exact original18-commit/seven-branch local campaign history delta; supersedes origin-only bundle",
+      "cli": "git -C REPO bundle verify FILE; git -C REPO fetch FILE refs/heads/*:refs/remotes/campaign-history/*",
+      "dependencyGroup": "git-history-prerequisite",
+      "kind": "git-history-bundle",
+      "provenance": "Exact existing frozen file/history object; preserve bytes.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    },
+    {
+      "localPath": "native-score-evidence/campaign-local-history-bundle.json",
+      "intendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/campaign-local-history-bundle.json",
+      "bytes": 4183,
+      "sha256": "d95f9269b043f4f263ab32b606f8062b28de1518bc52b689e0f690f51ec557db",
+      "gitBlob": "897225102ad495436d7ac721d7a68729abde8c6c",
+      "role": "Hash/ref/prerequisite/provenance receipt for exact full campaign history bundle",
+      "cli": "Data receipt; bundle path in original acquisition is historical metadata",
+      "dependencyGroup": "history-receipt",
+      "kind": "data",
+      "provenance": "Exact existing frozen file/history object; preserve bytes.",
+      "credentialAndSignedUrlScan": "passed",
+      "sourceOrPatchWrapper": false
+    }
+  ],
+  "coreFileCount": 19,
+  "coreBytes": 291092,
+  "optionalSupport": [],
+  "optionalSupportBytes": 0,
+  "alreadyRecoverableDoNotDuplicate": [
+    {
+      "localPaths": [
+        "native-score-qualification.py",
+        "native-score-evidence/hosted-v1-jmdict/qualification-driver.py",
+        "native-score-evidence/hosted-v1-jitendex/qualification-driver.py",
+        "native-score-evidence/hosted-v1-vndb/qualification-driver.py"
+      ],
+      "remoteRevision": "bee2c67d4b6d4ef70915b30931289c5cbd438b44",
+      "remotePath": "dev/perf/import-qualification-native-score-2ed.py",
+      "gitBlob": "36c66d08c0f03f0a15b429d5ddff20c8ddfc17c7",
+      "sha256": "e40161963984bcf0e28c28d2930cc989345f9c239a74ed7306331c7a98a762c7",
+      "reason": "Exact driver is already in both native study revisions; do not duplicate."
+    },
+    {
+      "remoteRevision": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "remotePathsAndSha256": {
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+        "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d",
+        "dev/perf/import-memory-20261125-a7f7/test_import_window.py": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518",
+        "dev/perf/import-memory-20261125-a7f7/test_protocol.py": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba",
+        "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+      },
+      "reason": "Existing immutable memory/semantic verifier dependency set and fixture lock; recover from Git, not copied."
+    },
+    {
+      "remoteRevision": "13e7a7e6c1568de0af563d0577385e9ba16892c1",
+      "tree": "cb45e5071784ec13fabe8d64494399c65480878c",
+      "remotePaths": [
+        "ext/",
+        "dev/data/dictionary-wasm/",
+        "test/",
+        "types/",
+        "eslint.config.js"
+      ],
+      "reason": "Final product and regression tests already published."
+    },
+    {
+      "remoteRevisions": [
+        "1540e0e3451956cd9757780879a02ef41ec9505a",
+        "bee2c67d4b6d4ef70915b30931289c5cbd438b44",
+        "a009b2397502df2ebda56541abad3ab324115b4f",
+        "f35c61c84f0ab4ab1740b65470337e52ecddee07"
+      ],
+      "remotePaths": [
+        ".github/workflows/"
+      ],
+      "reason": "Frozen benchmark, source-validation and lint-only workflows are already Git-backed."
+    }
+  ],
+  "excludedFromMinimalClosure": [
+    {
+      "path": "audit-score-confirmation.py",
+      "reason": "Superseded before artifacts by the frozen v2 auditor; not the implementation used for final receipts."
+    },
+    {
+      "paths": [
+        "collect-screen-evidence.py",
+        "native-score-evidence/corpus-record-oracle.mjs",
+        "native-score-evidence/production-options-record-oracle.mjs"
+      ],
+      "reason": "Convenience collector and superseded/unbounded exploratory replay versions are not needed for the final bounded proof or artifact checks."
+    },
+    {
+      "paths": [
+        "native-score-evidence/field-component-*",
+        "native-score-evidence/prepare-field-component.py",
+        "native-score-evidence/run-field-component.py",
+        "native-score-evidence/repair-score-plan-type.mjs",
+        "key-witness-evidence/exposure.mjs",
+        "score-cache-census.py",
+        "live-pr-artifacts/*analysis.py"
+      ],
+      "reason": "Exploratory component generation, mutation helpers and historical investigation tools are outside this minimal artifact-audit closure."
+    },
+    {
+      "paths": [
+        "concurrent-prepared-scores-audit.py"
+      ],
+      "reason": "Separate external implementation reference, excluded from the seven campaign cohort totals and this minimal closure."
+    },
+    {
+      "path": "native-score-evidence/test-corrected-native-auditor.py",
+      "reason": "Not an execution dependency of frozen audits/replay; preserve its already-backed prospective check receipt without adding optional test tooling to this minimal closure."
+    }
+  ],
+  "runtimeAndPathLimitations": {
+    "artifactAuditors": "All seven Python artifact auditors hard-code /workspace/scratch/2ed731c9ad68/manabitan. Reconstruct a clean baseline9e checkout at that path (or an exact filesystem alias) before running. Do not edit ROOT in frozen files and then claim the old auditor hash. Output directory must be new. Native contracts must keep their exact adjacent filenames. Python standard library plus immutable baseline verifier modules are required; v2/cache/indexed/corrected also invoke git show against baseline9e.",
+    "fullArtifactDependency": "Complete original ZIPs are required for exact package/file-set/source-identity replay. The data-only backup intentionally excludes package binaries, and GitHub artifacts have finite retention. Preserving the code does not by itself preserve this complete package-byte input after the original artifact expires; prior audit and retention receipts remain evidence, not a substitute original ZIP.",
+    "retainers": "Keep the three retainers distinct: their completion markers and argument order differ. They read full audited packages before omitting them, rehash all retained raw members, and write a retention receipt; they do not delete the original ZIP.",
+    "diagnosticAnalyzer": "Accepts an explicit trace file or ZIP/member and records the supplied source SHA. Separate bound provenance/receipt checks remain necessary. Counts are unweighted samples, not elapsed CPU time or independent timing evidence.",
+    "boundedOracle": "Executed final replay requires the original locked fixture ZIPs, baseline and candidate source checkouts, built native libraries and Node/dependencies compatible with baseline setup. Its source/options/CRC/group hashes and fixed eight-part manifest must remain identical. The combiner preserves failed/incomplete attempts separately and requires exact ordered coverage; it does not pool timings.",
+    "historicalCountCorrection": "The final VNDB requested range is start160/count32, clipped to ten groups. The old origin-production-options-plan.json preserves count10 from a rejected invocation; final successful receipt/strict combiner use32. Do not reproduce the rejected plan value.",
+    "ASTBridge": "Exact verify-origin-style-bridge.mjs reads historical49b Git object and final store at fixed /workspace/scratch/2ed731c9ad68/native-score-plan, using its locked espree. It exclusively creates fixed origin-style-ast-bridge.json, so use a fresh reconstructed evidence directory. It does not mutate product source or prove test-file correctness.",
+    "historicalGitRestore": "The complete bundle requires baseline9e already present; fetch refs/heads/* into refs/remotes/campaign-history/* to restore exact original18 commits without overwriting current branches."
+  },
+  "dependencyGroups": {
+    "baseline-verifiers": "9e checkout; audit_memory, qualification_receipts, protocol and chromium_memory transitive helper; fixture lock; standard Python.",
+    "baseline-verifiers-and-git": "Same, plus baseline9e Git objects for source/harness binding.",
+    "native-v1-contract-and-baseline": "Adjacent hosted-audit-contract.json and its exact verifierDependencies/source hashes.",
+    "native-corrected-contract-and-baseline-and-git": "Adjacent hosted-corrected-audit-contract.json, exact dependency/source hashes and immutable baseline Git objects.",
+    "contract-data": "Self-contained frozen contract with hashes; no code wrapper or secret values.",
+    "native-retention-inputs": "Original ZIP, complete frozen native independent-audit.json and source-identities.json.",
+    "score-retention-inputs": "Original ZIP, complete frozen score confirmation audit/source identity and its strict completion markers.",
+    "indexed-retention-inputs": "Original ZIP, complete indexed audit JSON and output ZIP path.",
+    "stdlib-only": "Python standard library; explicit input trace/ZIP and output path.",
+    "node-locked-corpus-and-products": "Node and source dependencies/fixtures as noted in limitations.",
+    "bounded-oracle-and-group-manifest": "Exact bounded oracle source, grouping manifest and all eight complete part receipts.",
+    "locked-corpus-metadata": "Data-only source grouping/lock hashes already included in evidence backup.",
+    "ast-bridge-espree-and-history": "Node and candidate-lockfile espree; exact historical49b object restored from bundle; fixed original candidate/evidence paths.",
+    "git-history-prerequisite": "Git repository containing prerequisite9e; standard bundle verify/fetch.",
+    "history-receipt": "Data-only bundle hash/ref/prerequisite receipt."
+  },
+  "scan": {
+    "filesScanned": 20,
+    "credentialPatterns": [
+      "GitHub token prefixes",
+      "Authorization Bearer/Basic values",
+      "private-key headers"
+    ],
+    "signedUrlPatterns": [
+      "X-Amz-*",
+      "X-Goog-*",
+      "sig/signature/token/access_token query parameters"
+    ],
+    "findings": [],
+    "jsonWrappersContainingSourceOrSecrets": false,
+    "scope": "All19 selected files and README; expanded every new Git object reachable from the seven bundle tips beyond baseline9e. No environment or credentials read.",
+    "historyBundleExpandedObjectCount": 146,
+    "historyBundleExpandedObjectTypes": {
+      "commit": 18,
+      "tree": 82,
+      "blob": 46
+    },
+    "historyBundleExpandedBytes": 5634973,
+    "historyBundleObjectHashesVerified": true
+  },
+  "frozenFilesModified": false,
+  "published": false,
+  "libraryWrites": false,
+  "updatedAt": "2026-11-28T08:20:36.742760+00:00",
+  "previousProposalSha256": "871cdf943c1c3fa6ec47bd4d379a2321d498d0f0f903f7149bb5739f9f86a80f",
+  "readme": {
+    "localPath": "native-score-evidence/tooling-persistence-README.md",
+    "intendedPath": "dev/perf/import-campaign-20261128-2ed/README.md",
+    "bytes": 10706,
+    "sha256": "9c4e75c24793a58dd8d0706e84473bc3de40ce59f3dbe146257d9a3213b6a7a0",
+    "gitBlob": "d5ae10d099327a5752068673295726d7a0c4a0e0",
+    "role": "Repository usage, dependency, path and artifact-lifetime boundaries; not frozen benchmark code."
+  },
+  "manifestIntendedPath": "dev/perf/import-campaign-20261128-2ed/tooling-manifest.json",
+  "proposedPublicationFileCount": 21,
+  "historicalOriginSourceRecovery": {
+    "method": "Exact original Git history restored from the complete campaign bundle; no rewritten or equivalent-tree commit.",
+    "bundleIntendedPath": "dev/perf/import-campaign-20261128-2ed/campaign-local-history.bundle",
+    "bundleSha256": "e71e9d067fb774789651f083ff40c9d16ec3e231533804ccb59fe4d3792c41fd",
+    "bundleGitBlob": "d491ecc203d0cccdaec9b325d6af5cf5c1f470a0",
+    "bundleBytes": 57536,
+    "receiptIntendedPath": "dev/perf/import-campaign-20261128-2ed/native-score-evidence/campaign-local-history-bundle.json",
+    "prerequisite": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "originalLocalCommit": "49b426371ace2542710ab2b7a3e0e0915b6c4e35",
+    "originalTree": "17bc2b87d5c1c49b0e6c1f7ce1061de980186d5c",
+    "commitCount": 18,
+    "exportedRefs": [
+      {
+        "ref": "refs/heads/fix/native-score-plan-origin-20261128-2ed",
+        "sha": "2c744b53f51abc5c53d855d60597b9e619725d45"
+      },
+      {
+        "ref": "refs/heads/perf/adjacent-key-validation-witness-20261127-2ed",
+        "sha": "2f79f44b103a44240d00dae502d6d8974fe144d7"
+      },
+      {
+        "ref": "refs/heads/perf/exact-score-index-cache-20261128",
+        "sha": "a369b88c7f4f11a8131ba6c1ffaf450df9fa42e2"
+      },
+      {
+        "ref": "refs/heads/perf/exact-score-index-cache-checks-20261128",
+        "sha": "592eca35ac3655b9279f06b84fe99a84a4a7527e"
+      },
+      {
+        "ref": "refs/heads/perf/native-score-plan-20261128",
+        "sha": "1aa81610ce6f23f361fb3b42030d0aca2aaa80d8"
+      },
+      {
+        "ref": "refs/heads/perf/plain-glossary-string-arrays-20261128-recovered",
+        "sha": "752204a07b3970cbac74d7091883bebf5c71eb9b"
+      },
+      {
+        "ref": "refs/heads/perf/restore-indexed-score-validation-20261128",
+        "sha": "cd6d3e58df2d25432034342d23250a67f66c105b"
+      }
+    ],
+    "standardBundleVerifyPassed": true,
+    "standardListHeadsPassed": true,
+    "sourceReceiptsPolicy": "Restore the exact original commit objects/ref histories. All original receipts and AST bridges remain unchanged; later replays are separate evidence.",
+    "supersededStaging": "36,361-byte origin-only bundle is not part of this publication."
+  }
+}

@@ -1,0 +1,1662 @@
+{
+  "schema": 1,
+  "sourceReceiptSha256": "32bc50a58924920b087cc38665257934ee4e101e055a3d2b87d717fd509a8abb",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "grouping": {
+    "parserWorkers": 3,
+    "targetBytes": 25165824,
+    "executionConcurrency": 1
+  },
+  "dictionaries": {
+    "jmdict": {
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "rows": 528299,
+      "groups": [
+        {
+          "ordinal": 1,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_5.json",
+          "sourceBytes": 14543374,
+          "rows": 50000,
+          "firstId": 1
+        },
+        {
+          "ordinal": 2,
+          "firstBank": "term_bank_6.json",
+          "lastBank": "term_bank_9.json",
+          "sourceBytes": 13240716,
+          "rows": 40000,
+          "firstId": 50001
+        },
+        {
+          "ordinal": 3,
+          "firstBank": "term_bank_10.json",
+          "lastBank": "term_bank_13.json",
+          "sourceBytes": 13257737,
+          "rows": 40000,
+          "firstId": 90001
+        },
+        {
+          "ordinal": 4,
+          "firstBank": "term_bank_14.json",
+          "lastBank": "term_bank_17.json",
+          "sourceBytes": 14088207,
+          "rows": 40000,
+          "firstId": 130001
+        },
+        {
+          "ordinal": 5,
+          "firstBank": "term_bank_18.json",
+          "lastBank": "term_bank_22.json",
+          "sourceBytes": 15138615,
+          "rows": 50000,
+          "firstId": 170001
+        },
+        {
+          "ordinal": 6,
+          "firstBank": "term_bank_23.json",
+          "lastBank": "term_bank_27.json",
+          "sourceBytes": 15955653,
+          "rows": 50000,
+          "firstId": 220001
+        },
+        {
+          "ordinal": 7,
+          "firstBank": "term_bank_28.json",
+          "lastBank": "term_bank_31.json",
+          "sourceBytes": 13702906,
+          "rows": 40000,
+          "firstId": 270001
+        },
+        {
+          "ordinal": 8,
+          "firstBank": "term_bank_32.json",
+          "lastBank": "term_bank_36.json",
+          "sourceBytes": 14307906,
+          "rows": 50000,
+          "firstId": 310001
+        },
+        {
+          "ordinal": 9,
+          "firstBank": "term_bank_37.json",
+          "lastBank": "term_bank_40.json",
+          "sourceBytes": 14119170,
+          "rows": 40000,
+          "firstId": 360001
+        },
+        {
+          "ordinal": 10,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_44.json",
+          "sourceBytes": 13775196,
+          "rows": 40000,
+          "firstId": 400001
+        },
+        {
+          "ordinal": 11,
+          "firstBank": "term_bank_45.json",
+          "lastBank": "term_bank_48.json",
+          "sourceBytes": 13936647,
+          "rows": 40000,
+          "firstId": 440001
+        },
+        {
+          "ordinal": 12,
+          "firstBank": "term_bank_49.json",
+          "lastBank": "term_bank_53.json",
+          "sourceBytes": 15551396,
+          "rows": 48299,
+          "firstId": 480001
+        }
+      ]
+    },
+    "jitendex": {
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "rows": 436555,
+      "groups": [
+        {
+          "ordinal": 1,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_8.json",
+          "sourceBytes": 24893667,
+          "rows": 16000,
+          "firstId": 1
+        },
+        {
+          "ordinal": 2,
+          "firstBank": "term_bank_9.json",
+          "lastBank": "term_bank_17.json",
+          "sourceBytes": 25026655,
+          "rows": 18000,
+          "firstId": 16001
+        },
+        {
+          "ordinal": 3,
+          "firstBank": "term_bank_18.json",
+          "lastBank": "term_bank_25.json",
+          "sourceBytes": 23043927,
+          "rows": 16000,
+          "firstId": 34001
+        },
+        {
+          "ordinal": 4,
+          "firstBank": "term_bank_26.json",
+          "lastBank": "term_bank_33.json",
+          "sourceBytes": 23736964,
+          "rows": 16000,
+          "firstId": 50001
+        },
+        {
+          "ordinal": 5,
+          "firstBank": "term_bank_34.json",
+          "lastBank": "term_bank_41.json",
+          "sourceBytes": 23812188,
+          "rows": 16000,
+          "firstId": 66001
+        },
+        {
+          "ordinal": 6,
+          "firstBank": "term_bank_42.json",
+          "lastBank": "term_bank_50.json",
+          "sourceBytes": 25940259,
+          "rows": 18000,
+          "firstId": 82001
+        },
+        {
+          "ordinal": 7,
+          "firstBank": "term_bank_51.json",
+          "lastBank": "term_bank_56.json",
+          "sourceBytes": 23048922,
+          "rows": 12000,
+          "firstId": 100001
+        },
+        {
+          "ordinal": 8,
+          "firstBank": "term_bank_57.json",
+          "lastBank": "term_bank_64.json",
+          "sourceBytes": 24644281,
+          "rows": 16000,
+          "firstId": 112001
+        },
+        {
+          "ordinal": 9,
+          "firstBank": "term_bank_65.json",
+          "lastBank": "term_bank_76.json",
+          "sourceBytes": 24730960,
+          "rows": 24000,
+          "firstId": 128001
+        },
+        {
+          "ordinal": 10,
+          "firstBank": "term_bank_77.json",
+          "lastBank": "term_bank_88.json",
+          "sourceBytes": 25783808,
+          "rows": 24000,
+          "firstId": 152001
+        },
+        {
+          "ordinal": 11,
+          "firstBank": "term_bank_89.json",
+          "lastBank": "term_bank_99.json",
+          "sourceBytes": 24862702,
+          "rows": 22000,
+          "firstId": 176001
+        },
+        {
+          "ordinal": 12,
+          "firstBank": "term_bank_100.json",
+          "lastBank": "term_bank_109.json",
+          "sourceBytes": 24929815,
+          "rows": 20000,
+          "firstId": 198001
+        },
+        {
+          "ordinal": 13,
+          "firstBank": "term_bank_110.json",
+          "lastBank": "term_bank_119.json",
+          "sourceBytes": 24824311,
+          "rows": 20000,
+          "firstId": 218001
+        },
+        {
+          "ordinal": 14,
+          "firstBank": "term_bank_120.json",
+          "lastBank": "term_bank_130.json",
+          "sourceBytes": 24359052,
+          "rows": 22000,
+          "firstId": 238001
+        },
+        {
+          "ordinal": 15,
+          "firstBank": "term_bank_131.json",
+          "lastBank": "term_bank_142.json",
+          "sourceBytes": 25241688,
+          "rows": 24000,
+          "firstId": 260001
+        },
+        {
+          "ordinal": 16,
+          "firstBank": "term_bank_143.json",
+          "lastBank": "term_bank_152.json",
+          "sourceBytes": 23352420,
+          "rows": 20000,
+          "firstId": 284001
+        },
+        {
+          "ordinal": 17,
+          "firstBank": "term_bank_153.json",
+          "lastBank": "term_bank_163.json",
+          "sourceBytes": 23697647,
+          "rows": 22000,
+          "firstId": 304001
+        },
+        {
+          "ordinal": 18,
+          "firstBank": "term_bank_164.json",
+          "lastBank": "term_bank_174.json",
+          "sourceBytes": 25363233,
+          "rows": 22000,
+          "firstId": 326001
+        },
+        {
+          "ordinal": 19,
+          "firstBank": "term_bank_175.json",
+          "lastBank": "term_bank_185.json",
+          "sourceBytes": 25152680,
+          "rows": 22000,
+          "firstId": 348001
+        },
+        {
+          "ordinal": 20,
+          "firstBank": "term_bank_186.json",
+          "lastBank": "term_bank_196.json",
+          "sourceBytes": 25211083,
+          "rows": 22000,
+          "firstId": 370001
+        },
+        {
+          "ordinal": 21,
+          "firstBank": "term_bank_197.json",
+          "lastBank": "term_bank_207.json",
+          "sourceBytes": 23317333,
+          "rows": 22000,
+          "firstId": 392001
+        },
+        {
+          "ordinal": 22,
+          "firstBank": "term_bank_208.json",
+          "lastBank": "term_bank_219.json",
+          "sourceBytes": 23953715,
+          "rows": 22555,
+          "firstId": 414001
+        }
+      ]
+    },
+    "vndb": {
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "rows": 6648310,
+      "groups": [
+        {
+          "ordinal": 1,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_4.json",
+          "sourceBytes": 26807554,
+          "rows": 40000,
+          "firstId": 1
+        },
+        {
+          "ordinal": 2,
+          "firstBank": "term_bank_5.json",
+          "lastBank": "term_bank_8.json",
+          "sourceBytes": 26905014,
+          "rows": 40000,
+          "firstId": 40001
+        },
+        {
+          "ordinal": 3,
+          "firstBank": "term_bank_9.json",
+          "lastBank": "term_bank_12.json",
+          "sourceBytes": 26723780,
+          "rows": 40000,
+          "firstId": 80001
+        },
+        {
+          "ordinal": 4,
+          "firstBank": "term_bank_13.json",
+          "lastBank": "term_bank_16.json",
+          "sourceBytes": 26881418,
+          "rows": 40000,
+          "firstId": 120001
+        },
+        {
+          "ordinal": 5,
+          "firstBank": "term_bank_17.json",
+          "lastBank": "term_bank_20.json",
+          "sourceBytes": 26841900,
+          "rows": 40000,
+          "firstId": 160001
+        },
+        {
+          "ordinal": 6,
+          "firstBank": "term_bank_21.json",
+          "lastBank": "term_bank_24.json",
+          "sourceBytes": 26555443,
+          "rows": 40000,
+          "firstId": 200001
+        },
+        {
+          "ordinal": 7,
+          "firstBank": "term_bank_25.json",
+          "lastBank": "term_bank_28.json",
+          "sourceBytes": 26648405,
+          "rows": 40000,
+          "firstId": 240001
+        },
+        {
+          "ordinal": 8,
+          "firstBank": "term_bank_29.json",
+          "lastBank": "term_bank_32.json",
+          "sourceBytes": 26613376,
+          "rows": 40000,
+          "firstId": 280001
+        },
+        {
+          "ordinal": 9,
+          "firstBank": "term_bank_33.json",
+          "lastBank": "term_bank_36.json",
+          "sourceBytes": 26903178,
+          "rows": 40000,
+          "firstId": 320001
+        },
+        {
+          "ordinal": 10,
+          "firstBank": "term_bank_37.json",
+          "lastBank": "term_bank_40.json",
+          "sourceBytes": 26853514,
+          "rows": 40000,
+          "firstId": 360001
+        },
+        {
+          "ordinal": 11,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_44.json",
+          "sourceBytes": 26932148,
+          "rows": 40000,
+          "firstId": 400001
+        },
+        {
+          "ordinal": 12,
+          "firstBank": "term_bank_45.json",
+          "lastBank": "term_bank_48.json",
+          "sourceBytes": 26876596,
+          "rows": 40000,
+          "firstId": 440001
+        },
+        {
+          "ordinal": 13,
+          "firstBank": "term_bank_49.json",
+          "lastBank": "term_bank_52.json",
+          "sourceBytes": 26734970,
+          "rows": 40000,
+          "firstId": 480001
+        },
+        {
+          "ordinal": 14,
+          "firstBank": "term_bank_53.json",
+          "lastBank": "term_bank_56.json",
+          "sourceBytes": 26378849,
+          "rows": 40000,
+          "firstId": 520001
+        },
+        {
+          "ordinal": 15,
+          "firstBank": "term_bank_57.json",
+          "lastBank": "term_bank_60.json",
+          "sourceBytes": 26790937,
+          "rows": 40000,
+          "firstId": 560001
+        },
+        {
+          "ordinal": 16,
+          "firstBank": "term_bank_61.json",
+          "lastBank": "term_bank_64.json",
+          "sourceBytes": 26551946,
+          "rows": 40000,
+          "firstId": 600001
+        },
+        {
+          "ordinal": 17,
+          "firstBank": "term_bank_65.json",
+          "lastBank": "term_bank_68.json",
+          "sourceBytes": 26762133,
+          "rows": 40000,
+          "firstId": 640001
+        },
+        {
+          "ordinal": 18,
+          "firstBank": "term_bank_69.json",
+          "lastBank": "term_bank_72.json",
+          "sourceBytes": 26737059,
+          "rows": 40000,
+          "firstId": 680001
+        },
+        {
+          "ordinal": 19,
+          "firstBank": "term_bank_73.json",
+          "lastBank": "term_bank_76.json",
+          "sourceBytes": 26798374,
+          "rows": 40000,
+          "firstId": 720001
+        },
+        {
+          "ordinal": 20,
+          "firstBank": "term_bank_77.json",
+          "lastBank": "term_bank_80.json",
+          "sourceBytes": 26434780,
+          "rows": 40000,
+          "firstId": 760001
+        },
+        {
+          "ordinal": 21,
+          "firstBank": "term_bank_81.json",
+          "lastBank": "term_bank_84.json",
+          "sourceBytes": 26525993,
+          "rows": 40000,
+          "firstId": 800001
+        },
+        {
+          "ordinal": 22,
+          "firstBank": "term_bank_85.json",
+          "lastBank": "term_bank_88.json",
+          "sourceBytes": 26300907,
+          "rows": 40000,
+          "firstId": 840001
+        },
+        {
+          "ordinal": 23,
+          "firstBank": "term_bank_89.json",
+          "lastBank": "term_bank_92.json",
+          "sourceBytes": 26532931,
+          "rows": 40000,
+          "firstId": 880001
+        },
+        {
+          "ordinal": 24,
+          "firstBank": "term_bank_93.json",
+          "lastBank": "term_bank_96.json",
+          "sourceBytes": 26709192,
+          "rows": 40000,
+          "firstId": 920001
+        },
+        {
+          "ordinal": 25,
+          "firstBank": "term_bank_97.json",
+          "lastBank": "term_bank_100.json",
+          "sourceBytes": 26378460,
+          "rows": 40000,
+          "firstId": 960001
+        },
+        {
+          "ordinal": 26,
+          "firstBank": "term_bank_101.json",
+          "lastBank": "term_bank_104.json",
+          "sourceBytes": 26751140,
+          "rows": 40000,
+          "firstId": 1000001
+        },
+        {
+          "ordinal": 27,
+          "firstBank": "term_bank_105.json",
+          "lastBank": "term_bank_108.json",
+          "sourceBytes": 27020020,
+          "rows": 40000,
+          "firstId": 1040001
+        },
+        {
+          "ordinal": 28,
+          "firstBank": "term_bank_109.json",
+          "lastBank": "term_bank_112.json",
+          "sourceBytes": 27090427,
+          "rows": 40000,
+          "firstId": 1080001
+        },
+        {
+          "ordinal": 29,
+          "firstBank": "term_bank_113.json",
+          "lastBank": "term_bank_116.json",
+          "sourceBytes": 26752740,
+          "rows": 40000,
+          "firstId": 1120001
+        },
+        {
+          "ordinal": 30,
+          "firstBank": "term_bank_117.json",
+          "lastBank": "term_bank_120.json",
+          "sourceBytes": 26344290,
+          "rows": 40000,
+          "firstId": 1160001
+        },
+        {
+          "ordinal": 31,
+          "firstBank": "term_bank_121.json",
+          "lastBank": "term_bank_124.json",
+          "sourceBytes": 26682958,
+          "rows": 40000,
+          "firstId": 1200001
+        },
+        {
+          "ordinal": 32,
+          "firstBank": "term_bank_125.json",
+          "lastBank": "term_bank_128.json",
+          "sourceBytes": 26350714,
+          "rows": 40000,
+          "firstId": 1240001
+        },
+        {
+          "ordinal": 33,
+          "firstBank": "term_bank_129.json",
+          "lastBank": "term_bank_132.json",
+          "sourceBytes": 26786195,
+          "rows": 40000,
+          "firstId": 1280001
+        },
+        {
+          "ordinal": 34,
+          "firstBank": "term_bank_133.json",
+          "lastBank": "term_bank_136.json",
+          "sourceBytes": 26650919,
+          "rows": 40000,
+          "firstId": 1320001
+        },
+        {
+          "ordinal": 35,
+          "firstBank": "term_bank_137.json",
+          "lastBank": "term_bank_140.json",
+          "sourceBytes": 26449639,
+          "rows": 40000,
+          "firstId": 1360001
+        },
+        {
+          "ordinal": 36,
+          "firstBank": "term_bank_141.json",
+          "lastBank": "term_bank_144.json",
+          "sourceBytes": 26963943,
+          "rows": 40000,
+          "firstId": 1400001
+        },
+        {
+          "ordinal": 37,
+          "firstBank": "term_bank_145.json",
+          "lastBank": "term_bank_148.json",
+          "sourceBytes": 26841651,
+          "rows": 40000,
+          "firstId": 1440001
+        },
+        {
+          "ordinal": 38,
+          "firstBank": "term_bank_149.json",
+          "lastBank": "term_bank_152.json",
+          "sourceBytes": 26620004,
+          "rows": 40000,
+          "firstId": 1480001
+        },
+        {
+          "ordinal": 39,
+          "firstBank": "term_bank_153.json",
+          "lastBank": "term_bank_156.json",
+          "sourceBytes": 26637607,
+          "rows": 40000,
+          "firstId": 1520001
+        },
+        {
+          "ordinal": 40,
+          "firstBank": "term_bank_157.json",
+          "lastBank": "term_bank_160.json",
+          "sourceBytes": 26848367,
+          "rows": 40000,
+          "firstId": 1560001
+        },
+        {
+          "ordinal": 41,
+          "firstBank": "term_bank_161.json",
+          "lastBank": "term_bank_164.json",
+          "sourceBytes": 26778835,
+          "rows": 40000,
+          "firstId": 1600001
+        },
+        {
+          "ordinal": 42,
+          "firstBank": "term_bank_165.json",
+          "lastBank": "term_bank_168.json",
+          "sourceBytes": 26619992,
+          "rows": 40000,
+          "firstId": 1640001
+        },
+        {
+          "ordinal": 43,
+          "firstBank": "term_bank_169.json",
+          "lastBank": "term_bank_172.json",
+          "sourceBytes": 26660065,
+          "rows": 40000,
+          "firstId": 1680001
+        },
+        {
+          "ordinal": 44,
+          "firstBank": "term_bank_173.json",
+          "lastBank": "term_bank_176.json",
+          "sourceBytes": 26720317,
+          "rows": 40000,
+          "firstId": 1720001
+        },
+        {
+          "ordinal": 45,
+          "firstBank": "term_bank_177.json",
+          "lastBank": "term_bank_180.json",
+          "sourceBytes": 26703044,
+          "rows": 40000,
+          "firstId": 1760001
+        },
+        {
+          "ordinal": 46,
+          "firstBank": "term_bank_181.json",
+          "lastBank": "term_bank_184.json",
+          "sourceBytes": 26988443,
+          "rows": 40000,
+          "firstId": 1800001
+        },
+        {
+          "ordinal": 47,
+          "firstBank": "term_bank_185.json",
+          "lastBank": "term_bank_188.json",
+          "sourceBytes": 26865953,
+          "rows": 40000,
+          "firstId": 1840001
+        },
+        {
+          "ordinal": 48,
+          "firstBank": "term_bank_189.json",
+          "lastBank": "term_bank_192.json",
+          "sourceBytes": 26917595,
+          "rows": 40000,
+          "firstId": 1880001
+        },
+        {
+          "ordinal": 49,
+          "firstBank": "term_bank_193.json",
+          "lastBank": "term_bank_196.json",
+          "sourceBytes": 26665096,
+          "rows": 40000,
+          "firstId": 1920001
+        },
+        {
+          "ordinal": 50,
+          "firstBank": "term_bank_197.json",
+          "lastBank": "term_bank_200.json",
+          "sourceBytes": 26687792,
+          "rows": 40000,
+          "firstId": 1960001
+        },
+        {
+          "ordinal": 51,
+          "firstBank": "term_bank_201.json",
+          "lastBank": "term_bank_204.json",
+          "sourceBytes": 26774634,
+          "rows": 40000,
+          "firstId": 2000001
+        },
+        {
+          "ordinal": 52,
+          "firstBank": "term_bank_205.json",
+          "lastBank": "term_bank_208.json",
+          "sourceBytes": 26381207,
+          "rows": 40000,
+          "firstId": 2040001
+        },
+        {
+          "ordinal": 53,
+          "firstBank": "term_bank_209.json",
+          "lastBank": "term_bank_212.json",
+          "sourceBytes": 26402339,
+          "rows": 40000,
+          "firstId": 2080001
+        },
+        {
+          "ordinal": 54,
+          "firstBank": "term_bank_213.json",
+          "lastBank": "term_bank_216.json",
+          "sourceBytes": 26093887,
+          "rows": 40000,
+          "firstId": 2120001
+        },
+        {
+          "ordinal": 55,
+          "firstBank": "term_bank_217.json",
+          "lastBank": "term_bank_220.json",
+          "sourceBytes": 26367627,
+          "rows": 40000,
+          "firstId": 2160001
+        },
+        {
+          "ordinal": 56,
+          "firstBank": "term_bank_221.json",
+          "lastBank": "term_bank_224.json",
+          "sourceBytes": 26498043,
+          "rows": 40000,
+          "firstId": 2200001
+        },
+        {
+          "ordinal": 57,
+          "firstBank": "term_bank_225.json",
+          "lastBank": "term_bank_228.json",
+          "sourceBytes": 26426928,
+          "rows": 40000,
+          "firstId": 2240001
+        },
+        {
+          "ordinal": 58,
+          "firstBank": "term_bank_229.json",
+          "lastBank": "term_bank_232.json",
+          "sourceBytes": 26287550,
+          "rows": 40000,
+          "firstId": 2280001
+        },
+        {
+          "ordinal": 59,
+          "firstBank": "term_bank_233.json",
+          "lastBank": "term_bank_236.json",
+          "sourceBytes": 26420107,
+          "rows": 40000,
+          "firstId": 2320001
+        },
+        {
+          "ordinal": 60,
+          "firstBank": "term_bank_237.json",
+          "lastBank": "term_bank_240.json",
+          "sourceBytes": 26366737,
+          "rows": 40000,
+          "firstId": 2360001
+        },
+        {
+          "ordinal": 61,
+          "firstBank": "term_bank_241.json",
+          "lastBank": "term_bank_244.json",
+          "sourceBytes": 26381241,
+          "rows": 40000,
+          "firstId": 2400001
+        },
+        {
+          "ordinal": 62,
+          "firstBank": "term_bank_245.json",
+          "lastBank": "term_bank_248.json",
+          "sourceBytes": 26359203,
+          "rows": 40000,
+          "firstId": 2440001
+        },
+        {
+          "ordinal": 63,
+          "firstBank": "term_bank_249.json",
+          "lastBank": "term_bank_252.json",
+          "sourceBytes": 26586483,
+          "rows": 40000,
+          "firstId": 2480001
+        },
+        {
+          "ordinal": 64,
+          "firstBank": "term_bank_253.json",
+          "lastBank": "term_bank_256.json",
+          "sourceBytes": 26119899,
+          "rows": 40000,
+          "firstId": 2520001
+        },
+        {
+          "ordinal": 65,
+          "firstBank": "term_bank_257.json",
+          "lastBank": "term_bank_260.json",
+          "sourceBytes": 26554661,
+          "rows": 40000,
+          "firstId": 2560001
+        },
+        {
+          "ordinal": 66,
+          "firstBank": "term_bank_261.json",
+          "lastBank": "term_bank_264.json",
+          "sourceBytes": 26727916,
+          "rows": 40000,
+          "firstId": 2600001
+        },
+        {
+          "ordinal": 67,
+          "firstBank": "term_bank_265.json",
+          "lastBank": "term_bank_268.json",
+          "sourceBytes": 26522650,
+          "rows": 40000,
+          "firstId": 2640001
+        },
+        {
+          "ordinal": 68,
+          "firstBank": "term_bank_269.json",
+          "lastBank": "term_bank_272.json",
+          "sourceBytes": 26493911,
+          "rows": 40000,
+          "firstId": 2680001
+        },
+        {
+          "ordinal": 69,
+          "firstBank": "term_bank_273.json",
+          "lastBank": "term_bank_276.json",
+          "sourceBytes": 25944457,
+          "rows": 40000,
+          "firstId": 2720001
+        },
+        {
+          "ordinal": 70,
+          "firstBank": "term_bank_277.json",
+          "lastBank": "term_bank_280.json",
+          "sourceBytes": 26164493,
+          "rows": 40000,
+          "firstId": 2760001
+        },
+        {
+          "ordinal": 71,
+          "firstBank": "term_bank_281.json",
+          "lastBank": "term_bank_284.json",
+          "sourceBytes": 25867447,
+          "rows": 40000,
+          "firstId": 2800001
+        },
+        {
+          "ordinal": 72,
+          "firstBank": "term_bank_285.json",
+          "lastBank": "term_bank_288.json",
+          "sourceBytes": 26007088,
+          "rows": 40000,
+          "firstId": 2840001
+        },
+        {
+          "ordinal": 73,
+          "firstBank": "term_bank_289.json",
+          "lastBank": "term_bank_292.json",
+          "sourceBytes": 26512564,
+          "rows": 40000,
+          "firstId": 2880001
+        },
+        {
+          "ordinal": 74,
+          "firstBank": "term_bank_293.json",
+          "lastBank": "term_bank_296.json",
+          "sourceBytes": 26497689,
+          "rows": 40000,
+          "firstId": 2920001
+        },
+        {
+          "ordinal": 75,
+          "firstBank": "term_bank_297.json",
+          "lastBank": "term_bank_300.json",
+          "sourceBytes": 26185455,
+          "rows": 40000,
+          "firstId": 2960001
+        },
+        {
+          "ordinal": 76,
+          "firstBank": "term_bank_301.json",
+          "lastBank": "term_bank_304.json",
+          "sourceBytes": 26261423,
+          "rows": 40000,
+          "firstId": 3000001
+        },
+        {
+          "ordinal": 77,
+          "firstBank": "term_bank_305.json",
+          "lastBank": "term_bank_308.json",
+          "sourceBytes": 26249717,
+          "rows": 40000,
+          "firstId": 3040001
+        },
+        {
+          "ordinal": 78,
+          "firstBank": "term_bank_309.json",
+          "lastBank": "term_bank_312.json",
+          "sourceBytes": 26312831,
+          "rows": 40000,
+          "firstId": 3080001
+        },
+        {
+          "ordinal": 79,
+          "firstBank": "term_bank_313.json",
+          "lastBank": "term_bank_316.json",
+          "sourceBytes": 26417040,
+          "rows": 40000,
+          "firstId": 3120001
+        },
+        {
+          "ordinal": 80,
+          "firstBank": "term_bank_317.json",
+          "lastBank": "term_bank_320.json",
+          "sourceBytes": 26505293,
+          "rows": 40000,
+          "firstId": 3160001
+        },
+        {
+          "ordinal": 81,
+          "firstBank": "term_bank_321.json",
+          "lastBank": "term_bank_324.json",
+          "sourceBytes": 26696025,
+          "rows": 40000,
+          "firstId": 3200001
+        },
+        {
+          "ordinal": 82,
+          "firstBank": "term_bank_325.json",
+          "lastBank": "term_bank_328.json",
+          "sourceBytes": 26248343,
+          "rows": 40000,
+          "firstId": 3240001
+        },
+        {
+          "ordinal": 83,
+          "firstBank": "term_bank_329.json",
+          "lastBank": "term_bank_332.json",
+          "sourceBytes": 25756304,
+          "rows": 40000,
+          "firstId": 3280001
+        },
+        {
+          "ordinal": 84,
+          "firstBank": "term_bank_333.json",
+          "lastBank": "term_bank_336.json",
+          "sourceBytes": 25467830,
+          "rows": 40000,
+          "firstId": 3320001
+        },
+        {
+          "ordinal": 85,
+          "firstBank": "term_bank_337.json",
+          "lastBank": "term_bank_340.json",
+          "sourceBytes": 25963614,
+          "rows": 40000,
+          "firstId": 3360001
+        },
+        {
+          "ordinal": 86,
+          "firstBank": "term_bank_341.json",
+          "lastBank": "term_bank_344.json",
+          "sourceBytes": 26313665,
+          "rows": 40000,
+          "firstId": 3400001
+        },
+        {
+          "ordinal": 87,
+          "firstBank": "term_bank_345.json",
+          "lastBank": "term_bank_348.json",
+          "sourceBytes": 26073524,
+          "rows": 40000,
+          "firstId": 3440001
+        },
+        {
+          "ordinal": 88,
+          "firstBank": "term_bank_349.json",
+          "lastBank": "term_bank_352.json",
+          "sourceBytes": 26260954,
+          "rows": 40000,
+          "firstId": 3480001
+        },
+        {
+          "ordinal": 89,
+          "firstBank": "term_bank_353.json",
+          "lastBank": "term_bank_356.json",
+          "sourceBytes": 26502545,
+          "rows": 40000,
+          "firstId": 3520001
+        },
+        {
+          "ordinal": 90,
+          "firstBank": "term_bank_357.json",
+          "lastBank": "term_bank_360.json",
+          "sourceBytes": 26544500,
+          "rows": 40000,
+          "firstId": 3560001
+        },
+        {
+          "ordinal": 91,
+          "firstBank": "term_bank_361.json",
+          "lastBank": "term_bank_364.json",
+          "sourceBytes": 26378389,
+          "rows": 40000,
+          "firstId": 3600001
+        },
+        {
+          "ordinal": 92,
+          "firstBank": "term_bank_365.json",
+          "lastBank": "term_bank_368.json",
+          "sourceBytes": 25583096,
+          "rows": 40000,
+          "firstId": 3640001
+        },
+        {
+          "ordinal": 93,
+          "firstBank": "term_bank_369.json",
+          "lastBank": "term_bank_372.json",
+          "sourceBytes": 26307016,
+          "rows": 40000,
+          "firstId": 3680001
+        },
+        {
+          "ordinal": 94,
+          "firstBank": "term_bank_373.json",
+          "lastBank": "term_bank_376.json",
+          "sourceBytes": 25727946,
+          "rows": 40000,
+          "firstId": 3720001
+        },
+        {
+          "ordinal": 95,
+          "firstBank": "term_bank_377.json",
+          "lastBank": "term_bank_380.json",
+          "sourceBytes": 25980722,
+          "rows": 40000,
+          "firstId": 3760001
+        },
+        {
+          "ordinal": 96,
+          "firstBank": "term_bank_381.json",
+          "lastBank": "term_bank_384.json",
+          "sourceBytes": 24910752,
+          "rows": 40000,
+          "firstId": 3800001
+        },
+        {
+          "ordinal": 97,
+          "firstBank": "term_bank_385.json",
+          "lastBank": "term_bank_388.json",
+          "sourceBytes": 25072969,
+          "rows": 40000,
+          "firstId": 3840001
+        },
+        {
+          "ordinal": 98,
+          "firstBank": "term_bank_389.json",
+          "lastBank": "term_bank_392.json",
+          "sourceBytes": 25477088,
+          "rows": 40000,
+          "firstId": 3880001
+        },
+        {
+          "ordinal": 99,
+          "firstBank": "term_bank_393.json",
+          "lastBank": "term_bank_396.json",
+          "sourceBytes": 25010811,
+          "rows": 40000,
+          "firstId": 3920001
+        },
+        {
+          "ordinal": 100,
+          "firstBank": "term_bank_397.json",
+          "lastBank": "term_bank_400.json",
+          "sourceBytes": 25233060,
+          "rows": 40000,
+          "firstId": 3960001
+        },
+        {
+          "ordinal": 101,
+          "firstBank": "term_bank_401.json",
+          "lastBank": "term_bank_404.json",
+          "sourceBytes": 25108059,
+          "rows": 40000,
+          "firstId": 4000001
+        },
+        {
+          "ordinal": 102,
+          "firstBank": "term_bank_405.json",
+          "lastBank": "term_bank_408.json",
+          "sourceBytes": 24529998,
+          "rows": 40000,
+          "firstId": 4040001
+        },
+        {
+          "ordinal": 103,
+          "firstBank": "term_bank_409.json",
+          "lastBank": "term_bank_412.json",
+          "sourceBytes": 24925659,
+          "rows": 40000,
+          "firstId": 4080001
+        },
+        {
+          "ordinal": 104,
+          "firstBank": "term_bank_413.json",
+          "lastBank": "term_bank_416.json",
+          "sourceBytes": 25222023,
+          "rows": 40000,
+          "firstId": 4120001
+        },
+        {
+          "ordinal": 105,
+          "firstBank": "term_bank_417.json",
+          "lastBank": "term_bank_420.json",
+          "sourceBytes": 24383412,
+          "rows": 40000,
+          "firstId": 4160001
+        },
+        {
+          "ordinal": 106,
+          "firstBank": "term_bank_421.json",
+          "lastBank": "term_bank_424.json",
+          "sourceBytes": 24682256,
+          "rows": 40000,
+          "firstId": 4200001
+        },
+        {
+          "ordinal": 107,
+          "firstBank": "term_bank_425.json",
+          "lastBank": "term_bank_428.json",
+          "sourceBytes": 25613257,
+          "rows": 40000,
+          "firstId": 4240001
+        },
+        {
+          "ordinal": 108,
+          "firstBank": "term_bank_429.json",
+          "lastBank": "term_bank_432.json",
+          "sourceBytes": 24469671,
+          "rows": 40000,
+          "firstId": 4280001
+        },
+        {
+          "ordinal": 109,
+          "firstBank": "term_bank_433.json",
+          "lastBank": "term_bank_436.json",
+          "sourceBytes": 24520354,
+          "rows": 40000,
+          "firstId": 4320001
+        },
+        {
+          "ordinal": 110,
+          "firstBank": "term_bank_437.json",
+          "lastBank": "term_bank_440.json",
+          "sourceBytes": 25129544,
+          "rows": 40000,
+          "firstId": 4360001
+        },
+        {
+          "ordinal": 111,
+          "firstBank": "term_bank_441.json",
+          "lastBank": "term_bank_444.json",
+          "sourceBytes": 24608608,
+          "rows": 40000,
+          "firstId": 4400001
+        },
+        {
+          "ordinal": 112,
+          "firstBank": "term_bank_445.json",
+          "lastBank": "term_bank_448.json",
+          "sourceBytes": 24499812,
+          "rows": 40000,
+          "firstId": 4440001
+        },
+        {
+          "ordinal": 113,
+          "firstBank": "term_bank_449.json",
+          "lastBank": "term_bank_452.json",
+          "sourceBytes": 24137428,
+          "rows": 40000,
+          "firstId": 4480001
+        },
+        {
+          "ordinal": 114,
+          "firstBank": "term_bank_453.json",
+          "lastBank": "term_bank_456.json",
+          "sourceBytes": 24319294,
+          "rows": 40000,
+          "firstId": 4520001
+        },
+        {
+          "ordinal": 115,
+          "firstBank": "term_bank_457.json",
+          "lastBank": "term_bank_460.json",
+          "sourceBytes": 25797923,
+          "rows": 40000,
+          "firstId": 4560001
+        },
+        {
+          "ordinal": 116,
+          "firstBank": "term_bank_461.json",
+          "lastBank": "term_bank_464.json",
+          "sourceBytes": 25332993,
+          "rows": 40000,
+          "firstId": 4600001
+        },
+        {
+          "ordinal": 117,
+          "firstBank": "term_bank_465.json",
+          "lastBank": "term_bank_468.json",
+          "sourceBytes": 25275387,
+          "rows": 40000,
+          "firstId": 4640001
+        },
+        {
+          "ordinal": 118,
+          "firstBank": "term_bank_469.json",
+          "lastBank": "term_bank_472.json",
+          "sourceBytes": 24742680,
+          "rows": 40000,
+          "firstId": 4680001
+        },
+        {
+          "ordinal": 119,
+          "firstBank": "term_bank_473.json",
+          "lastBank": "term_bank_476.json",
+          "sourceBytes": 24642061,
+          "rows": 40000,
+          "firstId": 4720001
+        },
+        {
+          "ordinal": 120,
+          "firstBank": "term_bank_477.json",
+          "lastBank": "term_bank_480.json",
+          "sourceBytes": 24287098,
+          "rows": 40000,
+          "firstId": 4760001
+        },
+        {
+          "ordinal": 121,
+          "firstBank": "term_bank_481.json",
+          "lastBank": "term_bank_484.json",
+          "sourceBytes": 24205414,
+          "rows": 40000,
+          "firstId": 4800001
+        },
+        {
+          "ordinal": 122,
+          "firstBank": "term_bank_485.json",
+          "lastBank": "term_bank_488.json",
+          "sourceBytes": 24449696,
+          "rows": 40000,
+          "firstId": 4840001
+        },
+        {
+          "ordinal": 123,
+          "firstBank": "term_bank_489.json",
+          "lastBank": "term_bank_492.json",
+          "sourceBytes": 24629942,
+          "rows": 40000,
+          "firstId": 4880001
+        },
+        {
+          "ordinal": 124,
+          "firstBank": "term_bank_493.json",
+          "lastBank": "term_bank_496.json",
+          "sourceBytes": 24229413,
+          "rows": 40000,
+          "firstId": 4920001
+        },
+        {
+          "ordinal": 125,
+          "firstBank": "term_bank_497.json",
+          "lastBank": "term_bank_500.json",
+          "sourceBytes": 23934396,
+          "rows": 40000,
+          "firstId": 4960001
+        },
+        {
+          "ordinal": 126,
+          "firstBank": "term_bank_501.json",
+          "lastBank": "term_bank_504.json",
+          "sourceBytes": 24742447,
+          "rows": 40000,
+          "firstId": 5000001
+        },
+        {
+          "ordinal": 127,
+          "firstBank": "term_bank_505.json",
+          "lastBank": "term_bank_508.json",
+          "sourceBytes": 25109532,
+          "rows": 40000,
+          "firstId": 5040001
+        },
+        {
+          "ordinal": 128,
+          "firstBank": "term_bank_509.json",
+          "lastBank": "term_bank_512.json",
+          "sourceBytes": 24773494,
+          "rows": 40000,
+          "firstId": 5080001
+        },
+        {
+          "ordinal": 129,
+          "firstBank": "term_bank_513.json",
+          "lastBank": "term_bank_516.json",
+          "sourceBytes": 25273236,
+          "rows": 40000,
+          "firstId": 5120001
+        },
+        {
+          "ordinal": 130,
+          "firstBank": "term_bank_517.json",
+          "lastBank": "term_bank_520.json",
+          "sourceBytes": 24168119,
+          "rows": 40000,
+          "firstId": 5160001
+        },
+        {
+          "ordinal": 131,
+          "firstBank": "term_bank_521.json",
+          "lastBank": "term_bank_524.json",
+          "sourceBytes": 24833064,
+          "rows": 40000,
+          "firstId": 5200001
+        },
+        {
+          "ordinal": 132,
+          "firstBank": "term_bank_525.json",
+          "lastBank": "term_bank_528.json",
+          "sourceBytes": 24096044,
+          "rows": 40000,
+          "firstId": 5240001
+        },
+        {
+          "ordinal": 133,
+          "firstBank": "term_bank_529.json",
+          "lastBank": "term_bank_532.json",
+          "sourceBytes": 24300211,
+          "rows": 40000,
+          "firstId": 5280001
+        },
+        {
+          "ordinal": 134,
+          "firstBank": "term_bank_533.json",
+          "lastBank": "term_bank_536.json",
+          "sourceBytes": 24247963,
+          "rows": 40000,
+          "firstId": 5320001
+        },
+        {
+          "ordinal": 135,
+          "firstBank": "term_bank_537.json",
+          "lastBank": "term_bank_540.json",
+          "sourceBytes": 24166789,
+          "rows": 40000,
+          "firstId": 5360001
+        },
+        {
+          "ordinal": 136,
+          "firstBank": "term_bank_541.json",
+          "lastBank": "term_bank_544.json",
+          "sourceBytes": 24143887,
+          "rows": 40000,
+          "firstId": 5400001
+        },
+        {
+          "ordinal": 137,
+          "firstBank": "term_bank_545.json",
+          "lastBank": "term_bank_547.json",
+          "sourceBytes": 19483806,
+          "rows": 30000,
+          "firstId": 5440001
+        },
+        {
+          "ordinal": 138,
+          "firstBank": "term_bank_548.json",
+          "lastBank": "term_bank_550.json",
+          "sourceBytes": 19464408,
+          "rows": 30000,
+          "firstId": 5470001
+        },
+        {
+          "ordinal": 139,
+          "firstBank": "term_bank_551.json",
+          "lastBank": "term_bank_553.json",
+          "sourceBytes": 19162642,
+          "rows": 30000,
+          "firstId": 5500001
+        },
+        {
+          "ordinal": 140,
+          "firstBank": "term_bank_554.json",
+          "lastBank": "term_bank_557.json",
+          "sourceBytes": 24550565,
+          "rows": 40000,
+          "firstId": 5530001
+        },
+        {
+          "ordinal": 141,
+          "firstBank": "term_bank_558.json",
+          "lastBank": "term_bank_561.json",
+          "sourceBytes": 24117616,
+          "rows": 40000,
+          "firstId": 5570001
+        },
+        {
+          "ordinal": 142,
+          "firstBank": "term_bank_562.json",
+          "lastBank": "term_bank_565.json",
+          "sourceBytes": 23783564,
+          "rows": 40000,
+          "firstId": 5610001
+        },
+        {
+          "ordinal": 143,
+          "firstBank": "term_bank_566.json",
+          "lastBank": "term_bank_569.json",
+          "sourceBytes": 22820283,
+          "rows": 40000,
+          "firstId": 5650001
+        },
+        {
+          "ordinal": 144,
+          "firstBank": "term_bank_570.json",
+          "lastBank": "term_bank_573.json",
+          "sourceBytes": 23563045,
+          "rows": 40000,
+          "firstId": 5690001
+        },
+        {
+          "ordinal": 145,
+          "firstBank": "term_bank_574.json",
+          "lastBank": "term_bank_577.json",
+          "sourceBytes": 23829696,
+          "rows": 40000,
+          "firstId": 5730001
+        },
+        {
+          "ordinal": 146,
+          "firstBank": "term_bank_578.json",
+          "lastBank": "term_bank_581.json",
+          "sourceBytes": 23482774,
+          "rows": 40000,
+          "firstId": 5770001
+        },
+        {
+          "ordinal": 147,
+          "firstBank": "term_bank_582.json",
+          "lastBank": "term_bank_585.json",
+          "sourceBytes": 23712815,
+          "rows": 40000,
+          "firstId": 5810001
+        },
+        {
+          "ordinal": 148,
+          "firstBank": "term_bank_586.json",
+          "lastBank": "term_bank_589.json",
+          "sourceBytes": 24209802,
+          "rows": 40000,
+          "firstId": 5850001
+        },
+        {
+          "ordinal": 149,
+          "firstBank": "term_bank_590.json",
+          "lastBank": "term_bank_593.json",
+          "sourceBytes": 23648115,
+          "rows": 40000,
+          "firstId": 5890001
+        },
+        {
+          "ordinal": 150,
+          "firstBank": "term_bank_594.json",
+          "lastBank": "term_bank_596.json",
+          "sourceBytes": 18392164,
+          "rows": 30000,
+          "firstId": 5930001
+        },
+        {
+          "ordinal": 151,
+          "firstBank": "term_bank_597.json",
+          "lastBank": "term_bank_600.json",
+          "sourceBytes": 23936179,
+          "rows": 40000,
+          "firstId": 5960001
+        },
+        {
+          "ordinal": 152,
+          "firstBank": "term_bank_601.json",
+          "lastBank": "term_bank_603.json",
+          "sourceBytes": 19095770,
+          "rows": 30000,
+          "firstId": 6000001
+        },
+        {
+          "ordinal": 153,
+          "firstBank": "term_bank_604.json",
+          "lastBank": "term_bank_606.json",
+          "sourceBytes": 18818409,
+          "rows": 30000,
+          "firstId": 6030001
+        },
+        {
+          "ordinal": 154,
+          "firstBank": "term_bank_607.json",
+          "lastBank": "term_bank_609.json",
+          "sourceBytes": 18748243,
+          "rows": 30000,
+          "firstId": 6060001
+        },
+        {
+          "ordinal": 155,
+          "firstBank": "term_bank_610.json",
+          "lastBank": "term_bank_613.json",
+          "sourceBytes": 24062874,
+          "rows": 40000,
+          "firstId": 6090001
+        },
+        {
+          "ordinal": 156,
+          "firstBank": "term_bank_614.json",
+          "lastBank": "term_bank_617.json",
+          "sourceBytes": 24075362,
+          "rows": 40000,
+          "firstId": 6130001
+        },
+        {
+          "ordinal": 157,
+          "firstBank": "term_bank_618.json",
+          "lastBank": "term_bank_620.json",
+          "sourceBytes": 18479097,
+          "rows": 30000,
+          "firstId": 6170001
+        },
+        {
+          "ordinal": 158,
+          "firstBank": "term_bank_621.json",
+          "lastBank": "term_bank_623.json",
+          "sourceBytes": 18801386,
+          "rows": 30000,
+          "firstId": 6200001
+        },
+        {
+          "ordinal": 159,
+          "firstBank": "term_bank_624.json",
+          "lastBank": "term_bank_626.json",
+          "sourceBytes": 18609948,
+          "rows": 30000,
+          "firstId": 6230001
+        },
+        {
+          "ordinal": 160,
+          "firstBank": "term_bank_627.json",
+          "lastBank": "term_bank_630.json",
+          "sourceBytes": 24158185,
+          "rows": 40000,
+          "firstId": 6260001
+        },
+        {
+          "ordinal": 161,
+          "firstBank": "term_bank_631.json",
+          "lastBank": "term_bank_634.json",
+          "sourceBytes": 24221107,
+          "rows": 40000,
+          "firstId": 6300001
+        },
+        {
+          "ordinal": 162,
+          "firstBank": "term_bank_635.json",
+          "lastBank": "term_bank_637.json",
+          "sourceBytes": 17986758,
+          "rows": 30000,
+          "firstId": 6340001
+        },
+        {
+          "ordinal": 163,
+          "firstBank": "term_bank_638.json",
+          "lastBank": "term_bank_641.json",
+          "sourceBytes": 24498905,
+          "rows": 40000,
+          "firstId": 6370001
+        },
+        {
+          "ordinal": 164,
+          "firstBank": "term_bank_642.json",
+          "lastBank": "term_bank_644.json",
+          "sourceBytes": 18822477,
+          "rows": 30000,
+          "firstId": 6410001
+        },
+        {
+          "ordinal": 165,
+          "firstBank": "term_bank_645.json",
+          "lastBank": "term_bank_647.json",
+          "sourceBytes": 18474408,
+          "rows": 30000,
+          "firstId": 6440001
+        },
+        {
+          "ordinal": 166,
+          "firstBank": "term_bank_648.json",
+          "lastBank": "term_bank_651.json",
+          "sourceBytes": 24773719,
+          "rows": 40000,
+          "firstId": 6470001
+        },
+        {
+          "ordinal": 167,
+          "firstBank": "term_bank_652.json",
+          "lastBank": "term_bank_654.json",
+          "sourceBytes": 18359664,
+          "rows": 30000,
+          "firstId": 6510001
+        },
+        {
+          "ordinal": 168,
+          "firstBank": "term_bank_655.json",
+          "lastBank": "term_bank_658.json",
+          "sourceBytes": 24877793,
+          "rows": 40000,
+          "firstId": 6540001
+        },
+        {
+          "ordinal": 169,
+          "firstBank": "term_bank_659.json",
+          "lastBank": "term_bank_661.json",
+          "sourceBytes": 18853254,
+          "rows": 30000,
+          "firstId": 6580001
+        },
+        {
+          "ordinal": 170,
+          "firstBank": "term_bank_662.json",
+          "lastBank": "term_bank_665.json",
+          "sourceBytes": 22810694,
+          "rows": 38310,
+          "firstId": 6610001
+        }
+      ]
+    }
+  }
+}

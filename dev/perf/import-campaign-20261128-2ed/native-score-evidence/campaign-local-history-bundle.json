@@ -1,0 +1,66 @@
+{
+  "bundlePath": "/tmp/manabitan-2ed-campaign-history-9ewh9rom/campaign-local-history.bundle",
+  "bytes": 57536,
+  "sha256": "e71e9d067fb774789651f083ff40c9d16ec3e231533804ccb59fe4d3792c41fd",
+  "gitBlob": "d491ecc203d0cccdaec9b325d6af5cf5c1f470a0",
+  "prerequisite": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "exportedRefs": [
+    {
+      "ref": "refs/heads/fix/native-score-plan-origin-20261128-2ed",
+      "sha": "2c744b53f51abc5c53d855d60597b9e619725d45"
+    },
+    {
+      "ref": "refs/heads/perf/adjacent-key-validation-witness-20261127-2ed",
+      "sha": "2f79f44b103a44240d00dae502d6d8974fe144d7"
+    },
+    {
+      "ref": "refs/heads/perf/exact-score-index-cache-20261128",
+      "sha": "a369b88c7f4f11a8131ba6c1ffaf450df9fa42e2"
+    },
+    {
+      "ref": "refs/heads/perf/exact-score-index-cache-checks-20261128",
+      "sha": "592eca35ac3655b9279f06b84fe99a84a4a7527e"
+    },
+    {
+      "ref": "refs/heads/perf/native-score-plan-20261128",
+      "sha": "1aa81610ce6f23f361fb3b42030d0aca2aaa80d8"
+    },
+    {
+      "ref": "refs/heads/perf/plain-glossary-string-arrays-20261128-recovered",
+      "sha": "752204a07b3970cbac74d7091883bebf5c71eb9b"
+    },
+    {
+      "ref": "refs/heads/perf/restore-indexed-score-validation-20261128",
+      "sha": "cd6d3e58df2d25432034342d23250a67f66c105b"
+    }
+  ],
+  "commitCount": 18,
+  "commits": [
+    "752204a07b3970cbac74d7091883bebf5c71eb9b",
+    "26c9ca75894ab29e936b48531cc48a974fa9dd66",
+    "2f79f44b103a44240d00dae502d6d8974fe144d7",
+    "a369b88c7f4f11a8131ba6c1ffaf450df9fa42e2",
+    "592eca35ac3655b9279f06b84fe99a84a4a7527e",
+    "cd6d3e58df2d25432034342d23250a67f66c105b",
+    "e030153c72d8d51879452b660ec5ab50bc116c06",
+    "6b9cd007e0d12bd6dc126cebe20c00407f7fa38b",
+    "79f2d139ebf6128ea68fb220c5f39d0ca488ac0e",
+    "c81e7a6bcf8fd7433107e3b4da4ca4df4c648257",
+    "3f9ccb99c53082aaf3319aa76c0da1428322c1de",
+    "2cbd7e8abe0521f679ac014f381043323795998c",
+    "3a66541ae604b090dec286c73c4c303685747be5",
+    "a60548ec883078200b6aff585b8fd418eaf0b0ca",
+    "1aa81610ce6f23f361fb3b42030d0aca2aaa80d8",
+    "49b426371ace2542710ab2b7a3e0e0915b6c4e35",
+    "19495e4178a6ba2ee3fc7cf0be8b6f45003b40e6",
+    "2c744b53f51abc5c53d855d60597b9e619725d45"
+  ],
+  "historicalOriginCommit": "49b426371ace2542710ab2b7a3e0e0915b6c4e35",
+  "historicalOriginTree": "17bc2b87d5c1c49b0e6c1f7ce1061de980186d5c",
+  "verifyExit": 0,
+  "verifyOutput": "The bundle contains these 7 refs:\n2c744b53f51abc5c53d855d60597b9e619725d45 refs/heads/fix/native-score-plan-origin-20261128-2ed\n2f79f44b103a44240d00dae502d6d8974fe144d7 refs/heads/perf/adjacent-key-validation-witness-20261127-2ed\na369b88c7f4f11a8131ba6c1ffaf450df9fa42e2 refs/heads/perf/exact-score-index-cache-20261128\n592eca35ac3655b9279f06b84fe99a84a4a7527e refs/heads/perf/exact-score-index-cache-checks-20261128\n1aa81610ce6f23f361fb3b42030d0aca2aaa80d8 refs/heads/perf/native-score-plan-20261128\n752204a07b3970cbac74d7091883bebf5c71eb9b refs/heads/perf/plain-glossary-string-arrays-20261128-recovered\ncd6d3e58df2d25432034342d23250a67f66c105b refs/heads/perf/restore-indexed-score-validation-20261128\nThe bundle requires this ref:\n9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 \nThe bundle uses this hash algorithm: sha1\n/tmp/manabitan-2ed-campaign-history-9ewh9rom/campaign-local-history.bundle is okay\n",
+  "listHeads": "2c744b53f51abc5c53d855d60597b9e619725d45 refs/heads/fix/native-score-plan-origin-20261128-2ed\n2f79f44b103a44240d00dae502d6d8974fe144d7 refs/heads/perf/adjacent-key-validation-witness-20261127-2ed\na369b88c7f4f11a8131ba6c1ffaf450df9fa42e2 refs/heads/perf/exact-score-index-cache-20261128\n592eca35ac3655b9279f06b84fe99a84a4a7527e refs/heads/perf/exact-score-index-cache-checks-20261128\n1aa81610ce6f23f361fb3b42030d0aca2aaa80d8 refs/heads/perf/native-score-plan-20261128\n752204a07b3970cbac74d7091883bebf5c71eb9b refs/heads/perf/plain-glossary-string-arrays-20261128-recovered\ncd6d3e58df2d25432034342d23250a67f66c105b refs/heads/perf/restore-indexed-score-validation-20261128\n",
+  "sourceGitStatus": "",
+  "supersedesStagingBundleReceipt": "native-score-evidence/native-origin-replay-history-bundle.json",
+  "status": "staged; not yet published"
+}

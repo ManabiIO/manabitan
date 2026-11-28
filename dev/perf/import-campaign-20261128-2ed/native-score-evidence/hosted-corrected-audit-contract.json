@@ -1,0 +1,146 @@
+{
+  "schema": 2,
+  "repository": "ManabiIO/manabitan",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "candidate": "13e7a7e6c1568de0af563d0577385e9ba16892c1",
+  "candidateTree": "cb45e5071784ec13fabe8d64494399c65480878c",
+  "study": "bee2c67d4b6d4ef70915b30931289c5cbd438b44",
+  "studyTree": "a09f9cf09602eb48f252d2401fc28a177e7ad157",
+  "driverSha256": "e40161963984bcf0e28c28d2930cc989345f9c239a74ed7306331c7a98a762c7",
+  "workflowSha256": "df873250c13e9ccbe67dbb687f1495e1ddca92ad3bc91e8ed7986b06f11ee6a6",
+  "expectedAddedEntries": [
+    "js/dictionary/term-score-plan.js"
+  ],
+  "expectedChangedOrAddedEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-record-opfs-store.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm",
+    "js/dictionary/term-score-plan.js"
+  ],
+  "expectedBaselineChangedEntryHashes": {
+    "js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+    "js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+    "js/dictionary/term-record-opfs-store.js": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+    "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "expectedCandidateChangedEntryHashes": {
+    "js/dictionary/dictionary-database.js": "0f72d61ffce9f308f6edf896a6a344538799a3f52c62a6be5df929da9294ca72",
+    "js/dictionary/dictionary-importer.js": "79e0add1d039158f749bac547a80a32f7410be09e7a4aa17aff41da4784d3d3d",
+    "js/dictionary/term-bank-wasm-parser-worker.js": "12663ea4d65a5c12ec05c42b8c1bc417d6941b747dea27528543e586e4689946",
+    "js/dictionary/term-bank-wasm-parser.js": "7bdde4e4061a83d41a3676930c6ce5ad39fe91fdf2821d5678424f40bfdd317a",
+    "js/dictionary/term-record-opfs-store.js": "8e188c82f9bb418cd3411868d255fc98eae0b48b9ba4d22132a5f7d749d91f7c",
+    "js/dictionary/wasm/term-bank-parser.c": "025b5844755b6bce338a88b0544768a7781665edcfed3cd5aa5c2b0d09ee7617",
+    "lib/term-bank-parser.wasm": "a97f9f39eca091a39f746a3e1bd42be6d55e69d048802cee78bbb543c060228c",
+    "js/dictionary/term-score-plan.js": "3eaed351a78b7ee89c464fde8ab759665c74157e6ef978faa284b8ffbff4e82b"
+  },
+  "verifierDependencies": {
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d",
+    "dev/perf/import-memory-20261125-a7f7/test_import_window.py": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518",
+    "dev/perf/import-memory-20261125-a7f7/test_protocol.py": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+  },
+  "sameSourceHashes": {
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "expectedNativePlans": {
+    "jmdict": {
+      "NativeScorePlanGroups": 12,
+      "NativeScorePlanRows": 528299,
+      "NativeScorePlanBytesAvoided": 1043222
+    },
+    "jitendex": {
+      "NativeScorePlanGroups": 22,
+      "NativeScorePlanRows": 436555,
+      "NativeScorePlanBytesAvoided": 868106
+    },
+    "vndb": {
+      "NativeScorePlanGroups": 170,
+      "NativeScorePlanRows": 6648310,
+      "NativeScorePlanBytesAvoided": 13294580
+    }
+  },
+  "baselineEquivalentParserMetrics": [
+    "FusedAttempts",
+    "FusedFallbacks",
+    "DiscardedFusedRows",
+    "BankSpanCount",
+    "EscapedKeyDecodeCount",
+    "FusedSingleBankGroups",
+    "NativeLookupScratchReusedBytes",
+    "NativeLookupScratchReuseGroups",
+    "NativeLookupScratchReuseMisses",
+    "NativeSegmentedLookupSegments",
+    "NativeSegmentedLookupFallbacks",
+    "DirectLookupArenaSegments",
+    "DirectLookupArenaCopiedBytesAvoided",
+    "LookupCompactionSourceValidationPasses",
+    "MaxWasmHeapBytes",
+    "MediaHintRowsSkipped",
+    "SourceTransferredBytes",
+    "SourceCrcScannedBytes",
+    "SourceCrcReusedBytes",
+    "SourceCrcReusedGlossaryCount",
+    "SourceCompressedBytes",
+    "SourceUncompressedBytes",
+    "CompactContentMetadataGroups",
+    "CompactContentMetadataBytesAvoided",
+    "BorrowedContentResultCount",
+    "ParallelWorkerCount",
+    "ParallelPipelineGroupsPerWorker",
+    "ParallelGroupCount",
+    "ParallelOwnedContentBytes"
+  ],
+  "expectedObservationCount": 42,
+  "nativeMetricInterpretation": "Cumulative owned transport bytes and route admission only; not peak memory or timing evidence",
+  "diagnosticTracePolicy": "No extra diagnostic traces or observations in this fixed corrected-source cohort",
+  "stage": "frozen-before-results",
+  "cohort": "corrected-native-12-pair-BA-20261128",
+  "localProductSource": "2c744b53f51abc5c53d855d60597b9e619725d45",
+  "workflowPath": ".github/workflows/native-score-corrected-screen-2ed.yml",
+  "branch": "perf/native-score-corrected-screen-20261128-2ed",
+  "initialOrder": "BA",
+  "pairs": 12,
+  "timingObservationCount": 36,
+  "controlPairs": 4,
+  "warmupPairs": 2,
+  "mediaOrder": [
+    "B",
+    "A"
+  ],
+  "memoryReplication": 2,
+  "expectedArmObservationCounts": {
+    "A": 25,
+    "B": 17
+  },
+  "previousCohort": "Original native v1 remains immutable and separate; its correctness or timing cannot substitute for this corrected-source cohort.",
+  "studyParent": "13e7a7e6c1568de0af563d0577385e9ba16892c1",
+  "workflowGitBlob": "66c14f8d78af9bf75b60e09eb7b74e9b705b32a9",
+  "driverPath": "dev/perf/import-qualification-native-score-2ed.py",
+  "driverGitBlob": "36c66d08c0f03f0a15b429d5ddff20c8ddfc17c7",
+  "artifactNamePattern": "native-score-corrected-screen-2ed-{dictionary}",
+  "evidencePathPattern": "builds/perf/native-score-corrected-screen-{dictionary}",
+  "runIdentityPolicy": "Contract freezes before branch trigger. Record resulting workflow run IDs separately; never modify this frozen contract to add results.",
+  "qualificationPolicy": "First complete-browser measurement of corrected product13e7. Never pool timings with original native v1 or substitute its results. This auditor does not establish a speedup; a strong result may require its own independent corrected-source follow-up.",
+  "publicationReviewSha256": "dfce6352ff2bfe99c95700fdd23b5ff18bb1ff5a92d90b216f2e1e1dc404725d"
+}
