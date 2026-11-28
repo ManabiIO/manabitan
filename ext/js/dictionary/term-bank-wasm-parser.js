@@ -73,6 +73,8 @@ const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
 const MAX_WASM_MEDIA_INPUT_GAP_RATIO = 1 / 8
 const CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024;
 const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
+// DEFLATE can emit a 258-byte match from two one-bit Huffman symbols.
+const MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE = 258 * 4;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -110,6 +112,8 @@ const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, mediaHintRowsSkipped?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, mediaHintPresent?: boolean, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
+/** @type {WeakMap<typeof DecompressionStream, Promise<boolean>>} */
+const nativeGzipCapabilities = new WeakMap();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
 let suppliedWasmModule = null;
@@ -263,6 +267,25 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     uncompressedBytes >= CRC_REUSE_MIN_SOURCE_BYTES &&
     compressedBytes <= Math.floor(uncompressedBytes / CRC_REUSE_MIN_COMPRESSION_RATIO) &&
     typeof wasm.verify_term_bank_source_crcs === 'function';
+    // A parser worker owns its heap until its result is posted. Native streaming
+    // can therefore fill that heap across awaits without retaining a second
+    // decoded source buffer. Other callers keep the synchronous WASM operation.
+    if (
+        !deferCrc && Reflect.get(globalThis, '__manabitanTermBankParserWorker') === true &&
+        typeof DecompressionStream === 'function' && sources.every((source) => (
+            source.compressionMethod === 8 && source.compressedSize <= source.uncompressedSize
+        ))
+    ) {
+        const Stream = DecompressionStream;
+        if (await supportsSingleMemberGzip(Stream)) {
+            try {
+                return await inflateTermBankSourcesNative(sources, wasm, compressedBytes, uncompressedBytes, experiments.experimentalTermBankSpans === true, Stream);
+            } catch {
+                // Retry malformed/unsupported streams through the existing decoder
+                // to preserve its integrity error types and per-bank failure order.
+            }
+        }
+    }
     wasm.wasm_reset_heap();
     const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'compressed term-bank input');
     const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'compressed term-bank offset');
@@ -358,6 +381,154 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         crcSignaturesPtr: deferCrc ? signaturesPtr : 0,
         crcStatsPtr,
         inflateMs,
+        compressedBytes,
+        uncompressedBytes,
+    };
+}
+
+/**
+ * Some implementations accept concatenated gzip members despite the Web API's
+ * single-member contract. Such a decoder cannot prove a ZIP payload has no
+ * trailing bytes. Check once per constructor before using it for integrity.
+ * @param {typeof DecompressionStream} Stream
+ * @returns {Promise<boolean>}
+ */
+async function supportsSingleMemberGzip(Stream) {
+    let result = nativeGzipCapabilities.get(Stream);
+    if (typeof result === 'undefined') {
+        result = (async () => {
+            // A complete empty gzip member: fixed header, empty DEFLATE block,
+            // and zero CRC32/ISIZE. No dictionary bytes participate in the probe.
+            const member = new Uint8Array([0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 0, 255, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            /**
+             * @param {BlobPart[]} parts
+             * @returns {Promise<boolean>}
+             */
+            const acceptsEmpty = async (parts) => {
+                let reader;
+                try {
+                    reader = new Blob(parts).stream().pipeThrough(new Stream('gzip')).getReader();
+                    while (true) {
+                        const {done, value} = await reader.read();
+                        if (done) { return true; }
+                        if (!(value instanceof Uint8Array) || value.byteLength !== 0) {
+                            await reader.cancel();
+                            return false;
+                        }
+                    }
+                } catch {
+                    return false;
+                } finally {
+                    reader?.releaseLock();
+                }
+            };
+            return await acceptsEmpty([member]) && !await acceptsEmpty([member, member]);
+        })();
+        nativeGzipCapabilities.set(Stream, result);
+    }
+    return await result;
+}
+
+/**
+ * A ZIP DEFLATE payload becomes one gzip member by surrounding it with a fixed
+ * header and its existing CRC/size. The native decoder validates both trailer
+ * fields and consumes the complete member before any source is published.
+ * @param {CompressedTermBankSource[]} sources
+ * @param {TermBankWasmExports} wasm
+ * @param {number} compressedBytes
+ * @param {number} uncompressedBytes
+ * @param {boolean} forceBankSpans
+ * @param {typeof DecompressionStream} Stream
+ * @returns {Promise<PreloadedTermBankSource>}
+ * @throws {Error} If a stream, its exact output length or its array wrapper is invalid.
+ */
+async function inflateTermBankSourcesNative(sources, wasm, compressedBytes, uncompressedBytes, forceBankSpans, Stream) {
+    wasm.wasm_reset_heap();
+    const preserveBankBoundaries = sources.length > 1 || forceBankSpans;
+    const bankSpansPtr = preserveBankBoundaries ? allocateWasmBuffer(wasm, sources.length * 8, 'term-bank spans') : 0;
+    const outputPtr = allocateWasmBuffer(wasm, uncompressedBytes + 2, 'inflated term-bank output');
+    const output = new Uint8Array(wasm.memory.buffer, outputPtr, uncompressedBytes + 2);
+    const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, preserveBankBoundaries ? sources.length * 2 : 0);
+    const gzipHeader = new Uint8Array([0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 0, 255]);
+    let cursor = 0;
+    const startedAt = safePerformance.now();
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        const trailer = new Uint8Array(8);
+        const trailerView = new DataView(trailer.buffer);
+        trailerView.setUint32(0, source.signature, true);
+        trailerView.setUint32(4, source.uncompressedSize, true);
+        // Native transforms may collect all output for one input chunk before
+        // yielding. Limit compressed input bursts using DEFLATE's maximum
+        // expansion, rather than handing an entire Blob chunk to the decoder.
+        // The input is worker-owned, so these views also avoid a Blob copy.
+        // Admission requires compressed <= decoded size, bounding the number
+        // of payload pulls even for a tiny declared output with empty blocks.
+        const inputChunkSize = Math.max(1, Math.floor(source.uncompressedSize / MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE));
+        let inputOffset = -1;
+        const input = new ReadableStream({
+            pull(controller) {
+                if (inputOffset < 0) {
+                    controller.enqueue(gzipHeader);
+                    inputOffset = 0;
+                } else if (inputOffset < source.bytes.byteLength) {
+                    const end = Math.min(source.bytes.byteLength, inputOffset + inputChunkSize);
+                    controller.enqueue(source.bytes.subarray(inputOffset, end));
+                    inputOffset = end;
+                } else {
+                    controller.enqueue(trailer);
+                    controller.close();
+                }
+            },
+        });
+        const stream = input.pipeThrough(new Stream('gzip'));
+        const reader = stream.getReader();
+        let written = 0;
+        try {
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) { break; }
+                if (!(value instanceof Uint8Array) || value.byteLength > source.uncompressedSize - written) {
+                    throw new Error('Native term-bank output exceeds its declared length');
+                }
+                output.set(value, cursor + written);
+                written += value.byteLength;
+            }
+        } catch (error) {
+            await reader.cancel(error).catch(() => {});
+            throw error;
+        } finally {
+            reader.releaseLock();
+        }
+        if (written !== source.uncompressedSize) {
+            throw new Error('Native term-bank output length does not match ZIP metadata');
+        }
+        const span = getJsonArrayContentSpan(output.subarray(cursor, cursor + written));
+        if (span === null) {
+            throw new Error('Native term-bank output is not a JSON array');
+        }
+        if (preserveBankBoundaries) {
+            spans[i * 2] = cursor;
+            spans[i * 2 + 1] = written;
+            cursor += written;
+        } else {
+            const contentLength = span.end - span.start;
+            output.copyWithin(1, span.start, span.end);
+            output[0] = U8_ARRAY_OPEN;
+            output[contentLength + 1] = U8_ARRAY_CLOSE;
+            cursor = contentLength + 2;
+        }
+    }
+    return {
+        wasm,
+        jsonPtr: outputPtr,
+        jsonLength: cursor,
+        sourceCount: sources.length,
+        bankSpansPtr,
+        bankSpanCount: preserveBankBoundaries ? sources.length : 0,
+        crcSignaturesPtr: 0,
+        crcStatsPtr: 0,
+        inflateMs: Math.max(0, safePerformance.now() - startedAt),
         compressedBytes,
         uncompressedBytes,
     };
