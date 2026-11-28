@@ -1,0 +1,46 @@
+name: Read-only frozen import artifact audit 4a779
+
+on:
+  push:
+    branches: [audit/import-artifacts-20261128-4a779]
+    paths:
+      - '.github/scripts/import-artifact-audit-4a779.py'
+      - '.github/scripts/import-artifact-audit-4a779.json'
+      - '.github/workflows/import-artifact-audit-4a779.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: import-artifact-audit-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit existing frozen import artifacts
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Inspect existing immutable evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/scripts/import-artifact-audit-4a779.py
+          python3 .github/scripts/import-artifact-audit-4a779.py \
+            --output builds/perf/import-artifact-audit-4a779
+      - name: Preserve complete compact audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frozen-import-artifact-audit-4a779-${{ github.run_attempt }}
+          path: builds/perf/import-artifact-audit-4a779
+          if-no-files-found: error
+          retention-days: 14

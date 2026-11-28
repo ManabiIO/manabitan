@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "browserSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+  "baselineFixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "runs": [
+    {
+      "label": "cached-tag",
+      "id": 46105248799,
+      "head": "9e670b6587618c66091455356e8695a7db679cec",
+      "attempt": 1,
+      "expectedPackageEntries": [
+        "js/dictionary/dictionary-importer.js"
+      ],
+      "artifacts": [
+        {
+          "dictionary": "jmdict",
+          "name": "import-lab-cached-tag-jmdict",
+          "id": 15252470574,
+          "sha256": "b6502ae706abe306931f518abc1ab7c25b2e1dbbd9a3b7385d303ec350df117c"
+        },
+        {
+          "dictionary": "jitendex",
+          "name": "import-lab-cached-tag-jitendex",
+          "id": 15252591435,
+          "sha256": "37c5c9fb13ea10034694a925574f522b97f7436a51bae18738f7145f516fd740"
+        },
+        {
+          "dictionary": "vndb",
+          "name": "import-lab-cached-tag-vndb",
+          "id": 15252703747,
+          "sha256": "39eb6b59382691bd2a54ccb7319c59935a4c7edd335b601ca3baf00bb1f8dbbb"
+        }
+      ]
+    },
+    {
+      "label": "cache-envelope",
+      "id": 46104654270,
+      "head": "b17bbe06596d3dab8c39a353ed29265a8aa5f115",
+      "attempt": 1,
+      "expectedPackageEntries": [
+        "js/dictionary/dictionary-database.js"
+      ],
+      "artifacts": [
+        {
+          "dictionary": "jmdict",
+          "name": "import-lab-cache-envelope-jmdict",
+          "id": 15253110441,
+          "sha256": "bb9630ab116809b8905acaa05afcceaa3c1181c0ac328535e4b0f7d1fa85e3bd"
+        },
+        {
+          "dictionary": "jitendex",
+          "name": "import-lab-cache-envelope-jitendex",
+          "id": 15253105062,
+          "sha256": "f5bafd41fcabbdd1126e5d438c583f18fda786bd76c4f0fa768622f64993325e"
+        },
+        {
+          "dictionary": "vndb",
+          "name": "import-lab-cache-envelope-vndb",
+          "id": 15253575014,
+          "sha256": "aa0b0f7ed3a4f96ac661d6f8d064347cc5ddccfccd37c9a8490838c3fe7dcbd8"
+        }
+      ]
+    },
+    {
+      "label": "media-catalog",
+      "id": 46108057559,
+      "head": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+      "attempt": 1,
+      "expectedPackageEntries": [
+        "js/dictionary/dense-zip-directory.js",
+        "js/dictionary/dense-zip-file-map.js",
+        "js/dictionary/source-zip-media-pack.js",
+        "js/dictionary/source-zip-media-preparation-worker.js"
+      ],
+      "artifacts": [
+        {
+          "dictionary": "jmdict",
+          "name": "media-catalog-imports-jmdict"
+        },
+        {
+          "dictionary": "jitendex",
+          "name": "media-catalog-imports-jitendex"
+        },
+        {
+          "dictionary": "vndb",
+          "name": "media-catalog-imports-vndb"
+        }
+      ]
+    },
+    {
+      "label": "native-rehash",
+      "id": 46115970275,
+      "head": "cea622d9b99d269787a0cbbd4d5d74aadc79e356",
+      "attempt": 1,
+      "expectedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "artifacts": [
+        {
+          "dictionary": "jitendex",
+          "name": "native-rehash-jitendex"
+        }
+      ]
+    },
+    {
+      "label": "native-rehash-original-quality-failure",
+      "id": 46108373173,
+      "head": "f1d13557917db7cea5a242b35f147b23f27f97dd",
+      "attempt": 1,
+      "statusOnly": true,
+      "artifacts": [],
+      "scope": "Original failed quality run; no observation cohort inferred"
+    },
+    {
+      "label": "cached-tag-corrected-quality",
+      "id": 46106310303,
+      "head": "f44f6e34e63de549d480473f508f894132b604a5",
+      "attempt": 1,
+      "statusOnly": true,
+      "scope": "Corrected quality-only run; actual logs were separately reviewed, metadata alone is not a quality receipt",
+      "artifacts": []
+    },
+    {
+      "label": "cache-envelope-corrected-quality",
+      "id": 46108743857,
+      "head": "78e956bd07ca76b8c92a7f33252b27ad61e8e821",
+      "attempt": 1,
+      "statusOnly": true,
+      "scope": "Corrected quality-only run; actual logs were separately reviewed, metadata alone is not a quality receipt",
+      "artifacts": []
+    },
+    {
+      "label": "cache-envelope-earlier-quality-failure",
+      "id": 46106100994,
+      "head": "96101c5897c03015cbfefb4aa979740c8810de8e",
+      "attempt": 1,
+      "statusOnly": true,
+      "scope": "Earlier pipefail-only quality correction failed; preserved separately and does not create an observation cohort",
+      "artifacts": []
+    }
+  ],
+  "activationKeys": [
+    "step4SourcePackedMediaParallel",
+    "step4SourcePackedMediaEarlyPayload",
+    "step4SourcePackedMediaEntryCount",
+    "step4SourcePackedMediaBytes",
+    "step4SourcePackedMediaCompressedBytes",
+    "step4SourcePackedMediaUncompressedBytes",
+    "step4SourcePackedMediaBatchCount",
+    "step4TagReadMs",
+    "step4BulkAddTagsMetaMs",
+    "tagMeta",
+    "media",
+    "contentMetadataIndexPublishMs",
+    "contentMetadataPublishMs",
+    "dedupRecentSourceCacheMs",
+    "dedupRecentSourceCacheBytes",
+    "dedupRecentSourceAdoptedBytes",
+    "dedupRecentSourceHitCount",
+    "parserParallelWorkerCount",
+    "parserParallelOwnedContentBytes",
+    "parserParallelPeakQueuedOwnedContentBytes",
+    "fastPathParserParallelWorkerCount"
+  ],
+  "vndbPackedActivation": {
+    "step4SourcePackedMediaParallel": true,
+    "step4SourcePackedMediaEarlyPayload": true,
+    "step4SourcePackedMediaEntryCount": 146570,
+    "step4SourcePackedMediaBytes": 195649882
+  },
+  "notes": [
+    "No new imports, timings, memory samples, tests, or product changes. Read existing completed artifacts only.",
+    "Missing artifacts remain explicitly pending and may be inspected by rerunning this identical auditor after their registered jobs finish.",
+    "A successful audit means evidence integrity/arithmetic checked; it is not a performance/qualification pass.",
+    "The separate primary extension-memory screen missed its prespecified 16 MiB catalog floor; this ordinary-artifact audit does not change that decision or metric.",
+    "Frozen repository receipt/protocol helpers only revalidate existing JSON using Python standard-library dependencies; no benchmark, browser, Node, npm or test is executed.",
+    "Green original cached-tag/cache-envelope validation jobs were insufficient because their tee pipelines could mask failures. Corrected quality-only run metadata is included separately; verified original/corrected quality logs remain distinct evidence."
+  ],
+  "sourceHashPaths": [
+    "package-lock.json",
+    "test/perf/dictionaries.lock.json",
+    "dev/perf/benchmark-support.js",
+    "dev/perf/dictionary-fixtures.js",
+    "dev/perf/import-benchmark.js",
+    "test/chromium/import-flags-ab-benchmark.js",
+    "test/chromium/extension-two-dictionary-import.e2e.js",
+    "test/e2e/import-timing.js",
+    "ext/js/pages/settings/dictionary-import-controller.js",
+    "builds/manabitan-chrome-dev.zip",
+    "builds/manabitan-chrome.zip"
+  ]
+}
