@@ -1,0 +1,38 @@
+async _openConnection() {
+        await this._resumePersistentDictionaryPurge();
+        this._sqlite3 = await getSqlite3();
+        try {
+            this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
+        } catch (error) {
+            const diagnostics = getLastOpenStorageDiagnostics();
+            const message = (error instanceof Error) ? error.message : String(error);
+            throw new Error(`Dictionary database open failed: ${message}. diagnostics=${JSON.stringify(diagnostics)}`);
+        }
+        this._usesFallbackStorage = didLastOpenUseFallbackStorage();
+        this._openStorageDiagnostics = getLastOpenStorageDiagnostics();
+        // A downgraded build must not initialize old tables or inspect newer
+        // OPFS formats before it rejects an unsupported database version.
+        this._getSupportedInstalledSchemaVersion();
+        // An interrupted rollback can leave a sticky store error or gaps among
+        // unpublished segments. Recover the journal before ordinary preparation
+        // tries to admit that incomplete state as a readable content inventory.
+        await this._recoverInterruptedImportSession();
+        await this._termContentStore.prepare();
+        await this._termRecordStore.prepare();
+        this._termContentBlockStore.clearCache();
+        this._clearTermsVtabCursorState();
+        this._termsVtabModuleRegistered = false;
+
+        this._applyRuntimePragmas();
+
+        await this._initializeSchema();
+        await this._runSchemaMigrations();
+        this._restoreTermRecordDictionaryHealth();
+        if (!this._hasUnresolvedImportJournal()) {
+            try {
+                await this._generationMediaStore.removeOrphans(new Set(this._termRecordGenerationByStorage.values()));
+            } catch (error) {
+                reportDiagnostics('dictionary-generation-media-orphan-cleanup-failed', {error: toError(error).message});
+            }
+        }
+    }

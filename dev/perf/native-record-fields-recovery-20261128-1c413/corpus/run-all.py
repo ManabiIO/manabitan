@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""NEW serial, untimed full-corpus correctness acquisition; no timing comparisons."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+BASELINE = "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+DICTIONARIES = ("jmdict", "jitendex", "vndb")
+EXPECTED_GROUPS = {"jmdict": 12, "jitendex": 22, "vndb": 170}
+EXPECTED_RUNTIME_DELTA = {
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-opfs-store.js",
+    "js/dictionary/term-record-fields.js",
+    "js/dictionary/wasm/term-record-fields.c",
+    "lib/term-record-fields.wasm",
+}
+PARSER_KEYS = (
+    "fastPathParserFusedAttempts", "fastPathParserFusedFallbacks",
+    "fastPathParserSourceTransferredBytes",
+    "fastPathParserSourceCrcScannedBytes", "fastPathParserSourceCrcReusedBytes",
+    "fastPathParserSourceCrcReusedGlossaryCount",
+    "fastPathParserSourceCompressedBytes", "fastPathParserSourceUncompressedBytes",
+    "fastPathParserCompactContentMetadataGroups",
+    "fastPathParserParallelWorkerCount", "fastPathParserParallelPipelineGroupsPerWorker",
+    "fastPathParserParallelGroupCount", "fastPathParserParallelSkipReason",
+)
+
+
+class CorrectnessError(RuntimeError):
+    pass
+
+
+def require(condition, message):
+    if not condition:
+        raise CorrectnessError(message)
+
+
+def read_json(path):
+    def invalid(value):
+        raise CorrectnessError("Nonfinite JSON: " + value)
+    return json.loads(Path(path).read_text(), parse_constant=invalid)
+
+
+def save(path, value):
+    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n")
+
+
+def digest(path):
+    with Path(path).open("rb") as stream:
+        return {"bytes": os.fstat(stream.fileno()).st_size,
+                "sha256": hashlib.file_digest(stream, "sha256").hexdigest()}
+
+
+def source_receipts(directory):
+    result = {}
+    for path in sorted(Path(directory).iterdir()):
+        if path.is_file():
+            result[path.name] = digest(path)
+    return result
+
+
+def command(args, logfile, cwd=None):
+    with Path(logfile).open("xb") as output:
+        result = subprocess.run(args, stdout=output, stderr=subprocess.STDOUT, cwd=cwd, check=False)
+    receipt = {"argv": [str(value) for value in args], "exitCode": result.returncode,
+               "log": digest(logfile)}
+    save(Path(logfile).with_suffix(".process.json"), receipt)
+    require(result.returncode == 0, "Original correctness process failed; no replacement: " + str(logfile))
+    return receipt
+
+
+def term_files(report):
+    files = report["termFiles"]
+    paths = [item["path"] for item in files]
+    require(len(paths) == len(set(paths)), "Duplicate finalized term file")
+    require(files and all(item["termPayload"] is True for item in files), "Missing finalized term payload inventory")
+    return sorted(
+        (item["path"], item["bytes"], item["normalizedSha256"], item["normalization"])
+        for item in files
+    )
+
+
+def fields(calls):
+    keys = ("ordinal", "rowCount", "contentOffsetBase", "bytes", "sha256")
+    require([item["ordinal"] for item in calls] == list(range(len(calls))), "Field-call ordinals changed")
+    return [{key: item[key] for key in keys} for item in calls]
+
+
+def group_plan(workers):
+    requests = []
+    for worker in workers:
+        require(worker["failures"] == [], "Production worker reported a failure")
+        if worker["entry"] == "term-bank-wasm-parser-worker.js":
+            require(worker["ready"] == 1, "Parser worker did not start once")
+            for request in worker["parseRequests"]:
+                require(request["banks"], "Actual compressed source metadata was not captured")
+                requests.append({"banks": request["banks"], "sourceByteLengths": request["sourceByteLengths"]})
+    return sorted(requests, key=lambda item: json.dumps(item, sort_keys=True))
+
+
+def parser_counts(phases):
+    matches = [phase["details"] for phase in phases if phase["phase"] == "import-data-banks"]
+    require(len(matches) == 1, "Missing unique successful source-import phase")
+    values = matches[0]
+    require(all(key in values for key in PARSER_KEYS), "Missing parser work counter")
+    return {key: values[key] for key in PARSER_KEYS}
+
+
+def compare_pair(a_dir, b_dir, dictionary, fixture, candidate):
+    a_dir, b_dir = Path(a_dir), Path(b_dir)
+    a, b = read_json(a_dir / "report.json"), read_json(b_dir / "report.json")
+    for arm, report, commit in (("A", a, BASELINE), ("B", b, candidate)):
+        require(report["passed"] is True and report["arm"] == arm, "Missing successful original arm")
+        require(report["newReconstructedDriver"] is True and report["performanceMeasurements"] is False,
+                "Wrong acquisition scope")
+        require(report["dictionary"] == dictionary and report["source"]["commit"] == commit,
+                "Arm source or corpus identity changed")
+        require(report["fixture"] == {"sha256": fixture["sha256"], "bytes": fixture["sizeBytes"]},
+                "Fixture identity changed")
+        require(report["fieldRows"] == fixture["termRows"], "Incomplete term field coverage")
+        require(report["parserGroups"] == EXPECTED_GROUPS[dictionary] and report["parserWorkers"] == 3,
+                "Current production source grouping was not exercised")
+        require(report["sqlite"]["persistentSqlite"] is False and
+                report["sqlite"]["usesFallbackStorageOverride"] is False,
+                "Undeclared SQLite host boundary")
+        cleanup = read_json((a_dir if arm == "A" else b_dir) / "cleanup.json")
+        require(cleanup == {"completed": True, "cleanupErrors": []}, "Post-receipt cleanup failed")
+    a_runtime, b_runtime = a["source"]["runtimeFiles"], b["source"]["runtimeFiles"]
+    changed = {path for path in set(a_runtime) | set(b_runtime) if a_runtime.get(path) != b_runtime.get(path)}
+    require(changed == EXPECTED_RUNTIME_DELTA, "Complete generated runtime delta differs from the frozen five entries")
+    require(a["source"]["kit"] == b["source"]["kit"], "Arm observer code changed")
+    require(a["flags"] == b["flags"], "Arm import flags changed")
+    require(a["semantic"] == b["semantic"], "Complete counts or live lookup results differ")
+    require(term_files(a) == term_files(b), "A finalized term-content/record/index byte differs")
+    a_calls, b_calls = read_json(a_dir / "field-calls.json"), read_json(b_dir / "field-calls.json")
+    require(fields(a_calls) == fields(b_calls), "A synchronous complete field buffer differs")
+    require(a["fieldMetrics"] is None and a["optionalAssets"] == [], "Baseline activated candidate code")
+    metrics = b["fieldMetrics"]
+    require(metrics["calls"] == metrics["javascriptCalls"] + metrics["native"]["nativeCalls"],
+            "Candidate terminal call counters do not reconcile")
+    require(metrics["calls"] == len(b_calls) and metrics["native"]["nativeCalls"] > 0,
+            "No actual natural native activation or incomplete accounting")
+    require(len(b["optionalAssets"]) == 1, "Candidate asset fetch witness is missing")
+    a_groups = group_plan(read_json(a_dir / "workers.json"))
+    b_groups = group_plan(read_json(b_dir / "workers.json"))
+    require(a_groups == b_groups and len(a_groups) == EXPECTED_GROUPS[dictionary],
+            "Production source-bank boundaries differ")
+    a_counts = parser_counts(read_json(a_dir / "product-work-counts.json"))
+    b_counts = parser_counts(read_json(b_dir / "product-work-counts.json"))
+    require(a_counts == b_counts, "Parser/CRC/fallback work counters differ")
+    require(a_counts["fastPathParserFusedFallbacks"] == 0, "Unexpected fused parser fallback")
+    receipts = {}
+    for arm, directory in (("A", a_dir), ("B", b_dir)):
+        receipts[arm] = {path.name: digest(path) for path in sorted(directory.glob("*.json"))}
+    return {
+        "passed": True, "dictionary": dictionary, "baseline": BASELINE, "candidate": candidate,
+        "performanceMeasurements": False,
+        "termRows": fixture["termRows"], "fieldCalls": len(a_calls),
+        "completeTermFiles": term_files(a), "parserWorkCounts": a_counts,
+        "completeRuntimeDelta": sorted(changed),
+        "sourceGroupsSha256": hashlib.sha256(json.dumps(a_groups, sort_keys=True).encode()).hexdigest(),
+        "candidateNativeCoverage": b["nativeCoverage"], "candidateMetrics": metrics,
+        "receipts": receipts,
+        "limitations": [
+            "New untimed A-to-B acquisition; no recovered historical receipt is substituted",
+            "Nonpersistent real SQLite plus disk OPFS-shaped term sidecars",
+            "Natural helper activation observed; no optional-loader readiness await or replacement import",
+            "No browser, restart, image decoding, full-media or performance qualification",
+        ],
+    }
+
+
+def retire_verified_disk(directory):
+    """Remove only this successful arm's own files after a second full raw-byte hash."""
+    directory = Path(directory)
+    disk = directory / "disk"
+    require(disk.is_dir() and not disk.is_symlink(), "Unexpected generated disk root")
+    recorded = read_json(directory / "files.json")
+    root = disk / "root"
+    actual = {}
+    for path in sorted(root.rglob("*")):
+        require(not path.is_symlink(), "Refusing to retire a symlink")
+        if path.is_file():
+            actual[path.relative_to(root).as_posix()] = digest(path)
+        else:
+            require(path.is_dir(), "Unexpected generated disk member")
+    expected = {item["path"]: {"bytes": item["bytes"], "sha256": item["sha256"]} for item in recorded}
+    require(len(expected) == len(recorded) and actual == expected, "Raw file changed before bounded retirement")
+    require(list((disk / "staging").iterdir()) == [], "Unsettled writable remains")
+    receipt = {
+        "retired": True, "scope": "Only this successful newly generated arm's disk directory",
+        "everyRawByteRehashed": True, "rawFilesRetained": False,
+        "files": actual, "originalFinalizedInventory": digest(directory / "files.json"),
+        "reconstruction": "Pinned fixture and source plus retained new driver; hashes are not a raw archive",
+    }
+    save(directory / "retired-disk.json", receipt)
+    shutil.rmtree(disk)
+
+
+def main():
+    require(sys.version_info >= (3, 11), "Python 3.11 or later is required")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--baseline-root", required=True, type=Path)
+    parser.add_argument("--candidate-root", required=True, type=Path)
+    parser.add_argument("--candidate", required=True)
+    parser.add_argument("--fixtures", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    require(len(args.candidate) == 40 and all(value in "0123456789abcdef" for value in args.candidate),
+            "Candidate must be an immutable commit SHA")
+    output = args.output.resolve()
+    require(not output.exists(), "Output must be fresh")
+    output.mkdir(parents=False)
+    kit = Path(__file__).resolve().parent
+    baseline_root = args.baseline_root.resolve(strict=True)
+    candidate_root = args.candidate_root.resolve(strict=True)
+    fixture_root = args.fixtures.resolve(strict=True)
+    plan = {
+        "schema": 1, "identity": "NEW reconstructed untimed correctness acquisition",
+        "baseline": BASELINE, "candidate": args.candidate,
+        "dictionaryOrder": list(DICTIONARIES), "armOrder": ["A", "B"],
+        "freshProcessPerArm": True, "performanceMeasurements": False,
+        "optionalReadinessWait": False, "replacementObservations": False,
+        "source": source_receipts(kit),
+    }
+    save(output / "plan.json", plan)
+    source_copy = output / "harness-source"
+    source_copy.mkdir()
+    for path in kit.iterdir():
+        if path.is_file():
+            shutil.copyfile(path, source_copy / path.name)
+    completed = []
+    try:
+        lock_a = read_json(baseline_root / "test/perf/dictionaries.lock.json")
+        lock_b = read_json(candidate_root / "test/perf/dictionaries.lock.json")
+        require(lock_a == lock_b, "Pinned dictionary fixture lock changed")
+        for arm, root in (("A", baseline_root), ("B", candidate_root)):
+            command(["node", str(kit / "test-opfs.mjs"), str(root), str(output / ("smoke-" + arm))],
+                    output / ("smoke-" + arm + ".log"))
+            require(read_json(output / ("smoke-" + arm) / "report.json")["passed"] is True,
+                    "Actual-I/O/production-worker smoke failed")
+        for dictionary in DICTIONARIES:
+            cell = output / dictionary
+            cell.mkdir()
+            fixture = lock_a["dictionaries"][dictionary]
+            archive = fixture_root / fixture["cacheFile"]
+            require(digest(archive) == {"bytes": fixture["sizeBytes"], "sha256": fixture["sha256"]},
+                    "Pinned fixture is missing or changed")
+            for arm, root, commit in (("A", baseline_root, BASELINE), ("B", candidate_root, args.candidate)):
+                command(["node", str(kit / "run.mjs"), str(root), dictionary, str(archive),
+                         str(cell / arm), arm, commit], cell / (arm + ".log"))
+            receipt = compare_pair(cell / "A", cell / "B", dictionary, fixture, args.candidate)
+            save(cell / "comparison.json", receipt)
+            # Both original arms must agree before either generated raw sink is retired.
+            retire_verified_disk(cell / "A")
+            retire_verified_disk(cell / "B")
+            completed.append(receipt)
+        save(output / "report.json", {"passed": True, "plan": plan, "comparisons": completed,
+                                     "performanceMeasurements": False})
+        print(json.dumps({"passed": True, "baseline": BASELINE, "candidate": args.candidate,
+                          "performanceMeasurements": False,
+                          "comparisons": [{"dictionary": item["dictionary"], "termRows": item["termRows"],
+                                           "fieldCalls": item["fieldCalls"], "native": item["candidateNativeCoverage"]}
+                                          for item in completed]}, sort_keys=True))
+    except BaseException as cause:
+        save(output / "failure.json", {
+            "passed": False, "plan": plan, "completed": completed,
+            "error": repr(cause), "remainingCorporaNotRun": True,
+            "replacementObservations": False,
+        })
+        raise
+
+
+if __name__ == "__main__":
+    main()
