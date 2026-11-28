@@ -21,6 +21,7 @@ import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
+import {copyMediaDiagnosticKeys} from './dictionary-media-diagnostics.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -79,7 +80,8 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {{rowIndexes: Uint32Array, pathEnds: Uint32Array, paths: string[], diagnosticKeys: import('dictionary-importer').MediaImportDiagnosticKeys}} ProjectedMediaReferences */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, projectedMedia?: ProjectedMediaReferences, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -4105,10 +4107,11 @@ function tryProjectNativeGlossaryImagePath(row, source) {
  * @param {boolean} [projectImagePaths=false]
  * @param {boolean} [prepareLookupRoute=false]
  * @param {PreloadedTermBankSource} [preloadedSource]
+ * @param {boolean} [columnarMedia=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0, columnarMedia = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4144,7 +4147,17 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
-    const mediaRows = chunk.mediaRows.map(({index, row}) => {
+    const mediaRows = [];
+    /** @type {number[]} */
+    const projectedRowIndexes = [];
+    /** @type {number[]} */
+    const projectedPathEnds = [];
+    /** @type {string[]} */
+    const projectedPaths = [];
+    /** @type {Array<string|Uint8Array>} */
+    const diagnosticKeys = [];
+    let diagnosticByteLength = 0;
+    for (const {index, row} of chunk.mediaRows) {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             (tryProjectNativeGlossaryImagePath(row, preloadedSource) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
@@ -4153,7 +4166,24 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint8Array(row.glossaryJsonBytes)))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
-        return {
+        if (columnarMedia && useProjectedPaths) {
+            // Only the worker transport uses these columns. Keep ordinary
+            // row projection available to sequential consumers and fallbacks.
+            const expressionBytes = row.expressionBytes ?? chunk.expressionBytesList[index];
+            const readingBytes = row.readingBytes ?? chunk.readingBytesList[index];
+            const expression = row.expression.length > 0 || typeof expressionBytes === 'undefined' ? row.expression : expressionBytes;
+            const reading = chunk.readingEqualsExpressionList[index] === 1 ?
+                expression :
+                (row.reading.length > 0 || typeof readingBytes === 'undefined' ? row.reading : readingBytes);
+            diagnosticKeys.push(expression, reading);
+            if (typeof expression !== 'string') { diagnosticByteLength += expression.byteLength; }
+            if (reading !== expression && typeof reading !== 'string') { diagnosticByteLength += reading.byteLength; }
+            projectedRowIndexes.push(index);
+            for (const path of imagePaths) { projectedPaths.push(path); }
+            projectedPathEnds.push(projectedPaths.length);
+            continue;
+        }
+        mediaRows.push({
             index,
             ...(useProjectedPaths ? {imagePaths} : {}),
             row: {
@@ -4167,8 +4197,19 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                 glossaryJsonBytes: !useProjectedPaths && row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
                 termEntryContentBytes: useProjectedPaths ? EMPTY_UINT8_ARRAY : new Uint8Array(row.termEntryContentBytes),
             },
+        });
+    }
+    if (!Number.isSafeInteger(diagnosticByteLength) || diagnosticByteLength > 0xffffffff || projectedPaths.length > 0xffffffff) {
+        throw new TermBankWasmResourceError('Media diagnostic keys exceed their offset budget');
+    }
+    const projectedMedia = projectedRowIndexes.length === 0 ?
+        void 0 :
+        {
+            rowIndexes: Uint32Array.from(projectedRowIndexes),
+            pathEnds: Uint32Array.from(projectedPathEnds),
+            paths: projectedPaths,
+            diagnosticKeys: copyMediaDiagnosticKeys(diagnosticKeys, diagnosticByteLength),
         };
-    });
     const stablePlan = {
         stringLengths: new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
@@ -4220,6 +4261,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
             null :
             new Uint32Array(chunk.contentUniqueIndexList),
         mediaRows,
+        ...(typeof projectedMedia === 'undefined' ? {} : {projectedMedia}),
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
     };
