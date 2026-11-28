@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Verify product tree matches the frozen Manabitan source
@@ -129,7 +130,7 @@ jobs:
           if (selected.length !== 2 || !selected.every(receipt => receipt.status === 'passed')) throw new Error('Both pinned engine receipts must pass semantic validation');
           writeFileSync(process.env.RUNNER_TEMP + '/jmdict-smoke/upload/summary.json', JSON.stringify({manabitanHarnessCommit:process.env.GITHUB_SHA, manabitanProductCommit:'f28c2801fcfd9416f220b46b9cbafeee901c1cb2', manabitanCommit:'f28c2801fcfd9416f220b46b9cbafeee901c1cb2', hoshidictsCommit:'c77b36201de0e86c8950dd1d3d88cbee36472fb1', archiveUrl:'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip', archiveSha256:'3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f', receipts:selected}, null, 2) + '\n');
           NODE
-          cp "${RUNNER_TEMP}/jmdict-smoke/qualification-manifest.sha256" "${RUNNER_TEMP}/jmdict-smoke/upload/qualification-manifest.sha256"
+          if [[ -f "${RUNNER_TEMP}/jmdict-smoke/qualification-manifest.sha256" ]]; then cp "${RUNNER_TEMP}/jmdict-smoke/qualification-manifest.sha256" "${RUNNER_TEMP}/jmdict-smoke/upload/qualification-manifest.sha256"; fi
 
       - name: Upload smoke receipts
         if: always()
