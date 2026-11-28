@@ -64,6 +64,9 @@ try {
     run('git', ['-C', sourceRoot, 'remote', 'add', 'origin', ZSTD_REPOSITORY]);
     run('git', ['-C', sourceRoot, 'fetch', '--quiet', '--depth=1', 'origin', ZSTD_COMMIT]);
     run('git', ['-C', sourceRoot, 'checkout', '--quiet', 'FETCH_HEAD']);
+    // Keep the wasm32 specialization source-bound to the pinned upstream revision.
+    // eslint-disable-next-line @stylistic/semi
+    run('git', ['-C', sourceRoot, 'apply', path.join(projectRoot, 'dev/data/zstd-wasm32-count.patch')])
 
     const singleFileRoot = path.join(sourceRoot, 'build/single_file_libs');
     run('./create_single_file_library.sh', [], {cwd: singleFileRoot});
