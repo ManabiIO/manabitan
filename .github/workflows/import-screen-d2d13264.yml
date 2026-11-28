@@ -16,7 +16,7 @@ concurrency:
 
 env:
   PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-  PERF_CANDIDATE: ecb077918e4e641187c561105205b53a6c135441
+  PERF_CANDIDATE: 6d6600a3277f83782729fcce14ea7e02f48a4b40
 
 jobs:
   validation:
@@ -86,6 +86,12 @@ jobs:
           if [[ "$PERF_DICTIONARY" == vndb ]]; then
             policy+=(--vndb-sah-allocation-units 37 37)
           fi
+          python - <<'PY'
+          import json, pathlib
+          plan = json.loads("{\"stage\":\"exploratory-six-pair-screen\",\"frozenBeforeFirstTiming\":true,\"primaryDictionary\":\"jmdict\",\"screenIsNotPromotion\":true,\"confirmation\":{\"hosts\":2,\"pairsPerHost\":12,\"initialOrders\":[\"AB\",\"BA\"],\"minimumMedianImprovementPercent\":3,\"minimumFasterPairs\":10,\"candidateMedianIntervalUpperPercent\":0,\"equalWorkMustImprove\":true,\"maximumAbsoluteControlMedianAndEqualWorkPercent\":1.5,\"minimumEffectToControlShiftRatio\":2,\"otherDictionaryMedianEqualWorkAndIntervalUpperRegressionPercent\":3,\"independentHostsNotPooled\":true,\"allObservationsAndFailuresRetained\":true},\"otherGates\":\"Unchanged semantic, source/package identity, storage, lookup, and qualified sampled-memory checks; report package-size delta separately.\"}")
+          pathlib.Path('builds/perf/import-screen-d2d13264/review-criteria.json').write_text(json.dumps(plan, indent=2) + '\n')
+          print('REVIEW_CRITERIA ' + json.dumps(plan, sort_keys=True))
+          PY
           python dev/perf/import-qualification-20261125-a7f7.py \
             --baseline "$PERF_BASELINE" \
             --candidate "$PERF_CANDIDATE" \
@@ -96,6 +102,35 @@ jobs:
             "${policy[@]}" \
             --evidence "$evidence_root/cohort" \
             2>&1 | tee "$evidence_root/acquisition.log"
+      - name: Print compact retained evidence for independent audit
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib
+          root = pathlib.Path('builds/perf/import-screen-d2d13264')
+          cohort = root / 'cohort'
+          paths = ['analysis.json', 'observations.json', 'registered-plan.json', 'browser-identity.json',
+                   'memory/memory-comparison.json', 'memory/memory-audit.json',
+                   'memory/memory-audit-failure.json', 'memory/semantic-failures.json']
+          for relative in paths:
+              path = cohort / relative
+              if path.is_file():
+                  print('EVIDENCE_JSON ' + relative + ' ' + json.dumps(json.loads(path.read_text()), sort_keys=True))
+          source = cohort / 'source-identities.json'
+          if source.is_file():
+              identities = json.loads(source.read_text())
+              for arm in identities['arms'].values():
+                  arm['packagedEntryCount'] = len(arm.pop('entries'))
+              print('EVIDENCE_JSON source-identities-compact.json ' + json.dumps(identities, sort_keys=True))
+          for path in sorted(cohort.glob('package-*.zip')):
+              print('PACKAGE_BYTES ' + json.dumps({'name': path.name, 'bytes': path.stat().st_size,
+                                                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}, sort_keys=True))
+          if not (cohort / 'analysis.json').is_file():
+              for path in sorted(root.rglob('*.log')):
+                  lines = path.read_text(errors='replace').splitlines()
+                  print('INCOMPLETE_LOG_TAIL ' + str(path) + '\n' + '\n'.join(lines[-35:]))
+          PY
       - name: Preserve all observations, packages and failures
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
