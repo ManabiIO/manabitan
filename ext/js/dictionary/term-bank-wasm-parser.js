@@ -598,7 +598,7 @@ function isJsonWhitespace(value) {
  * @returns {string}
  */
 function decodeParserText(bytes) {
-    return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
+    return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : new Uint8Array(bytes));
 }
 
 /**
