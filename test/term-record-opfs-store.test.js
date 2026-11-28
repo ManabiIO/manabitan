@@ -1352,9 +1352,11 @@ describe('TermRecordOpfsStore', () => {
         const store = new TermRecordOpfsStore();
         await store.beginImportSession();
         let finishQueuedWrites = /** @type {() => void} */ (() => {});
-        vi.spyOn(store, '_awaitQueuedWrites').mockImplementation(async () => await new Promise((resolve) => {
-            finishQueuedWrites = resolve;
-        }));
+        const closeWritables = store._closeAllWritables.bind(store);
+        vi.spyOn(store, '_closeAllWritables').mockImplementation(async (...args) => {
+            await new Promise((resolve) => { finishQueuedWrites = () => { resolve(void 0); }; });
+            return await closeWritables(...args);
+        });
         const repair = vi.spyOn(store, '_repairPersistentDictionaryIndex').mockResolvedValue(true);
 
         const end = store.endImportSession();

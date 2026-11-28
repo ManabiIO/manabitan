@@ -1502,21 +1502,26 @@ export class TermRecordOpfsStore {
         const tStart = safePerformance.now();
         let flushPendingWritesMs = 0;
         let awaitQueuedWritesMs = 0;
-        let closeWritableMs = 0;
-        const tFlushPendingWritesStart = safePerformance.now();
-        await this._flushPendingWrites();
-        flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
-        const tAwaitQueuedWritesStart = safePerformance.now();
-        await this._awaitQueuedWrites();
-        awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
-        const tCloseWritableStart = safePerformance.now();
-        await this._closeAllWritables();
+        if (!this._importSessionActive) {
+            const tFlushPendingWritesStart = safePerformance.now();
+            await this._flushPendingWrites();
+            flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
+            const tAwaitQueuedWritesStart = safePerformance.now();
+            await this._awaitQueuedWrites();
+            awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
+        }
+        const pendingWriteTimings = await this._closeAllWritables(this._importSessionActive);
+        flushPendingWritesMs += pendingWriteTimings.flushPendingWritesMs;
+        awaitQueuedWritesMs += pendingWriteTimings.awaitQueuedWritesMs;
         for (const dictionaryName of this._importSessionDictionaryNames) {
             this._setDictionaryHealth(dictionaryName, 'available');
         }
         this._importSessionDictionaryNames.clear();
         this._importSessionActive = false;
-        closeWritableMs = safePerformance.now() - tCloseWritableStart;
+        // Descriptor preparation overlaps lookup-index finalization. Keep its
+        // measured waits separate from the remaining joint completion tail;
+        // these are not independent measures of underlying storage work.
+        const closeWritableMs = Math.max(0, safePerformance.now() - tStart - flushPendingWritesMs - awaitQueuedWritesMs);
         this._deferIndexBuild = false;
         this._lastEndImportSessionMetrics = {
             flushPendingWritesMs,
@@ -6519,14 +6524,16 @@ view.chunks :
     }
 
     /**
-     * @returns {Promise<void>}
+     * @param {boolean} [flushPendingWrites=false]
+     * @returns {Promise<{flushPendingWritesMs: number, awaitQueuedWritesMs: number}>}
      */
-    async _closeAllWritables() {
+    async _closeAllWritables(flushPendingWrites = false) {
         /** @type {Error[]} */
         const errors = [];
+        const pendingWriteTimings = {flushPendingWritesMs: 0, awaitQueuedWritesMs: 0};
         for (const state of this._shardStateByFileName.values()) {
             const results = await Promise.allSettled([
-                this._finalizeShardWritable(state),
+                this._finalizeShardWritable(state, flushPendingWrites ? pendingWriteTimings : null),
                 this._flushLookupIndexFile(state),
             ]);
             for (const result of results) {
@@ -6545,19 +6552,38 @@ view.chunks :
         if (errors.length > 1) {
             throw new AggregateError(errors, 'Failed to finalize term-record storage');
         }
+        return pendingWriteTimings;
     }
 
     /**
      * @param {TermRecordShardState} state
+     * @param {{flushPendingWritesMs: number, awaitQueuedWritesMs: number}|null} [pendingWriteTimings=null]
      * @returns {Promise<void>}
      */
-    async _finalizeShardWritable(state) {
+    async _finalizeShardWritable(state, pendingWriteTimings = null) {
         /** @type {Error[]} */
         const errors = [];
+        if (pendingWriteTimings !== null) {
+            const startedAt = safePerformance.now();
+            try {
+                await this._flushPendingWritesForShard(state);
+            } catch (error) {
+                errors.push(toError(error));
+            } finally {
+                pendingWriteTimings.flushPendingWritesMs += safePerformance.now() - startedAt;
+            }
+        }
+        const tAwaitQueuedWritesStart = pendingWriteTimings === null ? 0 : safePerformance.now();
         try {
             await this._awaitQueuedWritesForShard(state);
         } catch (error) {
-            errors.push(error instanceof Error ? error : new Error(String(error)));
+            const writeError = toError(error);
+            // A failed flush can already have observed this sticky queue error.
+            if (!errors.includes(writeError)) { errors.push(writeError); }
+        } finally {
+            if (pendingWriteTimings !== null) {
+                pendingWriteTimings.awaitQueuedWritesMs += safePerformance.now() - tAwaitQueuedWritesStart;
+            }
         }
         try {
             await this._closeShardWritable(state);

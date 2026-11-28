@@ -1,0 +1,136 @@
+name: Import finalization screen 0119
+
+on:
+  push:
+    branches: ['perf/import-finalization-overlap-20261128-0119']
+    paths:
+      - '.github/workflows/import-finalization-0119.yml'
+      - 'ext/js/dictionary/term-record-opfs-store.js'
+      - 'test/term-record-finalization-overlap.test.js'
+      - 'test/term-record-opfs-store.test.js'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: import-finalization-0119-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: ${{ github.sha }}
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    name: Source validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Prepare validation receipts
+        run: mkdir -p builds/perf/import-finalization-validation
+      - name: Unit suite
+        run: npm run test:unit -- --reporter=default --reporter=json --outputFile=builds/perf/import-finalization-validation/unit.json
+      - name: JavaScript lint
+        if: always()
+        run: npm run test:js 2>&1 | tee builds/perf/import-finalization-validation/lint.log
+      - name: Main and test TypeScript
+        if: always()
+        run: |
+          npm run test:ts:main 2>&1 | tee builds/perf/import-finalization-validation/types-main.log
+          npm run test:ts:test 2>&1 | tee builds/perf/import-finalization-validation/types-test.log
+      - name: All target dry builds
+        if: always()
+        run: npm run test:build 2>&1 | tee builds/perf/import-finalization-validation/build.log
+      - name: Qualification observer and receipt regressions
+        if: always()
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee builds/perf/import-finalization-validation/qualification.log
+      - name: Retain validation reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-finalization-validation-0119
+          path: builds/perf/import-finalization-validation
+          if-no-files-found: error
+          retention-days: 30
+
+  qualify:
+    name: ${{ matrix.dictionary }} (${{ matrix.order }}, ${{ matrix.pairs }} pairs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            order: AB
+            pairs: 12
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_PAIRS: ${{ matrix.pairs }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install locked Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Retain exact acquisition inputs
+        run: |
+          inputs="builds/perf/import-finalization-$PERF_DICTIONARY-$PERF_ORDER-inputs"
+          mkdir -p "$inputs"
+          cp .github/workflows/import-finalization-0119.yml "$inputs/workflow.yml"
+          cp dev/perf/import-qualification-20261125-a7f7.py "$inputs/runner.py"
+          cp test/perf/dictionaries.lock.json "$inputs/dictionaries.lock.json"
+          cp -r dev/perf/import-memory-20261125-a7f7 "$inputs/qualification"
+          git diff --binary "$PERF_BASELINE" "$PERF_CANDIDATE" > "$inputs/source.patch"
+          git rev-parse HEAD > "$inputs/workflow-source.txt"
+      - name: Run fixed complete-import and separate memory cohorts
+        run: |
+          storage_args=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Current-source baseline/control storage is 37 aligned pages;
+            # preserve exact equality instead of the historical 129-131 range.
+            storage_args=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs "$PERF_PAIRS" \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            "${storage_args[@]}" \
+            --evidence "builds/perf/import-finalization-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-finalization-${{ matrix.dictionary }}-${{ matrix.order }}-0119
+          path: |
+            builds/perf/import-finalization-${{ matrix.dictionary }}-${{ matrix.order }}
+            builds/perf/import-finalization-${{ matrix.dictionary }}-${{ matrix.order }}-inputs
+          if-no-files-found: error
+          retention-days: 30
