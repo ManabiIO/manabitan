@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-source-only-whole-record-plan-handoff-feasibility",
+  "createdAt": "2026-11-28 11:50:16 UTC",
+  "examinedProposal": {
+    "blob": "e7792d051320ef037db80d2516ccb8aa9769517f",
+    "sha256": "3af7bdfbe3f657cfc73b1526678ce456628b63495e37ce6b30595bf3ed24fdbe"
+  },
+  "source": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "product": "663df294f40e1832ad3e3349d0e061681fed77cb",
+    "tree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+    "store": "83757284db4df342e3106baf0dc1148ddb5cd14c",
+    "helper": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+    "c": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+    "otherBindings": {
+      "ext/js/dictionary/term-lookup-index-preparation.js": {
+        "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+        "size": 11139,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/9f50eed5f3e42986bce7c6338993f5a66a1c42a5"
+      },
+      "ext/js/dictionary/term-record-preinterned-plan.js": {
+        "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a91ec492ae9f576c5f079e21071efc72cfe9cd4f",
+        "size": 25435,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/a91ec492ae9f576c5f079e21071efc72cfe9cd4f"
+      },
+      "ext/js/dictionary/term-bank-wasm-parser.js": {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+        "size": 210111,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/4f3f7e73c78bca23672f46588cb897633fc7a4ac"
+      },
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+        "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "82808931b73e099a604c598460cdeaed43d67bd5",
+        "size": 16935,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/82808931b73e099a604c598460cdeaed43d67bd5"
+      },
+      "ext/js/dictionary/term-content-ownership.js": {
+        "path": "ext/js/dictionary/term-content-ownership.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0f8d50ac47427f609ef6eaed121c1d2a2d3c5d8f",
+        "size": 4250,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/0f8d50ac47427f609ef6eaed121c1d2a2d3c5d8f"
+      }
+    }
+  },
+  "conclusion": "A bounded identity-only prepared-entry handoff is feasible in source, but no existing prepared-entry witness makes the proposed fusion safe as-is. Keep this a conditional future candidate, not an implementation or nomination.",
+  "findings": [
+    "resolvedContentReferenceOrigins records only the freshly created chunk/reference object. The factory passes preparedLookupIndexes through unchanged, including foreign maps.",
+    "hasCompletePreparedTermLookupIndexes reads overridable Map.get/size and Reflect.get entry bytes/preinternedPlan. Later Map.get and entry property reads occur after the old row validation. Merely using descriptors cannot distinguish an arbitrary Proxy.",
+    "prepareTermLookupIndexesFromPreinternedPlan and native/copy parser routes already create ordinary map/entry literals. The main parser result receiver has an existing ownership-registration point before publishing its resolved chunk. Worker-local weak identity cannot survive structured clone.",
+    "The later _encodeArtifactChunkRecords validation pass is already skipped by a non-null validatedContentOffsetBase. This proposal removes only the preceding JS run-planning walk.",
+    "The twelve retained JMdict call facts belong to the exact f28 correctness receipts. This review acquired no a300 corpus or browser observation."
+  ],
+  "boundedHandoff": [
+    "Use a private weak identity registry for maps/entry records created by controlled producers. At the actual worker receiver, construct/register fresh ordinary metadata wrappers before the result escapes; retain existing bytes/plan/route-filter references rather than clone payload buffers or row columns.",
+    "Do not brand an arbitrary map passed to createArtifactTermRecordChunkWithResolvedContent. A missing producer witness must return to the existing route before extra metadata reads.",
+    "Keep the existing whole-index admission/completeness calls in their original pre-row position. After those potentially effectful calls, obtain a fresh callback-free witness immediately before native selection; do not rely on a witness captured before validation callbacks.",
+    "Require the current registered map and entry, unchanged intrinsic Map has/get/size behavior, and own data fields for the metadata moved across the old row loop. Reject replacements, accessors, proxies, prototype changes, absent/null prepared bytes or plans, and a current rowCount different from the already captured count.",
+    "Reuse current per-call native input guards for actual typed brands, private non-resizable buffers, current columns and bounds. The witness establishes origin/access behavior only; it must not cache input validity across awaits.",
+    "Pass owned field bytes and computed base through the existing async encode/append boundary. Keep the existing await point and late route-filter read; do not eagerly snapshot post-await data.",
+    "A failed whole-chunk attempt must fall back to the unchanged planner and avoid a duplicate copied native attempt on the same fallback run. A call-local disposition is sufficient; no global validity cache should be introduced."
+  ],
+  "stopConditions": [
+    "No controlled main-realm producer/receiver hook can distinguish owned metadata from arbitrary factory-supplied maps.",
+    "The design requires branding foreign objects by shape, deep-copying lookup/plan payloads, rechecking every row a second time, or preserving a validation witness across awaited storage work.",
+    "Run splitting, persistence formats, or session lifecycle must be redesigned.",
+    "The original browser result or later source-bound work evidence does not justify another candidate."
+  ],
+  "limits": {
+    "implementation": false,
+    "sourceRefsChanged": false,
+    "testsExecuted": false,
+    "importsExecuted": false,
+    "timingsAcquired": false,
+    "cOrAbiEdited": false,
+    "broadProvenanceRedesignRecommended": false,
+    "frozenBrowserRun": 46138650386
+  }
+}

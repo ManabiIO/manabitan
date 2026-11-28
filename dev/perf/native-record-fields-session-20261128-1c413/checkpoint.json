@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 11:43:33 UTC",
+  "observedAt": "2026-11-28 12:44 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -152,7 +152,7 @@
     }
   },
   "browser": {
-    "status": "Four original jobs (both JMdict and both Jitendex orders) completed success; both VNDB original jobs still acquiring at the last metadata-only check. No partial timing contrasts inspected or used; all six original artifacts required before final audit.",
+    "status": "CLOSED / REJECTED. All six original artifacts independently audited, all444 original reports retained, all semantics and activation passed. JMdict both original host medians missed2%; BA control noise also exceeded1%. VNDB AB separate memory coverage failed. No PR, rerun, replacement, exclusion, pooling or control subtraction.",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -229,7 +229,7 @@
       "cases": 19,
       "rootCoreReview": "567b805fd40629243db747057b2fab8126eb0ecb",
       "assemblyProof": "13d00893f1bfe94f4563fb96b367cda8b7015fb8",
-      "published": false,
+      "published": true,
       "nativeReview": "d1ec2e300f307bdd69494dd2c1e5e1ace6e86ed8",
       "correctedCaller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
       "correctedTests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099",
@@ -249,7 +249,27 @@
       "acquireTests": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
       "acquireLiteralReview": "0b3037582a23e4b07dc24c069d7bec7d7b8d90c2",
       "independentAcquireLiteralReview": "12032a1a31fe855ecb3a386fa0fe3433278b0fd7",
-      "finalManifestState": "Disabled/null until all six original acquisition artifacts exist"
+      "finalManifestState": "Enabled after all six original terminal artifacts existed; failure explicitly bound",
+      "finalHead": "139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+      "finalTree": "696241c0e96212eb79d50f18ebe1eb4b104d9f6f",
+      "finalManifest": "56a31fb082f00f56d280b5d9756aead43458f2e6",
+      "finalSourceBinding": "d326ad698c3a566c418da58ebce55194cc92f819",
+      "finalWorkflow": "61f724d5d6424bfb17b6e570e552f13ee7f3db73",
+      "finalReadme": "24e011dd3b249e138d04988cf2452cb142d50b8f",
+      "branch": "audit/native-record-fields-browser-20261128-1c413",
+      "rootPublicationReview": "effa68f0d0139f95f2b52949160de254f5909077",
+      "inventoryFinalReview": "3f5e6682cb68158f4c1247020e9b393431ac5509",
+      "pipelineFinalReview": "fac458c07b457c5b58d11a902a2360f787f0eb9a",
+      "run": 46143319941,
+      "job": 140973853695,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "pureTests": 33,
+      "pureTestsPassed": true,
+      "originalStudyCanQualify": false,
+      "readOnly": true,
+      "noImportsOrTimings": true
     },
     "numericEvaluator": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
     "activationChecker": "9e03c189823092fa7a8217f65ab9283893f85d2e",
@@ -486,14 +506,14 @@
       "createdAt": "2026-11-28T11:10:53Z",
       "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
       "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "failure",
       "jobs": [
         {
           "id": 140959486645,
           "name": "Complete import (vndb, AB)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "failure"
         },
         {
           "id": 140959486747,
@@ -504,8 +524,8 @@
         {
           "id": 140959486755,
           "name": "Complete import (vndb, BA)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 140959486757,
@@ -528,7 +548,48 @@
       ],
       "registration": "de7abdfe0368f1951df3559448b8bfc71ca08e1a",
       "partialTimingsInspected": false,
-      "allOriginalCellsRetained": true
+      "allOriginalCellsRetained": true,
+      "updatedAt": "2026-11-28T12:00:26Z",
+      "artifacts": [
+        {
+          "id": 15261819804,
+          "name": "native-record-fields-browser-vndb-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37296733,
+          "sha256": "f10f9597247f6a01e58fa03e27d94b060415c82298f4382b514d709665d5b314"
+        },
+        {
+          "id": 15261787471,
+          "name": "native-record-fields-browser-vndb-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37372991,
+          "sha256": "6094113d633bd8cf1c93a0b10a0271a2b3afc849b77b2f05612867a5124eddb7"
+        },
+        {
+          "id": 15261327053,
+          "name": "native-record-fields-browser-jitendex-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37151092,
+          "sha256": "a121bec01944948209d0e8a5d9867605034f63ee430191b92c3ff1daedeb9fc8"
+        },
+        {
+          "id": 15261037077,
+          "name": "native-record-fields-browser-jmdict-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37170747,
+          "sha256": "1b974be844016a17255170d681246929355673dec228cce74c4ceecd5dca3274"
+        },
+        {
+          "id": 15261002204,
+          "name": "native-record-fields-browser-jitendex-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37108249,
+          "sha256": "0e4ae8d4fe200d1c81458dfffd018e2893f4ef4030ccee6cd7c2b20529453b98"
+        },
+        {
+          "id": 15261001868,
+          "name": "native-record-fields-browser-jmdict-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+          "bytes": 37176542,
+          "sha256": "473d43afc021dd25e3947ecb57aeefa6241e663c3e02c206ac56c632ff57a4b4"
+        }
+      ],
+      "terminalApi": "8f62d18f6fb33d91205bb03a0f5e0abe455272ab",
+      "failedJobLog": "0f90fd491d3afe5a06722e1fc272a527dcd0c001"
     },
     "finalSourcePreflight": {
       "head": "236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
@@ -555,7 +616,545 @@
       },
       "noImportsOrTimings": true,
       "archiveBytesIndependentlyRead": false
-    }
+    },
+    "finalRecordsAudit": {
+      "head": "139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+      "tree": "696241c0e96212eb79d50f18ebe1eb4b104d9f6f",
+      "branch": "audit/native-record-fields-browser-20261128-1c413",
+      "run": 46143319941,
+      "job": 140973853695,
+      "attempt": 1,
+      "conclusion": "success",
+      "pureTests": 33,
+      "errors": [],
+      "evidenceValidated": true,
+      "qualifiesFrozenStudy": false,
+      "productPrAuthorized": false,
+      "result": {
+        "blob": "acbc0b3a88da99a21306615de88e5369f73d559b",
+        "bytes": 1706200,
+        "sha256": "4e450ac7210460d7458c31f5a0a6866e508cf683f2f47dede70ab0f5e39e2dd7"
+      },
+      "log": {
+        "blob": "3250104a91349578a6a8b52b523dfd4aa0b4a7e3",
+        "bytes": 1737750,
+        "sha256": "b4ca1d01c3884e11d5139a19b025ebfcdd663a61026586d3a2d217385e21f67b"
+      },
+      "compact": "df1ee2051ea6d41de76e25294495bdf714970ed3",
+      "projector": "c97033c827bad3ded0b2367a607c65ec6e084842",
+      "closure": "ccec119fcf84b43e91b4907a456cdf7963bca8a5",
+      "independentArithmetic": "f2beb15fc8f605acda3ca5fc0e6fb648f47fffce",
+      "sourceReview": "3f5e6682cb68158f4c1247020e9b393431ac5509",
+      "pipelineReview": "fac458c07b457c5b58d11a902a2360f787f0eb9a",
+      "publicationReview": "effa68f0d0139f95f2b52949160de254f5909077",
+      "artifact": {
+        "id": 15262653489,
+        "bytes": 512542682,
+        "sha256": "b567ca8f229693d6334b9e75c06263184050bbb8aca9b8339f9074ab1c59748b"
+      },
+      "newImports": 0,
+      "newPerformanceObservations": 0,
+      "all444SemanticsAndActivationPass": true,
+      "candidateReports": 174,
+      "nativeCalls": 13108,
+      "nativeRows": 441563512,
+      "readinessJavascriptCalls": 0,
+      "readyDeclines": 0,
+      "vndbABMemoryCoverage": {
+        "gapLimitMs": 250,
+        "failed": [
+          {
+            "name": "B1",
+            "gapMs": 277.954603
+          },
+          {
+            "name": "B2",
+            "gapMs": 251.152134
+          },
+          {
+            "name": "A2",
+            "gapMs": 300.373316
+          }
+        ],
+        "passingA1GapMs": 249.912985,
+        "failedQualifiedMaxima": null,
+        "interpretation": "Incomplete scan coverage, not a measured memory regression"
+      }
+    },
+    "finalOriginalContrasts": [
+      {
+        "dictionary": "jitendex",
+        "initialOrder": "AB",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -1.6799581644629136,
+            0.23817186997179274
+          ],
+          "equalWorkChangePercent": -0.5718910315005488,
+          "fasterPairs": 13,
+          "medianPairedChangePercent": -0.5098756774688629,
+          "ratios": [
+            0.9885602859928464,
+            0.9898950387900124,
+            1.006897000455466,
+            1.0014260711739045,
+            1.022501138063326,
+            1.0122588554100262,
+            1.002381718699718,
+            0.9779076488343937,
+            0.9915654952076974,
+            0.9802879004020081,
+            0.9940284795590033,
+            1.001794986858162,
+            0.9618406285072877,
+            1.013271526543068,
+            0.9832004183553709,
+            1.012667414396035,
+            0.9727614077515866,
+            1.026146367100281,
+            1.0011721039265027,
+            0.9957740068916194,
+            1.0108594888094449,
+            0.9604512612498279,
+            0.9815502882767159,
+            0.9775887757636093
+          ],
+          "worstPairChangePercent": 2.6146367100281065
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -1.8129588254084394,
+            -0.058369544070513424
+          ],
+          "equalWorkChangePercent": -0.6248990796066556,
+          "fasterPairs": 7,
+          "medianPairedChangePercent": -0.3674678537270548,
+          "ratios": [
+            0.9991541964866699,
+            0.9819972399949747,
+            0.9966019106238454,
+            0.9818704117459156,
+            0.9726975581618331,
+            1.023741627428905,
+            0.9960487323016134,
+            0.9994163045592949
+          ],
+          "worstPairChangePercent": 2.3741627428905065
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 3,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": true,
+            "absoluteControlMedianWithinFrozenLimit": true,
+            "allOriginalActivationReceipts": true,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": true,
+            "separateCorrectness": true,
+            "separateMemory": true
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": true
+        }
+      },
+      {
+        "dictionary": "jitendex",
+        "initialOrder": "BA",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -2.713043478260868,
+            0.38707861214721806
+          ],
+          "equalWorkChangePercent": -1.5347278199498882,
+          "fasterPairs": 15,
+          "medianPairedChangePercent": -1.0189215528973339,
+          "ratios": [
+            0.9216756624141419,
+            1.0390676058383475,
+            0.9217257730581451,
+            0.9679333239158112,
+            0.9932514029978184,
+            0.985426089453687,
+            0.9983792544570584,
+            0.9728695652173913,
+            1.0032008906826084,
+            1.0057662915103434,
+            1.0067262969588717,
+            0.98910292463438,
+            0.9905186443076734,
+            1.019151064742066,
+            0.9865663243775659,
+            1.0162706983441157,
+            1.0092907801418274,
+            1.0038707861214722,
+            0.9433464193854392,
+            0.9722726637798887,
+            0.8563299271859878,
+            1.1081218643204744,
+            0.9728366049211741,
+            0.98909612625533
+          ],
+          "worstPairChangePercent": 10.812186432047444
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -2.501708817496695,
+            7.856986820070211
+          ],
+          "equalWorkChangePercent": 5.46093681342823,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 0.29716471059546556,
+          "ratios": [
+            1.446057192374332,
+            1.078569868200702,
+            0.9482954166388673,
+            0.9992831027314203,
+            0.974982911825033,
+            1.006660191480489,
+            0.993194415210784,
+            1.007871761843424
+          ],
+          "worstPairChangePercent": 44.60571923743319
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 3,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": false,
+            "absoluteControlMedianWithinFrozenLimit": true,
+            "allOriginalActivationReceipts": true,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": true,
+            "separateCorrectness": true,
+            "separateMemory": true
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": false
+        }
+      },
+      {
+        "dictionary": "jmdict",
+        "initialOrder": "AB",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -1.8244013683076266,
+            -0.028996713699025456
+          ],
+          "equalWorkChangePercent": -0.8144436490890361,
+          "fasterPairs": 17,
+          "medianPairedChangePercent": -0.9970896162149412,
+          "ratios": [
+            1.0151123864179985,
+            0.9878787878787879,
+            0.9940627650551699,
+            1.0103494113179103,
+            0.9966999811427495,
+            0.990991845249384,
+            1.0255845151399121,
+            1.0106880427521825,
+            0.979050279329609,
+            0.9827057182705935,
+            0.9823341477166058,
+            0.9547384674772991,
+            0.9728245157560425,
+            0.9890663624263173,
+            1.0214340638215396,
+            0.9643027584231929,
+            0.9817559863169237,
+            0.996447431589099,
+            0.9675984137729803,
+            1.0186073841934011,
+            0.9747055416105052,
+            0.9781478629187957,
+            1.0108674368513575,
+            0.9997100328630097
+          ],
+          "worstPairChangePercent": 2.558451513991211
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -3.4926298000250267,
+            1.2800769971170967
+          ],
+          "equalWorkChangePercent": -0.4675467546737977,
+          "fasterPairs": 4,
+          "medianPairedChangePercent": 0.20728362987840754,
+          "ratios": [
+            0.9649532710280374,
+            0.9832933269323427,
+            1.0057628719886962,
+            0.9650737019997497,
+            1.0232603406326262,
+            1.012800769971171,
+            0.9983828006088722,
+            1.0112871287128944
+          ],
+          "worstPairChangePercent": 2.3260340632626164
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 1,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": true,
+            "absoluteControlMedianWithinFrozenLimit": true,
+            "allOriginalActivationReceipts": true,
+            "atLeastEighteenOfTwentyFourFaster": false,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": true,
+            "pairedMedianAtMostMinusTwoPercent": false,
+            "separateCorrectness": true,
+            "separateMemory": true
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": false
+        }
+      },
+      {
+        "dictionary": "jmdict",
+        "initialOrder": "BA",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -2.2290364429794485,
+            -0.4904306220067878
+          ],
+          "equalWorkChangePercent": -0.3500377491662876,
+          "fasterPairs": 19,
+          "medianPairedChangePercent": -1.3795127740500512,
+          "ratios": [
+            1.0357057843370645,
+            0.9950956937799321,
+            0.9676490904904703,
+            0.9963555137550237,
+            0.9825199436883824,
+            0.9828743346447718,
+            0.9993973725443632,
+            0.9777096355702055,
+            0.9545715928694652,
+            0.9759474363487048,
+            0.9883527454243746,
+            0.9679107080572289,
+            1.0186298785519732,
+            1.0151862118839265,
+            0.98814463544754,
+            0.9920290704490325,
+            0.9738659912503407,
+            0.9787380760832083,
+            0.9842651090714589,
+            0.9518370230806534,
+            0.9949465272065687,
+            1.2236952107965122,
+            0.976574455562205,
+            1.0011820330969268
+          ],
+          "worstPairChangePercent": 22.36952107965122
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -0.03436819795948898,
+            2.9931018356105454
+          ],
+          "equalWorkChangePercent": 1.6533325446191904,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 1.4068771398942026,
+          "ratios": [
+            1.028091937249222,
+            0.9996563180204051,
+            1.0299310183561055,
+            1.0503236838888892,
+            1.0070238095236987,
+            1.0131469856685729,
+            1.0149905571293112,
+            0.9912932435570004
+          ],
+          "worstPairChangePercent": 5.032368388888919
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 1,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": false,
+            "absoluteControlMedianWithinFrozenLimit": false,
+            "allOriginalActivationReceipts": true,
+            "atLeastEighteenOfTwentyFourFaster": true,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": true,
+            "pairedMedianAtMostMinusTwoPercent": false,
+            "separateCorrectness": true,
+            "separateMemory": true
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": false
+        }
+      },
+      {
+        "dictionary": "vndb",
+        "initialOrder": "AB",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -2.581232918319265,
+            -0.20103341141837205
+          ],
+          "equalWorkChangePercent": -1.335163083405566,
+          "fasterPairs": 18,
+          "medianPairedChangePercent": -1.2229636045900216,
+          "ratios": [
+            0.975432333675697,
+            0.9538474406155866,
+            0.957060093150048,
+            0.9913156012669004,
+            1.001397394979725,
+            1.017952012222671,
+            1.0607350694384938,
+            0.9502718864483973,
+            0.9929196239839224,
+            0.9882356861961173,
+            1.0032868657505516,
+            0.9979896658858163,
+            0.9542177534089057,
+            1.0679600175598152,
+            0.9764218862491224,
+            1.0202814217412677,
+            0.9680902969781819,
+            0.9665402485674901,
+            0.9994847331416551,
+            0.9155443675267391,
+            0.9886890715273822,
+            0.9873050417120823,
+            0.9835762202175332,
+            0.9741876708168073
+          ],
+          "worstPairChangePercent": 6.796001755981518
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -1.7116104240392338,
+            2.418868177552125
+          ],
+          "equalWorkChangePercent": -0.598783707589623,
+          "fasterPairs": 5,
+          "medianPairedChangePercent": -0.740886912836336,
+          "ratios": [
+            0.94985076532647,
+            0.9951994340385587,
+            0.9828838957596077,
+            1.0241886817755212,
+            1.0276051746969308,
+            1.0015686274510036,
+            0.9836620547541342,
+            0.9899828277047146
+          ],
+          "worstPairChangePercent": 2.76051746969308
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 3,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": true,
+            "absoluteControlMedianWithinFrozenLimit": true,
+            "allOriginalActivationReceipts": true,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": false,
+            "separateCorrectness": true,
+            "separateMemory": false
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": false
+        }
+      },
+      {
+        "dictionary": "vndb",
+        "initialOrder": "BA",
+        "candidateVsBaseline": {
+          "count": 24,
+          "descriptiveBootstrap95Percent": [
+            -2.3885872995828006,
+            0.19239532175527874
+          ],
+          "equalWorkChangePercent": -1.1276307276754882,
+          "fasterPairs": 15,
+          "medianPairedChangePercent": -1.3332527239237946,
+          "ratios": [
+            0.9478974207375587,
+            0.9794701314520571,
+            0.9572105788423154,
+            0.9616955951172518,
+            1.0014197578667643,
+            1.015184210526319,
+            1.0019239532175528,
+            0.9586356861882661,
+            0.9993168880455526,
+            0.9844374500399853,
+            1.0200769012412705,
+            0.976114127004172,
+            0.9602525364188145,
+            1.0094541885154795,
+            1.0034596047588291,
+            0.9834296923394411,
+            0.9888974954815388,
+            1.0316010875698245,
+            0.9756151903748652,
+            0.9773401152278688,
+            1.0272045733771278,
+            1.016053937158146,
+            0.9922736195700949,
+            0.9686008479709042
+          ],
+          "worstPairChangePercent": 3.1601087569824493
+        },
+        "identicalCodeControl": {
+          "count": 8,
+          "descriptiveBootstrap95Percent": [
+            -1.8377420579667514,
+            1.1572035923624657
+          ],
+          "equalWorkChangePercent": -0.05353251628018585,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.09810703064342396,
+          "ratios": [
+            0.9948751119514437,
+            0.9816225794203325,
+            0.9983609451042691,
+            1.0115720359236247,
+            1.0310900716479017,
+            0.9790083150538069,
+            0.9996994891315353,
+            0.9996769142828624
+          ],
+          "worstPairChangePercent": 3.1090071647901674
+        },
+        "qualification": {
+          "controlAbsoluteLimitPercent": 3,
+          "gates": {
+            "absoluteControlEqualWorkWithinFrozenLimit": true,
+            "absoluteControlMedianWithinFrozenLimit": true,
+            "allOriginalActivationReceipts": true,
+            "completeEightSameCodeControlPairs": true,
+            "completeSourceAndSemantics": true,
+            "completeTwentyFourCandidatePairs": true,
+            "originalJobSucceeded": true,
+            "separateCorrectness": true,
+            "separateMemory": true
+          },
+          "nonTargetMedianSlowdownAboveThreePercent": false,
+          "passesCellPolicy": true
+        }
+      }
+    ]
   },
   "historicalCorrectness": {
     "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
@@ -757,20 +1356,60 @@
     "runPlannerOpportunity": {
       "receipt": "e7792d051320ef037db80d2516ccb8aa9769517f",
       "nominated": false,
-      "implemented": false,
+      "implemented": "Bounded unmeasured draft only, under independent review",
       "measured": false,
       "mechanism": "Absorb the one existing serial JS reference-planning/min-max pass into current C encoder first pass with the same copies, only for complete unsplit compact chunks.",
       "evidence": "Retained f28 twelve JMdict calls exceed30k cap and whole prepared admission raises row limit but does not bypass the loop. No a300 execution claim.",
       "unresolved": "Require callback-free producer-owned prepared-index metadata; current reference provenance does not cover Map/getter callbacks. Stop if broad provenance redesign or extra copies/revalidation are required.",
-      "nativeIndependentFeasibilityReview": "In progress; source-only"
+      "nativeIndependentFeasibilityReview": "Complete: a narrowly owned metadata handoff is conditionally feasible; current proof alone is insufficient.",
+      "nativeIndependentReview": "403df36b26811cf6b562f1e5c27d5654ac45c26f"
+    },
+    "runPlannerPrototype": {
+      "status": "Isolated draft under focused adversarial correctness review; no new performance observations",
+      "baseProduct": "663df294f40e1832ad3e3349d0e061681fed77cb",
+      "baseUpstream": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "implementationOwner": "native_host_review",
+      "reviewOwner": "pipeline_audit",
+      "noNewTimings": true,
+      "noPerformanceRef": true,
+      "noPr": true,
+      "originalStudyUnchanged": true,
+      "allowedValidation": "Focused tests for new admission/lifecycle/ABI boundaries and pinned native reproduction only; no broad suite until independent review",
+      "sourceRequirements": [
+        "Whole compact unsplit chunks only; min/max in existing C first pass with same input/output copies",
+        "Owned result bytes and offset base; persisted format, existing append awaits and session ownership unchanged",
+        "Genuinely producer-owned prepared metadata and receiver renewal; no arbitrary-map branding API",
+        "Current data descriptors/intrinsic typed-view safety including nested plan/view shadows; no extra foreign callbacks",
+        "Completeness callback order and live rowCount check; no validity cache across await",
+        "No deep copies, second row scan or duplicate copied attempt on unchanged fallback",
+        "Producer/receiver registration is candidate-only active work; inactive C must retain stock runtime callers"
+      ],
+      "stopIf": "Safe admission requires broad provenance/transport/lifecycle redesign, copying payloads, another row scan or native run splitting",
+      "performanceNomination": false,
+      "localPath": "/tmp/manabitan-native-fields-fusion-1c413-20261128",
+      "pending": "Final exact-source focused tests and independent review, including proxy input callback parity and current proof at native encode boundary",
+      "harness": {
+        "owner": "whole_owner_benchmark",
+        "status": "Source-independent capture schema, independent Python full-base/header/field oracle and pure tests authorized only",
+        "noActualCapture": true,
+        "noImports": true,
+        "noTimings": true,
+        "noPublicRef": true,
+        "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "candidate": null,
+        "control": null,
+        "design": "Future measured unit must include B-only producer and receiver metadata, actual worker/owner startup/copies/retirement; old field-only captured calls are insufficient",
+        "draftScreen": "Two prospectively defined replications and20ms median CPU savings are unsealed suggestions; no performance acquisition authorization"
+      }
     }
   },
   "next": [
-    "Retain and finish original six-cell run46138650386 without source/gate changes or reruns",
-    "Seal final74-report reader only after all six original artifacts exist and independently review manifest",
-    "Audit all444 reports and apply original per-host gates, controls, media, memory and activation",
-    "Complete isolated a300 integration prep while old-source timings remain scoped to f28",
-    "Open PR only for a worthwhile whole-import gain with appropriate current-source validation"
+    "Preserve closed original study evidence as reachable checkpoint files; no original rerun or PR",
+    "Read existing original JMdict phase counters only to assess remaining opportunity; no new observations",
+    "Complete bounded fusion prototype source/focused correctness review; stop if provenance overhead or redesign becomes broad",
+    "Review source-independent whole-owner capture/oracle design before any fresh untimed capture or broader correctness run",
+    "Only after exact source and correctness, seal any distinct performance protocol before observations",
+    "PR only for a separately qualified worthwhile whole-import gain"
   ],
   "integration": {
     "reviewedDevelop": "a300da36d00df8e353c5679b1528b50a1299b75f",
@@ -804,7 +1443,7 @@
     },
     "rootSourceReview": "adac3f56f626433abdbc354381c36a00e04dd87c",
     "inventorySourceReview": "f23f6dec06f96040faa7ae696b8a042e42484f11",
-    "sourceRefsPublished": false,
+    "sourceRefsPublished": "No dedicated product/performance refs; candidate and control commits are reachable as additional parents of checkpoint9388514",
     "performanceAcquired": false,
     "validation": {
       "receipt": "111c6f9a5100609fff6b5e81a4dbbe8252b075f8",

@@ -1,9 +1,6 @@
 {
   "schemaVersion": 1,
-  "kind": "reachable-evidence-index",
-  "repository": "ManabiIO/manabitan",
-  "observedAt": "2026-11-28 11:43:33 UTC",
-  "scope": "All original evidence retained. Four browser jobs complete and two VNDB jobs remain in progress; full-study qualification undecided, no partial numeric contrasts interpreted. Separate a300 product/control source and local validation are preserved without a timing or fresh-CI claim.",
+  "scope": "Immutable evidence files; no product code, new imports or new timings",
   "files": {
     "current-correctness-result.json": "07161060078f96743419784e04ae5e33d407ddca",
     "current-correctness-completion.json": "af558285347a7e5e941509a5ee69def401bd0014",
@@ -53,6 +50,19 @@
     "browser-jmdict-AB.log": "78da821931d14ebba7494cea14626417de620f04",
     "browser-jmdict-BA.log": "619811c4ab588773bef8c4e515218328a761397b",
     "browser-jitendex-AB.log": "c811984e3116f1d844c6749126748aa97d08b5a4",
-    "browser-jitendex-BA.log": "6c4b9255487e20c5964a36e0f3e3cf25a7e6040c"
+    "browser-jitendex-BA.log": "6c4b9255487e20c5964a36e0f3e3cf25a7e6040c",
+    "run-planner-native-feasibility.json": "403df36b26811cf6b562f1e5c27d5654ac45c26f",
+    "browser-vndb-AB.log": "0f90fd491d3afe5a06722e1fc272a527dcd0c001",
+    "browser-vndb-BA.log": "d6561e9d779ddcd8cac8887259193d27c02dbf1d",
+    "browser-terminal-api.json": "8f62d18f6fb33d91205bb03a0f5e0abe455272ab",
+    "browser-final-result.json": "acbc0b3a88da99a21306615de88e5369f73d559b",
+    "browser-final-audit.log": "3250104a91349578a6a8b52b523dfd4aa0b4a7e3",
+    "browser-final-compact.json": "df1ee2051ea6d41de76e25294495bdf714970ed3",
+    "browser-final-projector.py": "c97033c827bad3ded0b2367a607c65ec6e084842",
+    "browser-final-closure.json": "ccec119fcf84b43e91b4907a456cdf7963bca8a5",
+    "browser-final-independent-arithmetic.json": "f2beb15fc8f605acda3ca5fc0e6fb648f47fffce",
+    "browser-final-source-review.json": "3f5e6682cb68158f4c1247020e9b393431ac5509",
+    "browser-final-pipeline-review.json": "fac458c07b457c5b58d11a902a2360f787f0eb9a",
+    "browser-final-publication-review.json": "effa68f0d0139f95f2b52949160de254f5909077"
   }
 }

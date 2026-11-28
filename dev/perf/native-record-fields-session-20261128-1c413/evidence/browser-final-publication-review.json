@@ -1,0 +1,71 @@
+{
+  "kind": "root-final-six-artifact-reader-publication-review",
+  "passed": true,
+  "head": "139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+  "tree": "696241c0e96212eb79d50f18ebe1eb4b104d9f6f",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "branch": "audit/native-record-fields-browser-20261128-1c413",
+  "exactNineAddedPaths": true,
+  "allEightBindingsVerified": true,
+  "sourceHashes": {
+    ".github/workflows/native-record-fields-browser-audit-1c413.yml": {
+      "blob": "61f724d5d6424bfb17b6e570e552f13ee7f3db73",
+      "bytes": 3988,
+      "sha256": "6560596faf54308523e85f74267a8cbe3b06834c46927327bc4377896d1bce60"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/README.md": {
+      "blob": "24e011dd3b249e138d04988cf2452cb142d50b8f",
+      "bytes": 13353,
+      "sha256": "7b6202225de1676ab4fcbc054fe3b1c9aea4928f0d1d43354fcb39fde56bf499"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/audit_fields_browser.py": {
+      "blob": "003ad2118b61b488545c595044eba7cfeaa050d5",
+      "bytes": 80377,
+      "sha256": "d95980bd01016a53f5b073c8e46b147daf6a0f7bc242bdacd95766c71a1cf97c"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/audit_transport.py": {
+      "blob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+      "bytes": 9875,
+      "sha256": "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/manifest.json": {
+      "blob": "56a31fb082f00f56d280b5d9756aead43458f2e6",
+      "bytes": 10259,
+      "sha256": "c5fcc139c080a7b7aedc4c843f1128d4bd21fe9a465e558d2c307cb48efcefd4"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/qualification_policy.py": {
+      "blob": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
+      "bytes": 7572,
+      "sha256": "e9ff8ca56e33e6bb573a08aa4f1cfd55193de4f4944e4188a332b5eed00409e8"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/source-binding.json": {
+      "blob": "d326ad698c3a566c418da58ebce55194cc92f819",
+      "bytes": 1559,
+      "sha256": "96f4b413d5121a863c06fe1400ed716154eccb3e9ab42deee041e2e645e96523"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/test_audit_fields_browser.py": {
+      "blob": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+      "bytes": 27112,
+      "sha256": "859c0c814c22617a7cf8f894377407b84f804262136d9b36cae3350075379a4c"
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/test_qualification_policy.py": {
+      "blob": "e792a8b60cb690cc7c6b601203805cf2a00f6fa5",
+      "bytes": 10282,
+      "sha256": "e51c40480e2461a4e4d7180e60a3568a992c03a08497787cb9379cc6bf5d7a7e"
+    }
+  },
+  "originalTerminalApi": "8f62d18f6fb33d91205bb03a0f5e0abe455272ab",
+  "allSixOriginalJobArtifactIdentitiesVerified": true,
+  "failedCellRetained": "vndb-AB",
+  "originalStudyCannotQualify": true,
+  "currentCorrectnessReader": "7890ebe21b4bf7d6b694771d7417e2c27c0b2fd6",
+  "currentCorrectnessManifestExact": "1153ad3a761c671ddd3b62dbf85d41dcb207d889",
+  "allProductControlPoliciesUnchanged": true,
+  "callerTestsChange": "One exact acquisition branch literal in each; inverse restores entire original text",
+  "workflowChange": "Remove push.paths and inert if:false; refresh comments. Exact branch retained, complete steps byte-identical.",
+  "noProductOrTimingExecution": true,
+  "inventoryReview": "3f5e6682cb68158f4c1247020e9b393431ac5509",
+  "pipelineReview": "fac458c07b457c5b58d11a902a2360f787f0eb9a",
+  "originalArchiveBytesNotYetReadByThisAuditor": true,
+  "note": "Initial root comparison incorrectly treated the inert null correctness prerequisite as immutable content; inspection established expected placeholder activation, with embedded final manifest byte-equivalent as parsed to exact1153. No source was changed."
+}

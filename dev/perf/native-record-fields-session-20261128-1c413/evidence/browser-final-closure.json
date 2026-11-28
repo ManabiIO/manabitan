@@ -1,0 +1,564 @@
+{
+  "schemaVersion": 1,
+  "kind": "Completed independent records-only audit and frozen native-fields whole-import study closure",
+  "repository": "ManabiIO/manabitan",
+  "recordedAtUtc": "2026-11-28T12:14:12Z",
+  "rootDecision": {
+    "closed": true,
+    "productPullRequest": false,
+    "independentRawArithmeticReviewBlob": "f2beb15fc8f605acda3ca5fc0e6fb648f47fffce"
+  },
+  "originalStudy": {
+    "run": 46138650386,
+    "attempt": 1,
+    "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+    "originalRunConclusion": "failure",
+    "source": {
+      "candidate": {
+        "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+        "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+      },
+      "control": {
+        "commit": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+        "tree": "4c916a995f996afe56cecf0714c20d5b7e5ef346"
+      },
+      "producerSourceDigest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28",
+      "runtimeSha256": {
+        "ext/js/dictionary/dictionary-database.js": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+        "ext/js/dictionary/term-record-fields.js": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+        "ext/js/dictionary/term-record-opfs-store.js": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+        "ext/lib/term-record-fields.wasm": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+      },
+      "upstream": {
+        "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+        "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+      }
+    },
+    "originalJobs": {
+      "jitendex-AB": "success",
+      "jitendex-BA": "success",
+      "jmdict-AB": "success",
+      "jmdict-BA": "success",
+      "vndb-AB": "failure",
+      "vndb-BA": "success"
+    },
+    "originalSixArtifactManifest": {
+      "blob": "56a31fb082f00f56d280b5d9756aead43458f2e6",
+      "sha256": "c5fcc139c080a7b7aedc4c843f1128d4bd21fe9a465e558d2c307cb48efcefd4"
+    },
+    "noRerunsReplacementsExclusionsPoolingOrThresholdChanges": true
+  },
+  "completedReader": {
+    "sourceCommit": "139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+    "sourceTree": "696241c0e96212eb79d50f18ebe1eb4b104d9f6f",
+    "run": 46143319941,
+    "attempt": 1,
+    "head": "139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+    "branch": "audit/native-record-fields-browser-20261128-1c413",
+    "status": "completed",
+    "conclusion": "success",
+    "job": 140973853695,
+    "jobStartedAt": "2026-11-28T12:10:17Z",
+    "jobCompletedAt": "2026-11-28T12:14:11Z",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-11-28T12:10:18Z",
+        "completed_at": "2026-11-28T12:10:20Z"
+      },
+      {
+        "name": "Preserve launcher context before dependency setup",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-11-28T12:10:20Z",
+        "completed_at": "2026-11-28T12:10:20Z"
+      },
+      {
+        "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-11-28T12:10:20Z",
+        "completed_at": "2026-11-28T12:10:26Z"
+      },
+      {
+        "name": "Preserve exact audit source before Python installation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-11-28T12:10:26Z",
+        "completed_at": "2026-11-28T12:10:26Z"
+      },
+      {
+        "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-11-28T12:10:26Z",
+        "completed_at": "2026-11-28T12:10:26Z"
+      },
+      {
+        "name": "Check pure schedule, arithmetic and records-reader logic",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-11-28T12:10:26Z",
+        "completed_at": "2026-11-28T12:10:29Z"
+      },
+      {
+        "name": "Inspect immutable original artifacts and prerequisite records",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-11-28T12:10:29Z",
+        "completed_at": "2026-11-28T12:13:37Z"
+      },
+      {
+        "name": "Preserve every launcher and reader outcome",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-11-28T12:13:37Z",
+        "completed_at": "2026-11-28T12:13:37Z"
+      },
+      {
+        "name": "Preserve source, every original member and all analysis",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-11-28T12:13:37Z",
+        "completed_at": "2026-11-28T12:14:07Z"
+      },
+      {
+        "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17,
+        "started_at": "2026-11-28T12:14:07Z",
+        "completed_at": "2026-11-28T12:14:07Z"
+      },
+      {
+        "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-11-28T12:14:07Z",
+        "completed_at": "2026-11-28T12:14:07Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-11-28T12:14:07Z",
+        "completed_at": "2026-11-28T12:14:09Z"
+      }
+    ],
+    "pureTests": {
+      "count": 33,
+      "passed": true,
+      "exactLog": "Ran 33 tests in 2.041s\\nOK",
+      "networkOrProductAcquisition": false
+    },
+    "artifact": {
+      "id": 15262653489,
+      "node_id": "MDg6QXJ0aWZhY3QxNTI2MjY1MzQ4OQ==",
+      "name": "native-fields-browser-records-audit-139cb978054b9bbf32918e4872e0bce0a2bc3c48",
+      "size_in_bytes": 512542682,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262653489",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262653489/zip",
+      "expired": false,
+      "digest": "sha256:b567ca8f229693d6334b9e75c06263184050bbb8aca9b8339f9074ab1c59748b",
+      "created_at": "2026-11-28T12:14:07Z",
+      "updated_at": "2026-11-28T12:14:07Z",
+      "expires_at": "2026-12-12T12:13:38Z",
+      "workflow_run": {
+        "id": 46143319941,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "audit/native-record-fields-browser-20261128-1c413",
+        "head_sha": "139cb978054b9bbf32918e4872e0bce0a2bc3c48"
+      }
+    },
+    "noNewBrowserImportOrTiming": true,
+    "auditEvidenceValidated": true,
+    "errors": []
+  },
+  "preservedEvidence": {
+    "fullOriginalStdoutJson": {
+      "blob": "acbc0b3a88da99a21306615de88e5369f73d559b",
+      "bytes": 1706200,
+      "sha256": "4e450ac7210460d7458c31f5a0a6866e508cf683f2f47dede70ab0f5e39e2dd7"
+    },
+    "completeJobLog": {
+      "blob": "3250104a91349578a6a8b52b523dfd4aa0b4a7e3",
+      "bytes": 1737750,
+      "sha256": "b4ca1d01c3884e11d5139a19b025ebfcdd663a61026586d3a2d217385e21f67b"
+    },
+    "compactEveryOriginalRecord": {
+      "blob": "df1ee2051ea6d41de76e25294495bdf714970ed3",
+      "bytes": 290703,
+      "sha256": "9ab52dfb84395260418322ea96c13d8b5710df2bc499fa56fe733ae3ae02d720"
+    },
+    "pureCompactProjectionAndRecomputationSource": {
+      "blob": "c97033c827bad3ded0b2367a607c65ec6e084842",
+      "bytes": 6669,
+      "sha256": "d47281910527a3b9d19044ed5771d70200a7b19a85b66e6a3083171ea560e86c"
+    },
+    "allRawArchivesAndMembers": "Retained in exact successful audit artifact; no downloaded original cache or evidence removed by this closure."
+  },
+  "completeCounts": {
+    "reports": 444,
+    "candidateReports": 288,
+    "controlReports": 96,
+    "warmupReports": 24,
+    "fullMediaReports": 12,
+    "memoryReports": 24,
+    "candidateImports": 174,
+    "nativeCalls": 13108,
+    "nativeRows": 441563512,
+    "readinessJavascriptCalls": 0,
+    "declaredFallbackCalls": 0
+  },
+  "verification": {
+    "allSixArtifactsAndSourcePackageMapsValidated": true,
+    "all444SemanticsPassed": true,
+    "all444ActivationReceiptsPassed": true,
+    "all174CandidateImportsFullyNative": true,
+    "allTwelveContrastsRecomputedFromRawRows": true,
+    "recomputationTolerance": 1e-10,
+    "separateComponentAndCurrentCorrectnessPrerequisitesPassed": true
+  },
+  "cells": [
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "originalJob": 140959486757,
+      "originalConclusion": "success",
+      "originalArtifact": 15261002204,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -0.5098756774688629,
+        "equalWorkChangePercent": -0.5718910315005488,
+        "fasterPairs": 13,
+        "baselineMedianMs": 1542.4500000000116,
+        "comparisonMedianMs": 1536.2000000000116,
+        "medianPairedSavingMs": 7.800000000017462
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": -0.36746785372706037,
+        "equalWorkChangePercent": -0.6248990796066556,
+        "fasterPairs": 7,
+        "baselineMedianMs": 1550.8000000000175,
+        "comparisonMedianMs": 1539.5499999999884,
+        "medianPairedSavingMs": 5.649999999994179
+      },
+      "descriptiveBootstrap95Percent": [
+        -1.6799581644629136,
+        0.23817186997179274
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": true,
+      "failedMemoryObservations": [],
+      "failedFrozenGates": [],
+      "cellPassesFrozenPolicy": true
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "originalJob": 140959486747,
+      "originalConclusion": "success",
+      "originalArtifact": 15261327053,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -1.0189215528973283,
+        "equalWorkChangePercent": -1.5347278199498882,
+        "fasterPairs": 15,
+        "baselineMedianMs": 1420.000000000029,
+        "comparisonMedianMs": 1406.8999999999942,
+        "medianPairedSavingMs": 14.300000000017462
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": 0.29716471059546,
+        "equalWorkChangePercent": 5.46093681342823,
+        "fasterPairs": 4,
+        "baselineMedianMs": 1411.3499999999767,
+        "comparisonMedianMs": 1423.8999999999942,
+        "medianPairedSavingMs": -4.300000000017462
+      },
+      "descriptiveBootstrap95Percent": [
+        -2.713043478260868,
+        0.38707861214721806
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": true,
+      "failedMemoryObservations": [],
+      "failedFrozenGates": [
+        "absoluteControlEqualWorkWithinFrozenLimit"
+      ],
+      "cellPassesFrozenPolicy": false
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "originalJob": 140959486760,
+      "originalConclusion": "success",
+      "originalArtifact": 15261037077,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -0.9970896162149356,
+        "equalWorkChangePercent": -0.8144436490890361,
+        "fasterPairs": 17,
+        "baselineMedianMs": 1046.600000000035,
+        "comparisonMedianMs": 1042.7000000000407,
+        "medianPairedSavingMs": 10.5
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": 0.20728362987841864,
+        "equalWorkChangePercent": -0.4675467546737977,
+        "fasterPairs": 4,
+        "baselineMedianMs": 1046.3499999999767,
+        "comparisonMedianMs": 1041,
+        "medianPairedSavingMs": -2.2000000000407454
+      },
+      "descriptiveBootstrap95Percent": [
+        -1.8244013683076266,
+        -0.028996713699025456
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": true,
+      "failedMemoryObservations": [],
+      "failedFrozenGates": [
+        "atLeastEighteenOfTwentyFourFaster",
+        "pairedMedianAtMostMinusTwoPercent"
+      ],
+      "cellPassesFrozenPolicy": false
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "originalJob": 140959486803,
+      "originalConclusion": "success",
+      "originalArtifact": 15261001868,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -1.3795127740500512,
+        "equalWorkChangePercent": -0.3500377491662876,
+        "fasterPairs": 19,
+        "baselineMedianMs": 849.3499999999767,
+        "comparisonMedianMs": 839,
+        "medianPairedSavingMs": 11.599999999976717
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": 1.4068771398942026,
+        "equalWorkChangePercent": 1.6533325446191904,
+        "fasterPairs": 2,
+        "baselineMedianMs": 845.7500000000582,
+        "comparisonMedianMs": 857.6499999999651,
+        "medianPairedSavingMs": -11.899999999965075
+      },
+      "descriptiveBootstrap95Percent": [
+        -2.2290364429794485,
+        -0.4904306220067878
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": true,
+      "failedMemoryObservations": [],
+      "failedFrozenGates": [
+        "absoluteControlEqualWorkWithinFrozenLimit",
+        "absoluteControlMedianWithinFrozenLimit",
+        "pairedMedianAtMostMinusTwoPercent"
+      ],
+      "cellPassesFrozenPolicy": false
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "originalJob": 140959486645,
+      "originalConclusion": "failure",
+      "originalArtifact": 15261819804,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -1.222963604590016,
+        "equalWorkChangePercent": -1.335163083405566,
+        "fasterPairs": 18,
+        "baselineMedianMs": 6017.59999999986,
+        "comparisonMedianMs": 5941.500000000116,
+        "medianPairedSavingMs": 73.79999999969732
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": -0.740886912836336,
+        "equalWorkChangePercent": -0.598783707589623,
+        "fasterPairs": 5,
+        "baselineMedianMs": 5962.449999999837,
+        "comparisonMedianMs": 5976.500000000058,
+        "medianPairedSavingMs": 43.99999999970896
+      },
+      "descriptiveBootstrap95Percent": [
+        -2.581232918319265,
+        -0.20103341141837205
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": false,
+      "failedMemoryObservations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "benchmarkExitCode": 0,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "maximumCoveredSampleGapMs": 277.954603,
+          "allObservedSampleCount": 106,
+          "fullyContainedImportSampleCount": 36,
+          "stableFullyReadImportSampleCount": 36,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "benchmarkExitCode": 0,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "maximumCoveredSampleGapMs": 251.152134,
+          "allObservedSampleCount": 107,
+          "fullyContainedImportSampleCount": 37,
+          "stableFullyReadImportSampleCount": 37,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "benchmarkExitCode": 0,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "maximumCoveredSampleGapMs": 300.373316,
+          "allObservedSampleCount": 104,
+          "fullyContainedImportSampleCount": 36,
+          "stableFullyReadImportSampleCount": 36,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0
+        }
+      ],
+      "failedFrozenGates": [
+        "originalJobSucceeded",
+        "separateMemory"
+      ],
+      "cellPassesFrozenPolicy": false
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "originalJob": 140959486755,
+      "originalConclusion": "success",
+      "originalArtifact": 15261787471,
+      "candidateVsBaseline": {
+        "count": 24,
+        "medianPairedChangePercent": -1.3332527239237946,
+        "equalWorkChangePercent": -1.1276307276754882,
+        "fasterPairs": 15,
+        "baselineMedianMs": 3966.95000000007,
+        "comparisonMedianMs": 3932.25,
+        "medianPairedSavingMs": 52.649999999965075
+      },
+      "identicalCodeControl": {
+        "count": 8,
+        "medianPairedChangePercent": -0.09810703064342396,
+        "equalWorkChangePercent": -0.05353251628018585,
+        "fasterPairs": 6,
+        "baselineMedianMs": 3970.4000000000233,
+        "comparisonMedianMs": 3995.5,
+        "medianPairedSavingMs": 3.900000000023283
+      },
+      "descriptiveBootstrap95Percent": [
+        -2.3885872995828006,
+        0.19239532175527874
+      ],
+      "semanticAndActivationPassed": true,
+      "memoryPassed": true,
+      "failedMemoryObservations": [],
+      "failedFrozenGates": [],
+      "cellPassesFrozenPolicy": true
+    }
+  ],
+  "qualification": {
+    "gates": {
+      "allProspectivePrerequisitesVerified": true,
+      "allSixCellPoliciesPass": false,
+      "allSixOriginalCellsAudited": true,
+      "noRepeatedNonTargetRegression": true,
+      "separateFullCorrectness": true
+    },
+    "policy": {
+      "controlPairsPerHost": 8,
+      "measuredPairsPerHost": 24,
+      "noRetriesReplacementsExclusionsOrPooling": true,
+      "nonTargetAbsoluteControlEqualWorkAtMost": 3,
+      "nonTargetAbsoluteControlMedianAtMost": 3,
+      "originalHostsPerDictionary": 2,
+      "originalReportsByArm": {
+        "A": 37,
+        "B": 29,
+        "C": 8
+      },
+      "originalReportsPerCell": 74,
+      "primaryTarget": "jmdict",
+      "repeatedNonTargetDefinition": "Paired-median slowdown greater than 3 percent for the same dictionary on both original hosts",
+      "repeatedNonTargetRegressionPercent": 3,
+      "requireAllSixSourceSemanticMediaMemoryActivationCells": true,
+      "requireCompletedComponentNominationAndArtifactAudit": true,
+      "requireSeparateFullCorrectness": true,
+      "scope": "Complete browser import qualification of the original frozen fields study; component measurements do not substitute for whole-import evidence.",
+      "targetAbsoluteControlEqualWorkAtMost": 1,
+      "targetAbsoluteControlMedianAtMost": 1,
+      "targetFasterPairsAtLeast": 18,
+      "targetMedianChangePercentAtMost": -2
+    },
+    "productPrAuthorizedByReader": false,
+    "qualifiesFrozenStudy": false,
+    "repeatedNonTargetRegressions": []
+  },
+  "disposition": {
+    "frozenStudyQualified": false,
+    "candidateClosed": true,
+    "productPullRequest": false,
+    "reasons": [
+      "Both primary JMdict hosts miss the frozen 2 percent paired-median improvement; AB also has 17 of 24 faster pairs instead of at least 18.",
+      "JMdict BA same-code median and equal-work changes exceed the frozen 1 percent limits.",
+      "Jitendex BA same-code equal-work change exceeds the frozen 3 percent limit.",
+      "VNDB AB retains its original strict-memory acquisition failure: three covered import scan gaps exceed 250 ms. This is incomplete sampled memory coverage, not a measured memory regression."
+    ],
+    "limitations": [
+      "Original hosts are kept separate; no pooling, same-code subtraction, discarded pairs, replacement imports or retuned gates.",
+      "Native activation is complete on every candidate import; no fallback/readiness omission explains the primary result.",
+      "The component CPU gain remains separately valid but does not satisfy the complete browser-import gate.",
+      "The later a300 integration and any new fusion prototype are separate source studies and are not covered by this f28 result."
+    ]
+  }
+}
