@@ -1,0 +1,18 @@
+[
+  {
+    "label": "baseline",
+    "reads": 1,
+    "error": {
+      "name": "Error",
+      "message": "Unexpected fixed base getter"
+    },
+    "fused": 0,
+    "appends": 0
+  },
+  {
+    "label": "candidate",
+    "reads": 0,
+    "fused": 128,
+    "appends": 1
+  }
+]

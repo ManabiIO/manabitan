@@ -1,0 +1,51 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(process.env.FUSION_EVIDENCE_ROOT || 'dev/perf/import-fused-fields-20261128-d2d13264');
+const api = Function(fs.readFileSync(path.join(root, 'helper-harness.js.txt'), 'utf8'))();
+const totalRows = 528299;
+const output = [];
+let checksum = 0;
+for (const aliasRows of [1, 2, 4]) {
+    const chunks = [];
+    let remaining = totalRows;
+    for (let group = 0; group < 12; ++group) {
+        const count = Math.ceil(remaining / (12 - group));
+        remaining -= count;
+        const uniqueCount = Math.ceil(count / aliasRows);
+        chunks.push(api.factory(
+            {rowCount: count, scoreList: Int32Array.from({length: count}, (_, i) => i % 11 - 5)},
+            Uint32Array.from({length: count}, (_, i) => Math.floor(i / aliasRows)),
+            Float64Array.from({length: uniqueCount}, (_, i) => 2 ** 40 + i * 51),
+            Uint32Array.from({length: uniqueCount}, (_, i) => i % 31),
+        ));
+    }
+    const encoder = new api.Encoder();
+    const replay = (arm) => {
+        for (const chunk of chunks) {
+            const selected = arm === 'A' ? api.selectBaselineWholeRun(chunk) : null;
+            const fields = selected === null ?
+                api.fused(chunk, chunk.rowCount).recordFields :
+                encoder._encodeArtifactRecordFields(chunk, [], [], selected.contentOffsetBase);
+            checksum ^= fields.length ^ fields[fields.length - 1];
+        }
+    };
+    for (let i = 0; i < 4; ++i) { replay('A'); replay('B'); }
+    const pairs = [];
+    const replaysPerObservation = 6;
+    const measure = (arm) => {
+        const start = performance.now();
+        for (let i = 0; i < replaysPerObservation; ++i) { replay(arm); }
+        return performance.now() - start;
+    };
+    for (let pair = 0; pair < 8; ++pair) {
+        const order = pair % 2 ? 'BA' : 'AB';
+        const times = {};
+        for (const arm of order) { times[arm] = measure(arm); }
+        pairs.push({order, aMs: times.A, bMs: times.B, ratio: times.B / times.A});
+    }
+    output.push({aliasRows, totalRows, chunks: chunks.length, replaysPerObservation, pairs});
+}
+console.log(JSON.stringify({
+    scope: 'Optional synthetic helper experiment on current archived helper. Not a complete import or a rerun of the earlier exploratory V8 observations; this explicitly defined workload was archived after the first probe.',
+    checksum, output,
+}, null, 2));

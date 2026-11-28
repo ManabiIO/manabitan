@@ -1,0 +1,91 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(process.env.FUSION_EVIDENCE_ROOT || 'dev/perf/import-fused-fields-20261128-d2d13264');
+const api = Function(fs.readFileSync(path.join(root, 'helper-harness.js.txt'), 'utf8'))();
+function runHelperOracle(api) {
+    let seed = 0x17bb39a1;
+    const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed; };
+    function fixture(count, uniqueCount, mode = 0) {
+        const base = [0, 17, 2 ** 40, Number.MAX_SAFE_INTEGER - 2000000][mode % 4];
+        const offsets = Float64Array.from({length: uniqueCount}, (_, i) => base + ((i * 53) % 1000000));
+        const lengths = Uint32Array.from({length: uniqueCount}, (_, i) => i % 32);
+        const ids = Uint32Array.from({length: count}, (_, i) => mode % 3 === 0 ? Math.floor(i / 3) % uniqueCount : random() % uniqueCount);
+        const values = [0, -256, 255, 256, -257, -2147483648, 2147483647, 7];
+        const scores = Int32Array.from({length: count}, (_, i) => values[(i + mode) % values.length]);
+        return api.factory({rowCount: count, scoreList: scores}, ids, offsets, lengths);
+    }
+    const records = [];
+    function examine(name, chunk) {
+        let baseline, actual, baselineError, actualError;
+        try {
+            const selected = api.selectBaselineWholeRun(chunk);
+            baseline = selected.runEnd === chunk.rowCount ?
+                {...selected, fields: new api.Encoder()._encodeArtifactRecordFields(chunk, [], [], selected.contentOffsetBase)} :
+                selected;
+        } catch (error) { baselineError = {name: error.name, message: error.message}; }
+        try { actual = api.fused(chunk, chunk.rowCount); }
+        catch (error) { actualError = {name: error.name, message: error.message}; }
+        let outcome, pass;
+        if (actualError) {
+            outcome = 'error';
+            pass = JSON.stringify(actualError) === JSON.stringify(baselineError);
+        } else if (actual === null) {
+            outcome = 'fallback';
+            pass = true;
+        } else {
+            outcome = 'compact';
+            pass = !baselineError && Boolean(baseline.fields) &&
+                Object.is(baseline.contentOffsetBase, actual.contentOffsetBase) &&
+                baseline.fields.length === actual.recordFields.length &&
+                baseline.fields.every((byte, i) => byte === actual.recordFields[i]);
+        }
+        records.push({
+            name, rowCount: chunk.rowCount, outcome, pass,
+            baselineError, actualError,
+            baselineBase: baseline?.contentOffsetBase,
+            candidateBase: actual?.contentOffsetBase,
+            baselineRunEnd: baseline?.runEnd,
+            baselineBytes: baseline?.fields?.length,
+            candidateBytes: actual?.recordFields?.length,
+        });
+    }
+    for (let i = 0; i < 2000; ++i) {
+        const count = 1 + random() % 1024;
+        const unique = 1 + random() % Math.min(count, 71);
+        const chunk = fixture(count, unique, i);
+        const references = chunk.resolvedContentReferences;
+        if (i % 17 === 0) { references.offsets[random() % unique] = -1; }
+        if (i % 23 === 0) { references.lengths[random() % unique] = 65534; }
+        if (i % 29 === 0) { references.lengths[random() % unique] = 65535; }
+        if (i % 31 === 0) { references.offsets[random() % unique] = Number.NaN; }
+        if (i % 37 === 0) { references.offsets[random() % unique] = -2; }
+        if (i % 41 === 0) { references.offsets[random() % unique] = 0.25; }
+        if (i % 43 === 0) { references.lengths[random() % unique] = 0xffffffff; }
+        if (i % 47 === 0) { references.uniqueIndexList[random() % count] = unique; }
+        if (i % 53 === 0 && unique > 1) {
+            references.offsets[0] = 0; references.offsets[1] = 0xffffffff;
+            references.uniqueIndexList[0] = 0; references.uniqueIndexList[1] = 1;
+        }
+        examine('generated-' + i, chunk);
+    }
+    for (const count of [1, 4, 5, 63, 64, 65, 65534, 65535, 65536]) {
+        const chunk = fixture(count, count);
+        chunk.scoreList = Int32Array.from({length: count}, (_, i) => i - 32768);
+        examine('distinct-scores-' + count, chunk);
+    }
+    for (const pair of [[0, 0xfffffffe], [17, 17 + 0xfffffffe], [0, 0xffffffff], [Number.MAX_SAFE_INTEGER - 0xfffffffe, Number.MAX_SAFE_INTEGER]]) {
+        const chunk = fixture(128, 2);
+        chunk.resolvedContentReferences.offsets.set(pair);
+        examine('offset-boundary-' + pair.join(':'), chunk);
+    }
+    for (const offset of [Number.NaN, Infinity, -Infinity, -2, 0.5, Number.MAX_SAFE_INTEGER + 1]) {
+        const chunk = fixture(128, 2);
+        chunk.resolvedContentReferences.uniqueIndexList.fill(1);
+        chunk.resolvedContentReferences.offsets[1] = offset;
+        examine('invalid-offset-' + offset, chunk);
+    }
+    return {seed: 0x17bb39a1, generatedCases: 2000, cases: records.length, records};
+}
+const result = runHelperOracle(api);
+console.log(JSON.stringify(result, null, 2));
+if (result.records.some((record) => !record.pass)) { process.exitCode = 1; }

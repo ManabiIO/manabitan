@@ -1,0 +1,485 @@
+[
+  {
+    "mode": "default",
+    "pass": false,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "appendMismatch": true
+  },
+  {
+    "mode": "unbranded-entry",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "proxy-entry",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 3,
+    "candidateReads": 3,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "proxy-map",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 3,
+    "candidateReads": 3,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "map-get-hook",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 1,
+    "candidateReads": 1,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "entry-plan-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 2,
+    "candidateReads": 2,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "entry-bytes-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 1,
+    "candidateReads": 1,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "plain-chunk",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "proxy-chunk",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 386,
+    "candidateReads": 386,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "row-count-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 1,
+    "candidateReads": 1,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "fixed-length-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 128,
+    "candidateReads": 128,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "own-encoder",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "own-field-encoder",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "subclass-store",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "proxy-store",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "zero-length",
+    "pass": false,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "appendMismatch": true
+  },
+  {
+    "mode": "sentinel-offsets",
+    "pass": false,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "appendMismatch": true
+  },
+  {
+    "mode": "negative-zero",
+    "pass": false,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "appendMismatch": true
+  },
+  {
+    "mode": "large-length",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "invalid-length",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content length: 4294967295"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content length: 4294967295"
+    }
+  },
+  {
+    "mode": "max-delta",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "split-delta",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "bad-after-split",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "non-finite",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    }
+  },
+  {
+    "mode": "fractional",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: 0.5"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: 0.5"
+    }
+  },
+  {
+    "mode": "bad-index",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid resolved term content reference index: 64"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid resolved term content reference index: 64"
+    }
+  },
+  {
+    "mode": "out-of-range-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "negative-zero-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "distinct-scores",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "late-invalid-after-legacy",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    }
+  },
+  {
+    "mode": "short-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "offset-length-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 128,
+    "candidateReads": 128,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  },
+  {
+    "mode": "throwing-offset-buffer",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    },
+    "candidateError": {
+      "name": "ReferenceError",
+      "message": "hasResolvedContentReferences is not defined"
+    }
+  }
+]

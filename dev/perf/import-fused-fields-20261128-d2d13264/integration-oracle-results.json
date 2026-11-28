@@ -1,0 +1,345 @@
+[
+  {
+    "mode": "default",
+    "pass": true,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "unbranded-entry",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "proxy-entry",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 5,
+    "candidateReads": 5
+  },
+  {
+    "mode": "proxy-map",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 4,
+    "candidateReads": 4
+  },
+  {
+    "mode": "map-get-hook",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 2,
+    "candidateReads": 2
+  },
+  {
+    "mode": "entry-plan-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 3,
+    "candidateReads": 3
+  },
+  {
+    "mode": "entry-bytes-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 2,
+    "candidateReads": 2
+  },
+  {
+    "mode": "plain-chunk",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "proxy-chunk",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 906,
+    "candidateReads": 906
+  },
+  {
+    "mode": "row-count-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 5,
+    "candidateReads": 5
+  },
+  {
+    "mode": "fixed-length-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 256,
+    "candidateReads": 256
+  },
+  {
+    "mode": "own-encoder",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "own-field-encoder",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 1,
+    "candidateReads": 1
+  },
+  {
+    "mode": "subclass-store",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "proxy-store",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "zero-length",
+    "pass": true,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "sentinel-offsets",
+    "pass": true,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "negative-zero",
+    "pass": true,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "large-length",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "invalid-length",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content length: 4294967295"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content length: 4294967295"
+    }
+  },
+  {
+    "mode": "max-delta",
+    "pass": true,
+    "fused": 128,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "split-delta",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "bad-after-split",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    }
+  },
+  {
+    "mode": "non-finite",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    }
+  },
+  {
+    "mode": "fractional",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: 0.5"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: 0.5"
+    }
+  },
+  {
+    "mode": "bad-index",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid resolved term content reference index: 64"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid resolved term content reference index: 64"
+    }
+  },
+  {
+    "mode": "out-of-range-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "negative-zero-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "distinct-scores",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "late-invalid-after-legacy",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0,
+    "baselineError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    },
+    "candidateError": {
+      "name": "RangeError",
+      "message": "Invalid term content offset: NaN"
+    }
+  },
+  {
+    "mode": "short-score",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "offset-length-getter",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 257,
+    "candidateReads": 257
+  },
+  {
+    "mode": "throwing-offset-buffer",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "throwing-fixed-base",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 1,
+    "candidateReads": 1,
+    "baselineError": {
+      "name": "Error",
+      "message": "Unexpected fixed base getter"
+    },
+    "candidateError": {
+      "name": "Error",
+      "message": "Unexpected fixed base getter"
+    }
+  },
+  {
+    "mode": "changing-fixed-base",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 2,
+    "candidateReads": 2
+  },
+  {
+    "mode": "proxy-offsets",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 518,
+    "candidateReads": 518
+  },
+  {
+    "mode": "proxy-scores",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 131,
+    "candidateReads": 131
+  },
+  {
+    "mode": "offset-buffer-proxy-prototype",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 2,
+    "candidateReads": 2
+  },
+  {
+    "mode": "entry-prototype",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "swapped-null-bytes",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  },
+  {
+    "mode": "swapped-null-plan",
+    "pass": true,
+    "fused": 0,
+    "baselineReads": 0,
+    "candidateReads": 0
+  }
+]

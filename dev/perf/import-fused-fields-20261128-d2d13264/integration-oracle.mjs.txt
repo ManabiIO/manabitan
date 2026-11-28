@@ -1,0 +1,67 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(process.env.FUSION_EVIDENCE_ROOT || 'dev/perf/import-fused-fields-20261128-d2d13264');
+const baseline = Function(fs.readFileSync(path.join(root, 'integration-baseline-harness.js.txt'), 'utf8'))();
+const candidate = Function(fs.readFileSync(path.join(root, 'integration-candidate-harness.js.txt'), 'utf8'))();
+function make(api,mode,count=128){
+ const unique=Math.max(1,Math.ceil(count/2));
+ const plan={stringLengths:Uint16Array.of(1),stringsBuffer:Uint8Array.of(97),expressionIndexes:new Uint32Array(count),readingIndexes:new Uint32Array(count)};
+ const prepared=api.preparedFactory(Uint8Array.of(8,6,7,5,3,0,9),plan);
+ let indexes=new Map([[`0:${count}`,prepared]]);
+ const offsets=Float64Array.from({length:unique},(_,i)=>2**40+i*19),lengths=Uint32Array.from({length:unique},(_,i)=>i%31),ids=Uint32Array.from({length:count},(_,i)=>Math.floor(i/2));
+ let chunk=api.factory({dictionary:"oracle",rowCount:count,expressionBytesList:new Array(count).fill(Uint8Array.of(97)),readingBytesList:new Array(count).fill(Uint8Array.of(97)),readingEqualsExpressionList:new Uint8Array(count).fill(1),scoreList:Int32Array.from({length:count},(_,i)=>i%7-3),sequenceList:new Int32Array(count).fill(-1)},ids,offsets,lengths,indexes);
+ let store=new api.Store();let reads=0;
+ switch(mode){
+ case "unbranded-entry":indexes=new Map([[`0:${count}`,{bytes:prepared.bytes,preinternedPlan:plan}]]);break;
+ case "proxy-entry":indexes=new Map([[`0:${count}`,new Proxy(prepared,{get(t,k,r){reads++;return Reflect.get(t,k,r);}})]]);break;
+ case "proxy-map":{const original=indexes;indexes=new Proxy(original,{get(t,k){reads++;const v=Reflect.get(t,k,t);return typeof v==="function"?v.bind(t):v;}});break;}
+ case "map-get-hook":{const get=indexes.get;indexes.get=function(k){reads++;if(reads===2)offsets[0]=27;return get.call(this,k);};break;}
+ case "entry-plan-getter":Object.defineProperty(prepared,"preinternedPlan",{get(){reads++;if(reads===3)offsets[0]=27;return plan;}});break;
+ case "entry-bytes-getter":{const bytes=prepared.bytes;Object.defineProperty(prepared,"bytes",{get(){reads++;return bytes;}});break;}
+ case "plain-chunk":chunk={...chunk};break;
+ case "proxy-chunk":chunk=new Proxy(chunk,{get(t,k,r){reads++;return Reflect.get(t,k,r);}});break;
+ case "row-count-getter":Object.defineProperty(chunk,"rowCount",{get(){reads++;return count;}});break;
+ case "throwing-fixed-base":Object.defineProperty(chunk,"fixedContentOffsetBase",{get(){reads++;throw new Error("Unexpected fixed base getter");}});break;
+ case "changing-fixed-base":Object.defineProperty(chunk,"fixedContentOffsetBase",{get(){reads++;if(reads===2)offsets[0]=Number.NaN;return undefined;}});break;
+ case "proxy-offsets":chunk.resolvedContentReferences.offsets=new Proxy(offsets,{getPrototypeOf(t){reads++;return Reflect.getPrototypeOf(t);},get(t,k){reads++;return Reflect.get(t,k,t);}});break;
+ case "proxy-scores":chunk.scoreList=new Proxy(chunk.scoreList,{getPrototypeOf(t){reads++;return Reflect.getPrototypeOf(t);},get(t,k){reads++;return Reflect.get(t,k,t);}});break;
+ case "offset-buffer-proxy-prototype":Object.setPrototypeOf(offsets.buffer,new Proxy(ArrayBuffer.prototype,{getPrototypeOf(t){reads++;return Reflect.getPrototypeOf(t);}}));break;
+ case "entry-prototype":Object.setPrototypeOf(prepared,{});break;
+ case "swapped-null-bytes":Object.defineProperty(indexes,"size",{get(){indexes.set(`0:${count}`,api.preparedFactory(null,plan));return 1;}});break;
+ case "swapped-null-plan":Object.defineProperty(indexes,"size",{get(){indexes.set(`0:${count}`,api.preparedFactory(prepared.bytes,null));return 1;}});break;
+ case "fixed-length-getter":Object.defineProperty(chunk,"fixedContentLength",{get(){reads++;return undefined;}});break;
+ case "own-encoder":{const fn=store._encodeArtifactChunkRecords;store._encodeArtifactChunkRecords=async function(...args){offsets[0]=27;return await fn.apply(this,args);};break;}
+ case "own-field-encoder":{const fn=store._encodeArtifactRecordFields;store._encodeArtifactRecordFields=function(...args){reads++;return fn.apply(this,args);};break;}
+ case "subclass-store":{class Sub extends api.Store{}store=new Sub();break;}
+ case "proxy-store":store=new Proxy(store,{});break;
+ case "zero-length":lengths.fill(0);break;
+ case "sentinel-offsets":offsets.fill(-1);break;
+ case "negative-zero":offsets.fill(-0);break;
+ case "large-length":lengths[0]=65535;break;
+ case "invalid-length":lengths[0]=0xffffffff;break;
+ case "max-delta":offsets.fill(0);offsets[0]=0;offsets[1]=0xfffffffe;break;
+ case "split-delta":offsets[0]=0;offsets[1]=0xffffffff;break;
+ case "bad-after-split":offsets[0]=0;offsets[1]=0xffffffff;offsets[2]=Number.NaN;break;
+ case "non-finite":offsets[unique-1]=Number.NaN;break;
+ case "fractional":offsets[unique-1]=0.5;break;
+ case "bad-index":ids[count-1]=unique;break;
+ case "out-of-range-score":chunk.scoreList=new Float64Array(count).fill(0.5);break;
+ case "negative-zero-score":chunk.scoreList=new Float64Array(count).fill(-0);break;
+ case "distinct-scores":chunk.scoreList=Int32Array.from({length:count},(_,i)=>i);break;
+ case "late-invalid-after-legacy":lengths[0]=65535;offsets[unique-1]=Number.NaN;break;
+ case "short-score":chunk.scoreList=new Int32Array(count-1);break;
+ case "offset-length-getter":Object.defineProperty(offsets,"length",{get(){reads++;return unique;}});break;
+ case "throwing-offset-buffer":Object.defineProperty(offsets,"buffer",{get(){reads++;throw new Error("Unexpected buffer getter");}});break;
+ }
+ return{store,chunk,indexes,getReads:()=>reads};
+}
+function serial(value){return JSON.stringify(value,(_key,v)=>ArrayBuffer.isView(v)?{type:v.constructor.name,values:Array.from(v)}:v);}
+async function run(api,mode,count){const x=make(api,mode,count);let metrics,error;try{metrics=await x.store._encodeAndAppendArtifactChunkForState({},x.chunk,1,[],[],null,"raw",x.indexes);}catch(e){error={name:e.name,message:e.message};}return{append:serial(x.store.captured),error,reads:x.getReads(),fused:metrics?.fusedRecordFieldRows??0};}
+const modes = ["default","unbranded-entry","proxy-entry","proxy-map","map-get-hook","entry-plan-getter","entry-bytes-getter","plain-chunk","proxy-chunk","row-count-getter","fixed-length-getter","own-encoder","own-field-encoder","subclass-store","proxy-store","zero-length","sentinel-offsets","negative-zero","large-length","invalid-length","max-delta","split-delta","bad-after-split","non-finite","fractional","bad-index","out-of-range-score","negative-zero-score","distinct-scores","late-invalid-after-legacy","short-score","offset-length-getter","throwing-offset-buffer","throwing-fixed-base","changing-fixed-base","proxy-offsets","proxy-scores","offset-buffer-proxy-prototype","entry-prototype","swapped-null-bytes","swapped-null-plan"];
+const results=[];
+for (const mode of modes) {
+ const a = await run(baseline,mode,128), b = await run(candidate,mode,128);
+ results.push({mode, pass:a.append===b.append && JSON.stringify(a.error)===JSON.stringify(b.error) && a.reads===b.reads, baseline:a, candidate:b});
+}
+console.log(JSON.stringify({cases:results.length,passed:results.filter(r=>r.pass).length,results},null,2));
+if(results.some(r=>!r.pass)){process.exitCode=1;}

@@ -1,0 +1,155 @@
+{
+  "scope": "Exploratory initial helper in functions V8; before admission hardening; workload source not frozen. Not exact-source final-candidate evidence and not an import speedup.",
+  "warmupReplaysPerArm": 4,
+  "initialOrder": "AB",
+  "alternatePairs": true,
+  "observations": [
+    {
+      "aliasRows": 1,
+      "replaysPerObservation": 6,
+      "rowsPerReplay": 528299,
+      "pairs": [
+        {
+          "aMs": 955,
+          "bMs": 645,
+          "ratio": 0.675392670157068
+        },
+        {
+          "aMs": 936,
+          "bMs": 685,
+          "ratio": 0.7318376068376068
+        },
+        {
+          "aMs": 944,
+          "bMs": 631,
+          "ratio": 0.6684322033898306
+        },
+        {
+          "aMs": 950,
+          "bMs": 621,
+          "ratio": 0.6536842105263158
+        },
+        {
+          "aMs": 948,
+          "bMs": 617,
+          "ratio": 0.6508438818565401
+        },
+        {
+          "aMs": 1007,
+          "bMs": 613,
+          "ratio": 0.608738828202582
+        },
+        {
+          "aMs": 944,
+          "bMs": 656,
+          "ratio": 0.6949152542372882
+        },
+        {
+          "aMs": 933,
+          "bMs": 654,
+          "ratio": 0.7009646302250804
+        }
+      ],
+      "medianChangePercent": -32.80875632265507,
+      "equalWorkChangePercent": -32.755678088486285
+    },
+    {
+      "aliasRows": 2,
+      "replaysPerObservation": 6,
+      "rowsPerReplay": 528299,
+      "pairs": [
+        {
+          "aMs": 771,
+          "bMs": 492,
+          "ratio": 0.6381322957198443
+        },
+        {
+          "aMs": 780,
+          "bMs": 498,
+          "ratio": 0.6384615384615384
+        },
+        {
+          "aMs": 755,
+          "bMs": 482,
+          "ratio": 0.6384105960264901
+        },
+        {
+          "aMs": 737,
+          "bMs": 448,
+          "ratio": 0.6078697421981004
+        },
+        {
+          "aMs": 746,
+          "bMs": 457,
+          "ratio": 0.6126005361930295
+        },
+        {
+          "aMs": 752,
+          "bMs": 485,
+          "ratio": 0.6449468085106383
+        },
+        {
+          "aMs": 744,
+          "bMs": 478,
+          "ratio": 0.6424731182795699
+        },
+        {
+          "aMs": 799,
+          "bMs": 463,
+          "ratio": 0.5794743429286608
+        }
+      ],
+      "medianChangePercent": -36.17285541268328,
+      "equalWorkChangePercent": -37.491781722550954
+    },
+    {
+      "aliasRows": 4,
+      "replaysPerObservation": 6,
+      "rowsPerReplay": 528299,
+      "pairs": [
+        {
+          "aMs": 635,
+          "bMs": 380,
+          "ratio": 0.5984251968503937
+        },
+        {
+          "aMs": 648,
+          "bMs": 386,
+          "ratio": 0.595679012345679
+        },
+        {
+          "aMs": 660,
+          "bMs": 387,
+          "ratio": 0.5863636363636363
+        },
+        {
+          "aMs": 662,
+          "bMs": 387,
+          "ratio": 0.5845921450151057
+        },
+        {
+          "aMs": 605,
+          "bMs": 370,
+          "ratio": 0.6115702479338843
+        },
+        {
+          "aMs": 608,
+          "bMs": 377,
+          "ratio": 0.6200657894736842
+        },
+        {
+          "aMs": 603,
+          "bMs": 365,
+          "ratio": 0.6053067993366501
+        },
+        {
+          "aMs": 642,
+          "bMs": 376,
+          "ratio": 0.5856697819314641
+        }
+      ],
+      "medianChangePercent": -40.29478954019636,
+      "equalWorkChangePercent": -40.193561129764966
+    }
+  ]
+}
