@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28T09:28:00.624600+00:00",
+  "scope": "Final saved-result aggregate of six independent frozen browser hosts; no pooled timing statistic and no new acquisition",
+  "campaign": {
+    "runId": 46113567719,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113567719",
+    "researchHead": "d36ee85feb1513af31f769175affa33b3696a307",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "e90c4c04172b691985858609094887f9541541dd",
+    "nodeVersion": "22.22.0",
+    "chromiumVersion": "153.0.8010.12",
+    "parserWorkers": 3,
+    "flags": {}
+  },
+  "decision": {
+    "optimizationPr": "none",
+    "reviewQualificationPassed": false,
+    "wholeImportSpeedupClaimQualified": false,
+    "reason": "Three hosts fail mandatory memory-sampling coverage; both VNDB hosts independently miss the stronger whole-import latency criteria.",
+    "failedCoverageIsDemonstratedMemoryRegression": false,
+    "memoryInterpretation": "Invalid coverage is not demonstrated memory growth or reduction. Invalid maxima and aggregate comparisons remain null; valid slots do not replace invalid ones."
+  },
+  "totals": {
+    "independentHosts": 6,
+    "imports": 252,
+    "ordinaryImportsIncludingExcludedWarmups": 216,
+    "excludedWarmupImports": 24,
+    "candidatePairs": 72,
+    "identicalControlPairs": 24,
+    "exhaustiveMediaImports": 12,
+    "rawMemoryScans": 2255,
+    "memorySlots": 24,
+    "validMemorySlots": 19,
+    "invalidMemorySlots": 5,
+    "mandatoryHostsPassed": 3,
+    "mandatoryHostsFailed": 3,
+    "allImportSemanticAndIdentityChecksPassed": true
+  },
+  "mandatoryCriteria": {
+    "allSixIndependentHostsRequired": true,
+    "completeRegisteredScheduleAndAllSourceFixturePackageSemanticMediaRestartStorageChecksRequired": true,
+    "memory": {
+      "allFourSlotsQualified": true,
+      "minimumCoveredImportScansPerSlot": 5,
+      "maximumCoveredScanGapMs": 250,
+      "maximumPreAndPostBracketGapMs": 250,
+      "bothMetrics": [
+        "maxSampledPssKiB",
+        "maxSampledPrivateKiB"
+      ],
+      "medianPairedIncreasePercentAtMost": 5,
+      "everyPairedIncreasePercentAtMost": 10
+    },
+    "control": {
+      "pairs": 4,
+      "absoluteMedianIdenticalControlDriftPercentAtMost": 5
+    },
+    "ordinaryNonRegression": {
+      "candidatePairs": 12,
+      "medianPairedChangePercentAtMost": 3,
+      "equalWorkChangePercentAtMost": 3,
+      "descriptiveIntervalUpperPercentAtMost": 5
+    }
+  },
+  "strongerVndbClaimCriteria": {
+    "bothIndependentVndbHostsRequired": true,
+    "allMandatoryRequirementsAlsoRequired": true,
+    "medianPairedChangePercentAtMost": -5,
+    "candidateMedianVsControlCPercentAtMost": -5,
+    "minimumFasterPairs": 10,
+    "candidatePairs": 12,
+    "equalWorkChangePercentStrictlyBelow": 0,
+    "descriptiveIntervalUpperPercentStrictlyBelow": 0
+  },
+  "statisticsConvention": {
+    "negativePercentMeansFaster": true,
+    "allPerHostNumericValuesCopiedAtFullPrecisionFromIndependentAuditJson": true,
+    "bootstrap": {
+      "completePairResamples": 10000,
+      "seedResetPerComparison": 897,
+      "sortedMedianEndpointIndexes": [
+        249,
+        9749
+      ],
+      "interpretation": "descriptive"
+    },
+    "excludedFromOrdinaryTiming": [
+      "warmup imports",
+      "exhaustive-media imports",
+      "instrumented memory imports"
+    ]
+  },
+  "hosts": [
+    {
+      "cell": "jmdict-AB",
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "jobId": 140904689380,
+      "artifactId": 15256162585,
+      "originalArtifactSha256": "2bc83e741b11967bc9c034da28ef87ae40df7d45be0e1b47e3fdccfbef47838f",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/jmdict-AB/independent-audit.json",
+          "sha256": "5dd9fbd711c5b293a795636e01e9633c8a517c2dd80511df5a39f93e817c023d"
+        },
+        "result": {
+          "path": "path-hosted-audits/jmdict-AB/RESULT.md",
+          "sha256": "7305b5b9106fb8716586541c8937e40bd8d4323afbfbf3650d70ec03d8a7df76"
+        }
+      },
+      "immutableEvidence": "jmdictABAndJitendexAB",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": -1.0799494759079042,
+        "equalWorkChangePercent": -0.7551711524626636,
+        "descriptiveBootstrap95Percent": [
+          -1.7170987949022498,
+          0.44824205070903567
+        ],
+        "fasterPairs": 8,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": -0.1065196005359037,
+        "candidateMedianVsControlCPercent": 0.15033287994679068
+      },
+      "memory": {
+        "rawScans": 307,
+        "slots": 4,
+        "validSlots": 4,
+        "invalidSlots": 0,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.40955868225778236,
+            "maximumPairedChangePercent": 0.8055542044171915
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.46755294333822306,
+            "maximumPairedChangePercent": 1.0937403128810308
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": true,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": true,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": true
+    },
+    {
+      "cell": "jmdict-BA",
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "jobId": 140904689347,
+      "artifactId": 15256246047,
+      "originalArtifactSha256": "3a39c24c411fadf7f1791aa119816c14c85e8a6d518b70bed74f9244b613c75b",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/jmdict-BA/independent-audit.json",
+          "sha256": "60f676d3be3113f33a724952b706d0f6c79bca4257a2a667c8bb133e0d48e5e1"
+        },
+        "result": {
+          "path": "path-hosted-audits/jmdict-BA/RESULT.md",
+          "sha256": "68feb72e43555402fcac3aa8311c114fb84d8d9bcd699ded08af04f69b7f7eed"
+        }
+      },
+      "immutableEvidence": "jmdictBA",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": 0.02382842439323518,
+        "equalWorkChangePercent": 1.804963182110697,
+        "descriptiveBootstrap95Percent": [
+          -3.4032997782976415,
+          4.519511146154498
+        ],
+        "fasterPairs": 6,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": -1.0651016655207735,
+        "candidateMedianVsControlCPercent": -0.0791631326012121
+      },
+      "memory": {
+        "rawScans": 463,
+        "slots": 4,
+        "validSlots": 4,
+        "invalidSlots": 0,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.5549959357400047,
+            "maximumPairedChangePercent": 0.5542400437455131
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.6931736182040127,
+            "maximumPairedChangePercent": 1.093863310191634
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": true,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": true,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": true
+    },
+    {
+      "cell": "jitendex-AB",
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "jobId": 140904689410,
+      "artifactId": 15256555705,
+      "originalArtifactSha256": "82ab640cdc6aec23a033dc3960cfe7e26bb1cc778d22c5efa602eddd4f81ff46",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/jitendex-AB/independent-audit.json",
+          "sha256": "3f64181d1364ce47330af2afe4315db65dfe881cec7a7190faf35404e75568a6"
+        },
+        "result": {
+          "path": "path-hosted-audits/jitendex-AB/RESULT.md",
+          "sha256": "123dc71e6639e5617aca876647608f830b11fc9f8c2ca3041af83a9d7100c5a3"
+        }
+      },
+      "immutableEvidence": "jmdictABAndJitendexAB",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": -0.8856699132332002,
+        "equalWorkChangePercent": -0.05672656221353822,
+        "descriptiveBootstrap95Percent": [
+          -2.1675061165242204,
+          1.590214232696674
+        ],
+        "fasterPairs": 7,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": 0.4227440805607996,
+        "candidateMedianVsControlCPercent": -0.5792304509735668
+      },
+      "memory": {
+        "rawScans": 271,
+        "slots": 4,
+        "validSlots": 4,
+        "invalidSlots": 0,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.6671270463907657,
+            "maximumPairedChangePercent": -1.8584199716828564
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -3.372753228454039,
+            "maximumPairedChangePercent": -2.1747208260810003
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": true,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": true,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": true
+    },
+    {
+      "cell": "jitendex-BA",
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "jobId": 140904689455,
+      "artifactId": 15256069414,
+      "originalArtifactSha256": "8b1154e433540eb3a9cf8c0bbf24f03b180362dd7ec5a98cd8f836fb7ae0dce6",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/jitendex-BA/independent-audit.json",
+          "sha256": "07f695da30e54321a03027d03f7b010bdc7550b262b320f25d02dadd7eb3f61d"
+        },
+        "result": {
+          "path": "path-hosted-audits/jitendex-BA/RESULT.md",
+          "sha256": "66b81df66df33fb87977e026bfc9022180a7595460a6ff2da528929cf22eec25"
+        }
+      },
+      "immutableEvidence": "allThreeFailedHosts",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": 1.8381390424470734,
+        "equalWorkChangePercent": 2.8926013309780396,
+        "descriptiveBootstrap95Percent": [
+          -0.0641870310438053,
+          4.023405926808987
+        ],
+        "fasterPairs": 3,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": 3.1532478997950086,
+        "candidateMedianVsControlCPercent": -0.1403355579063681
+      },
+      "memory": {
+        "rawScans": 276,
+        "slots": 4,
+        "validSlots": 3,
+        "invalidSlots": 1,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": false,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": false,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": false
+    },
+    {
+      "cell": "vndb-BA",
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "jobId": 140904689425,
+      "artifactId": 15256915453,
+      "originalArtifactSha256": "f17f72117dd699d9757041d744208795429a8b92e22e6e7a554dbfd91c48bc8c",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/vndb-BA/independent-audit.json",
+          "sha256": "e7a9d487c4db3c1db43c41e63013f429d3c95487dfab3a40f0e6395f2f5f5c46"
+        },
+        "result": {
+          "path": "path-hosted-audits/vndb-BA/RESULT.md",
+          "sha256": "c74f48117d7c755a670a6996332c658a12b38d22a551699eb8df4c0813647374"
+        }
+      },
+      "immutableEvidence": "allThreeFailedHosts",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": -1.1823649382245227,
+        "equalWorkChangePercent": -1.2479249348627208,
+        "descriptiveBootstrap95Percent": [
+          -3.320650514501744,
+          0.4603911035716557
+        ],
+        "fasterPairs": 8,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": 0.2456250798278159,
+        "candidateMedianVsControlCPercent": -1.5526018562468824
+      },
+      "memory": {
+        "rawScans": 416,
+        "slots": 4,
+        "validSlots": 1,
+        "invalidSlots": 3,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": false,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": false,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": false
+    },
+    {
+      "cell": "vndb-AB",
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "jobId": 140904689385,
+      "artifactId": 15257031285,
+      "originalArtifactSha256": "10730c5db5a511e7804d23093d56f74d29708c00b7c3eda9df8c52e4fcd2a8a3",
+      "sourceReceipts": {
+        "audit": {
+          "path": "path-hosted-audits/vndb-AB/independent-audit.json",
+          "sha256": "324176887d78b79e5d859beb4d63d5e8e1fa1b0f5f8ca17fa5121a0f6e6d27d1"
+        },
+        "result": {
+          "path": "path-hosted-audits/vndb-AB/RESULT.md",
+          "sha256": "cbc548473a32051b072c5b2a23ac022ced410e724342077dad10487053324933"
+        }
+      },
+      "immutableEvidence": "allThreeFailedHosts",
+      "imports": 42,
+      "allSemanticAndIdentityChecksPassed": true,
+      "ordinaryTiming": {
+        "candidatePairs": 12,
+        "medianPairedChangePercent": -1.8182718857638447,
+        "equalWorkChangePercent": -1.5665836186375515,
+        "descriptiveBootstrap95Percent": [
+          -3.9311784820116547,
+          -0.07922294628179838
+        ],
+        "fasterPairs": 9,
+        "identicalControlPairs": 4,
+        "identicalControlMedianDriftPercent": -0.9506722138831192,
+        "candidateMedianVsControlCPercent": -0.6813640657788
+      },
+      "memory": {
+        "rawScans": 522,
+        "slots": 4,
+        "validSlots": 3,
+        "invalidSlots": 1,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "pairedMetrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "frozenGates": {
+        "correctnessAndMemory": false,
+        "completeSchedule": true,
+        "unchangedControls": true,
+        "nonRegression": false,
+        "wholeImportGain": false
+      },
+      "mandatoryHostEligibility": false
+    }
+  ],
+  "invalidMemoryWindows": [
+    {
+      "cell": "jitendex-BA",
+      "slot": "A1",
+      "arm": "A",
+      "pair": 1,
+      "maximumCoveredSampleGapMs": 369.393278,
+      "limitMs": 250,
+      "preImportBracketGapMs": 10.094188,
+      "postImportBracketGapMs": 102.953164,
+      "stableFullyReadImportSampleCount": 11,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "cell": "vndb-BA",
+      "slot": "B1",
+      "arm": "B",
+      "pair": 1,
+      "maximumCoveredSampleGapMs": 257.913014,
+      "limitMs": 250,
+      "preImportBracketGapMs": 80.384544,
+      "postImportBracketGapMs": 79.511454,
+      "stableFullyReadImportSampleCount": 36,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "cell": "vndb-BA",
+      "slot": "A1",
+      "arm": "A",
+      "pair": 1,
+      "maximumCoveredSampleGapMs": 281.955552,
+      "limitMs": 250,
+      "preImportBracketGapMs": 99.713466,
+      "postImportBracketGapMs": 95.45769,
+      "stableFullyReadImportSampleCount": 36,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "cell": "vndb-BA",
+      "slot": "B2",
+      "arm": "B",
+      "pair": 2,
+      "maximumCoveredSampleGapMs": 322.487852,
+      "limitMs": 250,
+      "preImportBracketGapMs": 34.950965,
+      "postImportBracketGapMs": 103.489775,
+      "stableFullyReadImportSampleCount": 37,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    },
+    {
+      "cell": "vndb-AB",
+      "slot": "B1",
+      "arm": "B",
+      "pair": 1,
+      "maximumCoveredSampleGapMs": 285.11808,
+      "limitMs": 250,
+      "preImportBracketGapMs": 44.787186,
+      "postImportBracketGapMs": 61.792643,
+      "stableFullyReadImportSampleCount": 47,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null
+    }
+  ],
+  "preservation": {
+    "allObservedRowsRetained": true,
+    "replacementObservations": 0,
+    "rerunCohorts": 0,
+    "pooledHostTiming": false,
+    "controlDriftSubtracted": false,
+    "thresholdsChangedAfterAcquisition": false,
+    "rawEvidenceNotDuplicatedInThisAggregate": true
+  },
+  "immutableEvidence": {
+    "jmdictBA": {
+      "commit": "4d1feb8cef029825a03d0e3a7c9e49f300b6a33a",
+      "url": "https://github.com/ManabiIO/manabitan/commit/4d1feb8cef029825a03d0e3a7c9e49f300b6a33a"
+    },
+    "jmdictABAndJitendexAB": {
+      "commit": "aaf36ede3cfe2e0cc56a29708649370427ba002b",
+      "url": "https://github.com/ManabiIO/manabitan/commit/aaf36ede3cfe2e0cc56a29708649370427ba002b"
+    },
+    "allThreeFailedHosts": {
+      "commit": "81f63fbf8f619836ef003145f7138354564d2810",
+      "url": "https://github.com/ManabiIO/manabitan/commit/81f63fbf8f619836ef003145f7138354564d2810"
+    }
+  },
+  "laterDevelop": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "scope": "Later develop reported separately; not a measured source in this campaign",
+    "combinedTreeExecuted": false,
+    "historicalMeasurementsRelabeledAsCurrentDevelop": false
+  }
+}

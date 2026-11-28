@@ -1,7 +1,7 @@
 {
   "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
   "startedAtUtc": "2026-11-28T02:49:00Z",
-  "updatedAtUtc": "2026-11-28T07:41:28.671323+00:00",
+  "updatedAtUtc": "2026-11-28T09:29:18.597857+00:00",
   "optimizationPrs": [],
   "policy": "Only gains worth reviewing may become PRs; no Work mode; failed observations retained; sources and protocols frozen before acquisition.",
   "experiments": [
@@ -76,7 +76,7 @@
     },
     {
       "id": "worker-ascii-image-paths",
-      "decision": "hosted-qualification-pending",
+      "decision": "not-qualified-no-pr",
       "component": {
         "cpuMedianVsAPercent": -25.47,
         "cpuMedianVsCPercent": -24.46,
@@ -96,7 +96,7 @@
       "candidate": "e90c4c04172b691985858609094887f9541541dd",
       "researchCommit": "d36ee85feb1513af31f769175affa33b3696a307",
       "runId": 46113567719,
-      "limits": "Qualified projection CPU component and complete untimed Node24 plus hosted Node22 correctness passes. Browser/nonregression/memory qualification remains queued. Prior incomplete/killed copy oracles remain separate and were not combined. Hosted maximum process RSS is diagnostic only.",
+      "limits": "The qualified projection-only CPU component and complete untimed Node24 plus hosted Node22 copy oracles remain scoped evidence. The frozen 9e/e90 browser campaign is complete but unqualified because three hosts lack required memory coverage. Its historical timings are not measurements of current develop or a merged tree. Prior incomplete or killed copy oracles remain separate; hosted maximum process RSS is diagnostic only.",
       "completeCopyOracle": {
         "passed": true,
         "node": "24.22.3",
@@ -122,7 +122,12 @@
         "localValidationManifestSha256": "64fdf891512732056f734b396b3c1cad9d25d5f011f4ce49c9bc00b66139e154",
         "completeCopyManifestSha256": "9fe1f1df8bb50de18925f9f2bc5409d9f13111887f6d5eaba694e64a86bf61fe",
         "hostedCopyCommit": "61506e8b8b5da634f36efcaa8cd82b8006f8e1e4",
-        "hostedCopyBundleSha256": "00f089c752b132362f1debd0f4dfd0ee6f04f49f7f2e2fbfca8eee57f0a34ea2"
+        "hostedCopyBundleSha256": "00f089c752b132362f1debd0f4dfd0ee6f04f49f7f2e2fbfca8eee57f0a34ea2",
+        "browserPublicationKeys": [
+          "passingJmdictBABrowserCell",
+          "passingABBrowserCells",
+          "failedBrowserCells"
+        ]
       },
       "hostedCopyRunStatus": {
         "runId": 46111017640,
@@ -174,9 +179,13 @@
         "bundleSha256": "364e03b474968a9d3f51109b6f3cf6245ad26f68b5ab889b6e84fbcbd1cd06bc"
       },
       "browserQualification": {
-        "status": "queued",
-        "observedAtUtc": "2026-11-28T07:41:05Z",
+        "status": "completed",
+        "conclusion": "failure",
+        "qualification": "unqualified",
+        "observedAtUtc": "2026-11-28T09:29:18.597857+00:00",
+        "finalRunUpdatedAtUtc": "2026-11-28T09:02:40Z",
         "runId": 46113567719,
+        "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113567719",
         "head": "d36ee85feb1513af31f769175affa33b3696a307",
         "jobs": {
           "jmdict-BA": 140904689347,
@@ -186,16 +195,316 @@
           "vndb-AB": 140904689385,
           "vndb-BA": 140904689425
         },
-        "startedBrowserCohorts": 0,
+        "startedBrowserCohorts": 6,
+        "completedBrowserCohorts": 6,
+        "completedIndependentAudits": 6,
+        "allIndependentAuditsPassed": true,
         "allSixHostGatesRequired": true,
+        "allSixHostGatesPassed": false,
+        "mandatoryPassingHosts": 3,
+        "mandatoryFailingHosts": 3,
+        "imports": 252,
+        "ordinaryImports": 216,
+        "separateExhaustiveMediaImports": 12,
+        "separateMemoryImports": 24,
+        "all252ImportsSemanticVerificationPassed": true,
+        "rawMemoryScans": 2255,
+        "invalidMemorySlots": [
+          {
+            "cell": "jitendex-BA",
+            "slot": "A1",
+            "arm": "A",
+            "maximumCoveredSampleGapMs": 369.393278,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ]
+          },
+          {
+            "cell": "vndb-AB",
+            "slot": "B1",
+            "arm": "B",
+            "maximumCoveredSampleGapMs": 285.11808,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ]
+          },
+          {
+            "cell": "vndb-BA",
+            "slot": "B1",
+            "arm": "B",
+            "maximumCoveredSampleGapMs": 257.913014,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ]
+          },
+          {
+            "cell": "vndb-BA",
+            "slot": "A1",
+            "arm": "A",
+            "maximumCoveredSampleGapMs": 281.955552,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ]
+          },
+          {
+            "cell": "vndb-BA",
+            "slot": "B2",
+            "arm": "B",
+            "maximumCoveredSampleGapMs": 322.487852,
+            "qualificationFailures": [
+              "covered-import-scan-gap-over-250ms"
+            ]
+          }
+        ],
+        "memoryCoveredGapLimitMs": 250,
+        "memoryCoverageFailureHosts": [
+          "jitendex-BA",
+          "vndb-AB",
+          "vndb-BA"
+        ],
+        "memoryFailureInterpretation": "Insufficient sampling coverage under the frozen rule; no observed candidate memory increase is established. Invalid pairs remain in the evidence and failed-host aggregate memory metrics remain null.",
         "wholeImportSpeedClaim": false,
-        "memoryClaim": false
-      }
+        "memoryClaim": false,
+        "memoryRegressionClaim": false,
+        "optimizationPrCreated": false,
+        "observationsReplaced": false,
+        "campaignRerun": false,
+        "cohorts": {
+          "jmdict-AB": {
+            "jobId": 140904689380,
+            "artifactId": 15256162585,
+            "artifactSha256": "2bc83e741b11967bc9c034da28ef87ae40df7d45be0e1b47e3fdccfbef47838f",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/jmdict-AB/independent-audit.json",
+            "independentAuditSha256": "5dd9fbd711c5b293a795636e01e9633c8a517c2dd80511df5a39f93e817c023d",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 307,
+            "mandatoryHostEligibility": true,
+            "gates": {
+              "correctnessAndMemory": true,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": true,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": -1.0799494759079042,
+            "candidateEqualWorkChangePercent": -0.7551711524626636,
+            "unchangedControlMedianPairedChangePercent": -0.1065196005359037,
+            "invalidMemorySlots": [],
+            "evidencePublication": "passingABBrowserCells"
+          },
+          "jmdict-BA": {
+            "jobId": 140904689347,
+            "artifactId": 15256246047,
+            "artifactSha256": "3a39c24c411fadf7f1791aa119816c14c85e8a6d518b70bed74f9244b613c75b",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/jmdict-BA/independent-audit.json",
+            "independentAuditSha256": "60f676d3be3113f33a724952b706d0f6c79bca4257a2a667c8bb133e0d48e5e1",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 463,
+            "mandatoryHostEligibility": true,
+            "gates": {
+              "correctnessAndMemory": true,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": true,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": 0.02382842439323518,
+            "candidateEqualWorkChangePercent": 1.804963182110697,
+            "unchangedControlMedianPairedChangePercent": -1.0651016655207735,
+            "invalidMemorySlots": [],
+            "evidencePublication": "passingJmdictBABrowserCell"
+          },
+          "jitendex-AB": {
+            "jobId": 140904689410,
+            "artifactId": 15256555705,
+            "artifactSha256": "82ab640cdc6aec23a033dc3960cfe7e26bb1cc778d22c5efa602eddd4f81ff46",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/jitendex-AB/independent-audit.json",
+            "independentAuditSha256": "3f64181d1364ce47330af2afe4315db65dfe881cec7a7190faf35404e75568a6",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 271,
+            "mandatoryHostEligibility": true,
+            "gates": {
+              "correctnessAndMemory": true,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": true,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": -0.8856699132332002,
+            "candidateEqualWorkChangePercent": -0.05672656221353822,
+            "unchangedControlMedianPairedChangePercent": 0.4227440805607996,
+            "invalidMemorySlots": [],
+            "evidencePublication": "passingABBrowserCells"
+          },
+          "jitendex-BA": {
+            "jobId": 140904689455,
+            "artifactId": 15256069414,
+            "artifactSha256": "8b1154e433540eb3a9cf8c0bbf24f03b180362dd7ec5a98cd8f836fb7ae0dce6",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/jitendex-BA/independent-audit.json",
+            "independentAuditSha256": "07f695da30e54321a03027d03f7b010bdc7550b262b320f25d02dadd7eb3f61d",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 276,
+            "mandatoryHostEligibility": false,
+            "gates": {
+              "correctnessAndMemory": false,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": false,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": 1.8381390424470734,
+            "candidateEqualWorkChangePercent": 2.8926013309780396,
+            "unchangedControlMedianPairedChangePercent": 3.1532478997950086,
+            "invalidMemorySlots": [
+              {
+                "cell": "jitendex-BA",
+                "slot": "A1",
+                "arm": "A",
+                "maximumCoveredSampleGapMs": 369.393278,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ]
+              }
+            ],
+            "evidencePublication": "failedBrowserCells"
+          },
+          "vndb-AB": {
+            "jobId": 140904689385,
+            "artifactId": 15257031285,
+            "artifactSha256": "10730c5db5a511e7804d23093d56f74d29708c00b7c3eda9df8c52e4fcd2a8a3",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/vndb-AB/independent-audit.json",
+            "independentAuditSha256": "324176887d78b79e5d859beb4d63d5e8e1fa1b0f5f8ca17fa5121a0f6e6d27d1",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 522,
+            "mandatoryHostEligibility": false,
+            "gates": {
+              "correctnessAndMemory": false,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": false,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": -1.8182718857638447,
+            "candidateEqualWorkChangePercent": -1.5665836186375515,
+            "unchangedControlMedianPairedChangePercent": -0.9506722138831192,
+            "invalidMemorySlots": [
+              {
+                "cell": "vndb-AB",
+                "slot": "B1",
+                "arm": "B",
+                "maximumCoveredSampleGapMs": 285.11808,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ]
+              }
+            ],
+            "evidencePublication": "failedBrowserCells"
+          },
+          "vndb-BA": {
+            "jobId": 140904689425,
+            "artifactId": 15256915453,
+            "artifactSha256": "f17f72117dd699d9757041d744208795429a8b92e22e6e7a554dbfd91c48bc8c",
+            "status": "completed",
+            "independentAuditStatus": "passed",
+            "independentAuditPath": "path-hosted-audits/vndb-BA/independent-audit.json",
+            "independentAuditSha256": "e7a9d487c4db3c1db43c41e63013f429d3c95487dfab3a40f0e6395f2f5f5c46",
+            "imports": 42,
+            "allSemanticReceiptsMatched": true,
+            "rawMemoryScans": 416,
+            "mandatoryHostEligibility": false,
+            "gates": {
+              "correctnessAndMemory": false,
+              "completeSchedule": true,
+              "unchangedControls": true,
+              "nonRegression": false,
+              "wholeImportGain": false
+            },
+            "candidateMedianPairedChangePercent": -1.1823649382245227,
+            "candidateEqualWorkChangePercent": -1.2479249348627208,
+            "unchangedControlMedianPairedChangePercent": 0.2456250798278159,
+            "invalidMemorySlots": [
+              {
+                "cell": "vndb-BA",
+                "slot": "B1",
+                "arm": "B",
+                "maximumCoveredSampleGapMs": 257.913014,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ]
+              },
+              {
+                "cell": "vndb-BA",
+                "slot": "A1",
+                "arm": "A",
+                "maximumCoveredSampleGapMs": 281.955552,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ]
+              },
+              {
+                "cell": "vndb-BA",
+                "slot": "B2",
+                "arm": "B",
+                "maximumCoveredSampleGapMs": 322.487852,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ]
+              }
+            ],
+            "evidencePublication": "failedBrowserCells"
+          }
+        }
+      },
+      "qualificationHistory": [
+        {
+          "snapshotUpdatedAtUtc": "2026-11-28T07:41:28.671323+00:00",
+          "decision": "hosted-qualification-pending",
+          "limits": "Qualified projection CPU component and complete untimed Node24 plus hosted Node22 correctness passes. Browser/nonregression/memory qualification remains queued. Prior incomplete/killed copy oracles remain separate and were not combined. Hosted maximum process RSS is diagnostic only.",
+          "browserQualification": {
+            "status": "queued",
+            "observedAtUtc": "2026-11-28T07:41:05Z",
+            "runId": 46113567719,
+            "head": "d36ee85feb1513af31f769175affa33b3696a307",
+            "jobs": {
+              "jmdict-BA": 140904689347,
+              "jmdict-AB": 140904689380,
+              "jitendex-AB": 140904689410,
+              "jitendex-BA": 140904689455,
+              "vndb-AB": 140904689385,
+              "vndb-BA": 140904689425
+            },
+            "startedBrowserCohorts": 0,
+            "allSixHostGatesRequired": true,
+            "wholeImportSpeedClaim": false,
+            "memoryClaim": false
+          },
+          "scope": "Historical queue snapshot retained; superseded by the final qualification below."
+        }
+      ],
+      "reason": "All six original hosted cells and independent audits completed. All 252 imports passed semantic, restart, lookup, media and exact-storage checks. Three hosts failed the mandatory memory-coverage requirement because five slots exceeded the frozen 250 ms covered-scan gap; this is not a demonstrated memory regression. Neither VNDB host passed the stronger whole-import gain gate. No optimization PR, observation replacement, rerun, or threshold relaxation."
     },
     {
       "id": "reserved-contiguous-lookup-envelope",
       "decision": "rejected-ownership-contract",
-      "reason": "42 semantic/known-alias unit cases pass, but later typed-view expando aliases are outside the receipt scan. Adoption can detach a still-observable buffer; revoking getter also needs an explicit consumed/future-read contract. No candidate timing or publication. Complexity not justified before a sound smaller ownership boundary."
+      "reason": "42 semantic/known-alias unit cases pass, but later typed-view expando aliases are outside the receipt scan. Adoption can detach a still-observable buffer; revoking getter also needs an explicit consumed/future-read contract. No candidate timing or publication. Complexity not justified before a sound smaller ownership boundary.",
+      "decisionStage": "rejected-before-timing",
+      "candidateTimingPerformed": false,
+      "optimizationPrCreated": false
     },
     {
       "id": "zstd-count64",
@@ -253,7 +562,7 @@
         "usesDiagnosticSymbolFlag": true,
         "timed": false
       },
-      "exactProductBuildReason": "Added --emit-symbol-map changes Binaryen intermediate name retention, so exact production-command A0/B0 modules without that flag must be frozen and qualified before timing.",
+      "exactProductBuildReason": "Historical build requirement, already completed: --emit-symbol-map changes Binaryen intermediate name retention, so exact production-command A0/B0 modules without that flag were frozen and qualified before the sole corrected-corpus screen.",
       "exactProduct": {
         "manifestSha256": "8c5fabfe74e3e782231d70bd0eb00388e9ecd82c60535fa34509be7de87f15bf",
         "sourceManifestSha256": "912bb3c970e8099857d985370f17b7e666b3225b4d89a24bed13db38c846efb7",
@@ -262,7 +571,8 @@
         "candidateWasmBytes": 433771,
         "candidateWasmGrowthBytes": 140,
         "same31BlockFrameAndCapacityGates": "passed",
-        "timed": false
+        "timed": false,
+        "scope": "Historical 31-block exact-product build and correctness acquisition, which was untimed; the later 103-block componentScreen records the completed timing study separately."
       },
       "geometryCorrection": {
         "timingObservationsBeforeDiscovery": 0,
@@ -374,7 +684,7 @@
         "independent-design-b-timer-draft-review.json": "059f1eaad697860761e0261a82552526e3c65c2f3d59d990f5ff025175bb88ed",
         "design-b-publication-validation-scope.json": "559d58587f1fd72e33348867835d5b52e919e8a67b73a44f6decbd69e87ddb53"
       },
-      "downstreamValidation": "If component qualifies, integrate frozen source/artifact into normal builder, reproduce exact candidate bytes, run fresh full units/all-target dry build/pinned native parser verification, and actual browser correctness for unchanged JMdict/Jitendex/VNDB routes. VNDB default is retained span/compressUsingDict level1 with empty dictionary; plain compress is disabled-experiment fallback.",
+      "downstreamValidation": "Not undertaken. The sole performance process ended before any observation was recorded, so no product integration, normal-builder reproduction, merged-tree validation, or new browser campaign was authorized or performed for this candidate. The earlier conditional integration plan is retained separately as history.",
       "sourceManifestSha256": "e75ec7c6773427690abcfcd29d38cdf726438618d8e956652d486f3f9ccd42aa",
       "correctness": {
         "firstAcquisitionPassed": true,
@@ -458,19 +768,19 @@
         "freshVerificationSha256": "a6a40809d7a6f41f28146c4ef0dbeed17a081f92b22c564412a1e707a6a0e8b2",
         "nativeOrTimingRerun": false,
         "remoteGitBlobIdentitiesVerified": true
-      }
+      },
+      "historicalDownstreamValidationPlan": "If component qualifies, integrate frozen source/artifact into normal builder, reproduce exact candidate bytes, run fresh full units/all-target dry build/pinned native parser verification, and actual browser correctness for unchanged JMdict/Jitendex/VNDB routes. VNDB default is retained span/compressUsingDict level1 with empty dictionary; plain compress is disabled-experiment fallback.",
+      "downstreamValidationStatus": "not-run-no-performance-qualification"
     }
   ],
   "infrastructure": {
-    "lastRecoveryUtc": "2026-11-28T07:35:34Z",
+    "lastRecoveryUtc": "2026-11-28T09:17:16.553571+00:00",
     "workspaceCheckpointsVerified": true,
     "temporaryDirectoryReset": true,
     "localCompilerAndSourceZipCacheLost": true,
-    "hostedQueuedRuns": [
-      46113567719
-    ],
+    "hostedQueuedRuns": [],
     "noWorkModeUsed": true,
-    "queueObservedAtUtc": "2026-11-28T07:41:05Z",
+    "queueObservedAtUtc": "2026-11-28T09:05:42Z",
     "localBrowserPreflight": "Blocked before install/launch: one AF_UNIX socket constructor returned EPERM; no security workaround or retry",
     "localSocketReceiptSha256": "bf74d9fb06de347b136d9e925c94a9885703ce4d31156eeac202efa697a0125d",
     "thirdTemporaryDirectoryReset": {
@@ -485,6 +795,111 @@
         "Design B external verification.json (old hash retained)",
         "Hosted validation wrapper manifest.json (old hash retained)"
       ]
+    },
+    "historicalStatusSnapshots": [
+      {
+        "snapshotUpdatedAtUtc": "2026-11-28T07:41:28.671323+00:00",
+        "lastRecoveryUtc": "2026-11-28T07:35:34Z",
+        "hostedQueuedRuns": [
+          46113567719
+        ],
+        "queueObservedAtUtc": "2026-11-28T07:41:05Z"
+      }
+    ],
+    "lastRecoveryTimestampBasis": "Start of the recorded successful post-recovery saved-byte verification; exact executor restoration time was not measured.",
+    "completedHostedQualificationRuns": [
+      {
+        "runId": 46113567719,
+        "status": "completed",
+        "conclusion": "failure",
+        "head": "d36ee85feb1513af31f769175affa33b3696a307",
+        "finalRunUpdatedAtUtc": "2026-11-28T09:02:40Z"
+      }
+    ],
+    "fourthTemporaryDirectoryReset": {
+      "outageOrdinal": 4,
+      "exactOutageAndRestorationTimesKnown": false,
+      "workspaceCheckpointsPreserved": true,
+      "temporaryBrowserArtifactExtractionsLost": true,
+      "recoveryReceiptPath": "evidence-packages/browser-vndb-BA-15256915453/recovery.json",
+      "recoveryReceiptSha256": "eee1364658eee2db35bcbbe9ec1d2665e98199e83dd0adb58659e83ff5bbaf69",
+      "originalVndbBaVerifier": {
+        "sessionId": 21275,
+        "completion": "unknown",
+        "savedSuccessReceiptPresent": false,
+        "savedFailureReceiptPresent": false,
+        "resumeResult": "Session could not be recovered after executor transport disconnection; no process result available"
+      },
+      "originalVerifierCompletionRemainsUnknown": true,
+      "originalArchiveAndPartsByteIdentical": true,
+      "archiveSha256": "81ed2de9bf862f0956e2e74c441807e6f8ff56e38ea52bb9f6b6dd521b59ea62",
+      "originalIndexSha256": "27ad7d21f515528c4b4bf3f0ca2153f36e85f3000463f5574bc0a275bcb399d2",
+      "freshSavedByteVerification": {
+        "status": "passed",
+        "startedAtUtc": "2026-11-28T09:17:16.553571+00:00",
+        "finishedAtUtc": "2026-11-28T09:17:16.845599+00:00",
+        "returnCode": 0,
+        "receiptSha256": "a5d766243754ed3217afc846993f54e93ab6338a21c10b1d5011b8a382260c10"
+      },
+      "nativeExecutionRepeated": false,
+      "browserObservationRepeated": false,
+      "performanceAcquisitionRepeated": false,
+      "gateChanged": false,
+      "finalVndbAbArtifactRetrievedAfterRecovery": true,
+      "evidencePublication": "failedBrowserCells"
     }
-  }
+  },
+  "measurementScope": {
+    "measuredBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "measuredPathCandidate": "e90c4c04172b691985858609094887f9541541dd",
+    "reviewedCurrentDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "currentDevelopIncludesPr": 972,
+    "historicalMeasurementsRelabeled": false,
+    "mergedTreeExecutionPerformed": false,
+    "mergedTreeMeasurementsExist": false,
+    "compatibilityReviewPath": "path-publication-review/current-develop-compatibility.md",
+    "compatibilityReviewSha256": "574fa77246d0db95faf7f92d639b395dbae98ff3bccb3197c2d2e6fa411d9925",
+    "interpretation": "Read-only source compatibility review found no static integration blocker, but no merge, rebase, combined-tree build, test, or performance acquisition was executed. All browser results remain bound to the frozen 9e/e90 sources."
+  },
+  "publications": {
+    "failedBrowserCells": {
+      "commit": "81f63fbf8f619836ef003145f7138354564d2810",
+      "scope": "Complete failed Jitendex BA and VNDB AB/BA raw evidence, independent audits, and fourth-outage preservation recovery.",
+      "url": "https://github.com/ManabiIO/manabitan/commit/81f63fbf8f619836ef003145f7138354564d2810"
+    },
+    "passingABBrowserCells": {
+      "commit": "aaf36ede3cfe2e0cc56a29708649370427ba002b",
+      "scope": "Complete JMdict AB and Jitendex AB raw evidence and independent audits.",
+      "url": "https://github.com/ManabiIO/manabitan/commit/aaf36ede3cfe2e0cc56a29708649370427ba002b"
+    },
+    "passingJmdictBABrowserCell": {
+      "commit": "4d1feb8cef029825a03d0e3a7c9e49f300b6a33a",
+      "scope": "Complete JMdict BA raw evidence and independent audit.",
+      "url": "https://github.com/ManabiIO/manabitan/commit/4d1feb8cef029825a03d0e3a7c9e49f300b6a33a"
+    },
+    "jmdictProfile": {
+      "commit": "6acf4f53fe947e5d25829a56361bffebaa885269",
+      "scope": "Preserved JMdict raw trace, attribution scripts, symbol mapping, and profile findings.",
+      "url": "https://github.com/ManabiIO/manabitan/commit/6acf4f53fe947e5d25829a56361bffebaa885269"
+    }
+  },
+  "finalDecision": {
+    "status": "completed-no-optimization-pr",
+    "optimizationPrsCreated": 0,
+    "browserAuditsComplete": 6,
+    "browserSemanticImportsPassed": 252,
+    "mandatoryBrowserHostFailures": 3,
+    "invalidMemorySlots": 5,
+    "failureIsMemoryCoverageNotDemonstratedRegression": true,
+    "reason": "No candidate satisfied the required evidence for an optimization PR. Rejected, held, incomplete, duplicate and successful scoped component results remain preserved; the image-path candidate failed mandatory browser memory coverage and did not establish the required VNDB whole-import gain.",
+    "observationsRerunOrReplaced": false,
+    "mergedTreeExecuted": false
+  },
+  "consolidationHistory": [
+    {
+      "previousUpdatedAtUtc": "2026-11-28T07:41:28.671323+00:00",
+      "previousLedgerSha256": "00d936a19e3c890b561cb03b9d00e4ddfb5f72c075579049e1c0d8d7ccd1df9c",
+      "scope": "Final status consolidation only. Historical experiment entries, prior queue snapshot, conditional integration plan, third-outage record and all raw or archived evidence retained; no other file changed."
+    }
+  ]
 }
