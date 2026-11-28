@@ -1,0 +1,97 @@
+name: Frozen VNDB import profile
+
+on:
+  push:
+    branches: ['perf/vndb-profile-20261128-b9cacc']
+    paths: ['.github/workflows/import-profile-vndb-b9cacc.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Build frozen release package
+        run: |
+          npm run build:libs
+          npm run license-report:html
+          npm run build -- --target chrome
+          git diff --exit-code
+      - name: Acquire ordinary production-default reference
+        run: node dev/perf/import-benchmark.js vndb --runs 1 --build-target chrome --no-build --media-check sample --output builds/perf/vndb-profile-b9cacc/ordinary
+      - name: Acquire separate non-authoritative CPU trace
+        run: node dev/perf/import-benchmark.js vndb --trace --runs 1 --build-target chrome --no-build --media-check sample --output builds/perf/vndb-profile-b9cacc/trace
+      - name: Record source and acquisition scope
+        if: always()
+        run: |
+          mkdir -p builds/perf/vndb-profile-b9cacc
+          git rev-parse HEAD HEAD^{tree} > builds/perf/vndb-profile-b9cacc/source.txt
+          git status --short >> builds/perf/vndb-profile-b9cacc/source.txt
+          python - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+          root = pathlib.Path('builds/perf/vndb-profile-b9cacc')
+          base = '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+          fixture = json.loads(pathlib.Path('test/perf/dictionaries.lock.json').read_text())['dictionaries']['vndb']
+          report = {
+              'scope': 'One ordinary reference plus a separate CPU trace; no A/B timing comparison or performance claim.',
+              'baseline': base, 'dictionary': 'vndb', 'mediaCheck': 'sample',
+              'mediaScope': 'Both imports retain locked total media counts and 64 source-derived persisted-byte probes after restart; not exhaustive media equality.',
+              'summaries': {}, 'errors': [],
+          }
+          packages = []
+          if subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() != base:
+              report['errors'].append('Product HEAD differs from frozen baseline')
+          for name in ('ordinary', 'trace'):
+              path = root / name / 'summary.json'
+              if not path.exists():
+                  report['errors'].append('Missing acquisition summary: ' + name)
+                  continue
+              value = json.loads(path.read_text())
+              report['summaries'][name] = {key: value.get(key) for key in ('dictionary', 'gitSha', 'source', 'fixture', 'hostEnvironment', 'browserVersion', 'authoritativeTiming', 'traceEnabled', 'importFlags', 'mediaCheck', 'timingBoundary', 'timing')}
+              valid = (
+                  value.get('dictionary') == 'vndb' and value.get('fixture') == fixture and
+                  value.get('gitSha') == base and value.get('source', {}).get('dirty') is False and
+                  value.get('buildTarget') == 'chrome' and value.get('importFlags') is None and
+                  value.get('mediaCheck') == 'sample' and value.get('traceEnabled') is (name == 'trace') and
+                  value.get('authoritativeTiming') is (name == 'ordinary') and len(value.get('runs', [])) == 1
+              )
+              if not valid:
+                  report['errors'].append('Acquisition identity/configuration mismatch: ' + name)
+              for run in value.get('runs', []):
+                  packages.append(run.get('packageSha256'))
+          if len(packages) != 2 or any(not isinstance(value, str) or len(value) != 64 for value in packages) or len(set(packages)) != 1:
+              report['errors'].append('Ordinary and trace package identities do not match')
+          report['packageSha256'] = packages[0] if packages else None
+          (root / 'acquisition.json').write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          if report['errors']:
+              raise SystemExit('; '.join(report['errors']))
+          PY
+      - name: Retain original reference and trace
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vndb-current-profile-b9cacc
+          path: builds/perf/vndb-profile-b9cacc
+          if-no-files-found: error
+          retention-days: 90
