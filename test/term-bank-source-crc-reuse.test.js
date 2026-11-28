@@ -159,6 +159,25 @@ describe('raw glossary witness source CRC verification', () => {
         expect((await parse(await inflateCompressedTermBankSourcesWasm(sourcesFor(), options, true))).rows).toBe(1600)
     })
 
+    test.each(['expression', 'score', 'trailing-whitespace'])('rejects a changed %s gap before publishing rows', async (field) => {
+        const preloaded = await inflateCompressedTermBankSourcesWasm(sourcesFor(), options, true)
+        expect(preloaded.crcSignaturesPtr).toBeGreaterThan(0)
+        const text = new TextDecoder().decode(banks[0])
+        const offset = field === 'expression' ?
+            text.indexOf('term0') :
+            (field === 'score' ? text.indexOf(',0,[') + 1 : banks[0].length - 1)
+        expect(offset).toBeGreaterThan(0)
+        // These mutations preserve valid JSON and the glossary bytes. A
+        // glossary witness must not hide a changed non-glossary source byte.
+        const bytes = new Uint8Array(preloaded.wasm.memory.buffer, preloaded.jsonPtr, preloaded.jsonLength)
+        bytes[offset] = field === 'expression' ? 0x54 : (field === 'score' ? 0x39 : 0x09)
+        const sink = vi.fn()
+        await expect(parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, sink, 2048, {...options, preloadedSource: preloaded}))
+            .rejects.toBeInstanceOf(DictionarySourceIntegrityError)
+        expect(sink).not.toHaveBeenCalled()
+        expect(preloaded.crcVerified).not.toBe(true)
+    })
+
     test.each(['invalid-json', 'escaped-key', 'skip-fused', 'native-throw', 'allocation-failure'])('preserves CRC failure precedence through %s', async (mode) => {
         const changed = [...banks]
         if (mode === 'invalid-json') {
