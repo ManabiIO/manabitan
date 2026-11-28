@@ -1,0 +1,1383 @@
+{
+  "format": 1,
+  "study": "Completed score-restoration JMdict browser cohort plus later read-only verification; fixed cutoff2026-11-28T07:20:18Z",
+  "scope": "All204 original non-package artifact members,26reports/receipts and250raw memory rows; preserved failed memory coverage and inconclusive complete-import timing. Later seven-cohort source/clock supplement and independently reviewed future auditors remain separate from acquisition. No new observation, retry, replacement or retroactive auditor execution.",
+  "sourceBindings": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "915268441352c3c7aa50fc0fbd44f73f5a826d79",
+    "runtimeGitBlob": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+    "originalArtifactId": 15253012612,
+    "originalArchiveSha256": "a94ec5951f9df34bfc3ddabb1e4eeca26b0353135b18e22f036a24915d2f61a4",
+    "cohortRecordSha256": "72497bed3d040320538804844586dd1d010b3e43ec9a8a6e074e0d8162bdcf97",
+    "fixedPublicationCutoffUtc": "2026-11-28T07:20:18Z",
+    "priorCompletedEvidenceCommit": "40192ef785296f50a37afe9511b137a5744556c0",
+    "laterVerificationScope": "Seven named completed cohorts only; future auditor v2/compression files are preparation metadata"
+  },
+  "memberPathBase": "Original workspace-relative path; contents are byte-for-byte unchanged",
+  "archiveMetadata": "gzip timestamp, tar ownership and file timestamps normalized; payload paths and contents preserved",
+  "symlinkPolicy": "All payload files and their directory components must be regular, non-symlink paths; symlink targets are never read",
+  "manifestPlacement": "External to archive so every archive member, without a self-hash exception, has a digest",
+  "spec": {
+    "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/bundle-spec.json",
+    "sha256": "6bbb82e055be7e5d77b381ae76ca681097da1cc7c2ce2ab1db2a4eebf0cf1c45"
+  },
+  "archive": {
+    "file": "score-jmdict-browser-addendum-20261128-1b47.tar.gz",
+    "bytes": 1689228,
+    "sha256": "5d400949b03587909a973cac958b4276ddfe5adf6318427b01782e0fb044b4b0"
+  },
+  "totalPayloadBytes": 17758181,
+  "members": [
+    {
+      "path": "evidence/audit-hosted-import-artifact-1b47.py",
+      "bytes": 8716,
+      "sha256": "df10a6f16eb17cbcff1da3b8c5f622f6e34808587549790187f78be67f22c2c5"
+    },
+    {
+      "path": "evidence/durable-bundles/package-evidence-v2.py",
+      "bytes": 6789,
+      "sha256": "68b0f97d8e5b40fb5485420419739d95af0e6c47e02a577a09b790ff75f60684"
+    },
+    {
+      "path": "evidence/durable-bundles/stage-pending-browser-cohort.py",
+      "bytes": 11295,
+      "sha256": "9eec5a3decd7a9119596dbb5460c5fc8a4dea52f0c85c98e14d8ae8cca6103e7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/cohort-record.json",
+      "bytes": 119490,
+      "sha256": "72497bed3d040320538804844586dd1d010b3e43ec9a8a6e074e0d8162bdcf97"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/baseline-tree.txt",
+      "bytes": 41,
+      "sha256": "e7eeeeb8dc66c5568919c561aa5546fd54e30233922c4842c40e77998c42da4a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/candidate-sha.txt",
+      "bytes": 41,
+      "sha256": "293916a1127b9c588579c0bad28705cec32e9f336ce63730c362f11495edf5ce"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict-driver.log",
+      "bytes": 336,
+      "sha256": "942cc9a29033314d2efa7c9931d3542993eb341661187d96650bec809fdcccf7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict-summary.log",
+      "bytes": 17622,
+      "sha256": "bf3e6904da9371e9b862a61e4daa94c157fe4bddc2379a0af370a111348f3b63"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/analysis.json",
+      "bytes": 1314,
+      "sha256": "f4581cd42aab577375fb1523575b21b9e9b6161c1d676fba99e96b304afabd96"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/build-A.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/build-B.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/host-after.json",
+      "bytes": 504,
+      "sha256": "cddb366723250bc567c0f48c13f2d0fbff1af4be27d4bdcab179ddbb7a325717"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/host-before.json",
+      "bytes": 504,
+      "sha256": "7e3732483efce11f48eb3c1c1b1d1b900c18832284ee4926f7d86145c21041ab"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/run-1.html",
+      "bytes": 83747,
+      "sha256": "b11cd4ab5bd9dbe914941e865fa36141dcc5bcf88d90d4b0f5b7dfc3f14b5ed6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/run-1.json",
+      "bytes": 151543,
+      "sha256": "6db783e5b2a37f48098e6e5086f78b2785b1dbff0a8d3a4d5a49a783fb1ecabf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/run.log",
+      "bytes": 1754,
+      "sha256": "46b20f863727e650d9c58128486fae5bbf8a40c1109361bbf6f5857f965dfc27"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-A/summary.json",
+      "bytes": 59171,
+      "sha256": "56c212d77088ab0adf97fd6584c795d6a79c531bf10342e340c41030f256a858"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/host-after.json",
+      "bytes": 504,
+      "sha256": "4e3128c738b97010415e7f264a3bddb8fac4d8cf8d4a86c40feee32b39f353c6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/host-before.json",
+      "bytes": 504,
+      "sha256": "e0eec3352a4637089514df48425e38edeeaf8c8b332ef32265a4220b5d375cc0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/run-1.html",
+      "bytes": 84448,
+      "sha256": "b5c801221e8bbdbac9005b15a1021ff479a7323e5803a231d94e9f8611dccee4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/run-1.json",
+      "bytes": 151908,
+      "sha256": "83108df30679d80e4658a9616230e7c3438f6192c8ca839d54200a1af01887e3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/run.log",
+      "bytes": 1842,
+      "sha256": "70210728b8ac249b8bb8e4aa9af8b65b9f67adf9ad5983f1da22db6d8e6ce74e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-01-C/summary.json",
+      "bytes": 59151,
+      "sha256": "d774aa9c0e6b5967c22a6d4d407796ba68e61deb63df7418de6be2be13909a03"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/host-after.json",
+      "bytes": 503,
+      "sha256": "17930ab2ef8b269f7d20acea6ce672d94cf1bb556185b98c38ea1064663c0dbd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/host-before.json",
+      "bytes": 504,
+      "sha256": "64dd8951d8122fd6e62d3e5985b16d7a933b885473b20ba0cd030f5386b028f9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/run-1.html",
+      "bytes": 84189,
+      "sha256": "9beb19708db5ff3bcae157238da537f2aef0d3d6f338d025e1704e2062b62a5c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/run-1.json",
+      "bytes": 151391,
+      "sha256": "efe088493c5d7ffb1962ce6b8d8152ed91f5e5c859f69388d770e057b9e09e5d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/run.log",
+      "bytes": 1843,
+      "sha256": "6ee5ed87254d6ed49a8f136c2196ac2e509442f76dd4df1afed50f1dfb1b74bc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-A/summary.json",
+      "bytes": 58972,
+      "sha256": "21103b909d3b429d6e7205670b96ae86d384b6a6b92550b9b426d0b1771d198a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/host-after.json",
+      "bytes": 504,
+      "sha256": "3d78a8d15e25f92df2973e4cf8156163b83a5b1f076009586e92b89dab2a3ca0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/host-before.json",
+      "bytes": 503,
+      "sha256": "fa68c8d09c3bcd33fbb5e8378041d7cb683294e25f09c34011e608dc3dc9cd70"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/run-1.html",
+      "bytes": 83678,
+      "sha256": "d42df887fec9192c8d7eea51ab80230feb9b981a90a0974cbf87bee1501029da"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/run-1.json",
+      "bytes": 151428,
+      "sha256": "7e6c430ed601b1e066d388961ac6ee9e265e65d3aaefdf0986dd65d457fe8e65"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/run.log",
+      "bytes": 1753,
+      "sha256": "efb6298cb9847bc6f177e95361596978e3a57784c711c4169dbcf84c134a5624"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/control-02-C/summary.json",
+      "bytes": 59146,
+      "sha256": "8c6fb76b7b70d5150bdf505e11ffdf6e75aa23686ce2ee326ec9e5b0f2b656d4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-A/canonical-receipt.json",
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-A/run-1.html",
+      "bytes": 83600,
+      "sha256": "82102fbd4e385e16552d6d0181a6c1275b5e3a7dd57249cadd8112f76db1a134"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-A/run-1.json",
+      "bytes": 151339,
+      "sha256": "eb61203fc7f9c799b8e107a714f7af2beb0307afa720f0fc4e616dd8c46fb86f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-A/run.log",
+      "bytes": 1773,
+      "sha256": "4d370820ee3e9092cea50617e3d750fe85c358a643b24e431cdcad29ddc416fb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-A/summary.json",
+      "bytes": 59112,
+      "sha256": "b72d7c77b12df3892fafe7e12bcf09d5ff0a8e825356f6c32744ac046f3420cb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-B/canonical-receipt.json",
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-B/run-1.html",
+      "bytes": 83711,
+      "sha256": "206db84cde08f83bdf3dc8e91c001ccdb3c7794a37d0d1427696c7a3d12b0cf2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-B/run-1.json",
+      "bytes": 151512,
+      "sha256": "9171d42e8c4bde5127d51c2c0f163210cf245729891b3e2bf7af5fadb757e45a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-B/run.log",
+      "bytes": 1772,
+      "sha256": "4a01af96ba7c09793e7414c38e33fa5dd0b570a843b50611f6254044c801232b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/exhaustive-media-B/summary.json",
+      "bytes": 59194,
+      "sha256": "3cd3f1e61cafa8903ae43dd86599786b4f92d95983bcbb543b30586fcde27f04"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/fixtures.log",
+      "bytes": 157,
+      "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/libs-A.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/libs-B.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/license-A.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/license-B.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/markers.jsonl",
+      "bytes": 140,
+      "sha256": "ae160739eea53f81fed41e3db15542ff73b492ab0867b7e5c3198405723163e2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/memory.json",
+      "bytes": 1846844,
+      "sha256": "dce2a61b2290f2f8e65ed156199ea10e6a1421add8b39e5161fadec3aa4fc991"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/run-1.html",
+      "bytes": 84237,
+      "sha256": "fac44e7ba9248839f8b94f04a7dd2dc5646074bfb1a7510d9cbf8dff462690c3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/run-1.json",
+      "bytes": 151568,
+      "sha256": "c2daa77b777c3b8b052e8bbb59ec155a8c5cda527f27b0dfe65c6378dfebd4a4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/run.log",
+      "bytes": 1839,
+      "sha256": "f98af06e60f8356830b23bf2959a4918736c2c688275c5c438000ad332fe358a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A1/summary.json",
+      "bytes": 59017,
+      "sha256": "abd3193886f5707e01436524fc41801eca2b6cc6c06ef11f0f974bc5f439494b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/markers.jsonl",
+      "bytes": 140,
+      "sha256": "64c40113c6f49cd425cbcfc65c88f2c83e6ed1cc7dc18e6228cfb6642dd1953d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/memory.json",
+      "bytes": 1804693,
+      "sha256": "98668c111c4578f7039db4401ae7d63ceebb29dccce36f6220e54cf549944db4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/run-1.html",
+      "bytes": 83588,
+      "sha256": "67168b28c67f9d354142d33733c93c97f75be7a597e32de15e27fa3db1c58b89"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/run-1.json",
+      "bytes": 151296,
+      "sha256": "cf1c64226e176a8a9d92695aae17383e7c9b17a69400ad0d9fb9e5d9e2b2d97f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/run.log",
+      "bytes": 1750,
+      "sha256": "2a169826c726572f5a0662f4b5f0291b8afa80cb612a3166fd1207b8f6c5f3df"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/A2/summary.json",
+      "bytes": 59099,
+      "sha256": "d3e570ff494f6d297e7f1d846343a16f9d9b2e5c6f0348ef9da1964f46943866"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/markers.jsonl",
+      "bytes": 140,
+      "sha256": "ffe52cf9a749a288c9caaa31abe015e5438eddbee6202df9df39783961570657"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/memory.json",
+      "bytes": 1819665,
+      "sha256": "8e5e1f5b173ee3285d90552017129a083361662cefef24531a754ca0062457fe"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/run-1.html",
+      "bytes": 83551,
+      "sha256": "251ae3bac76599e4d60b2ceeff79ab68eef1713b022f19515a456fe2db414057"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/run-1.json",
+      "bytes": 151118,
+      "sha256": "4a374ab169bcbb3ca2fd6b90420266790b77d197e4a8599150cc8e5e49b7fc03"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/run.log",
+      "bytes": 1751,
+      "sha256": "03fd2a8d201ee27dc182a8ac746ff698290c765716e03084d5d67be63beed420"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B1/summary.json",
+      "bytes": 59000,
+      "sha256": "dbfc9dfeb24f11a839ec7b3059e03f229d7c12de5e3f81bbdae62a8bebd3daa2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/markers.jsonl",
+      "bytes": 140,
+      "sha256": "34d49b9693bf3540bd9eb4b18cdb72447c843098332123e1dc65604822925eeb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/memory.json",
+      "bytes": 1835274,
+      "sha256": "ac955a891ea11540454df226abe532d66767281333c5b3d3d87832f0dfdaa918"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/run-1.html",
+      "bytes": 83464,
+      "sha256": "ebb1cbd54c056ecaed4cdeb1ecee89580c5162d25b375aef70a455b6e5102d41"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/run-1.json",
+      "bytes": 151006,
+      "sha256": "e3cd639140eb98ffee7b804a1dfe2634f8e81d09ad13d71c9aecd129fa5fc37b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/run.log",
+      "bytes": 1751,
+      "sha256": "19a59ea2b177b970ddfd1ca810a9f3cc8fc4b9b00d09793b43b8caa93659b928"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/B2/summary.json",
+      "bytes": 58955,
+      "sha256": "21a0f098d900eba42ab6561a6f99caa31274440300da6da8c6abae969d9c9f8e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/harness-instrumented.js",
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/harness-original.js",
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/memory-audit.json",
+      "bytes": 402,
+      "sha256": "599b36a353a2143aaafa8db42acf4ac14d78231275c6ed1251113e61b6e9c169"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/memory-comparison.json",
+      "bytes": 10079,
+      "sha256": "93cd414f1ffb25fe7bbabad2c9659d7bca1c2efdd1cde7ebf5a27374159ac443"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/observations.json",
+      "bytes": 8538,
+      "sha256": "8ecd6bceccc1473f32564dd55e8179cf6e235e96204e6959a743dc30bf376725"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/plan.json",
+      "bytes": 129296,
+      "sha256": "b55a3cfbc2d6f09289bf21b8cd2c467b9676466a57a9f44117098c0ca0d89588"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/observations.json",
+      "bytes": 2515,
+      "sha256": "7cb9cc6de859493d648fbb686bfc27dd109401d6ba03e196a742bdaab82eadd5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/host-after.json",
+      "bytes": 501,
+      "sha256": "cf58c289d0abd94536eddac005645e257d8afb42b01d51590a1151c07253d59d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/host-before.json",
+      "bytes": 504,
+      "sha256": "bab0c48fe8cf75ec5214bf79e740e8d35c88723b817fd11c494981f93766b973"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/run-1.html",
+      "bytes": 83621,
+      "sha256": "20d3d3c719c77aab1a6baecb1122793a4be7a80b62da2dcea0c6ba86a149cb13"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/run-1.json",
+      "bytes": 151348,
+      "sha256": "98a8c9d0d8faf59c8fcc6e2e9891251870b670b8548f07ceafb8f93ff4d1df2d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/run.log",
+      "bytes": 1746,
+      "sha256": "b0f0661934f4d1b24aedad010c5a7dfffc440546df798f86a52f9c37929e4c7e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-A/summary.json",
+      "bytes": 59133,
+      "sha256": "1606566e7e25cd325e3dd8b7478f35ba09638df367c9bc0eaa937c326a22f4a1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/host-after.json",
+      "bytes": 503,
+      "sha256": "02be77077737de4b0296b695f2f3f41abee1fd3bbfdd4e9dfd2a4b10a27f2f13"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/host-before.json",
+      "bytes": 501,
+      "sha256": "e9f7c3c10cb6dc78c5cdc6b32a2a90dc484dcec95128e1c297231f53064edae2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/run-1.html",
+      "bytes": 83518,
+      "sha256": "e6f98723a74d37a53089160b3ba6f7084dd5b47be53bc489cb8b341ac0aba04b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/run-1.json",
+      "bytes": 151322,
+      "sha256": "1cda20f45ee71b0c2cb8a154d35a40eeb1f0454cc2b440b2a89767f9e8a24fe0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/run.log",
+      "bytes": 1745,
+      "sha256": "37a38e5b1bb6e8d81fd04204aa34148505fc3dabb97330078f4dc337e7fe2c6a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-01-B/summary.json",
+      "bytes": 59183,
+      "sha256": "6d459c1807648ec912561a2581ef9100dbfbdefce545686c48956f08f6f0da63"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/host-after.json",
+      "bytes": 504,
+      "sha256": "7794c703131c850f8e656d1acede1ff5d247b71c0db92595d4c50c9262076d33"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/host-before.json",
+      "bytes": 504,
+      "sha256": "939eb3880dad189304013799c1978b29ca4db0cfdc8ab7c0923772580c268366"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/run-1.html",
+      "bytes": 83507,
+      "sha256": "685757c628eb1cf43e4914979daa9611d95cc2f512a0390cca95d1ecc02bf7d4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/run-1.json",
+      "bytes": 151222,
+      "sha256": "4d9b9af305a94f765701c55ebb70dc44f654a2200ef89b5e7f2c97047f85b0b1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/run.log",
+      "bytes": 1745,
+      "sha256": "5a2eb169fcae8c1dec75431f9c10a36288243ae515322c3ff090d220c72ec0cc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-A/summary.json",
+      "bytes": 59149,
+      "sha256": "07169f916e9c30e3b623a402cb57e0a20bdbacb811865e7bd0369c0036355c2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/host-after.json",
+      "bytes": 504,
+      "sha256": "e31335ef65e4c2a8c50a60f33067f7a74083f6f54686f52b4101a7a7aee1798d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/host-before.json",
+      "bytes": 503,
+      "sha256": "65f8871f2e488ddd3a9e2193f4e77cc034ee49b7f84e5a9b4764335f64938e74"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/run-1.html",
+      "bytes": 83367,
+      "sha256": "837a71a3a07ee26652e5a987abe5ea3e8efedee6fa8bf638ee48a2f308d1912f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/run-1.json",
+      "bytes": 150896,
+      "sha256": "857a6c60316e07ec66c20a4e4c94a46fb9bc4a2411d02ba7109b59b0d81bc4d8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/run.log",
+      "bytes": 1745,
+      "sha256": "95062d3a2d1bb065a98c777acf3528a15fe1a83e85785af215e457793c4d9f59"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-02-B/summary.json",
+      "bytes": 58881,
+      "sha256": "517ce304b6196f65d17c3ad5739038ef7eb299f0e7f157140b7f6de5bac7172b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/host-after.json",
+      "bytes": 501,
+      "sha256": "eedab82090acc0e162f9c7f5282bbefdd87405e3b44f156b68234dfaa92abbd4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/host-before.json",
+      "bytes": 504,
+      "sha256": "51aca17b31acdc32efbef87ddc12f5d07e87f178f16623c0f530a58dc8d4d7d6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/run-1.html",
+      "bytes": 83563,
+      "sha256": "cd2b1d750bd70b02d86d0ce32a569c3763a88b7d64c04c2bbbcf01dece076f59"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/run-1.json",
+      "bytes": 151208,
+      "sha256": "53d843e03da3b7bbd4f5d8e250f34b68b691dd1b321415e4c09eb2b656d12541"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/run.log",
+      "bytes": 1745,
+      "sha256": "40db27bab47ede5a561652684981e2fa23b67cfc5f02ff54c124355e0293af91"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-A/summary.json",
+      "bytes": 58955,
+      "sha256": "ed5adc5d5b673784ff9c6e0cf0a99a0ce86b3f942924d80d0fbb2f87108e816f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/host-after.json",
+      "bytes": 504,
+      "sha256": "0e45f1ef395bf29fa3f156dcb359c5b805941e71b100ee9659140b38aee1a969"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/host-before.json",
+      "bytes": 501,
+      "sha256": "d720647a4d8231cfd880ebfb00f8d9967ddfba17e400094f731d59d2ebd64dd5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/run-1.html",
+      "bytes": 83367,
+      "sha256": "653e6dabfec78cc8dbea1fcad9f042ad515c1e53fdfc6ea187388ae2781c1771"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/run-1.json",
+      "bytes": 151014,
+      "sha256": "3e8ea5285c63862067afd113f01262edd89209722490fcd03bbaff9461b337cf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/run.log",
+      "bytes": 1745,
+      "sha256": "93d88e0d5fe8e10ce07ee0e12ac89865d74302d33cd3cb1d6fb1ceef596533be"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-03-B/summary.json",
+      "bytes": 59139,
+      "sha256": "5b5eac97de6a96688eeb2b4a18ab4cdd8231f34b643ee8b22672a306d3fcdbe3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/host-after.json",
+      "bytes": 503,
+      "sha256": "db0f957253a4273239ac2e713c046d621583ecad948a03f5dc0e00f83e202f41"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/host-before.json",
+      "bytes": 504,
+      "sha256": "893fddadbf846398c80aa4db6ae9e94b0909c41356ebf388046eb8cbaa2996b1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/run-1.html",
+      "bytes": 83450,
+      "sha256": "6145ad05bdaa1a7ebe1d539ae16f181eb866525952bde88867ececb0fd21ef69"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/run-1.json",
+      "bytes": 151024,
+      "sha256": "72055f3094462664527e1fbe6c58d305e11aec339d1bce85e9ac80a37e2f18d5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/run.log",
+      "bytes": 1745,
+      "sha256": "f0a02f0dfb42e03b35f6547ad405f23aea37f109c1ff7d7fd484da6054f06cea"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-A/summary.json",
+      "bytes": 59042,
+      "sha256": "787f4bb7a1a4ae555efe60cd6d700c81d53b26809a80c138f8b98cebffc54788"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/host-after.json",
+      "bytes": 504,
+      "sha256": "3887d71473e757fdcc5fb45e2e9c2aae8b3aeac227e7cc62e1255f7692ee72de"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/host-before.json",
+      "bytes": 504,
+      "sha256": "d11ea81edff3594066971cbe2cf71eb6c467fbda44f86804836c525d17c94b88"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/run-1.html",
+      "bytes": 83511,
+      "sha256": "6dcf7faf0c63183ae327063c48b08b0b9a19e8d26155e23aac7a395ae2e53916"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/run-1.json",
+      "bytes": 151195,
+      "sha256": "ad68d47c99b6978b88e99fef0100a5d0c50304e161fff03d027f2f8e93c14620"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/run.log",
+      "bytes": 1744,
+      "sha256": "0c86c667f253c97f7fc4cd5aff55e6ccba3417ac80a1ee509486455922f0d2d5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-04-B/summary.json",
+      "bytes": 59120,
+      "sha256": "bf7712e829d46908fd156a40c6a402fd3acd1d26a8396902ca1d4ac9194bb315"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/host-after.json",
+      "bytes": 503,
+      "sha256": "3aa093dd51ba42d753fdb28b531765c008f3ef2fedab15f0028946d94fcb9c2e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/host-before.json",
+      "bytes": 503,
+      "sha256": "58abd0b7a75bfce391c80ad7ccc15288e1a2596e8e6a0aec51bf7992c577dacf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/run-1.html",
+      "bytes": 83548,
+      "sha256": "fc6c59925614952dfa58790c2537cb745640b6e06b1af3f42d08e20da9b2899d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/run-1.json",
+      "bytes": 151186,
+      "sha256": "a448bd4d15e4b7c1ec33fcc4300f6faa1ba57236236af2f6812a4f0b23c41d0a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/run.log",
+      "bytes": 1744,
+      "sha256": "9f69bb90c898d1fc128d3d075e1d8ca870e7b28ac8cd8deb3c93d7c060f95086"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-A/summary.json",
+      "bytes": 59031,
+      "sha256": "5ba50e7667b99cfe13247622705a37e9dc2a0fa34773bc8fb7a56a2a45c42d7d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/host-after.json",
+      "bytes": 504,
+      "sha256": "a70579fcdb29a2228d8315ff523fb37489dfbecb49dc4451d68b9bba1940915c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/host-before.json",
+      "bytes": 503,
+      "sha256": "638b955616be8b1e17553b176d4582dfc97ff4869ca71b027c10bde216218103"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/run-1.html",
+      "bytes": 83586,
+      "sha256": "047fd12120b21b6bd3c5982c7ddcbd4e5f43d43e2d585c053dbd7e532f101536"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/run-1.json",
+      "bytes": 151222,
+      "sha256": "9e0e09b3351a20c848eb219d0db64385f717a5a0f55f7903dbbb60589536fe50"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/run.log",
+      "bytes": 1745,
+      "sha256": "75637171fcbc9c10284ab24874bf2c601b57ca05d4bdbfc876d4143b5930a831"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-05-B/summary.json",
+      "bytes": 59067,
+      "sha256": "80fcddcd6c6645506a59709ef29d0078190d4f9d2efc5d26d02d96738c890d77"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/host-after.json",
+      "bytes": 503,
+      "sha256": "e6222599e04dd1e0cf4e44ac945afe05afa659c420b6d48915138960d828fba9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/host-before.json",
+      "bytes": 503,
+      "sha256": "3ea7b5f344d12f22930db1312221662e50ef0e8507e5c1f81f86793a9a03f496"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/run-1.html",
+      "bytes": 83545,
+      "sha256": "b5267a6df5d6b870896b1e394b322f17b56b4c210ed94258e90c1ba6eb3306aa"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/run-1.json",
+      "bytes": 151208,
+      "sha256": "dcafcc44eead2ebe77ffc40aa379c60d5c056396535ba0f6d0bb042b96b6bfc5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/run.log",
+      "bytes": 1744,
+      "sha256": "e6af6f849ab06c48db5c2625eac2f4a9fd5b2cae0c1ddd6d142b6cb3b8f56f81"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-A/summary.json",
+      "bytes": 59027,
+      "sha256": "acb84f619c6ab6da45cdee65213ea486e408caac3308a40d73284d4b1a9abb99"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/host-after.json",
+      "bytes": 503,
+      "sha256": "182c1ec005b606bcc5dc63d21419a01aea81959975e236a8fa541f0f93ce966f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/host-before.json",
+      "bytes": 504,
+      "sha256": "d43c603d9aecd0c4e6667dfff7b835f9e1f3f130c1001062ed2629482c437320"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/run-1.html",
+      "bytes": 83485,
+      "sha256": "3f33bfb72cc1048818fe68e73da6b604b7f2044fdb599bc07fbb3b1f4068acc6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/run-1.json",
+      "bytes": 151035,
+      "sha256": "33f997948f87678b8bcc41ae11ca37351eb0876d50156df6943a934c1dce71fc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/run.log",
+      "bytes": 1745,
+      "sha256": "ea0c376f983fd8325b9acafa0a32f190e62459ef4f7f875ecdbf59ec8b0dc64c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/pair-06-B/summary.json",
+      "bytes": 58918,
+      "sha256": "369e4c6e1307a3caa9f52433a0b39a38f25b689e21a0b48219c71c2f5121b2ed"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/registered-plan.json",
+      "bytes": 3315,
+      "sha256": "d0f12782cec87b30f0aea566877767f0fb64d73eccf67351854de4bbf889730e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/source-identities.json",
+      "bytes": 128938,
+      "sha256": "42d0cb535e03fab5e59558124e8dc003f1f02c92bcc51e4bbd0f88a114fca93d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/host-after.json",
+      "bytes": 504,
+      "sha256": "8b560c14bfcd2788c341cbb7800866e5a6082ec8806d9bcb5d55afc15ae24ffb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/host-before.json",
+      "bytes": 504,
+      "sha256": "2b73f7f331cdcab587bd1fd6702cbcf3a660a5c1fc0314a6bfef08289454636d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/run-1.html",
+      "bytes": 83777,
+      "sha256": "1b5ba648f56c08dc2ac77b85de08c76c1715db5939b57372918071099a608302"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/run-1.json",
+      "bytes": 151597,
+      "sha256": "07c0600bcb2411fa0e9cac9540736a1288f37d590b2ac22fc7a92b633b86b405"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/run.log",
+      "bytes": 1752,
+      "sha256": "10e58dcd2bebddc18f320eeaa1af1ffb9bbc86d23e682d373626f754882aaed9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-A/summary.json",
+      "bytes": 59195,
+      "sha256": "a59c7fa9f701a32199dbd8568384ab4443e1c907edb6997f762b16fc81e70849"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/host-after.json",
+      "bytes": 503,
+      "sha256": "abc65e5761910ad9da35dad6ff29f23e26896a9c102da9468a6bfe7dd1cc8865"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/host-before.json",
+      "bytes": 504,
+      "sha256": "401cb18b1c25a6b69230cf0483d3b0139837632010da20f08171ee56aff45b46"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/run-1.html",
+      "bytes": 83599,
+      "sha256": "819c6c1325621c6f9945168031e5877b0c8605614675f14e95bc0a5675171c94"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/run-1.json",
+      "bytes": 151340,
+      "sha256": "95bace1ad5f1faed063f3f3a6cf13c546293ac0269eb3a478a00f352bb2d1988"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/run.log",
+      "bytes": 1753,
+      "sha256": "56cdc6f756593bbf104fd107af02afe09ef38535e5ad825876abef6c57c8dc98"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-1-B/summary.json",
+      "bytes": 59128,
+      "sha256": "ff7566b3ddb716fd3adafb493712b50416882e292a0e75d715a644b5cea28928"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/host-after.json",
+      "bytes": 504,
+      "sha256": "7d249c38fa24679a876fb69b29761d11a6f74c7a27bcf30b4678fc7db59ee88a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/host-before.json",
+      "bytes": 504,
+      "sha256": "c5cbaa6dce8f555af8f081ef04561cea76da357b02c07327a69b802a7f4b0498"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/run-1.html",
+      "bytes": 83475,
+      "sha256": "a476efdd17bcaa2f20b44d2002acb3f44d0f240971a86410e8c19e269d126146"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/run-1.json",
+      "bytes": 151037,
+      "sha256": "6595eb0bcfe725cb374326e2bf166eb366ac38b1a5a7d1e2c55f6b9fe577a134"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/run.log",
+      "bytes": 1748,
+      "sha256": "b81f78320c2f4b122f95c267a530af017842748aa7e7846402f6ba779aa5c228"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-A/summary.json",
+      "bytes": 58959,
+      "sha256": "0414c5fd87d13bf18b95ae62c35ee1d3b52ac47bd4af2bacd398a6197e5fb42c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/canonical-receipt.json",
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/host-after.json",
+      "bytes": 504,
+      "sha256": "6a7d8a387af65ccc10d19341e30142e3c984edf5511870680935840325bca69a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/host-before.json",
+      "bytes": 503,
+      "sha256": "f95883990ae485a8c31e24a23866b9a82feb02b0dfd693b21d21e8f05ff327c4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/run-1.html",
+      "bytes": 83571,
+      "sha256": "d4cb809dd919cc103166dd28b3891d65f85087ee70cd351060e16a1613cee44b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/run-1.json",
+      "bytes": 151204,
+      "sha256": "3111cf952114f38ecabc8051d40bdff091e4c158643e5101864d5f401d701196"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/run.log",
+      "bytes": 1752,
+      "sha256": "b511aa755cdf56d7f4cf4db174ca77fdd799f4061dfb61dbd0a40aee4bb1b05f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/warmup-2-B/summary.json",
+      "bytes": 59059,
+      "sha256": "85f86e461825e5faf6232254c975ae0eed6ca72aa249b398ee10b22a6ce76d82"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/worktree-A.log",
+      "bytes": 158,
+      "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/jmdict/worktree-B.log",
+      "bytes": 135,
+      "sha256": "764169731340a5506bfa60423e2fd2ae415e8b886f74a219a6de27276db7653b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/raw/source-diff.txt",
+      "bytes": 106,
+      "sha256": "94c578aea8ba54a02156789ad347fd233f461519c258f3642b18c67a052d41b2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/scripts/evidence/audit-hosted-import-artifact-1b47.py",
+      "bytes": 8716,
+      "sha256": "df10a6f16eb17cbcff1da3b8c5f622f6e34808587549790187f78be67f22c2c5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/scripts/stage-pending-browser-cohort.py",
+      "bytes": 11295,
+      "sha256": "9eec5a3decd7a9119596dbb5460c5fc8a4dea52f0c85c98e14d8ae8cca6103e7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/README.md",
+      "bytes": 5960,
+      "sha256": "fb328a7564b542135bd0fcf309df57a78ebcf0406027dbae39b607c91129304f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/analysis.json",
+      "bytes": 1314,
+      "sha256": "f4581cd42aab577375fb1523575b21b9e9b6161c1d676fba99e96b304afabd96"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/artifact-metadata.json",
+      "bytes": 1732,
+      "sha256": "ba026c1bd2275f69c7c45086802d69ab4156c62c054dc2551e1dfb2294b00767"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/emitted-source-identities.json",
+      "bytes": 911,
+      "sha256": "38317ff4b28ed1bf51dad17d8a237b523ced7c1d16287a4652c943729244da77"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/independent-artifact-audit.json",
+      "bytes": 184748,
+      "sha256": "a9f75130f9c9cc7047d0d29e7f54abd3f238ed5b0a43a916bdae54687a7e4585"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/independent-artifact-audit.log",
+      "bytes": 1632,
+      "sha256": "95096d44719b53e44c1f53fa698af7f8ed17085d90b6b131deb075fa2a78d11b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/job.log",
+      "bytes": 329696,
+      "sha256": "a850beb49da4e1f51fbbd99ae8f1e6a0788ddf46d5fc04c6f1216f879e39017b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/memory/memory-audit.json",
+      "bytes": 402,
+      "sha256": "599b36a353a2143aaafa8db42acf4ac14d78231275c6ed1251113e61b6e9c169"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/memory/memory-comparison.json",
+      "bytes": 10079,
+      "sha256": "93cd414f1ffb25fe7bbabad2c9659d7bca1c2efdd1cde7ebf5a27374159ac443"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/missing-emitted-files.json",
+      "bytes": 41,
+      "sha256": "78c19a717ca14aa64deee0fb2008622eb42904d3fa2a980ec92a3b78eae6bf31"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/observations.json",
+      "bytes": 2515,
+      "sha256": "7cb9cc6de859493d648fbb686bfc27dd109401d6ba03e196a742bdaab82eadd5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/registered-plan.json",
+      "bytes": 3315,
+      "sha256": "d0f12782cec87b30f0aea566877767f0fb64d73eccf67351854de4bbf889730e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/result-summary.json",
+      "bytes": 3277,
+      "sha256": "5029aa19655e117076ccccb4f8e5226d41e93cc988cbd2593e0bb896bc434c3c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/retrieval-manifest.json",
+      "bytes": 801,
+      "sha256": "d0640649798f8ca68ddcfe738f36f2d6992945c5308459b281a34f176ee039fc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/hosted-score-jmdict-46106456744/run-statuses.json",
+      "bytes": 3495,
+      "sha256": "8c17fe169732807b76280a27ce651f9eaf5228c8894dbde7d8546c18eadbd095"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/score-jmdict-independent-pr-review-1b47.json",
+      "bytes": 3960,
+      "sha256": "682282a02f6e822e3102e32ea59393f09aeb5f507ceb1342d0a6cbcd087e8f68"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/snapshots/evidence/score-jmdict-pr978-body-addendum-1b47.md",
+      "bytes": 2060,
+      "sha256": "5df21d166ae8fd32ee1f8386e4e8b2df12f55b54a3007105974aecd816a42b13"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py",
+      "bytes": 13354,
+      "sha256": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/test_import_window.py",
+      "bytes": 9404,
+      "sha256": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/test_protocol.py",
+      "bytes": 2039,
+      "sha256": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jmdict/validators/dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+      "bytes": 21080,
+      "sha256": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/clock-source-links/independent-source-review.json",
+      "bytes": 4874,
+      "sha256": "9376ce2dc3a6e4f4dd3a741919bec83c03e43d0a458cc35edb1438da1bf28844"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/clock-source-links/snapshots/evidence/hosted-clock-source-link-supplement-1b47.json",
+      "bytes": 70898,
+      "sha256": "dc8a0c11d31d5efa221bec2e19d2b099bbefa329ba2cbd7db19d9273b0a92a31"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/clock-source-links/snapshots/evidence/hosted-clock-source-link-supplement-1b47.log",
+      "bytes": 169,
+      "sha256": "9c5664b2cf0e8836b417b4d689dfbc32034ee2fb605ab181851e5b7df684fe2a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/clock-source-links/snapshots/evidence/verify-hosted-clock-source-links-1b47.py",
+      "bytes": 7649,
+      "sha256": "bc9d5ad9776130f90feaeea0d578c0cdb38ef305249224ae4238cbfce358c033"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/clock-source-links/supplement-record.json",
+      "bytes": 1653,
+      "sha256": "113d59c85bde71aa4177c0647ebf94d428abd817d96a2ab77660dc2c00916eff"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/audit-hosted-compression-artifact-1b47-derivation.json",
+      "bytes": 913,
+      "sha256": "f4991f9978fa1c77a3dd866636af5fb1667ccbd11dc4e379843e5957ed3987a1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/audit-hosted-compression-artifact-1b47.patch",
+      "bytes": 11240,
+      "sha256": "cc219ef1ffe0a58a8a7bf179efc56dc2bdb73723dc92eb8b4606b073d1fabd40"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/audit-hosted-compression-artifact-1b47.py",
+      "bytes": 14134,
+      "sha256": "cabb2ce37ebd2eb1b5d78f5e38703b4083647ad05f572095a25dc16a028b8eb6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/audit-hosted-import-artifact-1b47.py",
+      "bytes": 8716,
+      "sha256": "df10a6f16eb17cbcff1da3b8c5f622f6e34808587549790187f78be67f22c2c5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/compression-artifact-auditor-independent-review-1b47.json",
+      "bytes": 4720,
+      "sha256": "b805d82e141515f8a42e2db11ff670de2a1ac8b0b471b14efee4402b0efa864f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/compression-level-study/compression_receipts.py",
+      "bytes": 7953,
+      "sha256": "7512dd8f4422fc01fe094eb49dcccc4a3f8a80cb9dbf8fc2e37b8b00e1f68bb8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/compression-level-study/import-compression-level-20261128-1b47.py",
+      "bytes": 23455,
+      "sha256": "7fe216453d56094cb94a2504915efcbc64e08b5a3c99be25ca206b435b094d98"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/snapshots/evidence/compression-level-study/test_compression_receipts.py",
+      "bytes": 12177,
+      "sha256": "ffc48b76a565eccb100fc0fa1a9f7d5f355b087bc6c6199ad2a58639ca47789d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/compression-auditor/supplement-record.json",
+      "bytes": 4370,
+      "sha256": "abe87343032ddc54d97519f61c87071ee2baf822b1cda2d932f5d61641c7dbd8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/generic-auditor-v2/snapshots/evidence/audit-hosted-import-artifact-v2-1b47-derivation.json",
+      "bytes": 578,
+      "sha256": "1e609bf2a6f0ae122c624f26e3956c12f02eadcfba81101f2db285e6fb48b375"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/generic-auditor-v2/snapshots/evidence/audit-hosted-import-artifact-v2-1b47.patch",
+      "bytes": 6565,
+      "sha256": "597304d1a09d36e778e5dce2bc37627de2ae4a70eb53f36c18aefab4cc2a0f14"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/generic-auditor-v2/snapshots/evidence/audit-hosted-import-artifact-v2-1b47.py",
+      "bytes": 11147,
+      "sha256": "292eea976f78c24ce93f441b468c9a3efad62ad539cd9425c74eec893ee27ca0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/generic-auditor-v2/snapshots/evidence/generic-artifact-auditor-v2-independent-review-1b47.json",
+      "bytes": 963,
+      "sha256": "49a3c9cb5e631a8bf87ba1ece47f31da449d4cc703c9ad093a079645bfb7b46c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-verification/generic-auditor-v2/supplement-record.json",
+      "bytes": 2122,
+      "sha256": "105395aefe9bea2fdb74a252d8d71d6acabfbea99f746ffb59ffba336009ee9e"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/README.md",
+      "bytes": 15150,
+      "sha256": "1cd131cc982648ba927d25d629ec9aa2e3691689f5c48f132409f22ba03bd9c0"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/bundle-spec.json",
+      "bytes": 84288,
+      "sha256": "6bbb82e055be7e5d77b381ae76ca681097da1cc7c2ce2ab1db2a4eebf0cf1c45"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/independent-publication-review.json",
+      "bytes": 858,
+      "sha256": "44d5baa353cca652b5c07c4b3e95efbf081161741fcb06d94c3172c0dcf20dc5"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/sealing-scope-history.json",
+      "bytes": 1498,
+      "sha256": "2673139631c81ffc756d1a1960f893dff23f4689caa30ad1d9bb39c35b9352c5"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/snapshots/evidence/hosted-pending-screens-status-20261128072018.json",
+      "bytes": 16729,
+      "sha256": "1ef2f27d10d8acb0e0a9d6f3300afce564de616ed74fe80247092ea8bfb56691"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/superseded-broader-packaging-plan.json",
+      "bytes": 698,
+      "sha256": "f9d062056d7b00ff9d25649dfe872df31c44b324b8561b2267b61f1ab8a56a2f"
+    },
+    {
+      "path": "evidence/score-jmdict-browser-addendum-20261128-1b47/superseded-open-staging-index.json",
+      "bytes": 1709,
+      "sha256": "51adc63f4f21e4829a9a81f3f70f56c50b55b43273497d354238c134bcd3a6f7"
+    }
+  ],
+  "omissions": [
+    {
+      "originalArtifactMember": "jmdict/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "42683133951f318ef5f199e26236f034798630ac8144055db8414b092e8d974d",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "originalArtifactId": 15253012612,
+      "originalArchiveSha256": "a94ec5951f9df34bfc3ddabb1e4eeca26b0353135b18e22f036a24915d2f61a4"
+    },
+    {
+      "originalArtifactMember": "jmdict/package-B.zip",
+      "bytes": 16805726,
+      "sha256": "fe722d58ac4411541c5c7c752f1c09e5c2ba9695a9038163a615b7727ed49839",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "originalArtifactId": 15253012612,
+      "originalArchiveSha256": "a94ec5951f9df34bfc3ddabb1e4eeca26b0353135b18e22f036a24915d2f61a4"
+    },
+    {
+      "kind": "original-artifact-container",
+      "file": "score-validation-1b47-screen-jmdict-15253012612.zip",
+      "bytes": 34929639,
+      "sha256": "a94ec5951f9df34bfc3ddabb1e4eeca26b0353135b18e22f036a24915d2f61a4",
+      "included": false,
+      "reason": "All204 non-package members retained individually; only two duplicate extension ZIPs omitted with exact digests/inventories"
+    }
+  ],
+  "verification": {
+    "verifiedMembers": 263,
+    "allMemberBytesAndHashesMatch": true
+  }
+}

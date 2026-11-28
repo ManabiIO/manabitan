@@ -102,6 +102,28 @@ The archive, member manifest and checksum are stored here as
 `completed-browser-raw-addendum-20261128-1b47.*`. Archive SHA-256:
 `f89e9cfcf6c20a65a248555dbf13150838404db326aaf389d517850fac7a9c30`.
 
+## Score-restoration JMdict browser result
+
+The [score JMdict browser addendum](score-jmdict-browser-addendum-README.md)
+preserves all 26 completed reports and 250 memory scan rows, with the actual
+packaged runtime bound to PR #978. Its paired median is -0.960%, with a
+descriptive interval spanning zero and a more favorable identical-code control.
+This does not establish a whole-import gain.
+
+All recorded semantic checks pass. Candidate memory observation B2 exceeds the
+fixed sampling-gap limit (252.093481 ms against 250 ms), so the complete memory
+comparison remains unqualified. The separate 1.57-1.60 ms warm-validator saving
+is unchanged. Jitendex and VNDB remain separate pending qualifications at this
+addendum's cutoff.
+
+The addendum also preserves a later read-only cross-file verification for the
+seven completed cohorts and the reviewed auditors prepared for later results.
+Preparation of an auditor is not a completed compression or CRC measurement.
+
+The archive, member manifest and checksum are stored here as
+`score-jmdict-browser-addendum-20261128-1b47.*`. Archive SHA-256:
+`5d400949b03587909a973cac958b4276ddfe5adf6318427b01782e0fb044b4b0`.
+
 ## Why JMdict gains stayed small
 
 The [technical assessment](jmdict-technical-assessment.md) explains the measured
