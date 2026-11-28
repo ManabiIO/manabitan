@@ -9,7 +9,7 @@ permissions:
 
 concurrency:
   group: import-lab-4a779-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   qualify:
@@ -42,9 +42,14 @@ jobs:
           key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
       - name: Compare complete imports with identical-code controls
         run: |
+          args=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            args+=(--vndb-sah-allocation-units 37 37)
+          fi
           python dev/perf/import-qualification-20261125-a7f7.py \
             --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
             --dictionary "$PERF_DICTIONARY" --initial-order AB --pairs 6 \
+            "${args[@]}" \
             --expected-package-entry js/dictionary/term-record-opfs-store.js \
             --evidence "builds/perf/lab-index-worker/$PERF_DICTIONARY"
       - name: Preserve all observations and failures
