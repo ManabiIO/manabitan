@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "compilerVersion": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)",
+  "linkerVersion": "Debian LLD 21.1.8",
+  "flags": [
+    "--target=wasm32",
+    "-O3",
+    "-mbulk-memory",
+    "-nostdlib",
+    "-Wl,--no-entry",
+    "-Wl,--import-memory",
+    "-Wl,-z,stack-size=65536",
+    "-Wl,--strip-all"
+  ],
+  "files": {
+    "record-fields.c": "cc6661abdb8fdc9cb1b327b16614b8a18935f23f76324fdce91d2ef0b241abd2",
+    "record-fields.wasm": "55994bb5eaddb22975e0dffb7549395b550610bb63f835d7da248024a051430a",
+    "prototype.mjs": "37b2b54e85ef4f62344d8375a8916a69e3199e8feba9f1476d51182c189831ab",
+    "edge-check.mjs": "34a804425cbd4fc562b3575f17589461c4c793202b7957583a3f59b36059cc50",
+    "screen.mjs": "0a542ccd4cbffc8778e95d150e8cbd66431b4018743cc9ad11cc4a427789eb3c",
+    "build.mjs": "57634c5334269458bb809b9c35d893dad0c62e3711843dc30356a1365d8d25b9"
+  }
+}

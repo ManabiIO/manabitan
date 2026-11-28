@@ -1,0 +1,66 @@
+name: Native record component screen 20261127 beb5
+
+on:
+  push:
+    branches: ['test/native-record-screen-20261127-beb5']
+    paths:
+      - '.github/workflows/native-record-screen-beb5.yml'
+      - 'dev/perf/native-components-20261127-beb5/record/**'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: Record fields (${{ matrix.dictionary }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned native compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Reproduce native module and acquire complete bounded corpus screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          prototype="$GITHUB_WORKSPACE/dev/perf/native-components-20261127-beb5/record"
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-record-screen-beb5/$PERF_DICTIONARY"
+          mkdir -p "$evidence" "$RUNNER_TEMP/record-prototype"
+          cp "$prototype"/* "$RUNNER_TEMP/record-prototype/"
+          git rev-parse HEAD > "$evidence/source-sha.txt"
+          node dev/perf/host-environment.js > "$evidence/host.json"
+          node "$RUNNER_TEMP/record-prototype/build.mjs" > "$evidence/pinned-build.json"
+          cmp "$prototype/record-fields.wasm" "$RUNNER_TEMP/record-prototype/record-fields.wasm"
+          node --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", [process.env.PERF_DICTIONARY])'
+          node "$prototype/edge-check.mjs" --repository "$GITHUB_WORKSPACE" > "$evidence/edge-check.json"
+          node --expose-gc --max-old-space-size=2048 "$prototype/screen.mjs" \
+            --repository "$GITHUB_WORKSPACE" \
+            --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --wasm "$prototype/record-fields.wasm" \
+            --dictionary "$PERF_DICTIONARY" \
+            --parser-workers 3 --pairs 6 --repetitions 8 \
+            --out "$evidence/screen.json" 2>&1 | tee "$evidence/screen.log"
+      - name: Retain every observation, source identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-screen-beb5-${{ matrix.dictionary }}
+          path: builds/perf/native-record-screen-beb5
+          if-no-files-found: error
+          retention-days: 14
