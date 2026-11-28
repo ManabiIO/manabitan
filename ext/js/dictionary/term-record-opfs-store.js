@@ -2475,12 +2475,29 @@ export class TermRecordOpfsStore {
             const runLimitEnd = Math.min(count, runStart + runRowLimit);
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
+            // Every ID below this prefix has passed the current run's checks
+            // and contributed its span to the range. Reset after every await.
+            // eslint-disable-next-line @stylistic/semi
+            let validatedContentPrefix = 0
             while (runEnd < runLimitEnd) {
                 let uniqueIndex = -1;
                 let contentOffset;
                 let contentLength;
                 if (references !== null) {
                     uniqueIndex = references.uniqueIndexList[runEnd];
+                    /* eslint-disable @stylistic/semi */
+                    if (uniqueIndex < validatedContentPrefix && uniqueIndex >= 0 && Number.isInteger(uniqueIndex)) {
+                        // This private indexed scan has no intervening caller
+                        // callbacks. Repeated IDs cannot change its min/max.
+                        // Keep malformed IDs on the original validation path,
+                        // including typed columns with a spoofed prototype.
+                        ++runEnd
+                        while (runEnd < runLimitEnd && references.uniqueIndexList[runEnd] === uniqueIndex) {
+                            ++runEnd
+                        }
+                        continue
+                    }
+                    /* eslint-enable @stylistic/semi */
                     if (uniqueIndex >= references.offsets.length) {
                         throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
                     }
@@ -2505,6 +2522,9 @@ export class TermRecordOpfsStore {
                 maxContentOffset = nextMaxContentOffset;
                 ++runEnd;
                 if (references !== null) {
+                    // Advance only after validation and range acceptance.
+                    // eslint-disable-next-line @stylistic/semi
+                    if (uniqueIndex === validatedContentPrefix) { ++validatedContentPrefix }
                     // Consecutive aliases have the same already-validated span
                     // and cannot change this run's minimum or maximum offset.
                     while (runEnd < runLimitEnd && references.uniqueIndexList[runEnd] === uniqueIndex) {
