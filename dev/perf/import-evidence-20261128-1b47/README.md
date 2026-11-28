@@ -168,6 +168,26 @@ The archive, member manifest and checksum are stored here as
 `crc-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `84d5ae1f80c2a5ccfb2981c71eb335b4320d09ec19c649884fb512e5a561d8c5`.
 
+## Original compression-level browser trial
+
+The [original compression trial readout](compression-original-browser-addendum-README.md)
+preserves both active-corpus failures and the complete VNDB control. JMdict and
+Jitendex each stopped during the first warmup comparison: their exact declared
+storage increases passed, but a representation-sensitive physical digest still
+differed. Neither acquired a measured pair. The original failures remain
+incomplete and cannot establish a speedup.
+
+VNDB completed all 26 observations and passed its original semantic and memory
+gates, with an inconclusive -1.937% paired median and an interval spanning zero.
+The packet preserves 30 raw reports, every original receipt form and 418 memory
+scan rows across the three actual artifacts. A separately registered correction
+must retain its own proof, source identity and observations; none is included in
+this original-trial archive.
+
+The archive, member manifest and checksum are stored here as
+`compression-original-browser-addendum-20261128-1b47.*`. Archive SHA-256:
+`bf0ea30f7c8faa7e3ff30b4207fc777ddc99b07c084830889add6bbeae56086a`.
+
 ## Why JMdict gains stayed small
 
 The [technical assessment](jmdict-technical-assessment.md) explains the measured
