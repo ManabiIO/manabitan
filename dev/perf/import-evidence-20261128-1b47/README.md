@@ -5,9 +5,9 @@ against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
 The bundles support component improvements; neither establishes a complete
 browser-import speedup. Product changes are on separate branches.
 
-| Proposal | Product commit | Measured scope |
-| --- | --- | --- |
-| [Restore indexed compact score-key validation](https://github.com/ManabiIO/manabitan/commit/b15bad43acdfd54d541895cac1109c0e5ba51b2f) | `b15bad43acdfd54d541895cac1109c0e5ba51b2f` | Approximately 1.57–1.60 ms saved per complete warm validation of 12 actual JMdict field buffers / 528,299 rows |
+| Proposal                                                                                                                                            | Product commit                             | Measured scope                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [Restore indexed compact score-key validation](https://github.com/ManabiIO/manabitan/commit/b15bad43acdfd54d541895cac1109c0e5ba51b2f)               | `b15bad43acdfd54d541895cac1109c0e5ba51b2f` | Approximately 1.57–1.60 ms saved per complete warm validation of 12 actual JMdict field buffers / 528,299 rows                         |
 | [Use existing CRC tables for eight- and four-byte gap tails](https://github.com/ManabiIO/manabitan/commit/5909db31ebe859fce1cc4b38324271ddf9f3dd59) | `5909db31ebe859fce1cc4b38324271ddf9f3dd59` | 6.82–8.65% lower summed CRC phase in two complete sequential VNDB parser cohorts; the direct verifier interval includes no improvement |
 
 ## Evidence bundles
