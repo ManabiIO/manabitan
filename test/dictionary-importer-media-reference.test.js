@@ -26,12 +26,13 @@ afterEach(() => { vi.restoreAllMocks() })
  * be observed without spawning a browser for this unit test.
  * @param {unknown[]} rows
  * @param {(chunk: ColumnChunk) => void} [inspect]
+ * @param {boolean} [columnarMedia]
  * @returns {Promise<{importer: DictionaryImporter, requirements: import('dictionary-importer').ImportRequirement[]}>}
  */
-async function collectReferences(rows, inspect = () => {}) {
+async function collectReferences(rows, inspect = () => {}, columnarMedia = false) {
     vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
         return await nativeParse(source, version, async (chunk, progress) => {
-            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
+            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true, false, void 0, columnarMedia)
             inspect(projected)
             await onChunk(projected, progress)
         }, size, options)
@@ -49,6 +50,58 @@ async function collectReferences(rows, inspect = () => {}) {
 }
 
 describe('preformatted image references', () => {
+    test('merges projected columns and fallback rows in source order with identical diagnostics', async () => {
+        const rows = [
+            ['先行', 'せんこう', '', '', 0, [{type: 'image', path: 'first.png'}], 0, ''],
+            ['fallback', '', '', '', 0, [{type: 'image', path: 'unsupported.bin'}], 0, ''],
+            ['別名', '', '', '', 0, [{
+                type: 'structured-content',
+                content: [
+                    {tag: 'img', path: 'first.png'},
+                    {tag: 'img', path: 'last.webp'},
+                ],
+            }], 0, ''],
+        ]
+        const baseline = await collectReferences(rows)
+        /** @type {ColumnChunk|undefined} */
+        let copied
+        const candidate = await collectReferences(rows, (chunk) => { copied = chunk }, true)
+        if (typeof copied === 'undefined' || typeof copied.projectedMedia === 'undefined') { throw new Error('Missing media columns') }
+        expect(copied.mediaRows.map(({index}) => index)).toEqual([1])
+        expect(copied.projectedMedia.rowIndexes).toEqual(new Uint32Array([0, 2]))
+        expect(copied.projectedMedia.pathEnds).toEqual(new Uint32Array([1, 3]))
+        expect(copied.projectedMedia.paths).toEqual(['first.png', 'first.png', 'last.webp'])
+        expect(candidate.requirements).toEqual(baseline.requirements)
+        const diagnostics = copied.projectedMedia.diagnosticKeys
+        for (const requirement of candidate.requirements) {
+            if (requirement.type === 'image-reference') { expect(requirement.entry).toHaveProperty('diagnosticKeys', diagnostics) }
+        }
+        // The owner consumes the transferred diagnostic arena directly. It
+        // neither keeps the large key plan alive nor takes a second snapshot.
+        const before = structuredClone(diagnostics)
+        copied.termRecordPreinternedPlan.stringsBuffer.fill(0)
+        await nativeParse(encoder.encode(JSON.stringify([
+            ['replacement'.repeat(100), '', '', '', 0, ['later'], 1, ''],
+        ])), 3, () => {})
+        expect(diagnostics).toEqual(before)
+        const deferred = candidate.requirements.map((requirement) => candidate.importer._createDeferredMediaRequirement(requirement))
+        await expect(candidate.importer._importDeferredMediaRequirements(deferred, [], new Map(), async () => {}))
+            .rejects.toThrow('Could not find image at path "first.png" for 先行 (せんこう) in Media references')
+    })
+
+    test('keeps empty and unsupported media projections on the existing path', async () => {
+        const rows = [
+            ['text', '', '', '', 0, ['ordinary'], 0, ''],
+            ['unsupported', '', '', '', 0, [{type: 'image', path: 'unsupported.bin'}], 0, ''],
+        ]
+        const baseline = await collectReferences(rows)
+        const candidate = await collectReferences(rows, (chunk) => {
+            expect(chunk.projectedMedia).toBeUndefined()
+            expect(chunk.mediaRows).toHaveLength(1)
+        }, true)
+        expect(candidate.requirements).toEqual(baseline.requirements)
+    })
+
     test('keeps exact diagnostic key views in the owned string arena across native reuse', async () => {
         /** @type {Uint8Array[]} */
         const keys = []
@@ -200,11 +253,11 @@ describe('preformatted image references', () => {
         ['日本😀', 'にほん'],
         ['\ufeff画像', '\ufeffがぞう'],
         ['unpaired\ud800', 'unpaired\udfff'],
-    ])('preserves missing-image diagnostics for %s and %s', async (expression, reading) => {
+    ].flatMap(([expression, reading]) => [false, true].map((columnarMedia) => /** @type {const} */ ([expression, reading, columnarMedia]))))('preserves missing-image diagnostics for %s and %s (columns=%s)', async (expression, reading, columnarMedia) => {
         const {importer, requirements} = await collectReferences([
             [expression, reading, '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
             ['別名', 'べつめい', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
-        ])
+        ], () => {}, columnarMedia)
         const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
         const expectedReading = reading || expression
         const readingSource = expectedReading.length > 0 ? ` (${expectedReading})` : ''

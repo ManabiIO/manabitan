@@ -70,12 +70,19 @@ const defer = () => {
     const promise = new Promise((resolveValue) => { resolvePromise = resolveValue })
     return {promise, resolve: () => resolvePromise()}
 }
-async function waitFor(promise) {
+async function waitFor(promise, outcome) {
     let timer
     try {
-        return await Promise.race([promise, new Promise((_, reject) => {
-            timer = setTimeout(() => reject(new Error('Borrowed worker schedule timed out')), 5000)
-        })])
+        return await Promise.race([
+            promise,
+            outcome.then((error) => {
+                if (error !== null) { throw error }
+                throw new Error('Borrowed worker completed before the expected schedule event')
+            }),
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error('Borrowed worker schedule timed out')), 5000)
+            }),
+        ])
     } finally { clearTimeout(timer) }
 }
 function bank(index, repeated = false, compact = false) {
@@ -134,6 +141,7 @@ for (const config of [
         const results = []
         const retained = []
         let calls = 0
+        let nextBankIndex = 0
         let cancelled = false
         const original = new Error('Borrowed content sink failure witness')
         parseRequests = 0
@@ -152,10 +160,33 @@ for (const config of [
                 ++calls
                 assert.equal(typeof chunk.releaseBorrowedContent, config.borrowed ? 'function' : 'undefined')
                 assert.equal(takeOwnedTermContent(chunk.contentBytesBuffer), !config.borrowed)
-                assert.ok(chunk.mediaRows.length > 0)
-                assert.ok(chunk.mediaRows.every(({imagePaths}) => (config.forceNonProjected ?
-                    typeof imagePaths === 'undefined' :
-                    imagePaths.length === 1 && imagePaths[0].endsWith('.png'))))
+                const rowsPerBank = config.repeated ? 40 : 1
+                const bankCount = chunk.rowCount / rowsPerBank
+                assert.ok(Number.isInteger(bankCount) && bankCount > 0)
+                if (config.forceNonProjected) {
+                    assert.equal(chunk.projectedMedia, undefined)
+                    assert.ok(chunk.mediaRows.length > 0)
+                    assert.ok(chunk.mediaRows.every(({imagePaths}) => typeof imagePaths === 'undefined'))
+                } else {
+                    assert.deepEqual(chunk.mediaRows, [])
+                    const keys = Array.from({length: bankCount}, (_, index) => encoder.encode(`word-${nextBankIndex + index}-0`))
+                    const bytes = new Uint8Array(keys.reduce((length, key) => length + key.length, 0))
+                    const spans = new Uint32Array(bankCount * 4)
+                    let offset = 0
+                    for (let index = 0; index < bankCount; ++index) {
+                        const key = keys[index]
+                        bytes.set(key, offset)
+                        spans.set([offset, key.length, offset, key.length], index * 4)
+                        offset += key.length
+                    }
+                    assert.deepEqual(chunk.projectedMedia, {
+                        rowIndexes: Uint32Array.from({length: bankCount}, (_, index) => index * rowsPerBank),
+                        pathEnds: Uint32Array.from({length: bankCount}, (_, index) => index + 1),
+                        paths: Array.from({length: bankCount}, (_, index) => `image-${nextBankIndex + index}.png`),
+                        diagnosticKeys: {bytes, spans, decodedKeys: null},
+                    })
+                }
+                nextBankIndex += bankCount
                 const fields = independentFields(chunk)
                 retained.push({fields, snapshot: structuredClone(fields)})
                 if (calls !== 1) { return }
@@ -169,8 +200,8 @@ for (const config of [
             () => cancelled,
         ).then(() => null, (error) => error)
         try {
-            await waitFor(firstSink.promise)
-            await waitFor(initialReady.promise)
+            await waitFor(firstSink.promise, outcome)
+            await waitFor(initialReady.promise, outcome)
             await turn()
             assert.equal(parseRequests, expectedLead)
             for (const result of results) {
@@ -228,7 +259,7 @@ await runCase('peer parser failure releases waits without reusing active content
         options,
     ).then(() => null, (error) => error)
     try {
-        await waitFor(failureDelivered.promise)
+        await waitFor(failureDelivered.promise, outcome)
         await turn()
     } finally { finishSink.resolve() }
     const error = await outcome
