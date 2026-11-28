@@ -8,18 +8,12 @@ permissions:
   contents: read
 
 jobs:
-  profile:
-    name: Baseline profile (${{ matrix.dictionary }})
+  routing:
+    name: JMdict publication routing (diagnostic only)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        dictionary: [jmdict, jitendex, vndb]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          fetch-depth: 1
       - uses: ./.github/actions/setup
       - name: Install pinned Chromium
         run: npx playwright install --with-deps chromium
@@ -29,26 +23,43 @@ jobs:
           path: builds/e2e-dictionary-cache
           key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
       - name: Prepare complete dictionary
-        run: node dev/perf/prepare-dictionaries.js '${{ matrix.dictionary }}'
-      - name: Build release package
-        run: node dev/bin/build.js --target chrome
-      - name: Record frozen source and runtime
+        run: node dev/perf/prepare-dictionaries.js jmdict
+      - name: Add temporary routing observations
         run: |
-          mkdir -p builds/perf/lab-2ed
-          git rev-parse HEAD HEAD^{tree} > builds/perf/lab-2ed/source.txt
-          git status --porcelain > builds/perf/lab-2ed/source-status.txt
-          sha256sum package-lock.json test/perf/dictionaries.lock.json builds/manabitan-chrome.zip > builds/perf/lab-2ed/hashes.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          file = Path('ext/js/dictionary/dictionary-database.js')
+          source = file.read_text()
+          marker = '        let i = 0\n        if (canCopyRuns) {'
+          assert source.count(marker) == 1
+          observation = '''        console.log('[import-lab-publication]', JSON.stringify({
+              count, canCopyRuns, pendingStart,
+              pendingIndexes: pendingIndexes.constructor.name,
+              pendingOffsets: pendingOffsets.constructor.name,
+              pendingLengths: pendingLengths.constructor.name,
+              namesArray: Array.isArray(plan.resolvedDictNames),
+              resolvedUniformDictName: plan.resolvedUniformDictName,
+              pendingDictNames: typeof pendingDictNames === 'string' ? pendingDictNames : '<array>',
+              sameOutputBuffers: [offsetBuffer === lengthBuffer, offsetBuffer === flagBuffer, lengthBuffer === flagBuffer],
+              aliasedInputs: [pendingOffsets.buffer, pendingLengths.buffer, pendingIndexes.buffer].map((b) => [offsetBuffer, lengthBuffer, flagBuffer].includes(b))
+          }))
+          '''
+          file.write_text(source.replace(marker, observation + marker))
+          Path('builds/perf/lab-2ed').mkdir(parents=True, exist_ok=True)
+          Path('builds/perf/lab-2ed/BOUNDARY.txt').write_text('Temporary logging diagnoses route eligibility. All timing is diagnostic and must not be compared as a speed measurement.\n')
+          PY
+          git diff -- ext/js/dictionary/dictionary-database.js > builds/perf/lab-2ed/diagnostic-only.patch
+      - name: Build diagnostic release package
+        run: node dev/bin/build.js --target chrome
+      - name: Record source and runtime
+        run: |
+          git rev-parse HEAD 'HEAD^{tree}' > builds/perf/lab-2ed/source.txt
           node dev/perf/host-environment.js > builds/perf/lab-2ed/host-before.json
-      - name: Ordinary full import with exhaustive media verification
-        run: node dev/perf/import-benchmark.js '${{ matrix.dictionary }}' --build-target chrome --no-build --runs 1 --output builds/perf/lab-2ed/ordinary
-      - name: Separate non-authoritative CPU trace
-        run: node dev/perf/import-benchmark.js '${{ matrix.dictionary }}' --build-target chrome --no-build --runs 1 --trace --media-check sample --output builds/perf/lab-2ed/trace
-      - name: Record final host state
-        if: always()
-        run: node dev/perf/host-environment.js > builds/perf/lab-2ed/host-after.json
+      - name: Collect routing observations with full correctness checks
+        run: node dev/perf/import-benchmark.js jmdict --build-target chrome --no-build --runs 1 --trace --output builds/perf/lab-2ed/routing
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
-          name: import-lab-2ed-${{ matrix.dictionary }}
+          name: import-lab-2ed-publication-routing
           path: builds/perf/lab-2ed
           retention-days: 14
