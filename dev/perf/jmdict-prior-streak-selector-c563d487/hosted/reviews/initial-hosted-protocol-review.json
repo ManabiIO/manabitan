@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T08:01:44.476296+00:00",
+  "scope": "Independent static source/protocol review of the settled successor hosted controllers, workflow and prospective gates; no acquisition, compiler invocation or product edit",
+  "passedForReviewedScope": true,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+  "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+  "files": [
+    {
+      "path": "jmdict-prior-streak-selector-hosted/workflow.yml",
+      "bytes": 9438,
+      "sha256": "e77c6d292368ebe8156d18c8ffceb983c95cc6f4af715d019c5051edd04f5c4a"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/cohort_tools.py",
+      "bytes": 9063,
+      "sha256": "8ed997b656c5d7c477b3e9ee143b7d31622c15b395b0cdce0365705f9fac04c2"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/run.py",
+      "bytes": 7766,
+      "sha256": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/preflight.py",
+      "bytes": 2882,
+      "sha256": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/setup.sh",
+      "bytes": 1068,
+      "sha256": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/screen.mjs",
+      "bytes": 19878,
+      "sha256": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/native-oracle.mjs",
+      "bytes": 13002,
+      "sha256": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/output-digest.mjs",
+      "bytes": 2507,
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/candidate.patch",
+      "bytes": 5645,
+      "sha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/diagnostic-fields.json",
+      "bytes": 1116,
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/expected-mechanics.json",
+      "bytes": 15884,
+      "sha256": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/prospective-component-review.json",
+      "bytes": 4162,
+      "sha256": "aacd6585ea64bea7fc2932162d68ef63cb5cf82b3d3db07416d1f0fb001ddf97"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-hosted/prospective-complete-import-criteria.json",
+      "bytes": 4104,
+      "sha256": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/negative-run.py",
+      "bytes": 10239,
+      "sha256": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/negative-screen.mjs",
+      "bytes": 11757,
+      "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/negative-protocol.json",
+      "bytes": 4587,
+      "sha256": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/negative-fixtures.mjs",
+      "bytes": 5840,
+      "sha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/fixture-model.mjs",
+      "bytes": 6570,
+      "sha256": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/state-model.mjs",
+      "bytes": 11009,
+      "sha256": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/expected-counts.json",
+      "bytes": 14485,
+      "sha256": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64"
+    },
+    {
+      "path": "jmdict-prior-streak-selector-negative/legacy-fixture-manifest.json",
+      "bytes": 9311,
+      "sha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1"
+    },
+    {
+      "path": "jmdict-prior-streak-selector/hosted/prepare.py",
+      "bytes": 13281,
+      "sha256": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b"
+    }
+  ],
+  "checked": {
+    "baselineReproductionAndExactDirtyCandidateCTrackedWasmManifestOnly": true,
+    "runtimeWasmMatchesTrackedWasmForBothArms": true,
+    "dependenciesPinnedEqual": true,
+    "allFixtureModelProtocolFilesIncludedInPerChildToolingReceipt": true,
+    "sixSmokeModesAndScopedLintStrictTypesFocusedTestsBeforeAcquisition": true,
+    "nativeOracleAndOutputDigestByteIdenticalToOriginal": true,
+    "mainScreenOnlyFourGetterSpellingsDiffer": true,
+    "negativeExactClockBlockUnchanged": {
+      "sha256": "ba87ecfd1017907064b6d196616027d4c842ef7ac287a3d854bddb8408065efb",
+      "bytes": 1062
+    },
+    "serialCells": [
+      "jmdict",
+      "negative1",
+      "negative2",
+      "negative3",
+      "negative4",
+      "negative5",
+      "negative6",
+      "jitendex",
+      "vndb"
+    ],
+    "freshChildrenPerCell": 16,
+    "plannedMeasuredChildren": 144,
+    "schedule": "ABCD/DCBA/ABCD/DCBA; A,C,D baseline and B candidate",
+    "dictionaryWarmups": 2,
+    "dictionaryMeasuredCorpusPasses": 1,
+    "negativeWarmups": 2,
+    "negativeMeasuredRepetitionsPerChild": 16,
+    "pairedUnit": "Fresh child; negative repetitions summed exactly using sequential binary64 and not treated as independent samples",
+    "digestAfterEachClockAndBeforeViewReuse": true,
+    "diagnosticsExcludedFromEveryMeasuredChild": true,
+    "dictionaryPerGroupFusedVsSingletonRulePreserved": true,
+    "negativePerPassStrictNativeCRCAndPublicCountsChecked": true,
+    "all48NegativeDiagnosticFieldsRequired": true,
+    "JMdict43PredictedCountersPerTotalAndEightGroups": 387,
+    "fiveAdditionalJMdictCountersHaveBoundsOnlyAndAreExplicitlyUnpredicted": true,
+    "failedCellsRemainFailedAndLaterIndependentCellsContinueUnderGlobalGates": true,
+    "noResumeReplacementOrExistingResultOverwrite": true,
+    "rawChildStatusesReceiptsAndPartialNegativePassesRetained": true,
+    "alwaysUploadOriginalArtifact": true,
+    "externalHostContentionNotClaimedControlled": true
+  },
+  "prospectiveGates": {
+    "jmdictComponent": "At least1% enclosing elapsed median reduction, all4 faster, absolute effect exceeds largest absolute same-code pair; exact parity/mechanics and no clear non-target/negative regression",
+    "negativeAndNonTargetClearHold": "Median enclosing slowdown greater than3%, all4 slower, effect exceeds largest absolute same-case A/A pair; ambiguity remains hold/qualification limitation, never equivalence proof",
+    "fullImportTarget": "Unchanged1% each of2 independent12-pair JMdict hosts, at least9/12 faster, descriptive intervals below0, controls materially smaller, all unchanged correctness/package/storage/media/restart/memory gates",
+    "fullImportNonTarget": "Unchanged replicated1% slowdown/at least9/12 slower/interval above0/controls smaller holds or rejects",
+    "fullCriteriaComparedStructurallyToOriginal": true,
+    "noPoolingControlSubtractionSelectedMetricsOrRetries": true
+  },
+  "publicationPrerequisitesStillSeparate": [
+    "Final preparation-record and exact publication manifest must bind these reviewed bytes and supersede earlier core-preparation snapshots",
+    "Independent fixture/state-model and diagnostic-origin semantic review is assigned to another agent",
+    "Candidate must be reproduced and pass all dynamic preflights before any measured children"
+  ],
+  "findings": []
+}

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "scope": "Source-only tooling preparation; no parser call or timing",
+  "expectedJMdictCounters": 43,
+  "files": {
+    "candidate.patch": {
+      "sha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+      "bytes": 5645
+    },
+    "cohort_tools.py": {
+      "sha256": "d1f72d0087ddfa4619fba184d713a728493e793b38be39107923753f29a75582",
+      "bytes": 8982
+    },
+    "diagnostic-fields.json": {
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+      "bytes": 1116
+    },
+    "expected-mechanics.json": {
+      "sha256": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+      "bytes": 15884
+    },
+    "native-oracle.mjs": {
+      "sha256": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+      "bytes": 13002
+    },
+    "output-digest.mjs": {
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+      "bytes": 2507
+    },
+    "prepare-core.py": {
+      "sha256": "68320da43f4f1dcb6464c633bd7ec8f176efe07789a91b9593ac08fd1ecc7538",
+      "bytes": 8464
+    },
+    "run.py": {
+      "sha256": "94fcf11cce1b1aecad097a13f3cf15f3e601eb90e92fb7e0c3cdef0f4a7eb4ab",
+      "bytes": 7671
+    },
+    "screen.mjs": {
+      "sha256": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+      "bytes": 19878
+    },
+    "setup.sh": {
+      "sha256": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+      "bytes": 1068
+    }
+  }
+}

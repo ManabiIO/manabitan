@@ -1,0 +1,31 @@
+{
+  "scope": "Source-only and excluded baseline-only preparation checks",
+  "baselineEnabledDisabledRichResultsEqual": true,
+  "semanticResultCount": 73,
+  "richResultsSha256": "50e1bd1b131748e3d335b6b571706201ac53681b2e56869ff7d21263bd8f2c44",
+  "nodeSyntax": [
+    {
+      "path": "qualification/term-bank-prior-streak-selector-fixtures.js",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "path": "qualification/term-bank-prior-streak-selector.test.js",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:13) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "path": "hosted/smoke.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:20) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    }
+  ],
+  "pythonPreparerSyntaxPassed": true,
+  "patchAppliesToBaseline": true,
+  "candidateCompiled": false,
+  "candidateExecuted": false,
+  "timingsAcquired": false
+}

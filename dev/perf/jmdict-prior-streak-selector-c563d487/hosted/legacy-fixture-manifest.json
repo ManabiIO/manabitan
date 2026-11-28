@@ -1,0 +1,289 @@
+{
+  "schema": 1,
+  "generatorSha256": "ebb80da2dcd7308795b67174f3b415ac6e404fd39f261909ef7dc086931334ff",
+  "node": "v22.22.0",
+  "zlib": "1.3.1-470d3a2",
+  "compression": {
+    "method": 8,
+    "level": 6
+  },
+  "rowsPerCase": 20000,
+  "rowsPerBank": 10000,
+  "banksPerCase": 2,
+  "grouping": "Both banks in one fused group, no reset at the second bank",
+  "globalMarker": "Six decimal digits, global row index 0..19999, never reset at bank boundary",
+  "families": {
+    "short": {
+      "serializedGlossaryBytes": 240,
+      "mutation": {
+        "start": 216,
+        "endExclusive": 222
+      },
+      "tailSample": {
+        "start": 232,
+        "endExclusive": 240
+      },
+      "middleSample": {
+        "start": 116,
+        "endExclusive": 124
+      },
+      "shape": "One-element JSON array containing one ASCII string; byte lengths include all JSON delimiters"
+    },
+    "long": {
+      "serializedGlossaryBytes": 4096,
+      "mutation": {
+        "start": 4072,
+        "endExclusive": 4078
+      },
+      "tailSample": {
+        "start": 4088,
+        "endExclusive": 4096
+      },
+      "middleSample": {
+        "start": 2044,
+        "endExclusive": 2052
+      },
+      "shape": "One-element JSON array containing one ASCII string; byte lengths include all JSON delimiters"
+    }
+  },
+  "flags": {},
+  "cases": [
+    {
+      "id": 1,
+      "name": "unique-short-keys",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-1/term_bank_1.json",
+          "compressedFile": "case-1/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "5bb07c139b5c2176a1ed793ec72c60939787394ec70ffb479b725d966a0017f6",
+          "compressedSha256": "938a017e1a28dc96f0060b3a0dd33cd9a5a143160b79a4df8a1999907bc6993e",
+          "uncompressedSize": 2710001,
+          "compressedSize": 61141,
+          "compressionMethod": 8,
+          "signature": 3790676514
+        },
+        {
+          "rawFile": "case-1/term_bank_2.json",
+          "compressedFile": "case-1/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "caf34ed0882476de6bf32b03db24b489c7fda56bf499448ca3f32e987f048ab4",
+          "compressedSha256": "83d76e11afea3899a86570f314b2611c2070aa4064300aa8d6b4dfa35e718f36",
+          "uncompressedSize": 2710001,
+          "compressedSize": 61142,
+          "compressionMethod": 8,
+          "signature": 722769397
+        }
+      ],
+      "expectedMechanics": {
+        "rows": 20000,
+        "hits": 0,
+        "hitBytes": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "keyIdentityRows": 19999,
+        "admissions": 0,
+        "candidateRecordsInspected": 0,
+        "noPrefixCandidate": 0,
+        "selected": 0,
+        "selectedBytes": 0,
+        "fullRejected": 0,
+        "fullBytesOffered": 0,
+        "failedFullBytesOffered": 0,
+        "maxSelectedBytes": 0,
+        "maxFailedFullBytes": 0,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      }
+    },
+    {
+      "id": 2,
+      "name": "same-key-short-full-misses",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-2/term_bank_1.json",
+          "compressedFile": "case-2/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "313919eb11461456cc381dfe92c6fa675e4eeba71c86dba5573a7d2309479423",
+          "compressedSha256": "40a8b54dae6d6c61098e1551c287f997a0a52c56122c3c7a719377e3d5cf6bac",
+          "uncompressedSize": 2700001,
+          "compressedSize": 37374,
+          "compressionMethod": 8,
+          "signature": 558818720
+        },
+        {
+          "rawFile": "case-2/term_bank_2.json",
+          "compressedFile": "case-2/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "8d4ba8b9dc6e4ff467d7865c983708e3bc66d78508776a82bf502008d7bb12e7",
+          "compressedSha256": "cb188ccb8ae24b05a972708e3799ba3a30050f3f16a4d9e42217ae80e2a029eb",
+          "uncompressedSize": 2700001,
+          "compressedSize": 37396,
+          "compressionMethod": 8,
+          "signature": 270405730
+        }
+      ],
+      "expectedMechanics": {
+        "rows": 20000,
+        "hits": 0,
+        "hitBytes": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "selectedDistance1": 19999,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "keyIdentityRows": 19999,
+        "admissions": 19999,
+        "candidateRecordsInspected": 19999,
+        "noPrefixCandidate": 0,
+        "selected": 19999,
+        "selectedBytes": 4799760,
+        "fullRejected": 19999,
+        "fullBytesOffered": 4799760,
+        "failedFullBytesOffered": 4799760,
+        "maxSelectedBytes": 240,
+        "maxFailedFullBytes": 240,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      }
+    },
+    {
+      "id": 3,
+      "name": "alternating-older-long-full-misses",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-3/term_bank_1.json",
+          "compressedFile": "case-3/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "fab1eebccac2a8a6bbac425ac4bca0c3d0e3ecea1e6fa26d702786187ff33e1e",
+          "compressedSha256": "675f798e1537e5f668a67d07c6a62f4a401fd0fd4cd25efcce4df023427efade",
+          "uncompressedSize": 21980001,
+          "compressedSize": 65785,
+          "compressionMethod": 8,
+          "signature": 3847112808
+        },
+        {
+          "rawFile": "case-3/term_bank_2.json",
+          "compressedFile": "case-3/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "2f8704bda110c8267995f0bbc830ceb842aebba440d1e2897881bafdc09f6e29",
+          "compressedSha256": "fc586503cc24091cd84eedcd1bbb1feda9916ccd7fdf8ff89c4b8fa04fc20d28",
+          "uncompressedSize": 21980001,
+          "compressedSize": 65801,
+          "compressionMethod": 8,
+          "signature": 1098449885
+        }
+      ],
+      "expectedMechanics": {
+        "rows": 20000,
+        "hits": 0,
+        "hitBytes": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 9999,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "selectedAtLeast512": 9999,
+        "selectedAtLeast512Bytes": 40955904,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 10000,
+        "rulesSignatureRejected": 0,
+        "keyIdentityRows": 10000,
+        "admissions": 10000,
+        "candidateRecordsInspected": 19999,
+        "noPrefixCandidate": 1,
+        "selected": 9999,
+        "selectedBytes": 40955904,
+        "fullRejected": 9999,
+        "fullBytesOffered": 40955904,
+        "failedFullBytesOffered": 40955904,
+        "maxSelectedBytes": 4096,
+        "maxFailedFullBytes": 4096,
+        "originalLookbackZeroRows": 10000,
+        "originalLookbackPositiveRows": 9999
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      }
+    }
+  ]
+}

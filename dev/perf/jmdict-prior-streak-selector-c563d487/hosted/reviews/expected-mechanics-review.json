@@ -1,0 +1,19 @@
+{
+  "scope": "Independent summary-only arithmetic and meaning review of prospective native expectations; no parser execution",
+  "status": "pass",
+  "expectedMechanicsSha256": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+  "observerReportSha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31",
+  "priorBudgetEvidenceSha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+  "matchedValues": 387,
+  "expectedFieldsPerTotalOrGroup": 43,
+  "groups": 8,
+  "unpredictedAdditionalCounters": [
+    "readingIneligibleRows",
+    "readingAliasRejected",
+    "keyComparisonCalls",
+    "keyComparisonBytesOffered",
+    "maxKeyComparisonBytes"
+  ],
+  "cumulativeMaximaReview": "Runner compares after[max] to max(before[max], independent group expectation); does not subtract maxima.",
+  "limit": "Predictions only; successor native execution remains required. Two old budget counts are predicted from unchanged policy and prior native evidence, not observed on successor."
+}

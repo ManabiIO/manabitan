@@ -1,0 +1,151 @@
+name: JMdict prior-streak selector component screen c563d487
+
+on:
+  push:
+    branches: [perf/jmdict-prior-streak-selector-screen-20261128-c563d487]
+
+permissions:
+  contents: read
+
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  TOOL_ROOT: dev/perf/jmdict-prior-streak-selector-c563d487/hosted
+  BASE_ROOT: ${{ github.workspace }}/../prior-streak-selector-baseline
+  CANDIDATE_ROOT: ${{ github.workspace }}/../prior-streak-selector-candidate
+  OUTPUT_ROOT: ${{ github.workspace }}/builds/jmdict-prior-streak-selector
+
+jobs:
+  serial-screen:
+    name: One fixed source, nine serial component cells
+    runs-on: ubuntu-26.04
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out frozen experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up frozen baseline dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install pinned compiler and reproduce baseline artifacts
+        run: |
+          mkdir -p "$OUTPUT_ROOT"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npm run build:dictionary-wasm -- --check
+          node --version
+          uname -a
+          lscpu
+          clang-21 --version
+          wasm-ld-21 --version
+
+      - name: Prepare isolated product and untimed diagnostic builds
+        id: prepare
+        run: bash "$TOOL_ROOT/setup.sh"
+
+      - name: Verify six guarded production smoke modes
+        id: smoke
+        run: python3 "$TOOL_ROOT/preflight.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT"
+
+      - name: Lint and type-check fixtures and run focused correctness tests
+        id: correctness
+        working-directory: ${{ env.CANDIDATE_ROOT }}
+        run: |
+          npx eslint test/term-bank-prior-streak-selector-fixtures.js test/term-bank-prior-streak-selector.test.js --format json --output-file "$OUTPUT_ROOT/scoped-eslint.json"
+          npm run test:ts:test > "$OUTPUT_ROOT/test-types.log" 2>&1
+          npx vitest run test/term-bank-prior-streak-selector.test.js test/term-bank-wasm-parser.test.js test/dictionary-importer-term-bank-field-validation.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js test/term-bank-source-crc-reuse.test.js --maxWorkers=2 > "$OUTPUT_ROOT/focused-tests.log" 2>&1
+          cat "$OUTPUT_ROOT/focused-tests.log"
+
+      - name: Fetch and verify the three locked dictionaries
+        id: dictionaries
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', ['jmdict', 'jitendex', 'vndb']);"
+
+      - name: Generate and bind six fixed negative fixtures
+        id: negatives
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' }}
+        run: |
+          node --max-old-space-size=512 "$TOOL_ROOT/negative-fixtures.mjs" "$OUTPUT_ROOT/negative-fixtures"
+          python3 "$TOOL_ROOT/verify-negative-fixtures.py" "$OUTPUT_ROOT/negative-fixtures"
+
+      - name: jmdict fixed native oracle and sixteen fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.dictionaries.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/jmdict"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/jmdict/diagnostic.wasm"
+          node --max-old-space-size=512 "$TOOL_ROOT/native-oracle.mjs" --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --dictionary jmdict --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --output "$OUTPUT_ROOT/jmdict/native-oracle"
+          python3 "$TOOL_ROOT/run.py" jmdict "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT/jmdict"
+
+      - name: Negative case 1, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-1"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-1/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-1" 1
+
+      - name: Negative case 2, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-2"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-2/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-2" 2
+
+      - name: Negative case 3, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-3"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-3/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-3" 3
+
+      - name: Negative case 4, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-4"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-4/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-4" 4
+
+      - name: Negative case 5, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-5"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-5/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-5" 5
+
+      - name: Negative case 6, sixteen fixed fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.negatives.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/negative-case-6"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/negative-case-6/diagnostic.wasm"
+          python3 "$TOOL_ROOT/negative-run.py" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT/negative-fixtures" "$OUTPUT_ROOT/negative-case-6" 6
+
+      - name: jitendex fixed native oracle and sixteen fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.dictionaries.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/jitendex"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/jitendex/diagnostic.wasm"
+          node --max-old-space-size=512 "$TOOL_ROOT/native-oracle.mjs" --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --dictionary jitendex --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --output "$OUTPUT_ROOT/jitendex/native-oracle"
+          python3 "$TOOL_ROOT/run.py" jitendex "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT/jitendex"
+
+      - name: vndb fixed native oracle and sixteen fresh children
+        if: ${{ !cancelled() && steps.prepare.conclusion == 'success' && steps.smoke.conclusion == 'success' && steps.correctness.conclusion == 'success' && steps.dictionaries.conclusion == 'success' }}
+        run: |
+          mkdir -p "$OUTPUT_ROOT/vndb"
+          cp "$OUTPUT_ROOT/diagnostic.wasm" "$OUTPUT_ROOT/vndb/diagnostic.wasm"
+          node --max-old-space-size=512 "$TOOL_ROOT/native-oracle.mjs" --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --dictionary vndb --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" --output "$OUTPUT_ROOT/vndb/native-oracle"
+          python3 "$TOOL_ROOT/run.py" vndb "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT/vndb"
+
+      - name: Preserve every source, fixture, observation, failure and criterion
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-prior-streak-selector-screen-${{ github.run_attempt }}
+          path: builds/jmdict-prior-streak-selector
+          if-no-files-found: warn
+          retention-days: 14

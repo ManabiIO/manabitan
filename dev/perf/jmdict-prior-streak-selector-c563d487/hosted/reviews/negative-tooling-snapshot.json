@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "scope": "Source-bound successor negative tooling and ONE excluded pure generation/model result; no native candidate execution or timing",
+  "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+  "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+  "publicationCodeFiles": [
+    "diagnostic-fields.json",
+    "expected-counts.json",
+    "fixture-model.mjs",
+    "legacy-fixture-manifest.json",
+    "negative-fixtures.mjs",
+    "negative-protocol.json",
+    "negative-run.py",
+    "negative-screen.mjs",
+    "output-digest.mjs",
+    "state-model.mjs",
+    "screen-change-proof.json",
+    "generation-audit.json"
+  ],
+  "evidenceFiles": [
+    "excluded-generation-1.status.json",
+    "excluded-generation-1/manifest.json",
+    "excluded-generation-1/state-model-result.json",
+    "excluded-generation-1/preparation-receipt.json"
+  ],
+  "files": {
+    "diagnostic-fields.json": {
+      "bytes": 1116,
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+    },
+    "expected-counts.json": {
+      "bytes": 14485,
+      "sha256": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64"
+    },
+    "fixture-model.mjs": {
+      "bytes": 6570,
+      "sha256": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac"
+    },
+    "legacy-fixture-manifest.json": {
+      "bytes": 9311,
+      "sha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1"
+    },
+    "negative-fixtures.mjs": {
+      "bytes": 5840,
+      "sha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d"
+    },
+    "negative-protocol.json": {
+      "bytes": 4587,
+      "sha256": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652"
+    },
+    "negative-run.py": {
+      "bytes": 10239,
+      "sha256": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2"
+    },
+    "negative-screen.mjs": {
+      "bytes": 11757,
+      "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c"
+    },
+    "output-digest.mjs": {
+      "bytes": 2507,
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61"
+    },
+    "state-model.mjs": {
+      "bytes": 11009,
+      "sha256": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08"
+    },
+    "screen-change-proof.json": {
+      "bytes": 704,
+      "sha256": "bd4fc8c22677256b6dfc560d8e80d376dd5a59787a7c05ad5c90d3df1b40a553"
+    },
+    "generation-audit.json": {
+      "bytes": 5048,
+      "sha256": "3600f7f1d7c6181274b1657385fe1a7e3660673da9db053366a3e1bb0256be54"
+    },
+    "excluded-generation-1.status.json": {
+      "bytes": 2056,
+      "sha256": "454abdde78c96ee739e431df2705ca8e1b1d97af9b0753fda3499c1b01a48f2f"
+    },
+    "excluded-generation-1/manifest.json": {
+      "bytes": 23383,
+      "sha256": "7291d348f059862bbb51df976902d0cd21cb2115757e49d0020e59ae4483be54"
+    },
+    "excluded-generation-1/state-model-result.json": {
+      "bytes": 78117,
+      "sha256": "fbd0863047d88d3f358b7ee54de924c4caf18e201e52f196918df3c8a12f10dd"
+    },
+    "excluded-generation-1/preparation-receipt.json": {
+      "bytes": 17360,
+      "sha256": "20b77f4351b8530e97de097153eb4dc6a39a50df1051c491277140c455c44822"
+    }
+  },
+  "commonModuleContract": {
+    "module": "cohort_tools.py owned by root, not supplied or edited here",
+    "imports": [
+      "CANDIDATE_C",
+      "PATCH_SHA",
+      "assert_expected",
+      "check_diagnostic",
+      "checked_sources",
+      "child",
+      "identity",
+      "paired_summaries",
+      "runtime_receipt",
+      "schedule",
+      "sha",
+      "tooling_receipt"
+    ],
+    "timingMetric": "Original fixed16 sequential binary64 sums per child",
+    "progressTags": [
+      "PREFIX_NEGATIVE_CHILD_START",
+      "PREFIX_NEGATIVE_PASS",
+      "PREFIX_NEGATIVE_CHILD_FAILED"
+    ],
+    "toolingHashesMustInclude": [
+      "diagnostic-fields.json",
+      "expected-counts.json",
+      "fixture-model.mjs",
+      "legacy-fixture-manifest.json",
+      "negative-fixtures.mjs",
+      "negative-protocol.json",
+      "negative-run.py",
+      "negative-screen.mjs",
+      "output-digest.mjs",
+      "state-model.mjs"
+    ]
+  },
+  "pending": [
+    "Exact common-helper/workflow composition and independent final publication review",
+    "Hosted pinned compiler/baseline reproduction/native smoke/types/lint/focused tests/raw17-word oracle",
+    "One excluded native baseline/candidate-mechanics pass before each fixed negative cell",
+    "All96 synthetic and48 dictionary measured observations; no performance conclusion exists for the successor"
+  ]
+}

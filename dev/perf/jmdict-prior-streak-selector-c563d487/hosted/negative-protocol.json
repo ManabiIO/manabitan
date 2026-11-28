@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "status": "Prospective preparation only; native execution, timing and publication require the separate source/tooling review",
+  "scope": "Six fixed synthetic enclosing-component failure-overhead cells; separate from dictionary cells and complete-browser import qualification",
+  "source": {
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+    "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+    "diagnosticGetter": "prior_streak_selector_diag_get",
+    "diagnosticFieldsSha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+    "legacyFixtureManifestSha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+    "compilation": "Pinned Clang/LLD21.1.8; unchanged baseline reproduces tracked artifact; exact candidate C/patch/WASM/manifest and diagnostic binary bound by common preflight"
+  },
+  "casesOrder": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "input": {
+    "rowsPerCase": 20000,
+    "rowsPerBank": 10000,
+    "banksPerCase": 2,
+    "grouping": "One fused two-bank group; no reset at bank2",
+    "legacyCases": "Cases1..3 require byte-identical original raw/compressed banks and CRCs; they are inactive prior-streak controls",
+    "activeCases": "Case4 XXY242B; case5 L4096B,S18B,S18B,L-prime4096B; case6 Q242B,H242B,S18B,S18B,Q242B; block identity never resets at bank boundary",
+    "compression": "deflateRawSync level6 under exact Node22.22.0/zlib; generation/compression/hash/independent state replay before acquisition",
+    "rawByteGeometry": "Exact lengths, identity offsets and late mutation/sample offsets in fixtureGeometry; all include JSON delimiters",
+    "flags": {}
+  },
+  "acquisition": {
+    "node": "v22.22.0",
+    "nodeArguments": [
+      "--expose-gc",
+      "--max-old-space-size=512"
+    ],
+    "cases": 6,
+    "freshChildrenPerCase": 16,
+    "measuredObservations": 96,
+    "candidatePairsPerCase": 4,
+    "sameCodeControlPairsPerCase": 4,
+    "schedule": "Pairs0,2 ABCD; pairs1,3 DCBA; A,C,D baseline and B candidate",
+    "excludedWarmupPassesPerChild": 2,
+    "completeMeasuredPassesPerChild": 16,
+    "pairedUnit": "The fixed16-pass sum from one fresh child; repetitions are not independent observations",
+    "scopePerPass": "Fresh native compressed inflate/CRC, strict parse, content encoding and completed lookup construction; exact original execute clock block",
+    "digest": "Full canonical/key/numeric/index/dedup-plan/media digest after each clock interval and before WASM-backed views are reused",
+    "excludedPreflightsPerCase": "One baseline verify-only child plus one exact candidate instrumented mechanics child, one pass each; all displayed durations excluded",
+    "activationGate": "All48 exact diagnostic fields, exact public recent/unique counts and full digest must agree before the case timing; active failures must exercise the selected full proof exactly",
+    "serialIsolation": "No concurrent experiment commands in this job; external host contention is uncontrolled and assessed with same-code controls. Root owns one serial nine-cell schedule: JMdict, negatives1..6, Jitendex, VNDB.",
+    "failurePolicy": "No retry, resumption or selective replacement; retain all raw logs, completed pass receipts, status and partial plans. A failed cell remains failed; independent later cells may run only after global source/correctness/input gates passed."
+  },
+  "rejection": {
+    "metric": "Per-child enclosing elapsed16-pass sum",
+    "minimumSlowdownPercentExclusive": 3,
+    "allFourCandidatePairsMustBeSlower": true,
+    "controlCriterion": "Candidate median slowdown must exceed the largest absolute same-case C/D paired change",
+    "actionIfTriggered": "Hold/reject the exact candidate; no adaptive admission/cap/budget retuning within the cohort",
+    "ambiguousResult": "Hold/qualification limitation; failure to trigger the rule is not proof of equivalence",
+    "cpuRole": "Descriptive corroboration only"
+  },
+  "limits": [
+    "One hosted runner is a fail-fast component screen, not complete-import, browser-memory, or equivalence qualification",
+    "Full-comparison bytes are offered proof lengths, not observed instruction-level bytes read",
+    "These fixed prefix patterns are not exhaustive; case6 protects first-prefix-only semantics while still producing downstream complete-content hits",
+    "No pooling with original-prefix hosted/local evidence or numeric-suffix studies"
+  ]
+}

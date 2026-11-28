@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "originalScreenSha256": "00b0ff9df8fbbca349e51bf18195ebbaa5af28d33e3be46130c52a5b72d728a3",
+  "successorScreenSha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+  "clockBoundarySha256": "ba87ecfd1017907064b6d196616027d4c842ef7ac287a3d854bddb8408065efb",
+  "clockBoundaryBytes": 1062,
+  "clockBoundaryUnchanged": true,
+  "changes": [
+    "Accept fixed case IDs1..6",
+    "Use the successor diagnostic getter",
+    "Assert each fixture exact public reuse/recent and unique count after clocks",
+    "Retain per-pass uniqueCount and assert equality outside clocks"
+  ],
+  "outputDigestSha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61"
+}

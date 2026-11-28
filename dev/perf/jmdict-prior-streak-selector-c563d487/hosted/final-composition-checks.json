@@ -1,0 +1,115 @@
+{
+  "scope": "Source composition and syntax only; no native candidate compiled or executed, no timings",
+  "checks": [
+    {
+      "file": "assemble-final.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "cohort_tools.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "negative-run.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "preflight.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "prepare-core.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "prepare-workflow.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "prepare.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "run.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "verify-negative-fixtures.py",
+      "check": "python-ast",
+      "passed": true
+    },
+    {
+      "file": "fixture-model.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "native-oracle.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "negative-fixtures.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "negative-screen.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "output-digest.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "screen.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "smoke.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "state-model.mjs",
+      "check": "node-check",
+      "passed": true
+    },
+    {
+      "file": "setup.sh",
+      "check": "bash-n",
+      "passed": true
+    },
+    {
+      "file": "workflow.yml",
+      "check": "yaml-nine-fixed-serial-cells-and-gates",
+      "passed": true
+    },
+    {
+      "file": "expected-counts.json",
+      "check": "common-diagnostic-algebra-on-six-static-cases",
+      "passed": true
+    },
+    {
+      "file": "verify-negative-fixtures.py",
+      "check": "read-only-hash-check-existing-excluded-output",
+      "passed": true
+    }
+  ],
+  "deterministicFixtureHashes": {
+    "manifest.json": "7291d348f059862bbb51df976902d0cd21cb2115757e49d0020e59ae4483be54",
+    "state-model-result.json": "fbd0863047d88d3f358b7ee54de924c4caf18e201e52f196918df3c8a12f10dd",
+    "preparation-receipt.json": "20b77f4351b8530e97de097153eb4dc6a39a50df1051c491277140c455c44822"
+  }
+}

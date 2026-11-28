@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "status": "Source and focused test preparation complete; successor native compilation/execution and independent fixture review pending",
+  "scope": "One separate successor on baseline 9e10. Source, correctness fixtures, diagnostic preparation and excluded baseline-only fixture/oracle checks only. No timing, hosted launch or publication.",
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "worktreeClean": true
+  },
+  "files": {
+    "term-bank-parser.c": {
+      "sha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+      "bytes": 161346
+    },
+    "candidate.patch": {
+      "sha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+      "bytes": 5645
+    },
+    "qualification/term-bank-prior-streak-selector-fixtures.js": {
+      "sha256": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+      "bytes": 22868
+    },
+    "qualification/term-bank-prior-streak-selector.test.js": {
+      "sha256": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5",
+      "bytes": 13906
+    },
+    "hosted/smoke.mjs": {
+      "sha256": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+      "bytes": 18004
+    },
+    "hosted/prepare.py": {
+      "sha256": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+      "bytes": 13281
+    },
+    "hosted/diagnostic-fields.json": {
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+      "bytes": 1116
+    }
+  },
+  "diff": {
+    "files": 1,
+    "insertions": 51,
+    "deletions": 5,
+    "appliesToBaseline": true,
+    "generatedArtifactsEdited": false,
+    "productionJavaScriptChanged": false
+  },
+  "design": {
+    "admission": "Only the new lookback-zero pointer admission additionally requires a nonzero prior recent-content-match streak. Original positive lookback remains authoritative.",
+    "keyPredicate": "Pure expression-first boolean check after strict key/header/score grammar. Reading-only admission excludes empty/current-raw-alias reading. No key state, metadata or interner writes.",
+    "keyWorkBounds": {
+      "maxBodyBytesPerAddedComparison": 32,
+      "maxComparisonsPerHelper": 3,
+      "maxOfferedBodyBytesPerHelper": 96
+    },
+    "selector": "At most four preceding rows, newest first, matching raw tag/rule lengths and first up-to-four bytes; select exactly the first candidate and never retry.",
+    "proof": "Logical-bank bounds, opener, existing tail/middle samples and complete glossary bytes; successful earlier row in this parse alone can supply extent and all three hints.",
+    "preserved": "Baseline late interner/numeric tail and both two-bit escape-mask assignments remain byte-identical. Current sequence, term tags and closing syntax still parse normally. Original four-match/four-miss policy and CRC admission are unchanged; only original-lookback witnesses directly refill the budget.",
+    "interfaces": "No new production argument, exported ABI, allocation, metadata format, cache, threshold, option or table."
+  },
+  "sourceReviews": {
+    "proposal": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-successor-source-review.json",
+      "sha256": "bb835e3d4108be6d20464ef50c70da624c07a30fafaadcebeec8c25994c80c61"
+    },
+    "independent": {
+      "path": "independent-source-review.json",
+      "sha256": "9c266010ab9c13409a2ca4d7da33eb4c97aee9fbcab1787ad13898173cb4156d",
+      "status": "pass; no semantic blocker"
+    },
+    "root": "Root independently confirmed grammar order, bounded helper operations, first-only witness, necessary-prefix dedup reasoning, original-budget refill isolation, and baseline-authoritative late interning."
+  },
+  "diagnostics": {
+    "getter": "prior_streak_selector_diag_get",
+    "schemaFields": 48,
+    "schemaSha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+    "sourceOnlyGeneratedSha256": "236fd5bb7648c8167e25f720a501c0ed752b511a241bded92abb537faa54eef1",
+    "compiled": false,
+    "keyPredicateRows": "Every helper invocation, including rejected identities; replaces original keyIdentityRows meaning.",
+    "admissions": "Successful pure key predicates; expressionMatches + readingMatches. Added key-comparison counters exclude unchanged late interning.",
+    "priorStreakLookbackZeroRows": "Caller-side strict enabled lookback-zero prior-streak exposures; equals helper calls on valid input, may exceed them when current header grammar rejects.",
+    "proofAttribution": "Only new-selector proof attempts feed new stage counters. Legacy proof/budget/streak counts remain separate. A proof can precede a later row error, so failed parses need not reconcile proof hits with completed rows/public output.",
+    "cumulativeMaxFields": [
+      "maxSelectedBytes",
+      "maxFailedFullBytes",
+      "maxKeyComparisonBytes"
+    ],
+    "disabledZeroFields": [
+      "keyPredicateRows",
+      "admissions",
+      "candidateRecordsInspected",
+      "noPrefixCandidate",
+      "selected",
+      "selectedDistance1",
+      "selectedDistance2",
+      "selectedDistance3",
+      "selectedDistance4",
+      "selectedBytes",
+      "selectedAtLeast512",
+      "selectedAtLeast512Bytes",
+      "boundsRejected",
+      "openerRejected",
+      "tailRejected",
+      "middleRejected",
+      "fullRejected",
+      "hits",
+      "hitBytes",
+      "fullBytesOffered",
+      "failedFullBytesOffered",
+      "maxSelectedBytes",
+      "maxFailedFullBytes",
+      "originalLookbackZeroRows",
+      "originalLookbackPositiveRows",
+      "originalGlossaryReuses",
+      "totalGlossaryReuses",
+      "priorStreakRows",
+      "budgetPositiveRows",
+      "budgetRefreshByRecentStreak",
+      "definitionLengthRejected",
+      "rulesLengthRejected",
+      "definitionSignatureRejected",
+      "rulesSignatureRejected",
+      "hitDistance1",
+      "hitDistance2",
+      "hitDistance3",
+      "hitDistance4",
+      "priorStreakLookbackZeroRows",
+      "expressionMatches",
+      "readingMatches",
+      "readingIneligibleRows",
+      "readingAliasRejected",
+      "keyComparisonCalls",
+      "keyComparisonBytesOffered",
+      "maxKeyComparisonBytes"
+    ],
+    "disabledNonzeroPermitted": [
+      "recentContentHits",
+      "rows"
+    ]
+  },
+  "qualification": {
+    "validCases": 67,
+    "malformedCases": 16,
+    "fallbackCases": 3,
+    "smokeSemanticResultRecords": 73,
+    "smokeDiagnosticRecords": 83,
+    "productionTestCount": 90,
+    "smokeCli": "node hosted/smoke.mjs <sourceRoot> [diagnosticWasm] [--baseline] [--disabled-reuse]",
+    "requiredPath": "At least two logical banks; public fusedParseAttempts=1, fusedSingleBankGroups=0 and zero fallback for supported strict valid fixtures. singleChunk does not grant single-bank fusion.",
+    "coverage": [
+      "Inactive unique/common-prefix/same-key unequal-content controls",
+      "Active X,X,Y late full mismatch; older 4096-byte L,S,S,L-prime miss/success; current logical-bank bounds",
+      "First-prefix-only Q,H,S,S,Q mismatch and bounds failure without retry",
+      "Complete tags/rules/term tags after prefix collisions, all hints/media and current numeric fields",
+      "Raw reading bypass and permitted reading-only admission; escaped/literal keys; lone/paired surrogate handling; active ASCII/UTF8/escaped 31/32/33-byte body boundaries; worst-case three comparisons/96 bytes",
+      "Existing lookback1/lookback4, four-miss expiry and four-match readmission, 511/512 boundary, no direct budget seeding",
+      "Malformed keys/headers and post-proof fields; fallback and negative zero; opt-out/permissive parsing; empty/cross-bank and independent requests; ownership after memory growth/failure"
+    ],
+    "crcScope": "Small corrupt-CRC fixture proves rejection before publication and healthy retry. It is below unchanged 4MiB admission and does not exercise deferred witness CRC after parsing.",
+    "independentFixtureReview": "Pending; independent source review already passed."
+  },
+  "localValidation": {
+    "node": "v22.22.0",
+    "sourceOnlyDiagnosticPreparation": "pass",
+    "fullScopedEslint": "pass on two qualification files under unchanged repository configuration",
+    "targetedStrictTypes": "pass; two entries, ambient declarations and transitive dependencies; full repository type lane not run",
+    "baselineOnlySmokeEnabled": "pass",
+    "baselineOnlySmokeDisabled": "pass",
+    "baselineRichResultsEqual": true,
+    "candidateCompiled": false,
+    "candidateExecuted": false,
+    "candidateUnitTestsExecuted": false,
+    "benchmarksExecuted": false,
+    "hostedLaunches": false,
+    "preservedFailure": "Initial fixture scoped lint exited 1 with 264 function argument/paren newline errors; test file had zero findings. Original source/report/log retained. Formatting-only correction passed, with nonpositional AST and all fixture exports equal. No semantic fixture changes.",
+    "preparationRoot": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-preparation",
+    "receipts": {
+      "source-only-1/receipt.json": "9f036a9bacdbd2b364940308dcad42f8426b41a67f25fb2d7a3a2bef4578afce",
+      "eslint-initial/receipt.json": "b020a698f9d44d805ac9addaac2ecfcaf29e02b61cdb7ef5b1b7c8e199744f64",
+      "eslint-fixed/receipt.json": "c520006e459d1bd05cda764e1291859f8d797d55f7d46c50e5d7205c77bb2005",
+      "eslint-formatting-identity.json": "4c04ace338c8a470ce84ccc6a70ea416a7e071d9b42477be62faef81958f763f",
+      "qualification-formatting.patch": "8d1e37b4dbf47f4c9c30f97430f4592df53f13a1edbd125515616bee6f43fd65",
+      "targeted-types-1/receipt.json": "ce95b9e73720a51e00cacea101f5bec3a89cca52da83c7254680e9077c4a6bdc",
+      "baseline-smoke-enabled-1/receipt.json": "b5fce373a08ea0cc90ea2a31955ca69ab50bf81d29cf55d080bd1cf74e964964",
+      "baseline-smoke-disabled-1/receipt.json": "7b1ce11579a72417d593acabb17e8dceef6ac5c366af6a86f939ee7ea561213e",
+      "final-source-and-baseline-checks.json": "93050f3030fbb336410c85bfafd105e304d76f7f77ec375fc33e451f08770440",
+      "expected-mechanics-review.json": "2520059f787fc4aac10ebd666d41ea97a7872f185d96d323b0e55070702bfb44",
+      "frozen-input-identities.json": "91d1a30d92e0fa265f183736b2745a19805ff3d0a779a8b8ae4e961a9846f6ff"
+    }
+  },
+  "prospectiveJmdictMechanics": {
+    "scope": "Untimed earlier observer predictions only at eight fixed seven-bank groups; successor native verification required before any future timing decision.",
+    "rows": 528299,
+    "helperCalls": 85314,
+    "keyRejections": 40848,
+    "admissions": 44466,
+    "selectedCandidates": 44181,
+    "newGlossaryProofs": 44102,
+    "newProvenGlossaryBytes": 8059365,
+    "originalGlossaryProofs": 54629,
+    "totalGlossaryReuses": 98731,
+    "native17WordMetadataDigest": "d6965c13c73fbe3312802d1e4800b0acd8942f317b3ed065d7c8edd25c1c0809",
+    "expectedMechanicsReview": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-preparation/expected-mechanics-review.json",
+    "nonTargets": "No successor Jitendex or VNDB counts or performance are assumed."
+  },
+  "pending": [
+    "Independent settled fixture/diagnostic review",
+    "Separately authorized hosted pinned native build",
+    "All candidate production/diagnostic enabled/disabled smoke modes and 90 focused tests",
+    "Native 17-word oracle and full rich corpus parity; exact mechanical expectations and separately owned active/inactive negatives",
+    "Independent root/protocol review and separate authorization before any timing or publication"
+  ],
+  "rationale": "Prior untimed selectivity/cost evidence and preserving the common late interner path. No performance inference from this design, source-only checks, excluded baseline smoke, or the inconclusive prior-prefix local screen.",
+  "frozenInputsVerifiedUnchanged": true
+}
