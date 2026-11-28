@@ -1229,3 +1229,39 @@ This component gain warrants review of the bounded-overlap candidate in a clean
 draft, held for complete current validation and the frozen browser timing,
 semantic, and memory gates. No full-import speedup or production memory result
 is inferred. The independent FIFO and VNDB alias studies remain separate.
+
+### Clean review branch and independent interpretation
+
+[Draft PR #977](https://github.com/ManabiIO/manabitan/pull/977) is now open at
+`4702e9e9d73dda0d0f6ea83dce399a249ebb13a6`, directly on frozen develop
+`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. It contains exactly seven runtime
+files, six focused test files, and the enforced copyright-header registration.
+Its tree is `879621db6fc05a24a04239dc51dd748165ff68da`.
+
+The complete `ext/` subtree
+`498442aef1fa20e49c414b930c23e38a29749ce4`, `test/` subtree
+`d4e90453af7af534f5a8029179e633015e1cbfff`, and ESLint configuration blob
+`ecacd4bd0572e1df051d2f0167d11d09d3026cf8` match frozen runtime `5048ba3e`
+exactly. The clean branch excludes research scripts, qualification helpers,
+archives, and the accumulated research handoff.
+
+The [independent clean-diff audit](../../builds/perf/import-overlap-20261128-da6c4/clean-product-source-audit.json)
+records all fourteen path-to-blob bindings, applicable repository validation
+requirements, and nearby distinct optimization work. The [independent codec
+interpretation](../../builds/perf/import-overlap-20261128-da6c4/independent-corrected-codec-interpretation.json)
+recomputes all arithmetic, confirms order balance, and explicitly records the
+cohort's downward drift, preloaded-memory scope, noisier later ablation,
+one-pass decode check, and earlier-runtime parity boundary.
+
+The prototype's inherited comment about an idle fourth worker applies only to
+the superseded 4 MiB screen. All four workers are active at the actual 1 MiB
+target. The committed worker cursor changes every shared-span batch; only the
+cross-group preparation eligibility is JMdict-specific. Jitendex and VNDB
+therefore remain required cross-corpus controls even with serial sinks.
+
+Normal [PR CI run 46114581653](https://github.com/ManabiIO/manabitan/actions/runs/46114581653)
+was discovered queued at 06:00 UTC, with ordinary source/type/unit/build and
+extension checks unchanged. The existing `5048ba3e` release-browser
+qualification remains a separate fixed acquisition. No additional performance
+cohort was started by opening the PR; unrelated pre-existing candidate workflow
+gates skipped. Draft status and the full-import/memory hold remain explicit.

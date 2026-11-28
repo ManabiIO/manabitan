@@ -1,0 +1,182 @@
+{
+  "schema": "manabitan.clean-owned-content-pipeline-source-audit.v1",
+  "scope": "Read-only clean product diff, repository guidance, novelty and successful scheduler-prototype mapping review. No refs, product source, workflow, or tests were mutated or executed.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "currentDevelopObserved": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimeAndTestSource": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+  "minimalFiles": [
+    {
+      "path": "eslint.config.js",
+      "blob": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8",
+      "kind": "required-header-config"
+    },
+    {
+      "path": "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+      "blob": "8119bdd41ffb50c2cb91970df5c9f6afa20b3076",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "blob": "102e26c04ab5474f02ccaecc4cd9283648c3df98",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-import-session.js",
+      "blob": "32574553d57b302880f1235a59000a3bb9dbef4c",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "blob": "037c976fce4d78752f7c4aa003161f5ebbc85bc4",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "blob": "c0d0bc701a06b11760b20dea481dff1321d4db35",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "blob": "594dcac28affa8d982d7705556db78d3ecd26f35",
+      "kind": "runtime"
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "blob": "1310d598e4e230eed12c415eb4fbf9be60c8c5a4",
+      "kind": "runtime"
+    },
+    {
+      "path": "test/artifact-term-chunk-pipeline.test.js",
+      "blob": "4022099cca30d71acaa7f1040dffeb900c8032a3",
+      "kind": "test"
+    },
+    {
+      "path": "test/dictionary-database-chunk-pipeline.test.js",
+      "blob": "562959d45a5402d75cc0a9ee65683b35a07454ab",
+      "kind": "test"
+    },
+    {
+      "path": "test/dictionary-import-ownership.test.js",
+      "blob": "fe94582d3b6714afeee4d85f42b6ce78ce2cb0bc",
+      "kind": "test"
+    },
+    {
+      "path": "test/dictionary-importer-chunk-completion.test.js",
+      "blob": "bd9c874f8510c91bb1cb9ab4a038e64b8a34941d",
+      "kind": "test"
+    },
+    {
+      "path": "test/term-bank-pipeline-completion.test.js",
+      "blob": "c7f0e70eef4f2b016e2bd45a8fe0f48067747b8e",
+      "kind": "test"
+    },
+    {
+      "path": "test/zstd-term-content-overlap.test.js",
+      "blob": "b152488474601d4a1ee2156803635cfbe3e22a6c",
+      "kind": "test"
+    }
+  ],
+  "counts": {
+    "runtime": 7,
+    "tests": 6,
+    "config": 1,
+    "total": 14
+  },
+  "excludeFromProductDiff": [
+    ".github/workflows/import-content-overlap-da6c4.yml",
+    "builds/perf/import-overlap-20261128-da6c4/components-v1-index.json",
+    "builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz",
+    "dev/perf/import-experiments-20260914.md",
+    "dev/perf/import-memory-20261125-a7f7/package_identity.py",
+    "dev/perf/import-memory-20261125-a7f7/test_package_identity.py",
+    "dev/perf/import-qualification-20261125-a7f7.py"
+  ],
+  "configReason": "The one-line addition to manabitanHeaderFiles registers the new coordinator with an enforced Manabitan GPL header pattern. The ordinary upstream header rule excludes that list, and a separate header/header error rule applies the Manabitan pattern. This does not disable lint.",
+  "instructions": {
+    "applicable": "Root AGENTS.md at blob938666275257cbc3303dc38c17dc0a9728ab9b45; no nested ext/ or test/ AGENTS exists in the frozen tree. The other AGENTS file is archived performance evidence.",
+    "targetedRequired": [
+      "npm run test:unit",
+      "npm run test:build",
+      "Relevant browser/integration coverage because import/worker behavior changes"
+    ],
+    "normalCi": "Eleven validation matrix jobs (JavaScript, four TypeScript projects, CSS, HTML, Markdown, JSON, unit, options), Test Build with locked native-WASM rebuild and all-target package build, full Firefox/Chromium extension E2E and Chromium Anki. Four manual-only lanes remain conditional; do not count skips as passes.",
+    "docs": "No mandatory research-script or research-workflow copy is required by AGENTS. Keep immutable evidence links, exact source/prototype distinction, incomplete gates and HOLD in the PR description or a small product-facing design note.",
+    "provenance": "Contributing policy requires attribution for third-party-derived implementation. Same-repository owner-authored PRs have the documented acknowledgement-checklist exemption. Original repository changes remain GPL-3.0-or-later."
+  },
+  "nearbyWork": [
+    {
+      "pr": 874,
+      "head": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "state": "open draft/HOLD",
+      "distinction": "Overlaps selected private compression and records within one admitted batch by bounded prefix reservation; retains producer join and intentionally changes reference placement. Its independent Jitendex confirmations disagree. Current proposal overlaps successive eligible owned chunks after ordered publication, preserving existing layout.",
+      "sharedModules": [
+        "term-content-ownership.js",
+        "zstd-term-content.js"
+      ]
+    },
+    {
+      "pr": 955,
+      "head": "bc94ee31a5dbfc1b29766cb9dee3a6fe6b54ea54",
+      "currentPort": "1de603b81a377391529c9e518a824ff00ac4cc04",
+      "state": "open draft; current port separately qualifying",
+      "distinction": "Earlier borrowed-source release after compression source consumption, retaining ordered sink completion; not successive owned chunk admission.",
+      "sharedModules": [
+        "dictionary-database.js"
+      ]
+    },
+    {
+      "pr": 820,
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "state": "open draft/HOLD",
+      "distinction": "Worker-local synchronous native lookup column copy elision; not content persistence admission.",
+      "sharedModules": [
+        "term-bank-wasm-parser.js"
+      ]
+    },
+    {
+      "branch": "perf/owned-whole-lookup-plan-20261128-92c09",
+      "head": "9eef39ef86e1fc41d0f6e8ed64fa685d0fc4abbc",
+      "distinction": "Same synchronous worker boundary copy-elision area as820; receiver cross-await ownership is not established."
+    },
+    {
+      "pr": 974,
+      "head": "ab00fae7cdf7f32ad5100fd2101f3e7ce7202af1",
+      "state": "open draft",
+      "distinction": "Shares compiled codec/module and dictionary at pool startup; same zstd module, distinct rotation behavior. Future integration needs fresh source and CI review."
+    },
+    {
+      "prs": [
+        828,
+        829
+      ],
+      "head829": "f6ae9bcdd0bfc43aa0f13ad6b500bc2179541f26",
+      "distinction": "Changes parser admission byte policy. Do not conflate with retaining current budgets."
+    },
+    {
+      "branch": "perf/import-finalization-overlap-20261128-0119",
+      "head": "ebc56e97ecfb6543a85d6d2c61cc6568391b24f6",
+      "distinction": "Changes only term-record-opfs-store finalization ordering, outside the seven product files."
+    },
+    {
+      "branch": "test/import-terminal-overlap-diagnostics-20261128-4990",
+      "head": "2e315ba7de0f0f6258e90e8533bc9527e68a890a",
+      "distinction": "Research instrumentation in database/importer terminal completion; observes the existing await graph without changing scheduling. Same file areas, not a product scheduling duplicate."
+    }
+  ],
+  "conflictQualification": "Only source and mechanism overlap was inspected. No merge simulation was run; this is not a claim that all independently active branches merge cleanly.",
+  "schedulerPrototype": {
+    "replayBlob": "e61c8d33e16f4e298b5e9eb70a842544525656a8",
+    "replaySha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d",
+    "equivalence": "For valid shared-span batches in the four-worker component, both dispatch blocki to physical W[(cursor+i)%4] and advance cursor by block count modulo4. Baseline-array rotation and fixed-array indexing preserve the same worker membership, request IDs, output ordering and per-group maximum envelope-clock aggregate.",
+    "limits": [
+      "Replay resets its local cursor each observation while retaining the baseline pool; production cursor persists for the lifetime of its pool.",
+      "Replay rotates/advances before beginCompressWrappedSpans validates; product advances only after validation and immutable metadata snapshot. Invalid-input and failure paths are not established by the successful component.",
+      "Replay array mutation would affect other compression methods if interleaved; this component uses the shared-span route only.",
+      "The component admits two codec groups and waits oldest completion; production admits a successor only after ordered metadata publication, so available overlap is narrower.",
+      "The corrected1MiB result is a successful scheduler prototype on the baseline pool, not direct measurement of the5048 product. Full browser and memory qualification remain HOLD."
+    ],
+    "reviewResult": "No concrete defect found in the11-added/3-deleted-line pool rotation patch. No execution performed."
+  }
+}

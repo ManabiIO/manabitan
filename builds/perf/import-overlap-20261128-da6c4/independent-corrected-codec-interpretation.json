@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent source and interpretation review of an existing JMdict codec cohort",
+  "acquisition": "No new timing, corpus execution, or product changes. Arithmetic recomputed in V8 from all 36 values in the exact compact derivation; source inspected directly from its Git blob.",
+  "source": {
+    "replayBlob": "e61c8d33e16f4e298b5e9eb70a842544525656a8",
+    "replaySha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d",
+    "compactReceiptBlob": "652cdf89f8291a70a4c8c56be68975c2b1e9e9e8",
+    "compactReceiptSha256": "af5d2160a563c040f8a046ffb5ec5e5f38c7c6d068a14c4a0525522c6f341633",
+    "archivedRawReport": {
+      "commit": "05f0cc67da3d070b31208f7afdd9700c759c672a",
+      "path": "builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz",
+      "sha256": "0b10131113eab3c5a627c5a009d1c2cbcaa222abdff2989b7fc306ba6e123bc1",
+      "member": "profiling/compression-scheduling-db-1m-replication.json",
+      "memberBytes": 1815727,
+      "memberSha256": "434f569b5a8db01fa96c549a6581f0e4bcda9e5cecf6f0e14f012de5f3562ba0"
+    },
+    "baselineRuntime": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "productCandidateRuntime": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+    "productCandidateTree": "9d5adaad4be1660b5d22c0e54a5d964e8a11d264",
+    "fullCorpusParityRuntime": "a20453bc325faff75a7f6a9c7d408a361c8fe981"
+  },
+  "result": "Worth retaining as evidence for a held draft of the bounded scheduling mechanism. It does not establish a speedup of candidate runtime 5048, browser import latency, merge readiness, or improvement for Jitendex/VNDB.",
+  "arithmetic": {
+    "verified": true,
+    "sourceBlob": "e61c8d33e16f4e298b5e9eb70a842544525656a8",
+    "sourceSha": {
+      "sha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d",
+      "bytes": 10399
+    },
+    "derivedReceiptBlob": "652cdf89f8291a70a4c8c56be68975c2b1e9e9e8",
+    "derivedReceiptSha": {
+      "sha256": "af5d2160a563c040f8a046ffb5ec5e5f38c7c6d068a14c4a0525522c6f341633",
+      "bytes": 21690
+    },
+    "observations": 36,
+    "rounds": 12,
+    "metrics": {
+      "B/A": {
+        "medianDeltaMs": -13.074684000000005,
+        "medianPercent": -16.515289090772804,
+        "fasterPairs": 12,
+        "equalWorkPercent": -17.29312100534174,
+        "minPercent": -28.075136376551413,
+        "maxPercent": -2.5845086355374303
+      },
+      "B/C": {
+        "medianDeltaMs": -10.645081500000003,
+        "medianPercent": -12.919712319263276,
+        "fasterPairs": 11,
+        "equalWorkPercent": -15.288805590278065,
+        "minPercent": -38.04140748296317,
+        "maxPercent": 6.726211411551475
+      },
+      "C/A": {
+        "medianDeltaMs": -1.0119029999999967,
+        "medianPercent": -1.1922307620569284,
+        "fasterPairs": 7,
+        "equalWorkPercent": -2.366057318669612,
+        "minPercent": -23.83462640193299,
+        "maxPercent": 22.75869152118539
+      }
+    },
+    "balance": {
+      "A": {
+        "positions": [
+          4,
+          4,
+          4
+        ],
+        "median": 78.6873235,
+        "firstSixMedian": 86.9729325,
+        "lastSixMedian": 70.314672
+      },
+      "B": {
+        "positions": [
+          4,
+          4,
+          4
+        ],
+        "median": 67.573001,
+        "firstSixMedian": 71.76758749999999,
+        "lastSixMedian": 58.3842135
+      },
+      "C": {
+        "positions": [
+          4,
+          4,
+          4
+        ],
+        "median": 78.0942505,
+        "firstSixMedian": 84.28097650000001,
+        "lastSixMedian": 64.144531
+      }
+    },
+    "statement": "Recomputed from all 36 exact compact observations; full original raw report remains in cited archive. Split-cohort medians are descriptive drift diagnostics only; no new timing or post-hoc qualification gate."
+  },
+  "supportedFacts": [
+    "The corrected plan uses the frozen production 1 MiB target: 12 actual native-parser/global-canonical-dedup groups, 103 blocks, 100,300,626 input bytes. All four workers are used; the earlier 31-block/4 MiB diagnostic is not production evidence.",
+    "The comparison holds input slabs, span order, block boundaries, compression settings, dictionary/module, four workers, and codec/worker source fixed. A and C execute identical serial code.",
+    "The scratch B scheduler changes two things together: it rotates baseline pool._workers at group boundaries and admits up to two codec groups immediately. It is not a timing run of the product cursor/pipeline implementation.",
+    "All six three-arm orders occur twice. Each arm occupies each within-round position four times. All 36 observations and three prior warmups are retained; no tail removal.",
+    "The replay enforces aggregate and per-block compressed hashes on every warm/timed/verification run. The compact receipt reports all 36 block-hash arrays equal. One separate serial verification run decodes all 103 blocks and matches all 100,300,626 input bytes.",
+    "I independently checked counts, timing pair reconstruction, order positions, aggregate hashes/output byte counts, pending-count assertions, and every reported arithmetic value from the compact receipt. I did not re-extract the full 1,815,727-byte raw report in this review."
+  ],
+  "runtimeBoundary": [
+    "5048 uses a persistent span-worker cursor rather than replacing the worker array. Its successor starts preparation only after predecessor metadata publication and publishes its own metadata/records only after predecessor completion.",
+    "The database's two-phase overlap eligibility is JMdict-specific, but the candidate's cursor rotates assignment for every shared span batch. Jitendex/VNDB multi-block paths can therefore change scheduling while retaining a serial sink; the JMdict-only component does not qualify their performance.",
+    "The codec prototype submits a successor immediately, using all groups already loaded in memory. It excludes parser release timing, canonical dedup and metadata/cache work, record preparation/encoding, media handling, storage reservation/append/flush, browser message transport, and final publication.",
+    "Those omitted stages can narrow available overlap, already overlap with compression in the baseline, introduce contention, or add lifecycle overhead. The component percentage or millisecond saving cannot be added to an import profile or converted into a whole-import percentage.",
+    "The preloaded replay is not a peak-memory or retained-owner benchmark. maxPendingGroups=2 counts live codec operations while all 12 source slabs and all resulting outputs remain retained.",
+    "The complete DB/store corpus parity replay belongs to a20453, not current 5048. Later lifecycle/metrics/lint changes have separate focused evidence; exact-current-head corpus/browser parity remains a distinct gate."
+  ],
+  "confounders": [
+    "One shared host and Node v24.22.3 worker transport; production qualification targets Chromium/Node22 harness. Host load snapshots do not establish exclusive CPU ownership.",
+    "Workers and codec contexts persist across all observations. One warmup per arm and explicit main-process GC precede measurements; worker JIT/heap/CPU state is not reset between observations.",
+    "All arms trend faster across the cohort: first-six versus last-six medians A 86.9729325 to 70.314672 ms, B 71.7675875 to 58.3842135 ms, C 84.2809765 to 64.144531 ms. Pairing and balanced positions mitigate simple sequence bias but do not establish a stable magnitude.",
+    "Identical controls have small aggregate/median drift in this cohort but broad paired variation: C/A ranges -23.8346% to +22.7587%. The later five-arm ablation had large A/A drift and does not independently reproduce the magnitude or isolate rotation as a win; it must remain disclosed.",
+    "Worker busy intervals are elapsed time between worker message receipt and response. They are not CPU time, and queue sums or overlapping worker wall intervals are not additive main-thread/import costs.",
+    "The old bridge observes worker errors but lacks the newer idle-exit/terminal cleanup acceptance latch, and report.complete is written before final worker termination. Its completed output witnesses support codec equivalence for these successful observations; this harness is not failure-path/lifetime qualification."
+  ],
+  "claimToUse": "In a preloaded Node codec replay of the 103 actual 1 MiB JMdict blocks, the combined two-group/rotating-assignment prototype reduced paired elapsed time by a median 13.07 ms (16.52%) versus serial admission and 10.65 ms (12.92%) versus an identical serial control. All output blocks matched, with one separate full decode pass. This motivates review of the bounded scheduling implementation; current-head browser import performance is still unproven.",
+  "claimsToAvoid": [
+    "JMdict imports are 16.5% faster.",
+    "The 5048 runtime was measured 16.5% faster by this replay.",
+    "Rotation alone delivers the gain.",
+    "The 4 MiB/31-block result demonstrates production worker underutilization.",
+    "Each of the 36 observations performed a separate decode pass.",
+    "The component establishes bounded peak memory, current-head full-corpus parity, or complete failure handling."
+  ],
+  "prospectiveRemainingGates": [
+    "Normal clean product source/test/build/lint gates, with repaired lifecycle behavior retained.",
+    "Exact-current-runtime full-corpus persistence and reopened lookup parity, including media/unwitnessed/borrowed fallback and failure/rollback behavior.",
+    "Balanced source-bound current-head Chromium whole-import qualification with a same-code control; retain ordinary and traced runs separately and all failures.",
+    "Memory/ownership accounting at real producer budgets; no extrapolation from all-slabs-preloaded component."
+  ],
+  "decision": "A held draft can accurately expose the mechanism, correctness work, and component motivation for review while marking full-import qualification incomplete. This review is not a recommendation to merge or to claim an established product gain.",
+  "supersedesInterpretationBlob": "cccc7707cee16ede8da5e72d6822abb8a3450be0"
+}
