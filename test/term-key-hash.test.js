@@ -2,7 +2,7 @@
 
 import {describe, expect, test} from 'vitest';
 
-import {hashTermKeyByteRange, hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
+import {createTermKeyHashState, finishTermKeyHashState, hashTermKeyByteRange, hashTermKeyBytes, updateTermKeyHashState} from '../ext/js/dictionary/term-key-hash.js';
 
 // Generated with upstream XXH32 via Python xxhash 4.0.2, seed 0x811c9dc5.
 // Fixed independent values prevent a shared writer/reader regression from
@@ -187,5 +187,35 @@ describe('stable term lookup key and integrity hashes', () => {
                 }
             }
         }
+    });
+});
+
+describe('resumable integrity hashing', () => {
+    test.each(VECTORS)('matches upstream values across streamed chunks at %i bytes', (length, expected) => {
+        const payload = makePayload(length);
+        for (const chunkBytes of [1, 7, 16, 257, 4096]) {
+            // Very small chunks exercise tails; long vectors use larger steps.
+            if (length > 65536 && chunkBytes < 257) { continue; }
+            let state = createTermKeyHashState();
+            let maximumTail = 0;
+            for (let offset = 0; offset < payload.byteLength; offset += chunkBytes) {
+                state = updateTermKeyHashState(state, payload.subarray(offset, offset + chunkBytes));
+                maximumTail = Math.max(maximumTail, state.tail.length);
+            }
+            expect(maximumTail).toBeLessThan(16);
+            expect(finishTermKeyHashState(state, length)).toBe(expected);
+        }
+    });
+
+    test('checkpoint roundtrip and later source mutation preserve privately owned state', () => {
+        const payload = makePayload(1025);
+        const first = updateTermKeyHashState(createTermKeyHashState(), payload.subarray(0, 23));
+        const checkpoint = JSON.stringify(first);
+        const second = updateTermKeyHashState(JSON.parse(checkpoint), payload.subarray(23));
+        expect(JSON.stringify(first)).toBe(checkpoint);
+        const expected = hashTermKeyBytes(payload);
+        payload.fill(0);
+        expect(finishTermKeyHashState(second, 1025)).toBe(expected);
+        expect(finishTermKeyHashState(JSON.parse(checkpoint), 23)).toBe(hashTermKeyBytes(makePayload(1025).subarray(0, 23)));
     });
 });

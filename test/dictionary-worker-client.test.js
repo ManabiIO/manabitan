@@ -8,6 +8,7 @@
  */
 
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
+import {termContentOptimizationNotificationId} from '../ext/js/background/term-content-optimization-control.js';
 
 const reportDiagnostics = vi.fn();
 vi.mock('../ext/js/core/diagnostics-reporter.js', () => ({reportDiagnostics}));
@@ -132,6 +133,32 @@ describe('DictionaryWorkerClient', () => {
         vi.useRealTimers();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
+    });
+
+    test('optional optimizer notifications have no deadline and cannot reset or recover the worker', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const worker = FakeWorker.instances[0];
+        const snapshot = {sessionId: 'test', revision: 1, ownerIds: ['import'], ready: true};
+        worker.postMessage.mockImplementationOnce(() => { throw new Error('optional send failed'); });
+        client.notifyTermContentOptimizationState(snapshot);
+        client.notifyTermContentOptimizationState({...snapshot, revision: 2, ownerIds: []});
+        expect(worker.postMessage).toHaveBeenLastCalledWith({
+            id: termContentOptimizationNotificationId,
+            optimizationState: {...snapshot, revision: 2, ownerIds: []},
+        });
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(worker.terminate).not.toHaveBeenCalled();
+
+        const lookup = client.invoke('findTermsOffscreen', {text: '日本'});
+        expect(worker.postMessage).toHaveBeenLastCalledWith({id: 1, action: 'findTermsOffscreen', params: {text: '日本'}}, []);
+        worker.emit('message', {data: {id: 1, result: 'found'}});
+        await expect(lookup).resolves.toBe('found');
+
+        worker.emit('error', {message: 'worker became unavailable'});
+        client.notifyTermContentOptimizationState({...snapshot, revision: 3});
+        expect(FakeWorker.instances).toHaveLength(1);
+        expect(worker.postMessage).toHaveBeenCalledTimes(3);
     });
 
     test('restarts and retries an interactive lookup after an early worker failure', async () => {

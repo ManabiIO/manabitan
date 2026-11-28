@@ -39,7 +39,7 @@ export type ImportDictionaryDoneResult = {
     importedTitles: string[];
 };
 
-export type ImportDictionaryDoneCallback = ((result: ImportDictionaryDoneResult) => void) | null;
+export type ImportDictionaryDoneCallback = ((result: ImportDictionaryDoneResult) => void | Promise<void>) | null;
 
 export type ScanInputsMutation = {
     optionsContext: Settings.OptionsContext;

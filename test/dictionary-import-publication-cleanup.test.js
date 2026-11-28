@@ -24,7 +24,9 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-/** @returns {Promise<void>} */
+/**
+ * @returns {Promise<void>}
+ */
 async function resolveVoid() {}
 
 /**
@@ -52,9 +54,14 @@ function createDatabase(filename = ':memory:') {
             beginImportSession: vi.fn(resolveVoid),
             endImportSession: vi.fn(resolveVoid),
             getLastEndImportSessionMetrics: () => null,
+            ...(key === '_termContentStore' ? {getLogicalLength: vi.fn(() => 0)} : {}),
             rollbackImportSession: vi.fn(resolveVoid),
         });
     }
+    // This is a real SQLite fixture: keep the additive online-content roots
+    // and cursor present so publication exercises the actual atomic updates.
+    database._initializeOnlineContentSchema();
+    database._seedTermContentStorageState();
     return {database, connection};
 }
 
@@ -107,7 +114,9 @@ const summary = /** @type {import('dictionary-importer').Summary} */ ({
     title: 'Dictionary 42', version: 3, importSuccess: true,
 });
 
-/** @returns {Promise<ArrayBuffer>} */
+/**
+ * @returns {Promise<ArrayBuffer>}
+ */
 async function createArchive() {
     const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
     await writer.add('index.json', new TextReader(JSON.stringify({title: summary.title, revision: '1', format: 3})));
@@ -249,7 +258,7 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         let release = () => {};
         const gate = new Promise((resolve) => { release = () => resolve(void 0); });
         let cleanupStarted = false;
-        vi.mocked(Reflect.get(database, '_termContentStore').rollbackImportSession).mockImplementationOnce(async () => {
+        vi.mocked(Reflect.get(database, '_termContentStore').endImportSession).mockImplementationOnce(async () => {
             cleanupStarted = true;
             await gate;
         });
@@ -270,6 +279,8 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         }
         expect(receipt).toBeNull();
         expect(fenced).toBe(true);
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).not.toHaveBeenCalled();
         expect(database.isPrepared()).toBe(false);
         expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
     });

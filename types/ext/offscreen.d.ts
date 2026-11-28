@@ -30,8 +30,19 @@ import type {
     ApiNames as BaseApiNames,
 } from './api-map';
 
+export type TermContentOptimizationState = {
+    sessionId: string;
+    revision: number;
+    ready: boolean;
+    ownerIds: string[];
+};
+
 type ApiSurface = {
     databasePrepareOffscreen: {
+        params: void;
+        return: void;
+    };
+    setTermContentOptimizationHoldOffscreen: {
         params: void;
         return: void;
     };
@@ -192,7 +203,7 @@ type ApiSurface = {
     };
 };
 
-export type ApiMessage<TName extends ApiNames> = (
+export type ApiMessage<TName extends ApiNames> = {optimizationState?: TermContentOptimizationState} & (
     ApiParams<TName> extends void ?
         {action: TName, params?: never} :
         {action: TName, params: ApiParams<TName>}
@@ -282,7 +293,7 @@ export type ImportOperationStatus = {
 
 type McApiExtraArgs = [ports: readonly MessagePort[]];
 
-export type McApiMessage<TName extends McApiNames> = (
+export type McApiMessage<TName extends McApiNames> = {optimizationState?: TermContentOptimizationState} & (
     McApiParams<TName> extends void ?
         {action: TName, params?: never} :
         {action: TName, params: McApiParams<TName>}

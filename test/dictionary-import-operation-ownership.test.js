@@ -319,7 +319,9 @@ describe('dictionary import operation ownership', () => {
         const invoke = vi.fn((action, params, transfers) => {
             const transferred = structuredClone(transfers[0], {transfer: [transfers[0]]});
             const port = {
-                /** @param {{type: string}} message */
+                /**
+                 * @param {{type: string}} message
+                 */
                 postMessage(message) {
                     if (message.type === 'complete') { throw new Error('Terminal delivery lost'); }
                     transferred.postMessage(message);
@@ -476,7 +478,8 @@ describe('dictionary import operation ownership', () => {
         await backend._setDictionaryImportMode(false, 'page-A');
         await backend._setDictionaryImportMode(false, 'page-A');
         await backend._setDictionaryImportMode(false);
-        expect(sendMessagePromise).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: 'A'}});
+        const cancellationCalls = sendMessagePromise.mock.calls.filter(([message]) => message.action === 'cancelDictionaryImportOffscreen');
+        expect(cancellationCalls).toEqual([[{action: 'cancelDictionaryImportOffscreen', params: {operationId: 'A'}}]]);
         expect(Reflect.get(backend, '_dictionaryImportModeActive')).toBe(true);
         expect(Reflect.get(backend, '_ownedDictionaryImports').get('B')?.cancelled).toBe(false);
     });
@@ -637,9 +640,10 @@ describe('dictionary import operation ownership', () => {
         await backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [port]);
         expect(Reflect.get(backend, '_ownedDictionaryImports').get(id)).toMatchObject({settled: true, completed: false});
         await backend._setDictionaryImportMode(false, 'page-A');
-        expect(cancel).toHaveBeenCalledTimes(2);
-        expect(cancel).toHaveBeenNthCalledWith(1, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id, workerGeneration: void 0, lookupOnly: true}});
-        expect(cancel).toHaveBeenNthCalledWith(2, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(cancel.mock.calls.filter(([message]) => message.action === 'cancelDictionaryImportOffscreen')).toEqual([
+            [{action: 'cancelDictionaryImportOffscreen', params: {operationId: id, workerGeneration: void 0, lookupOnly: true}}],
+            [{action: 'cancelDictionaryImportOffscreen', params: {operationId: id}}],
+        ]);
         expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(1);
         cancel.mockResolvedValueOnce({operationId: id, state: 'cancelled'});
         await backend._onApiGetDictionaryImportOperationStatus({operationId: id}, {});
@@ -739,7 +743,8 @@ describe('dictionary import operation ownership', () => {
         expect(relays[1].port2.close).not.toHaveBeenCalled();
         expect(closeClientB).not.toHaveBeenCalled();
         expect(Reflect.get(backend, '_ownedDictionaryImports').get(b)?.responseCleanup).toEqual(expect.any(Function));
-        expect(cancellation).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: a}});
+        expect(cancellation.mock.calls.filter(([message]) => message.action === 'cancelDictionaryImportOffscreen'))
+            .toEqual([[{action: 'cancelDictionaryImportOffscreen', params: {operationId: a}}]]);
         Reflect.get(backend, '_ownedDictionaryImports').get(b)?.responseCleanup?.();
         for (const port of transferredPorts) { port.close(); }
         clientA.port1.close();

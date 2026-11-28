@@ -154,3 +154,68 @@ function hashLargeTermKeyByteRange(bytes, start, end) {
     hash ^= hash >>> 16;
     return hash >>> 0;
 }
+
+/** @typedef {{lanes: number[], tail: number[]}} TermKeyHashState */
+
+/**
+ * @returns {TermKeyHashState}
+ */
+export function createTermKeyHashState() {
+    return {lanes: [(HASH_SEED + PRIME1 + PRIME2) >>> 0,
+        (HASH_SEED + PRIME2) >>> 0,
+        HASH_SEED,
+        (HASH_SEED - PRIME1) >>> 0],
+    tail: []};
+}
+
+/**
+ * Streaming XXH32 with the same persisted seed and rounds as the scalar API.
+ * The returned state owns four accumulators and <=15 bytes, never a source view.
+ * @param {TermKeyHashState} state
+ * @param {Uint8Array} bytes
+ * @returns {TermKeyHashState}
+ */
+export function updateTermKeyHashState(state, bytes) {
+    const input = new Uint8Array(state.tail.length + bytes.byteLength);
+    input.set(state.tail);
+    input.set(bytes, state.tail.length);
+    const lanes = [...state.lanes];
+    const view = new DataView(input.buffer);
+    let offset = 0;
+    for (; offset + 16 <= input.byteLength; offset += 16) {
+        for (let lane = 0; lane < 4; ++lane) {
+            lanes[lane] = round(lanes[lane], view.getUint32(offset + lane * 4, true));
+        }
+    }
+    return {lanes, tail: [...input.subarray(offset)]};
+}
+
+/**
+ * @param {TermKeyHashState} state
+ * @param {number} length
+ * @returns {number}
+ */
+export function finishTermKeyHashState(state, length) {
+    let hash = length >= 16 ?
+(rotateLeft(state.lanes[0], 1) +
+rotateLeft(state.lanes[1], 7) + rotateLeft(state.lanes[2], 12) +
+rotateLeft(state.lanes[3], 18)) >>> 0 :
+(HASH_SEED + PRIME5) >>> 0;
+    hash = (hash + length) >>> 0;
+    const tail = Uint8Array.from(state.tail);
+    const view = new DataView(tail.buffer);
+    let offset = 0;
+    while (offset + 4 <= tail.length) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(view.getUint32(offset, true), PRIME3)) >>> 0, 17), PRIME4) >>> 0;
+        offset += 4;
+    }
+    while (offset < tail.length) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(tail[offset++], PRIME5)) >>> 0, 11), PRIME1) >>> 0;
+    }
+    hash ^= hash >>> 15;
+    hash = Math.imul(hash, PRIME2) >>> 0;
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, PRIME3) >>> 0;
+    hash ^= hash >>> 16;
+    return hash >>> 0;
+}

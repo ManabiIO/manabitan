@@ -559,7 +559,9 @@ export class DictionaryImportController {
         );
     }
 
-    /** @param {PageTransitionEvent} event */
+    /**
+     * @param {PageTransitionEvent} event
+     */
     _onPageHide(event) {
         // beforeunload only requests a confirmation: choosing Stay must not
         // cancel an import or consume its eventual page-departure cleanup.
@@ -1042,7 +1044,6 @@ export class DictionaryImportController {
     }
 
     /**
-     *
      * @param {import('dictionary-recommended.js').RecommendedDictionary[]} recommendedDictionaries
      * @param {HTMLElement} dictionariesList
      * @param {Set<string>} installedDictionaryNames
@@ -1805,7 +1806,9 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
-            /** @param {unknown} error */
+            /**
+             * @param {unknown} error
+             */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -2452,7 +2455,7 @@ export class DictionaryImportController {
             // recheck ownership before touching a possibly newer import UI.
             if (importModeEnabled) {
                 try {
-                    await this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId);
+                    await this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId, true);
                 } catch (error) {
                     const importModeExitError = toError(error);
                     errors.push(importModeExitError);
@@ -2463,43 +2466,54 @@ export class DictionaryImportController {
                     });
                 }
             }
-            if (this._activeImportOwnerId === importOwnerId) { this._activeImportOwnerId = void 0; }
-            if (this._isImportRunCurrent(importRunGeneration)) {
-                for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
-                if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
-                this._setModifying(false);
-                this._showErrors(errors);
-                this._triggerStorageChanged();
-                if (onImportDone) {
-                    try {
-                        onImportDone({
-                            ok: errors.length === 0,
-                            errors,
-                            importedTitles: [...new Set(importedTitles)],
-                        });
-                    } catch (error) {
-                        const callbackError = toError(error);
-                        reportDiagnostics('dictionary-import-session-callback-failed', {
-                            message: callbackError.message,
-                            importRunGeneration,
-                        });
-                        log.error(callbackError);
+            try {
+                if (this._activeImportOwnerId === importOwnerId) { this._activeImportOwnerId = void 0; }
+                if (this._isImportRunCurrent(importRunGeneration)) {
+                    for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
+                    if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
+                    this._setModifying(false);
+                    this._showErrors(errors);
+                    this._triggerStorageChanged();
+                    if (onImportDone) {
+                        try {
+                            await onImportDone({
+                                ok: errors.length === 0,
+                                errors,
+                                importedTitles: [...new Set(importedTitles)],
+                            });
+                        } catch (error) {
+                            const callbackError = toError(error);
+                            reportDiagnostics('dictionary-import-session-callback-failed', {
+                                message: callbackError.message,
+                                importRunGeneration,
+                            });
+                            log.error(callbackError);
+                        }
                     }
+                } else {
+                    reportDiagnostics('dictionary-import-session-complete-stale', {
+                        dictionaryCount: importProgressTracker.dictionaryCount,
+                        errorCount: errors.length,
+                        importRunGeneration,
+                        activeImportRunGeneration: this._activeImportRunGeneration,
+                    });
                 }
-            } else {
-                reportDiagnostics('dictionary-import-session-complete-stale', {
-                    dictionaryCount: importProgressTracker.dictionaryCount,
-                    errorCount: errors.length,
+                this._signalImportSessionCompletion({
                     importRunGeneration,
-                    activeImportRunGeneration: this._activeImportRunGeneration,
+                    importRunCurrent: this._isImportRunCurrent(importRunGeneration),
+                    errorCount: errors.length,
+                    importedTitles: [...new Set(importedTitles)],
                 });
+            } finally {
+                // This notification follows backend refresh, progress dismissal,
+                // error presentation and the complete import callback. It is
+                // optional and cannot delay/fail the published import result.
+                if (importModeEnabled) {
+                    void this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId).catch((error) => {
+                        reportDiagnostics('dictionary-import-optimization-release-deferred', {message: toError(error).message});
+                    });
+                }
             }
-            this._signalImportSessionCompletion({
-                importRunGeneration,
-                importRunCurrent: this._isImportRunCurrent(importRunGeneration),
-                errorCount: errors.length,
-                importedTitles: [...new Set(importedTitles)],
-            });
         }
     }
 
@@ -3822,7 +3836,9 @@ export class ImportProgressTracker {
         return this._stepTimingHistory.map((item) => ({...item}));
     }
 
-    /** @param {() => boolean} check */
+    /**
+     * @param {() => boolean} check
+     */
     setImportRunCheck(check) {
         this._isImportRunCurrent = check;
     }

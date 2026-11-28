@@ -106,7 +106,7 @@ test('a failed SQLite wipe leaves the payloads and import journal intact', async
     expect(reopen).not.toHaveBeenCalled();
 });
 
-test('startup finishes an interrupted purge before opening SQLite, then stops replaying it', async () => {
+test('startup validates storage before finishing an interrupted purge, then stops replaying it', async () => {
     const interrupted = new DictionaryDatabase();
     const marker = createPurgeRoot();
     stubPurgeRoot(interrupted, marker.root);
@@ -137,8 +137,19 @@ test('startup finishes an interrupted purge before opening SQLite, then stops re
         events.push('open SQLite');
         throw stopBeforeOpen;
     });
+    vi.mocked(openOpfsDatabase).mockImplementationOnce(async () => {
+        events.push('open SQLite');
+        return /** @type {import('@sqlite.org/sqlite-wasm').Database} */ (/** @type {unknown} */ ({
+            selectValue(/** @type {string} */ sql) {
+                if (sql === 'PRAGMA user_version') { return 10; }
+                if (sql.includes('sqlite_master')) { return 0; }
+                throw new Error('Unexpected startup query: ' + sql);
+            },
+            close() { events.push('close SQLite'); },
+        }));
+    });
     await expect(restarted._openConnection()).rejects.toThrow(stopBeforeOpen.message);
-    expect(events).toEqual(['wipe SQLite', 'reset payloads', 'clear import journal', 'open SQLite']);
+    expect(events).toEqual(['open SQLite', 'close SQLite', 'wipe SQLite', 'reset payloads', 'clear import journal', 'open SQLite']);
     expect(marker.hasMarker).toBe(false);
 
     events.length = 0;

@@ -4,7 +4,7 @@
  */
 
 import {execFile} from 'node:child_process';
-import {mkdtemp, writeFile} from 'node:fs/promises';
+import {mkdtemp, readFile, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {promisify} from 'node:util';
@@ -31,6 +31,8 @@ async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {
     zip.file('manifest.json', JSON.stringify(manifest));
     zip.file('lib/term-bank-parser.wasm', wasm);
     zip.file('lib/zstd.wasm', wasm);
+    zip.file('js/dictionary/zstd-trainer.wasm', await readFile(new URL('../ext/js/dictionary/zstd-trainer.wasm', import.meta.url)));
+    zip.file('js/dictionary/zstd-trainer.LICENSE', await readFile(new URL('../ext/js/dictionary/zstd-trainer.LICENSE', import.meta.url)));
     if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v1.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }
     const path = join(directory, `manabitan-${variant}.zip`);
     await writeFile(path, await zip.generateAsync({type: 'nodebuffer'}));
@@ -42,12 +44,13 @@ test.each(['missing', 'corrupt'])('release package audit rejects a %s canonical 
     await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u);
 });
 
-test('release package audit validates and records the canonical scanner alongside parser and codec', async () => {
+test('release package audit validates and records the canonical scanner alongside parser, codec, and trainer', async () => {
     const path = await packageFixture('valid');
     const {stdout} = await run(process.execPath, ['dev/bin/audit-release-packages.js', version, path]);
     const report = JSON.parse(stdout);
     expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u);
-    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(3);
+    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(4);
+    expect(report.packages[0].licenseAssets['js/dictionary/zstd-trainer.LICENSE']).toMatch(/^[0-9a-f]{64}$/u);
 });
 
 test.each(['chrome', 'chrome-dev', 'chrome-playwright', 'edge', 'firefox', 'firefox-dev', 'firefox-android'])('release audit accepts the canonical %s package', async (variant) => {

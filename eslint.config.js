@@ -45,6 +45,32 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/dictionary/term-content-layout.js',
+    'ext/js/dictionary/term-content-storage-snapshots.js',
+    'ext/js/dictionary/term-content-immutable-file-store.js',
+    'ext/js/dictionary/term-content-physical-file-store.js',
+    'ext/js/dictionary/term-content-training-sampler.js',
+    'ext/js/dictionary/term-content-optimization-checkpoint.js',
+    'ext/js/dictionary/term-content-optimization-controller.js',
+    'ext/js/dictionary/term-content-legacy-eligibility.js',
+    'ext/js/dictionary/term-content-optimization-headroom.js',
+    'ext/js/dictionary/term-content-optimization-artifacts.js',
+    'ext/js/dictionary/term-content-optimization-batch-store.js',
+    'ext/js/dictionary/term-content-optimization-reclaimer.js',
+    'ext/js/dictionary/term-content-optimization-replacement.js',
+    'ext/js/dictionary/term-content-optimization-frame-reader.js',
+    'ext/js/dictionary/term-content-zstd-frame-inspector.js',
+    'ext/js/dictionary/term-content-zstd-codec.js',
+    'ext/js/dictionary/term-content-optimization-candidate-source.js',
+    'ext/js/dictionary/term-content-region-repack-planner.js',
+    'ext/js/dictionary/term-content-identity-layout.js',
+    'ext/js/dictionary/term-content-idle-scheduler.js',
+    'ext/js/dictionary/zstd-trainer-worker-owner.js',
+    'ext/js/dictionary/trainer-worker.js',
+    'ext/js/dictionary/term-content-frame-codec-worker-owner.js',
+    'ext/js/dictionary/term-content-frame-codec-worker.js',
+    'ext/js/background/term-content-optimization-control.js',
+    'dev/bin/build-zstd-trainer-wasm.js',
     'ext/js/comm/dictionary-import-owner-client.js',
     'ext/js/dictionary/dictionary-zip-read-scope.js',
     'ext/js/dictionary/dense-zip-directory.js',
@@ -127,7 +153,7 @@ export default [
     {
         // Emscripten output is reproduced by build:zstd-wasm and covered by
         // WASM behavior tests. Keep its handwritten wrapper and types linted.
-        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
+        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/js/dictionary/zstd-trainer-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',

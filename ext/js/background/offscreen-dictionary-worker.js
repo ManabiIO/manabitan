@@ -19,15 +19,19 @@
 import {createDictionaryImportBusyError} from '../core/dictionary-import-busy-error.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../dictionary/dictionary-importer-media-loader.js';
+import {TermContentIdleScheduler} from '../dictionary/term-content-idle-scheduler.js';
 import {Translator} from '../language/translator.js';
+import {termContentOptimizationNotificationId, TermContentOptimizationControl} from './term-content-optimization-control.js';
 import {getDictionaryRuntimeActionPolicy} from './dictionary-runtime-action-policy.js';
 
 /**
- * @typedef {{id: number, action: string, params?: import('core').SerializableObject}} WorkerRequest
+ * @typedef {{id: number, action: string, optimizationState?: import('offscreen').TermContentOptimizationState, params?: import('core').SerializableObject}} WorkerRequest
+ * @typedef {{id: typeof termContentOptimizationNotificationId, optimizationState: import('offscreen').TermContentOptimizationState}} WorkerOptimizationNotification
  * @typedef {{id: number, result?: unknown, error?: import('core').SerializedError}} WorkerResponse
  */
 
@@ -63,6 +67,20 @@ export class OffscreenDictionaryWorkerHandler {
         this._retiredImportIssuedAt = 0;
         /** @type {AbortController|null} */
         this._activeImportAbortController = null;
+        /**
+         *
+         */
+        this._termContentOptimizationControl = new TermContentOptimizationControl();
+        /** @type {Set<string>} */
+        this._termContentOptimizationOwners = new Set();
+        /**
+         *
+         */
+        this._termContentIdleScheduler = new TermContentIdleScheduler({
+            runStep: (/** @type {AbortSignal} */ signal) => this._runOnlineContentOptimizationStep(signal),
+            onError: (error) => log.error(error),
+        });
+        this._termContentIdleScheduler.setHold('!backend-startup', true);
     }
 
     /** */
@@ -93,6 +111,8 @@ export class OffscreenDictionaryWorkerHandler {
             }
             this._translator.prepare();
             this._databaseReady = true;
+            this._termContentIdleScheduler.setHold('!database-lifecycle', false);
+            this._termContentIdleScheduler.wake();
         })();
         try {
             await this._prepareDatabasePromise;
@@ -102,27 +122,87 @@ export class OffscreenDictionaryWorkerHandler {
     }
 
     /**
-     * @param {MessageEvent<WorkerRequest>} event
+     * Executes only one bounded optimizer step; it never enters the RPC queue.
+     * @param {AbortSignal} signal
+     * @returns {Promise<{pending: boolean, retryAt?: number}>}
+     */
+    async _runOnlineContentOptimizationStep(signal) {
+        if (signal.aborted || this._databaseSuspended || !this._databaseReady) { return {pending: false}; }
+        if (!this._dictionaryDatabase.isPrepared()) { return {pending: false}; }
+        const runStep = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'runOnlineContentOptimizationStep'));
+        if (typeof runStep !== 'function') { return {pending: false}; }
+        const run = /** @type {(signal: AbortSignal) => Promise<{pending: boolean, retryAt?: number}>} */ (runStep);
+        return await run.call(this._dictionaryDatabase, signal);
+    }
+
+    /**
+     * @param {import('offscreen').TermContentOptimizationState|undefined} state
+     */
+    _applyTermContentOptimizationState(state) {
+        if (!this._termContentOptimizationControl.accept(state)) { return; }
+        const desired = new Set(state?.ownerIds);
+        // Keep one incoming hold before releasing obsolete owners. Adding the
+        // entire old+new union can exceed the scheduler's bounded hold registry.
+        this._termContentIdleScheduler.setHold('!backend-startup', state?.ready !== true);
+        const incoming = desired.values().next().value;
+        if (typeof incoming === 'string') { this._termContentIdleScheduler.setHold(incoming, true); }
+        for (const ownerId of this._termContentOptimizationOwners) {
+            if (!desired.has(ownerId)) { this._termContentIdleScheduler.setHold(ownerId, false); }
+        }
+        for (const ownerId of desired) { this._termContentIdleScheduler.setHold(ownerId, true); }
+        this._termContentOptimizationOwners = desired;
+    }
+
+    /** Abort/join private staging I/O before changing database resource ownership. */
+    async _joinTermContentOptimization() {
+        this._termContentIdleScheduler.setHold('!database-lifecycle', true);
+        await this._termContentIdleScheduler.preemptAndJoin();
+    }
+
+    /**
+     * @param {MessageEvent<WorkerRequest|WorkerOptimizationNotification>} event
      */
     _onMessage(event) {
-        const action = event.data.action;
+        if (event.data.id === termContentOptimizationNotificationId) {
+            try {
+                this._applyTermContentOptimizationState(event.data.optimizationState);
+            } catch (error) {
+                reportDiagnostics('term-content-optimization-control-deferred', {error: error instanceof Error ? error.message : String(error)});
+            }
+            return;
+        }
+        const request = /** @type {MessageEvent<WorkerRequest>} */ (event);
+        const action = request.data.action;
+        this._applyTermContentOptimizationState(/** @type {import('offscreen').TermContentOptimizationState|undefined} */ (
+            request.data.optimizationState ?? request.data.params?.optimizationState
+        ));
         const policy = getDictionaryRuntimeActionPolicy(action);
         if (policy.concurrency === 'cancellation') {
-            void this._onMessageAsync(event).catch((error) => {
+            const releaseMaintenanceAdmission = request.data.params?.lookupOnly === true ?
+                () => {} :
+                this._termContentIdleScheduler.foregroundStarted();
+            void this._onMessageAsync(request, releaseMaintenanceAdmission).catch((error) => {
+                releaseMaintenanceAdmission();
                 log.error(error);
             });
             return;
         }
+        // This synchronous fence terminates the disposable trainer before a
+        // lookup, mutation, or import reaches its regular owner/queue.
+        const releaseMaintenanceAdmission = policy.preemptsMaintenance === false ?
+            () => {} :
+            this._termContentIdleScheduler.foregroundStarted();
         if (policy.concurrency === 'streamed-import') {
             try {
-                this._admitImportOperation(event.data.params?.operationId);
+                this._admitImportOperation(request.data.params?.operationId);
             } catch (error) {
-                const port = event.ports[0];
+                releaseMaintenanceAdmission();
+                const port = request.ports[0];
                 if (port) {
                     this._postImportError(port, error);
                     port.close();
                 }
-                self.postMessage({id: event.data.id, error: ExtensionError.serialize(error)});
+                self.postMessage({id: request.data.id, error: ExtensionError.serialize(error)});
                 return;
             }
             ++this._queuedImportRequestCount;
@@ -131,7 +211,8 @@ export class OffscreenDictionaryWorkerHandler {
             policy.concurrency === 'lookup' &&
             (this._queuedImportRequestCount > 0 || this._activeImportAbortController !== null)
         ) {
-            const id = event.data.id;
+            releaseMaintenanceAdmission();
+            const id = request.data.id;
             self.postMessage({
                 id,
                 error: ExtensionError.serialize(createDictionaryImportBusyError(action)),
@@ -142,8 +223,9 @@ export class OffscreenDictionaryWorkerHandler {
             policy.rejectDuringImport === true &&
             (this._queuedImportRequestCount > 0 || this._activeImportAbortController !== null)
         ) {
+            releaseMaintenanceAdmission();
             self.postMessage({
-                id: event.data.id,
+                id: request.data.id,
                 error: ExtensionError.serialize(createDictionaryImportBusyError(action)),
             });
             return;
@@ -153,7 +235,7 @@ export class OffscreenDictionaryWorkerHandler {
             this._queuedExclusiveRequestCount === 0 &&
             this._activeImportAbortController === null
         ) {
-            this._startConcurrentLookup(event);
+            this._startConcurrentLookup(request, releaseMaintenanceAdmission);
             return;
         }
         if (policy.concurrency === 'lookup') {
@@ -163,9 +245,10 @@ export class OffscreenDictionaryWorkerHandler {
             // fan out and a later mutation will wait for the active read set.
             this._requestQueue = this._requestQueue
                 .then(() => {
-                    this._startConcurrentLookup(event);
+                    this._startConcurrentLookup(request, releaseMaintenanceAdmission);
                 })
                 .catch((error) => {
+                    releaseMaintenanceAdmission();
                     log.error(error);
                 });
             return;
@@ -177,9 +260,10 @@ export class OffscreenDictionaryWorkerHandler {
                 if (activeLookupPromises.length > 0) {
                     await Promise.allSettled(activeLookupPromises);
                 }
-                await this._onMessageAsync(event);
+                await this._onMessageAsync(request, releaseMaintenanceAdmission);
             })
             .catch((error) => {
+                releaseMaintenanceAdmission();
                 log.error(error);
             })
             .finally(() => {
@@ -189,10 +273,11 @@ export class OffscreenDictionaryWorkerHandler {
 
     /**
      * @param {MessageEvent<WorkerRequest>} event
+     * @param {() => void} releaseMaintenanceAdmission
      * @returns {void}
      */
-    _startConcurrentLookup(event) {
-        const lookupPromise = this._onMessageAsync(event);
+    _startConcurrentLookup(event, releaseMaintenanceAdmission) {
+        const lookupPromise = this._onMessageAsync(event, releaseMaintenanceAdmission);
         this._activeConcurrentLookupPromises.add(lookupPromise);
         void lookupPromise
             .catch((error) => {
@@ -205,8 +290,9 @@ export class OffscreenDictionaryWorkerHandler {
 
     /**
      * @param {MessageEvent<WorkerRequest>} event
+     * @param {() => void} releaseMaintenanceAdmission
      */
-    async _onMessageAsync(event) {
+    async _onMessageAsync(event, releaseMaintenanceAdmission = () => {}) {
         const {id, action, params} = event.data;
         /** @type {WorkerResponse} */
         const response = {id};
@@ -216,11 +302,15 @@ export class OffscreenDictionaryWorkerHandler {
             response.error = ExtensionError.serialize(e);
         }
         try {
-            self.postMessage(response);
-        } catch (error) {
-            // Retry only delivery, never the action: a mutation may already
-            // have committed. A second transport failure reaches the owner.
-            self.postMessage({id, error: this._serializeTransportSafeError(error)});
+            try {
+                self.postMessage(response);
+            } catch (error) {
+                // Retry only delivery, never the action: a mutation may already
+                // have committed. A second transport failure reaches the owner.
+                self.postMessage({id, error: this._serializeTransportSafeError(error)});
+            }
+        } finally {
+            releaseMaintenanceAdmission();
         }
     }
 
@@ -444,7 +534,9 @@ export class OffscreenDictionaryWorkerHandler {
         /** @type {AbortController|null} */
         let abortController = null;
         let responsePortAvailable = true;
-        /** @param {import('dictionary-importer').ProgressData} progress */
+        /**
+         * @param {import('dictionary-importer').ProgressData} progress
+         */
         const onProgress = (progress) => {
             if (!responsePortAvailable) { return; }
             responsePortAvailable = this._postImportProgress(port, progress);
@@ -554,6 +646,7 @@ export class OffscreenDictionaryWorkerHandler {
                 const suspended = params.suspended === true;
                 if (suspended) {
                     this._databaseSuspended = true;
+                    await this._joinTermContentOptimization();
                     this._databaseReady = false;
                     if (this._dictionaryDatabase.isPrepared()) {
                         await this._dictionaryDatabase.close();
@@ -569,6 +662,7 @@ export class OffscreenDictionaryWorkerHandler {
                 await this._ensureDatabasePrepared();
                 return await this._dictionaryDatabase.getDictionaryInfo();
             case 'deleteDictionaryOffscreen':
+                await this._termContentIdleScheduler.preemptAndJoin();
                 await this._ensureDatabasePrepared();
                 try {
                     await this._dictionaryDatabase.deleteDictionary(/** @type {string} */ (params.dictionaryTitle ?? ''), 1000, () => {});
@@ -579,6 +673,7 @@ export class OffscreenDictionaryWorkerHandler {
                 }
                 return;
             case 'replaceDictionaryTitleOffscreen':
+                await this._termContentIdleScheduler.preemptAndJoin();
                 await this._ensureDatabasePrepared();
                 try {
                     await this._dictionaryDatabase.replaceDictionaryTitle(
@@ -651,6 +746,7 @@ export class OffscreenDictionaryWorkerHandler {
                     /** @type {string[]} */ (params.dictionaryNames ?? []),
                 );
             case 'databasePurgeOffscreen':
+                await this._joinTermContentOptimization();
                 // Join an existing open attempt, but do not require a damaged
                 // database to open successfully before the user can reset it.
                 if (this._prepareDatabasePromise !== null) {
@@ -663,6 +759,7 @@ export class OffscreenDictionaryWorkerHandler {
                     this._translator.clearDatabaseCaches();
                 }
             case 'databaseRefreshOffscreen':
+                await this._joinTermContentOptimization();
                 this._databaseReady = false;
                 if (this._dictionaryDatabase.isPrepared()) {
                     await this._dictionaryDatabase.close();
@@ -747,6 +844,7 @@ export class OffscreenDictionaryWorkerHandler {
                 }
                 return;
             case 'importDictionaryOffscreen':
+                await this._termContentIdleScheduler.preemptAndJoin();
                 if (ports.length === 0) {
                     this._consumeQueuedImportRequest();
                     const operation = this._importOperations.get(/** @type {string} */ (params.operationId));
@@ -766,7 +864,7 @@ export class OffscreenDictionaryWorkerHandler {
             case 'connectToDatabaseWorker':
                 await this._ensureDatabasePrepared();
                 if (ports.length > 0) {
-                    await this._dictionaryDatabase.connectToDatabaseWorker(ports[0]);
+                    await this._dictionaryDatabase.connectToDatabaseWorker(ports[0], () => this._termContentIdleScheduler.foregroundStarted());
                 }
                 return;
             default:

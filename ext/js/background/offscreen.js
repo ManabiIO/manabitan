@@ -25,6 +25,7 @@ import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {sanitizeCSS} from '../core/utilities.js';
 import {getSqlite3} from '../dictionary/sqlite-wasm.js';
 import {WebExtension} from '../extension/web-extension.js';
+import {TermContentOptimizationControl} from './term-content-optimization-control.js';
 import {DictionaryWorkerClient} from './dictionary-worker-client.js';
 
 const structuredLookupAcceptanceDelayMs = 250;
@@ -52,6 +53,7 @@ export class Offscreen {
             ['clipboardGetImageOffscreen',     this._getImageHandler.bind(this)],
             ['clipboardSetBrowserOffscreen',   this._setClipboardBrowser.bind(this)],
             ['databasePrepareOffscreen',       this._prepareDatabaseHandler.bind(this)],
+            ['setTermContentOptimizationHoldOffscreen', this._setTermContentOptimizationHoldHandler.bind(this)],
             ['databaseRefreshOffscreen',       this._refreshDatabaseHandler.bind(this)],
             ['getDatabaseRuntimeStateOffscreen', this._getDatabaseRuntimeStateHandler.bind(this)],
             ['databaseSetSuspendedOffscreen',  this._setDatabaseSuspendedHandler.bind(this)],
@@ -85,6 +87,8 @@ export class Offscreen {
 
         /** @type {?Promise<void>} */
         this._prepareDatabasePromise = null;
+        /** @type {TermContentOptimizationControl} */
+        this._termContentOptimizationControl = new TermContentOptimizationControl();
         /** @type {DictionaryWorkerClient} */
         this._dictionaryWorkerClient = new DictionaryWorkerClient(
             '/js/background/offscreen-dictionary-worker.js',
@@ -228,6 +232,12 @@ export class Offscreen {
         return this._prepareDatabasePromise;
     }
 
+    /** @type {import('offscreen').ApiHandler<'setTermContentOptimizationHoldOffscreen'>} */
+    _setTermContentOptimizationHoldHandler() {
+        const state = this._termContentOptimizationControl.state;
+        if (state !== null) { this._dictionaryWorkerClient.notifyTermContentOptimizationState(state); }
+    }
+
     /**
      * @returns {Promise<void>}
      */
@@ -339,7 +349,8 @@ export class Offscreen {
     }
 
     /** @type {import('extension').ChromeRuntimeOnMessageCallback<import('offscreen').ApiMessageAny>} */
-    _onMessage({action, params}, _sender, callback) {
+    _onMessage({action, params, optimizationState}, _sender, callback) {
+        (this._termContentOptimizationControl ??= new TermContentOptimizationControl()).accept(optimizationState);
         return invokeApiMapHandler(this._apiMap, action, params, [], callback);
     }
 
@@ -469,14 +480,17 @@ export class Offscreen {
      * @returns {Promise<any>}
      */
     _invokeDictionaryWorker(action, params, transferables = []) {
-        return this._dictionaryWorkerClient.invoke(action, params, transferables);
+        return this._dictionaryWorkerClient.invoke(action, {
+            ...params, ...(this._termContentOptimizationControl?.state ? {optimizationState: this._termContentOptimizationControl.state} : {}),
+        }, transferables);
     }
 
     /**
      * @param {MessageEvent<import('offscreen').McApiMessageAny>} event
      */
     _onMcMessage(event) {
-        const {id, action, params} = /** @type {import('offscreen').McApiRequest} */ (event.data);
+        const {id, action, params, optimizationState} = /** @type {import('offscreen').McApiRequest} */ (event.data);
+        (this._termContentOptimizationControl ??= new TermContentOptimizationControl()).accept(optimizationState);
         const responsePortValue = event.currentTarget;
         if (responsePortValue === null || typeof Reflect.get(responsePortValue, 'postMessage') !== 'function' || typeof id !== 'number') { return; }
         const responsePort = /** @type {MessagePort} */ (responsePortValue);
@@ -489,7 +503,9 @@ export class Offscreen {
                 }
             }, structuredLookupAcceptanceDelayMs) :
             null;
-        /** @param {import('core').Response<unknown>} response */
+        /**
+         * @param {import('core').Response<unknown>} response
+         */
         const callback = (response) => {
             if (acceptanceTimeoutId !== null) {
                 globalThis.clearTimeout(acceptanceTimeoutId);

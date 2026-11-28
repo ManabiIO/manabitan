@@ -24,6 +24,7 @@
  *   retryable: boolean,
  *   requiresDatabase: boolean,
  *   rejectDuringImport?: boolean,
+ *   preemptsMaintenance?: boolean,
  * }} DictionaryRuntimeActionPolicy
  */
 
@@ -71,7 +72,12 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
         concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     getDatabaseRuntimeStateOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
+        preemptsMaintenance: false,
+        concurrency: 'exclusive',
+        timeoutClass: 'standard',
+        retryable: false,
+        requiresDatabase: false,
+        rejectDuringImport: true,
     }),
     databaseSetSuspendedOffscreen: Object.freeze({
         concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: false, rejectDuringImport: true,
@@ -80,7 +86,7 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     // state. An exclusive metadata read would wait for active cache warming,
     // then make later foreground lookups wait behind that best-effort warm.
     // Keep mutation ordering and import rejection through the read scheduler.
-    getDictionaryInfoOffscreen: concurrentStandardReadPolicy,
+    getDictionaryInfoOffscreen: Object.freeze({...concurrentStandardReadPolicy, preemptsMaintenance: false}),
     deleteDictionaryOffscreen: maintenancePolicy,
     replaceDictionaryTitleOffscreen: maintenancePolicy,
     getDictionaryCountsOffscreen: standardReadPolicy,
@@ -91,9 +97,9 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     // Cache warming only reads persistent state and uses the same coalesced
     // cache loaders as visible lookups. Let interactive reads run alongside it
     // so a best-effort post-import warm cannot become a first-hover barrier.
-    warmTermLookupCachesOffscreen: cooperativeMaintenanceReadPolicy,
-    debugDictionaryStorageStateOffscreen: maintenancePolicy,
-    debugDictionaryLookupStateOffscreen: maintenancePolicy,
+    warmTermLookupCachesOffscreen: Object.freeze({...cooperativeMaintenanceReadPolicy, preemptsMaintenance: false}),
+    debugDictionaryStorageStateOffscreen: Object.freeze({...maintenancePolicy, preemptsMaintenance: false}),
+    debugDictionaryLookupStateOffscreen: Object.freeze({...maintenancePolicy, preemptsMaintenance: false}),
     databasePurgeOffscreen: maintenancePolicy,
     databaseRefreshOffscreen: maintenancePolicy,
     // Media reads release their SQLite cursor before awaiting OPFS. Allow them

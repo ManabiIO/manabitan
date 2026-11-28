@@ -398,6 +398,20 @@ export class Backend {
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
         /** @type {Set<string>} */
+        this._termContentOptimizationHolds = new Set();
+        /**
+         *
+         */
+        this._termContentOptimizationSessionId = crypto.randomUUID();
+        /**
+         *
+         */
+        this._termContentOptimizationRevision = 0;
+        /**
+         *
+         */
+        this._termContentOptimizationReady = false;
+        /** @type {Set<string>} */
         this._dictionaryImportOwners = new Set();
         /** @type {Map<string, chrome.runtime.Port>} */
         this._dictionaryImportOwnerConnections = new Map();
@@ -487,7 +501,9 @@ export class Backend {
         chrome.runtime.onInstalled.addListener(this._onInstalled.bind(this));
     }
 
-    /** @param {chrome.runtime.Port} port */
+    /**
+     * @param {chrome.runtime.Port} port
+     */
     _onDictionaryImportOwnerConnect(port) {
         let details;
         try {
@@ -552,7 +568,10 @@ export class Backend {
         if (this._dictionaryImportOwnerConnections?.has(ownerId)) { return; }
         if ([...this._ownedDictionaryImports.values()].some((operation) => operation.ownerId === ownerId)) { return; }
         this._orphanedDictionaryImportOwners.delete(ownerId);
-        return this._setDictionaryImportMode(false, ownerId).catch((error) => {
+        // A disconnected observer proves mutation ownership ended, not that
+        // the page finished publishing UI/callbacks. Keep optional maintenance
+        // held until explicit completion or the next reconciled backend boot.
+        return this._setDictionaryImportMode(false, ownerId, true).catch((error) => {
             reportDiagnostics('dictionary-orphaned-import-owner-release-failed', {ownerId, error: toError(error).message});
         });
     }
@@ -695,7 +714,9 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
-            /** @param {Error|Event|string} error */
+            /**
+             * @param {Error|Event|string} error
+             */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -845,7 +866,9 @@ export class Backend {
             responsePort.onmessageerror = null;
             closeDictionaryImportResponsePort(responsePort);
         };
-        /** @param {unknown} message */
+        /**
+         * @param {unknown} message
+         */
         const forward = (message) => {
             if (!observerDetached && !postDictionaryImportResponseMessage(responsePort, message)) { detachObserver(); }
         };
@@ -865,7 +888,9 @@ export class Backend {
                 delete operation.responseReconcile;
             }
         };
-        /** @param {import('offscreen').ImportOperationStatus} status */
+        /**
+         * @param {import('offscreen').ImportOperationStatus} status
+         */
         const reconcile = (status) => {
             if (closed) { return; }
             // A status lookup may beat the original terminal message. Preserve
@@ -998,6 +1023,9 @@ export class Backend {
         const prepareStartedAt = safePerformance.now();
         /** @type {Array<{phase: string, durationMs: number}>} */
         const preparePhases = [];
+        // Publish the held startup state before any ordinary runtime request.
+        // This also fences a surviving offscreen worker from a prior backend.
+        this._syncTermContentOptimizationState();
         reportDiagnostics('backend-prepare-begin', {
             context: self.constructor?.name ?? 'unknown',
         });
@@ -1140,6 +1168,8 @@ export class Backend {
                 recordPhase('clipboardMonitor.on(change)', startedAt);
             }
 
+            this._termContentOptimizationReady = true;
+            this._syncTermContentOptimizationState();
             this._sendMessageAllTabsIgnoreResponse({action: 'applicationBackendReady'});
             this._sendMessageIgnoreResponse({action: 'applicationBackendReady'});
             reportDiagnostics('backend-prepare-complete', {
@@ -1415,7 +1445,9 @@ export class Backend {
         return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
     }
 
-    /** @returns {void} */
+    /**
+     * @returns {void}
+     */
     _ensureSharedWorkerBridge() {
         if (this._sharedWorkerBridge !== null || this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
             return;
@@ -2156,7 +2188,9 @@ export class Backend {
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
-    /** @returns {Promise<unknown>} */
+    /**
+     * @returns {Promise<unknown>}
+     */
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
@@ -2224,7 +2258,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         };
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _awaitDictionaryRefreshSettled() {
         while (true) {
             const importModePromise = this._setDictionaryImportModePromise;
@@ -2274,7 +2310,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         }
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _awaitDictionaryMutationSettled() {
         while (true) {
             const promise = this._dictionaryMutationPromise;
@@ -2384,8 +2422,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     }
 
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
-    async _onApiSetDictionaryImportMode({active, ownerId}) {
-        await this._setDictionaryImportMode(active, ownerId);
+    async _onApiSetDictionaryImportMode({active, ownerId, frontendPending}) {
+        await this._setDictionaryImportMode(active, ownerId, frontendPending);
     }
 
     /**
@@ -4497,7 +4535,9 @@ null;
         let token = null;
         let invalidated = false;
         const eventListeners = new EventListenerCollection();
-        /** @returns {Promise<void>} */
+        /**
+         * @returns {Promise<void>}
+         */
         const assertCurrentTab = async () => {
             const currentTab = await this._getTabById(tabId);
             if (invalidated || !currentTab.active || currentTab.windowId !== windowId || currentTab.url !== tab.url) {
@@ -4516,7 +4556,9 @@ null;
                     invalidated = true;
                 }
             });
-            /** @param {number} removedTabId */
+            /**
+             * @param {number} removedTabId
+             */
             const onOwnerRemoved = (removedTabId) => {
                 if (removedTabId === tabId) { invalidated = true; }
             };
@@ -4905,7 +4947,9 @@ null;
         this._sendApplicationDatabaseUpdated(type, cause);
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _flushDictionaryCacheInvalidation() {
         const generation = this._dictionaryCacheInvalidationGeneration ?? 0;
         await Promise.resolve(this._translator.clearDatabaseCaches());
@@ -6273,9 +6317,10 @@ null;
     /**
      * @param {boolean} active
      * @param {string|undefined} [ownerId]
+     * @param {boolean} [frontendPending]
      * @returns {Promise<void>}
      */
-    async _setDictionaryImportMode(active, ownerId) {
+    async _setDictionaryImportMode(active, ownerId, frontendPending = false) {
         while (this._setDictionaryImportModePromise !== null) {
             try {
                 await this._setDictionaryImportModePromise;
@@ -6286,13 +6331,22 @@ null;
         const transitionPromise = (async () => {
             this._dictionaryImportOwners ??= new Set();
             this._ownedDictionaryImports ??= new Map();
+            const maintenanceHoldId = ownerId ?? 'anonymous-import-mode';
             if (typeof ownerId !== 'undefined') {
                 if (!/^[a-zA-Z0-9:_-]{1,128}$/.test(ownerId)) { throw new Error('Invalid dictionary import session owner'); }
                 if (active) {
                     if (!this._dictionaryImportOwners.has(ownerId) && this._dictionaryImportOwners.size >= 128) { throw new Error('Dictionary import session owner registry is full'); }
                     this._dictionaryImportOwners.add(ownerId);
                 } else {
-                    if (!this._dictionaryImportOwners.delete(ownerId)) { return; }
+                    if (!this._dictionaryImportOwners.delete(ownerId)) {
+                        // A second completion or a lost release ACK must still
+                        // reconcile the desired hold state after UI publication.
+                        if (frontendPending) { return; }
+                        if (this._dictionaryImportOwners.size > 0 || (!this._deferredDictionaryRefreshDuringImport && this._pendingDatabaseUpdatedNotifications.length === 0)) {
+                            this._setTermContentOptimizationHold(maintenanceHoldId, false);
+                            return;
+                        }
+                    }
                     if (this._dictionaryImportOwnerPublications?.delete(ownerId)) {
                         // A page can disappear after publication but before its
                         // settings-side notification. The backend retains that
@@ -6322,16 +6376,25 @@ null;
                         }
                         this._retireOwnedDictionaryImport(operationId, operation);
                     }
-                    if (this._dictionaryImportOwners.size > 0) { return; }
+                    if (this._dictionaryImportOwners.size > 0) {
+                        if (!frontendPending) { this._setTermContentOptimizationHold(maintenanceHoldId, false); }
+                        return;
+                    }
                 }
             } else if (!active && this._dictionaryImportOwners.size > 0) {
                 return;
+            }
+            if (active) {
+                // Remember desired ownership even if transport applied the hold
+                // but lost its ACK. Ordinary requests replay this same snapshot.
+                this._setTermContentOptimizationHold(maintenanceHoldId, true);
             }
             const hasDeferredRefresh = (
                 this._deferredDictionaryRefreshDuringImport ||
                 this._pendingDatabaseUpdatedNotifications.length > 0
             );
             if (this._dictionaryImportModeActive === active && !(active === false && hasDeferredRefresh)) {
+                if (!active && !frontendPending) { this._setTermContentOptimizationHold(maintenanceHoldId, false); }
                 return;
             }
             this._clearTextParseCache();
@@ -6372,9 +6435,9 @@ null;
                     reuseActiveImportConnection: canReuseActiveImportConnection,
                 });
             } catch (error) {
-                if (hadDeferredRefresh || this._pendingDatabaseUpdatedNotifications.length > 0) {
-                    this._deferredDictionaryRefreshDuringImport = true;
-                }
+                // Keep the hold through recovery; optional transport cannot make
+                // an otherwise completed import fail or release it prematurely.
+                this._deferredDictionaryRefreshDuringImport = true;
                 reportDiagnostics('dictionary-refresh-on-import-mode-exit-failed', {
                     hadDeferredRefresh,
                     pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
@@ -6396,6 +6459,7 @@ null;
                 this._sendApplicationDatabaseUpdated(type, cause);
             }
             this._clearDictionaryRefreshRetry();
+            if (!frontendPending) { this._setTermContentOptimizationHold(maintenanceHoldId, false); }
         })();
         this._setDictionaryImportModePromise = transitionPromise;
         try {
@@ -6405,6 +6469,36 @@ null;
                 this._setDictionaryImportModePromise = null;
             }
         }
+    }
+
+    /**
+     * @param {string} ownerId
+     * @param {boolean} active
+     * @throws {TypeError} If synchronizing the desired runtime state fails.
+     */
+    _setTermContentOptimizationHold(ownerId, active) {
+        this._termContentOptimizationHolds ??= new Set();
+        if (active) {
+            this._termContentOptimizationHolds.add(ownerId);
+        } else {
+            this._termContentOptimizationHolds.delete(ownerId);
+        }
+        this._syncTermContentOptimizationState();
+    }
+
+    /** Store the desired snapshot synchronously. Sending it alone is best effort. */
+    _syncTermContentOptimizationState() {
+        this._termContentOptimizationSessionId ??= crypto.randomUUID();
+        this._termContentOptimizationRevision = (this._termContentOptimizationRevision ?? 0) + 1;
+        const state = {
+            sessionId: this._termContentOptimizationSessionId,
+            revision: this._termContentOptimizationRevision,
+            ready: this._termContentOptimizationReady === true,
+            // The scheduler only needs to know whether any owner remains. Bound
+            // the snapshot even when orphaned holds survive many closed pages.
+            ownerIds: [...this._termContentOptimizationHolds ?? []].slice(0, 128),
+        };
+        (this._offscreen ?? this._localDictionaryRuntime)?.setTermContentOptimizationState?.(state);
     }
 
     /**

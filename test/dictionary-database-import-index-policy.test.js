@@ -46,7 +46,7 @@ async function createDatabase(enableIndexes = false) {
  * @returns {unknown[]}
  */
 function secondaryIndexes(connection) {
-    return connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%' ORDER BY name")
+    return connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%' AND name <> 'idx_term_content_single_active_job' ORDER BY name")
 }
 
 /**

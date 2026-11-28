@@ -22,6 +22,7 @@
  */
 export function isZstdResourceError(error) {
     if (!(error instanceof Error)) { return false; }
+    if (error.name === 'ZstdDictionaryUnavailableError') { return true; }
     switch (error.message) {
         case 'Failed to allocate Zstd input buffer':
         case 'Failed to allocate Zstd destination buffer':

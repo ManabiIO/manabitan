@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {getLegacyTermContentZstdCodecId} from './term-content-zstd-codec.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -38,16 +39,36 @@ import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
+import {advanceZstdFrameInspection, beginZstdFrameInspection, ZstdFrameInspectionError} from './term-content-zstd-frame-inspector.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
+
+/**
+ * @typedef {import('./term-content-layout.js').FrameIdentity} TermContentFrameIdentity
+ * @typedef {{bytes: Uint8Array, codecId: string|null, envelope: 'mbc2'|'none', decodedLength: number|null, physicalKey: string, release: () => void}} TermContentResolvedFrame
+ * @typedef {{status: 'ok', bytes: Uint8Array}|{status: 'unavailable'}|{status: 'error', error: unknown}} TermContentSliceResult
+ * @typedef {object} TermContentReadContext
+ * @property {(offset: number, length: number) => Promise<Uint8Array|null>} readSlice
+ * @property {(requests: Array<{offset: number, length: number}>) => Promise<TermContentSliceResult[]>} readSlicesDetailed
+ * @property {(identity: TermContentFrameIdentity) => Promise<TermContentResolvedFrame|null>} resolveFrame
+ * @property {number} [logicalHighWater] Committed end under the leased root.
+ * @property {(query: {kind: 'legacy-entry', logicalOffset: number, recordLength: number, originalCodecId: string|null}) => Promise<TermContentFrameIdentity|null>} [findFrameOverride] Looks up replacement identity before inspecting retired source bytes.
+ * @property {() => TermContentReadContext} fork
+ * @property {() => void} release
+ * @property {string} [rootKey] Stable immutable root identity for sharing pending I/O.
+ * @property {(identity: TermContentFrameIdentity, physicalKey: string) => Promise<boolean>} [isCurrentFrame] Compares physical source, not merely root epoch.
+ * @property {(identity: TermContentFrameIdentity, layoutId: string) => Promise<boolean>} [isCurrentFrameLayout] Compares the owner of a failed frame manifest.
+ * @property {(offset: number, length: number) => Promise<boolean>} [isCurrentRange] Compares retained reference/header physical spans across roots.
+ */
 
 class TermContentReadError extends Error {
     /**
      * @param {'temporarilyUnavailable'|'corrupt'} status
      * @param {string} message
+     * @param {ErrorOptions} [options]
      */
-    constructor(status, message) {
-        super(message);
+    constructor(status, message, options) {
+        super(message, options);
         /** @type {string} */
         this.name = 'TermContentReadError';
         /** @type {'temporarilyUnavailable'|'corrupt'} */
@@ -60,6 +81,9 @@ const DEFAULT_REFERENCE_PACK_TARGET_BYTES = 4 * 1024 * 1024;
 const DEFAULT_MIN_INPUT_BYTES = 512 * 1024;
 const DEFAULT_MIN_SAVINGS_RATIO = 0.1;
 const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+const RAW_CONTENT_SELECTORS = new Set(['raw', 'raw-v2', 'raw-v3', 'raw-v4', 'raw-v6']);
+const LEGACY_INSPECTION_MAX_BLOCKS = 1024;
+const LEGACY_DECODE_MAX_BYTES = 128 * 1024 * 1024;
 const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
 const EARLY_SELECTION_MAX_SPANS = 512;
 const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
@@ -167,11 +191,17 @@ export class ByteBoundedLruCache {
         this._bytes = 0;
     }
 
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get size() { return this._values.size; }
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get bytes() { return this._bytes; }
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get maxBytes() { return this._maxBytes; }
 
     /** */
@@ -234,15 +264,21 @@ export class TermContentBlockStore {
         this._cacheMaxBytes = options.cacheMaxBytes ?? DEFAULT_CACHE_MAX_BYTES;
         /** @type {ByteBoundedLruCache} */
         this._cache = new ByteBoundedLruCache(this._cacheMaxBytes);
-        /** @type {Map<string, Promise<Uint8Array|null>>} */
+        /** @type {Map<string|symbol, Promise<Uint8Array|null>>} */
         this._inFlightBlocks = new Map();
+        /** @type {((identity: TermContentFrameIdentity) => Promise<TermContentResolvedFrame|null>)|null} */
+        this._onlineFrameResolver = null;
+        /** @type {(() => TermContentReadContext|null)|null} */
+        this._readContextProvider = null;
         /** @type {number} */
         this._cacheGeneration = 0;
         /** @type {Record<string, unknown>|null} */
         this._lastError = null;
     }
 
-    /** @returns {TermContentBlockImportSession} */
+    /**
+     * @returns {TermContentBlockImportSession}
+     */
     beginImportSession() {
         return new TermContentBlockImportSession(this);
     }
@@ -263,6 +299,28 @@ export class TermContentBlockStore {
     }
 
     /**
+     * Installs the optional immutable physical-frame resolver. A null result
+     * means the original OPFS content stream remains authoritative.
+     * @param {(identity: TermContentFrameIdentity) => Promise<TermContentResolvedFrame|null>} resolver
+     * @throws {TypeError} If the provider is not callable.
+     */
+    setOnlineFrameResolver(resolver) {
+        if (typeof resolver !== 'function') { throw new TypeError('Online frame resolver must be callable'); }
+        this._onlineFrameResolver = resolver;
+    }
+
+    /**
+     * Acquires the request root synchronously, before reference I/O starts.
+     * Logical decoded caches survive compression-only root publication.
+     * @param {(() => TermContentReadContext|null)|null} provider
+     * @throws {TypeError} If the provider is not callable.
+     */
+    setReadContextProvider(provider) {
+        if (provider !== null && typeof provider !== 'function') { throw new TypeError('Content read context provider must be callable'); }
+        this._readContextProvider = provider;
+    }
+
+    /**
      * @param {number} value
      * @throws {RangeError} If the byte target cannot be represented safely.
      */
@@ -273,7 +331,9 @@ export class TermContentBlockStore {
         this._blockTargetBytes = value;
     }
 
-    /** @returns {Record<string, unknown>} */
+    /**
+     * @returns {Record<string, unknown>}
+     */
     getDiagnostics() {
         return {
             compressionExperiments: this._compressionExperiments,
@@ -287,6 +347,7 @@ export class TermContentBlockStore {
     }
 
     /**
+     * Returns canonical entry payload bytes for every stored representation.
      * @param {number} contentOffset
      * @param {number} contentLength
      * @param {string} contentDictName
@@ -305,14 +366,31 @@ export class TermContentBlockStore {
      */
     async readDetailed(contentOffset, contentLength, contentDictName) {
         const generation = this._cacheGeneration;
-        try {
-            const result = await this._readDetailed(contentOffset, contentLength, contentDictName);
-            this._assertReadGeneration(generation);
-            return result;
-        } catch (error) {
-            if (generation !== this._cacheGeneration) { return this._createInvalidatedReadFailure(); }
-            return this._createReadFailure(error);
+        for (let attempt = 0; attempt < 2; ++attempt) {
+            /** @type {TermContentReadContext|null} */
+            let readContext = null;
+            try {
+                readContext = this._readContextProvider?.() ?? null;
+                const result = await this._readDetailed(contentOffset, contentLength, contentDictName, readContext);
+                this._assertReadGeneration(generation);
+                return result;
+            } catch (error) {
+                if (generation !== this._cacheGeneration) { return this._createInvalidatedReadFailure(); }
+                const failure = this._createReadFailure(error);
+                if (attempt === 0 && failure.status === 'corrupt' && readContext?.isCurrentRange &&
+                (RAW_CONTENT_SELECTORS.has(contentDictName) || typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined')) {
+                    try {
+                        const current = await readContext.isCurrentRange(contentOffset, this._getReferenceReadLength(contentLength, contentDictName));
+                        this._assertReadGeneration(generation);
+                        if (!current) { continue; }
+                    } catch (currentError) { return this._createReadFailure(currentError); }
+                }
+                return failure;
+            } finally {
+                readContext?.release();
+            }
         }
+        return this._createInvalidatedReadFailure();
     }
 
     /**
@@ -324,14 +402,107 @@ export class TermContentBlockStore {
      */
     async readDetailedBatch(requests) {
         const generation = this._cacheGeneration;
+        for (let attempt = 0; attempt < 2; ++attempt) {
+            /** @type {TermContentReadContext|null} */
+            let readContext = null;
+            try {
+                readContext = this._readContextProvider?.() ?? null;
+                const results = await this._readDetailedBatch(requests, readContext);
+                if (attempt === 0 && readContext?.isCurrentRange && results.some((result) => result.status === 'corrupt')) {
+                    const context = readContext;
+                    const checks = await Promise.allSettled(results.map(async (result, index) => {
+                        if (result.status !== 'corrupt') { return true; }
+                        const request = requests[index];
+                        if (!RAW_CONTENT_SELECTORS.has(request.contentDictName) &&
+                        typeof getRawTermContentBlockCompressionDictName(request.contentDictName) === 'undefined') { return true; }
+                        return await context.isCurrentRange?.(
+                            request.contentOffset,
+                            this._getReferenceReadLength(request.contentLength, request.contentDictName),
+                        );
+                    }));
+                    this._assertReadGeneration(generation);
+                    let retry = false;
+                    for (let index = 0; index < checks.length; ++index) {
+                        const check = checks[index];
+                        if (check.status === 'rejected') {
+                            results[index] = this._createReadFailure(check.reason);
+                        } else
+                            if (check.value === false) {
+                                retry = true;
+                            }
+                    }
+                    if (retry) { continue; }
+                }
+                return results;
+            } catch (error) {
+                return requests.map(() => this._createReadFailure(error));
+            } finally {
+                readContext?.release();
+            }
+        }
+        return requests.map(() => this._createInvalidatedReadFailure());
+    }
+
+    /**
+     * Decodes an explicitly typed block, legacy entry or shared artifact under
+     * one leased root. Raw-v4 per-entry headers use readDetailed instead.
+     * @param {TermContentFrameIdentity} identity
+     * @returns {Promise<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string, cause?: unknown}>}
+     */
+    async readDecodedFrameDetailed(identity) {
+        const generation = this._cacheGeneration;
+        /** @type {TermContentReadContext|null} */
+        let readContext = null;
+        try {
+            readContext = this._readContextProvider?.() ?? null;
+            const bytes = await this._getOrLoadFrame(this._createFrameCacheKey(identity), identity, {
+                contentOffset: identity.logicalOffset,
+                contentLength: identity.recordLength,
+                contentDictName: identity.originalCodecId ?? '',
+            }, readContext);
+            this._assertReadGeneration(generation);
+            if (bytes === null) { throw new TermContentReadError('temporarilyUnavailable', 'Term content frame could not be loaded'); }
+            return {status: 'ok', bytes};
+        } catch (error) {
+            if (generation !== this._cacheGeneration) { return this._createInvalidatedReadFailure(); }
+            const failure = this._createReadFailure(error);
+            return error instanceof Error && typeof error.cause !== 'undefined' ? {...failure, cause: error.cause} : failure;
+        } finally { readContext?.release(); }
+    }
+
+    /**
+     * @param {number} length
+     * @param {string} dictName
+     * @returns {number}
+     */
+    _getReferenceReadLength(length, dictName) {
+        if (typeof getRawTermContentBlockCompressionDictName(dictName) === 'undefined') { return length; }
+        return dictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX || dictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`) ?
+            RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES :
+RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
+    }
+
+    /**
+     * @param {Array<{contentOffset: number, contentLength: number, contentDictName: string}>} requests
+     * @param {TermContentReadContext|null} readContext
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>>}
+     */
+    async _readDetailedBatch(requests, readContext) {
+        const generation = this._cacheGeneration;
         const results = new Array(requests.length);
         /** @type {Array<{index: number, request: {contentOffset: number, contentLength: number, contentDictName: string}, compact: boolean|null, compressionDictName: string|null|undefined, sliceLength: number}>} */
         const sliceRequests = [];
+        /** @type {Array<{index: number, request: {contentOffset: number, contentLength: number, contentDictName: string}}>} */
+        const legacyRequests = [];
         for (let index = 0; index < requests.length; ++index) {
             const request = requests[index];
             const {contentLength, contentDictName} = request;
             const compressionDictName = getRawTermContentBlockCompressionDictName(contentDictName);
             if (typeof compressionDictName === 'undefined') {
+                if (!RAW_CONTENT_SELECTORS.has(contentDictName)) {
+                    legacyRequests.push({index, request});
+                    continue;
+                }
                 sliceRequests.push({
                     index,
                     request,
@@ -352,10 +523,12 @@ export class TermContentBlockStore {
             });
         }
 
-        const sliceResults = await this._contentStore.readSlicesDetailed(sliceRequests.map(({request, sliceLength}) => ({
-            offset: request.contentOffset,
-            length: sliceLength,
-        })));
+        const sliceResults = sliceRequests.length === 0 ?
+[] :
+await (readContext ?? this._contentStore).readSlicesDetailed(sliceRequests.map(({request, sliceLength}) => ({
+    offset: request.contentOffset,
+    length: sliceLength,
+})));
         if (generation !== this._cacheGeneration) {
             return requests.map(() => this._createInvalidatedReadFailure());
         }
@@ -410,17 +583,23 @@ export class TermContentBlockStore {
         }
 
         const groupList = [...groups.values()];
-        const groupSettled = await Promise.allSettled(groupList.map(async ({cacheKey, reference, compressionDictName, context}) => {
+        const [groupSettled, legacySettled] = await Promise.all([Promise.allSettled(groupList.map(async ({cacheKey, reference, compressionDictName, context}) => {
             const cached = this._cache.get(cacheKey);
             if (typeof cached !== 'undefined') { return cached; }
-            const block = await this._getOrLoadBlock(cacheKey, reference, compressionDictName, context);
+            const block = await this._getOrLoadBlock(cacheKey, reference, compressionDictName, context, readContext);
             if (block === null) {
                 throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
             }
             return block;
-        }));
+        })), Promise.allSettled(legacyRequests.map(async ({request}) => await this._readLegacyEntry(request.contentOffset, request.contentLength, request.contentDictName, readContext)))]);
         if (generation !== this._cacheGeneration) {
             return requests.map(() => this._createInvalidatedReadFailure());
+        }
+        for (let i = 0; i < legacyRequests.length; ++i) {
+            const settled = legacySettled[i];
+            results[legacyRequests[i].index] = settled.status === 'rejected' ?
+                this._createReadFailure(settled.reason) :
+{status: 'ok', bytes: settled.value};
         }
         for (let i = 0; i < groupList.length; ++i) {
             const group = groupList[i];
@@ -449,13 +628,17 @@ export class TermContentBlockStore {
      * @param {number} contentOffset
      * @param {number} contentLength
      * @param {string} contentDictName
+     * @param {TermContentReadContext|null} [readContext]
      * @returns {Promise<{status: 'ok', bytes: Uint8Array}>}
      */
-    async _readDetailed(contentOffset, contentLength, contentDictName) {
+    async _readDetailed(contentOffset, contentLength, contentDictName, readContext = null) {
         const generation = this._cacheGeneration;
         const compressionDictName = getRawTermContentBlockCompressionDictName(contentDictName);
         if (typeof compressionDictName === 'undefined') {
-            const bytes = await this._contentStore.readSlice(contentOffset, contentLength);
+            if (!RAW_CONTENT_SELECTORS.has(contentDictName)) {
+                return {status: 'ok', bytes: await this._readLegacyEntry(contentOffset, contentLength, contentDictName, readContext)};
+            }
+            const bytes = await (readContext ?? this._contentStore).readSlice(contentOffset, contentLength);
             if (!(bytes instanceof Uint8Array)) {
                 throw new TermContentReadError('temporarilyUnavailable', 'Term content could not be read from OPFS');
             }
@@ -464,7 +647,7 @@ export class TermContentBlockStore {
         const compact = contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||
         contentDictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`);
         const referenceLength = compact ? RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES : RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
-        const referenceBytes = await this._contentStore.readSlice(contentOffset, referenceLength);
+        const referenceBytes = await (readContext ?? this._contentStore).readSlice(contentOffset, referenceLength);
         this._assertReadGeneration(generation);
         if (!(referenceBytes instanceof Uint8Array)) {
             throw new TermContentReadError('temporarilyUnavailable', 'Term content block reference could not be read from OPFS');
@@ -483,7 +666,7 @@ export class TermContentBlockStore {
                 contentOffset,
                 contentLength,
                 contentDictName,
-            });
+            }, readContext);
             this._assertReadGeneration(generation);
             if (loadedBlock === null) {
                 throw new TermContentReadError('temporarilyUnavailable', 'Term content block could not be loaded');
@@ -498,7 +681,120 @@ export class TermContentBlockStore {
         return {status: 'ok', bytes: block.subarray(reference.entryOffset, entryEnd)};
     }
 
-    /** @returns {{status: 'temporarilyUnavailable', reason: string}} */
+    /**
+     * Legacy record lengths do not define their compressed spans. Discover
+     * exact frame boundaries without reading past the committed root.
+     * @param {number} contentOffset
+     * @param {number} contentLength
+     * @param {string} contentDictName
+     * @param {TermContentReadContext|null} readContext
+     * @returns {Promise<Uint8Array>}
+     * @param {boolean} [allowSourceRetry]
+     */
+    async _readLegacyEntry(contentOffset, contentLength, contentDictName, readContext, allowSourceRetry = true) {
+        const generation = this._cacheGeneration;
+        if (!Number.isSafeInteger(contentOffset) || contentOffset < 0 ||
+        !Number.isSafeInteger(contentLength) || contentLength <= 0) {
+            throw new TermContentReadError('corrupt', 'Legacy term content reference is invalid');
+        }
+        const cacheKey = JSON.stringify(['legacy-entry', contentOffset, contentLength, contentDictName]);
+        const cached = this._cache.get(cacheKey);
+        if (typeof cached !== 'undefined') { return cached; }
+        const originalCodecId = getLegacyTermContentZstdCodecId(contentDictName);
+        const query = {kind: /** @type {const} */ ('legacy-entry'), logicalOffset: contentOffset, recordLength: contentLength, originalCodecId};
+        const metadataState = {lastRead: /** @type {{offset: number, length: number}|null} */ (null)};
+        /** @type {TermContentFrameIdentity|null} */
+        let initialOverride = null;
+        let overrideKnown = false;
+        try {
+            if (readContext !== null && typeof readContext.findFrameOverride !== 'function') {
+                throw new Error('Leased legacy frame identity lookup is unavailable');
+            }
+            let identity = await readContext?.findFrameOverride?.(query) ?? null;
+            initialOverride = identity;
+            overrideKnown = true;
+            this._assertReadGeneration(generation);
+            if (identity === null) {
+                const highWater = readContext?.logicalHighWater ?? this._contentStore.getLogicalLength();
+                const read = async (/** @type {number} */ offset, /** @type {number} */ length) => {
+                    metadataState.lastRead = {offset, length};
+                    const bytes = await (readContext ?? this._contentStore).readSlice(offset, length);
+                    this._assertReadGeneration(generation);
+                    if (!(bytes instanceof Uint8Array)) { throw new Error('Legacy frame metadata is temporarily unavailable'); }
+                    return bytes;
+                };
+                try {
+                    let cursor = await beginZstdFrameInspection(read, contentOffset, highWater);
+                    if ((cursor.decodedLength ?? cursor.windowSize) > LEGACY_DECODE_MAX_BYTES) {
+                        throw new TermContentReadError('temporarilyUnavailable', 'Legacy term content frame exceeds decoded resource admission');
+                    }
+                    let sourceStoredLength = null;
+                    while (cursor.blocks < LEGACY_INSPECTION_MAX_BLOCKS && sourceStoredLength === null) {
+                        const result = await advanceZstdFrameInspection(read, cursor, {maxBlockHeaders: 256});
+                        cursor = result.cursor;
+                        sourceStoredLength = result.sourceStoredLength;
+                    }
+                    if (sourceStoredLength === null || sourceStoredLength > LEGACY_DECODE_MAX_BYTES + 1024 * 1024) {
+                        throw new TermContentReadError('temporarilyUnavailable', 'Legacy term content frame exceeds metadata resource admission');
+                    }
+                    identity = {...query, sourceStoredLength, expectedDecodedLength: null, originalEnvelope: 'none'};
+                } catch (error) {
+                    if (error instanceof ZstdFrameInspectionError) { throw new TermContentReadError('corrupt', error.message); }
+                    throw error;
+                }
+            }
+            const bytes = await this._getOrLoadFrame(cacheKey, identity, {contentOffset, contentLength, contentDictName}, readContext);
+            if (bytes === null) { throw new TermContentReadError('temporarilyUnavailable', 'Legacy term content frame could not be loaded'); }
+            return bytes;
+        } catch (error) {
+            const failure = this._createReadFailure(error);
+            if (allowSourceRetry && failure.status === 'corrupt' && readContext !== null && initialOverride === null) {
+                const current = this._readContextProvider?.() ?? null;
+                try {
+                    if (current !== null && current.rootKey !== readContext.rootKey) {
+                        let changed = false;
+                        const layoutId = /** @type {unknown} */ (error instanceof Error ? Reflect.get(error, 'layoutId') : void 0);
+                        if (!overrideKnown && typeof layoutId === 'string' && readContext.isCurrentFrameLayout) {
+                            changed = !await readContext.isCurrentFrameLayout({...query,
+                                sourceStoredLength: 1,
+                                expectedDecodedLength: null,
+                                originalEnvelope: 'none'}, layoutId);
+                        } else if (overrideKnown && initialOverride === null && current.findFrameOverride) {
+                            const replacement = await current.findFrameOverride(query);
+                            changed = replacement !== null;
+                            if (!changed && metadataState.lastRead !== null && readContext.isCurrentRange) {
+                                changed = !await readContext.isCurrentRange(metadataState.lastRead.offset, metadataState.lastRead.length);
+                            }
+                        }
+                        this._assertReadGeneration(generation);
+                        if (changed) {
+                            return await this._readLegacyEntry(contentOffset, contentLength, contentDictName, current, false);
+                        }
+                    }
+                } finally { current?.release(); }
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * @param {TermContentFrameIdentity} identity
+     * @returns {string}
+     */
+    _createFrameCacheKey(identity) {
+        return JSON.stringify(['frame',
+            identity.kind,
+            identity.logicalOffset,
+            identity.recordLength,
+            identity.sourceStoredLength,
+            identity.originalCodecId,
+            identity.expectedDecodedLength,
+            identity.originalEnvelope]);
+    }
+
+    /**
+     * @returns {{status: 'temporarilyUnavailable', reason: string}}
+     */
     _createInvalidatedReadFailure() {
         return {status: 'temporarilyUnavailable', reason: 'Term content changed during read'};
     }
@@ -578,97 +874,172 @@ export class TermContentBlockStore {
      * @param {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number}} reference
      * @param {string|null} compressionDictName
      * @param {{contentOffset: number, contentLength: number, contentDictName: string}} context
+     * @param {TermContentReadContext|null} [readContext]
      * @returns {Promise<Uint8Array|null>}
      */
-    async _getOrLoadBlock(cacheKey, reference, compressionDictName, context) {
-        const pending = this._inFlightBlocks.get(cacheKey);
-        if (typeof pending !== 'undefined') {
-            const block = await pending;
-            return block !== null && block.byteLength === reference.blockUncompressedLength ? block : null;
-        }
-        const load = this._loadBlock(cacheKey, reference, compressionDictName, context);
-        this._inFlightBlocks.set(cacheKey, load);
+    async _getOrLoadBlock(cacheKey, reference, compressionDictName, context, readContext = null) {
+        return await this._getOrLoadFrame(cacheKey, {
+            kind: 'block',
+            logicalOffset: reference.blockOffset,
+            recordLength: reference.blockCompressedLength,
+            sourceStoredLength: reference.blockCompressedLength,
+            originalCodecId: getLegacyTermContentZstdCodecId(compressionDictName),
+            expectedDecodedLength: reference.blockUncompressedLength,
+            originalEnvelope: 'mbc2',
+        }, context, readContext);
+    }
+
+    /**
+     * @param {string} cacheKey
+     * @param {TermContentFrameIdentity} identity
+     * @param {{contentOffset: number, contentLength: number, contentDictName: string}} context
+     * @param {TermContentReadContext|null} readContext
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async _getOrLoadFrame(cacheKey, identity, context, readContext) {
+        const cached = this._cache.get(cacheKey);
+        if (typeof cached !== 'undefined') { return cached; }
+        const pendingKey = readContext === null ?
+            `legacy:${cacheKey}` :
+            (typeof readContext.rootKey === 'string' ? `root:${readContext.rootKey}:${cacheKey}` : Symbol(cacheKey));
+        const pending = this._inFlightBlocks.get(pendingKey);
+        if (typeof pending !== 'undefined') { return await pending; }
+        const loaderContext = readContext?.fork() ?? null;
+        const load = this._loadFrame(cacheKey, identity, context, loaderContext).finally(() => { loaderContext?.release(); });
+        this._inFlightBlocks.set(pendingKey, load);
         try {
             return await load;
         } finally {
-            if (this._inFlightBlocks.get(cacheKey) === load) {
-                this._inFlightBlocks.delete(cacheKey);
-            }
+            if (this._inFlightBlocks.get(pendingKey) === load) { this._inFlightBlocks.delete(pendingKey); }
         }
     }
 
     /**
      * @param {string} cacheKey
-     * @param {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number}} reference
-     * @param {string|null} compressionDictName
+     * @param {TermContentFrameIdentity} identity
      * @param {{contentOffset: number, contentLength: number, contentDictName: string}} context
+     * @param {TermContentReadContext|null} [readContext]
+     * @param {boolean} [allowSourceRetry]
      * @returns {Promise<Uint8Array|null>}
      */
-    async _loadBlock(cacheKey, reference, compressionDictName, context) {
+    async _loadFrame(cacheKey, identity, context, readContext = null, allowSourceRetry = true) {
         const generation = this._cacheGeneration;
-        const storedBlock = await this._contentStore.readSlice(reference.blockOffset, reference.blockCompressedLength);
-        // Check before integrity validation or publication: these bytes may belong
-        // to a removed import whose offsets have already been reused.
-        this._assertReadGeneration(generation);
-        if (!(storedBlock instanceof Uint8Array)) {
-            throw new TermContentReadError('temporarilyUnavailable', 'Compressed term content block could not be read from OPFS');
-        }
-        if (
-            storedBlock.byteLength <= TERM_CONTENT_BLOCK_ENVELOPE_BYTES ||
-            !TERM_CONTENT_BLOCK_ENVELOPE_MAGIC.every((value, index) => storedBlock[index] === value)
-        ) {
-            throw new TermContentReadError('corrupt', 'Term content block checksum envelope is invalid');
-        }
-        const storedBlockView = new DataView(storedBlock.buffer, storedBlock.byteOffset, storedBlock.byteLength);
-        const expectedHash1 = storedBlockView.getUint32(4, true);
-        const expectedHash2 = storedBlockView.getUint32(8, true);
-        const compressed = storedBlock.subarray(TERM_CONTENT_BLOCK_ENVELOPE_BYTES);
-        const [actualHash1, actualHash2] = hashTermEntryContentBytesPair(compressed);
-        if (actualHash1 !== expectedHash1 || actualHash2 !== expectedHash2) {
-            this._recordError('term-content-block-checksum-mismatch', {
-                contentDictName: context.contentDictName,
-                blockOffset: reference.blockOffset,
-                expectedHash1,
-                expectedHash2,
-                actualHash1,
-                actualHash2,
-            });
-            throw new TermContentReadError('corrupt', 'Term content block checksum does not match its stored payload');
-        }
-        /** @type {Uint8Array} */
-        let block;
+        /** @type {TermContentResolvedFrame|null} */
+        let onlineFrame = null;
         try {
-            // The decoder returns owned bytes that remain safe to cache.
-            block = decompressTermContentZstd(compressed, compressionDictName, {
-                defaultHeapSize: reference.blockUncompressedLength,
-                maxOutputSize: reference.blockUncompressedLength,
-            });
+            onlineFrame = readContext !== null ?
+await readContext.resolveFrame(identity) :
+                (this._onlineFrameResolver === null ? null : await this._onlineFrameResolver(identity));
+            this._assertReadGeneration(generation);
+            const storedBlock = onlineFrame?.bytes ?? await (readContext ?? this._contentStore).readSlice(identity.logicalOffset, identity.sourceStoredLength);
+            // Check before integrity validation or publication: these bytes may belong
+            // to a removed import whose offsets have already been reused.
+            this._assertReadGeneration(generation);
+            if (!(storedBlock instanceof Uint8Array)) {
+                throw new TermContentReadError('temporarilyUnavailable', 'Compressed term content block could not be read from OPFS');
+            }
+            const storedEnvelope = onlineFrame?.envelope ?? identity.originalEnvelope;
+            if (storedEnvelope === 'mbc2' && (storedBlock.byteLength <= TERM_CONTENT_BLOCK_ENVELOPE_BYTES ||
+            !TERM_CONTENT_BLOCK_ENVELOPE_MAGIC.every((value, index) => storedBlock[index] === value))) {
+                throw new TermContentReadError('corrupt', 'Term content block checksum envelope is invalid');
+            }
+            const compressed = storedEnvelope === 'mbc2' ? storedBlock.subarray(TERM_CONTENT_BLOCK_ENVELOPE_BYTES) : storedBlock;
+            if (storedEnvelope === 'mbc2') {
+                const storedBlockView = new DataView(storedBlock.buffer, storedBlock.byteOffset, storedBlock.byteLength);
+                const expectedHash1 = storedBlockView.getUint32(4, true);
+                const expectedHash2 = storedBlockView.getUint32(8, true);
+                const [actualHash1, actualHash2] = hashTermEntryContentBytesPair(compressed);
+                if (actualHash1 !== expectedHash1 || actualHash2 !== expectedHash2) {
+                    this._recordError('term-content-block-checksum-mismatch', {
+                        contentDictName: context.contentDictName,
+                        blockOffset: identity.logicalOffset,
+                        expectedHash1,
+                        expectedHash2,
+                        actualHash1,
+                        actualHash2,
+                    });
+                    throw new TermContentReadError('corrupt', 'Term content block checksum does not match its stored payload');
+                }
+            }
+            const decodedLength = onlineFrame?.decodedLength ?? identity.expectedDecodedLength;
+            if (identity.kind === 'legacy-entry' && decodedLength !== null && decodedLength > LEGACY_DECODE_MAX_BYTES) {
+                throw new TermContentReadError('temporarilyUnavailable', 'Legacy term content frame exceeds decoded resource admission');
+            }
+            if (identity.expectedDecodedLength !== null && decodedLength !== identity.expectedDecodedLength) {
+                throw new TermContentReadError('corrupt', 'Term content frame decoded length differs from its identity');
+            }
+            /** @type {Uint8Array} */
+            let block;
+            try {
+                // The decoder returns owned bytes that remain safe to cache.
+                const codecId = onlineFrame === null ? identity.originalCodecId : onlineFrame.codecId;
+                /** @type {NonNullable<Parameters<typeof decompressTermContentZstd>[2]>} */
+                const options = {
+                    defaultHeapSize: decodedLength ?? Math.min(identity.recordLength, LEGACY_DECODE_MAX_BYTES),
+                    maxOutputSize: decodedLength ?? LEGACY_DECODE_MAX_BYTES,
+                };
+                if (onlineFrame !== null && codecId !== null && codecId !== 'jmdict') {
+                    options.codecSource = 'immutable-layout';
+                }
+                block = decompressTermContentZstd(compressed, codecId, options);
+                if (!(block instanceof Uint8Array)) { throw new TypeError('Zstd decoder returned non-byte data'); }
+            } catch (error) {
+                this._recordError('term-content-block-decompress-error', {
+                    ...context,
+                    blockOffset: identity.logicalOffset,
+                    blockCompressedLength: identity.sourceStoredLength,
+                    blockUncompressedLength: identity.expectedDecodedLength,
+                    compressedPrefix: [...compressed.subarray(0, 8)],
+                    error: `${error}`,
+                });
+                throw new TermContentReadError(
+                    isZstdResourceError(error) || (identity.kind === 'legacy-entry' && decodedLength === null &&
+                    error instanceof RangeError && /^Zstd frame output size [0-9]+ exceeds configured output limit 134217728$/.test(error.message)) ?
+                        'temporarilyUnavailable' :
+'corrupt',
+                    identity.kind === 'shared-glossary' ? 'Shared glossary decompression failed' : 'Term content block decompression failed',
+                    {cause: error},
+                );
+            }
+            if (decodedLength !== null && block.byteLength !== decodedLength) {
+                this._recordError('term-content-block-length-mismatch', {
+                    contentDictName: context.contentDictName,
+                    blockOffset: identity.logicalOffset,
+                    expectedLength: decodedLength,
+                    actualLength: block.byteLength,
+                });
+                throw new TermContentReadError('corrupt', identity.kind === 'shared-glossary' ?
+                    `Shared glossary decoded length mismatch: expected ${decodedLength}, got ${block.byteLength}` :
+                    'Term content block decoded length does not match its reference');
+            }
+            this._lastError = null;
+            this._cache.set(cacheKey, block);
+            return block;
         } catch (error) {
-            this._recordError('term-content-block-decompress-error', {
-                ...context,
-                blockOffset: reference.blockOffset,
-                blockCompressedLength: reference.blockCompressedLength,
-                blockUncompressedLength: reference.blockUncompressedLength,
-                compressedPrefix: [...compressed.subarray(0, 8)],
-                error: `${error}`,
-            });
-            throw new TermContentReadError(
-                isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
-                'Term content block decompression failed',
-            );
+            const failure = this._createReadFailure(error);
+            const physicalKey = /** @type {unknown} */ (onlineFrame?.physicalKey ?? (error instanceof Error ? Reflect.get(error, 'physicalKey') : void 0));
+            const layoutId = /** @type {unknown} */ (error instanceof Error ? Reflect.get(error, 'layoutId') : void 0);
+            let changed = false;
+            if (allowSourceRetry && failure.status === 'corrupt' && readContext !== null) {
+                if (typeof physicalKey === 'string' && readContext.isCurrentFrame) {
+                    changed = !await readContext.isCurrentFrame(identity, physicalKey);
+                } else if (typeof layoutId === 'string' && readContext.isCurrentFrameLayout) {
+                    changed = !await readContext.isCurrentFrameLayout(identity, layoutId);
+                }
+            }
+            this._assertReadGeneration(generation);
+            if (changed) {
+                const currentContext = this._readContextProvider?.() ?? null;
+                if (currentContext !== null) {
+                    try {
+                        return await this._loadFrame(cacheKey, identity, context, currentContext, false);
+                    } finally { currentContext.release(); }
+                }
+            }
+            throw error;
+        } finally {
+            onlineFrame?.release();
         }
-        if (block.byteLength !== reference.blockUncompressedLength) {
-            this._recordError('term-content-block-length-mismatch', {
-                contentDictName: context.contentDictName,
-                blockOffset: reference.blockOffset,
-                expectedLength: reference.blockUncompressedLength,
-                actualLength: block.byteLength,
-            });
-            throw new TermContentReadError('corrupt', 'Term content block decoded length does not match its reference');
-        }
-        this._lastError = null;
-        this._cache.set(cacheKey, block);
-        return block;
     }
 
     /**

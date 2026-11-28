@@ -17,6 +17,7 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
+import {TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
@@ -25,9 +26,9 @@ const {decoder} = vi.hoisted(() => ({
     decoder: vi.fn((/** @type {Uint8Array} */ bytes) => /** @type {unknown} */ (bytes)),
 }));
 
-vi.mock('../ext/lib/zstd-wasm.js', async (importOriginal) => ({
+vi.mock('../ext/js/dictionary/zstd-term-content.js', async (importOriginal) => ({
     ...await importOriginal(),
-    decompress: decoder,
+    decompressTermContentZstd: decoder,
 }));
 
 const inflate = /** @type {(this: DictionaryDatabase, dictionary: string) => Promise<Uint8Array>} */ (
@@ -40,7 +41,9 @@ const matchTitle = /** @type {(this: DictionaryController, title: unknown) => st
     Reflect.get(DictionaryController.prototype, '_getDictionaryTaskMatchTitle')
 );
 
-/** @returns {DictionaryDatabase} */
+/**
+ * @returns {DictionaryDatabase}
+ */
 function glossaryDatabase() {
     const database = new DictionaryDatabase();
     Reflect.set(database, '_getSharedGlossaryArtifactMeta', () => ({
@@ -49,9 +52,9 @@ function glossaryDatabase() {
         uncompressedLength: 3,
         contentDictName: RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
     }));
-    Reflect.set(database, '_termContentBlockStore', {
-        readDetailed: vi.fn().mockResolvedValue({status: 'ok', bytes: new Uint8Array([1, 2, 3])}),
-    });
+    const content = Reflect.get(database, '_termContentStore');
+    vi.spyOn(content, 'readSlice').mockResolvedValue(new Uint8Array([1, 2, 3]));
+    Reflect.set(database, '_termContentBlockStore', new TermContentBlockStore(content));
     return database;
 }
 

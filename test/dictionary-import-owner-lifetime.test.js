@@ -7,7 +7,9 @@ import {afterEach, expect, test, vi} from 'vitest';
 import {API} from '../ext/js/comm/api.js';
 import {Backend} from '../ext/js/background/backend.js';
 
-/** @returns {{addListener: (callback: (...args: unknown[]) => void) => void, removeListener: (callback: (...args: unknown[]) => void) => void, emit: (...args: unknown[]) => void}} */
+/**
+ * @returns {{addListener: (callback: (...args: unknown[]) => void) => void, removeListener: (callback: (...args: unknown[]) => void) => void, emit: (...args: unknown[]) => void}}
+ */
 function browserEvent() {
     /** @type {Set<(...args: unknown[]) => void>} */
     const listeners = new Set();
@@ -15,6 +17,17 @@ function browserEvent() {
         addListener(callback) { listeners.add(callback); },
         removeListener(callback) { listeners.delete(callback); },
         emit(...args) { for (const callback of listeners) { callback(...args); } },
+    };
+}
+
+/**
+ * @param {import('vitest').Mock<(message: {action?: string}) => Promise<unknown>>} sendMessagePromise
+ * @returns {(message: {action?: string}) => Promise<unknown>}
+ */
+function withMaintenanceHoldAck(sendMessagePromise) {
+    return async (/** @type {{action?: string}} */ message) => {
+        if (message.action === 'setTermContentOptimizationHoldOffscreen') { return; }
+        return await Reflect.apply(sendMessagePromise, undefined, [message]);
     };
 }
 
@@ -26,9 +39,20 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
+/** @returns {Record<string, import('core').SafeAny>} */
 function fixture() {
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
-    const cancel = vi.fn(async () => {});
+    const cancel = /** @type {import('vitest').Mock<(message: {action?: string}) => Promise<void>>} */
+        (/** @type {unknown} */ (vi.fn(async () => {})));
+    const maintenanceHold = vi.fn();
+    const sendMessagePromise = /** @type {import('vitest').Mock<(message: {action?: string}) => Promise<void>>} */
+        (/** @type {unknown} */ (vi.fn(async (/** @type {{action?: string}} */ message) => {
+            if (message.action === 'setTermContentOptimizationHoldOffscreen') {
+                await maintenanceHold(message);
+                return;
+            }
+            return Reflect.apply(cancel, undefined, [message]);
+        })));
     const refresh = vi.fn(async () => {});
     const notifications = vi.fn();
     Object.assign(backend, {
@@ -40,7 +64,7 @@ function fixture() {
         _ownedDictionaryImports: new Map(),
         _dictionaryImportOwnerConnections: new Map(),
         _orphanedDictionaryImportOwners: new Set(),
-        _offscreen: {sendMessagePromise: cancel},
+        _offscreen: {sendMessagePromise},
         _localDictionaryRuntime: null,
         _pendingDatabaseUpdatedNotifications: [],
         _deferredDictionaryRefreshDuringImport: false,
@@ -50,6 +74,9 @@ function fixture() {
         _refreshDictionaryDatabaseAfterUpdate: refresh,
         _clearDictionaryRefreshRetry: vi.fn(),
         _sendApplicationDatabaseUpdated: notifications,
+    });
+    Reflect.set(backend, '_setTermContentOptimizationHold', (ownerId, active) => {
+        maintenanceHold({action: 'setTermContentOptimizationHoldOffscreen', params: {ownerId, active}});
     });
     const connect = vi.fn((/** @type {{name: string}} */ {name}) => {
         const onClientMessage = browserEvent();
@@ -82,19 +109,24 @@ function fixture() {
         clients.push(api);
         return api;
     };
-    return {backend, client, connect, cancel, refresh, notifications};
+    return {backend, client, connect, cancel, maintenanceHold, refresh, notifications};
 }
 
 test('a browser connection acknowledges ownership and ordinary release closes it', async () => {
-    const {backend, client, connect, cancel, refresh} = fixture();
+    const {backend, client, connect, cancel, maintenanceHold, refresh} = fixture();
     const api = client();
     await Promise.all([api.setDictionaryImportMode(true, 'page-A'), api.setDictionaryImportMode(true, 'page-A')]);
     expect(connect).toHaveBeenCalledOnce();
     expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+    expect(maintenanceHold).toHaveBeenCalledExactlyOnceWith({
+        action: 'setTermContentOptimizationHoldOffscreen',
+        params: {ownerId: 'page-A', active: true},
+    });
     await api.setDictionaryImportMode(false, 'page-A');
     expect(backend._dictionaryImportOwners.size).toBe(0);
     expect(Reflect.get(backend, '_dictionaryImportOwnerConnections').size).toBe(0);
     expect(cancel).not.toHaveBeenCalled();
+    expect(maintenanceHold).toHaveBeenCalledTimes(2);
     expect(refresh).toHaveBeenCalledOnce();
 });
 
@@ -423,7 +455,7 @@ test.each(['offscreen', 'local'])('lost %s handoff acknowledgement reconciles af
         sending.resolve();
         await handoff.promise;
     });
-    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: cancel};
+    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: withMaintenanceHoldAck(cancel)};
     if (runtime === 'offscreen') {
         Reflect.set(backend, '_offscreen', messenger);
     } else {
@@ -529,7 +561,7 @@ test.each(['offscreen', 'local'])('lost %s handoff acknowledgement cannot discar
         entered.resolve();
         await acknowledge.promise;
     });
-    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: cancel};
+    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: withMaintenanceHoldAck(cancel)};
     Reflect.set(backend, runtime === 'offscreen' ? '_offscreen' : '_localDictionaryRuntime', messenger);
     if (runtime === 'local') { Reflect.set(backend, '_offscreen', null); }
     cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', workerGeneration: 'worker-A', state: 'running'}));
@@ -616,7 +648,7 @@ test.each([['offscreen', false], ['offscreen', true], ['local', false], ['local'
     await api.setDictionaryImportMode(true, 'page-A');
     if (runtime === 'local') {
         Reflect.set(backend, '_offscreen', null);
-        Reflect.set(backend, '_localDictionaryRuntime', {sendMessagePromise: cancel});
+        Reflect.set(backend, '_localDictionaryRuntime', {sendMessagePromise: withMaintenanceHoldAck(cancel)});
     }
     backend._registerDictionaryImportOwner('operation-A', 'page-A');
     const operation = backend._ownedDictionaryImports.get('operation-A');

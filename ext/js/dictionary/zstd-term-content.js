@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {getLegacyTermContentZstdCodecId} from './term-content-zstd-codec.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {
     compress,
@@ -38,6 +39,8 @@ let isInitialized = false;
 let initializePromise = null;
 /** @type {Uint8Array|null} */
 let jmdictDict = null;
+/** @type {Map<string, Uint8Array>} Persisted dictionary identities loaded by the sole storage owner. */
+const trainedDictionaryByName = new Map();
 /** @type {number|null} */
 let cctx = null;
 /** @type {number|null} */
@@ -52,6 +55,55 @@ const COMPRESSION_WORKER_READY_TIMEOUT_MS = 30_000;
 const COMPRESSION_JOB_TIMEOUT_MS = 60_000;
 const JMDICT_COMPRESSION_LEVEL = -1;
 const EMPTY_COMPRESSION_DICTIONARY = new Uint8Array(0);
+
+export class ZstdDictionaryUnavailableError extends Error {
+    /**
+     * @param {string} message
+     */
+    constructor(message) {
+        super(message);
+        /**
+         *
+         */
+        this.name = 'ZstdDictionaryUnavailableError';
+    }
+}
+
+/**
+ * Registers a privately owned, SHA-verified dictionary supplied by the
+ * database codec loader. Registration is intentionally separate from lookup
+ * module initialization and never fetches or prewarms import workers.
+ * @param {string} name
+ * @param {Uint8Array} dictionary
+ * @throws {TypeError} If the verified dictionary identity or size is invalid.
+ */
+export function registerTermContentZstdDictionary(name, dictionary) {
+    if (!/^manabitan-zstd-[a-f0-9]{64}$/.test(name) || !(dictionary instanceof Uint8Array) ||
+    dictionary.byteLength < 8 || dictionary.byteLength > 112640) {
+        throw new TypeError('Invalid trained Zstd dictionary identity or size');
+    }
+    trainedDictionaryByName.set(name, new Uint8Array(dictionary));
+}
+
+/**
+ * @param {string} name
+ */
+export function unregisterTermContentZstdDictionary(name) {
+    trainedDictionaryByName.delete(name);
+}
+
+/**
+ * @param {string} name
+ * @returns {Uint8Array}
+ * @throws {ZstdDictionaryUnavailableError} If the codec loader has not registered its bytes.
+ */
+function getTrainedDictionary(name) {
+    const dictionary = trainedDictionaryByName.get(name);
+    if (typeof dictionary === 'undefined') {
+        throw new ZstdDictionaryUnavailableError(`Trained Zstd dictionary is not ready: ${name}`);
+    }
+    return dictionary;
+}
 
 /**
  * @param {unknown} value
@@ -93,7 +145,9 @@ function validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, b
 }
 
 export class TermContentCompressionPool {
-    /** @param {Worker[]} workers */
+    /**
+     * @param {Worker[]} workers
+     */
     constructor(workers) {
         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
         /** @type {Worker[]} */
@@ -115,7 +169,9 @@ export class TermContentCompressionPool {
         }
     }
 
-    /** @returns {boolean} */
+    /**
+     * @returns {boolean}
+     */
     get failed() { return this._failed; }
 
     /**
@@ -400,7 +456,9 @@ export class TermContentCompressionPool {
         this._fail(new Error('Term content compression pool closed'));
     }
 
-    /** @param {MessageEvent} event */
+    /**
+     * @param {MessageEvent} event
+     */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
         const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
@@ -438,7 +496,9 @@ export class TermContentCompressionPool {
         });
     }
 
-    /** @param {Error} error */
+    /**
+     * @param {Error} error
+     */
     _fail(error) {
         if (this._failed) { return; }
         this._failed = true;
@@ -771,7 +831,9 @@ function discardCompressionPool(pool) {
     if (compressionPool === pool) { compressionPool = null; }
 }
 
-/** @returns {Promise<TermContentCompressionPool|null>} */
+/**
+ * @returns {Promise<TermContentCompressionPool|null>}
+ */
 async function initializeCompressionPool() {
     if (compressionPool !== null && !compressionPool.failed) { return compressionPool; }
     if (compressionPoolPromise !== null) { return await compressionPoolPromise; }
@@ -827,7 +889,9 @@ function waitForCompressionWorkerReady(worker, signal) {
             cleanup();
             reject(new Error(`Compression worker initialization timed out after ${COMPRESSION_WORKER_READY_TIMEOUT_MS}ms`));
         }, COMPRESSION_WORKER_READY_TIMEOUT_MS);
-        /** @param {MessageEvent<unknown>} event */
+        /**
+         * @param {MessageEvent<unknown>} event
+         */
         const onMessage = (event) => {
             const rawData = /** @type {unknown} */ (event.data);
             const data = /** @type {{type?: unknown, error?: unknown}} */ (rawData);
@@ -839,7 +903,9 @@ function waitForCompressionWorkerReady(worker, signal) {
                 reject(new Error(typeof data.error === 'string' ? data.error : 'Compression worker initialization failed'));
             }
         };
-        /** @param {ErrorEvent} event */
+        /**
+         * @param {ErrorEvent} event
+         */
         const onError = (event) => {
             cleanup();
             reject(new Error(event.message || 'Compression worker initialization failed'));
@@ -991,7 +1057,7 @@ export function finishWrappedTermContentZstdSpans(prepared) {
 /**
  * @param {Uint8Array} content
  * @param {string|null} dictName
- * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number, codecSource?: 'immutable-layout'}} [options]
  * @returns {Uint8Array}
  * @throws {Error}
  */
@@ -1007,9 +1073,14 @@ export function decompressTermContentZstd(content, dictName, options = {}) {
         }
         dctx = context
     }
-    // Generic frames can use the existing decoder without allocating another
-    // native context. A null dictionary also clears any preceding dictionary.
-    return decompressUsingDict(dctx, content, dictName === 'jmdict' ? jmdictDict : null, options)
+    // A record selector remains opaque even if its text equals a registered
+    // codec ID. Only the resolved immutable layout may choose that dictionary.
+    const codecId = options.codecSource === 'immutable-layout' ? dictName : getLegacyTermContentZstdCodecId(dictName)
+    const dictionary = codecId === 'jmdict' ?
+jmdictDict :
+        (codecId === null ? null : getTrainedDictionary(codecId))
+    // A null dictionary clears any preceding dictionary in the shared context.
+    return decompressUsingDict(dctx, content, dictionary, options)
     /* eslint-enable @stylistic/semi */
 }
 

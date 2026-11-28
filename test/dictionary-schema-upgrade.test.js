@@ -83,6 +83,7 @@ describe('dictionary schema upgrade inventory recovery', () => {
         await database._runSchemaMigrations();
         expect(connection.selectValue('PRAGMA user_version')).toBe(10);
         expect(contentReset).toHaveBeenCalledTimes(5);
+        expect(contentReset).toHaveBeenCalledWith({purgeImmutable: true});
         expect(recordReset).toHaveBeenCalledTimes(5);
         const {storageImportOperationId: _receipt, ...retainedSummary} = summary;
         expect(JSON.parse(String(connection.selectValue('SELECT summaryJson FROM dictionaries')))).toEqual(retainedSummary);
@@ -241,7 +242,7 @@ test('startup pruning preserves migrated dictionary aliases, ordering, and profi
 });
 
 
-test.each([12, -1])('refuses unsupported installed schema %s without resetting dictionaries', async (version) => {
+test.each([13, -1])('refuses unsupported installed schema %s without resetting dictionaries', async (version) => {
     const {database, connection, summary, contentReset, recordReset} = createDatabase();
     connection.exec(`PRAGMA user_version = ${version}`);
     await expect(database._runSchemaMigrations()).rejects.toThrow(/schema.*(?:newer|invalid)/iu);

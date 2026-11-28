@@ -19,6 +19,7 @@ import {parseJson} from '../core/json.js';
 
 const FILE_NAME = 'manabitan-dictionary-import-journal.json';
 const JOURNAL_VERSION = 1;
+const ARENA_IDENTIFIER = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/;
 const MAX_CHECKPOINT_FILES = 100000;
 
 export class DictionaryImportJournal {
@@ -118,7 +119,9 @@ export class DictionaryImportJournal {
         return this._runExclusive(async () => { await this._clear(); });
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _clear() {
         const root = await this._getRoot();
         if (root === null) {
@@ -168,15 +171,32 @@ export class DictionaryImportJournal {
         if (typeof value !== 'object' || value === null) { return false; }
         const record = /** @type {Record<string, unknown>} */ (value);
         return (
-            record.version === JOURNAL_VERSION &&
+            (record.version === JOURNAL_VERSION || record.version === 2) &&
             typeof record.sessionId === 'string' &&
             record.sessionId.length > 0 &&
             record.sessionId.length <= 256 &&
             Number.isSafeInteger(record.createdAt) &&
             /** @type {number} */ (record.createdAt) >= 0 &&
-            this._isCheckpoint(record.contentCheckpoint, 'segments') &&
+            this._isContentCheckpoint(record.contentCheckpoint) &&
+            (record.version !== 2 || /** @type {Record<string, unknown>} */ (record.contentCheckpoint).version === 2) &&
             this._isCheckpoint(record.recordCheckpoint, 'shards')
         );
+    }
+
+    /**
+     * @param {unknown} value
+     * @returns {boolean}
+     */
+    _isContentCheckpoint(value) {
+        if (typeof value !== 'object' || value === null) { return false; }
+        const checkpoint = /** @type {Record<string, unknown>} */ (value);
+        if (checkpoint.version !== 2) {
+            return (typeof checkpoint.version === 'undefined' || checkpoint.version === 1) && this._isCheckpoint(value, 'segments');
+        }
+        return Number.isSafeInteger(checkpoint.storageEpoch) && /** @type {number} */ (checkpoint.storageEpoch) >= 0 &&
+        Number.isSafeInteger(checkpoint.logicalHighWater) && /** @type {number} */ (checkpoint.logicalHighWater) >= 0 &&
+        typeof checkpoint.arenaNamespace === 'string' && checkpoint.arenaNamespace.length <= 96 && ARENA_IDENTIFIER.test(checkpoint.arenaNamespace) &&
+        Array.isArray(checkpoint.segments) && checkpoint.segments.length === 0;
     }
 
     /**
