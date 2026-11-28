@@ -1,0 +1,1010 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "scope": "Exact native states from production JMdict grouping and baseline dedup/publication; deterministic surrogate persistence offsets do not enter the native arena. Excludes compression, records, OPFS and import timing.",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "sourceFiles": [
+    {
+      "path": "package-lock.json",
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    {
+      "path": "test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 613153,
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210111,
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "bytes": 16935,
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-source-pipeline.js",
+      "bytes": 47175,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "bytes": 19536,
+      "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-layout.js",
+      "bytes": 1827,
+      "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-metadata-arena.js",
+      "bytes": 5580,
+      "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "bytes": 6853,
+      "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+    },
+    {
+      "path": "test/fixtures/parser-settlement/worker-node.mjs",
+      "bytes": 803,
+      "sha256": "cc04b9bf7b875c7b49b4047823b6fb638598352620994c78dd88776b0752ad5c"
+    }
+  ],
+  "captureScriptSha256": "2811677fe1ebf6a518b1600bb129fbd830b0241e8905d0f220b38ac252f704df",
+  "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "nodeVersion": "v22.22.0",
+  "fixture": {
+    "dictionary": "jmdict",
+    "cacheFile": "JMdict.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "bytes": 15645766,
+    "rows": 528299,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "hardwareConcurrency": 4,
+  "deviceMemoryGiB": 8,
+  "parserWorkers": 3,
+  "sourceRows": 528299,
+  "totals": {
+    "uniqueRows": 366030,
+    "pendingRows": 362032,
+    "exactRows": 3998,
+    "recentHits": 3998
+  },
+  "metadataDigest": "bb373ee0186ce646887922256e1fe5d0f4f7c4990bbbbd35ac13d3d07755656d",
+  "compressedTotal": 63654684,
+  "groups": [
+    {
+      "group": 1,
+      "rowCount": 50000,
+      "uniqueRows": 34951,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 1,
+        "files": [
+          "term_bank_1.json",
+          "term_bank_2.json",
+          "term_bank_3.json",
+          "term_bank_4.json",
+          "term_bank_5.json"
+        ],
+        "bytes": [
+          232927,
+          201497,
+          204746,
+          200041,
+          261354
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        0,
+        50000,
+        0,
+        34951,
+        0,
+        0,
+        0,
+        8486982,
+        0,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-01.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "6d779fbc6f67b1a48e2ca09ab6f1ba77c134da7beb79a2047088ae82dbf2ec84",
+        "compressedBytes": 765856,
+        "compressedSha256": "d1f39188dcb74cedf027c519f1c6f45c835dc904bfa4b1177772f2034843c6da"
+      },
+      "afterSha256": "32f75fdff1a78f64d3c8cb54b440a967dc0a2f535ebdbb11d01747e7ab5ce2bf",
+      "afterHeader": [
+        34951,
+        34951,
+        34951,
+        0,
+        0,
+        34951,
+        0
+      ],
+      "afterXor": {
+        "path": "group-01.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "ce60174332f63ba2289ad23233e124e0e74048011874f4919c39756560df7703",
+        "compressedBytes": 1431005,
+        "compressedSha256": "aac6c2abc4cc2292d8e86ab70d08ed0206a13099a009c774e9342b9ff1d041dc"
+      },
+      "dedup": {
+        "pending": 34951,
+        "exact": 0,
+        "recent": 0
+      }
+    },
+    {
+      "group": 2,
+      "rowCount": 40000,
+      "uniqueRows": 32856,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 2,
+        "files": [
+          "term_bank_6.json",
+          "term_bank_7.json",
+          "term_bank_8.json",
+          "term_bank_9.json"
+        ],
+        "bytes": [
+          285667,
+          290985,
+          286576,
+          290973
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        34951,
+        40000,
+        0,
+        32856,
+        0,
+        0,
+        0,
+        9427894,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-02.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "03f32268126a2d4f18a23f4ad9467471878754364ee545a0400297ad548188be",
+        "compressedBytes": 2246983,
+        "compressedSha256": "0365770cd20065b085a3e065599e92cc1d25c7af8836c447f9d8866610b84152"
+      },
+      "afterSha256": "e32fb761b5dd036513194cbaab649cbd9d15c073c64fda5b30e636039bb4bcda",
+      "afterHeader": [
+        32739,
+        32856,
+        32739,
+        117,
+        0,
+        67690,
+        0
+      ],
+      "afterXor": {
+        "path": "group-02.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "8e4d0e7f3894372d36aca63eee29ebb147d7cd34c3249aa2777ffa01bfdb3749",
+        "compressedBytes": 1142079,
+        "compressedSha256": "546b5e0ed39a866717ad1d6b18fb09d445c26fff2237df8456309aa49e7fbd25"
+      },
+      "dedup": {
+        "pending": 32739,
+        "exact": 117,
+        "recent": 117
+      }
+    },
+    {
+      "group": 3,
+      "rowCount": 40000,
+      "uniqueRows": 32421,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 3,
+        "files": [
+          "term_bank_10.json",
+          "term_bank_11.json",
+          "term_bank_12.json",
+          "term_bank_13.json"
+        ],
+        "bytes": [
+          285278,
+          294349,
+          288324,
+          293356
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        67690,
+        40000,
+        0,
+        32421,
+        0,
+        0,
+        0,
+        9272798,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-03.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "8289d0d21aa66fd615655d1cc45923863f1d1ae76fef6d49397ef9db03596cb1",
+        "compressedBytes": 2762201,
+        "compressedSha256": "38287c008a1f5bd6d81164da731b0b439595b33018a8f9314a58b042fcc5a25b"
+      },
+      "afterSha256": "200f7f7c2f847fa25a023c26d9a93b8104b20e0fc552df2a8565319e1b0d1ccf",
+      "afterHeader": [
+        32256,
+        32421,
+        32256,
+        165,
+        0,
+        99946,
+        0
+      ],
+      "afterXor": {
+        "path": "group-03.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "7e5bb08d6ba99bdf5d1091f0be31a4a6d57ea006ab3f40f83a4633dae62fc090",
+        "compressedBytes": 1104231,
+        "compressedSha256": "2b64a5a505fdf80c3f1bf7f12c30dca5546976aebe53b20de28359261575ee3a"
+      },
+      "dedup": {
+        "pending": 32256,
+        "exact": 165,
+        "recent": 165
+      }
+    },
+    {
+      "group": 4,
+      "rowCount": 40000,
+      "uniqueRows": 28895,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 4,
+        "files": [
+          "term_bank_14.json",
+          "term_bank_15.json",
+          "term_bank_16.json",
+          "term_bank_17.json"
+        ],
+        "bytes": [
+          294296,
+          249827,
+          219292,
+          259297
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        99946,
+        40000,
+        0,
+        28895,
+        0,
+        0,
+        0,
+        8619220,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-04.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "d128a62fecd5e0f97b8565737fa26dcb843a1829ba75f1d0474a350f9b620527",
+        "compressedBytes": 3220227,
+        "compressedSha256": "e90b892efe3157cbed330687247df3c8fc4c4bf9a37e71258df01e01fb25cf6e"
+      },
+      "afterSha256": "6999ba91efbd4ea0409bf157f532069fee6fd36be966f279b934ec988914c02e",
+      "afterHeader": [
+        28758,
+        28895,
+        28758,
+        137,
+        0,
+        128704,
+        0
+      ],
+      "afterXor": {
+        "path": "group-04.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "e30b8b8cd6e6335adfcd2308ed0d038ab552ebf04f831e158fa6f798481a74c5",
+        "compressedBytes": 984255,
+        "compressedSha256": "aa6cdc84004fc50d2ac9182f42a4a671df5396a8f5f47323d97c18931b71388f"
+      },
+      "dedup": {
+        "pending": 28758,
+        "exact": 137,
+        "recent": 137
+      }
+    },
+    {
+      "group": 5,
+      "rowCount": 50000,
+      "uniqueRows": 34677,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 5,
+        "files": [
+          "term_bank_18.json",
+          "term_bank_19.json",
+          "term_bank_20.json",
+          "term_bank_21.json",
+          "term_bank_22.json"
+        ],
+        "bytes": [
+          283040,
+          278583,
+          286687,
+          280559,
+          257038
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        128704,
+        50000,
+        0,
+        34677,
+        0,
+        0,
+        0,
+        8782091,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-05.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "226e4b4e58a51e0fd5239eb6b7c61f0ef4746e8c07c00b33baba536a79150791",
+        "compressedBytes": 3645044,
+        "compressedSha256": "0a8f3fee980db178b65b64a8c7664efa657b1d4b7f4459e9dcefb67462f512c8"
+      },
+      "afterSha256": "0ac13590d9d5addaacf170d0571179cceb9f13af894176f0c1477af4f91d3bf0",
+      "afterHeader": [
+        34159,
+        34677,
+        34159,
+        518,
+        0,
+        162863,
+        0
+      ],
+      "afterXor": {
+        "path": "group-05.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "715f83cd02edc2d9e6f657084587712e74226b31dd1ea9b67412eb476b76beae",
+        "compressedBytes": 1196603,
+        "compressedSha256": "8e42b80825752ad050795b0d5e4ecfc19fa0c281cda490293c941b43f4300c4c"
+      },
+      "dedup": {
+        "pending": 34159,
+        "exact": 518,
+        "recent": 518
+      }
+    },
+    {
+      "group": 6,
+      "rowCount": 50000,
+      "uniqueRows": 34006,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 6,
+        "files": [
+          "term_bank_23.json",
+          "term_bank_24.json",
+          "term_bank_25.json",
+          "term_bank_26.json",
+          "term_bank_27.json"
+        ],
+        "bytes": [
+          310787,
+          308587,
+          303992,
+          333406,
+          327402
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        162863,
+        50000,
+        0,
+        34006,
+        0,
+        0,
+        0,
+        9009676,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-06.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "5286f58226251da2d43b5be352c2d31ef1fc6680d667d763deb4ec75fecb4a86",
+        "compressedBytes": 4156054,
+        "compressedSha256": "f3e5068cb84942c9d7c8f183d4db13966dbc66e3318410f7581ed914e556a56a"
+      },
+      "afterSha256": "34ba423205e9786c27c09866766c99eb66fc835609c0407ebf02e3803d3603ee",
+      "afterHeader": [
+        33543,
+        34006,
+        33543,
+        463,
+        0,
+        196406,
+        0
+      ],
+      "afterXor": {
+        "path": "group-06.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "7f854ab09bb68132237d7f69c3ab917ee00a373fd8d9358743bb3dac57eab07c",
+        "compressedBytes": 1181198,
+        "compressedSha256": "ed47c5fdcf4c138c3fb65eec4d27ae08b644ded8ebb6f481a04086421f5073b0"
+      },
+      "dedup": {
+        "pending": 33543,
+        "exact": 463,
+        "recent": 463
+      }
+    },
+    {
+      "group": 7,
+      "rowCount": 40000,
+      "uniqueRows": 24271,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 7,
+        "files": [
+          "term_bank_28.json",
+          "term_bank_29.json",
+          "term_bank_30.json",
+          "term_bank_31.json"
+        ],
+        "bytes": [
+          319120,
+          293949,
+          303907,
+          268676
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        196406,
+        40000,
+        0,
+        24271,
+        0,
+        0,
+        0,
+        7077918,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-07.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "7597e8dc9dc68fae728b2abaa54bf072ce1b34ca51100dc7ced9a2c041d59abe",
+        "compressedBytes": 4621363,
+        "compressedSha256": "041d0914978a2705b4e3cd604760cd500dacc555c4a096fcc1cf46412fa24b43"
+      },
+      "afterSha256": "d45beccc48f1e57d3753851134071398a6c7f1e4f85804086f784afff3de3cda",
+      "afterHeader": [
+        24030,
+        24271,
+        24030,
+        241,
+        0,
+        220436,
+        0
+      ],
+      "afterXor": {
+        "path": "group-07.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "3fdc764d0e9025e1669bc28bc556dc70a53023f9f27474d975bb6f2f69bb0877",
+        "compressedBytes": 860229,
+        "compressedSha256": "2e68a4b35c876221795b448d2f45d8158bc0961e06fa9da818c5ef47629e07d3"
+      },
+      "dedup": {
+        "pending": 24030,
+        "exact": 241,
+        "recent": 241
+      }
+    },
+    {
+      "group": 8,
+      "rowCount": 50000,
+      "uniqueRows": 31906,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 8,
+        "files": [
+          "term_bank_32.json",
+          "term_bank_33.json",
+          "term_bank_34.json",
+          "term_bank_35.json",
+          "term_bank_36.json"
+        ],
+        "bytes": [
+          195735,
+          337549,
+          284530,
+          185671,
+          303667
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        220436,
+        50000,
+        0,
+        31906,
+        0,
+        0,
+        0,
+        7502995,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-08.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "2d92cdf931639177c7cc60a78ec2e493d36ec9f8aadf734f31f2ece0cd1a45e1",
+        "compressedBytes": 4995412,
+        "compressedSha256": "0d39108823ab9ad697236f2de6da8f390eab39fb713f87fb68936ee2dc430a44"
+      },
+      "afterSha256": "d882415f6984539bde45a8c5d1ef62110b36b728b51b00b41e678f917c95e91e",
+      "afterHeader": [
+        31330,
+        31906,
+        31330,
+        576,
+        0,
+        251766,
+        0
+      ],
+      "afterXor": {
+        "path": "group-08.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "acafc9e0ffc3e2e45c81314ab12cf0cb9e26c5a1737cb7bb601e20c4af16f0ec",
+        "compressedBytes": 1095689,
+        "compressedSha256": "99015462a90387b9d3cf075317a4527e1b5a1e5242a0b97583fe4464a12bf096"
+      },
+      "dedup": {
+        "pending": 31330,
+        "exact": 576,
+        "recent": 576
+      }
+    },
+    {
+      "group": 9,
+      "rowCount": 40000,
+      "uniqueRows": 25774,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 9,
+        "files": [
+          "term_bank_37.json",
+          "term_bank_38.json",
+          "term_bank_39.json",
+          "term_bank_40.json"
+        ],
+        "bytes": [
+          336653,
+          325795,
+          341827,
+          327365
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        251766,
+        40000,
+        0,
+        25774,
+        0,
+        0,
+        0,
+        7850259,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-09.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "90b4c8ec8a39d41b366d08f58d76d5d3cefb56c779f683d79611bacd11bb03b9",
+        "compressedBytes": 5482818,
+        "compressedSha256": "c246fcebd07317fbc503af13c9b8bcaef581342f8f5d99f357d3827a1ad7cec2"
+      },
+      "afterSha256": "9aee86101d6cc6b2c6ecf74ec872d4feb6be6c389ac60ad326d72a911daf6a20",
+      "afterHeader": [
+        25442,
+        25774,
+        25442,
+        332,
+        0,
+        277208,
+        0
+      ],
+      "afterXor": {
+        "path": "group-09.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "c33764e12e76a795876addb62b715196e9490713892133c4cd9916892ed991a3",
+        "compressedBytes": 910593,
+        "compressedSha256": "df6a6f23a143a9acd462bbe3cf96929cf26b4d40807455ddfe464f936da8bb26"
+      },
+      "dedup": {
+        "pending": 25442,
+        "exact": 332,
+        "recent": 332
+      }
+    },
+    {
+      "group": 10,
+      "rowCount": 40000,
+      "uniqueRows": 25109,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 10,
+        "files": [
+          "term_bank_41.json",
+          "term_bank_42.json",
+          "term_bank_43.json",
+          "term_bank_44.json"
+        ],
+        "bytes": [
+          327770,
+          343507,
+          328238,
+          340246
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        277208,
+        40000,
+        0,
+        25109,
+        0,
+        0,
+        0,
+        7597844,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-10.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "bb17bcb1a83b2c35581a3022772017b332518c9c85b36dd78324547e5e0c0832",
+        "compressedBytes": 5871040,
+        "compressedSha256": "bdb25b2e0aeb0d34aefea1a4c118c472b616694a13cc8c28a495b4d030475f89"
+      },
+      "afterSha256": "556d57d503a90d13369ee9fe00a97033cbf367fda256b26434764d555ae91b3b",
+      "afterHeader": [
+        24806,
+        25109,
+        24806,
+        303,
+        0,
+        302014,
+        0
+      ],
+      "afterXor": {
+        "path": "group-10.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "6acbf0313604cb5894a602b249b36b37b962914ef21c34570b30fa4e02d9e5a9",
+        "compressedBytes": 887972,
+        "compressedSha256": "3d2cd56f8b2ea3ace06975d3bd7950daf3fed85e213e512230b1722d44857724"
+      },
+      "dedup": {
+        "pending": 24806,
+        "exact": 303,
+        "recent": 303
+      }
+    },
+    {
+      "group": 11,
+      "rowCount": 40000,
+      "uniqueRows": 26102,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 11,
+        "files": [
+          "term_bank_45.json",
+          "term_bank_46.json",
+          "term_bank_47.json",
+          "term_bank_48.json"
+        ],
+        "bytes": [
+          339568,
+          345914,
+          353697,
+          350718
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        302014,
+        40000,
+        0,
+        26102,
+        0,
+        0,
+        0,
+        7885247,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-11.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "f103321cc089c5913fe28cb37e0dbd29daaaab90aedf03ca3aed9909677b99d9",
+        "compressedBytes": 6265886,
+        "compressedSha256": "350057bf2a1f6a83cc115630e0d8d8df1df5cf669fef7e4a75a6fbfcf256340a"
+      },
+      "afterSha256": "22a91f5ec991519158848fcdd70bb1cf365e080260731724925473f931310348",
+      "afterHeader": [
+        25651,
+        26102,
+        25651,
+        451,
+        0,
+        327665,
+        0
+      ],
+      "afterXor": {
+        "path": "group-11.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "1fad8ff02a844b86c229daa9f48312f19f4c7348b7f773bf103521069c712a40",
+        "compressedBytes": 911925,
+        "compressedSha256": "3be5035ef933f74360274ba377f21c055eaf61f8bfd2008969878ab1e3a3a291"
+      },
+      "dedup": {
+        "pending": 25651,
+        "exact": 451,
+        "recent": 451
+      }
+    },
+    {
+      "group": 12,
+      "rowCount": 48299,
+      "uniqueRows": 35062,
+      "expectedReturn": 0,
+      "memoryPages": 400,
+      "sourceGroup": {
+        "id": 12,
+        "files": [
+          "term_bank_49.json",
+          "term_bank_50.json",
+          "term_bank_51.json",
+          "term_bank_52.json",
+          "term_bank_53.json"
+        ],
+        "bytes": [
+          343674,
+          330347,
+          337477,
+          366750,
+          291633
+        ]
+      },
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        327665,
+        48299,
+        0,
+        35062,
+        0,
+        0,
+        0,
+        9631061,
+        1,
+        1,
+        0
+      ],
+      "before": {
+        "path": "group-12.before.bin.gz",
+        "bytes": 26214400,
+        "sha256": "5d57e0fef82fbc201fab0f9e062b1bba533275f84c477734c4f99a9016a96317",
+        "compressedBytes": 6699048,
+        "compressedSha256": "1d45f8384bbb0c7282f6043283ef7a08c7039f181e0f1b1566215c0b2cc591f5"
+      },
+      "afterSha256": "b4945bb14e80ad7e24f1b3c7b0ff7a71bd99caa49248161d8cfe0a8109e24def",
+      "afterHeader": [
+        34367,
+        35062,
+        34367,
+        695,
+        0,
+        362032,
+        0
+      ],
+      "afterXor": {
+        "path": "group-12.after-xor.bin.gz",
+        "bytes": 26214400,
+        "sha256": "b80c748a1c0e9a08579c8a3d293a1ca30dbb00921b6e33ad237cf28da7eaf332",
+        "compressedBytes": 1216973,
+        "compressedSha256": "ba390aac41506d383fba9beaea3c77801fdbd9dd030743b70a39cbd15c516798"
+      },
+      "dedup": {
+        "pending": 34367,
+        "exact": 695,
+        "recent": 695
+      }
+    }
+  ]
+}

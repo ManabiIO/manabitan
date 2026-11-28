@@ -1,0 +1,138 @@
+name: Frozen canonical component experiment 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/canonical-component-20261128-0f1f']
+    paths:
+      - '.github/workflows/canonical-component-20261128-0f1f.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  component:
+    name: Canonical component / ${{ matrix.variant }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [row-helper, reservation-helper]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_TOOLING: dev/perf/canonical-component-20261128-0f1f
+      PERF_EVIDENCE: builds/perf/canonical-component-20261128-0f1f
+      PERF_VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Record frozen source and create baseline product worktree
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/tooling-source.txt"
+          cp -R "$PERF_TOOLING" "$PERF_EVIDENCE/tooling"
+          cp .github/workflows/canonical-component-20261128-0f1f.yml "$PERF_EVIDENCE/workflow.yml"
+          {
+            uname -a
+            lscpu
+            free -b
+            df -B1 .
+          } > "$PERF_EVIDENCE/host.txt"
+          git fetch --no-tags --depth 1 origin "$PERF_BASELINE"
+          git worktree add --detach "$RUNNER_TEMP/canonical-product" "$PERF_BASELINE"
+          printf 'PERF_PRODUCT=%s\n' "$RUNNER_TEMP/canonical-product" >> "$GITHUB_ENV"
+          test "$(git -C "$RUNNER_TEMP/canonical-product" rev-parse HEAD)" = "$PERF_BASELINE"
+          git -C "$RUNNER_TEMP/canonical-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source.txt"
+          git -C "$RUNNER_TEMP/canonical-product" status --porcelain=v1 > "$PERF_EVIDENCE/product-status-before.txt"
+          test ! -s "$PERF_EVIDENCE/product-status-before.txt"
+          cmp package-lock.json "$RUNNER_TEMP/canonical-product/package-lock.json"
+          cmp test/perf/dictionaries.lock.json "$RUNNER_TEMP/canonical-product/test/perf/dictionaries.lock.json"
+          cmp .github/actions/setup/action.yml "$RUNNER_TEMP/canonical-product/.github/actions/setup/action.yml"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Prepare baseline runtime libraries with shared dependencies
+        run: |
+          test "$(node --version)" = 'v22.22.0'
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$PERF_PRODUCT/node_modules"
+          node --version > "$PERF_EVIDENCE/node-version.txt"
+          npm --version > "$PERF_EVIDENCE/npm-version.txt"
+          npm --prefix "$PERF_PRODUCT" run build:libs > "$PERF_EVIDENCE/product-libraries.log" 2>&1
+          git -C "$PERF_PRODUCT" diff --exit-code > "$PERF_EVIDENCE/product-build-diff.txt"
+      - name: Restore locked dictionary archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify locked JMdict fixture
+        run: |
+          node --input-type=module <<'JS' > "$PERF_EVIDENCE/fixture.json"
+          import {pathToFileURL} from 'node:url'
+          import path from 'node:path'
+          const {ensureSelectedPinnedDictionaryCache} = await import(pathToFileURL(path.join(process.env.PERF_PRODUCT, 'dev/perf/dictionary-fixtures.js')))
+          const cache = path.join(process.env.GITHUB_WORKSPACE, 'builds/e2e-dictionary-cache')
+          const result = await ensureSelectedPinnedDictionaryCache(cache, ['jmdict'])
+          console.log(JSON.stringify({node: process.version, fixture: result.fixtures.jmdict, paths: result.paths}, null, 2))
+          JS
+      - name: Install and verify the pinned native toolchain and browser
+        run: |
+          sudo apt-get update > "$PERF_EVIDENCE/apt-update.log" 2>&1
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 > "$PERF_EVIDENCE/apt-install.log" 2>&1
+          npx playwright install --with-deps chromium > "$PERF_EVIDENCE/browser-install.log" 2>&1
+          node "$PERF_TOOLING/build.mjs" --project-root "$PERF_PRODUCT" \
+            --clang "$(command -v clang-21)" --linker "$(command -v wasm-ld-21)" \
+            --output "$PERF_EVIDENCE/modules" > "$PERF_EVIDENCE/build.log" 2>&1
+      - name: Regenerate all twelve exact snapshots without timing
+        run: |
+          node "$PERF_TOOLING/capture.mjs" --project-root "$PERF_PRODUCT" \
+            --fixtures "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --output "$PERF_EVIDENCE/snapshots" > "$PERF_EVIDENCE/capture.log" 2>&1
+          cmp "$PERF_TOOLING/snapshot-inventory.json" "$PERF_EVIDENCE/snapshots/inventory.json"
+          node "$PERF_TOOLING/verify.mjs" --snapshots "$PERF_EVIDENCE/snapshots" \
+            --modules "$PERF_EVIDENCE/modules" --output "$PERF_EVIDENCE/preflight.json" \
+            > "$PERF_EVIDENCE/preflight.log" 2>&1
+          node "$PERF_TOOLING/check-harness.mjs" > "$PERF_EVIDENCE/harness-contracts.json"
+      - name: Acquire the complete fixed component cohort once
+        run: |
+          node "$PERF_TOOLING/run.mjs" --variant "$PERF_VARIANT" \
+            --snapshots "$PERF_EVIDENCE/snapshots" --modules "$PERF_EVIDENCE/modules" \
+            --output "$PERF_EVIDENCE/cohort" > "$PERF_EVIDENCE/acquisition.log" 2>&1
+      - name: Analyze every prescribed observation including partial failures
+        if: always()
+        run: |
+          python3 "$PERF_TOOLING/analyze.py" --protocol "$PERF_TOOLING/protocol.json" \
+            --source-inventory "$PERF_TOOLING/source-inventory.json" \
+            --snapshots "$PERF_TOOLING/snapshot-inventory.json" \
+            --output "$PERF_EVIDENCE/cohort" --variant "$PERF_VARIANT" \
+            > "$PERF_EVIDENCE/analysis.log" 2>&1
+      - name: Preserve final identities and an inventory of all evidence
+        if: always()
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          if test -d "$RUNNER_TEMP/canonical-product"; then
+            git -C "$RUNNER_TEMP/canonical-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source-after.txt"
+            git -C "$RUNNER_TEMP/canonical-product" status --porcelain=v1 --untracked-files=no > "$PERF_EVIDENCE/product-status-after.txt"
+          fi
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['PERF_EVIDENCE'])
+          files = []
+          for file in sorted(root.rglob('*')):
+              if not file.is_file() or file.name == 'artifact-manifest.json':
+                  continue
+              files.append({'path': str(file.relative_to(root)), 'bytes': file.stat().st_size, 'sha256': hashlib.sha256(file.read_bytes()).hexdigest()})
+          (root / 'artifact-manifest.json').write_text(json.dumps({'schemaVersion': 1, 'variant': os.environ['PERF_VARIANT'], 'baseline': os.environ['PERF_BASELINE'], 'files': files}, indent=2) + '\n')
+          PY
+      - name: Upload all inputs, observations, failures, and analysis
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: canonical-component-20261128-0f1f-${{ matrix.variant }}
+          path: builds/perf/canonical-component-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14

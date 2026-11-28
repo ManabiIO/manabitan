@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "status": "frozen acquisition design; execute only after parent review and publication",
+  "scope": "Standalone canonical native component, two separately reported candidates; no whole-import or engine-pooling claim",
+  "baseline": {
+    "id": "baseline",
+    "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "sourcePath": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "sourceSha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+  },
+  "variants": {
+    "row-helper": {
+      "id": "row-helper",
+      "sha256": "2308bb4587bcb1e8a0e63655f815f594aed365bac2f771eaf8aec9e9869912bb",
+      "sourcePath": "variants/row-helper.c",
+      "sourceSha256": "0562cc4f06108134a0711c7f1e9cae9faf94ad7861630a5d75c7ee270aa338d5"
+    },
+    "reservation-helper": {
+      "id": "reservation-helper",
+      "sha256": "b2656b26b17ebe95015cd1b64de2f2b84941633d7690cd444ba8a4731c1ed94d",
+      "sourcePath": "variants/reservation-helper.c",
+      "sourceSha256": "ebdb05dcb7da104c504aaee1cdf18ed86ba594a1600fb915b675ea812370b238"
+    }
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "executableVersion": "Google Chrome for Testing 153.0.8010.12",
+    "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "playwrightVersion": "1.63.0"
+  },
+  "nodeVersion": "v22.22.0",
+  "compiler": {
+    "clangVersion": "21.1.8",
+    "lldVersion": "21.1.8"
+  },
+  "fixture": {
+    "dictionary": "jmdict",
+    "cacheFile": "JMdict.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "bytes": 15645766,
+    "rows": 528299,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "capture": {
+    "hardwareConcurrency": 4,
+    "deviceMemoryGiB": 8,
+    "parserWorkers": 3,
+    "expectedGroups": 12,
+    "expectedUniqueRows": 366030,
+    "expectedPendingRows": 362032,
+    "expectedExactRows": 3998
+  },
+  "snapshotInventoryFile": "snapshot-inventory.json",
+  "snapshotInventorySha256": "f51d8d4ba64b4047794b54be2409d8f37f186e44e2cb719a6d8a026efaea6bdc",
+  "sourceInventoryFile": "source-inventory.json",
+  "schedule": [
+    {
+      "id": "comparison-01-A",
+      "kind": "comparison",
+      "pair": 1,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-01-B",
+      "kind": "comparison",
+      "pair": 1,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-02-B",
+      "kind": "comparison",
+      "pair": 2,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-02-A",
+      "kind": "comparison",
+      "pair": 2,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-A1",
+      "kind": "control",
+      "pair": 1,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-A2",
+      "kind": "control",
+      "pair": 1,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-03-A",
+      "kind": "comparison",
+      "pair": 3,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-03-B",
+      "kind": "comparison",
+      "pair": 3,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-04-B",
+      "kind": "comparison",
+      "pair": 4,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-04-A",
+      "kind": "comparison",
+      "pair": 4,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-02-A1",
+      "kind": "control",
+      "pair": 2,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-02-A2",
+      "kind": "control",
+      "pair": 2,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-05-A",
+      "kind": "comparison",
+      "pair": 5,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-05-B",
+      "kind": "comparison",
+      "pair": 5,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-06-B",
+      "kind": "comparison",
+      "pair": 6,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-06-A",
+      "kind": "comparison",
+      "pair": 6,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-03-A1",
+      "kind": "control",
+      "pair": 3,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-03-A2",
+      "kind": "control",
+      "pair": 3,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-07-A",
+      "kind": "comparison",
+      "pair": 7,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-07-B",
+      "kind": "comparison",
+      "pair": 7,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-08-B",
+      "kind": "comparison",
+      "pair": 8,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-08-A",
+      "kind": "comparison",
+      "pair": 8,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-04-A1",
+      "kind": "control",
+      "pair": 4,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-04-A2",
+      "kind": "control",
+      "pair": 4,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-09-A",
+      "kind": "comparison",
+      "pair": 9,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-09-B",
+      "kind": "comparison",
+      "pair": 9,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-10-B",
+      "kind": "comparison",
+      "pair": 10,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-10-A",
+      "kind": "comparison",
+      "pair": 10,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-05-A1",
+      "kind": "control",
+      "pair": 5,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-05-A2",
+      "kind": "control",
+      "pair": 5,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-11-A",
+      "kind": "comparison",
+      "pair": 11,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-11-B",
+      "kind": "comparison",
+      "pair": 11,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-12-B",
+      "kind": "comparison",
+      "pair": 12,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-12-A",
+      "kind": "comparison",
+      "pair": 12,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-06-A1",
+      "kind": "control",
+      "pair": 6,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-06-A2",
+      "kind": "control",
+      "pair": 6,
+      "position": 1,
+      "arm": "A"
+    }
+  ],
+  "passes": 2,
+  "callsPerPass": 12,
+  "callsPerObservation": 24,
+  "observationsPerVariant": 36,
+  "observationTimeoutMs": 120000,
+  "fixedInterObservationDelayMs": 500,
+  "metrics": [
+    "firstCallMs",
+    "remainingFirstPassMs",
+    "firstPassSumMs",
+    "secondPassSumMs",
+    "secondPassFirstCallMs"
+  ],
+  "analysis": {
+    "bootstrapReplicates": 20000,
+    "bootstrapSeed": 253698086,
+    "intervalPercentiles": [
+      2.5,
+      97.5
+    ],
+    "primaryMetric": "firstPassSumMs",
+    "warmRiskMetric": "secondPassSumMs",
+    "selectionPolicy": "Report every prespecified candidate, metric, pair and control; no posthoc winning-cell selection, adaptive rerun, slow-run exclusion or import-speed inference."
+  },
+  "worker": {
+    "crossOriginIsolated": true,
+    "timer": "performance.now",
+    "crossOriginOpenerPolicy": "same-origin",
+    "crossOriginEmbedderPolicy": "require-corp",
+    "crossOriginResourcePolicy": "same-origin"
+  },
+  "hostedWorkflow": {
+    "path": ".github/workflows/canonical-component-20261128-0f1f.yml",
+    "sha256": "6d63f9fcb67350ceb456b4803521a38abb0ca069ca756c5e680647755009087f",
+    "runsOn": "ubuntu-26.04",
+    "requiredRunAttempt": 1
+  }
+}
