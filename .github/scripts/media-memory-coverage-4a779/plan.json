@@ -1,0 +1,162 @@
+{
+  "allowedDiagnosticFiles": [
+    ".github/scripts/media-memory-coverage-followup.py",
+    ".github/workflows/media-memory-coverage-followup-4a779.yml",
+    ".github/scripts/media-memory-coverage-4a779/plan.json",
+    ".github/scripts/media-memory-coverage-4a779/prior-canonical-receipt.json",
+    ".github/scripts/media-memory-coverage-4a779/prior-source-identities.json"
+  ],
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "browserSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+  "browserVersion": "153.0.8010.12",
+  "candidate": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+  "candidateProductAndTests": [
+    {
+      "gitBlob": "a4a468ec5fe7a2c8c13fcad75a0ffad64735fbe6",
+      "path": "ext/js/dictionary/dense-zip-directory.js",
+      "sha256": "b6e3cbf2fff2ef88cc2788374fed2739af6dfd8a0d13f4c6e8963ee8dc82ab4c"
+    },
+    {
+      "gitBlob": "e117ce5536e1b26c1fc6c53b23bf33f37d7563dc",
+      "path": "ext/js/dictionary/dense-zip-file-map.js",
+      "sha256": "48f259e0e35b6c6ac9ce866c1c3a02d0d6875e51baf660d6403577123dd100af"
+    },
+    {
+      "gitBlob": "b274dfd4a4dce46a152c39460742e18eaf130cac",
+      "path": "ext/js/dictionary/source-zip-media-pack.js",
+      "sha256": "8d00d6d2a8dbe463d0cc792d0efe0d555bbb7b8ba127cdb5fd360dc2cbd980c5"
+    },
+    {
+      "gitBlob": "08da39f0c54adb1e7a73979300e2e3eb38131584",
+      "path": "ext/js/dictionary/source-zip-media-preparation-worker.js",
+      "sha256": "346fda099232590bf12645cdf214c0a7ff1be69bea859898f2017a8fc6fc0d8b"
+    },
+    {
+      "gitBlob": "8e87a2d506dc7578e2ec4f59df4a06e46a94c8a1",
+      "path": "test/dense-zip-directory.test.js",
+      "sha256": "21cd223ab04239b93d822134da0892943632b5609133b82bb13d1869f12159d6"
+    },
+    {
+      "gitBlob": "f3c480c082803dadd34ee24810951787ceda2d56",
+      "path": "test/source-zip-media-entry-pack.test.js",
+      "sha256": "ce5bc45e5d6952cb0cb955b49e513a6738a892cbb1833c43f30350fc59c59faf"
+    }
+  ],
+  "expectedActivation": {
+    "step4SourcePackedMediaBytes": 195649882,
+    "step4SourcePackedMediaEarlyPayload": true,
+    "step4SourcePackedMediaEntryCount": 146570,
+    "step4SourcePackedMediaParallel": true
+  },
+  "expectedPackageEntries": [
+    "js/dictionary/dense-zip-directory.js",
+    "js/dictionary/dense-zip-file-map.js",
+    "js/dictionary/source-zip-media-pack.js",
+    "js/dictionary/source-zip-media-preparation-worker.js"
+  ],
+  "failurePolicy": "Exactly one four-observation cohort. No individual retries, additional warmups, latency comparisons, exhaustive-media reruns or automatic repetition. Preserve attempted/partial/failed observations. Stop after this cohort regardless of outcome. Identity/preparation failures stop before unsafe continuation.",
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "flags": {},
+  "memorySchedule": [
+    {
+      "arm": "A",
+      "index": 1,
+      "name": "A1",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "index": 2,
+      "name": "B1",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "index": 3,
+      "name": "B2",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "index": 4,
+      "name": "A2",
+      "pair": 2
+    }
+  ],
+  "nodeVersion": "v22.22.0",
+  "observations": 4,
+  "originalHarnessSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+  "overlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+  "packagePolicy": "Each arm independently built from its exact original source revision. Every package member must match that same arm in the original ordinary VNDB cohort; newly built ZIP container identities are bound separately because container metadata varies.",
+  "priorArtifact": {
+    "artifactId": 15254656202,
+    "artifactSha256": "40c4830053f2dddd94f0285f1c5608cf5aa097c6e63f72427bbeafd685fcbd8c",
+    "failedCoveredGapsMs": {
+      "A2": 308.60082,
+      "B1": 399.792045
+    },
+    "head": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+    "original16MiBPrimaryAndOverallPromotionRule": "FAIL, unchanged; this follow-up cannot reclassify it",
+    "priorWholeTreeMemoryStatus": "FAILED_COVERAGE",
+    "referenceMember": "warmup-1-A/canonical-receipt.json",
+    "runId": 46108057559,
+    "semanticRawReportsPassed": 26
+  },
+  "referenceFileSha256": {
+    "prior-canonical-receipt.json": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4",
+    "prior-source-identities.json": "22e633a72797c4aefc46fc30608828922add8062f8130a3599c016f8ef068d7f"
+  },
+  "requiredSameSha256": {
+    ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "dev/perf/host-environment.js": "0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5",
+    "dev/perf/import-ab.js": "b3d2403da238f7be624b06a9a51f8a202d07be8707935b1de4d59ebc31d21067",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "dev/perf/import-lookup-screen.js": "92817e0c0496f7f4f239ee7947147b1ddbcfa82e377aae44cede8f470d03339f",
+    "dev/perf/import-media-validation.js": "e493225cd4c66a6b3bcc4a5d309439b7a08e584b340b9d54d67115252da461bb",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "dev/perf/overflow-layout-benchmark.js": "1bd54f784f2ac0b216bb050ee10aa1d4cbab905f130e501c879948c2d30fe838",
+    "dev/perf/prepare-dictionaries.js": "c727bc62d04e6362442cfe981b13ba82b0d7e183191b3b3783dcece5b46a4f63",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+    "test/chromium/anki-deduplication.e2e.js": "ee87d2bcc0e13542c6dc465ec915faed45a1e8220b29cb94e5f4d38a9f808e58",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "test/chromium/freemdict-import-soak-util.js": "d460b5f642c6d16580913a869c80537d98c0a4c8103781a567b85d9f4e4e66f4",
+    "test/chromium/freemdict-import-soak.e2e.js": "7a875ad06183270b412d24522e42f41ea43241667b738904333d1dbd11b6ea57",
+    "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+    "test/chromium/restart-interruption-process-tree.js": "cfedf84866dc2d23263b5b5b69de2837bcae3ca27baa597c372dfda6e317f705",
+    "test/chromium/restart-interruption-process-tree.test.js": "3ed88e5a40c800c84e11bb323563b949c20aa1e58a3346dba072ff5c3988b173",
+    "test/chromium/restart-interruption-settings.js": "43ed4ecb8a513d35cc14c1881bf89946b697032efcb56f192599765ab072fd3d",
+    "test/chromium/restart-interruption.e2e.js": "29332614fff8d4ca1eae19f53852a41a2c6f0a744129afac940e5a639041d009",
+    "test/chromium/schema-upgrade.e2e.js": "0e8a542fc8b5174e918be8586acc368e3a7533617842026b534b8730268dea3b",
+    "test/chromium/term-bank-shared-decoder.e2e.js": "050d4edb370dc78bce340d955f6f01aa0ecfff4eb973be9fb25f99cf5d65b98b",
+    "test/e2e/anki-dedupe-matrix.js": "8c755e80ada4e15290e97e6cfbd70089aba45e4e677616a4725d947106b2e724",
+    "test/e2e/anki-mock-http-server.js": "bca3db882fa31f9aa4d91e4300b12f032d21ff42ceb50a9fc418dec4bce196cb",
+    "test/e2e/anki-mock-state.js": "6936a409f75b10cd5842a859fb34bb6207af42449ceade9338ee977b9e26e855",
+    "test/e2e/anki-save-destination.js": "46e0c259bf16db3195f71629f5bf1942c8b952d4887dcc821ac78d737722148a",
+    "test/e2e/anki-screenshot-ownership.js": "180acf6986ced2290837e8e7d9157146b5f1c5eff70890246591e22295e33cbc",
+    "test/e2e/chromium-launch-options.js": "a631dd35a96c7123075b3b9879bed94197275f81beb480f717a6355a2c2362e5",
+    "test/e2e/dictionary-auto-update-fixture.js": "44a4d5e8340521c2921529b5542cda7ebb7e64aca006136c9a8d80700b5a0827",
+    "test/e2e/display-history-recovery.js": "4b3af640ebd2f117a0c6458723e71e44a4df12fb4a962ba104ed8dab4d00a58e",
+    "test/e2e/firefox-extension-base-url.js": "603474b34fdcf06d7d60c46f9868cede2dfeb9273981e1d4588d45864037daf7",
+    "test/e2e/firefox-extension-base-url.test.js": "2f46b2113d0f0549c464226c8e79c23520af1527c65a57f9fe63cf793bb175ad",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "test/e2e/reader-finalization.js": "7f9b4b3e36d0eb64bfbca8251177c2dd31d37ad602ba929638119062ddcc1c6a",
+    "test/e2e/repeat-command.js": "4b673b9daee25f73c5b8a3cf416474655e58b732d7c316ada2ac0f3e5bce484a",
+    "test/e2e/report-tabs.js": "fce2a926396a301759875ed821794ace46bd0f3f8d0f6253d737d24675b2abfa",
+    "test/e2e/request-builder-rule-matching.js": "6da0852a97a52f2a9206c00c30d62bb251c2384dcd1394e583a6868de63531c6",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "samplingPolicy": "Unchanged frozen memory_overlay, run_with_sampling, summarize_import_window, memory_comparison and audit_cell. 25 ms wait between scans; maximum covered and bracketing gaps <=250 ms; every observation qualified; median paired sampled PSS/private increase <=5% and maximum <=10%.",
+  "schemaVersion": 1,
+  "scope": "One bounded VNDB whole-tree memory sampling coverage follow-up; the original failed screen, all prior latency observations and exhaustive-media receipts remain unchanged. No latency or peak-RSS improvement claim.",
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ]
+}

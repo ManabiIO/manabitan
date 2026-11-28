@@ -1,0 +1,51 @@
+name: VNDB memory coverage follow-up 4a779
+
+on:
+  push:
+    branches: [perf/media-memory-coverage-20261128-4a779]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: media-memory-coverage-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install the pinned full Chromium binary
+        run: npx playwright install --with-deps chromium
+      - name: Restore the pinned archive cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run exactly one four-observation memory coverage follow-up
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/media-memory-coverage-4a779
+          python .github/scripts/media-memory-coverage-followup.py \
+            --evidence builds/perf/media-memory-coverage-4a779/cohort \
+            2>&1 | tee builds/perf/media-memory-coverage-4a779/runner.log
+      - name: Preserve every outcome including partial failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: media-memory-coverage-followup-vndb-4a779
+          path: |
+            builds/perf/media-memory-coverage-4a779/runner.log
+            builds/perf/media-memory-coverage-4a779/cohort
+          if-no-files-found: error
+          retention-days: 14
