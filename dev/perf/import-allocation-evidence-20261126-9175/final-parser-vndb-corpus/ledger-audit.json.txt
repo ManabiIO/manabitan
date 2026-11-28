@@ -1,0 +1,36 @@
+{
+  "runId": 45864038998,
+  "jobId": 140062131372,
+  "artifactId": 15141027598,
+  "artifactZipSha256": "d4921d5a6186120faadaf6c9fc998aeecc146d2e299ac51592ac0da9771443d0",
+  "publishedCandidateCommit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "publishedTreeConfirmedThroughGitHubGitCommitEndpoint": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+  "equivalentLocalCommit": "42256a11e73bb64cf925f118d3e375a223954813",
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "lockedArchiveSizeBytes": 291705969,
+  "lockedArchiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "lockedArchiveChecksVerifiedFromExactExecutedRunnerAndExitZero": true,
+  "archiveReadRepeatedDuringAudit": false,
+  "runnerSha256": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+  "candidateResolutionHelperSha256": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+  "counts": {
+    "id": "vndb",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "rows": 6648310,
+    "uniqueContents": 157852,
+    "deferredResolutionBytes": 2052076,
+    "maxDeferredGroupBytes": 16367,
+    "banks": 665,
+    "groups": 167
+  },
+  "groupDigestLedgerSha256": "cc8ba94dec5760c5d6e150bc1a6e539aaa88c7aa1a0da93c875a79ddada398d4",
+  "artifactFileSha256": {
+    "corpus-parity.json": "0da3eeb7852b364da3cb45e0cec29a595f84e96b08a7e6a1a6d078cdbed5d8cd",
+    "execution.json": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e",
+    "provenance.json": "ef319800e0b0e41fedb5ccdaa2c9a990e1ae13cb1e6e14753806ba0575dd34dd",
+    "replay-resolution.mjs.txt": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+    "replay.log": "f6bc2c668f32ab3c32359496d142cd8674eb843348e438024dc06986933a4dd9"
+  },
+  "auditScope": "Verified artifact ZIP digest, exact source and runner hashes, every recorded bank-group boundary, complete row/count arithmetic, all 167 payload digest records, and the exact executed runner enforcement of locked archive size/SHA256 and paired output equality before successful completion. This audit did not reread the source archive, rerun native parsing, or independently recompute payload digests.",
+  "limitations": "Fixed four-bank component replay, not browser timing, actual browser grouping, total allocation savings, or simultaneous/peak memory. Candidate columns are allocated later at the storage sink."
+}

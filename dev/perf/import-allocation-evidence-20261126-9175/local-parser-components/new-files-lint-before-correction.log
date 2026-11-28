@@ -1,0 +1,50 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/9175611d1a4c/manabitan-parser/ext/js/dictionary/term-content-plan-resolution.js
+  15:1   error  incorrect header                                    header/header
+  22:9   error  Use `.length > 0` when checking length is not zero  unicorn/explicit-length-check
+  22:44  error  Use `.length > 0` when checking length is not zero  unicorn/explicit-length-check
+  22:81  error  Use `.length > 0` when checking length is not zero  unicorn/explicit-length-check
+
+/workspace/scratch/9175611d1a4c/manabitan-parser/test/dictionary-content-plan-resolution.test.js
+  147:13  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  147:19  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  147:80  error  There should be no line break here                                           @stylistic/function-call-argument-newline
+  148:13  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  148:38  error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  196:29  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  196:51  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  196:71  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  197:50  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  198:50  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  199:26  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  199:60  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  200:35  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  201:47  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  214:43  error  Remove the `./` prefix from the relative URL                                 unicorn/relative-url-style
+  223:59  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line
+  230:56  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line
+  232:53  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line
+  243:32  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  243:39  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  243:51  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  256:32  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  256:39  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  256:51  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+
+✖ 28 problems (28 errors, 0 warnings)
+  24 errors and 0 warnings potentially fixable with the `--fix` option.
+

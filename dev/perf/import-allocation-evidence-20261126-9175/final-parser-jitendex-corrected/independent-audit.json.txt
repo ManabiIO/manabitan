@@ -1,0 +1,62 @@
+{
+  "artifact": "/workspace/scratch/9175611d1a4c/allocation-ci-audit/allocation-scratch-jitendex-corrected-9175.zip",
+  "artifactSha256": "abaa92927aa3ab9633732211161ef312e198f7ab4ee9f4ba9e720ce0af35b871",
+  "kind": "scratch",
+  "dictionary": "jitendex",
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "browserVersion": "153.0.8010.12",
+  "matchedSemanticReceipts": 4,
+  "termRows": 436555,
+  "mediaFiles": 236,
+  "mediaBytes": 4992155,
+  "packageSha256": {
+    "A": "1088a42a47a09785b9936fb44bc38ff04cd9be5f9f321f7e5db762ce9ab72697",
+    "B": "ea512f6c4a10c5302ee40a853f74943283a32690d9619b05ffa863c50dd5ce1b"
+  },
+  "changedEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-plan-resolution.js"
+  ],
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 1864.7999999999884,
+      "workerImportMs": 1828.7000000000116,
+      "storageBytes": 67466332
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 1913.5,
+      "workerImportMs": 1876.2000000000116,
+      "storageBytes": 67466332
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 1573.0999999999767,
+      "workerImportMs": 1539.1999999999825,
+      "storageBytes": 67466332
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 1600.6000000000058,
+      "workerImportMs": 1566.6000000000058,
+      "storageBytes": 67466332
+    }
+  ],
+  "pairedChangePercent": [
+    2.6115401115407444,
+    -1.7181057103604291
+  ],
+  "medianPairedChangePercent": 0.4467172005901576,
+  "scope": "One-host four-import screen; no whole-import speed or peak-memory qualification",
+  "harnessOverlay": {
+    "ref": "439a1c9b6d40452061cda094b0727005553c1d1d",
+    "path": "dev/perf/benchmark-support.js",
+    "originalSha256": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+    "overlaySha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "scope": "Identical measurement-only overlay after unchanged product packages are built"
+  },
+  "supersedesDiagnosticOnly": "45862232094/scratch-jitendex/A1"
+}

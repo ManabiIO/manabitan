@@ -1,0 +1,49 @@
+{
+  "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "truncated": false,
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2fed15b2b2b47330d4ba72e86a5b8753eec2463e",
+      "size": 67550,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2fed15b2b2b47330d4ba72e86a5b8753eec2463e"
+    },
+    {
+      "path": "dev/perf/deferred-resolution-20261126/replay-portable.mjs.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8678d68be65f029e445edc3953213f2c22bde3c",
+      "size": 5523,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/d8678d68be65f029e445edc3953213f2c22bde3c"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8805f4e732a50015c97fd9f4e41c42b869eac789",
+      "size": 609318,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/8805f4e732a50015c97fd9f4e41c42b869eac789"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5633cc568ca6f4881da06be908581376f18435fd",
+      "size": 206844,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5633cc568ca6f4881da06be908581376f18435fd"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-plan-resolution.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49533c80d35350a9d3887c3e44a06cec14a70481",
+      "size": 2491,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/49533c80d35350a9d3887c3e44a06cec14a70481"
+    }
+  ],
+  "requestedTreeish": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "resolvedGitTreeSha": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+  "resolvedGitTreeSource": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/01d0eb7164385828c97efae1b319ccc1c4fe92f9"
+}

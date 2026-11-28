@@ -1,0 +1,35 @@
+{
+  "artifactId": 15139765802,
+  "runId": 45862232094,
+  "jobId": 140055923503,
+  "observation": "A1",
+  "productRevision": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "browserReportStatus": "success",
+  "verifierResult": "failed: Import experiment receipt mismatch: parserExperiments",
+  "candidateExecuted": false,
+  "cause": "Stale measurement expectation uses 512 MiB; importer uses 1 GiB. Jitendex input is 538,927,310 bytes and correctly reports experimentalNativeEscapedKeys=false.",
+  "rawReportSha256": "84d91a2f69a6a1e39ee7f42fbc4b9140186e5aabb63a24fe03192228ebb6bbd1",
+  "completedProductChecks": {
+    "termRows": 436555,
+    "probeCount": 12,
+    "restart": {
+      "title": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "contentReadable": true,
+      "probeCount": 12
+    },
+    "media": {
+      "mode": "all",
+      "totalFiles": 236,
+      "totalBytes": 4992155,
+      "files": 236,
+      "bytes": 4992155,
+      "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+    },
+    "lookupObservations": 72
+  },
+  "existingFixCommit": "439a1c9b6d40452061cda094b0727005553c1d1d",
+  "timingDisposition": "Diagnostic only; not used in corrected cohort statistics"
+}

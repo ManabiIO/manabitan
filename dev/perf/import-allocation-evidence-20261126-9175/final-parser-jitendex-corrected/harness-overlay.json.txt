@@ -1,0 +1,7 @@
+{
+  "ref": "439a1c9b6d40452061cda094b0727005553c1d1d",
+  "path": "dev/perf/benchmark-support.js",
+  "originalSha256": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+  "overlaySha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+  "scope": "Identical measurement-only overlay after unchanged product packages are built"
+}

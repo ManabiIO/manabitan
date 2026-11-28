@@ -1,0 +1,1700 @@
+{
+  "schemaVersion": 1,
+  "snapshotUtc": "2026-11-26 17:43:48 UTC",
+  "hashAlgorithm": "sha256",
+  "jsonFilenamePolicy": "JSON contents are byte-preserved; .json filenames gain .txt. Existing .json.txt names remain unchanged.",
+  "excludedPaths": [
+    "path-hash-manifest.json.txt"
+  ],
+  "files": [
+    {
+      "archivedPath": "README.md",
+      "logicalPathBeforeJsonSuffix": "README.md",
+      "bytes": 9416,
+      "sha256": "1aed7507e75f46edb35f07678a2fe80535f651ebe3f25890052f9276d6518023",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "auditors/audit-vndb-hosted.py.txt",
+      "logicalPathBeforeJsonSuffix": "auditors/audit-vndb-hosted.py.txt",
+      "bytes": 5739,
+      "sha256": "c943c1c83f79f9a0b335ab2677ff768b37385371b093deb153439076ceb0cb5e",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "auditors/audit.py",
+      "logicalPathBeforeJsonSuffix": "auditors/audit.py",
+      "bytes": 8238,
+      "sha256": "311333f568ec57db86a92af6250f41ade8afb17ed381478867535ec3bca800a7",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "auditors/audit_jit_corrected.py",
+      "logicalPathBeforeJsonSuffix": "auditors/audit_jit_corrected.py",
+      "bytes": 2510,
+      "sha256": "ce2f82759592e06eec3ca8fba1b5eedcd3820209d0b9dcc34b42f474fd40afc7",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/A-package-members.json",
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "A-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/A-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "A-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/A1/run-1.json",
+      "bytes": 151092,
+      "sha256": "027b3adb9b5f73a1aa2f9f43783c5cba80e4bc4d1efaea77c398ac77bde150a0",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "A1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/B-package-members.json",
+      "bytes": 59172,
+      "sha256": "24ca876deccd66dcf13a215f4e3cb144d44512d00e3e695e1e436d6600b196a8",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "B-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/B-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "B-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/archive-identity.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/archive-identity.json",
+      "bytes": 140,
+      "sha256": "ad53974449b4ae997fc1955e22df1a1864f4f91a306baa5f3cc168e759b0ee93",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/independent-failure-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/independent-failure-audit.json",
+      "bytes": 1154,
+      "sha256": "00d92660a88926f870809e57b3ffa5a41dd4fa1d3a37cf7a28962d852e79f4bd",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/job-failure-excerpt.log",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/job-failure-excerpt.log",
+      "bytes": 6204,
+      "sha256": "7a10fa968e53ba2b18fe3c94ca1187406a2375b92e60b01529cf3c16a04fc6f9",
+      "origin": {
+        "kind": "github-actions-decoded-job-log-excerpt",
+        "runId": 45862232094,
+        "jobId": 140055923592
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/package-comparison.json",
+      "bytes": 288,
+      "sha256": "124395dd5a3a378718094839f8a3ce44e296a2a14403aefcd8886e5e0ab59270",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "package-comparison.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jitendex-diagnostic/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jitendex-diagnostic/schedule.json",
+      "bytes": 671,
+      "sha256": "4a6696bb11c479a2dc51ff3873fd64e61d13ee5a67e83fd1d37267144cc59a2f",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140627503,
+        "originalArtifactPath": "schedule.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A-package-members.json",
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A1/run-1.json",
+      "bytes": 151110,
+      "sha256": "d6c85a7d456d67c988e7960f4832170aaa7742550896f023371a6da8b4c506b6",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A1/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A1/summary.json",
+      "bytes": 58973,
+      "sha256": "df90f813b19080a55262e220ceb0329818d2749b963f989f9034aea89d49f5f8",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A2/run-1.json",
+      "bytes": 150795,
+      "sha256": "566bd9a03de295689269bbf47c8fe9d5e8d5323510a7f0c95bd25fcd76df9226",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A2/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/A2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/A2/summary.json",
+      "bytes": 58946,
+      "sha256": "b383eef4bd0029033e09a3792e1e8751d5562011a47799a438063750b030193d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "A2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B-package-members.json",
+      "bytes": 59172,
+      "sha256": "24ca876deccd66dcf13a215f4e3cb144d44512d00e3e695e1e436d6600b196a8",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B1/run-1.json",
+      "bytes": 150754,
+      "sha256": "e49f7fcc6acd40ee7df082d500ecaebc3ff455f1f288d58bc544b95a05e22ea7",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B1/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B1/summary.json",
+      "bytes": 58938,
+      "sha256": "6519702937660e7116d53ed45320c09c0d6456c1e61d634c9acacffd46dde9a4",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B2/run-1.json",
+      "bytes": 151118,
+      "sha256": "a5cc2bf6f1daa57691d6577bcddeee5c4176afe6e91dbf9481b025263d0a6cd4",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B2/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/B2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/B2/summary.json",
+      "bytes": 58925,
+      "sha256": "474c82dcabed158d2e29f6fa412247b688592300ca829b1e0a0fa89f12ef6c7c",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "B2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/archive-identity.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/archive-identity.json",
+      "bytes": 140,
+      "sha256": "28e82aa3ea3b24baca960659fb57ea2136150f4017ab3d328e4473cd0368ea7f",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/independent-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/independent-audit.json",
+      "bytes": 1650,
+      "sha256": "2a423800739f32608d7bb97b7aa77b375e6fc2479428fa2e2e6dbd76b6d9c633",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/observations.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/observations.json",
+      "bytes": 6363,
+      "sha256": "56e6de887efb577676ef919e4a19236929f15047c970b7516ac5a9e02eabdb96",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "observations.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/package-comparison.json",
+      "bytes": 288,
+      "sha256": "b012a95a600f82646e27d045af13874be127c89632a4920fb81e9f91ce7ac0e5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "package-comparison.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/result.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/result.json",
+      "bytes": 7116,
+      "sha256": "5d2a43de00c9edcd4dab86348aef5b44c056ca9046389bfe56e2a52d990d84ec",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "result.json"
+      }
+    },
+    {
+      "archivedPath": "closed-media-alternative/original-jmdict/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "closed-media-alternative/original-jmdict/schedule.json",
+      "bytes": 669,
+      "sha256": "b2a3080ae11ed03ac52d9acb98c7b41a08283ec160d940c89ff049e581df9a7a",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140262793,
+        "originalArtifactPath": "schedule.json"
+      }
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A-package-members.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A-package-members.json"
+      },
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A-shared-source.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A-shared-source.json"
+      },
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A-status-with-harness-overlay.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A-status-with-harness-overlay.txt",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A-status-with-harness-overlay.txt"
+      },
+      "bytes": 49,
+      "sha256": "d492241860ba11a4c069051b8df7fc3b41805cea9dab1fc609db3bbf82c77540"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A1/run-1.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A1/run-1.json"
+      },
+      "bytes": 150839,
+      "sha256": "27322e9e48f7594c066b51c5eeb52ad5b966da44dafc7e9413e14bf4f4e6fc97"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A1/semantic-receipt.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A1/semantic-receipt.json"
+      },
+      "bytes": 12453,
+      "sha256": "d9ab149455842f6a17e91c14599c5315bada50c66bcd8535b8520fc1042a0697"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A1/summary.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A1/summary.json"
+      },
+      "bytes": 59193,
+      "sha256": "1474b0b30ef77ac581224ba5fc90aea0c39421a168702897406e9d5833b95e54"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A2/run-1.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A2/run-1.json"
+      },
+      "bytes": 150802,
+      "sha256": "f319cc9c9d5a26ca84d4a96987e8ca9b176c26a351e741d98ff860fc32f34656"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A2/semantic-receipt.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A2/semantic-receipt.json"
+      },
+      "bytes": 12453,
+      "sha256": "d9ab149455842f6a17e91c14599c5315bada50c66bcd8535b8520fc1042a0697"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/A2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/A2/summary.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "A2/summary.json"
+      },
+      "bytes": 59258,
+      "sha256": "19cfd6cfbce27a54db77d4bd250c2757b0656e24ff5934d33dc5e468e8c7f16e"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B-package-members.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B-package-members.json"
+      },
+      "bytes": 59291,
+      "sha256": "f0a7c441269aa94f1ea42055de7ab1be1a214efbb92a691f38bd81e20c34cccf"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B-shared-source.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B-shared-source.json"
+      },
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B-status-with-harness-overlay.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B-status-with-harness-overlay.txt",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B-status-with-harness-overlay.txt"
+      },
+      "bytes": 49,
+      "sha256": "d492241860ba11a4c069051b8df7fc3b41805cea9dab1fc609db3bbf82c77540"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B1/run-1.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B1/run-1.json"
+      },
+      "bytes": 150914,
+      "sha256": "f4156629e12e7537263e8be9806dded980007ce1455e22d4665b75a20b9e58fc"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B1/semantic-receipt.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B1/semantic-receipt.json"
+      },
+      "bytes": 12453,
+      "sha256": "d9ab149455842f6a17e91c14599c5315bada50c66bcd8535b8520fc1042a0697"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B1/summary.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B1/summary.json"
+      },
+      "bytes": 59230,
+      "sha256": "6c0bd8e61d7af3e9226648ac28b7317420f60a10fb74613fabe2e25bb8f9f316"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B2/run-1.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B2/run-1.json"
+      },
+      "bytes": 151236,
+      "sha256": "39326fbe5f282e9e962d0a92bb6533d733df6841665507d03bc86b62449deb4a"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B2/semantic-receipt.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B2/semantic-receipt.json"
+      },
+      "bytes": 12453,
+      "sha256": "d9ab149455842f6a17e91c14599c5315bada50c66bcd8535b8520fc1042a0697"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/B2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/B2/summary.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "B2/summary.json"
+      },
+      "bytes": 59238,
+      "sha256": "d4d8f99ba7f42fb47a60e2d0be8f1ea5a3dfec5086f8b9ae1038e537964b9e90"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/corrected-benchmark-support.js.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/corrected-benchmark-support.js",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "corrected-benchmark-support.js"
+      },
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/harness-overlay.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/harness-overlay.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "harness-overlay.json"
+      },
+      "bytes": 366,
+      "sha256": "ae1fe77a79f4ea3907e5bd54e9ee8131cd71f5dc7bab39c43ecce6cf36af886b"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/independent-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/independent-audit.json",
+      "origin": {
+        "kind": "generated-review-or-audit",
+        "runId": 45865210668,
+        "artifactId": 15141552176
+      },
+      "bytes": 2155,
+      "sha256": "80d2ceeeeee651e5f4435bf5883f99075be070b1947539327291812b989c4f03"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/independent-package-source-bindings.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/independent-package-source-bindings.json",
+      "origin": {
+        "kind": "generated-review-or-audit",
+        "runId": 45865210668,
+        "artifactId": 15141552176
+      },
+      "bytes": 1884,
+      "sha256": "26752ff0a3e886690174e1754149d11599de29035339b05d1af5662bb173dd5b"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/observations.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/observations.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "observations.json"
+      },
+      "bytes": 6460,
+      "sha256": "b342a9fb667eca5a34dff79e1688db5ac0ef1ac0de43d27d0b378b26a8a0e324"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/original-benchmark-support.js.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/original-benchmark-support.js",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "original-benchmark-support.js"
+      },
+      "bytes": 16729,
+      "sha256": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/outer-artifact-identity.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/outer-artifact-identity.json",
+      "origin": {
+        "kind": "generated-review-or-audit",
+        "runId": 45865210668,
+        "artifactId": 15141552176
+      },
+      "bytes": 285,
+      "sha256": "68df5b9ad60925a0b2b54380c9d63399ae03be79c4f6e013c86e084f9f5c20ef"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/package-comparison.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "package-comparison.json"
+      },
+      "bytes": 344,
+      "sha256": "8c71210e5aa47f038ba490df1897987ab0b0a5989f01cba9e125a5c53272684c"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/result.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/result.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "result.json"
+      },
+      "bytes": 7215,
+      "sha256": "7985343b0819fe999050d456c69e3ce869ba9e65c48ddd01e52767e6728ec315"
+    },
+    {
+      "archivedPath": "final-parser-jitendex-corrected/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-jitendex-corrected/schedule.json",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45865210668,
+        "artifactId": 15141552176,
+        "originalArtifactPath": "schedule.json"
+      },
+      "bytes": 794,
+      "sha256": "2bb5af797cceedadc0e4c900cc9420a3502c6d2c5c8c82a50026077b57386b14"
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/corpus-parity.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/corpus-parity.json",
+      "bytes": 46868,
+      "sha256": "0da3eeb7852b364da3cb45e0cec29a595f84e96b08a7e6a1a6d078cdbed5d8cd",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45864038998,
+        "artifactId": 15141027598,
+        "originalArtifactPath": "corpus-parity.json"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/execution.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/execution.json",
+      "bytes": 16,
+      "sha256": "982b9e9bfb10ffe83cad665807abcfd3fa97b37822db5ab7831157a499548a9e",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45864038998,
+        "artifactId": 15141027598,
+        "originalArtifactPath": "execution.json"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/final-source-git-blob-bindings.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/final-source-git-blob-bindings.json",
+      "bytes": 1946,
+      "sha256": "50372b713a986a730be77c7cfa938063371399ae8152681e56bf7c9e11eecfb2",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/independent-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/independent-audit.json",
+      "bytes": 1070,
+      "sha256": "1a6723b24a23f0e9179dc4a9d69db3842d15609e52c25db762e28b2f4d184fa4",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/ledger-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/ledger-audit.json",
+      "bytes": 2427,
+      "sha256": "746a22e2b7cd178aa2c9cd7272e9c6ecddb78f3581669a3369ace066a5185ade",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/provenance.json.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/provenance.json",
+      "bytes": 1079,
+      "sha256": "ef319800e0b0e41fedb5ccdaa2c9a990e1ae13cb1e6e14753806ba0575dd34dd",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45864038998,
+        "artifactId": 15141027598,
+        "originalArtifactPath": "provenance.json"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/replay-resolution.mjs.txt",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/replay-resolution.mjs.txt",
+      "bytes": 5523,
+      "sha256": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45864038998,
+        "artifactId": 15141027598,
+        "originalArtifactPath": "replay-resolution.mjs.txt"
+      }
+    },
+    {
+      "archivedPath": "final-parser-vndb-corpus/replay.log",
+      "logicalPathBeforeJsonSuffix": "final-parser-vndb-corpus/replay.log",
+      "bytes": 218,
+      "sha256": "f6bc2c668f32ab3c32359496d142cd8674eb843348e438024dc06986933a4dd9",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45864038998,
+        "artifactId": 15141027598,
+        "originalArtifactPath": "replay.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/corpus-parity.json.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/corpus-parity.json.txt",
+      "bytes": 4495,
+      "sha256": "0ab159ed81c32c7054af211131ad6aabfc24403a341d43c45641245dd96c6193",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/corpus-parity.json.txt"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/corpus-parity.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/corpus-parity.log",
+      "bytes": 218,
+      "sha256": "cbf94d1f81b88af2aaba63650220430f21db322e67a798c597dc9a96d2eb4c49",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/corpus-parity.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/corpus-parity.mjs.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/corpus-parity.mjs.txt",
+      "bytes": 4852,
+      "sha256": "5e0c45d9452446fd9661bab55d644dcae196bf7bc58a9b68f89ff0f2a97fee4e",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/corpus-parity.mjs.txt"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/jitendex-corpus-parity.json.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/jitendex-corpus-parity.json.txt",
+      "bytes": 15806,
+      "sha256": "1d858eb000d50ec58d29359b721e10b9d9f0e54423eb75db6cf5b96fd370258b",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/jitendex-corpus-parity.json.txt"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/jitendex-parity.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/jitendex-parity.log",
+      "bytes": 221,
+      "sha256": "61d4b7c34d072a3604e05d8e15abe119628ed5ec1070b74e0ce1a3cc548567a9",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/jitendex-parity.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/lint.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/lint.log",
+      "bytes": 851,
+      "sha256": "1c102cf2f2381c1f0ce40237a8d968928c881c1b308d2653bc38332c860d22df",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/lint.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/manifest.json.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/manifest.json.txt",
+      "bytes": 5584,
+      "sha256": "292ac7f0bb48b49df49540052fb1e96b4a27dabcde7323a7bfda729c14deca09",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/manifest.json.txt"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/new-files-lint-before-correction.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/new-files-lint-before-correction.log",
+      "bytes": 4455,
+      "sha256": "7b6ac4696ee00d26a2b0c389278e39de75c258e7003611b32cf7ecb9ad0c843a",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/new-files-lint-before-correction.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/new-files-lint-corrected.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/new-files-lint-corrected.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/new-files-lint-corrected.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/own-tests-final.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/own-tests-final.log",
+      "bytes": 1259,
+      "sha256": "0f3f5c5336f55260494353005937b2a138d667534a398f2e223aec665efe0abd",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/own-tests-final.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/own-tests-relaxed-timeout.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/own-tests-relaxed-timeout.log",
+      "bytes": 238,
+      "sha256": "39b7d3dae2b453f5868dbb2c1e2289bc899145f351b130b96f6a36c35e93155d",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/own-tests-relaxed-timeout.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/own-tests-style-corrected.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/own-tests-style-corrected.log",
+      "bytes": 237,
+      "sha256": "a3a1286ac107446258b30461c2d5f3b21f95c1cdd56aa06ed575ce27af880af7",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/own-tests-style-corrected.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/own-tests.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/own-tests.log",
+      "bytes": 2727,
+      "sha256": "40166b5a33d426f66e11128c69e710e0b179963fd2631b6508e7087db5d58f56",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/own-tests.log"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/replay-portable.mjs.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/replay-portable.mjs.txt",
+      "bytes": 5523,
+      "sha256": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/replay-portable.mjs.txt"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/source-README.md.txt",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/source-README.md.txt",
+      "bytes": 6012,
+      "sha256": "bce175458aeb47d664663e56e58753dd95185671d4590719c42b74aecbc58322",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/README.md"
+      }
+    },
+    {
+      "archivedPath": "local-parser-components/vndb-parity.log",
+      "logicalPathBeforeJsonSuffix": "local-parser-components/vndb-parity.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+        "originalGitPath": "dev/perf/deferred-resolution-20261126/vndb-parity.log"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/A-package-members.json",
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "A-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/A-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "A-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/A1/run-1.json",
+      "bytes": 150486,
+      "sha256": "84d91a2f69a6a1e39ee7f42fbc4b9140186e5aabb63a24fe03192228ebb6bbd1",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "A1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/B-package-members.json",
+      "bytes": 59291,
+      "sha256": "abb6546fefcc375cef961af21e4c76f417223a7e68c4acc188f76974ebc74ea7",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "B-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/B-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "B-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/archive-identity.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/archive-identity.json",
+      "bytes": 140,
+      "sha256": "62160214a0fd694aac9ad4b9867d073401a19e4ab6348c270e597a4c04dfb3f6",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/independent-failure-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/independent-failure-audit.json",
+      "bytes": 1274,
+      "sha256": "2da29aaa2fc913217753a6d3eb897a9211cb9ab59c6d1d887e37a8b2208434f7",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/job-failure-excerpt.log",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/job-failure-excerpt.log",
+      "bytes": 6137,
+      "sha256": "391ce4ca5d1819adfbe783dee78e570e8f164d6eff4fea5afbb1b899a742f942",
+      "origin": {
+        "kind": "github-actions-decoded-job-log-excerpt",
+        "runId": 45862232094,
+        "jobId": 140055923503
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/package-comparison.json",
+      "bytes": 344,
+      "sha256": "c81a3af131a30e62946edf68ca473260ffe419a4a5d1dd67386209840d4b0b65",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "package-comparison.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jitendex-diagnostic/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jitendex-diagnostic/schedule.json",
+      "bytes": 727,
+      "sha256": "9751dd5b1a5dee4501f0d4f928b17ba805792b3c3ca97ba57844b0132bb85093",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139765802,
+        "originalArtifactPath": "schedule.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A-package-members.json",
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A1/run-1.json",
+      "bytes": 150529,
+      "sha256": "80738236e76f19cdc767392221baecec82486d9b3c9efdbb6c84f124f7f4c97b",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A1/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A1/summary.json",
+      "bytes": 58844,
+      "sha256": "524a949484c34718b384a7f00ff4964d41e39dbadc482e7792c67c07ae28424a",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A2/run-1.json",
+      "bytes": 150194,
+      "sha256": "15a258f6853d4b949e98cea1c69b8118e5e1ceda54c8f4459f43dccfe950e7f7",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A2/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/A2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/A2/summary.json",
+      "bytes": 58525,
+      "sha256": "017a322e98621c3fac28f0ef484b4f294a86218ac56595505d233f063e617227",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "A2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B-package-members.json",
+      "bytes": 59291,
+      "sha256": "abb6546fefcc375cef961af21e4c76f417223a7e68c4acc188f76974ebc74ea7",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B1/run-1.json",
+      "bytes": 150264,
+      "sha256": "001159c86ea2be37a09d0f3f7ab3d540b95c8f0be91f83f895dc433021dfdc3f",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B1/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B1/summary.json",
+      "bytes": 58729,
+      "sha256": "c2130ebcc89b8da0ed33baffa8064341543b37bcac17adf2ca126d4aead33ec2",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B2/run-1.json",
+      "bytes": 150712,
+      "sha256": "247c8f318bd8b8aa389514211cfd42327e76f35a7900904428c66fb2957d4472",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B2/semantic-receipt.json",
+      "bytes": 12709,
+      "sha256": "609c8b2ab2dfc664174226e4ab773d67eb63b4f8bfe0253fb17ba4a98e56a540",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/B2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/B2/summary.json",
+      "bytes": 58721,
+      "sha256": "057ae574f2feb8350ce4c0eb00da133618077366bcf2284dbd7ae31409fcff9f",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "B2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/independent-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/independent-audit.json",
+      "bytes": 1636,
+      "sha256": "71b14b4b0c9bb07f4e903eaf865908ad527b9460f84be04040ada0d2b2bcf337",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/observations.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/observations.json",
+      "bytes": 6379,
+      "sha256": "5720964fc88b5473b68c66e4a2f78d22e5a49003d21be220ab258d9483d52b1c",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "observations.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/package-comparison.json",
+      "bytes": 344,
+      "sha256": "118acd8fcc1e433310d05e7a94c301bbdc6896dae0ae5102129dc72e33d07c97",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "package-comparison.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/result.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/result.json",
+      "bytes": 7135,
+      "sha256": "f5d581a58844295bdd2f76efdb2569bdc7b2f52c89baf6bc207b352e8d6f579f",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "result.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-jmdict/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-jmdict/schedule.json",
+      "bytes": 725,
+      "sha256": "4f6b85f8fe3cf1c40f97822e44d52d14bd5d14499ce7746defcbb3650e9d9dc0",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15139122618,
+        "originalArtifactPath": "schedule.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A-package-members.json",
+      "bytes": 59172,
+      "sha256": "06a193f48646deb3ffe5ef9c9092922fd8be47786f1f80a52ce7436861bafb8d",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A1/run-1.json",
+      "bytes": 152806,
+      "sha256": "c98d6062c18fbb5dd2842b98260b33a868b7e1d37dbc9255e014cd47e23624f4",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A1/semantic-receipt.json",
+      "bytes": 13000,
+      "sha256": "8fb929753ea4ebc96463758301b4fa270245a152da714ea7f046ba4349dae1a2",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A1/summary.json",
+      "bytes": 59804,
+      "sha256": "38b1b7c6db9a8eefc5d8513331c50b80a0b3e3edb0aad13d12fb8df4ae0dc2bb",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A2/run-1.json",
+      "bytes": 152455,
+      "sha256": "5051850d8e77b21f0b3a2eb6ac81fe7f53ba2dbb4c12d7feef61c3e263169a6b",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A2/semantic-receipt.json",
+      "bytes": 13000,
+      "sha256": "8fb929753ea4ebc96463758301b4fa270245a152da714ea7f046ba4349dae1a2",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/A2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/A2/summary.json",
+      "bytes": 59513,
+      "sha256": "0204421d004af0a59c8d069e296fca5b5db92d7116d371d3081f84e178cbde1e",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "A2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B-package-members.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B-package-members.json",
+      "bytes": 59291,
+      "sha256": "abb6546fefcc375cef961af21e4c76f417223a7e68c4acc188f76974ebc74ea7",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B-package-members.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B-shared-source.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B-shared-source.json",
+      "bytes": 735,
+      "sha256": "2dd31303fd3c1bbc9fccc764f01dcb22d46b46ea8227f9b58723a5209a0bb3b5",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B-shared-source.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B1/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B1/run-1.json",
+      "bytes": 152713,
+      "sha256": "a6d95231ef92a5c59a39dbe6c10d71b383b84c4d48523b022b903453ec2ab3ad",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B1/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B1/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B1/semantic-receipt.json",
+      "bytes": 13000,
+      "sha256": "8fb929753ea4ebc96463758301b4fa270245a152da714ea7f046ba4349dae1a2",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B1/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B1/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B1/summary.json",
+      "bytes": 59772,
+      "sha256": "0eb67c27ef912572933b4d87b3bf8bbc859b22fcbb34f7d6ded7ff2714a844e8",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B1/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B2/run-1.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B2/run-1.json",
+      "bytes": 152794,
+      "sha256": "050d3ad01bfe416bc5021a4545b8bb750f461e0e5b417b47af768de95666c1f4",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B2/run-1.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B2/semantic-receipt.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B2/semantic-receipt.json",
+      "bytes": 13000,
+      "sha256": "8fb929753ea4ebc96463758301b4fa270245a152da714ea7f046ba4349dae1a2",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B2/semantic-receipt.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/B2/summary.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/B2/summary.json",
+      "bytes": 59764,
+      "sha256": "895ea8b031381e6bb73d7bcc0e83c3a9f52ff041df3bb77984439e8ac5468a63",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "B2/summary.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/independent-audit.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/independent-audit.json",
+      "bytes": 1651,
+      "sha256": "2e6fa85b9e92043c215704ab9a3b33e4b0476dc28c6a4d0ee2b9ccefc87ba30e",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/observations.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/observations.json",
+      "bytes": 8022,
+      "sha256": "c03b596165645cfd477da8a1e297e0c56a8d79809365c957f17a8d4f6e3f060c",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "observations.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/package-comparison.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/package-comparison.json",
+      "bytes": 344,
+      "sha256": "5ef2adb0f3b6cb771d99ef28fcba22a760a11a3c2513dc4065e30fcfc23afc52",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "package-comparison.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/result.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/result.json",
+      "bytes": 8873,
+      "sha256": "9088c5bb59b611b2fcff54233af2072fdc86037df109c48585adf4f1521d6ee3",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "result.json"
+      }
+    },
+    {
+      "archivedPath": "original-parser-vndb/schedule.json.txt",
+      "logicalPathBeforeJsonSuffix": "original-parser-vndb/schedule.json",
+      "bytes": 723,
+      "sha256": "8ee947485a0a3a8ea954f6edb247de2602aa10a2d4f0706ea1faf29fc0c5360e",
+      "origin": {
+        "kind": "github-actions-artifact",
+        "runId": 45862232094,
+        "artifactId": 15140502781,
+        "originalArtifactPath": "schedule.json"
+      }
+    },
+    {
+      "archivedPath": "protocols/benchmark-support-950.js.txt",
+      "logicalPathBeforeJsonSuffix": "protocols/benchmark-support-950.js.txt",
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "439a1c9b6d40452061cda094b0727005553c1d1d",
+        "originalGitPath": "dev/perf/benchmark-support.js"
+      }
+    },
+    {
+      "archivedPath": "protocols/frozen-screen.py",
+      "logicalPathBeforeJsonSuffix": "protocols/frozen-screen.py",
+      "bytes": 8233,
+      "sha256": "67e6f3c5abc9ca58f8a0a8df0a331ed0c42f04b0327b72de1632886f1fea2efc",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "4741a616d34d2c9faf17cac27d2ce7ddb54149f9",
+        "originalGitPath": "dev/perf/import-allocation-screen-9175.py"
+      }
+    },
+    {
+      "archivedPath": "protocols/frozen-workflow.yml",
+      "logicalPathBeforeJsonSuffix": "protocols/frozen-workflow.yml",
+      "bytes": 3232,
+      "sha256": "b170acdb6c09470ba02c7dbb7dc16a9b6fcb94f2aaf17ed49f0f5feb8dc3bbc5",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "4741a616d34d2c9faf17cac27d2ce7ddb54149f9",
+        "originalGitPath": ".github/workflows/import-allocation-screen-9175.yml"
+      }
+    },
+    {
+      "archivedPath": "protocols/jit-corrected-screen.py",
+      "logicalPathBeforeJsonSuffix": "protocols/jit-corrected-screen.py",
+      "bytes": 9712,
+      "sha256": "f7925678f2a73414aadfef271bb66acd826763cb75f4105d03394171de51f325",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "fc2383252718ca37e249620417ef3178edfc4e39",
+        "originalGitPath": "dev/perf/import-allocation-screen-9175.py"
+      }
+    },
+    {
+      "archivedPath": "protocols/jit-corrected-workflow.yml",
+      "logicalPathBeforeJsonSuffix": "protocols/jit-corrected-workflow.yml",
+      "bytes": 2224,
+      "sha256": "3e4a687dd84557553439e7c3674a7c8e93b5386470ab596db4e30321cecbfcdd",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "fc2383252718ca37e249620417ef3178edfc4e39",
+        "originalGitPath": ".github/workflows/import-jitendex-screen-9175.yml"
+      }
+    },
+    {
+      "archivedPath": "protocols/vndb-corpus-workflow.yml",
+      "logicalPathBeforeJsonSuffix": "protocols/vndb-corpus-workflow.yml",
+      "bytes": 4797,
+      "sha256": "d6eb11366e43cdafbf7fb8eb9e0b37a9308558d672147d255e221fefbba9f69b",
+      "origin": {
+        "kind": "frozen-git-file",
+        "commit": "8311ad6b4d7297c6fca4a6d704db30311fb23e30",
+        "originalGitPath": ".github/workflows/import-resolution-corpus-9175.yml"
+      }
+    },
+    {
+      "archivedPath": "provenance.json.txt",
+      "logicalPathBeforeJsonSuffix": "provenance.json",
+      "bytes": 4778,
+      "sha256": "ac5f197f3ea77c6ea634f050c58a81cd885913995a11fac7c2fb1eb49a3b053d",
+      "origin": {
+        "kind": "generated-review-or-audit"
+      }
+    }
+  ]
+}

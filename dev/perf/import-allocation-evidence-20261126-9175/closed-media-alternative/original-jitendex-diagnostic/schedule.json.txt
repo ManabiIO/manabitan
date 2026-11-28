@@ -1,0 +1,19 @@
+{
+  "schedule": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "bdb9c74874e2612fbb8741f4d36ed4397e4eaf57",
+  "dictionary": "jitendex",
+  "allowedPackageChanges": [
+    "js/dictionary/dense-zip-file-map.js",
+    "js/dictionary/dictionary-importer.js"
+  ],
+  "boundary": "file-input change to post-UI completion, browser monotonic clock",
+  "scope": "Single-host ABBA regression screen; no speed or peak-memory qualification",
+  "failurePolicy": "Stop on failure and retain all observations; no replacement runs",
+  "scriptSha256": "67e6f3c5abc9ca58f8a0a8df0a331ed0c42f04b0327b72de1632886f1fea2efc"
+}

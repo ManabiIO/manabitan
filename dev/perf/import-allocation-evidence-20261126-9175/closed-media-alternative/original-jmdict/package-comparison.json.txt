@@ -1,0 +1,10 @@
+{
+  "sha256": {
+    "A": "e173051ef01733d67a5a3390416e7f7cfcf2173e875acabf8acd9707084020d2",
+    "B": "7682537b051cfee64cc812fdc89aa91aa5454a0f90f1165ef7dbcf02236da5ed"
+  },
+  "changedEntries": [
+    "js/dictionary/dense-zip-file-map.js",
+    "js/dictionary/dictionary-importer.js"
+  ]
+}

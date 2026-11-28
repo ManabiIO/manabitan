@@ -1,0 +1,236 @@
+{
+  "complete": true,
+  "matchedSemanticReceipts": 4,
+  "pairedChangePercent": [
+    1.1150852093405383,
+    4.479661912307886
+  ],
+  "medianPairedChangePercent": 2.7973735608242123,
+  "scope": "Four-import screen only; no established whole-import speedup or peak-memory reduction",
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 950.6000000000058,
+      "workerImportMs": 917.5,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43520477,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/0n9cn77jul4",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/6mojer1fg1v",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/8g2k660s2t7",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/9v1nr4ocbog",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/fr2pu1ydcxu",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ltlnjeqbet",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/pujdal5nhy",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/yti0mkngcwf",
+            "bytes": 176128
+          }
+        ]
+      }
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 961.1999999999971,
+      "workerImportMs": 926,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43520477,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2l34yhvmcxd",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2uix2q7bfwd",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/8fwgqgn6n1p",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ayaf4lzbh1i",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/fiwtomkyn",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/mcn8c5m71je",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/p5j45n9w00i",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/tst5w40wtd",
+            "bytes": 176128
+          }
+        ]
+      }
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 988.8999999999942,
+      "workerImportMs": 957.5,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43520477,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/1paow6oi56f",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/3by571aoym",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/acg3sv2onlv",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/au6zaz2xg6f",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ibf45p5a9nq",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/klpygkpiy3",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/ugcme7qx7j",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/vbgeg06rvin",
+            "bytes": 176128
+          }
+        ]
+      }
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 946.5,
+      "workerImportMs": 911.1999999999971,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43520477,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/0vpmehra353",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/42f1h0njz5m",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/4f8k1jzr97q",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/d3046t4hx1r",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/jlxbme85g",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/rwq1pxzmsok",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/uxqw54dgx4d",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/w5nzwhoe7k9",
+            "bytes": 176128
+          }
+        ]
+      }
+    }
+  ]
+}

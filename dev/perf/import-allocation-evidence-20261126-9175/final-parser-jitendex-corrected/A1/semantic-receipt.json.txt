@@ -1,0 +1,462 @@
+{
+  "title": "Jitendex.org [2026-10-03]",
+  "revision": "2026.10.03.0",
+  "termRows": 436555,
+  "probeTerms": [
+    "ヽ",
+    "お坊っちゃん",
+    "吃逆",
+    "どうやら",
+    "鈎爪",
+    "心ここに在らず",
+    "居残り手當て",
+    "水墨山水",
+    "野犬",
+    "寫真加工アプリ",
+    "気まＺ",
+    "ＪＭｄｉｃｔ"
+  ],
+  "outputDigestSha256": "754fc8c99cea76757778abe6b30f16a293c91bba3d45a68dcb9e3e9bac3ca215",
+  "media": {
+    "mode": "all",
+    "totalFiles": 236,
+    "totalBytes": 4992155,
+    "files": 236,
+    "bytes": 4992155,
+    "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+  },
+  "lookup": [
+    {
+      "pass": 0,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 0,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 0,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 0,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 0,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 0,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 0,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 0,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 0,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 0,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 0,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 0,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    },
+    {
+      "pass": 1,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 1,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 1,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 1,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 1,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 1,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 1,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 1,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 1,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 1,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 1,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 1,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    },
+    {
+      "pass": 2,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 2,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 2,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 2,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 2,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 2,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 2,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 2,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 2,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 2,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 2,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 2,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    },
+    {
+      "pass": 3,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 3,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 3,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 3,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 3,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 3,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 3,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 3,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 3,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 3,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 3,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 3,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    },
+    {
+      "pass": 4,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 4,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 4,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 4,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 4,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 4,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 4,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 4,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 4,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 4,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 4,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 4,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    },
+    {
+      "pass": 5,
+      "term": "お坊っちゃん",
+      "results": 1,
+      "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+    },
+    {
+      "pass": 5,
+      "term": "どうやら",
+      "results": 1,
+      "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+    },
+    {
+      "pass": 5,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+    },
+    {
+      "pass": 5,
+      "term": "吃逆",
+      "results": 1,
+      "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+    },
+    {
+      "pass": 5,
+      "term": "寫真加工アプリ",
+      "results": 2,
+      "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+    },
+    {
+      "pass": 5,
+      "term": "居残り手當て",
+      "results": 2,
+      "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+    },
+    {
+      "pass": 5,
+      "term": "心ここに在らず",
+      "results": 1,
+      "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+    },
+    {
+      "pass": 5,
+      "term": "気まＺ",
+      "results": 2,
+      "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+    },
+    {
+      "pass": 5,
+      "term": "水墨山水",
+      "results": 2,
+      "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+    },
+    {
+      "pass": 5,
+      "term": "野犬",
+      "results": 2,
+      "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+    },
+    {
+      "pass": 5,
+      "term": "鈎爪",
+      "results": 1,
+      "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+    },
+    {
+      "pass": 5,
+      "term": "ＪＭｄｉｃｔ",
+      "results": 1,
+      "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+    }
+  ]
+}

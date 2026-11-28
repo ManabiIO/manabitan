@@ -1,0 +1,69 @@
+import fs from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import assert from 'node:assert/strict'
+import {ZipReader, Uint8ArrayReader, configure} from '../manabitan/node_modules/@zip.js/zip.js/index.js'
+import * as baseline from '../manabitan/ext/js/dictionary/term-bank-wasm-parser.js'
+import * as candidate from '../manabitan-parser/ext/js/dictionary/term-bank-wasm-parser.js'
+import {RawZipPayloadReader} from '../manabitan/ext/js/dictionary/term-bank-source-pipeline.js'
+import {initializeTermContentPlanResolution} from '../manabitan-parser/ext/js/dictionary/term-content-plan-resolution.js'
+configure({useWebWorkers:false})
+const module=await WebAssembly.compile(await fs.readFile(new URL('../manabitan-parser/dev/data/dictionary-wasm/term-bank-parser.wasm',import.meta.url)))
+baseline.setTermBankWasmModule(module)
+candidate.setTermBankWasmModule(module)
+const dictionaries=JSON.parse(await fs.readFile(new URL('../manabitan/test/perf/dictionaries.lock.json',import.meta.url))).dictionaries
+function digest(value){
+ const h=createHash('sha256')
+ function visit(x){
+  if(x===undefined){h.update('undefined;');return}
+  if(x===null){h.update('null;');return}
+  if(ArrayBuffer.isView(x)){h.update(`${x.constructor.name}:${x.byteLength}:`);h.update(new Uint8Array(x.buffer,x.byteOffset,x.byteLength));return}
+  if(x instanceof Map){h.update(`Map:${x.size}:`);for(const [k,v]of x){visit(k);visit(v)};return}
+  if(typeof x==='object'){
+   const keys=Object.keys(x).filter(k=>k!=='resolutionDeferred'&&k!=='preparedLookupIndexEncodeMs').sort()
+   h.update(`${Array.isArray(x)?'Array':'Object'}:${keys.length}:`)
+   for(const key of keys){visit(key);visit(x[key])};return
+  }
+  h.update(`${typeof x}:${JSON.stringify(x)};`)
+ }
+ visit(value);return h.digest('hex')
+}
+const report={baseline:'0143e9596cd8f790d5e166d4ba6a2425fbc57f14',description:'Fixed groups of four compressed banks through actual native inflate/parser/copy functions. Component output parity and cumulative deferred resolution bytes; not whole-import timing or peak memory.',corpora:[]}
+for(const id of ['jmdict','jitendex','vndb']){
+ const fixture=dictionaries[id]
+ const bytes=new Uint8Array(await fs.readFile(new URL(`../manabitan/builds/e2e-dictionary-cache/${fixture.cacheFile}`,import.meta.url)))
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),fixture.sha256)
+ const zip=new ZipReader(new Uint8ArrayReader(bytes))
+ const entries=(await zip.getEntries()).filter(x=>/^term_bank_\d+\.json$/.test(x.filename)).sort((a,b)=>parseInt(a.filename.slice(10))-parseInt(b.filename.slice(10)))
+ const raw=new RawZipPayloadReader(new Blob([bytes]))
+ const signal=new AbortController().signal
+ const corpus={id,sha256:fixture.sha256,rows:0,uniqueContents:0,deferredResolutionBytes:0,maxDeferredGroupBytes:0,banks:entries.length,groups:[]}
+ for(let i=0;i<entries.length;i+=4){
+  const sources=[]
+  for(const entry of entries.slice(i,i+4))sources.push({bytes:await raw.read(entry,signal),filename:entry.filename,compressedSize:entry.compressedSize,uncompressedSize:entry.uncompressedSize,compressionMethod:entry.compressionMethod,signature:entry.signature})
+  let oldDigest,newDigest,groupRows=0,unique=0,deferred=0
+  for(const [kind,parser]of [['baseline',baseline],['candidate',candidate]]){
+   const preloadedSource=await parser.inflateCompressedTermBankSourcesWasm(sources)
+   await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0),3,(chunk)=>{
+    const owned=parser.copyWasmBackedColumnChunk(chunk,false,id==='vndb',true,preloadedSource)
+    if(kind==='candidate'){
+     const p=owned.contentDedupPlan
+     assert.equal(p.resolutionDeferred,true)
+     assert.equal(p.resolvedFlags.byteLength+p.resolvedOffsets.byteLength+p.resolvedLengths.byteLength,0)
+     unique=p.uniqueCount
+     deferred=unique*13
+     initializeTermContentPlanResolution(p)
+     groupRows=owned.rowCount
+     newDigest=digest(owned)
+    }else oldDigest=digest(owned)
+   },2048,{singleChunk:true,mediaHintFastScan:id!=='jmdict',emitContentSlab:true,compactContentMetadata:true,emitTokenBinaryContent:true,emitTermByteLists:false,prepareLookupIndexes:true,validateGlossaryTypes:true,preloadedSource})
+  }
+  assert.equal(newDigest,oldDigest,`${id} group ${i}`)
+  corpus.rows+=groupRows;corpus.uniqueContents+=unique;corpus.deferredResolutionBytes+=deferred;corpus.maxDeferredGroupBytes=Math.max(corpus.maxDeferredGroupBytes,deferred)
+  corpus.groups.push({firstBank:entries[i].filename,banks:Math.min(4,entries.length-i),rows:groupRows,uniqueContents:unique,deferredResolutionBytes:deferred,digest:newDigest})
+ }
+ assert.equal(corpus.rows,fixture.termRows)
+ report.corpora.push(corpus)
+ await fs.writeFile(new URL('corpus-parity.json',import.meta.url),JSON.stringify(report,null,2)+'\n')
+ console.log(JSON.stringify({...corpus,groups:corpus.groups.length}))
+ await zip.close()
+}

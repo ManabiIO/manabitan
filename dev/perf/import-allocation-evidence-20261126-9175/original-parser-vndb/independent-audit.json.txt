@@ -1,0 +1,54 @@
+{
+  "artifact": "/workspace/scratch/9175611d1a4c/allocation-ci-audit/allocation-scratch-vndb-9175.zip",
+  "artifactSha256": "6a8e694674ec1d2aabc2c931f395a1032a8842cf13843d0bb1323d7002696f85",
+  "kind": "scratch",
+  "dictionary": "vndb",
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "400d4375a89cdf93805cc9566da2068a741dc059",
+  "browserVersion": "153.0.8010.12",
+  "matchedSemanticReceipts": 4,
+  "termRows": 6648310,
+  "mediaFiles": 146570,
+  "mediaBytes": 188131284,
+  "packageSha256": {
+    "A": "c9e9cef7daf3acad9fa932d7d8e07a5ce6f3f6a12dbfa97a5b72b2c8ae59ec44",
+    "B": "e65ecc54988a5ad42b80f42939067ca3b055ec17b35e7d3533486eceb5543c47"
+  },
+  "changedEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-plan-resolution.js"
+  ],
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 8945.300000000003,
+      "workerImportMs": 8917.900000000009,
+      "storageBytes": 609176779
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 4928.0,
+      "workerImportMs": 4902.299999999988,
+      "storageBytes": 609176779
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 5745.400000000023,
+      "workerImportMs": 5717.79999999993,
+      "storageBytes": 609176779
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 5115.5,
+      "workerImportMs": 5091,
+      "storageBytes": 609176779
+    }
+  ],
+  "pairedChangePercent": [
+    -44.909617340950014,
+    12.313556837064276
+  ],
+  "medianPairedChangePercent": -16.29803025194287,
+  "scope": "One-host four-import screen; no whole-import speed or peak-memory qualification"
+}
