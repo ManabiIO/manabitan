@@ -18,6 +18,7 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {createArtifactTermChunkSinkCompletion, takeArtifactTermChunkSinkCompletion} from '../ext/js/dictionary/term-content-ownership.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 /** @typedef {Parameters<DictionaryImporter['_readTermBankFileFast']>[8]} Sources */
@@ -74,6 +75,26 @@ function createSources(mode) {
 afterEach(() => { vi.restoreAllMocks(); });
 
 describe('importer completion-ticket adapters', () => {
+    test.each([
+        {name: 'numeric result', value: 12},
+        {name: 'ordinary object', value: {completed: true}},
+        {name: 'incidental completion', value: {completion: deferred().promise}},
+        {name: 'completion getter', value: Object.defineProperty({}, 'completion', {get: () => { throw new Error('Incidental property was read'); }})},
+        {name: 'fulfilled ordinary promise', value: Promise.resolve({completion: deferred().promise})},
+    ])('ignores the legacy $name without creating a storage ticket', async ({value}) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const parallel = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallel').mockImplementation(async (_sources, _version, callback) => {
+            const result = await callback(chunk, progress);
+            expect(result).toBeUndefined();
+            expect(takeArtifactTermChunkSinkCompletion(result)).toBeNull();
+            return true;
+        });
+        await expect(importer._readTermBankFileFast(
+            file, 3, 'Legacy callback result', false, false, true, 'raw-bytes', () => value, [source],
+        )).resolves.toEqual({termList: [], requirements: null});
+        expect(parallel).toHaveBeenCalledTimes(1);
+    });
+
     test.each(/** @type {const} */ (['array', 'deferred', 'lazy', 'compressed']))('forwards pending completion through the %s parallel callback', async (mode) => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const completed = deferred();
@@ -87,17 +108,18 @@ describe('importer completion-ticket adapters', () => {
          */
         const consume = async (callback) => {
             const result = await callback(chunk, progress);
-            expect(result).toHaveProperty('completion');
-            if (typeof result === 'undefined') { throw new Error('Parallel adapter lost completion'); }
+            const completion = takeArtifactTermChunkSinkCompletion(result);
+            expect(completion).not.toBeNull();
+            if (completion === null) { throw new Error('Parallel adapter lost authentic completion'); }
             published.resolve();
-            await result.completion;
+            await completion;
             return true;
         };
         const direct = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallel').mockImplementation(async (_sources, _version, callback) => await consume(callback));
         const deferredParser = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallelDeferred').mockImplementation(async (_sources, _lengths, _version, callback) => await consume(callback));
         const lazy = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallelLazy').mockImplementation(async (_sources, _lengths, _version, callback) => await consume(callback));
         const compressed = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallelCompressedLazy').mockImplementation(async (_sources, _lengths, _version, callback) => await consume(callback));
-        const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => ({completion: completed.promise}), createSources(mode));
+        const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => createArtifactTermChunkSinkCompletion(completed.promise), createSources(mode));
         void read.then(
             () => { readSettled = true; },
             () => { readSettled = true; },
@@ -138,7 +160,7 @@ describe('importer completion-ticket adapters', () => {
         });
         const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => {
             entered.resolve();
-            return {completion: completed.promise};
+            return createArtifactTermChunkSinkCompletion(completed.promise);
         }, overlapped ? [source] : source);
 
         await entered.promise;
@@ -157,12 +179,13 @@ describe('importer completion-ticket adapters', () => {
         const failure = new Error('record persistence failed after publication');
         vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallel').mockImplementation(async (_sources, _version, callback) => {
             const result = await callback(chunk, progress);
-            if (typeof result === 'undefined') { throw new Error('Missing completion'); }
+            const completion = takeArtifactTermChunkSinkCompletion(result);
+            if (completion === null) { throw new Error('Missing authentic completion'); }
             published.resolve();
-            await result.completion;
+            await completion;
             return true;
         });
-        const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => ({completion: completed.promise}), [source]);
+        const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => createArtifactTermChunkSinkCompletion(completed.promise), [source]);
         const rejection = expect(read).rejects.toBe(failure);
         await published.promise;
         completed.reject(failure);

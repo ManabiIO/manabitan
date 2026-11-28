@@ -14,6 +14,7 @@ on:
       - 'test/*dictionary-import*.test.js'
       - 'test/dictionary-database-chunk-pipeline.test.js'
       - 'test/term-bank-pipeline-completion.test.js'
+      - 'test/zstd-term-content-initialization.test.js'
       - 'dev/perf/import-qualification-20261125-a7f7.py'
       - 'dev/perf/import-memory-20261125-a7f7/*.py'
       - '.github/workflows/import-content-overlap-da6c4.yml'

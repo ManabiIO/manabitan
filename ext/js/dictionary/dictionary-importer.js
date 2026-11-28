@@ -69,7 +69,7 @@ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} fr
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {beginArtifactTermChunkSink} from './artifact-term-chunk-pipeline.js';
-import {hasOwnedTermContent} from './term-content-ownership.js';
+import {createArtifactTermChunkSinkCompletion, hasOwnedTermContent, takeArtifactTermChunkSinkCompletion} from './term-content-ownership.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
@@ -5127,7 +5127,7 @@ export class DictionaryImporter {
      * @param {boolean} useMediaPipeline
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
-     * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} [onChunk]
+     * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} [onChunk]
      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @param {boolean} [allowNativeImageProjection]
@@ -5293,7 +5293,7 @@ export class DictionaryImporter {
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                     const tChunkSinkStart = Date.now();
-                    const sinkResult = await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} */ (/** @type {unknown} */ (onChunk))(
+                    const sinkResult = await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} */ (/** @type {unknown} */ (onChunk))(
                         {
                             ...columnPayload,
                             dictionary: dictionaryTitle,
@@ -5304,12 +5304,13 @@ export class DictionaryImporter {
                         requirementsForChunk,
                         chunkProgress,
                     );
-                    if (typeof sinkResult !== 'undefined') {
-                        const completion = sinkResult.completion.then(() => {
+                    const sinkCompletion = takeArtifactTermChunkSinkCompletion(sinkResult);
+                    if (sinkCompletion !== null) {
+                        const completion = sinkCompletion.then(() => {
                             importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
                         });
                         void completion.catch(() => {});
-                        return {completion};
+                        return createArtifactTermChunkSinkCompletion(completion);
                     }
                     importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
                     return;
@@ -5471,12 +5472,13 @@ export class DictionaryImporter {
 
                 const tChunkSinkStart = Date.now();
                 if (streamToChunkHandler) {
-                    const sinkResult = await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} */ (onChunk)(
+                    const sinkResult = await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} */ (onChunk)(
                         termListChunk,
                         requirementsForChunk,
                         chunkProgress,
                     );
-                    if (typeof sinkResult !== 'undefined') { await sinkResult.completion; }
+                    const completion = takeArtifactTermChunkSinkCompletion(sinkResult);
+                    if (completion !== null) { await completion; }
                 } else {
                     termList.push(...termListChunk);
                     if (requirements !== null && requirementsForChunk !== null) {
@@ -5496,7 +5498,8 @@ export class DictionaryImporter {
              */
             const handleParsedChunk = async (parsedRows, chunkProgress) => {
                 const result = await handleParallelParsedChunk(parsedRows, chunkProgress);
-                if (typeof result !== 'undefined') { await result.completion; }
+                const completion = takeArtifactTermChunkSinkCompletion(result);
+                if (completion !== null) { await completion; }
             };
             const parserOptions = {
                 ...this._termBankExperiments,

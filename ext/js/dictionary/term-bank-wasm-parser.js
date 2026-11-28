@@ -28,7 +28,7 @@ import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
-import {hasOwnedTermContent, registerOwnedTermContent} from './term-content-ownership.js';
+import {hasOwnedTermContent, registerOwnedTermContent, takeArtifactTermChunkSinkCompletion} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -80,7 +80,7 @@ const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
-/** @typedef {void|{completion: Promise<void>}} TermBankChunkSinkResult */
+/** @typedef {void|import('./term-content-ownership.js').ArtifactTermChunkSinkCompletion} TermBankChunkSinkResult */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -2878,19 +2878,12 @@ class ParallelTermBankParserPool {
 }
 
 /**
- * @param {TermBankChunkSinkResult} result
+ * @param {unknown} result
  * @returns {Promise<void>|null}
- * @throws {TypeError} If an internal sink returns an invalid completion ticket.
+ * @throws {TypeError} If an internal sink reuses an already claimed completion ticket.
  */
 function getTermBankChunkSinkCompletion(result) {
-    if (typeof result === 'undefined') { return null; }
-    if (
-        result === null || typeof result !== 'object' ||
-        typeof result.completion?.then !== 'function'
-    ) {
-        throw new TypeError('Term-bank chunk sink returned an invalid completion ticket');
-    }
-    return Promise.resolve(result.completion);
+    return takeArtifactTermChunkSinkCompletion(result);
 }
 
 class ParallelTermBankPipelineRun {
@@ -2899,7 +2892,7 @@ class ParallelTermBankPipelineRun {
      * @param {ParallelTermBankSource[][]} groups
      * @param {number} totalBytes
      * @param {number} version
-     * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+     * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
      * @param {Record<string, unknown>} options
      * @param {() => boolean} shouldCancel
      * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} poolLease
@@ -2914,7 +2907,7 @@ class ParallelTermBankPipelineRun {
         this._totalBytes = totalBytes;
         /** @type {number} */
         this._version = version;
-        /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} */
+        /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} */
         this._onChunk = onChunk;
         const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
@@ -3341,7 +3334,7 @@ export async function disposeParallelTermBankParser() {
  * begin as soon as the first group is available and overlap later parsing.
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3361,7 +3354,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {Promise<Uint8Array>[]} contentBytePromises
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3385,7 +3378,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3410,7 +3403,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3431,7 +3424,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
 /**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => unknown} onChunk
  * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]

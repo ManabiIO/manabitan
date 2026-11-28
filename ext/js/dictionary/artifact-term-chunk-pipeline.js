@@ -15,8 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {createArtifactTermChunkSinkCompletion} from './term-content-ownership.js';
+
 /** @typedef {Parameters<import('./dictionary-database.js').DictionaryDatabase['_bulkAddArtifactTermsChunkWithContentDedup']>[0]} ArtifactTermChunk */
 /** @typedef {{published: Promise<void>, completion: Promise<Record<string, number>>}} ArtifactTermChunkAppend */
+/** @typedef {import('./term-content-ownership.js').ArtifactTermChunkSinkCompletion} ArtifactTermChunkSinkCompletion */
 /**
  * @typedef {object} ArtifactTermChunkAppendContext
  * @property {() => Promise<void>} beforePublication
@@ -228,12 +231,12 @@ export class ArtifactTermChunkPipeline {
  * Returns a completion owner once the consumer publishes its ordered metadata.
  * The consumer keeps metrics, progress and source clearing inside completion.
  * @param {(published: () => void) => Promise<void>} consume
- * @returns {Promise<{completion: Promise<void>}>}
+ * @returns {Promise<ArtifactTermChunkSinkCompletion>}
  */
 export async function beginArtifactTermChunkSink(consume) {
     const publication = createBarrier();
     const completion = Promise.resolve().then(async () => { await consume(publication.resolve); });
     void completion.catch(() => {});
     await Promise.race([publication.promise, completion]);
-    return {completion};
+    return createArtifactTermChunkSinkCompletion(completion);
 }
