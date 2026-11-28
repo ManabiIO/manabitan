@@ -733,3 +733,41 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## November 27, 2026: narrow record-field length re-evaluation (5a86)
+
+This experiment re-evaluates the remaining length-dispatch portion of draft
+[PR #764](https://github.com/ManabiIO/manabitan/pull/764) on frozen baseline
+`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. It does not modify that PR or claim a
+new invention. The current direct field-column encoder already proves private,
+ordinary reference and score columns within one synchronous call. The candidate
+uses those captured references to read each content length in the compact-field
+eligibility pass, while keeping its existing index-bound error and generic
+fallback. It changes no formats, import options, concurrency, or cache budgets.
+
+Local focused validation passed all 44 tests in the direct-field, compact-score,
+and split-reference suites, including two added cases for empty resolved columns
+and accessor-backed reference mutation. Earlier failed test attempts caused by
+scratch exhaustion remain failures; the subsequent pass used a dedicated
+temporary directory. A full pinned JMdict parser metadata replay was prepared
+(528,299 rows, eight fixed component groups, 22 field segments), but no component
+timing was acquired before executor interruption. No elapsed benefit is claimed.
+
+The branch-only workflow
+`.github/workflows/import-record-field-lengths-20261127-5a86.yml` freezes the
+baseline above and uses the exact push SHA as candidate. Node 22.22.0, the
+repository-pinned Chromium and fixture lock, and the unchanged
+`import-qualification-20261125-a7f7.py` runner remain authoritative. Each of two
+independent JMdict jobs begins in opposite order (AB/BA) and registers six
+alternating timed pairs, two identical-code A/C control pairs, four excluded
+warmups, two separate exhaustive-media observations, and four separate memory
+observations. Only `js/dictionary/term-record-opfs-store.js` may differ in the
+release packages. No flags or worker overrides are supplied.
+
+The new Python wrapper only invokes that runner and prints compact results and
+failure-log tails for remote inspection. It does not alter acquisition, receipt
+validation, the memory observer, or qualification gates. Raw observations,
+packages, memory scans, audits, and failures are retained in hosted artifacts.
+Jitendex and VNDB controls are deferred until JMdict shows a review-worthy
+benefit. A code branch and CI acquisition do not establish a speedup; no pull
+request should be opened from this experiment without useful measured evidence.

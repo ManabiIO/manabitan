@@ -5873,7 +5873,18 @@ view.chunks :
         for (let i = 0; i < count; ++i) {
             /* eslint-disable-next-line @stylistic/semi */
             const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            let contentLength;
+            if (directReferences === null) {
+                contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            } else {
+                // The same synchronous origin check already selected private,
+                // ordinary columns for the final field writes below.
+                const uniqueIndex = directReferences.uniqueIndexList[i];
+                if (uniqueIndex >= directReferences.lengths.length) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+                }
+                contentLength = directReferences.lengths[uniqueIndex];
+            }
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;

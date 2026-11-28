@@ -108,6 +108,33 @@ describe('direct resolved record-field columns', () => {
         }
     })
 
+    test('rejects the first reference when private resolved columns are empty', () => {
+        const chunk = fixture()
+        chunk.resolvedContentReferences.offsets = new Float64Array(0)
+        chunk.resolvedContentReferences.lengths = new Uint32Array(0)
+        expect(() => encodeDirect(chunk)).toThrow('Invalid resolved term content reference index: 0')
+        expect(() => encodeGeneric(chunk)).toThrow('Invalid resolved term content reference index: 0')
+    })
+
+    test('keeps accessor-backed resolved references on their per-row path', () => {
+        /**
+         * @param {boolean} trusted
+         * @returns {Fixture}
+         */
+        const make = (trusted) => {
+            const chunk = trusted ? fixture() : {...fixture()}
+            const references = chunk.resolvedContentReferences
+            references.uniqueIndexList.fill(0)
+            let reads = 0
+            Object.defineProperty(chunk, 'resolvedContentReferences', {get() {
+                references.lengths[0] = ++reads
+                return references
+            }})
+            return chunk
+        }
+        expect(encodeDirect(make(true))).toEqual(encodeDirect(make(false)))
+    })
+
     test('returns owned bytes and rereads mutable columns on every invocation', () => {
         const chunk = fixture()
         const first = encodeDirect(chunk)
