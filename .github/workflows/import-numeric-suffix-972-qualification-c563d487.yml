@@ -1,0 +1,337 @@
+name: Current-base numeric suffix import qualification c563d487
+
+on:
+  push:
+    branches: ['perf/import-numeric-suffix-972-qualification-20261128-c563d487']
+    paths: ['.github/workflows/import-numeric-suffix-972-qualification-c563d487.yml']
+
+permissions:
+  contents: read
+  actions: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PERF_BASELINE: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+  PERF_CANDIDATE: 4cd1abfabcb92c09694f107ff8e856add52e07df
+  CORRECTNESS_TOOLING_HEAD: d28d74f9c1047491670942ec6e0414cc9c823101
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    name: Bind exact product to original correctness
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify frozen qualification tooling and syntax
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib
+          from pathlib import Path
+          root = Path("dev/perf/import-numeric-suffix-972-qualification-c563d487")
+          expected = {
+              "prospective-complete-import-criteria.json": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+              "correctness-reuse-binding.json": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+              "original-correctness-recovery.json": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+              "verify-correctness-reuse.py": "de63b509951892b9d83f6a0087fb77e20f9e224d4cb5d5ffebc09a9d0c5cf988",
+              "archive-evidence.py": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+          }
+          for name, digest in expected.items():
+              if hashlib.sha256((root / name).read_bytes()).hexdigest() != digest:
+                  raise SystemExit("Qualification tooling differs from its frozen identity: " + name)
+          PYTHON
+          python3 -m py_compile \
+            dev/perf/import-numeric-suffix-972-qualification-c563d487/verify-correctness-reuse.py \
+            dev/perf/import-numeric-suffix-972-qualification-c563d487/archive-evidence.py
+      - name: Fetch only frozen source and correctness commits
+        run: git fetch --no-tags --depth=2 origin "$PERF_BASELINE" "$PERF_CANDIDATE" "$CORRECTNESS_TOOLING_HEAD"
+      - name: Bind the six-file product to all original correctness proofs
+        env:
+          CORRECTNESS_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 dev/perf/import-numeric-suffix-972-qualification-c563d487/verify-correctness-reuse.py \
+            --binding dev/perf/import-numeric-suffix-972-qualification-c563d487/correctness-reuse-binding.json \
+            --output builds/perf/numeric-suffix-972-correctness-reuse
+      - name: Retain original correctness artifact and every binding outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: numeric-suffix-972-c563d487-correctness-reuse-${{ github.run_attempt }}
+          path: builds/perf/numeric-suffix-972-correctness-reuse
+          if-no-files-found: warn
+          retention-days: 14
+
+  qualify:
+    name: '${{ matrix.dictionary }} (${{ matrix.order }})'
+    needs: validate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Validate the independent observer
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Fetch frozen product sources
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Bind the unchanged observer to the frozen baseline
+        run: git diff --exit-code "$PERF_BASELINE" HEAD -- dev/perf/import-qualification-20261125-a7f7.py dev/perf/import-memory-20261125-a7f7
+      - name: Run registered complete-import and separate memory cohorts
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          frozen = {
+              "prospective-complete-import-criteria.json": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+              "correctness-reuse-binding.json": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+              "original-correctness-recovery.json": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720"
+          }
+          for name, expected in frozen.items():
+              data = (Path("dev/perf/import-numeric-suffix-972-qualification-c563d487") / name).read_bytes()
+              if hashlib.sha256(data).hexdigest() != expected:
+                  raise SystemExit("Frozen source/correctness/criteria binding changed: " + name)
+          baseline = os.environ["PERF_BASELINE"]
+          candidate = os.environ["PERF_CANDIDATE"]
+          for value in (baseline, candidate):
+              if re.fullmatch(r"[a-f0-9]{40}", value) is None:
+                  raise SystemExit("Frozen source IDs must be complete lowercase commit hashes")
+          if baseline == candidate:
+              raise SystemExit("Candidate must differ; identical controls are interleaved separately")
+          subprocess.run(["git", "merge-base", "--is-ancestor", baseline, candidate], check=True)
+          dictionary = os.environ["PERF_DICTIONARY"]
+          order = os.environ["PERF_ORDER"]
+          command = [
+              "python", "dev/perf/import-qualification-20261125-a7f7.py",
+              "--baseline", baseline, "--candidate", candidate,
+              "--dictionary", dictionary, "--initial-order", order,
+              "--pairs", "12", "--flags", "{}",
+              "--expected-package-entry", "js/dictionary/wasm/term-bank-parser.c",
+              "--expected-package-entry", "lib/term-bank-parser.wasm",
+              "--evidence", f"builds/perf/numeric-suffix-972-c563d487-{dictionary}-{order}",
+          ]
+          if dictionary == "vndb":
+              # Frozen before acquisition; every observed byte still compares
+              # exactly. A failing cohort is retained, never repaired in place.
+              command.extend(["--vndb-sah-allocation-units", "37", "37"])
+          subprocess.run(command, check=True)
+          PYTHON
+      - name: Preserve prospective criteria and exact correctness provenance
+        if: always()
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import os
+          from pathlib import Path
+          source = Path("dev/perf/import-numeric-suffix-972-qualification-c563d487")
+          target = Path("builds/perf") / ("numeric-suffix-972-c563d487-" + os.environ["PERF_DICTIONARY"] + "-" + os.environ["PERF_ORDER"])
+          target.mkdir(parents=True, exist_ok=True)
+          frozen = {
+              "prospective-complete-import-criteria.json": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+              "correctness-reuse-binding.json": "5e05d27bb1d7dd1bc0b95e3255e9ad8f0035a11c61c31b2c771d9e52f949cb03",
+              "original-correctness-recovery.json": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720"
+          }
+          for name, expected in frozen.items():
+              data = (source / name).read_bytes()
+              digest = hashlib.sha256(data).hexdigest()
+              if digest != expected:
+                  raise SystemExit("Frozen prospective provenance changed: " + name)
+              (target / name).write_bytes(data)
+              if name == "prospective-complete-import-criteria.json":
+                  print("MANABITAN_PROSPECTIVE_CRITERIA_SHA256 " + digest, flush=True)
+              else:
+                  print("MANABITAN_PROSPECTIVE_PROVENANCE " + name + " " + digest, flush=True)
+          PYTHON
+      - name: Print every raw observation and final result as compact JSON lines
+        if: always()
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import statistics
+          
+          PREFIX = "MANABITAN_QUALIFICATION_JSON "
+          root = Path("builds/perf") / ("numeric-suffix-972-c563d487-" + os.environ["PERF_DICTIONARY"] + "-" + os.environ["PERF_ORDER"])
+          
+          def emit(kind, value):
+              print(PREFIX + json.dumps({"kind": kind, "value": value}, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True)
+          
+          def read(path):
+              if not path.is_file():
+                  return None
+              try:
+                  return json.loads(path.read_text())
+              except Exception as error:
+                  emit("read-error", {"path": str(path), "type": type(error).__name__, "message": str(error)})
+                  return None
+          
+          def digest(value):
+              return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+          
+          def file_digest(path):
+              if not path.is_file():
+                  return None
+              result = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1048576), b""):
+                      result.update(block)
+              return result.hexdigest()
+          
+          def pick(value, keys):
+              value = value if isinstance(value, dict) else {}
+              return {key: value.get(key) for key in keys}
+          
+          def compact_validation(value):
+              value = value if isinstance(value, dict) else {}
+              result = pick(value, ("title", "revision", "termRows", "contentReadable", "probeCount", "probeTerms", "outputDigestSha256"))
+              result["restart"] = pick(value.get("restart"), ("title", "revision", "termRows", "contentReadable", "probeCount", "mediaFiles"))
+              result["media"] = pick(value.get("media"), ("mode", "totalFiles", "totalBytes", "files", "bytes", "sha256"))
+              result["storage"] = value.get("storage")
+              lookup = value.get("lookup") or {}
+              rows = lookup.get("observations") or []
+              semantic = [{key: item for key, item in row.items() if key != "elapsedMs"} for row in rows]
+              semantic.sort(key=lambda row: (row.get("pass", -1), row.get("term", "")))
+              groups = {}
+              for row in rows:
+                  groups.setdefault(row.get("pass"), []).append(row)
+              passes = []
+              for number, group in sorted(groups.items(), key=lambda item: str(item[0])):
+                  durations = [row["elapsedMs"] for row in group if type(row.get("elapsedMs")) in (int, float)]
+                  passes.append({"pass": number, "count": len(group), "elapsedCount": len(durations),
+                                 "totalMs": sum(durations), "medianMs": statistics.median(durations) if durations else None,
+                                 "maxMs": max(durations) if durations else None})
+              result["lookup"] = {"timingBoundary": lookup.get("timingBoundary"), "observationCount": len(rows),
+                                  "distinctPassTerms": len({(row.get("pass"), row.get("term")) for row in rows}),
+                                  "allExactHeadwordMatches": all(row.get("hasExactHeadwordMatch") is True for row in rows),
+                                  "semanticSha256": digest(semantic), "passes": passes}
+              return result
+          
+          plan = read(root / "registered-plan.json") or {}
+          identities = read(root / "source-identities.json") or {}
+          fixture_lock = read(Path("test/perf/dictionaries.lock.json")) or {}
+          fixture = fixture_lock.get("dictionaries", {}).get(os.environ["PERF_DICTIONARY"])
+          emit("cohort", {"dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"],
+                          "baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"],
+                          "expectedObservationCount": 42, "workflowCommit": os.environ.get("GITHUB_SHA"), "runId": os.environ.get("GITHUB_RUN_ID"),
+                          "attempt": os.environ.get("GITHUB_RUN_ATTEMPT"), "fixture": fixture,
+                          "fixtureLockSha256": file_digest(Path("test/perf/dictionaries.lock.json")),
+                          "observerSha256": file_digest(Path("dev/perf/import-qualification-20261125-a7f7.py")),
+                          "workflowSha256": file_digest(Path(".github/workflows/import-numeric-suffix-972-qualification-c563d487.yml")),
+                          "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements"})
+          emit("registered-plan", plan)
+          emit("browser-identity", read(root / "browser-identity.json"))
+          changed = identities.get("changedPackageEntries", [])
+          for arm, identity in identities.get("arms", {}).items():
+              result = {key: value for key, value in identity.items() if key != "entries"}
+              result["packageEntryCount"] = len(identity.get("entries", {}))
+              result["packageEntriesSha256"] = digest(identity.get("entries", {}))
+              result["changedPackageEntryHashes"] = {name: identity.get("entries", {}).get(name) for name in changed}
+              emit("source-identity", {"arm": arm, **result})
+          emit("package-diff", {"changedPackageEntries": changed, "controlC": identities.get("controlC")})
+          
+          roles = {}
+          for position, item in enumerate(plan.get("schedule", []), 1):
+              roles[item["id"]] = {**item, "position": position, "authoritativeCohort": item["kind"] == "candidate"}
+          for position, arm in enumerate(plan.get("initialOrder", ""), 1):
+              roles["exhaustive-media-" + arm] = {"kind": "exhaustive-media", "arm": arm, "position": position, "authoritativeCohort": False}
+          for item in plan.get("memorySchedule", []):
+              roles["memory/" + item["name"]] = {**item, "kind": "memory", "authoritativeCohort": False}
+          
+          report_paths = sorted(root.rglob("run-1.json")) if root.is_dir() else []
+          attempted = {path.parent for path in report_paths}
+          if root.is_dir():
+              attempted.update(path.parent for path in root.rglob("run.log"))
+          for location in sorted(attempted):
+              name = location.relative_to(root).as_posix()
+              report = read(location / "run-1.json") or {}
+              summary = read(location / "summary.json") or {}
+              runs = summary.get("runs") or []
+              run = runs[0] if len(runs) == 1 else {}
+              benchmark = report.get("benchmark") or {}
+              validation = benchmark.get("validation") or {}
+              canonical = read(location / "canonical-receipt.json")
+              phases = [phase for phase in report.get("phases", [])
+                        if phase.get("name") in ((fixture or {}).get("label", "") + ": total import",
+                                                 "Import " + (fixture or {}).get("label", "") + " via file input")]
+              phase_rows = [{**pick(phase, ("name", "startMs", "endMs", "durationMs")),
+                             "browserTiming": (phase.get("data") or {}).get("browserTiming"),
+                             "importDebug": pick((phase.get("data") or {}).get("importDebug"),
+                                                 ("hasResult", "resultTitle", "errorCount", "addSettingsErrorCount", "usesFallbackStorage"))}
+                            for phase in phases]
+              emit("observation", {
+                  "id": name, "role": roles.get(name), "requestedFlags": plan.get("flags"),
+                  "report": pick(report, ("status", "failureReason", "skipReason", "skippedVerification", "buildTarget", "browserFlavor", "launchMode", "browserVersion", "packageSha256")),
+                  "benchmark": pick(benchmark, ("dictionary", "pinnedDictionaries", "productionImportDefaults", "traceEnabled", "authoritativeTiming", "phaseProfiling", "phaseScreenshots", "processSampling", "importFlags", "mediaCheck")),
+                  "summary": pick(summary, ("schemaVersion", "dictionary", "buildTarget", "authoritativeTiming", "traceEnabled", "gitSha", "source", "browserVersion", "importFlags", "mediaCheck", "timingBoundary", "timing")),
+                  "fixtureSha256": digest(summary.get("fixture")) if summary.get("fixture") is not None else None,
+                  "runCount": len(runs),
+                  "run": pick(run, ("index", "tracePath", "browserVersion", "packageSha256", "totalImportMs", "automationObservedImportMs", "workerImportMs")),
+                  "rawPhases": phase_rows, "validation": compact_validation(validation),
+                  "summaryValidationSha256": digest(run.get("validation")) if run.get("validation") is not None else None,
+                  "rawValidationSha256": digest(validation) if validation else None,
+                  "canonicalCommonSha256": digest(canonical["common"]) if isinstance(canonical, dict) and "common" in canonical else None,
+                  "canonicalMedia": canonical.get("media") if isinstance(canonical, dict) else None,
+                  "host": summary.get("hostEnvironment"), "rawHost": report.get("hostEnvironment"),
+                  "fileSha256": {filename: file_digest(location / filename) for filename in ("run-1.json", "summary.json", "canonical-receipt.json")},
+              })
+              if report.get("status") != "success" or not summary:
+                  log = location / "run.log"
+                  if log.is_file():
+                      emit("failure-log-tail", {"id": name, "lines": log.read_text(errors="replace").splitlines()[-35:]})
+          
+          for name in ("observations.json", "analysis.json", "memory/observations.json", "memory/memory-comparison.json",
+                       "memory/memory-audit.json", "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
+              value = read(root / name)
+              if value is not None:
+                  emit("result-file", {"path": name, "sha256": file_digest(root / name), "value": value})
+          if not (root / "analysis.json").is_file() and root.is_dir():
+              for path in sorted(root.glob("*.log")):
+                  emit("setup-log-tail", {"path": path.name, "lines": path.read_text(errors="replace").splitlines()[-12:]})
+          emit("extraction-complete", {"rawReportCount": len(report_paths), "attemptedObservationCount": len(attempted),
+                                       "plannedObservationCount": len(roles), "analysisPresent": (root / "analysis.json").is_file(),
+                                       "unattemptedPlannedIds": sorted(set(roles) - {path.relative_to(root).as_posix() for path in attempted})})
+          PYTHON
+      - name: Preserve all original non-package evidence in bounded log chunks
+        if: always()
+        run: |
+          python3 dev/perf/import-numeric-suffix-972-qualification-c563d487/archive-evidence.py \
+            --evidence "builds/perf/numeric-suffix-972-c563d487-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain all original evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: numeric-suffix-972-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: |
+            builds/perf/numeric-suffix-972-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}
+            builds/perf/numeric-suffix-972-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}.raw-evidence.zip
+            builds/perf/numeric-suffix-972-c563d487-${{ matrix.dictionary }}-${{ matrix.order }}.raw-evidence-manifest.json
+          if-no-files-found: error
+          retention-days: 14

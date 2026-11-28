@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 09:13:12 UTC",
+  "repository": "ManabiIO/manabitan",
+  "scope": "Pre-acquisition binding of one current-base complete-import cohort to the exact six-file source already compiled and fully validated. This does not claim that the old build workflow executed at the later product commit.",
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "candidate": {
+    "commit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+    "directParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "files": {
+      "ext/js/dictionary/wasm/term-bank-parser.c": {
+        "bytes": 164449,
+        "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "gitBlobSha1": "5a9033fda78144bfa1edf038b52f6804eeba23f5",
+        "mode": "100644",
+        "status": "M"
+      },
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+        "bytes": 69998,
+        "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+        "gitBlobSha1": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124",
+        "mode": "100644",
+        "status": "M"
+      },
+      "dev/data/dictionary-wasm/manifest.json": {
+        "bytes": 2588,
+        "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+        "gitBlobSha1": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd",
+        "mode": "100644",
+        "status": "M"
+      },
+      "test/term-bank-row-suffix-reuse.test.js": {
+        "bytes": 15101,
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+        "mode": "100644",
+        "status": "A"
+      },
+      "test/term-bank-row-suffix-token-end-fixtures.js": {
+        "bytes": 3037,
+        "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+        "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+        "mode": "100644",
+        "status": "A"
+      },
+      "test/term-bank-row-suffix-token-ends.test.js": {
+        "bytes": 7560,
+        "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+        "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4",
+        "mode": "100644",
+        "status": "A"
+      }
+    }
+  },
+  "originalCorrectness": {
+    "runId": 46126462448,
+    "jobId": 140922033124,
+    "attempt": 1,
+    "toolingCommit": "d28d74f9c1047491670942ec6e0414cc9c823101",
+    "toolingTree": "169ea236aa1ba9a17583878be0b11d5f5cd795f9",
+    "toolingDirectory": "dev/perf/numeric-suffix-972-build-c563d487",
+    "producerSha256": "f548831d146b4b7210117756da67e50a73e3d70d761c10e919cb28efc3e96090",
+    "bindingSha256": "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05",
+    "artifactId": 15256173851,
+    "artifactBytes": 136615,
+    "artifactSha256": "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+    "independentArtifactAuditSha256": "eec68624e1d5a0e8bab9334a2a4b077b146aefa5a397b0fa887985b89f29ab47",
+    "sourceDigest": "9bcdbe3bc321293e9d9baa3b96778f031c1289677464259bf98e5cd8a1dd6718",
+    "sourceFileCount": 14,
+    "rebuiltDiffSha256": "113139f4799adbc3a030d5691a33e1666ee7bdd99cfd7017885fc6111e17b4f4",
+    "unitFiles": 671,
+    "unitPassed": 15180,
+    "unitSkipped": 47,
+    "unitTotal": 15227,
+    "originalSuffixCases": 32,
+    "tokenEndCases": 9,
+    "optionsPassed": 32,
+    "dryBuildTargets": 7
+  },
+  "recoveryProof": {
+    "file": "original-correctness-recovery.json",
+    "bytes": 17452,
+    "sha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+    "gitBlobSha1": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6",
+    "runId": 46128887478,
+    "jobId": 140929481433
+  },
+  "criteria": {
+    "file": "prospective-complete-import-criteria.json",
+    "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee"
+  },
+  "observer": {
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "helperDirectory": "dev/perf/import-memory-20261125-a7f7"
+  },
+  "qualification": {
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "initialOrders": [
+      "AB",
+      "BA"
+    ],
+    "candidatePairsPerCell": 12,
+    "identicalCodePairsPerCell": 4,
+    "excludedWarmupObservationsPerCell": 4,
+    "exhaustiveMediaObservationsPerCell": 2,
+    "separateMemoryObservationsPerCell": 4,
+    "totalObservationsPerCell": 42,
+    "totalObservations": 252,
+    "flags": {},
+    "vndbSahAllocationUnits": [
+      37,
+      37
+    ],
+    "expectedChangedPackageEntries": [
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "unchangedMemoryGates": "a7f7: 250 ms scan coverage; process-tree PSS/private 5% median and 10% maximum paired growth"
+  },
+  "correctnessReusePolicy": {
+    "exactSixFilesAndAllOtherBaseFilesRequired": true,
+    "all17OriginalCommandsRequired": true,
+    "all44OriginalArchiveMembersRequired": true,
+    "noCompilationOrTestsRepeatedByBindingJob": true,
+    "noOldBaselineGainTransferred": true,
+    "requiredExactHeadRepositoryChecksRemainRequiredBeforeMerge": true
+  },
+  "failurePolicy": "Any source, metadata, archive, command or result mismatch stops the dependency before all six measurement jobs. Keep the original artifact and any failed binding receipt; no fallback or replacement."
+}
