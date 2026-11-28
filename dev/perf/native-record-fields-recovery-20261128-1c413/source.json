@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "kind": "reconstructed-production-correctness-only",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productCommit": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+  "productTree": "1800a0e2cd59503d2ffeb605f415476dc9025f2c",
+  "nodeVersion": "22.22.0",
+  "digest": "cd4232f13e9feaa879bb0b09f66bbdc0a14ab5af3fce3d596af3bc01f9ded6e0",
+  "files": {
+    ".github/workflows/native-record-fields-correctness-1c413.yml": {
+      "gitBlob": "2a2d5ad0f4bf9db186eb9bebc9cd0d15e37d7dcb",
+      "mode": "100644",
+      "sha256": "25ba182118ed14d94848b88bd2fb05accfdfc3c7d47f1870e8bcd8c8b94d3beb",
+      "bytes": 16175
+    },
+    "dev/bin/audit-release-packages.js": {
+      "gitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "mode": "100644",
+      "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d",
+      "bytes": 4062
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "gitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+      "mode": "100644",
+      "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+      "bytes": 3159
+    },
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "mode": "100644",
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753
+    },
+    "dev/dictionary-wasm.js": {
+      "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "mode": "100644",
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "bytes": 7244
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/README.md": {
+      "gitBlob": "608dc75d7169fc25f14b8db7d4b739d5334b547d",
+      "mode": "100644",
+      "sha256": "4269c3e4f2688b7a08729b90e67b9ee0413622103526c88fde82e8eb4cfc2411",
+      "bytes": 11871
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/archive-evidence.py": {
+      "gitBlob": "82913f3e5a0091affdfa870c630c748dd20b150a",
+      "mode": "100644",
+      "sha256": "a4a97de2f5f63fc194c289a502f74d4065db4bfa1dd6b8f9b00c2d5b23d03928",
+      "bytes": 7634
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/README.md": {
+      "sha256": "7723f0dea5acda62d82b7e96324f4a8985b6a0c020ff966c6d9e07ef70951a93",
+      "bytes": 14692,
+      "gitBlob": "d52055e1b5e1acaddd0303e9e5fa882452d6d450",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/baseline-open-connection.txt": {
+      "sha256": "ab9f6d1be6bbbcaf07ff3cf9658c12a95799d8099e6a4e55d07a976207dfcd0b",
+      "bytes": 1953,
+      "gitBlob": "4a563609c474e77158f5bf1d403c938f359ba8c3",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-import-worker-bridge.mjs": {
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "bytes": 2148,
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-opfs-disk.mjs": {
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "bytes": 15180,
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-runtime.mjs": {
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "bytes": 8164,
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run-all.py": {
+      "sha256": "92a306e3e36ea00c23228895972ff98ad1c81adfc9983cf6fd96b4e85ae63f5f",
+      "bytes": 23605,
+      "gitBlob": "32426dec0b13db979d938585615856acf973245a",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run.mjs": {
+      "sha256": "eb9f1b64b4baee2976c74f8263d5f52c9002676c6ef5844b412560e04a1f8086",
+      "bytes": 24273,
+      "gitBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/source-binding.json": {
+      "gitBlob": "25d4614eaed6c123ed2b48a88846167d8cd5c267",
+      "mode": "100644",
+      "sha256": "ac65f284f4341b24a17711096717389d426de3cd682817515e8ee4cd0d2420f5",
+      "bytes": 5723
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/test-opfs.mjs": {
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "bytes": 11798,
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/test-run-all.py": {
+      "sha256": "ec2b0b9e19c6cc42ca7a8bbcec50eeacaa3dbd9fe240a6686d12abb89b6f4564",
+      "bytes": 14543,
+      "gitBlob": "22e91f49ed8be65eb641d8e5a877986214133720",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/recovery.json": {
+      "gitBlob": "7ff2e27382fbc86aca8adba8a1e9f4d1cf94b096",
+      "mode": "100644",
+      "sha256": "6c2f1d60ca9b689eaa5b4a74c7d207c2967fd666dd7c09362609270e3e84e3dd",
+      "bytes": 44859
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/test-archive-evidence.py": {
+      "gitBlob": "42f5543f35b0bd06c792487dba7d63759aa078bd",
+      "mode": "100644",
+      "sha256": "2b2ea1e53daeadb38f7143e859bdb3898ec0578ad52fc44d094c9e0ed5e1c3ed",
+      "bytes": 6910
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/verify-source.py": {
+      "gitBlob": "469e44c900632abff0a4f58242b01f5686ad7493",
+      "mode": "100644",
+      "sha256": "70266daba847f6a42957eb87e03354d49cff5c6cbfa3ecdf80a0773aba8c8e6a",
+      "bytes": 10665
+    },
+    "eslint.config.js": {
+      "gitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "mode": "100644",
+      "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b",
+      "bytes": 39532
+    },
+    "ext/js/dictionary/dictionary-database.js": {
+      "gitBlob": "c7426300d25a4933eed2f2565ce8628684f52ab3",
+      "mode": "100644",
+      "sha256": "65f8d900ed478050925320002c333ddda77f01271ee8840ba28f7333b43700a8",
+      "bytes": 613623
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "gitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "mode": "100644",
+      "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+      "bytes": 16843
+    },
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "gitBlob": "e3d79065ee729efbfe8b9b53d279a3116596fc3d",
+      "mode": "100644",
+      "sha256": "2da53d89fd0d9aca83ecfd9e5ed4857aa3784197bf5987464d6711de822529a5",
+      "bytes": 368766
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "mode": "100644",
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+      "bytes": 6660
+    },
+    "test/dictionary-wasm-build.test.js": {
+      "gitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "mode": "100644",
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+      "bytes": 7552
+    },
+    "test/release-package-native-assets.test.js": {
+      "gitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "mode": "100644",
+      "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174",
+      "bytes": 5421
+    },
+    "test/term-record-fields-native.test.js": {
+      "gitBlob": "bfdafcd86db1ca223132faa194250647321dea31",
+      "mode": "100644",
+      "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+      "bytes": 40450
+    },
+    "test/term-record-import-fields.test.js": {
+      "gitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "mode": "100644",
+      "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323",
+      "bytes": 20572
+    }
+  },
+  "sourceManifestExcludedFromOwnDigest": true
+}
