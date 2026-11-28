@@ -1,0 +1,82 @@
+name: Current import profiles 20261127 92c09
+
+on:
+  push:
+    branches: ['perf/import-profile-20261127-92c09']
+    paths: ['.github/workflows/import-profile-92c09.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-profile-92c09-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    name: Current baseline (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the unchanged product and benchmark sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected='.github/workflows/import-profile-92c09.yml'
+          actual="$(git diff --name-only "$PERF_BASELINE" "$GITHUB_SHA")"
+          test "$actual" = "$expected"
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare locked fixture and release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
+          npm run build -- --target chrome
+          test -z "$(git status --porcelain)"
+          mkdir -p builds/perf/current-profile
+          node dev/perf/host-environment.js > builds/perf/current-profile/host.json
+          git rev-parse HEAD HEAD^{tree} > builds/perf/current-profile/source.txt
+      - name: Acquire three ordinary complete imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --runs 3 --no-build --build-target chrome --media-check sample \
+            --output builds/perf/current-profile/ordinary \
+            2>&1 | tee builds/perf/current-profile/ordinary.log
+      - name: Acquire a separate diagnostic trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --trace --no-build --build-target chrome --media-check sample \
+            --output builds/perf/current-profile/trace \
+            2>&1 | tee builds/perf/current-profile/trace.log
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: current-import-profile-92c09-${{ matrix.dictionary }}
+          path: builds/perf/current-profile
+          if-no-files-found: error
+          retention-days: 14
