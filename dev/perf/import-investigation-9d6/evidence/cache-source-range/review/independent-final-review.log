@@ -1,0 +1,13 @@
+{
+  "complete": true,
+  "receipt": "/home/agent/manabitan-cache-hosted-9d6/packaging/independent-final-review.json",
+  "receiptSha256": "1af98704a9d93e0a080f333fe4b31ca0331fc08e27f17ee0e515c907b31cd136",
+  "members": 1938,
+  "counts": {
+    "canonicalReceipts": 252,
+    "rawReports": 252,
+    "rawMemoryScans": 1924,
+    "timedImports": 192,
+    "warmups": 24
+  }
+}

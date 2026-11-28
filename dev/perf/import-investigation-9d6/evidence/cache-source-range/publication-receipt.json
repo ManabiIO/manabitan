@@ -1,0 +1,261 @@
+{
+  "complete": true,
+  "finalizedAt": "2026-11-28T06:11:13.596121+00:00",
+  "runId": 46107460816,
+  "attempt": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+  "tooling": "5b5389ac69e07c95d11c4ff04230dbb8e0761995",
+  "disposition": {
+    "status": "Closed without promotion: no PR for any dictionary.",
+    "decision": "No replicated worthwhile complete-import gain was demonstrated for JMdict, Jitendex or VNDB. The source-cache helper is closed without a PR. Every candidate endpoint interval includes zero, and favorable single-host changes fail to replicate on the opposite-order host. The earlier component gains do not qualify the complete import.\n\nThe preserved record has 252 semantic receipts: 192 authoritative timed imports (144 candidate-pair imports plus 48 identical-code control imports), 24 excluded warmups, 12 exhaustive-media imports and 24 separate memory imports. Thus 216 ordinary imports include the 24 warmups; 216 is not the timed-import count. All 1,924 raw memory scans remain included.\n\n## Memory coverage failure retained\n\nFive hosts pass the unchanged memory screen. VNDB BA fails coverage only: all four observations exceed the fixed 250 ms covered-scan-gap limit. The semantic failure list is empty. This is insufficient sampler coverage, not evidence of measured memory growth. All observed memory maxima and paired changes for that host remain null; no missing value is zero-filled. No threshold, observation, tail or result was changed or rerun.\n\n| VNDB BA observation | Maximum covered scan gap | PSS/private maxima |\n| --- | ---: | --- |\n| B1 | 259.371315 ms | null / null |\n| A1 | 266.956994 ms | null / null |\n| A2 | 272.787439 ms | null / null |\n| B2 | 267.570606 ms | null / null |\n\nThe original failed job 140863296120 and its complete 65,610-byte decoded log are retained with the source/run binding receipt. Its failure status remains visible.\n\n## Every tail remains included\n\nAll individual candidate and control ratios remain in the original analysis and independent audits. The table below shows the largest recorded ratio in each host without excluding it or replacing the median. In particular, the JMdict BA first-pair tail and the Jitendex AB pair-12 tail remain in the endpoint statistics.\n\n| Dictionary / host | Largest B/A change | Largest C/A control change |\n| --- | ---: | ---: |\n| jmdict / AB | +3.3368% | +3.1892% |\n| jmdict / BA | +74.9033% | +8.4684% |\n| jitendex / AB | +18.9334% | +3.9962% |\n| jitendex / BA | +3.1814% | +1.0659% |\n| vndb / AB | +2.3465% | +6.2825% |\n| vndb / BA | +3.8655% | +1.8104% |\n\nPhase diagnostics remain exploratory: counters overlap, and the helper-stage change does not reproduce across opposite-order hosts. They do not adjust endpoint timing, subtract control variation, establish causality or change the final disposition. The bounded read-only JMdict review is retained separately as support evidence.\n\n## Complete-import endpoint results\n"
+  },
+  "inventorySha256": "1c5b9c56622234c84e6d6a1bce89b755cbf579b0e6cb56933908991db65ff1ee",
+  "materializerSha256": "66be542ee372e34f13b6ab81eb1de0ed847a33a311340d7d29efbeda0fb205de",
+  "sourceEntriesVerified": 1938,
+  "totalArchiveBytes": 13204300,
+  "canonicalReceiptsValidated": 252,
+  "rawMemoryScansValidated": 1924,
+  "archives": [
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/jmdict-AB.tar.gz",
+      "name": "jmdict-AB.tar.gz",
+      "bytes": 2072696,
+      "sha256": "d1dea50268b43c56dd72cdedd9efa6fd6f7258444ca6439a7e695ef74ccb4014",
+      "files": 319,
+      "uncompressedBytes": 21871311
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/jmdict-BA.tar.gz",
+      "name": "jmdict-BA.tar.gz",
+      "bytes": 2094784,
+      "sha256": "c6373dceeba3e839fe345fa6278d7c4b6f41433b88397897ca0c0d8891f6c671",
+      "files": 320,
+      "uncompressedBytes": 22494066
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/jitendex-AB.tar.gz",
+      "name": "jitendex-AB.tar.gz",
+      "bytes": 2148465,
+      "sha256": "1f7acf67c27d091c9f23d901d8a19efb2792607d84f59c5252525a04ec66240b",
+      "files": 316,
+      "uncompressedBytes": 23626883
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/jitendex-BA.tar.gz",
+      "name": "jitendex-BA.tar.gz",
+      "bytes": 2195975,
+      "sha256": "87ee97e2c43f5cb450c976f8bc70fa813beac0b793aee02496a7ae31dd40e8bf",
+      "files": 316,
+      "uncompressedBytes": 25390207
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/vndb-AB.tar.gz",
+      "name": "vndb-AB.tar.gz",
+      "bytes": 2306043,
+      "sha256": "b833347df8d487762ee16913f8e433a88d264f762f691fd8a8b0b4c9ca7e9eed",
+      "files": 319,
+      "uncompressedBytes": 28913963
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/vndb-BA.tar.gz",
+      "name": "vndb-BA.tar.gz",
+      "bytes": 2278977,
+      "sha256": "09c09c46daf633600d96bf7a48a87ffb8cb8a7bb469ca947515a4102527a1cfe",
+      "files": 321,
+      "uncompressedBytes": 27109152
+    },
+    {
+      "localPath": "/home/agent/manabitan-cache-hosted-9d6/packaging/completed/archives/checks-and-tools.tar.gz",
+      "name": "checks-and-tools.tar.gz",
+      "bytes": 107360,
+      "sha256": "3bdb5788d62f5b0acf231cb4f65a717085f75389e115a2246b4eb2df2bebc1f6",
+      "files": 27,
+      "uncompressedBytes": 856676
+    }
+  ],
+  "originalArtifacts": [
+    {
+      "artifact": {
+        "id": 15249903992,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI0OTkwMzk5Mg==",
+        "name": "cache-range-checks-9d6-46107460816-1",
+        "size_in_bytes": 42866,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249903992",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249903992/zip",
+        "expired": false,
+        "digest": "sha256:0317e41a0272a203351d482f05490120e545f2ff9999b1fade6d310661d4c997",
+        "created_at": "2026-11-28T05:34:29Z",
+        "updated_at": "2026-11-28T05:34:29Z",
+        "expires_at": "2026-12-12T05:34:29Z",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 42866,
+      "zipSha256": "0317e41a0272a203351d482f05490120e545f2ff9999b1fade6d310661d4c997"
+    },
+    {
+      "artifact": {
+        "id": 15250891381,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MDg5MTM4MQ==",
+        "name": "import-cache-range-9d6-jmdict-AB-46107460816-1",
+        "size_in_bytes": 35527690,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250891381",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250891381/zip",
+        "expired": false,
+        "digest": "sha256:11901673eef662dc44443c1a6e8d14f2aa5d38d4a7e95210f11f6ed53ca93b49",
+        "created_at": "2026-11-28T05:45:00Z",
+        "updated_at": "2026-11-28T05:45:00Z",
+        "expires_at": "2026-12-12T05:44:58Z",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35527690,
+      "zipSha256": "11901673eef662dc44443c1a6e8d14f2aa5d38d4a7e95210f11f6ed53ca93b49"
+    },
+    {
+      "artifact": {
+        "id": 15250980638,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MDk4MDYzOA==",
+        "name": "import-cache-range-9d6-jmdict-BA-46107460816-1",
+        "size_in_bytes": 35545553,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250980638",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250980638/zip",
+        "expired": false,
+        "digest": "sha256:451402a41581cefc77a7c02ebcc66e5c344d065b6029ef7a69c188bbbb48a792",
+        "created_at": "2026-11-28T05:36:44Z",
+        "updated_at": "2026-11-28T05:36:44Z",
+        "expires_at": "2026-12-12T05:36:42Z",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35545553,
+      "zipSha256": "451402a41581cefc77a7c02ebcc66e5c344d065b6029ef7a69c188bbbb48a792"
+    },
+    {
+      "artifact": {
+        "id": 15249894618,
+        "name": "import-cache-range-9d6-jitendex-AB-46107460816-1",
+        "size_in_bytes": 35593696,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249894618",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249894618/zip",
+        "expired": false,
+        "created_at": "2026-11-28T05:38:18Z",
+        "expires_at": "2026-12-12T05:38:15Z",
+        "updated_at": "2026-11-28T05:38:18Z",
+        "digest": "sha256:bf6e4b854a0f94bef88ef2e493d9be633dc552c1d6e88e74d325e5f09c0f481f",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35593696,
+      "zipSha256": "bf6e4b854a0f94bef88ef2e493d9be633dc552c1d6e88e74d325e5f09c0f481f"
+    },
+    {
+      "artifact": {
+        "id": 15251070283,
+        "name": "import-cache-range-9d6-jitendex-BA-46107460816-1",
+        "size_in_bytes": 35639921,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251070283",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251070283/zip",
+        "expired": false,
+        "created_at": "2026-11-28T05:42:01Z",
+        "expires_at": "2026-12-12T05:41:58Z",
+        "updated_at": "2026-11-28T05:42:01Z",
+        "digest": "sha256:31a99e25fc5d6760da535d683f7ab7eb0b78c1183c1909c4cb000e8b9dc894bc",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35639921,
+      "zipSha256": "31a99e25fc5d6760da535d683f7ab7eb0b78c1183c1909c4cb000e8b9dc894bc"
+    },
+    {
+      "artifact": {
+        "id": 15250784622,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MDc4NDYyMg==",
+        "name": "import-cache-range-9d6-vndb-AB-46107460816-1",
+        "size_in_bytes": 35757847,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250784622",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250784622/zip",
+        "expired": false,
+        "digest": "sha256:9c28f525272bad8d2f4448bf51b879a36bc0285f9f042339b96c580b519a749b",
+        "created_at": "2026-11-28T05:59:46Z",
+        "updated_at": "2026-11-28T05:59:46Z",
+        "expires_at": "2026-12-12T05:59:44Z",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35757847,
+      "zipSha256": "9c28f525272bad8d2f4448bf51b879a36bc0285f9f042339b96c580b519a749b"
+    },
+    {
+      "artifact": {
+        "id": 15251665600,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MTY2NTYwMA==",
+        "name": "import-cache-range-9d6-vndb-BA-46107460816-1",
+        "size_in_bytes": 35715986,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251665600",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251665600/zip",
+        "expired": false,
+        "digest": "sha256:3b23e15eec3b88ec7ea3d38f98a188db9ca91248066e2d442a72b673f1166d8b",
+        "created_at": "2026-11-28T06:08:06Z",
+        "updated_at": "2026-11-28T06:08:06Z",
+        "expires_at": "2026-12-12T06:08:03Z",
+        "workflow_run": {
+          "id": 46107460816,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "5b5389ac69e07c95d11c4ff04230dbb8e0761995"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35715986,
+      "zipSha256": "3b23e15eec3b88ec7ea3d38f98a188db9ca91248066e2d442a72b673f1166d8b"
+    }
+  ],
+  "verification": [
+    "All seven original ZIP sizes/digests and every extracted member verified",
+    "All twelve release ZIPs and every entry verified before payload omission",
+    "All primary audits bind the exact reviewed auditor and four baseline Git helpers",
+    "Every saved tar member re-read and checked against its frozen source hash",
+    "Credential pattern scan passed across retained evidence and generated text",
+    "No source receipt, endpoint observation, control, tail, memory scan or phase diagnostic rewritten",
+    "No benchmark executed, no earlier archive changed, no external publication performed"
+  ]
+}

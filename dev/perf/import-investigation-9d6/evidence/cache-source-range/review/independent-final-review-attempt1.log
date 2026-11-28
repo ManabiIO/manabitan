@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/agent/manabitan-cache-hosted-9d6/packaging/independent-final-review.py", line 63, in <module>
+    assert {p for p in PACKAGE.rglob('*') if p.is_file()} == publication_paths | {PACKAGE / 'publication-manifest.json'}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

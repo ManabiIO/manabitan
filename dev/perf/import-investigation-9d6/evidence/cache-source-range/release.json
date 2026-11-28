@@ -1,0 +1,91 @@
+{
+  "packagingReleased": true,
+  "runId": 46107460816,
+  "attempt": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+  "tooling": "5b5389ac69e07c95d11c4ff04230dbb8e0761995",
+  "approvedLayoutSha256": "8603137d3e535c0abe55dd608fb203dffb39660ec861869a9b980dea0d881d0e",
+  "finalizedAt": "2026-11-28T06:11:13.596121+00:00",
+  "disposition": {
+    "status": "Closed without promotion: no PR for any dictionary.",
+    "decision": "No replicated worthwhile complete-import gain was demonstrated for JMdict, Jitendex or VNDB. The source-cache helper is closed without a PR. Every candidate endpoint interval includes zero, and favorable single-host changes fail to replicate on the opposite-order host. The earlier component gains do not qualify the complete import.\n\nThe preserved record has 252 semantic receipts: 192 authoritative timed imports (144 candidate-pair imports plus 48 identical-code control imports), 24 excluded warmups, 12 exhaustive-media imports and 24 separate memory imports. Thus 216 ordinary imports include the 24 warmups; 216 is not the timed-import count. All 1,924 raw memory scans remain included.\n\n## Memory coverage failure retained\n\nFive hosts pass the unchanged memory screen. VNDB BA fails coverage only: all four observations exceed the fixed 250 ms covered-scan-gap limit. The semantic failure list is empty. This is insufficient sampler coverage, not evidence of measured memory growth. All observed memory maxima and paired changes for that host remain null; no missing value is zero-filled. No threshold, observation, tail or result was changed or rerun.\n\n| VNDB BA observation | Maximum covered scan gap | PSS/private maxima |\n| --- | ---: | --- |\n| B1 | 259.371315 ms | null / null |\n| A1 | 266.956994 ms | null / null |\n| A2 | 272.787439 ms | null / null |\n| B2 | 267.570606 ms | null / null |\n\nThe original failed job 140863296120 and its complete 65,610-byte decoded log are retained with the source/run binding receipt. Its failure status remains visible.\n\n## Every tail remains included\n\nAll individual candidate and control ratios remain in the original analysis and independent audits. The table below shows the largest recorded ratio in each host without excluding it or replacing the median. In particular, the JMdict BA first-pair tail and the Jitendex AB pair-12 tail remain in the endpoint statistics.\n\n| Dictionary / host | Largest B/A change | Largest C/A control change |\n| --- | ---: | ---: |\n| jmdict / AB | +3.3368% | +3.1892% |\n| jmdict / BA | +74.9033% | +8.4684% |\n| jitendex / AB | +18.9334% | +3.9962% |\n| jitendex / BA | +3.1814% | +1.0659% |\n| vndb / AB | +2.3465% | +6.2825% |\n| vndb / BA | +3.8655% | +1.8104% |\n\nPhase diagnostics remain exploratory: counters overlap, and the helper-stage change does not reproduce across opposite-order hosts. They do not adjust endpoint timing, subtract control variation, establish causality or change the final disposition. The bounded read-only JMdict review is retained separately as support evidence.\n\n## Complete-import endpoint results\n"
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "artifactId": 15250891381,
+      "audit": "root-audit.json",
+      "auditSha256": "29b24f9e5d06b106d502b5a0d196b49cd7899bf6e0f291b8b73d660cc3256ca2"
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifactId": 15250980638,
+      "audit": "root-audit.json",
+      "auditSha256": "314bc28dbd2adc06c5cdabd0f7303fadfe05193aed393528bf3f0321e5a25597"
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "artifactId": 15249894618,
+      "audit": "independent-audit.json",
+      "auditSha256": "6d05b553862cd4b2178414b3e2df0e19ea37eae5cb9faae13796d9a62394eee3"
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "artifactId": 15251070283,
+      "audit": "independent-audit.json",
+      "auditSha256": "874c4ddb9e597eff40c436a729c6af0283b97e6353fb958f4045e4e11de12c72"
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifactId": 15250784622,
+      "audit": "root-audit.json",
+      "auditSha256": "29a1016700e1d2420dbf0e5f158523a8455f6121f87feadc720c1e462347199d"
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "artifactId": 15251665600,
+      "audit": "root-audit.json",
+      "auditSha256": "afaa43bd3cf575958ce79476584002f8a2c0019c5fd4175783621c451a7621d4"
+    }
+  ],
+  "additionalSupportFiles": [
+    {
+      "sourcePath": "/home/agent/manabitan-cache-hosted-9d6/packaging/preparation-01.json",
+      "archivePath": "tools/packaging/preparation-01.json",
+      "bytes": 1793,
+      "sha256": "2553bd452f220687c5e408cc212f842c81d628213aa58d1e497582ee0dfef6b5"
+    },
+    {
+      "sourcePath": "/home/agent/manabitan-cache-hosted-9d6/packaging/preparation-02.json",
+      "archivePath": "tools/packaging/preparation-02.json",
+      "bytes": 1407,
+      "sha256": "6d9a4e89de045126e45fbc2da37b4219c981b71156ac74e05b03d54571eb56ed"
+    },
+    {
+      "sourcePath": "/home/agent/manabitan-cache-hosted-9d6/packaging/product-candidate.patch",
+      "archivePath": "identity/product-candidate.patch",
+      "bytes": 5573,
+      "sha256": "b017318bfaebc5783126e2773a3210f6483f336dd4cdcabc0d1da802bbda6ead"
+    },
+    {
+      "sourcePath": "/home/agent/manabitan-cache-hosted-9d6/packaging/product-source-binding.json",
+      "archivePath": "identity/product-source-binding.json",
+      "bytes": 777,
+      "sha256": "cf312173ba52d347202b318e55bad49ac3dd4bbec700faf0987f2c36c0cd0210"
+    },
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-results/import-cache-range-9d6.yml",
+      "archivePath": "tools/import-cache-range-9d6.yml",
+      "bytes": 4609,
+      "sha256": "dd5dc2a44bff567017c9d615c5afff64ba75406c2991d593a65604a857a700eb"
+    }
+  ],
+  "parentRelease": "Root authorized finalization after providing the complete failed-job log and all six audited cells; all failures remain unchanged."
+}

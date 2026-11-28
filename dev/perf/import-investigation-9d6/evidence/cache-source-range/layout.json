@@ -1,0 +1,213 @@
+{
+  "status": "Prepared only; no complete-import archives created. Wait for root confirmation that all six cell audits are complete.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "productCommit": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+  "toolingCommit": "5b5389ac69e07c95d11c4ff04230dbb8e0761995",
+  "runId": 46107460816,
+  "attempt": 1,
+  "evidenceRoot": "/home/agent/manabitan-cache-hosted-9d6",
+  "publicationDirectory": "dev/perf/import-investigation-9d6/evidence/cache-source-range",
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "expectedArtifactName": "import-cache-range-9d6-jmdict-AB-46107460816-1",
+      "currentlyKnownArtifactId": 15250891381,
+      "archive": "jmdict-AB.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "jmdict",
+        "order": "AB"
+      },
+      "completedAuditFiles": [
+        "root-audit.json",
+        "root-audit.log"
+      ],
+      "exploratoryDiagnosticFiles": [
+        "phase-diagnostics-reviewed.json",
+        "phase-diagnostics-reviewed.log"
+      ]
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "expectedArtifactName": "import-cache-range-9d6-jmdict-BA-46107460816-1",
+      "currentlyKnownArtifactId": 15250980638,
+      "archive": "jmdict-BA.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "jmdict",
+        "order": "BA"
+      },
+      "completedAuditFiles": [
+        "root-audit.json",
+        "root-audit.log"
+      ],
+      "exploratoryDiagnosticFiles": [
+        "phase-diagnostics-reviewed.json",
+        "phase-diagnostics-reviewed.log",
+        "phase-diagnostics.json"
+      ]
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "expectedArtifactName": "import-cache-range-9d6-jitendex-AB-46107460816-1",
+      "currentlyKnownArtifactId": 15249894618,
+      "archive": "jitendex-AB.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "jitendex",
+        "order": "AB"
+      },
+      "completedAuditFiles": [
+        "independent-audit.json"
+      ],
+      "exploratoryDiagnosticFiles": []
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "expectedArtifactName": "import-cache-range-9d6-jitendex-BA-46107460816-1",
+      "currentlyKnownArtifactId": 15251070283,
+      "archive": "jitendex-BA.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "jitendex",
+        "order": "BA"
+      },
+      "completedAuditFiles": [
+        "independent-audit.json"
+      ],
+      "exploratoryDiagnosticFiles": []
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "expectedArtifactName": "import-cache-range-9d6-vndb-AB-46107460816-1",
+      "currentlyKnownArtifactId": 15250784622,
+      "archive": "vndb-AB.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "vndb",
+        "order": "AB"
+      },
+      "completedAuditFiles": [
+        "root-audit.json",
+        "root-audit.log"
+      ],
+      "exploratoryDiagnosticFiles": [
+        "phase-diagnostics-reviewed.json",
+        "phase-diagnostics-reviewed.log"
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "expectedArtifactName": "import-cache-range-9d6-vndb-BA-46107460816-1",
+      "currentlyKnownArtifactId": 15251665600,
+      "archive": "vndb-BA.tar.gz",
+      "requiredAudit": {
+        "complete": true,
+        "observationsValidated": 42,
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+        "dictionary": "vndb",
+        "order": "BA"
+      },
+      "completedAuditFiles": [
+        "root-audit.json",
+        "root-audit.log"
+      ],
+      "exploratoryDiagnosticFiles": [
+        "phase-diagnostics-reviewed.json",
+        "phase-diagnostics-reviewed.log"
+      ]
+    }
+  ],
+  "hostArchiveLayout": {
+    "raw/": "Every extracted artifact member, unchanged, except the two exact release ZIP payloads below. No file-extension filter; include HTML, JS, JSON, JSONL, logs, raw scans, markers, host snapshots and future ancillary files.",
+    "identity/download-receipt.json": "Original verified download receipt, unchanged.",
+    "identity/artifact-members.json": "Original artifact metadata, ZIP bytes/digest, complete member sizes/hashes, and retained/omitted classification.",
+    "identity/package-A-members.json": "Full release ZIP digest/size and every member name/size/hash, checked against source-identities.json before payload omission.",
+    "identity/package-B-members.json": "Same, with exact candidate source binding.",
+    "audit/": "All completed audit JSON and logs, unchanged, including either root-audit.* or independent-audit.json and any later independent review files.",
+    "exploratory/": "All host phase diagnostics and logs, unchanged and explicitly exploratory. They do not adjust endpoint timing or remove observations."
+  },
+  "omitPayloadsOnly": [
+    "files/package-A.zip",
+    "files/package-B.zip"
+  ],
+  "identityRequirements": [
+    "Match run, attempt, tooling head, artifact name, listed ZIP bytes and digest",
+    "Verify outer ZIP CRCs and every extracted byte before selection",
+    "Verify both release ZIP byte digests and every entry hash against source-identities.json",
+    "Retain full outer and inner member maps, including omitted package payload identities",
+    "Verify every source file immediately before tar inclusion and re-read every saved archive member",
+    "Keep every completed observation, control, tail, failure record and raw memory scan without rewriting original analysis"
+  ],
+  "checks": {
+    "artifactId": 15249903992,
+    "expectedArtifactName": "cache-range-checks-9d6-46107460816-1",
+    "archive": "checks-and-tools.tar.gz",
+    "retain": [
+      "files/*",
+      "download-receipt.json",
+      "checks-binding.json",
+      "checks-independent-audit.json"
+    ]
+  },
+  "auditor": {
+    "sourcePath": "/workspace/scratch/9d6dcf05cf8f/benchmark-setup/audit-complete-import.py",
+    "bytes": 11159,
+    "sha256": "8f5dcacc42616d2198d3f1d6ab4b7ec84e560c7b12052458381b459b5783bd8e",
+    "retainBoundHelpersFrom": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/perf/import-memory-20261125-a7f7",
+    "helperPolicy": "Include the baseline Python observer/audit sources with a per-file hash map; verify against frozen baseline Git objects."
+  },
+  "exploratory": {
+    "knownPaths": [
+      "/home/agent/manabitan-cache-hosted-9d6/jitendex-phase-diagnostics.json",
+      "/home/agent/manabitan-cache-hosted-9d6/15250891381/phase-diagnostics-reviewed.json",
+      "/home/agent/manabitan-cache-hosted-9d6/15250891381/phase-diagnostics-reviewed.log",
+      "/home/agent/manabitan-cache-hosted-9d6/15250980638/phase-diagnostics-reviewed.json",
+      "/home/agent/manabitan-cache-hosted-9d6/15250980638/phase-diagnostics-reviewed.log",
+      "/home/agent/manabitan-cache-hosted-9d6/15250980638/phase-diagnostics.json"
+    ],
+    "policy": "Keep phase diagnostics in a separate exploratory subsection of support evidence. They must not adjust, filter, replace or pool endpoint timings.",
+    "phaseDiagnosticSource": {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/benchmark-setup/diagnose-complete-import-phases.py",
+      "bytes": 3238,
+      "sha256": "718c5d424db9e349dbd7301139570dd06e0ca80bf646f0579314fadbf9b30154"
+    }
+  },
+  "documentation": [
+    "README.md with exact six-host endpoint/control outcomes and pending-or-closed status supplied by root",
+    "inventory.json with every retained path/size/hash and original artifact/package identities",
+    "publication-receipt.json with exact archive sizes/hashes, source/verification coverage and exclusions",
+    "packaging source whose hash resolves from the publication receipt"
+  ],
+  "archiveEncoding": "Deterministic PAX tar, file mtime=0, uid/gid=0, mode0444; gzip level6 with mtime=0; separate archive per host to keep blobs compact.",
+  "supportRecords": [
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/jmdict-bounded-review-9d6.json",
+      "archivePath": "exploratory/jmdict-bounded-review-9d6.json",
+      "bytes": 8576,
+      "sha256": "0644136ea720ed443cb21c72438fce8a83f4c41ce1f380da7e66633457329720"
+    }
+  ]
+}

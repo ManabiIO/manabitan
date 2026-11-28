@@ -1,0 +1,141 @@
+{
+  "complete": true,
+  "reviewedAtUtc": "2026-11-28T06:16:32.707034+00:00",
+  "scope": "Independent final package/source readback only; no archive/source mutation and no benchmark.",
+  "manifestSha256": "0cf4c9cab875ee64bcbafb42a631117e9de91a42c7e0490552580b08f9717582",
+  "materializerSha256": "66be542ee372e34f13b6ab81eb1de0ed847a33a311340d7d29efbeda0fb205de",
+  "publicationFilesVerified": 13,
+  "archivesVerified": 7,
+  "archiveBytes": 13204300,
+  "archiveMembersVerified": 1938,
+  "uncompressedMemberBytes": 150262258,
+  "allPublicationGitBlobIdentitiesVerified": true,
+  "unpublishedOperationalSidecars": [
+    "root-upload-plan.json"
+  ],
+  "allOriginalOuterArtifactAndInnerPackageBytesAndMemberMapsVerified": true,
+  "allRetainedSourceBytesUnchanged": true,
+  "deterministicTarAndGzipMetadataVerified": true,
+  "credentialScan": {
+    "passed": true,
+    "rules": [
+      "github-token",
+      "openai-project-key",
+      "aws-access-key-id",
+      "private-key",
+      "authorization-value",
+      "signed-or-secret-url",
+      "url-user-password"
+    ],
+    "scope": "All retained tar payloads and publication text; bounded reviewed patterns."
+  },
+  "baselineHelpersVerifiedAgainstGit": [
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "gitBlobSha1": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "gitBlobSha1": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "gitBlobSha1": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "gitBlobSha1": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    }
+  ],
+  "counts": {
+    "canonicalReceipts": 252,
+    "rawReports": 252,
+    "rawMemoryScans": 1924,
+    "timedImports": 192,
+    "warmups": 24
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "artifactId": 15250891381,
+      "candidateMedianPercent": -0.5016904586536919,
+      "controlMedianPercent": -0.8066875751909119,
+      "rawMemoryScans": 239,
+      "memoryPassed": true
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifactId": 15250980638,
+      "candidateMedianPercent": 0.3153858471253379,
+      "controlMedianPercent": -1.4402092125619603,
+      "rawMemoryScans": 259,
+      "memoryPassed": true
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "artifactId": 15249894618,
+      "candidateMedianPercent": -0.021401918317065505,
+      "controlMedianPercent": -0.858098017758957,
+      "rawMemoryScans": 285,
+      "memoryPassed": true
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "artifactId": 15251070283,
+      "candidateMedianPercent": -0.03592849414190136,
+      "controlMedianPercent": -0.2971893563580963,
+      "rawMemoryScans": 324,
+      "memoryPassed": true
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifactId": 15250784622,
+      "candidateMedianPercent": -0.8447456455783375,
+      "controlMedianPercent": -0.01216449164743727,
+      "rawMemoryScans": 432,
+      "memoryPassed": true
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "artifactId": 15251665600,
+      "candidateMedianPercent": 0.9324048401360585,
+      "controlMedianPercent": 1.426695709463388,
+      "rawMemoryScans": 385,
+      "memoryPassed": false
+    }
+  ],
+  "vndbBaFailure": {
+    "jobId": 140863296120,
+    "decodedLogBytes": 65610,
+    "decodedLogSha256": "fe4a919adaffd190ec0caa16064fd43ac50985aaa49ba2d534b6c096013b3209",
+    "maximumCoveredScanGapsMs": {
+      "B1": 259.371315,
+      "A1": 266.956994,
+      "A2": 272.787439,
+      "B2": 267.570606
+    },
+    "allFourObservationMaximaAndPairMetricsRemainNull": true,
+    "semanticFailures": [],
+    "failureKind": "Sampler coverage exceeds fixed 250 ms limit; not measured memory growth."
+  },
+  "allCandidateIntervalsIncludeZero": true,
+  "sourceSha256": "8432b8c4ca8f12a643dd4617c51a1d6d4b15123cb90ffda1b9437dac769d287b"
+}
