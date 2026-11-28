@@ -1,0 +1,1750 @@
+{
+  "schemaVersion": 1,
+  "kind": "superseded-source-registration-screen-independent-audit",
+  "runId": 46102503309,
+  "workflowSha": "8655830a237be6bd5e8c03172d284912fc9ef94c",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "testedCandidate": "6d6600a3277f83782729fcce14ea7e02f48a4b40",
+  "correctedCandidateNotMeasuredHere": "a8230f060c2b2a9f56eb7ce83d78a7e23c2567f9",
+  "status": "partial-two-completed-corpora-vndb-still-running",
+  "decision": "No promotion. Tested source is superseded by correctness fixes, and neither completed corpus establishes a worthwhile whole-import gain.",
+  "bootstrapAudit": "Independently enumerate every ordered complete-pair bootstrap resample (6^6=46656 for candidates, 2^2=4 for controls), then nearest-rank 2.5% and 97.5% percentiles. All endpoints match the reported 10000-sample Python seed897 bootstrap. No pseudo-random implementation is reused.",
+  "limitations": [
+    "Only compact machine-readable evidence exposed in original job logs was available to this cloud audit; original raw per-observation canonical receipts and raw /proc scans remain in the linked 90-day artifacts.",
+    "Every timing observation was appended only after the frozen driver validated and compared its canonical receipt. Completed jobs also ran exhaustive-media and separate qualified-memory checks. This audit does not independently re-open every receipt field or raw memory scan.",
+    "Memory values are qualified sampled process-tree PSS/private maxima, not exact peaks. Instrumented durations are not included in timing statistics.",
+    "Six-pair single-host exploratory screens are not independent qualification replications.",
+    "The candidate lacks the later span-factory and intrinsic-backing-buffer provenance fixes. These observations cannot qualify corrected source.",
+    "No outlier is removed, no warmup is relabeled, no observation is reacquired."
+  ],
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "jobId": 140849615798,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46102503309/job/140849615798",
+      "jobConclusion": "success",
+      "artifact": {
+        "id": 15247176931,
+        "name": "import-registration-d2d13264-jmdict-46102503309",
+        "size_in_bytes": 560510468,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247176931",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247176931/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:04:18Z",
+        "expires_at": "2027-02-26T03:22:01Z",
+        "updated_at": "2026-11-28T04:04:18Z",
+        "digest": "sha256:7edf7c78a5358ce95950b7013121e058c4c75b4ae8344e067766277afce00aa4",
+        "workflow_run": {
+          "id": 46102503309,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-screen-registration-20261127-d2d13264",
+          "head_sha": "8655830a237be6bd5e8c03172d284912fc9ef94c"
+        }
+      },
+      "originalCompactEvidence": {
+        "analysis.json": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -6.256429524635165,
+              57.267638256099396
+            ],
+            "equalWorkChangePercent": 16.73002893145139,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.18732052322536497,
+            "ratios": [
+              0.8810126582278442,
+              2.1163693901035803,
+              1.0289833750184076,
+              0.9965487489214924,
+              0.9997048406140002,
+              0.9938587512794523
+            ],
+            "worstPairChangePercent": 111.63693901035802
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              0.4426042261573171,
+              0.6529158628911347
+            ],
+            "equalWorkChangePercent": 0.5457323728464747,
+            "fasterPairs": 0,
+            "medianPairedChangePercent": 0.547760044524237,
+            "ratios": [
+              1.0044260422615732,
+              1.0065291586289113
+            ],
+            "worstPairChangePercent": 0.6529158628911347
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        },
+        "observations.json": [
+          {
+            "arm": "A",
+            "id": "warmup-1-A",
+            "kind": "warmup",
+            "pair": 1,
+            "totalImportMs": 1158
+          },
+          {
+            "arm": "B",
+            "id": "warmup-1-B",
+            "kind": "warmup",
+            "pair": 1,
+            "totalImportMs": 968.6000000000058
+          },
+          {
+            "arm": "B",
+            "id": "warmup-2-B",
+            "kind": "warmup",
+            "pair": 2,
+            "totalImportMs": 686.5
+          },
+          {
+            "arm": "A",
+            "id": "warmup-2-A",
+            "kind": "warmup",
+            "pair": 2,
+            "totalImportMs": 672.3999999999942
+          },
+          {
+            "arm": "A",
+            "id": "pair-01-A",
+            "kind": "candidate",
+            "pair": 1,
+            "totalImportMs": 750.5
+          },
+          {
+            "arm": "B",
+            "id": "pair-01-B",
+            "kind": "candidate",
+            "pair": 1,
+            "totalImportMs": 661.1999999999971
+          },
+          {
+            "arm": "B",
+            "id": "pair-02-B",
+            "kind": "candidate",
+            "pair": 2,
+            "totalImportMs": 1471.300000000003
+          },
+          {
+            "arm": "A",
+            "id": "pair-02-A",
+            "kind": "candidate",
+            "pair": 2,
+            "totalImportMs": 695.1999999999971
+          },
+          {
+            "arm": "A",
+            "id": "pair-03-A",
+            "kind": "candidate",
+            "pair": 3,
+            "totalImportMs": 679.6999999999971
+          },
+          {
+            "arm": "B",
+            "id": "pair-03-B",
+            "kind": "candidate",
+            "pair": 3,
+            "totalImportMs": 699.4000000000087
+          },
+          {
+            "arm": "A",
+            "id": "control-01-A",
+            "kind": "control",
+            "pair": 1,
+            "totalImportMs": 700.3999999999942
+          },
+          {
+            "arm": "C",
+            "id": "control-01-C",
+            "kind": "control",
+            "pair": 1,
+            "totalImportMs": 703.5
+          },
+          {
+            "arm": "B",
+            "id": "pair-04-B",
+            "kind": "candidate",
+            "pair": 4,
+            "totalImportMs": 693
+          },
+          {
+            "arm": "A",
+            "id": "pair-04-A",
+            "kind": "candidate",
+            "pair": 4,
+            "totalImportMs": 695.3999999999942
+          },
+          {
+            "arm": "A",
+            "id": "pair-05-A",
+            "kind": "candidate",
+            "pair": 5,
+            "totalImportMs": 677.5999999999767
+          },
+          {
+            "arm": "B",
+            "id": "pair-05-B",
+            "kind": "candidate",
+            "pair": 5,
+            "totalImportMs": 677.4000000000233
+          },
+          {
+            "arm": "B",
+            "id": "pair-06-B",
+            "kind": "candidate",
+            "pair": 6,
+            "totalImportMs": 679.7000000000116
+          },
+          {
+            "arm": "A",
+            "id": "pair-06-A",
+            "kind": "candidate",
+            "pair": 6,
+            "totalImportMs": 683.8999999999942
+          },
+          {
+            "arm": "C",
+            "id": "control-02-C",
+            "kind": "control",
+            "pair": 2,
+            "totalImportMs": 678.3000000000175
+          },
+          {
+            "arm": "A",
+            "id": "control-02-A",
+            "kind": "control",
+            "pair": 2,
+            "totalImportMs": 673.8999999999942
+          }
+        ],
+        "registered-plan.json": {
+          "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "candidate": "6d6600a3277f83782729fcce14ea7e02f48a4b40",
+          "dictionary": "jmdict",
+          "expectedPackageEntries": [
+            "js/dictionary/dictionary-database.js"
+          ],
+          "expectedWorkers": null,
+          "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+          "flags": {},
+          "initialOrder": "AB",
+          "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+          "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+          "memorySchedule": [
+            {
+              "arm": "A",
+              "index": 1,
+              "name": "A1",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "index": 2,
+              "name": "B1",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "index": 3,
+              "name": "B2",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "index": 4,
+              "name": "A2",
+              "pair": 2
+            }
+          ],
+          "pairs": 6,
+          "schedule": [
+            {
+              "arm": "A",
+              "id": "warmup-1-A",
+              "kind": "warmup",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "warmup-1-B",
+              "kind": "warmup",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "warmup-2-B",
+              "kind": "warmup",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "warmup-2-A",
+              "kind": "warmup",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-01-A",
+              "kind": "candidate",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-01-B",
+              "kind": "candidate",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-02-B",
+              "kind": "candidate",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-02-A",
+              "kind": "candidate",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-03-A",
+              "kind": "candidate",
+              "pair": 3
+            },
+            {
+              "arm": "B",
+              "id": "pair-03-B",
+              "kind": "candidate",
+              "pair": 3
+            },
+            {
+              "arm": "A",
+              "id": "control-01-A",
+              "kind": "control",
+              "pair": 1
+            },
+            {
+              "arm": "C",
+              "id": "control-01-C",
+              "kind": "control",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-04-B",
+              "kind": "candidate",
+              "pair": 4
+            },
+            {
+              "arm": "A",
+              "id": "pair-04-A",
+              "kind": "candidate",
+              "pair": 4
+            },
+            {
+              "arm": "A",
+              "id": "pair-05-A",
+              "kind": "candidate",
+              "pair": 5
+            },
+            {
+              "arm": "B",
+              "id": "pair-05-B",
+              "kind": "candidate",
+              "pair": 5
+            },
+            {
+              "arm": "B",
+              "id": "pair-06-B",
+              "kind": "candidate",
+              "pair": 6
+            },
+            {
+              "arm": "A",
+              "id": "pair-06-A",
+              "kind": "candidate",
+              "pair": 6
+            },
+            {
+              "arm": "C",
+              "id": "control-02-C",
+              "kind": "control",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "control-02-A",
+              "kind": "control",
+              "pair": 2
+            }
+          ],
+          "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+          "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+          "vndbSahAllocationPolicy": null
+        },
+        "browser-identity.json": {
+          "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+          "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12",
+          "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+        },
+        "memory/memory-comparison.json": {
+          "authoritativeTiming": false,
+          "dictionary": "jmdict",
+          "everyObservationQualified": true,
+          "metrics": {
+            "maxSampledPrivateKiB": {
+              "maximumPairedChangePercent": 0.31081798195740085,
+              "medianPairedChangePercent": -0.5283061573075731
+            },
+            "maxSampledPssKiB": {
+              "maximumPairedChangePercent": 0.618185553495687,
+              "medianPairedChangePercent": -0.4618932454596103
+            }
+          },
+          "observations": [
+            {
+              "allObservedSampleCount": 64,
+              "arm": "A",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 8,
+              "index": 1,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 788340,
+              "maxSampledPssKiB": 1021549,
+              "maximumCoveredSampleGapMs": 151.33783,
+              "name": "A1",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 8,
+              "pair": 1,
+              "postImportBracketGapMs": 15.920596,
+              "preImportBracketGapMs": 11.70078,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 8,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 8,
+              "stableFullyReadTreeSampleCount": 8,
+              "windowDurationMs": 846.796643,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838599781,
+                  "event": "start",
+                  "monotonicNs": "200344952122"
+                },
+                {
+                  "epochMs": 1795838600628,
+                  "event": "end",
+                  "monotonicNs": "201191748765"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 63,
+              "arm": "B",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 7,
+              "index": 2,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 777560,
+              "maxSampledPssKiB": 1005797,
+              "maximumCoveredSampleGapMs": 143.310429,
+              "name": "B1",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 9,
+              "pair": 1,
+              "postImportBracketGapMs": 60.976707,
+              "preImportBracketGapMs": 32.453894,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 9,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 7,
+              "stableFullyReadTreeSampleCount": 9,
+              "windowDurationMs": 861.578926,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838606601,
+                  "event": "start",
+                  "monotonicNs": "207165360308"
+                },
+                {
+                  "epochMs": 1795838607463,
+                  "event": "end",
+                  "monotonicNs": "208026939234"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 64,
+              "arm": "B",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 1,
+              "confirmedExitedZombieObservationCount": 8,
+              "fullyContainedImportSampleCount": 7,
+              "index": 3,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 793920,
+              "maxSampledPssKiB": 1028504,
+              "maximumCoveredSampleGapMs": 159.812351,
+              "name": "B2",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 8,
+              "pair": 2,
+              "postImportBracketGapMs": 13.630427,
+              "preImportBracketGapMs": 39.919605,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 8,
+              "samplesWithUnavailableSmaps": 8,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 7,
+              "stableFullyReadTreeSampleCount": 8,
+              "windowDurationMs": 838.270731,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838613523,
+                  "event": "start",
+                  "monotonicNs": "214087098613"
+                },
+                {
+                  "epochMs": 1795838614361,
+                  "event": "end",
+                  "monotonicNs": "214925369344"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 61,
+              "arm": "A",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 7,
+              "index": 4,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 791460,
+              "maxSampledPssKiB": 1022185,
+              "maximumCoveredSampleGapMs": 147.805543,
+              "name": "A2",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 8,
+              "pair": 2,
+              "postImportBracketGapMs": 50.125887,
+              "preImportBracketGapMs": 2.73444,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 8,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 7,
+              "stableFullyReadTreeSampleCount": 8,
+              "windowDurationMs": 832.972366,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838620344,
+                  "event": "start",
+                  "monotonicNs": "220907959934"
+                },
+                {
+                  "epochMs": 1795838621177,
+                  "event": "end",
+                  "monotonicNs": "221740932300"
+                }
+              ]
+            }
+          ],
+          "pairs": [
+            {
+              "maxSampledPrivateKiB": {
+                "baseline": 788340,
+                "candidate": 777560,
+                "changePercent": -1.367430296572547
+              },
+              "maxSampledPssKiB": {
+                "baseline": 1021549,
+                "candidate": 1005797,
+                "changePercent": -1.5419720444149076
+              },
+              "pair": 1,
+              "qualified": true
+            },
+            {
+              "maxSampledPrivateKiB": {
+                "baseline": 791460,
+                "candidate": 793920,
+                "changePercent": 0.31081798195740085
+              },
+              "maxSampledPssKiB": {
+                "baseline": 1022185,
+                "candidate": 1028504,
+                "changePercent": 0.618185553495687
+              },
+              "pair": 2,
+              "qualified": true
+            }
+          ],
+          "passesProspectiveMemoryScreen": true,
+          "replication": 1,
+          "schemaVersion": 1
+        },
+        "memory/memory-audit.json": {
+          "everyObservationQualified": true,
+          "metrics": {
+            "maxSampledPrivateKiB": {
+              "maximumPairedChangePercent": 0.31081798195740085,
+              "medianPairedChangePercent": -0.5283061573075731
+            },
+            "maxSampledPssKiB": {
+              "maximumPairedChangePercent": 0.618185553495687,
+              "medianPairedChangePercent": -0.4618932454596103
+            }
+          },
+          "observations": 4,
+          "passesProspectiveMemoryScreen": true,
+          "rawScanCount": 252,
+          "schemaVersion": 1
+        },
+        "memory/semantic-failures.json": [],
+        "source-identities-compact.json": {
+          "arms": {
+            "A": {
+              "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+              "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+              "packageSha256": "853788e9d7110ca102121ed17779dae41a234135ce5b95d23b42971cdff84ba1",
+              "packagedEntryCount": 554,
+              "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+              "sourceHashes": {
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "853788e9d7110ca102121ed17779dae41a234135ce5b95d23b42971cdff84ba1",
+                "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+                "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+                "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+                "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+              },
+              "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+            },
+            "B": {
+              "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+              "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+              "packageSha256": "dcd8d9d014ba564295ff2e78a48c97af7fe714e73ecf91977b7a907aeb0a0c27",
+              "packagedEntryCount": 554,
+              "sha": "6d6600a3277f83782729fcce14ea7e02f48a4b40",
+              "sourceHashes": {
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "dcd8d9d014ba564295ff2e78a48c97af7fe714e73ecf91977b7a907aeb0a0c27",
+                "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+                "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+                "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+                "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+              },
+              "tree": "48ff4512802a372da7caea01cc142ae086fba8a5"
+            }
+          },
+          "changedPackageEntries": [
+            "js/dictionary/dictionary-database.js"
+          ],
+          "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+        }
+      },
+      "originalEvidenceLogLines": [
+        "2026-11-28T04:03:43.5368781Z EVIDENCE_JSON analysis.json {\"candidateVsBaseline\": {\"count\": 6, \"descriptiveBootstrap95Percent\": [-6.256429524635165, 57.267638256099396], \"equalWorkChangePercent\": 16.73002893145139, \"fasterPairs\": 4, \"medianPairedChangePercent\": -0.18732052322536497, \"ratios\": [0.8810126582278442, 2.1163693901035803, 1.0289833750184076, 0.9965487489214924, 0.9997048406140002, 0.9938587512794523], \"worstPairChangePercent\": 111.63693901035802}, \"identicalCodeControl\": {\"count\": 2, \"descriptiveBootstrap95Percent\": [0.4426042261573171, 0.6529158628911347], \"equalWorkChangePercent\": 0.5457323728464747, \"fasterPairs\": 0, \"medianPairedChangePercent\": 0.547760044524237, \"ratios\": [1.0044260422615732, 1.0065291586289113], \"worstPairChangePercent\": 0.6529158628911347}, \"limits\": \"One host/cohort only; independent opposite-order replication required. Memory observations remain separate.\", \"memoryPassed\": true, \"status\": \"correctness-memory-passed\", \"timingInterpretation\": \"Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.\", \"timingScope\": \"File input change through post-UI completion; fresh profile per observation\"}",
+        "2026-11-28T04:03:43.5379922Z EVIDENCE_JSON observations.json [{\"arm\": \"A\", \"id\": \"warmup-1-A\", \"kind\": \"warmup\", \"pair\": 1, \"totalImportMs\": 1158}, {\"arm\": \"B\", \"id\": \"warmup-1-B\", \"kind\": \"warmup\", \"pair\": 1, \"totalImportMs\": 968.6000000000058}, {\"arm\": \"B\", \"id\": \"warmup-2-B\", \"kind\": \"warmup\", \"pair\": 2, \"totalImportMs\": 686.5}, {\"arm\": \"A\", \"id\": \"warmup-2-A\", \"kind\": \"warmup\", \"pair\": 2, \"totalImportMs\": 672.3999999999942}, {\"arm\": \"A\", \"id\": \"pair-01-A\", \"kind\": \"candidate\", \"pair\": 1, \"totalImportMs\": 750.5}, {\"arm\": \"B\", \"id\": \"pair-01-B\", \"kind\": \"candidate\", \"pair\": 1, \"totalImportMs\": 661.1999999999971}, {\"arm\": \"B\", \"id\": \"pair-02-B\", \"kind\": \"candidate\", \"pair\": 2, \"totalImportMs\": 1471.300000000003}, {\"arm\": \"A\", \"id\": \"pair-02-A\", \"kind\": \"candidate\", \"pair\": 2, \"totalImportMs\": 695.1999999999971}, {\"arm\": \"A\", \"id\": \"pair-03-A\", \"kind\": \"candidate\", \"pair\": 3, \"totalImportMs\": 679.6999999999971}, {\"arm\": \"B\", \"id\": \"pair-03-B\", \"kind\": \"candidate\", \"pair\": 3, \"totalImportMs\": 699.4000000000087}, {\"arm\": \"A\", \"id\": \"control-01-A\", \"kind\": \"control\", \"pair\": 1, \"totalImportMs\": 700.3999999999942}, {\"arm\": \"C\", \"id\": \"control-01-C\", \"kind\": \"control\", \"pair\": 1, \"totalImportMs\": 703.5}, {\"arm\": \"B\", \"id\": \"pair-04-B\", \"kind\": \"candidate\", \"pair\": 4, \"totalImportMs\": 693}, {\"arm\": \"A\", \"id\": \"pair-04-A\", \"kind\": \"candidate\", \"pair\": 4, \"totalImportMs\": 695.3999999999942}, {\"arm\": \"A\", \"id\": \"pair-05-A\", \"kind\": \"candidate\", \"pair\": 5, \"totalImportMs\": 677.5999999999767}, {\"arm\": \"B\", \"id\": \"pair-05-B\", \"kind\": \"candidate\", \"pair\": 5, \"totalImportMs\": 677.4000000000233}, {\"arm\": \"B\", \"id\": \"pair-06-B\", \"kind\": \"candidate\", \"pair\": 6, \"totalImportMs\": 679.7000000000116}, {\"arm\": \"A\", \"id\": \"pair-06-A\", \"kind\": \"candidate\", \"pair\": 6, \"totalImportMs\": 683.8999999999942}, {\"arm\": \"C\", \"id\": \"control-02-C\", \"kind\": \"control\", \"pair\": 2, \"totalImportMs\": 678.3000000000175}, {\"arm\": \"A\", \"id\": \"control-02-A\", \"kind\": \"control\", \"pair\": 2, \"totalImportMs\": 673.8999999999942}]",
+        "2026-11-28T04:03:43.5393032Z EVIDENCE_JSON registered-plan.json {\"baseline\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\", \"candidate\": \"6d6600a3277f83782729fcce14ea7e02f48a4b40\", \"dictionary\": \"jmdict\", \"expectedPackageEntries\": [\"js/dictionary/dictionary-database.js\"], \"expectedWorkers\": null, \"failurePolicy\": \"Stop on first failed observation; retain all completed and failed evidence\", \"flags\": {}, \"initialOrder\": \"AB\", \"mediaCheck\": \"sample per timed observation; separate all-media verification after timing\", \"memoryPolicy\": \"Separate instrumented A/B observations after all timing and media verification\", \"memorySchedule\": [{\"arm\": \"A\", \"index\": 1, \"name\": \"A1\", \"pair\": 1}, {\"arm\": \"B\", \"index\": 2, \"name\": \"B1\", \"pair\": 1}, {\"arm\": \"B\", \"index\": 3, \"name\": \"B2\", \"pair\": 2}, {\"arm\": \"A\", \"index\": 4, \"name\": \"A2\", \"pair\": 2}], \"pairs\": 6, \"schedule\": [{\"arm\": \"A\", \"id\": \"warmup-1-A\", \"kind\": \"warmup\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"warmup-1-B\", \"kind\": \"warmup\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"warmup-2-B\", \"kind\": \"warmup\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"warmup-2-A\", \"kind\": \"warmup\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-01-A\", \"kind\": \"candidate\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-01-B\", \"kind\": \"candidate\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-02-B\", \"kind\": \"candidate\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-02-A\", \"kind\": \"candidate\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-03-A\", \"kind\": \"candidate\", \"pair\": 3}, {\"arm\": \"B\", \"id\": \"pair-03-B\", \"kind\": \"candidate\", \"pair\": 3}, {\"arm\": \"A\", \"id\": \"control-01-A\", \"kind\": \"control\", \"pair\": 1}, {\"arm\": \"C\", \"id\": \"control-01-C\", \"kind\": \"control\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-04-B\", \"kind\": \"candidate\", \"pair\": 4}, {\"arm\": \"A\", \"id\": \"pair-04-A\", \"kind\": \"candidate\", \"pair\": 4}, {\"arm\": \"A\", \"id\": \"pair-05-A\", \"kind\": \"candidate\", \"pair\": 5}, {\"arm\": \"B\", \"id\": \"pair-05-B\", \"kind\": \"candidate\", \"pair\": 5}, {\"arm\": \"B\", \"id\": \"pair-06-B\", \"kind\": \"candidate\", \"pair\": 6}, {\"arm\": \"A\", \"id\": \"pair-06-A\", \"kind\": \"candidate\", \"pair\": 6}, {\"arm\": \"C\", \"id\": \"control-02-C\", \"kind\": \"control\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"control-02-A\", \"kind\": \"control\", \"pair\": 2}], \"sourceBoundary\": \"Each revision built independently before timing; no product or harness overlays\", \"statistics\": \"Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.\", \"vndbSahAllocationPolicy\": null}",
+        "2026-11-28T04:03:43.5400077Z EVIDENCE_JSON browser-identity.json {\"executable\": \"/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome\", \"sha256\": \"8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e\", \"version\": \"153.0.8010.12\", \"versionOutput\": \"Google Chrome for Testing 153.0.8010.12\"}",
+        "2026-11-28T04:03:43.5420111Z EVIDENCE_JSON memory/memory-comparison.json {\"authoritativeTiming\": false, \"dictionary\": \"jmdict\", \"everyObservationQualified\": true, \"metrics\": {\"maxSampledPrivateKiB\": {\"maximumPairedChangePercent\": 0.31081798195740085, \"medianPairedChangePercent\": -0.5283061573075731}, \"maxSampledPssKiB\": {\"maximumPairedChangePercent\": 0.618185553495687, \"medianPairedChangePercent\": -0.4618932454596103}}, \"observations\": [{\"allObservedSampleCount\": 64, \"arm\": \"A\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 8, \"index\": 1, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 788340, \"maxSampledPssKiB\": 1021549, \"maximumCoveredSampleGapMs\": 151.33783, \"name\": \"A1\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 8, \"pair\": 1, \"postImportBracketGapMs\": 15.920596, \"preImportBracketGapMs\": 11.70078, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 8, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 8, \"stableFullyReadTreeSampleCount\": 8, \"windowDurationMs\": 846.796643, \"windowMarkers\": [{\"epochMs\": 1795838599781, \"event\": \"start\", \"monotonicNs\": \"200344952122\"}, {\"epochMs\": 1795838600628, \"event\": \"end\", \"monotonicNs\": \"201191748765\"}]}, {\"allObservedSampleCount\": 63, \"arm\": \"B\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 7, \"index\": 2, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 777560, \"maxSampledPssKiB\": 1005797, \"maximumCoveredSampleGapMs\": 143.310429, \"name\": \"B1\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 9, \"pair\": 1, \"postImportBracketGapMs\": 60.976707, \"preImportBracketGapMs\": 32.453894, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 9, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 7, \"stableFullyReadTreeSampleCount\": 9, \"windowDurationMs\": 861.578926, \"windowMarkers\": [{\"epochMs\": 1795838606601, \"event\": \"start\", \"monotonicNs\": \"207165360308\"}, {\"epochMs\": 1795838607463, \"event\": \"end\", \"monotonicNs\": \"208026939234\"}]}, {\"allObservedSampleCount\": 64, \"arm\": \"B\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 1, \"confirmedExitedZombieObservationCount\": 8, \"fullyContainedImportSampleCount\": 7, \"index\": 3, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 793920, \"maxSampledPssKiB\": 1028504, \"maximumCoveredSampleGapMs\": 159.812351, \"name\": \"B2\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 8, \"pair\": 2, \"postImportBracketGapMs\": 13.630427, \"preImportBracketGapMs\": 39.919605, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 8, \"samplesWithUnavailableSmaps\": 8, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 7, \"stableFullyReadTreeSampleCount\": 8, \"windowDurationMs\": 838.270731, \"windowMarkers\": [{\"epochMs\": 1795838613523, \"event\": \"start\", \"monotonicNs\": \"214087098613\"}, {\"epochMs\": 1795838614361, \"event\": \"end\", \"monotonicNs\": \"214925369344\"}]}, {\"allObservedSampleCount\": 61, \"arm\": \"A\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 7, \"index\": 4, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 791460, \"maxSampledPssKiB\": 1022185, \"maximumCoveredSampleGapMs\": 147.805543, \"name\": \"A2\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 8, \"pair\": 2, \"postImportBracketGapMs\": 50.125887, \"preImportBracketGapMs\": 2.73444, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 8, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 7, \"stableFullyReadTreeSampleCount\": 8, \"windowDurationMs\": 832.972366, \"windowMarkers\": [{\"epochMs\": 1795838620344, \"event\": \"start\", \"monotonicNs\": \"220907959934\"}, {\"epochMs\": 1795838621177, \"event\": \"end\", \"monotonicNs\": \"221740932300\"}]}], \"pairs\": [{\"maxSampledPrivateKiB\": {\"baseline\": 788340, \"candidate\": 777560, \"changePercent\": -1.367430296572547}, \"maxSampledPssKiB\": {\"baseline\": 1021549, \"candidate\": 1005797, \"changePercent\": -1.5419720444149076}, \"pair\": 1, \"qualified\": true}, {\"maxSampledPrivateKiB\": {\"baseline\": 791460, \"candidate\": 793920, \"changePercent\": 0.31081798195740085}, \"maxSampledPssKiB\": {\"baseline\": 1022185, \"candidate\": 1028504, \"changePercent\": 0.618185553495687}, \"pair\": 2, \"qualified\": true}], \"passesProspectiveMemoryScreen\": true, \"replication\": 1, \"schemaVersion\": 1}",
+        "2026-11-28T04:03:43.5435104Z EVIDENCE_JSON memory/memory-audit.json {\"everyObservationQualified\": true, \"metrics\": {\"maxSampledPrivateKiB\": {\"maximumPairedChangePercent\": 0.31081798195740085, \"medianPairedChangePercent\": -0.5283061573075731}, \"maxSampledPssKiB\": {\"maximumPairedChangePercent\": 0.618185553495687, \"medianPairedChangePercent\": -0.4618932454596103}}, \"observations\": 4, \"passesProspectiveMemoryScreen\": true, \"rawScanCount\": 252, \"schemaVersion\": 1}",
+        "2026-11-28T04:03:43.5435959Z EVIDENCE_JSON memory/semantic-failures.json []",
+        "2026-11-28T04:03:43.5443165Z EVIDENCE_JSON source-identities-compact.json {\"arms\": {\"A\": {\"fixtureLockSha256\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\", \"lockSha256\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"packageSha256\": \"853788e9d7110ca102121ed17779dae41a234135ce5b95d23b42971cdff84ba1\", \"packagedEntryCount\": 554, \"sha\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\", \"sourceHashes\": {\"builds/manabitan-chrome-dev.zip\": null, \"builds/manabitan-chrome.zip\": \"853788e9d7110ca102121ed17779dae41a234135ce5b95d23b42971cdff84ba1\", \"dev/perf/benchmark-support.js\": \"eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0\", \"dev/perf/dictionary-fixtures.js\": \"269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b\", \"dev/perf/import-benchmark.js\": \"aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6\", \"ext/js/pages/settings/dictionary-import-controller.js\": \"64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307\", \"package-lock.json\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"test/chromium/extension-two-dictionary-import.e2e.js\": \"d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf\", \"test/chromium/import-flags-ab-benchmark.js\": \"da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34\", \"test/e2e/import-timing.js\": \"20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c\", \"test/perf/dictionaries.lock.json\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\"}, \"tree\": \"d99ea4d04658f7ec1c76acdc5f3684594212a471\"}, \"B\": {\"fixtureLockSha256\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\", \"lockSha256\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"packageSha256\": \"dcd8d9d014ba564295ff2e78a48c97af7fe714e73ecf91977b7a907aeb0a0c27\", \"packagedEntryCount\": 554, \"sha\": \"6d6600a3277f83782729fcce14ea7e02f48a4b40\", \"sourceHashes\": {\"builds/manabitan-chrome-dev.zip\": null, \"builds/manabitan-chrome.zip\": \"dcd8d9d014ba564295ff2e78a48c97af7fe714e73ecf91977b7a907aeb0a0c27\", \"dev/perf/benchmark-support.js\": \"eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0\", \"dev/perf/dictionary-fixtures.js\": \"269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b\", \"dev/perf/import-benchmark.js\": \"aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6\", \"ext/js/pages/settings/dictionary-import-controller.js\": \"64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307\", \"package-lock.json\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"test/chromium/extension-two-dictionary-import.e2e.js\": \"d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf\", \"test/chromium/import-flags-ab-benchmark.js\": \"da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34\", \"test/e2e/import-timing.js\": \"20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c\", \"test/perf/dictionaries.lock.json\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\"}, \"tree\": \"48ff4512802a372da7caea01cc142ae086fba8a5\"}}, \"changedPackageEntries\": [\"js/dictionary/dictionary-database.js\"], \"controlC\": \"Same A source, package, runtime, and flags under a distinct observation label\"}"
+      ],
+      "packageBytes": [
+        {
+          "bytes": 16805714,
+          "name": "package-A.zip",
+          "sha256": "853788e9d7110ca102121ed17779dae41a234135ce5b95d23b42971cdff84ba1"
+        },
+        {
+          "bytes": 16806497,
+          "name": "package-B.zip",
+          "sha256": "dcd8d9d014ba564295ff2e78a48c97af7fe714e73ecf91977b7a907aeb0a0c27"
+        }
+      ],
+      "recomputed": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineMs": 750.5,
+              "comparisonMs": 661.1999999999971,
+              "ratio": 0.8810126582278442,
+              "changePercent": -11.898734177215575
+            },
+            {
+              "pair": 2,
+              "baselineMs": 695.1999999999971,
+              "comparisonMs": 1471.300000000003,
+              "ratio": 2.1163693901035803,
+              "changePercent": 111.63693901035802
+            },
+            {
+              "pair": 3,
+              "baselineMs": 679.6999999999971,
+              "comparisonMs": 699.4000000000087,
+              "ratio": 1.0289833750184076,
+              "changePercent": 2.898337501840764
+            },
+            {
+              "pair": 4,
+              "baselineMs": 695.3999999999942,
+              "comparisonMs": 693,
+              "ratio": 0.9965487489214924,
+              "changePercent": -0.34512510785076334
+            },
+            {
+              "pair": 5,
+              "baselineMs": 677.5999999999767,
+              "comparisonMs": 677.4000000000233,
+              "ratio": 0.9997048406140002,
+              "changePercent": -0.029515938599977698
+            },
+            {
+              "pair": 6,
+              "baselineMs": 683.8999999999942,
+              "comparisonMs": 679.7000000000116,
+              "ratio": 0.9938587512794523,
+              "changePercent": -0.6141248720547665
+            }
+          ],
+          "ratios": [
+            0.8810126582278442,
+            2.1163693901035803,
+            1.0289833750184076,
+            0.9965487489214924,
+            0.9997048406140002,
+            0.9938587512794523
+          ],
+          "medianPairedChangePercent": -0.18732052322536497,
+          "equalWorkChangePercent": 16.73002893145139,
+          "worstPairChangePercent": 111.63693901035802,
+          "fasterPairs": 4,
+          "exactEnumeratedBootstrap95Percent": [
+            -6.256429524635165,
+            57.267638256099396
+          ],
+          "exactEnumeratedBootstrapSampleCount": 46656,
+          "reportedSeed897Bootstrap95Percent": [
+            -6.256429524635165,
+            57.267638256099396
+          ],
+          "reportedSummaryMatches": true,
+          "exactBootstrapMatchesReported": true
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineMs": 700.3999999999942,
+              "comparisonMs": 703.5,
+              "ratio": 1.0044260422615732,
+              "changePercent": 0.4426042261573171
+            },
+            {
+              "pair": 2,
+              "baselineMs": 673.8999999999942,
+              "comparisonMs": 678.3000000000175,
+              "ratio": 1.0065291586289113,
+              "changePercent": 0.6529158628911347
+            }
+          ],
+          "ratios": [
+            1.0044260422615732,
+            1.0065291586289113
+          ],
+          "medianPairedChangePercent": 0.547760044524237,
+          "equalWorkChangePercent": 0.5457323728464747,
+          "worstPairChangePercent": 0.6529158628911347,
+          "fasterPairs": 0,
+          "exactEnumeratedBootstrap95Percent": [
+            0.4426042261573171,
+            0.6529158628911347
+          ],
+          "exactEnumeratedBootstrapSampleCount": 4,
+          "reportedSeed897Bootstrap95Percent": [
+            0.4426042261573171,
+            0.6529158628911347
+          ],
+          "reportedSummaryMatches": true,
+          "exactBootstrapMatchesReported": true
+        },
+        "memory": {
+          "maxSampledPrivateKiB": {
+            "changes": [
+              -1.367430296572547,
+              0.31081798195740085
+            ],
+            "medianPairedChangePercent": -0.5283061573075731,
+            "maximumPairedChangePercent": 0.31081798195740085
+          },
+          "maxSampledPssKiB": {
+            "changes": [
+              -1.5419720444149076,
+              0.618185553495687
+            ],
+            "medianPairedChangePercent": -0.4618932454596103,
+            "maximumPairedChangePercent": 0.618185553495687
+          }
+        },
+        "allMemoryMetricMatches": true,
+        "allTimingScheduleMatches": true
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "jobId": 140849615758,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46102503309/job/140849615758",
+      "jobConclusion": "success",
+      "artifact": {
+        "id": 15247481613,
+        "name": "import-registration-d2d13264-jitendex-46102503309",
+        "size_in_bytes": 560592411,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247481613",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247481613/zip",
+        "expired": false,
+        "created_at": "2026-11-28T04:04:24Z",
+        "expires_at": "2027-02-26T03:22:01Z",
+        "updated_at": "2026-11-28T04:04:24Z",
+        "digest": "sha256:bbb1c61a1512495865261203dd9048c04e2f9cac0c9803391a5a17166973c30d",
+        "workflow_run": {
+          "id": 46102503309,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-screen-registration-20261127-d2d13264",
+          "head_sha": "8655830a237be6bd5e8c03172d284912fc9ef94c"
+        }
+      },
+      "originalCompactEvidence": {
+        "analysis.json": {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -5.271758979219888,
+              2.3842880202235905
+            ],
+            "equalWorkChangePercent": -0.9395219319285664,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 0.3907534223993592,
+            "ratios": [
+              0.9879856115107934,
+              1.0390563187801105,
+              1.0042391463236284,
+              1.0086294416243613,
+              0.9065792089048088,
+              1.0035759221243588
+            ],
+            "worstPairChangePercent": 3.905631878011051
+          },
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.2998022040140778,
+              1.2079378774818572
+            ],
+            "equalWorkChangePercent": -0.05701254275961576,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.04593216326611582,
+            "ratios": [
+              0.9870019779598592,
+              1.0120793787748186
+            ],
+            "worstPairChangePercent": 1.2079378774818572
+          },
+          "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+          "memoryPassed": true,
+          "status": "correctness-memory-passed",
+          "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+          "timingScope": "File input change through post-UI completion; fresh profile per observation"
+        },
+        "observations.json": [
+          {
+            "arm": "A",
+            "id": "warmup-1-A",
+            "kind": "warmup",
+            "pair": 1,
+            "totalImportMs": 1434.5
+          },
+          {
+            "arm": "B",
+            "id": "warmup-1-B",
+            "kind": "warmup",
+            "pair": 1,
+            "totalImportMs": 1369.5
+          },
+          {
+            "arm": "B",
+            "id": "warmup-2-B",
+            "kind": "warmup",
+            "pair": 2,
+            "totalImportMs": 2167.2999999999884
+          },
+          {
+            "arm": "A",
+            "id": "warmup-2-A",
+            "kind": "warmup",
+            "pair": 2,
+            "totalImportMs": 1418.199999999997
+          },
+          {
+            "arm": "A",
+            "id": "pair-01-A",
+            "kind": "candidate",
+            "pair": 1,
+            "totalImportMs": 1390
+          },
+          {
+            "arm": "B",
+            "id": "pair-01-B",
+            "kind": "candidate",
+            "pair": 1,
+            "totalImportMs": 1373.300000000003
+          },
+          {
+            "arm": "B",
+            "id": "pair-02-B",
+            "kind": "candidate",
+            "pair": 2,
+            "totalImportMs": 1444.6000000000058
+          },
+          {
+            "arm": "A",
+            "id": "pair-02-A",
+            "kind": "candidate",
+            "pair": 2,
+            "totalImportMs": 1390.3000000000175
+          },
+          {
+            "arm": "A",
+            "id": "pair-03-A",
+            "kind": "candidate",
+            "pair": 3,
+            "totalImportMs": 1368.2000000000116
+          },
+          {
+            "arm": "B",
+            "id": "pair-03-B",
+            "kind": "candidate",
+            "pair": 3,
+            "totalImportMs": 1374
+          },
+          {
+            "arm": "A",
+            "id": "control-01-A",
+            "kind": "control",
+            "pair": 1,
+            "totalImportMs": 1415.6000000000058
+          },
+          {
+            "arm": "C",
+            "id": "control-01-C",
+            "kind": "control",
+            "pair": 1,
+            "totalImportMs": 1397.1999999999825
+          },
+          {
+            "arm": "B",
+            "id": "pair-04-B",
+            "kind": "candidate",
+            "pair": 4,
+            "totalImportMs": 1390.8999999999942
+          },
+          {
+            "arm": "A",
+            "id": "pair-04-A",
+            "kind": "candidate",
+            "pair": 4,
+            "totalImportMs": 1379
+          },
+          {
+            "arm": "A",
+            "id": "pair-05-A",
+            "kind": "candidate",
+            "pair": 5,
+            "totalImportMs": 1509.2999999999884
+          },
+          {
+            "arm": "B",
+            "id": "pair-05-B",
+            "kind": "candidate",
+            "pair": 5,
+            "totalImportMs": 1368.3000000000175
+          },
+          {
+            "arm": "B",
+            "id": "pair-06-B",
+            "kind": "candidate",
+            "pair": 6,
+            "totalImportMs": 1515.5
+          },
+          {
+            "arm": "A",
+            "id": "pair-06-A",
+            "kind": "candidate",
+            "pair": 6,
+            "totalImportMs": 1510.1000000000058
+          },
+          {
+            "arm": "C",
+            "id": "control-02-C",
+            "kind": "control",
+            "pair": 2,
+            "totalImportMs": 1407.6000000000058
+          },
+          {
+            "arm": "A",
+            "id": "control-02-A",
+            "kind": "control",
+            "pair": 2,
+            "totalImportMs": 1390.7999999999884
+          }
+        ],
+        "registered-plan.json": {
+          "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "candidate": "6d6600a3277f83782729fcce14ea7e02f48a4b40",
+          "dictionary": "jitendex",
+          "expectedPackageEntries": [
+            "js/dictionary/dictionary-database.js"
+          ],
+          "expectedWorkers": null,
+          "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+          "flags": {},
+          "initialOrder": "AB",
+          "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+          "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+          "memorySchedule": [
+            {
+              "arm": "A",
+              "index": 1,
+              "name": "A1",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "index": 2,
+              "name": "B1",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "index": 3,
+              "name": "B2",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "index": 4,
+              "name": "A2",
+              "pair": 2
+            }
+          ],
+          "pairs": 6,
+          "schedule": [
+            {
+              "arm": "A",
+              "id": "warmup-1-A",
+              "kind": "warmup",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "warmup-1-B",
+              "kind": "warmup",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "warmup-2-B",
+              "kind": "warmup",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "warmup-2-A",
+              "kind": "warmup",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-01-A",
+              "kind": "candidate",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-01-B",
+              "kind": "candidate",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-02-B",
+              "kind": "candidate",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-02-A",
+              "kind": "candidate",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "pair-03-A",
+              "kind": "candidate",
+              "pair": 3
+            },
+            {
+              "arm": "B",
+              "id": "pair-03-B",
+              "kind": "candidate",
+              "pair": 3
+            },
+            {
+              "arm": "A",
+              "id": "control-01-A",
+              "kind": "control",
+              "pair": 1
+            },
+            {
+              "arm": "C",
+              "id": "control-01-C",
+              "kind": "control",
+              "pair": 1
+            },
+            {
+              "arm": "B",
+              "id": "pair-04-B",
+              "kind": "candidate",
+              "pair": 4
+            },
+            {
+              "arm": "A",
+              "id": "pair-04-A",
+              "kind": "candidate",
+              "pair": 4
+            },
+            {
+              "arm": "A",
+              "id": "pair-05-A",
+              "kind": "candidate",
+              "pair": 5
+            },
+            {
+              "arm": "B",
+              "id": "pair-05-B",
+              "kind": "candidate",
+              "pair": 5
+            },
+            {
+              "arm": "B",
+              "id": "pair-06-B",
+              "kind": "candidate",
+              "pair": 6
+            },
+            {
+              "arm": "A",
+              "id": "pair-06-A",
+              "kind": "candidate",
+              "pair": 6
+            },
+            {
+              "arm": "C",
+              "id": "control-02-C",
+              "kind": "control",
+              "pair": 2
+            },
+            {
+              "arm": "A",
+              "id": "control-02-A",
+              "kind": "control",
+              "pair": 2
+            }
+          ],
+          "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+          "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+          "vndbSahAllocationPolicy": null
+        },
+        "browser-identity.json": {
+          "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+          "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12",
+          "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+        },
+        "memory/memory-comparison.json": {
+          "authoritativeTiming": false,
+          "dictionary": "jitendex",
+          "everyObservationQualified": true,
+          "metrics": {
+            "maxSampledPrivateKiB": {
+              "maximumPairedChangePercent": 1.589097124114569,
+              "medianPairedChangePercent": 1.4962768528630876
+            },
+            "maxSampledPssKiB": {
+              "maximumPairedChangePercent": 1.7069268285164751,
+              "medianPairedChangePercent": 1.521304547753255
+            }
+          },
+          "observations": [
+            {
+              "allObservedSampleCount": 71,
+              "arm": "A",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 14,
+              "index": 1,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 809768,
+              "maxSampledPssKiB": 1038123,
+              "maximumCoveredSampleGapMs": 159.425685,
+              "name": "A1",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 15,
+              "pair": 1,
+              "postImportBracketGapMs": 16.688685,
+              "preImportBracketGapMs": 96.092701,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 15,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 14,
+              "stableFullyReadTreeSampleCount": 15,
+              "windowDurationMs": 1745.532811,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838580135,
+                  "event": "start",
+                  "monotonicNs": "269759229098"
+                },
+                {
+                  "epochMs": 1795838581881,
+                  "event": "end",
+                  "monotonicNs": "271504761909"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 79,
+              "arm": "B",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 13,
+              "index": 2,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 822636,
+              "maxSampledPssKiB": 1055843,
+              "maximumCoveredSampleGapMs": 162.068794,
+              "name": "B1",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 14,
+              "pair": 1,
+              "postImportBracketGapMs": 86.129661,
+              "preImportBracketGapMs": 3.960468,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 14,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 13,
+              "stableFullyReadTreeSampleCount": 14,
+              "windowDurationMs": 1704.288497,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838590230,
+                  "event": "start",
+                  "monotonicNs": "279854057026"
+                },
+                {
+                  "epochMs": 1795838591934,
+                  "event": "end",
+                  "monotonicNs": "281558345523"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 80,
+              "arm": "B",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 13,
+              "index": 3,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 845356,
+              "maxSampledPssKiB": 1079679,
+              "maximumCoveredSampleGapMs": 154.437361,
+              "name": "B2",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 14,
+              "pair": 2,
+              "postImportBracketGapMs": 24.392154,
+              "preImportBracketGapMs": 62.788968,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 14,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 13,
+              "stableFullyReadTreeSampleCount": 14,
+              "windowDurationMs": 1719.788604,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838600477,
+                  "event": "start",
+                  "monotonicNs": "290100699639"
+                },
+                {
+                  "epochMs": 1795838602197,
+                  "event": "end",
+                  "monotonicNs": "291820488243"
+                }
+              ]
+            },
+            {
+              "allObservedSampleCount": 85,
+              "arm": "A",
+              "authoritativeTiming": false,
+              "benchmarkExitCode": 0,
+              "confirmedExitedZombieIdentityCount": 0,
+              "confirmedExitedZombieObservationCount": 0,
+              "fullyContainedImportSampleCount": 13,
+              "index": 4,
+              "limitations": [
+                "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+              ],
+              "maxSampledPrivateKiB": 833656,
+              "maxSampledPssKiB": 1065448,
+              "maximumCoveredSampleGapMs": 159.047171,
+              "name": "A2",
+              "observedProcessCountRange": [
+                9,
+                9
+              ],
+              "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+              "overlappingImportSampleCount": 14,
+              "pair": 2,
+              "postImportBracketGapMs": 15.080677,
+              "preImportBracketGapMs": 69.660185,
+              "qualificationFailures": [],
+              "qualifiedForWholeTreePss": true,
+              "sampleCount": 14,
+              "samplesWithUnavailableSmaps": 0,
+              "samplesWithUnreadableAddressSpaces": 0,
+              "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+              "schemaVersion": 3,
+              "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+              "stableFullyReadImportSampleCount": 13,
+              "stableFullyReadTreeSampleCount": 14,
+              "windowDurationMs": 1769.090161,
+              "windowMarkers": [
+                {
+                  "epochMs": 1795838611537,
+                  "event": "start",
+                  "monotonicNs": "301160739157"
+                },
+                {
+                  "epochMs": 1795838613306,
+                  "event": "end",
+                  "monotonicNs": "302929829318"
+                }
+              ]
+            }
+          ],
+          "pairs": [
+            {
+              "maxSampledPrivateKiB": {
+                "baseline": 809768,
+                "candidate": 822636,
+                "changePercent": 1.589097124114569
+              },
+              "maxSampledPssKiB": {
+                "baseline": 1038123,
+                "candidate": 1055843,
+                "changePercent": 1.7069268285164751
+              },
+              "pair": 1,
+              "qualified": true
+            },
+            {
+              "maxSampledPrivateKiB": {
+                "baseline": 833656,
+                "candidate": 845356,
+                "changePercent": 1.4034565816116062
+              },
+              "maxSampledPssKiB": {
+                "baseline": 1065448,
+                "candidate": 1079679,
+                "changePercent": 1.3356822669900348
+              },
+              "pair": 2,
+              "qualified": true
+            }
+          ],
+          "passesProspectiveMemoryScreen": true,
+          "replication": 1,
+          "schemaVersion": 1
+        },
+        "memory/memory-audit.json": {
+          "everyObservationQualified": true,
+          "metrics": {
+            "maxSampledPrivateKiB": {
+              "maximumPairedChangePercent": 1.589097124114569,
+              "medianPairedChangePercent": 1.4962768528630876
+            },
+            "maxSampledPssKiB": {
+              "maximumPairedChangePercent": 1.7069268285164751,
+              "medianPairedChangePercent": 1.521304547753255
+            }
+          },
+          "observations": 4,
+          "passesProspectiveMemoryScreen": true,
+          "rawScanCount": 315,
+          "schemaVersion": 1
+        },
+        "memory/semantic-failures.json": [],
+        "source-identities-compact.json": {
+          "arms": {
+            "A": {
+              "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+              "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+              "packageSha256": "5302be9a549d583da668537684b9e2967cd6c81acca2853270d560efcca825a3",
+              "packagedEntryCount": 554,
+              "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+              "sourceHashes": {
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "5302be9a549d583da668537684b9e2967cd6c81acca2853270d560efcca825a3",
+                "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+                "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+                "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+                "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+              },
+              "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+            },
+            "B": {
+              "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+              "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+              "packageSha256": "22114ab384e802f245c689d837f84293fea94b003a8050e65ef7647182c8d2af",
+              "packagedEntryCount": 554,
+              "sha": "6d6600a3277f83782729fcce14ea7e02f48a4b40",
+              "sourceHashes": {
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "22114ab384e802f245c689d837f84293fea94b003a8050e65ef7647182c8d2af",
+                "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+                "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+                "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+                "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+              },
+              "tree": "48ff4512802a372da7caea01cc142ae086fba8a5"
+            }
+          },
+          "changedPackageEntries": [
+            "js/dictionary/dictionary-database.js"
+          ],
+          "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+        }
+      },
+      "originalEvidenceLogLines": [
+        "2026-11-28T04:03:36.7734969Z EVIDENCE_JSON analysis.json {\"candidateVsBaseline\": {\"count\": 6, \"descriptiveBootstrap95Percent\": [-5.271758979219888, 2.3842880202235905], \"equalWorkChangePercent\": -0.9395219319285664, \"fasterPairs\": 2, \"medianPairedChangePercent\": 0.3907534223993592, \"ratios\": [0.9879856115107934, 1.0390563187801105, 1.0042391463236284, 1.0086294416243613, 0.9065792089048088, 1.0035759221243588], \"worstPairChangePercent\": 3.905631878011051}, \"identicalCodeControl\": {\"count\": 2, \"descriptiveBootstrap95Percent\": [-1.2998022040140778, 1.2079378774818572], \"equalWorkChangePercent\": -0.05701254275961576, \"fasterPairs\": 1, \"medianPairedChangePercent\": -0.04593216326611582, \"ratios\": [0.9870019779598592, 1.0120793787748186], \"worstPairChangePercent\": 1.2079378774818572}, \"limits\": \"One host/cohort only; independent opposite-order replication required. Memory observations remain separate.\", \"memoryPassed\": true, \"status\": \"correctness-memory-passed\", \"timingInterpretation\": \"Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.\", \"timingScope\": \"File input change through post-UI completion; fresh profile per observation\"}",
+        "2026-11-28T04:03:36.7745175Z EVIDENCE_JSON observations.json [{\"arm\": \"A\", \"id\": \"warmup-1-A\", \"kind\": \"warmup\", \"pair\": 1, \"totalImportMs\": 1434.5}, {\"arm\": \"B\", \"id\": \"warmup-1-B\", \"kind\": \"warmup\", \"pair\": 1, \"totalImportMs\": 1369.5}, {\"arm\": \"B\", \"id\": \"warmup-2-B\", \"kind\": \"warmup\", \"pair\": 2, \"totalImportMs\": 2167.2999999999884}, {\"arm\": \"A\", \"id\": \"warmup-2-A\", \"kind\": \"warmup\", \"pair\": 2, \"totalImportMs\": 1418.199999999997}, {\"arm\": \"A\", \"id\": \"pair-01-A\", \"kind\": \"candidate\", \"pair\": 1, \"totalImportMs\": 1390}, {\"arm\": \"B\", \"id\": \"pair-01-B\", \"kind\": \"candidate\", \"pair\": 1, \"totalImportMs\": 1373.300000000003}, {\"arm\": \"B\", \"id\": \"pair-02-B\", \"kind\": \"candidate\", \"pair\": 2, \"totalImportMs\": 1444.6000000000058}, {\"arm\": \"A\", \"id\": \"pair-02-A\", \"kind\": \"candidate\", \"pair\": 2, \"totalImportMs\": 1390.3000000000175}, {\"arm\": \"A\", \"id\": \"pair-03-A\", \"kind\": \"candidate\", \"pair\": 3, \"totalImportMs\": 1368.2000000000116}, {\"arm\": \"B\", \"id\": \"pair-03-B\", \"kind\": \"candidate\", \"pair\": 3, \"totalImportMs\": 1374}, {\"arm\": \"A\", \"id\": \"control-01-A\", \"kind\": \"control\", \"pair\": 1, \"totalImportMs\": 1415.6000000000058}, {\"arm\": \"C\", \"id\": \"control-01-C\", \"kind\": \"control\", \"pair\": 1, \"totalImportMs\": 1397.1999999999825}, {\"arm\": \"B\", \"id\": \"pair-04-B\", \"kind\": \"candidate\", \"pair\": 4, \"totalImportMs\": 1390.8999999999942}, {\"arm\": \"A\", \"id\": \"pair-04-A\", \"kind\": \"candidate\", \"pair\": 4, \"totalImportMs\": 1379}, {\"arm\": \"A\", \"id\": \"pair-05-A\", \"kind\": \"candidate\", \"pair\": 5, \"totalImportMs\": 1509.2999999999884}, {\"arm\": \"B\", \"id\": \"pair-05-B\", \"kind\": \"candidate\", \"pair\": 5, \"totalImportMs\": 1368.3000000000175}, {\"arm\": \"B\", \"id\": \"pair-06-B\", \"kind\": \"candidate\", \"pair\": 6, \"totalImportMs\": 1515.5}, {\"arm\": \"A\", \"id\": \"pair-06-A\", \"kind\": \"candidate\", \"pair\": 6, \"totalImportMs\": 1510.1000000000058}, {\"arm\": \"C\", \"id\": \"control-02-C\", \"kind\": \"control\", \"pair\": 2, \"totalImportMs\": 1407.6000000000058}, {\"arm\": \"A\", \"id\": \"control-02-A\", \"kind\": \"control\", \"pair\": 2, \"totalImportMs\": 1390.7999999999884}]",
+        "2026-11-28T04:03:36.7757064Z EVIDENCE_JSON registered-plan.json {\"baseline\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\", \"candidate\": \"6d6600a3277f83782729fcce14ea7e02f48a4b40\", \"dictionary\": \"jitendex\", \"expectedPackageEntries\": [\"js/dictionary/dictionary-database.js\"], \"expectedWorkers\": null, \"failurePolicy\": \"Stop on first failed observation; retain all completed and failed evidence\", \"flags\": {}, \"initialOrder\": \"AB\", \"mediaCheck\": \"sample per timed observation; separate all-media verification after timing\", \"memoryPolicy\": \"Separate instrumented A/B observations after all timing and media verification\", \"memorySchedule\": [{\"arm\": \"A\", \"index\": 1, \"name\": \"A1\", \"pair\": 1}, {\"arm\": \"B\", \"index\": 2, \"name\": \"B1\", \"pair\": 1}, {\"arm\": \"B\", \"index\": 3, \"name\": \"B2\", \"pair\": 2}, {\"arm\": \"A\", \"index\": 4, \"name\": \"A2\", \"pair\": 2}], \"pairs\": 6, \"schedule\": [{\"arm\": \"A\", \"id\": \"warmup-1-A\", \"kind\": \"warmup\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"warmup-1-B\", \"kind\": \"warmup\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"warmup-2-B\", \"kind\": \"warmup\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"warmup-2-A\", \"kind\": \"warmup\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-01-A\", \"kind\": \"candidate\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-01-B\", \"kind\": \"candidate\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-02-B\", \"kind\": \"candidate\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-02-A\", \"kind\": \"candidate\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"pair-03-A\", \"kind\": \"candidate\", \"pair\": 3}, {\"arm\": \"B\", \"id\": \"pair-03-B\", \"kind\": \"candidate\", \"pair\": 3}, {\"arm\": \"A\", \"id\": \"control-01-A\", \"kind\": \"control\", \"pair\": 1}, {\"arm\": \"C\", \"id\": \"control-01-C\", \"kind\": \"control\", \"pair\": 1}, {\"arm\": \"B\", \"id\": \"pair-04-B\", \"kind\": \"candidate\", \"pair\": 4}, {\"arm\": \"A\", \"id\": \"pair-04-A\", \"kind\": \"candidate\", \"pair\": 4}, {\"arm\": \"A\", \"id\": \"pair-05-A\", \"kind\": \"candidate\", \"pair\": 5}, {\"arm\": \"B\", \"id\": \"pair-05-B\", \"kind\": \"candidate\", \"pair\": 5}, {\"arm\": \"B\", \"id\": \"pair-06-B\", \"kind\": \"candidate\", \"pair\": 6}, {\"arm\": \"A\", \"id\": \"pair-06-A\", \"kind\": \"candidate\", \"pair\": 6}, {\"arm\": \"C\", \"id\": \"control-02-C\", \"kind\": \"control\", \"pair\": 2}, {\"arm\": \"A\", \"id\": \"control-02-A\", \"kind\": \"control\", \"pair\": 2}], \"sourceBoundary\": \"Each revision built independently before timing; no product or harness overlays\", \"statistics\": \"Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.\", \"vndbSahAllocationPolicy\": null}",
+        "2026-11-28T04:03:36.7763459Z EVIDENCE_JSON browser-identity.json {\"executable\": \"/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome\", \"sha256\": \"8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e\", \"version\": \"153.0.8010.12\", \"versionOutput\": \"Google Chrome for Testing 153.0.8010.12\"}",
+        "2026-11-28T04:03:36.7794144Z EVIDENCE_JSON memory/memory-comparison.json {\"authoritativeTiming\": false, \"dictionary\": \"jitendex\", \"everyObservationQualified\": true, \"metrics\": {\"maxSampledPrivateKiB\": {\"maximumPairedChangePercent\": 1.589097124114569, \"medianPairedChangePercent\": 1.4962768528630876}, \"maxSampledPssKiB\": {\"maximumPairedChangePercent\": 1.7069268285164751, \"medianPairedChangePercent\": 1.521304547753255}}, \"observations\": [{\"allObservedSampleCount\": 71, \"arm\": \"A\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 14, \"index\": 1, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 809768, \"maxSampledPssKiB\": 1038123, \"maximumCoveredSampleGapMs\": 159.425685, \"name\": \"A1\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 15, \"pair\": 1, \"postImportBracketGapMs\": 16.688685, \"preImportBracketGapMs\": 96.092701, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 15, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 14, \"stableFullyReadTreeSampleCount\": 15, \"windowDurationMs\": 1745.532811, \"windowMarkers\": [{\"epochMs\": 1795838580135, \"event\": \"start\", \"monotonicNs\": \"269759229098\"}, {\"epochMs\": 1795838581881, \"event\": \"end\", \"monotonicNs\": \"271504761909\"}]}, {\"allObservedSampleCount\": 79, \"arm\": \"B\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 13, \"index\": 2, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 822636, \"maxSampledPssKiB\": 1055843, \"maximumCoveredSampleGapMs\": 162.068794, \"name\": \"B1\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 14, \"pair\": 1, \"postImportBracketGapMs\": 86.129661, \"preImportBracketGapMs\": 3.960468, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 14, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 13, \"stableFullyReadTreeSampleCount\": 14, \"windowDurationMs\": 1704.288497, \"windowMarkers\": [{\"epochMs\": 1795838590230, \"event\": \"start\", \"monotonicNs\": \"279854057026\"}, {\"epochMs\": 1795838591934, \"event\": \"end\", \"monotonicNs\": \"281558345523\"}]}, {\"allObservedSampleCount\": 80, \"arm\": \"B\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 13, \"index\": 3, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 845356, \"maxSampledPssKiB\": 1079679, \"maximumCoveredSampleGapMs\": 154.437361, \"name\": \"B2\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 14, \"pair\": 2, \"postImportBracketGapMs\": 24.392154, \"preImportBracketGapMs\": 62.788968, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 14, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 13, \"stableFullyReadTreeSampleCount\": 14, \"windowDurationMs\": 1719.788604, \"windowMarkers\": [{\"epochMs\": 1795838600477, \"event\": \"start\", \"monotonicNs\": \"290100699639\"}, {\"epochMs\": 1795838602197, \"event\": \"end\", \"monotonicNs\": \"291820488243\"}]}, {\"allObservedSampleCount\": 85, \"arm\": \"A\", \"authoritativeTiming\": false, \"benchmarkExitCode\": 0, \"confirmedExitedZombieIdentityCount\": 0, \"confirmedExitedZombieObservationCount\": 0, \"fullyContainedImportSampleCount\": 13, \"index\": 4, \"limitations\": [\"Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.\", \"Only complete scans wholly inside the marked automation import window contribute to maxima.\", \"Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.\", \"PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.\", \"All failed and boundary scans are retained; no missing read is assigned a measured zero.\"], \"maxSampledPrivateKiB\": 833656, \"maxSampledPssKiB\": 1065448, \"maximumCoveredSampleGapMs\": 159.047171, \"name\": \"A2\", \"observedProcessCountRange\": [9, 9], \"observerRule\": \"import-window-stable-single-thread-zombie-esrch-v1\", \"overlappingImportSampleCount\": 14, \"pair\": 2, \"postImportBracketGapMs\": 15.080677, \"preImportBracketGapMs\": 69.660185, \"qualificationFailures\": [], \"qualifiedForWholeTreePss\": true, \"sampleCount\": 14, \"samplesWithUnavailableSmaps\": 0, \"samplesWithUnreadableAddressSpaces\": 0, \"sampling\": \"Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks\", \"schemaVersion\": 3, \"scope\": \"Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima\", \"stableFullyReadImportSampleCount\": 13, \"stableFullyReadTreeSampleCount\": 14, \"windowDurationMs\": 1769.090161, \"windowMarkers\": [{\"epochMs\": 1795838611537, \"event\": \"start\", \"monotonicNs\": \"301160739157\"}, {\"epochMs\": 1795838613306, \"event\": \"end\", \"monotonicNs\": \"302929829318\"}]}], \"pairs\": [{\"maxSampledPrivateKiB\": {\"baseline\": 809768, \"candidate\": 822636, \"changePercent\": 1.589097124114569}, \"maxSampledPssKiB\": {\"baseline\": 1038123, \"candidate\": 1055843, \"changePercent\": 1.7069268285164751}, \"pair\": 1, \"qualified\": true}, {\"maxSampledPrivateKiB\": {\"baseline\": 833656, \"candidate\": 845356, \"changePercent\": 1.4034565816116062}, \"maxSampledPssKiB\": {\"baseline\": 1065448, \"candidate\": 1079679, \"changePercent\": 1.3356822669900348}, \"pair\": 2, \"qualified\": true}], \"passesProspectiveMemoryScreen\": true, \"replication\": 1, \"schemaVersion\": 1}",
+        "2026-11-28T04:03:36.7817921Z EVIDENCE_JSON memory/memory-audit.json {\"everyObservationQualified\": true, \"metrics\": {\"maxSampledPrivateKiB\": {\"maximumPairedChangePercent\": 1.589097124114569, \"medianPairedChangePercent\": 1.4962768528630876}, \"maxSampledPssKiB\": {\"maximumPairedChangePercent\": 1.7069268285164751, \"medianPairedChangePercent\": 1.521304547753255}}, \"observations\": 4, \"passesProspectiveMemoryScreen\": true, \"rawScanCount\": 315, \"schemaVersion\": 1}",
+        "2026-11-28T04:03:36.7819271Z EVIDENCE_JSON memory/semantic-failures.json []",
+        "2026-11-28T04:03:36.7831104Z EVIDENCE_JSON source-identities-compact.json {\"arms\": {\"A\": {\"fixtureLockSha256\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\", \"lockSha256\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"packageSha256\": \"5302be9a549d583da668537684b9e2967cd6c81acca2853270d560efcca825a3\", \"packagedEntryCount\": 554, \"sha\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\", \"sourceHashes\": {\"builds/manabitan-chrome-dev.zip\": null, \"builds/manabitan-chrome.zip\": \"5302be9a549d583da668537684b9e2967cd6c81acca2853270d560efcca825a3\", \"dev/perf/benchmark-support.js\": \"eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0\", \"dev/perf/dictionary-fixtures.js\": \"269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b\", \"dev/perf/import-benchmark.js\": \"aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6\", \"ext/js/pages/settings/dictionary-import-controller.js\": \"64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307\", \"package-lock.json\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"test/chromium/extension-two-dictionary-import.e2e.js\": \"d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf\", \"test/chromium/import-flags-ab-benchmark.js\": \"da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34\", \"test/e2e/import-timing.js\": \"20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c\", \"test/perf/dictionaries.lock.json\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\"}, \"tree\": \"d99ea4d04658f7ec1c76acdc5f3684594212a471\"}, \"B\": {\"fixtureLockSha256\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\", \"lockSha256\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"packageSha256\": \"22114ab384e802f245c689d837f84293fea94b003a8050e65ef7647182c8d2af\", \"packagedEntryCount\": 554, \"sha\": \"6d6600a3277f83782729fcce14ea7e02f48a4b40\", \"sourceHashes\": {\"builds/manabitan-chrome-dev.zip\": null, \"builds/manabitan-chrome.zip\": \"22114ab384e802f245c689d837f84293fea94b003a8050e65ef7647182c8d2af\", \"dev/perf/benchmark-support.js\": \"eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0\", \"dev/perf/dictionary-fixtures.js\": \"269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b\", \"dev/perf/import-benchmark.js\": \"aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6\", \"ext/js/pages/settings/dictionary-import-controller.js\": \"64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307\", \"package-lock.json\": \"01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96\", \"test/chromium/extension-two-dictionary-import.e2e.js\": \"d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf\", \"test/chromium/import-flags-ab-benchmark.js\": \"da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34\", \"test/e2e/import-timing.js\": \"20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c\", \"test/perf/dictionaries.lock.json\": \"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89\"}, \"tree\": \"48ff4512802a372da7caea01cc142ae086fba8a5\"}}, \"changedPackageEntries\": [\"js/dictionary/dictionary-database.js\"], \"controlC\": \"Same A source, package, runtime, and flags under a distinct observation label\"}"
+      ],
+      "packageBytes": [
+        {
+          "bytes": 16805714,
+          "name": "package-A.zip",
+          "sha256": "5302be9a549d583da668537684b9e2967cd6c81acca2853270d560efcca825a3"
+        },
+        {
+          "bytes": 16806497,
+          "name": "package-B.zip",
+          "sha256": "22114ab384e802f245c689d837f84293fea94b003a8050e65ef7647182c8d2af"
+        }
+      ],
+      "recomputed": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineMs": 1390,
+              "comparisonMs": 1373.300000000003,
+              "ratio": 0.9879856115107934,
+              "changePercent": -1.2014388489206551
+            },
+            {
+              "pair": 2,
+              "baselineMs": 1390.3000000000175,
+              "comparisonMs": 1444.6000000000058,
+              "ratio": 1.0390563187801105,
+              "changePercent": 3.905631878011051
+            },
+            {
+              "pair": 3,
+              "baselineMs": 1368.2000000000116,
+              "comparisonMs": 1374,
+              "ratio": 1.0042391463236284,
+              "changePercent": 0.4239146323628429
+            },
+            {
+              "pair": 4,
+              "baselineMs": 1379,
+              "comparisonMs": 1390.8999999999942,
+              "ratio": 1.0086294416243613,
+              "changePercent": 0.86294416243613
+            },
+            {
+              "pair": 5,
+              "baselineMs": 1509.2999999999884,
+              "comparisonMs": 1368.3000000000175,
+              "ratio": 0.9065792089048088,
+              "changePercent": -9.34207910951912
+            },
+            {
+              "pair": 6,
+              "baselineMs": 1510.1000000000058,
+              "comparisonMs": 1515.5,
+              "ratio": 1.0035759221243588,
+              "changePercent": 0.35759221243587547
+            }
+          ],
+          "ratios": [
+            0.9879856115107934,
+            1.0390563187801105,
+            1.0042391463236284,
+            1.0086294416243613,
+            0.9065792089048088,
+            1.0035759221243588
+          ],
+          "medianPairedChangePercent": 0.3907534223993592,
+          "equalWorkChangePercent": -0.9395219319285664,
+          "worstPairChangePercent": 3.905631878011051,
+          "fasterPairs": 2,
+          "exactEnumeratedBootstrap95Percent": [
+            -5.271758979219888,
+            2.3842880202235905
+          ],
+          "exactEnumeratedBootstrapSampleCount": 46656,
+          "reportedSeed897Bootstrap95Percent": [
+            -5.271758979219888,
+            2.3842880202235905
+          ],
+          "reportedSummaryMatches": true,
+          "exactBootstrapMatchesReported": true
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineMs": 1415.6000000000058,
+              "comparisonMs": 1397.1999999999825,
+              "ratio": 0.9870019779598592,
+              "changePercent": -1.2998022040140778
+            },
+            {
+              "pair": 2,
+              "baselineMs": 1390.7999999999884,
+              "comparisonMs": 1407.6000000000058,
+              "ratio": 1.0120793787748186,
+              "changePercent": 1.2079378774818572
+            }
+          ],
+          "ratios": [
+            0.9870019779598592,
+            1.0120793787748186
+          ],
+          "medianPairedChangePercent": -0.04593216326611582,
+          "equalWorkChangePercent": -0.05701254275961576,
+          "worstPairChangePercent": 1.2079378774818572,
+          "fasterPairs": 1,
+          "exactEnumeratedBootstrap95Percent": [
+            -1.2998022040140778,
+            1.2079378774818572
+          ],
+          "exactEnumeratedBootstrapSampleCount": 4,
+          "reportedSeed897Bootstrap95Percent": [
+            -1.2998022040140778,
+            1.2079378774818572
+          ],
+          "reportedSummaryMatches": true,
+          "exactBootstrapMatchesReported": true
+        },
+        "memory": {
+          "maxSampledPrivateKiB": {
+            "changes": [
+              1.589097124114569,
+              1.4034565816116062
+            ],
+            "medianPairedChangePercent": 1.4962768528630876,
+            "maximumPairedChangePercent": 1.589097124114569
+          },
+          "maxSampledPssKiB": {
+            "changes": [
+              1.7069268285164751,
+              1.3356822669900348
+            ],
+            "medianPairedChangePercent": 1.521304547753255,
+            "maximumPairedChangePercent": 1.7069268285164751
+          }
+        },
+        "allMemoryMetricMatches": true,
+        "allTimingScheduleMatches": true
+      }
+    }
+  ]
+}
