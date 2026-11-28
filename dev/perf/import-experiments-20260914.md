@@ -1,5 +1,28 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: completed JavaScript large-hash study — STOP / no PR
+
+The fixed six-host study is complete. Measured source `baca22e773e835f6729d4fc5198f2445afac4535` against frozen `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` in run [46107975597](https://github.com/ManabiIO/manabitan/actions/runs/46107975597) does not establish an import gain worth review. Do not open a performance PR from this candidate or restart unchanged acquisition. The tiny signed-round rewrite remains only on its experimental branch. This follow-up preserves evidence without changing product, workflow, thresholds or observations.
+
+All six original cells were independently reconstructed from raw receipts and separately reviewed numerically. Each retained twelve candidate pairs, four same-code control pairs, four warmups, two exhaustive-media imports and four separate memory observations: 252 semantic imports and 2,183 raw memory scans overall. Negative percentages favor the candidate; independent AB/BA hosts and same-code movement are never pooled or subtracted.
+
+| Dictionary / host | Paired median | Equal-work total | Descriptive 95% interval | Faster pairs | Same-code median | Memory screen |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| jmdict-AB | -0.6263% | -0.5246% | [-2.6827%, +1.4133%] | 7/12 | +0.4702% | Pass |
+| jmdict-BA | -0.9220% | -0.2342% | [-1.5518%, +0.7553%] | 8/12 | +0.5279% | Pass |
+| jitendex-AB | -0.0654% | +0.4277% | [-1.8954%, +3.2488%] | 6/12 | -0.7600% | Pass |
+| jitendex-BA | -1.0980% | -1.1176% | [-2.0281%, +0.1982%] | 8/12 | -2.1942% | Pass |
+| vndb-AB | -1.2317% | -0.6427% | [-2.4201%, +0.4322%] | 8/12 | -0.7426% | Pass |
+| vndb-BA | +1.4705% | +1.0767% | [-1.2849%, +3.9887%] | 4/12 | +3.5263% | Unqualified coverage (0/4) |
+
+Every candidate interval crosses zero. JMdict's modest paired estimates do not exceed the observed uncertainty; equal-work changes are only −0.5246% and −0.2342%. Jitendex has no established replicated gain. VNDB points in opposite directions across the two hosts. All semantic/source/package/default-policy/media checks passed, and five memory screens passed. VNDB BA retains all four covered-scan failures (B1 = 268.173684 ms, A1 = 277.503958 ms, A2 = 263.562157 ms, B2 = 307.072375 ms; unchanged 250 ms bound), zero qualified pairs and null aggregate PSS/private deltas. This is unqualified coverage, not an established memory regression or a pass. Its original job and overall run remain failed. No observation, tail or control was discarded or replaced.
+
+The earlier approximately 1.75–2.23 ms cold first-hash component saving remains component-only. The modeled record offsets, mixed prescribed warmed/tiering results, all local failures and capture provenance note remain in the original evidence below; they do not establish a whole-import improvement. The complete source-validation checkpoint at `builds/perf/js-hash-rounds-5a86/source-validation-checkpoint/` remains unchanged.
+
+Durable completed evidence is at `builds/perf/js-hash-rounds-5a86/completed-hosted/`: machine summary `evidence-index.json`, all six lossless non-package cohort wrappers, 48-object / 38-path source proof, and the full review/recovery archive with member manifest. `dev/perf/verify-js-hash-cohort-5a86.py` is the unchanged reviewed 9db55be8 portable verifier and retains the original f2da37b2 auditor's receipt/statistic logic. See the adjacent README for exact offline commands and optional original-ZIP checks. Each original 315-member artifact retains 313 members; the two product ZIP payloads and original outer ZIP are omitted explicitly. Complete package checks were performed, and exact JS hash plus unchanged native C/WASM bytes for both arms remain Git-bound. Compact verification alone cannot repeat omitted package-byte checks.
+
+The independent numerical summary is SHA256 `595b0e53843c43e3e50c36f16f21e5da0febbea4c7f172a840aad2f9dd6179bf`; every ratio/tail/control/seed 897 bootstrap and memory disposition reproduces. Its previous checkpoints and initial reviewer-only failure remain retained. Fourteen original root review/support files, including verifier review 15b41973, were recovered exactly after the transient reset. One original local timestamp file, root `commands.json` (3251 bytes, SHA256 `960e4a60e68a768ea1f1e532ef928503e05fbea7f52e583d5f44d0e9baf93a61`), is unavailable and is not fabricated. It is not a CI observation; original artifacts/logs were recovered by their exact hashes, without acquisition. Recovery receipts are labelled separately.
+
 ## November 28, 2026: JavaScript large-hash rounds and prospective full-import study
 
 ### Scope and correctness
