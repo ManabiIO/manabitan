@@ -110,5 +110,13 @@
     "result": "Scoped lint passed. Both hosts passed parent controls1-14 and failed public-sink control15 on a premature resident record-store size assertion (observed0 after drain). Candidate controls and all corpus acquisitions were skipped. Cleanup diagnostics were empty.",
     "sourceDiagnosis": "Prepared OPFS import appends intentionally avoid resident caching; endImportSession drains without loading persistent indexes. The size getter is therefore not an authoritative post-import row count until the normal persistent dictionary reader runs.",
     "correction": "Use the unchanged ensureDictionariesLoaded reader after each drain, then require exact persisted row counts and decoded records. Keep the nonempty public sink, real glossary invalidation, cold exact content comparison and every existing negative control."
+  },
+  "retainedPublicSinkLifecycleAttempt": {
+    "runId": 46144303709,
+    "toolingCommit": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+    "rawEvidence": "public-sink-contract-attempt-2",
+    "result": "Scoped lint passed. Parent controls1-14 passed; public control15 passed its first authoritative row decoding, then correctly failed the second append because its first record endImportSession had finalized the shard. Candidate controls and corpus were skipped; cleanup errors were empty.",
+    "sourceDiagnosis": "The authoritative record writer finalizes its shard at endImportSession and a later begin does not reopen that finalized shard.",
+    "correction": "Keep one actual record import session across both public chunks, finalize once, and then load/decode both complete records. Retain the actual cold content read boundary and every exact nonempty/reference/glossary assertion; never clear the finalized-state guard."
   }
 }

@@ -26,6 +26,8 @@ The first complete-schema freeze (`d4c3991`, run46143543189) stopped at scoped l
 
 The next control gate (`fbeefb1`, run46143955956) passed scoped lint and the first14 parent controls, then rejected the public-sink fixture's premature resident `size` check. Prepared OPFS import writes intentionally do not cache appended records, and draining does not load persistent indexes. Candidate controls and corpus did not start. Both exact artifacts are retained at `public-sink-contract-attempt-1`. The corrected control calls the ordinary persistent dictionary loader and decodes the actual stored rows before asserting exact nonempty counts and IDs; no writer policy or expected row count is weakened.
 
+The following gate (`8b4213d`, run46144303709) passed the first authoritative row proof, then correctly rejected a second append to the record shard already finalized by the fixture. Candidate controls and corpus did not start; both artifacts are retained at `public-sink-contract-attempt-2`. The fixture now keeps one real record import session across both public chunks and finalizes it once, then loads and decodes both complete records. The content-only drain/cold-read boundary, exact duplicate/no-growth checks, ordinary glossary invalidation and all negative controls remain. No finalized-state reset or append-guard bypass is used.
+
 ## Reproduction
 
 Use the same exact Node v22.22.0 binary, clean source checkouts, locked `npm ci` and ordinary `npm run build:libs` documented in the adjacent original latest profile. Extract and hash-check the unchanged `verification-oracles.tar.gz` here using its member index. Acquire the locked archive by its declared URL, size and SHA256.

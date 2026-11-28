@@ -20,7 +20,7 @@
     }
   },
   "latestManifestSha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
-  "latestProtocolSha256": "e3a6dcf9a237b6f07cd4b22a715af66e7c3ac3726af906109b6774bb1dcfc219",
+  "latestProtocolSha256": "d2ea3b978ea6d2cb2aedd678898b1d11f4385c0525dd383cf5bd8c2e3d619944",
   "changedCanonicalParentFiles": [
     {
       "path": "ext/js/dictionary/dictionary-database.js",
@@ -227,9 +227,9 @@
       "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "929c25d11d6ad8e6db5d30a022ab7a8acd9a7731",
-      "bytes": 25098,
-      "sha256": "16941e63425a57a4b00aa9a601a25aed1e768fabbcd70d3da119fca5facb8a9f"
+      "sha": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+      "bytes": 26052,
+      "sha256": "9aa0c71cb18e56b8711e7dfdeab9eb1d2c5f166da22da738b3a9560a2086e22c"
     }
   ],
   "canonicalSourceCount": 42,
@@ -248,7 +248,7 @@
     "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
     "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
   },
-  "sourceReview": "Complete-schema module and15 real-I/O/public-sink controls were independently reviewed before the scoped lint gate. Narrow lint revisions preserve every product/schema/control assertion; teardown records and settles all actual resources, keeps the original body error, and propagates cleanup-only errors after finally. The comparator retains every output oracle and additionally requires both resource releases fulfilled. The authoritative nonempty-row control now loads the real persistent dictionary index after draining and decodes actual stored rows before asserting counts; it does not change writer cache policy or accept an empty sink.",
+  "sourceReview": "Complete-schema module and15 real-I/O/public-sink controls were independently reviewed before the scoped lint gate. Narrow lint revisions preserve every product/schema/control assertion; teardown records and settles all actual resources, keeps the original body error, and propagates cleanup-only errors after finally. The comparator retains every output oracle and additionally requires both resource releases fulfilled. The authoritative nonempty-row control now loads the real persistent dictionary index after draining and decodes actual stored rows before asserting counts; it does not change writer cache policy or accept an empty sink. The synthetic public control now respects one real record import session across both chunks, with complete authoritative two-row decoding after its only finalization and actual cold content reads retained. It records phase/row/export diagnostics; no production append guard is changed.",
   "retainedHistory": "Original dcfc/f28 six-run successes remain immutable; latest JMdict original acquisition is retained and strictly revalidated. Latest first Jitendex/VNDB boundary failures and original workflow pipefail issue remain in attempt-1. This distinct helper is not a relabeling or unchanged rerun. The additive-only6eff attempt/run46142163868 passed all14 cold-read contracts but failed all four actual arms at public group0 glossary invalidation; exact raw artifacts are retained at attempt-1. This freeze uses the actual full production initializer and a new nonempty public-sink control.",
   "originalHelperCount": 15,
   "newHelperCount": 5,
@@ -281,6 +281,17 @@
     "commit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
     "runId": 46143955956,
     "artifacts": "public-sink-contract-attempt-1",
+    "parentControls": {
+      "pass": 14,
+      "fail": 1
+    },
+    "candidateControlsExecuted": false,
+    "corpusExecuted": false
+  },
+  "retainedPublicSinkLifecycleAttempt": {
+    "commit": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+    "runId": 46144303709,
+    "artifacts": "public-sink-contract-attempt-2",
     "parentControls": {
       "pass": 14,
       "fail": 1

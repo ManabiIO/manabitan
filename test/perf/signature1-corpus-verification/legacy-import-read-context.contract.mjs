@@ -361,13 +361,22 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
             // Load and decode the authoritative index before counting records.
             const records = database._termRecordStore;
             await records.ensureDictionariesLoaded([dictionary]);
+            const ids = records.getDictionaryIdBatch(dictionary, 0, expectedCount + 1);
+            const rows = await records.getByIdsAsync(ids);
+            const meta = database._getTermEntryContentMetaByHashPair(10, 20);
+            context.diagnostic(JSON.stringify({name: 'actual-public-sink-persisted-records',
+                expectedCount,
+                state: records.getDiagnostics([dictionary]),
+                dictionaryCount: records.getDictionaryRecordCount(dictionary),
+                size: records.size,
+                ids,
+                rows: [...rows],
+                meta,
+                expectedContentBytes: bytes.byteLength}));
             assert.equal(records.getDictionaryRecordCount(dictionary), expectedCount);
             assert.equal(records.size, expectedCount);
-            const ids = records.getDictionaryIdBatch(dictionary, 0, expectedCount + 1);
             assert.deepEqual(ids, Array.from({length: expectedCount}, (_, index) => index + 1));
-            const rows = await records.getByIdsAsync(ids);
             assert.equal(rows.size, expectedCount);
-            const meta = database._getTermEntryContentMetaByHashPair(10, 20);
             assert(meta);
             for (const id of ids) {
                 const row = rows.get(id);
@@ -384,12 +393,18 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
             }
         };
         await database.bulkAddArtifactTermsChunk(chunk(1));
-        await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
-        await assertPersistedRows(1);
-        assert.equal(database._termRecordStore.size, 1);
+        // Drain content for a cold byte comparison. Keep the single record
+        // session open: ending it makes its authoritative shard immutable.
+        await database._termContentStore.endImportSession();
         assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 1);
         assert.deepEqual(boundary.assertState(), initialRoot);
         const afterEmptyInvalidation = sqliteIdentity();
+        context.diagnostic(JSON.stringify({name: 'actual-public-sink-first-chunk',
+            initialSqlite,
+            afterEmptyInvalidation,
+            root: initialRoot,
+            state: database._termRecordStore.getDiagnostics([dictionary]),
+            metrics: database._lastBulkAddTermsMetrics}));
         assert.equal(afterEmptyInvalidation.userVersion, 0);
         for (const table of tables) {
             assert.equal(database._db.selectValue(`SELECT count(*) FROM ${table}`), 0);
@@ -419,9 +434,13 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
         database._termContentStore._invalidateReadState();
         database._termContentBlockStore.clearCache();
         await database._termContentStore.beginImportSession();
-        await database._termRecordStore.beginImportSession();
         await database.bulkAddArtifactTermsChunk(chunk(2));
         await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
+        context.diagnostic(JSON.stringify({name: 'actual-public-sink-final-chunks',
+            beforeRealInvalidation,
+            afterRealInvalidation: sqliteIdentity(),
+            root: boundary.assertState(),
+            metrics: database._lastBulkAddTermsMetrics}));
         await assertPersistedRows(2);
         assert.equal(database._termRecordStore.size, 2);
         assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 0);
