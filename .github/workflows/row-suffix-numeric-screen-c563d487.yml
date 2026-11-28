@@ -1,0 +1,105 @@
+name: Numeric-admission row suffix component screen c563d487
+
+on:
+  push:
+    branches: [perf/row-suffix-numeric-screen-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: ${{ matrix.dictionary }} fixed component cohort
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      BASE_ROOT: ${{ github.workspace }}/../numeric-suffix-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../numeric-suffix-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/row-suffix-numeric-screen
+    steps:
+      - name: Check out the experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the frozen baseline dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install the pinned compiler and verify baseline artifacts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npm run build:dictionary-wasm -- --check
+          mkdir -p "$OUTPUT_ROOT"
+          node --version
+          uname -a
+          lscpu
+
+      - name: Prepare isolated source and rebuilt candidate worktrees
+        run: |
+          git fetch --no-tags origin "$BASE_SHA"
+          git worktree add --detach "$BASE_ROOT" "$BASE_SHA"
+          git worktree add --detach "$CANDIDATE_ROOT" "$BASE_SHA"
+          cp -a node_modules "$BASE_ROOT/node_modules"
+          cp -a node_modules "$CANDIDATE_ROOT/node_modules"
+          npm --prefix "$BASE_ROOT" run build:libs
+          git -C "$CANDIDATE_ROOT" apply --check "$GITHUB_WORKSPACE/dev/perf/row-suffix-numeric-c563d487/candidate.patch"
+          git -C "$CANDIDATE_ROOT" apply "$GITHUB_WORKSPACE/dev/perf/row-suffix-numeric-c563d487/candidate.patch"
+          npm --prefix "$CANDIDATE_ROOT" run build:dictionary-wasm -- --write
+          npm --prefix "$CANDIDATE_ROOT" run build:libs
+          npm --prefix "$CANDIDATE_ROOT" run build:dictionary-wasm -- --check
+          git -C "$CANDIDATE_ROOT" diff --binary > "$OUTPUT_ROOT/rebuilt-candidate.diff"
+          python3 dev/perf/row-suffix-numeric-c563d487/prepare.py "$CANDIDATE_ROOT" "$OUTPUT_ROOT"
+
+      - name: Check adversarial and cross-bank output parity
+        run: |
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$BASE_ROOT" > "$OUTPUT_ROOT/smoke-baseline.json"
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$CANDIDATE_ROOT" > "$OUTPUT_ROOT/smoke-candidate.json"
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$CANDIDATE_ROOT" "$OUTPUT_ROOT/diagnostic.wasm" > "$OUTPUT_ROOT/smoke-diagnostic.json"
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$BASE_ROOT" --disabled-reuse > "$OUTPUT_ROOT/smoke-disabled-baseline.json"
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$CANDIDATE_ROOT" --disabled-reuse > "$OUTPUT_ROOT/smoke-disabled-candidate.json"
+          node dev/perf/row-suffix-numeric-c563d487/smoke.mjs "$CANDIDATE_ROOT" "$OUTPUT_ROOT/diagnostic.wasm" --disabled-reuse > "$OUTPUT_ROOT/smoke-disabled-diagnostic.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['OUTPUT_ROOT'])
+          arms = ['baseline', 'candidate', 'diagnostic', 'disabled-baseline', 'disabled-candidate', 'disabled-diagnostic']
+          results = [json.loads((root / f'smoke-{arm}.json').read_text()) for arm in arms]
+          assert all(result['results'] == results[0]['results'] for result in results)
+          assert results[2]['diagnosticHits'] > 0
+          assert results[5]['diagnosticAttempts'] == 0 and results[5]['diagnosticHits'] == 0
+          print('SUFFIX_NUMERIC_SMOKE ' + json.dumps({'validCases': results[0]['validCases'], 'malformedCases': results[0]['malformedCases'], 'equal': True, 'diagnosticHits': results[2]['diagnosticHits'], 'disabledAttempts': results[5]['diagnosticAttempts'], 'disabledHits': results[5]['diagnosticHits']}, separators=(',', ':')))
+          PY
+
+      - name: Run targeted parser and field-validation tests
+        if: matrix.dictionary == 'jmdict'
+        working-directory: ${{ env.CANDIDATE_ROOT }}
+        run: npx vitest run test/term-bank-wasm-parser.test.js test/dictionary-importer-term-bank-field-validation.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js --maxWorkers=2
+
+      - name: Fetch and integrity-check only the locked selected dictionary
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY]);"
+
+      - name: Run the complete fixed four-pair cohort and four identical-code controls
+        run: python3 dev/perf/row-suffix-numeric-c563d487/run.py "$DICTIONARY" "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT"
+
+      - name: Preserve all observations, failures, rebuilt source, and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: row-suffix-numeric-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: builds/row-suffix-numeric-screen
+          if-no-files-found: warn
+          retention-days: 14
