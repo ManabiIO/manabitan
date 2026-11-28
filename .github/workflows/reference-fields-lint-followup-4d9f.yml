@@ -1,0 +1,80 @@
+name: Reference fields lint follow-up 4d9f
+
+on:
+  push:
+    branches: [experiment/reference-fields-lint-followup-20261128-4d9f]
+    paths: [.github/workflows/reference-fields-lint-followup-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  exact-follow-up:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: 16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Prepare exact runtime dependencies
+        env:
+          HUSKY: '0'
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          npm ci > reports/npm-ci.stdout.log 2> reports/npm-ci.stderr.log
+          npm run build:libs > reports/build-libs.stdout.log 2> reports/build-libs.stderr.log
+      - name: Apply only the reviewed exact lint source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/ManabiIO/manabitan/git/blobs/d056b473923f762ab2c4dca91393effa2abc0f40 > reports/reviewed-source-blob.json
+          python3 - <<'PY'
+          import base64, hashlib, json, pathlib, subprocess
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == '16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97'
+          target = pathlib.Path('ext/js/dictionary/term-record-opfs-store.js')
+          before = target.read_bytes()
+          assert hashlib.sha1(f'blob {len(before)}\0'.encode() + before).hexdigest() == 'fcf4b908938d818a456574352446d95e71623713'
+          blob = json.loads(pathlib.Path('reports/reviewed-source-blob.json').read_text())
+          assert blob['sha'] == 'd056b473923f762ab2c4dca91393effa2abc0f40' and blob['encoding'] == 'base64'
+          after = base64.b64decode(''.join(blob['content'].split()), validate=True)
+          assert len(after) == blob['size']
+          assert hashlib.sha1(f'blob {len(after)}\0'.encode() + after).hexdigest() == blob['sha']
+          assert hashlib.sha256(after).hexdigest() == '434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45'
+          target.write_bytes(after)
+          assert subprocess.check_output(['git', 'diff', '--name-only'], text=True).strip() == str(target)
+          pathlib.Path('reports/term-record-opfs-store.js').write_bytes(after)
+          pathlib.Path('reports/exact-source.diff').write_bytes(subprocess.check_output(['git', 'diff', '--', str(target)]))
+          pathlib.Path('reports/source-identity.json').write_text(json.dumps({'baseCommit': '16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97', 'beforeSha256': hashlib.sha256(before).hexdigest(), 'afterSha256': hashlib.sha256(after).hexdigest(), 'afterGitBlob': blob['sha'], 'equivalentPublicSource': '85a8aa49f76fbabd2dc494aad247f74774ff2573', 'equivalentTree': 'ae7323d19d6da0cc500ff231a0dcd469ce4f31af', 'timingEligible': False}, indent=2) + '\n')
+          PY
+      - name: Scoped lint and exact iterator controls
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess, sys
+          cases = [
+              ('scoped-lint', ['node', 'node_modules/eslint/bin/eslint.js', 'ext/js/dictionary/term-record-opfs-store.js']),
+              ('iterator-tests', ['node', 'node_modules/vitest/vitest.mjs', 'run', 'test/term-record-content-reference-iterator.test.js', '--maxWorkers=1']),
+          ]
+          results = []
+          for name, command in cases:
+              with pathlib.Path(f'reports/{name}.stdout.log').open('xb') as stdout, pathlib.Path(f'reports/{name}.stderr.log').open('xb') as stderr:
+                  result = subprocess.run(command, stdout=stdout, stderr=stderr, check=False)
+              results.append({'name': name, 'command': command, 'returncode': result.returncode})
+              pathlib.Path('reports/results.json').write_text(json.dumps(results, indent=2) + '\n')
+          sys.exit(0 if all(result['returncode'] == 0 for result in results) else 1)
+          PY
+      - name: Retain exact source and every outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reference-fields-lint-followup-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports
+          if-no-files-found: error
+          retention-days: 30
