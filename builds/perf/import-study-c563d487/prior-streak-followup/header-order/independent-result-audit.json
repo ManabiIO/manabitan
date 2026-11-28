@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:56:30.068502+00:00",
+  "scope": "Independent integer aggregation/source-receipt audit of the single completed untimed replay; no new native or corpus execution",
+  "passed": true,
+  "resultSha256": "63f4c1b4526a4fc096a532aa6468b2107d3874a71337d23009a2936ca1b58051",
+  "observerSha256": "9a227bb089dc9972d139b64458477de8f6413f8c75a301e90d864924b89bd65c",
+  "auditorSha256": "1beaebf946673000ec1952f819805abdba5473b51f46c3b9dbfb0d362a6c8bae",
+  "preparationSha256": "69f3cbcbe4a9535ba5e7ccab16deb1a2ac972fe5c291d18a6e675f6af827d7a5",
+  "childStatusSha256": "e271f35072bb9130d84a419de71f56174b85e92a2db3fc0d56ca22a7a8cc12da",
+  "previousResultSha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31",
+  "aggregatedIntegerFields": 135,
+  "baselineBankGroupTotalChecks": 838,
+  "rows": 528299,
+  "originalWitnesses": 54629,
+  "rawRecentHits": 154413,
+  "rawPredicateCalls": 171299,
+  "variantTotals": {
+    "original": {
+      "bytesOffered": 29012748,
+      "logicalBytesCompared": 27673224,
+      "sourceSimdBytesPerOperand": 27869762,
+      "sourceScalarBytesPerOperand": 27703962,
+      "equalityCalls": 597200,
+      "lengthChecks": 659980
+    },
+    "headersFirst": {
+      "bytesOffered": 28840394,
+      "logicalBytesCompared": 27614999,
+      "sourceSimdBytesPerOperand": 27796518,
+      "sourceScalarBytesPerOperand": 27645398,
+      "equalityCalls": 620206,
+      "lengthChecks": 684050
+    }
+  },
+  "savedGlossary": {
+    "calls": 1064,
+    "wouldMatch": 388,
+    "wouldDiffer": 676,
+    "bytesOffered": 249854,
+    "logicalBytesCompared": 132130,
+    "sourceSimdBytesPerOperand": 148906,
+    "sourceScalarBytesPerOperand": 134226,
+    "headerRejections": {
+      "definitionTags.bytes": 637,
+      "termTags.bytes": 366,
+      "rules.bytes": 61
+    }
+  },
+  "addedHeadersAfterGlossaryRejection": {
+    "calls": 8257,
+    "equalityCalls": 24070,
+    "bytesOffered": 77500,
+    "logicalBytesCompared": 73905,
+    "sourceSimdBytesPerOperand": 75662,
+    "sourceScalarBytesPerOperand": 75662
+  },
+  "netModeledRangesSaved": {
+    "bytesOffered": 172354,
+    "logicalBytesCompared": 58225,
+    "sourceSimdBytesPerOperand": 73244,
+    "sourceScalarBytesPerOperand": 58564
+  },
+  "relativeNetModeledRangesSavedPercent": {
+    "bytesOffered": 0.5940629960319512,
+    "logicalBytesCompared": 0.2104019394343066,
+    "sourceSimdBytesPerOperand": 0.2628081287525886,
+    "sourceScalarBytesPerOperand": 0.2113921467261614
+  },
+  "extraEqualityCalls": 23006,
+  "extraEqualityCallsPercent": 3.8523107836570647,
+  "metadataDigest": "d6965c13c73fbe3312802d1e4800b0acd8942f317b3ed065d7c8edd25c1c0809",
+  "recentMatchIndexesDigest": "b9c9bc8f1462614ad90ebd017402fb8f628b1d9b515da1bcd8a53d841ccb1abd",
+  "maxima": {
+    "decodedBankBytes": 4312211,
+    "retainedTupleBytes": 9536,
+    "wasmHeapBytes": 5636096
+  },
+  "timingsCollected": false,
+  "decision": "Drop before product implementation: only 73,244 modeled source-SIMD bytes per operand saved across the corpus, with 23,006 more equality calls. No prototype, benchmark, performance PR, or speedup conclusion.",
+  "limitations": [
+    "Counts are an exact source-level shadow of the frozen default recent path with original signature filtering, reconciled to existing native metadata and prior baseline state totals; they are not directly instrumented native call counters.",
+    "Logical and block prefixes describe source comparison ranges per operand; compiler scheduling, hardware traffic, cache effects, CPU cost and elapsed import behavior were not measured.",
+    "The unfiltered raw-byte oracle and every per-call equivalence assertion ran in the original observer; this audit rechecks the preserved aggregate and identity receipts without another corpus pass."
+  ]
+}

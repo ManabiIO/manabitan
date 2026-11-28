@@ -1,0 +1,219 @@
+{
+  "branch": "perf/jmdict-prior-streak-selector-screen-20261128-c563d487",
+  "commit": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+  "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "tree": "91c7cc68863129a0839991f09f323a01e373851d",
+  "publishedAtUtc": "2026-11-28 08:10:12 UTC",
+  "manifestSha256": "b246008cc6701768262d8a00b135bd67d1f6a0a4c984271f40598388271550d9",
+  "preparationRecordSha256": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+  "independentReviewSha256": "9eb54aa6bb19ad98383bd2379ca22d0a90915fe7b610af9bfe211a334ec63d5c",
+  "files": 39,
+  "bytes": 357017,
+  "comparisonAudit": {
+    "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "commit": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+    "tree": "91c7cc68863129a0839991f09f323a01e373851d",
+    "files": [
+      {
+        "path": ".github/workflows/jmdict-prior-streak-selector-screen-c563d487.yml",
+        "status": "added",
+        "gitBlobSha": "4504e5dca93895823533f2188c2d0fe0c03ff250"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/candidate.patch",
+        "status": "added",
+        "gitBlobSha": "68371bd4f612a1912a3cecde039a3fd16eb5452c"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/cohort_tools.py",
+        "status": "added",
+        "gitBlobSha": "0f133effda75f6b5240ce61e579d8e5ff071c1ee"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/core-preparation.json",
+        "status": "added",
+        "gitBlobSha": "10630526303cf60b9238416c172b1c7a3ca878a4"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/diagnostic-fields.json",
+        "status": "added",
+        "gitBlobSha": "c5c2d1f00a0b07557770d60fbbd5a33b1d54e47e"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-counts.json",
+        "status": "added",
+        "gitBlobSha": "cd6fb7a0254ed3ed860d88a836744277cedcaffc"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-mechanics.json",
+        "status": "added",
+        "gitBlobSha": "ddd737a0031f268f7d8962f1f7dc0fb86b0b74e0"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/final-composition-checks.json",
+        "status": "added",
+        "gitBlobSha": "5ab57c6fe1f8ed77353b25845ca5b3332c1baf08"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/fixture-model.mjs",
+        "status": "added",
+        "gitBlobSha": "ab74b398ffdfc81aea819a82e6a748da788f05b5"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/generation-audit.json",
+        "status": "added",
+        "gitBlobSha": "5dbfabfecc13b384da999373537930841597be5a"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/legacy-fixture-manifest.json",
+        "status": "added",
+        "gitBlobSha": "3cfa2fe36a64af9d24881cd31f66fbd5c6a5ad2a"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/native-oracle.mjs",
+        "status": "added",
+        "gitBlobSha": "31092901c621e3fb447ccc20dbe4c372e1ddf6c4"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-fixtures.mjs",
+        "status": "added",
+        "gitBlobSha": "0655757b169ff5551ded2766a1a15b70cd0e8a35"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-protocol.json",
+        "status": "added",
+        "gitBlobSha": "c39f1e4fd146e4c9e37be403d530061e1bb5d631"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-run.py",
+        "status": "added",
+        "gitBlobSha": "463bcca849028a5c8d9572a6026c681385af8182"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-screen.mjs",
+        "status": "added",
+        "gitBlobSha": "7705a04dfab9b7221c99d946118c3cdbbc0741d7"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/output-digest.mjs",
+        "status": "added",
+        "gitBlobSha": "44b6b2d14558b086b2df423b72595013af90b0e7"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preflight.py",
+        "status": "added",
+        "gitBlobSha": "4337557a775c8503a1c2d7abc5d3f7f8016c48c5"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preparation-record.json",
+        "status": "added",
+        "gitBlobSha": "ac12fe1a528621e50e97a72f3cf56182d20c81c5"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prepare.py",
+        "status": "added",
+        "gitBlobSha": "c60114acd9af850a3ba0454ab512a7f2329f4659"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-complete-import-criteria.json",
+        "status": "added",
+        "gitBlobSha": "392e60c9aa729f2f13b722864c42e8d9c19c0bc5"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-component-review.json",
+        "status": "added",
+        "gitBlobSha": "162dab82a08bf2ab39f65e14ad09126eacdf00be"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/baseline-and-source-checks.json",
+        "status": "added",
+        "gitBlobSha": "b1c14acfa7b1580ae3a99b0d4b24f45a9333b109"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/expected-mechanics-review.json",
+        "status": "added",
+        "gitBlobSha": "9ab903a024879cccae02ba29f3417433b3173b9c"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/fixture-diagnostic-review.json",
+        "status": "added",
+        "gitBlobSha": "2da9c3d9b244e3d6b282e0990347ec767e393d85"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/implementation-preparation-snapshot.json",
+        "status": "added",
+        "gitBlobSha": "004778ac04fe12ef55a2dd19dbf7e425ef25328e"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/initial-hosted-protocol-review.json",
+        "status": "added",
+        "gitBlobSha": "30a231ef171e67abcbd8db56383215e2411ffcd1"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/negative-tooling-snapshot.json",
+        "status": "added",
+        "gitBlobSha": "47293b4165d2b1de88206822d40f9e0732fa8c9f"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/source-review.json",
+        "status": "added",
+        "gitBlobSha": "7de10ca7bcf0e7e47598aac82a0c4628c1b9ddac"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/run.py",
+        "status": "added",
+        "gitBlobSha": "5eabedbfed4f43ba26d9ec1c5f1ff5d62ede9ae5"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen-change-proof.json",
+        "status": "added",
+        "gitBlobSha": "518fa88e1009614ac24ccf042e3525ddd7ef6e89"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen.mjs",
+        "status": "added",
+        "gitBlobSha": "4e6e5b44b3a003b520645e167fd68b44dcf6d03b"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/setup.sh",
+        "status": "added",
+        "gitBlobSha": "e1082d5c8c00767169b1cca22f29d91dd0e20382"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+        "status": "added",
+        "gitBlobSha": "faafca1bb9a3adec29088e4ce429c7f1c8e7307e"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/state-model.mjs",
+        "status": "added",
+        "gitBlobSha": "14831fc6924a67c6fc9ca8beeeb8bff99d17437f"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/verify-negative-fixtures.py",
+        "status": "added",
+        "gitBlobSha": "bce15840d07390a3b623292ab701d033c790680b"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/workflow.yml",
+        "status": "added",
+        "gitBlobSha": "4504e5dca93895823533f2188c2d0fe0c03ff250"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector-fixtures.js",
+        "status": "added",
+        "gitBlobSha": "d7c36b9ae487564a9b155d9c09a33710356f8e9d"
+      },
+      {
+        "path": "dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector.test.js",
+        "status": "added",
+        "gitBlobSha": "ba86065b515af694f0b43ae55fbd9845fc699030"
+      }
+    ],
+    "all39GitBlobsMatch": true,
+    "independentReviewSha256": "9eb54aa6bb19ad98383bd2379ca22d0a90915fe7b610af9bfe211a334ec63d5c",
+    "noProductFilesChanged": true
+  },
+  "productPrOpened": false,
+  "currentDevelopDifferent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+}

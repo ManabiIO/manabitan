@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:49:55.717Z",
+  "scope": "Read-only bounded history review for a separate untimed default-path comparison-order opportunity; no product change or measurement",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "hypothesis": "After the existing glossary-length check, compare exact rules/definitionTags/termTags before glossary bytes in raw_term_content_tokens_equal; preserve all semantic fields, witness bypass, signatures, default recent window and match indexes.",
+  "searchCoverage": {
+    "githubSearchReturnedNoResultsEvenForKnownPr740": true,
+    "absenceInferenceAllowed": false,
+    "primaryFallback": "Four REST /pulls pages, state=all, per_page=100, sort=updated, direction=desc",
+    "distinctPullsReviewed": 400,
+    "localGitHistoryLimited": true
+  },
+  "primarySourceReviews": [
+    {
+      "number": 740,
+      "url": "https://github.com/ManabiIO/manabitan/pull/740",
+      "filesUrl": "https://api.github.com/repos/ManabiIO/manabitan/pulls/740/files",
+      "head": "7cb199a4c1888942b10b134ba1ba0d1df8a68ef2",
+      "finding": "Adds direct validated-glossary-witness dedup shortcut and copies its quick signature; native patch does not reorder raw_term_content_tokens_equal field comparisons."
+    },
+    {
+      "number": 743,
+      "url": "https://github.com/ManabiIO/manabitan/pull/743",
+      "filesUrl": "https://api.github.com/repos/ManabiIO/manabitan/pulls/743/files",
+      "head": "e857177d3fd3c2d5a46a3a8e4fa2f070896a2271",
+      "finding": "Uses bounded first/middle/last signature reads; native patch does not reorder the exact content predicate."
+    }
+  ],
+  "relatedInventory": [
+    {
+      "number": 777,
+      "title": "Reduce glossary and media work during dictionary import",
+      "url": "https://github.com/ManabiIO/manabitan/pull/777",
+      "head": "e90363b8927bf3a79bfc19ca505b8bec483d5d60",
+      "base": "31d92b012298db2839233f4ce4c388d08d31006c",
+      "state": "closed",
+      "draft": false,
+      "updatedAt": "2026-11-20T19:11:46Z"
+    },
+    {
+      "number": 727,
+      "title": "Optimize exact term content comparison and cache metadata",
+      "url": "https://github.com/ManabiIO/manabitan/pull/727",
+      "head": "1528facfaa0c41b72294e93b6e0a35f1422918f0",
+      "base": "2ee9fe4556acd8942e962c53d6c6174281568632",
+      "state": "closed",
+      "draft": false,
+      "updatedAt": "2026-11-16T19:15:16Z"
+    },
+    {
+      "number": 739,
+      "title": "Speed up source dictionary parsing and ZIP checksums",
+      "url": "https://github.com/ManabiIO/manabitan/pull/739",
+      "head": "fb8dc6a6413ed4ff2001defaf050fb3d45709e23",
+      "base": "fd293a6c7e303cceae48a4bcb4a43cdf75073f1b",
+      "state": "closed",
+      "draft": false,
+      "updatedAt": "2026-11-18T05:24:41Z"
+    }
+  ],
+  "conclusion": "No exact field-order candidate identified in these bounded primary records. This is sufficient to assess the untimed opportunity, but does not establish exhaustive novelty.",
+  "observationsAcquired": 0
+}

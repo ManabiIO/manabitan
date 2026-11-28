@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "scope": "One authorized untimed locked-JMdict comparison-order replay; no benchmark observations",
+  "startedAtUtc": "2026-11-28T07:55:00.672254+00:00",
+  "argv": [
+    "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+    "--max-old-space-size=256",
+    "/workspace/scratch/c563d487c718/experiments/header-comparison-order/observer.mjs",
+    "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/JMdict.zip",
+    "/workspace/scratch/c563d487c718/experiments/header-comparison-order/run-1"
+  ],
+  "observerSha256": "9a227bb089dc9972d139b64458477de8f6413f8c75a301e90d864924b89bd65c",
+  "nodeSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "requestedTiming": false,
+  "replacement": false,
+  "exitCode": 0,
+  "timeout": false,
+  "completedAtUtc": "2026-11-28T07:55:10.442888+00:00",
+  "stdoutSha256": "3bd9ed1ab1c8e279a96342a5847836b2f4986bbb986afec003a2f1fa0f225055",
+  "stderrSha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+}

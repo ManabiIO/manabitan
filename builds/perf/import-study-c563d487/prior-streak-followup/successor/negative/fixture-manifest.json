@@ -1,0 +1,704 @@
+{
+  "schema": 2,
+  "generatorSha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+  "sourceHashes": {
+    "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+    "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+    "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+    "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+    "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+    "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+  },
+  "node": "v22.22.0",
+  "zlib": "1.3.1-470d3a2",
+  "compression": {
+    "method": 8,
+    "level": 6
+  },
+  "rowsPerCase": 20000,
+  "rowsPerBank": 10000,
+  "banksPerCase": 2,
+  "grouping": "Both banks in one fused group; recent records, streak and budget continue across the bank boundary",
+  "geometry": {
+    "byteMeaning": "All offsets and lengths are raw ASCII UTF-8 bytes, including JSON delimiters; ends are exclusive",
+    "legacy": {
+      "short": {
+        "serializedGlossaryBytes": 240,
+        "marker": {
+          "start": 216,
+          "endExclusive": 222
+        },
+        "tailSample": {
+          "start": 232,
+          "endExclusive": 240
+        },
+        "middleSample": {
+          "start": 116,
+          "endExclusive": 124
+        }
+      },
+      "long": {
+        "serializedGlossaryBytes": 4096,
+        "marker": {
+          "start": 4072,
+          "endExclusive": 4078
+        },
+        "tailSample": {
+          "start": 4088,
+          "endExclusive": 4096
+        },
+        "middleSample": {
+          "start": 2044,
+          "endExclusive": 2052
+        }
+      },
+      "identity": "Global row index, six digits, never reset at bank boundary"
+    },
+    "active": {
+      "short": {
+        "serializedGlossaryBytes": 242,
+        "blockMarker": {
+          "start": 2,
+          "endExclusive": 8
+        },
+        "mutation": {
+          "start": 215,
+          "endExclusive": 216
+        },
+        "tailSample": {
+          "start": 234,
+          "endExclusive": 242
+        },
+        "middleSample": {
+          "start": 117,
+          "endExclusive": 125
+        }
+      },
+      "long": {
+        "serializedGlossaryBytes": 4096,
+        "blockMarker": {
+          "start": 2,
+          "endExclusive": 8
+        },
+        "mutation": {
+          "start": 4069,
+          "endExclusive": 4070
+        },
+        "tailSample": {
+          "start": 4088,
+          "endExclusive": 4096
+        },
+        "middleSample": {
+          "start": 2044,
+          "endExclusive": 2052
+        }
+      },
+      "separator": {
+        "serializedGlossaryBytes": 18,
+        "shape": "[\"000000 small B\"]",
+        "blockMarker": {
+          "start": 2,
+          "endExclusive": 8
+        }
+      },
+      "identity": "Global block index, six digits, never reset at bank boundary; late x/y mutation distinguishes selected unequal bodies within a block",
+      "headers": {
+        "A": {
+          "definitionTags": "\"alpha\"",
+          "rules": "\"v5a\""
+        },
+        "B": {
+          "definitionTags": "\"other\"",
+          "rules": "\"v1\""
+        }
+      },
+      "headerRejection": "A/B definition token lengths are both7; rules lengths5 and4 reject before prefix signatures"
+    }
+  },
+  "flags": {},
+  "cases": [
+    {
+      "id": 1,
+      "name": "unique-short-keys-inactive",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-1/term_bank_1.json",
+          "compressedFile": "case-1/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "5bb07c139b5c2176a1ed793ec72c60939787394ec70ffb479b725d966a0017f6",
+          "compressedSha256": "938a017e1a28dc96f0060b3a0dd33cd9a5a143160b79a4df8a1999907bc6993e",
+          "uncompressedSize": 2710001,
+          "compressedSize": 61141,
+          "compressionMethod": 8,
+          "signature": 3790676514
+        },
+        {
+          "rawFile": "case-1/term_bank_2.json",
+          "compressedFile": "case-1/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "caf34ed0882476de6bf32b03db24b489c7fda56bf499448ca3f32e987f048ab4",
+          "compressedSha256": "83d76e11afea3899a86570f314b2611c2070aa4064300aa8d6b4dfa35e718f36",
+          "uncompressedSize": 2710001,
+          "compressedSize": 61142,
+          "compressionMethod": 8,
+          "signature": 722769397
+        }
+      ],
+      "expectedUniqueCount": 20000,
+      "expectedMechanics": {
+        "keyPredicateRows": 0,
+        "admissions": 0,
+        "candidateRecordsInspected": 0,
+        "noPrefixCandidate": 0,
+        "selected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 0,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 0,
+        "failedFullBytesOffered": 0,
+        "maxSelectedBytes": 0,
+        "maxFailedFullBytes": 0,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 0,
+        "expressionMatches": 0,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 0,
+        "keyComparisonBytesOffered": 0,
+        "maxKeyComparisonBytes": 0
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 0,
+        "recentCrossBank": 0,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 0,
+        "firstSelectedFailureBlockingLaterTrueContent": 0,
+        "maxRecentStreak": 0,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": true
+    },
+    {
+      "id": 2,
+      "name": "same-key-short-full-misses-inactive",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-2/term_bank_1.json",
+          "compressedFile": "case-2/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "313919eb11461456cc381dfe92c6fa675e4eeba71c86dba5573a7d2309479423",
+          "compressedSha256": "40a8b54dae6d6c61098e1551c287f997a0a52c56122c3c7a719377e3d5cf6bac",
+          "uncompressedSize": 2700001,
+          "compressedSize": 37374,
+          "compressionMethod": 8,
+          "signature": 558818720
+        },
+        {
+          "rawFile": "case-2/term_bank_2.json",
+          "compressedFile": "case-2/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "8d4ba8b9dc6e4ff467d7865c983708e3bc66d78508776a82bf502008d7bb12e7",
+          "compressedSha256": "cb188ccb8ae24b05a972708e3799ba3a30050f3f16a4d9e42217ae80e2a029eb",
+          "uncompressedSize": 2700001,
+          "compressedSize": 37396,
+          "compressionMethod": 8,
+          "signature": 270405730
+        }
+      ],
+      "expectedUniqueCount": 20000,
+      "expectedMechanics": {
+        "keyPredicateRows": 0,
+        "admissions": 0,
+        "candidateRecordsInspected": 0,
+        "noPrefixCandidate": 0,
+        "selected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 0,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 0,
+        "failedFullBytesOffered": 0,
+        "maxSelectedBytes": 0,
+        "maxFailedFullBytes": 0,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 0,
+        "expressionMatches": 0,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 0,
+        "keyComparisonBytesOffered": 0,
+        "maxKeyComparisonBytes": 0
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 0,
+        "recentCrossBank": 0,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 0,
+        "firstSelectedFailureBlockingLaterTrueContent": 0,
+        "maxRecentStreak": 0,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": true
+    },
+    {
+      "id": 3,
+      "name": "alternating-older-long-full-misses-inactive",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-3/term_bank_1.json",
+          "compressedFile": "case-3/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "fab1eebccac2a8a6bbac425ac4bca0c3d0e3ecea1e6fa26d702786187ff33e1e",
+          "compressedSha256": "675f798e1537e5f668a67d07c6a62f4a401fd0fd4cd25efcce4df023427efade",
+          "uncompressedSize": 21980001,
+          "compressedSize": 65785,
+          "compressionMethod": 8,
+          "signature": 3847112808
+        },
+        {
+          "rawFile": "case-3/term_bank_2.json",
+          "compressedFile": "case-3/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "2f8704bda110c8267995f0bbc830ceb842aebba440d1e2897881bafdc09f6e29",
+          "compressedSha256": "fc586503cc24091cd84eedcd1bbb1feda9916ccd7fdf8ff89c4b8fa04fc20d28",
+          "uncompressedSize": 21980001,
+          "compressedSize": 65801,
+          "compressionMethod": 8,
+          "signature": 1098449885
+        }
+      ],
+      "expectedUniqueCount": 20000,
+      "expectedMechanics": {
+        "keyPredicateRows": 0,
+        "admissions": 0,
+        "candidateRecordsInspected": 0,
+        "noPrefixCandidate": 0,
+        "selected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 0,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 0,
+        "failedFullBytesOffered": 0,
+        "maxSelectedBytes": 0,
+        "maxFailedFullBytes": 0,
+        "originalLookbackZeroRows": 10000,
+        "originalLookbackPositiveRows": 9999,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 0,
+        "expressionMatches": 0,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 0,
+        "keyComparisonBytesOffered": 0,
+        "maxKeyComparisonBytes": 0
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 0
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 0,
+        "recentCrossBank": 0,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 0,
+        "firstSelectedFailureBlockingLaterTrueContent": 0,
+        "maxRecentStreak": 0,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": true
+    },
+    {
+      "id": 4,
+      "name": "active-streak-short-XXY",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-4/term_bank_1.json",
+          "compressedFile": "case-4/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "853e8038322dec57d7078f1cd941929d88113ec5944d242ea7594fdb630d2e82",
+          "compressedSha256": "fad6de6e9c279c2a9941abfd7fbc47fd22eb2d39ced78191a07064788fd4e41f",
+          "uncompressedSize": 2800001,
+          "compressedSize": 34122,
+          "compressionMethod": 8,
+          "signature": 3065671376
+        },
+        {
+          "rawFile": "case-4/term_bank_2.json",
+          "compressedFile": "case-4/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "b74c13130ee0eb2dd48cc00078448812d4759871f9c8ebec3329b431aaf4a2e0",
+          "compressedSha256": "6c0fef8ed47409f8d329d712537222956dfe46aa6d2f59a55643fca52d20596e",
+          "uncompressedSize": 2800001,
+          "compressedSize": 34121,
+          "compressionMethod": 8,
+          "signature": 1615753575
+        }
+      ],
+      "expectedUniqueCount": 13333,
+      "expectedMechanics": {
+        "keyPredicateRows": 6666,
+        "admissions": 6666,
+        "candidateRecordsInspected": 6666,
+        "noPrefixCandidate": 0,
+        "selected": 6666,
+        "selectedDistance1": 6666,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 1613172,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 6666,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 1613172,
+        "failedFullBytesOffered": 1613172,
+        "maxSelectedBytes": 242,
+        "maxFailedFullBytes": 242,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 6666,
+        "recentContentHits": 6667,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 6666,
+        "expressionMatches": 6666,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 6666,
+        "keyComparisonBytesOffered": 26664,
+        "maxKeyComparisonBytes": 4
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 6667
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 0,
+        "recentCrossBank": 1,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 0,
+        "firstSelectedFailureBlockingLaterTrueContent": 0,
+        "maxRecentStreak": 1,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": false
+    },
+    {
+      "id": 5,
+      "name": "active-streak-older-long-LSSL-prime",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-5/term_bank_1.json",
+          "compressedFile": "case-5/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "efc76102589d481f1f71bad7444249487743664460ae6abe39133b59e714d936",
+          "compressedSha256": "913f03c6611f5f1f34a8e27cd3435e3e5a938ec5723356a1ce463a65ff4b3090",
+          "uncompressedSize": 20985001,
+          "compressedSize": 63874,
+          "compressionMethod": 8,
+          "signature": 971069418
+        },
+        {
+          "rawFile": "case-5/term_bank_2.json",
+          "compressedFile": "case-5/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "a3489df0e7115d7153745fbfa03fc1bd011788c34795849855c9334e979c7385",
+          "compressedSha256": "6bbe2108f07005e4ec7ea4a51b64b755d61dc5fd0df2a2b85146883926afd022",
+          "uncompressedSize": 20985001,
+          "compressedSize": 63877,
+          "compressionMethod": 8,
+          "signature": 1220084555
+        }
+      ],
+      "expectedUniqueCount": 15000,
+      "expectedMechanics": {
+        "keyPredicateRows": 5000,
+        "admissions": 5000,
+        "candidateRecordsInspected": 15000,
+        "noPrefixCandidate": 0,
+        "selected": 5000,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 5000,
+        "selectedDistance4": 0,
+        "selectedBytes": 20480000,
+        "selectedAtLeast512": 5000,
+        "selectedAtLeast512Bytes": 20480000,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 5000,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 20480000,
+        "failedFullBytesOffered": 20480000,
+        "maxSelectedBytes": 4096,
+        "maxFailedFullBytes": 4096,
+        "originalLookbackZeroRows": 10000,
+        "originalLookbackPositiveRows": 9999,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 5000,
+        "recentContentHits": 5000,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 10000,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 5000,
+        "expressionMatches": 5000,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 5000,
+        "keyComparisonBytesOffered": 20000,
+        "maxKeyComparisonBytes": 4
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 5000
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 0,
+        "recentCrossBank": 0,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 0,
+        "firstSelectedFailureBlockingLaterTrueContent": 0,
+        "maxRecentStreak": 1,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": false
+    },
+    {
+      "id": 6,
+      "name": "active-streak-first-prefix-QHSSQ",
+      "rows": 20000,
+      "banks": [
+        {
+          "rawFile": "case-6/term_bank_1.json",
+          "compressedFile": "case-6/term_bank_1.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 0,
+          "rawSha256": "dda9c639328dd609a7c89ca507e4f93982cb84bacbab980e5cfd0bb93a37b1a1",
+          "compressedSha256": "7b6c32bcde7b8cfd24a8adbcaae03e9cd6bd66368671a3bb94c600797e07c20c",
+          "uncompressedSize": 1940001,
+          "compressedSize": 31746,
+          "compressionMethod": 8,
+          "signature": 196086442
+        },
+        {
+          "rawFile": "case-6/term_bank_2.json",
+          "compressedFile": "case-6/term_bank_2.deflate",
+          "rows": 10000,
+          "firstGlobalRow": 10000,
+          "rawSha256": "05213e4df86ea781f4638864be92c5cf0ad5521312d5450b3ddac86318fe9838",
+          "compressedSha256": "3474b01b986f42bfbaf5cc5b1bcabfe1d6410d1d7b684207aad87f8c697e6705",
+          "uncompressedSize": 1940001,
+          "compressedSize": 31748,
+          "compressionMethod": 8,
+          "signature": 3874654210
+        }
+      ],
+      "expectedUniqueCount": 12000,
+      "expectedMechanics": {
+        "keyPredicateRows": 7999,
+        "admissions": 7999,
+        "candidateRecordsInspected": 15999,
+        "noPrefixCandidate": 0,
+        "selected": 7999,
+        "selectedDistance1": 3999,
+        "selectedDistance2": 0,
+        "selectedDistance3": 4000,
+        "selectedDistance4": 0,
+        "selectedBytes": 1935758,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 7999,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 1935758,
+        "failedFullBytesOffered": 1935758,
+        "maxSelectedBytes": 242,
+        "maxFailedFullBytes": 242,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 7999,
+        "recentContentHits": 8000,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 8000,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0,
+        "priorStreakLookbackZeroRows": 7999,
+        "expressionMatches": 7999,
+        "readingMatches": 0,
+        "readingIneligibleRows": 0,
+        "readingAliasRejected": 0,
+        "keyComparisonCalls": 7999,
+        "keyComparisonBytesOffered": 31996,
+        "maxKeyComparisonBytes": 4
+      },
+      "expectedPublic": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseCount": 0,
+        "recentContentDedupHitCount": 8000
+      },
+      "expectedShadow": {
+        "selectedCrossBank": 1,
+        "recentCrossBank": 0,
+        "firstSelectedFailureBlockingLaterTrueGlossary": 4000,
+        "firstSelectedFailureBlockingLaterTrueContent": 4000,
+        "maxRecentStreak": 2,
+        "maxProbeBudget": 0
+      },
+      "legacyBankIdentityRequired": false
+    }
+  ],
+  "modelReceiptSha256": "fbd0863047d88d3f358b7ee54de924c4caf18e201e52f196918df3c8a12f10dd"
+}

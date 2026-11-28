@@ -1,0 +1,91 @@
+{
+  "scope": "Static syntax and byte-binding checks only; no state-model/generator/native/timing execution",
+  "checks": [
+    {
+      "file": "fixture-model.mjs",
+      "kind": "Node syntax only; module not executed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "file": "negative-fixtures.mjs",
+      "kind": "Node syntax only; module not executed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:13) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "file": "negative-screen.mjs",
+      "kind": "Node syntax only; module not executed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:20) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "file": "output-digest.mjs",
+      "kind": "Node syntax only; module not executed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:27) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "file": "state-model.mjs",
+      "kind": "Node syntax only; module not executed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "(node:34) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "file": "negative-run.py",
+      "kind": "Python AST only; module not executed",
+      "passed": true
+    }
+  ],
+  "files": {
+    "diagnostic-fields.json": {
+      "bytes": 1116,
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+    },
+    "expected-counts.json": {
+      "bytes": 14485,
+      "sha256": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64"
+    },
+    "fixture-model.mjs": {
+      "bytes": 6570,
+      "sha256": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac"
+    },
+    "legacy-fixture-manifest.json": {
+      "bytes": 9311,
+      "sha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1"
+    },
+    "negative-fixtures.mjs": {
+      "bytes": 5840,
+      "sha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d"
+    },
+    "negative-protocol.json": {
+      "bytes": 4373,
+      "sha256": "eff3b05c50d7677007a1720b62c3b64a0e488afff7907cea6193d73bbfa771cf"
+    },
+    "negative-run.py": {
+      "bytes": 10142,
+      "sha256": "3acf2ecee1b6d01131c9ca517603b22093c68e11809fa8e08af3f80b8b1a60aa"
+    },
+    "negative-screen.mjs": {
+      "bytes": 11757,
+      "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c"
+    },
+    "output-digest.mjs": {
+      "bytes": 2507,
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61"
+    },
+    "screen-change-proof.json": {
+      "bytes": 704,
+      "sha256": "bd4fc8c22677256b6dfc560d8e80d376dd5a59787a7c05ad5c90d3df1b40a553"
+    },
+    "state-model.mjs": {
+      "bytes": 11009,
+      "sha256": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08"
+    }
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "scope": "Primary GitHub develop head and exact comparison fetched before separate prior-streak cohort launch; running experiments retain frozen9e10",
+  "checkedAtUtc": "2026-11-28 08:08:54 UTC",
+  "sourceUrls": [
+    "https://api.github.com/repos/ManabiIO/manabitan/branches/develop",
+    "https://api.github.com/repos/ManabiIO/manabitan/compare/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2...dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  ],
+  "develop": {
+    "name": "develop",
+    "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "commit": {
+      "author": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "message": "Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+      "tree": {
+        "sha": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d911260f1a57f518d59b3a12127fcc3b2293c918"
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCokmCRC1aQ7uu5UhlAAAgGEQAG1Dz8u/g+ETemEkUpAsVbqi\nIAjNBBjCIt3S4gg9r4VkyV6jwCMUUixE+gVdQj0bGLeHd/WP6T4XrEEj4B5yLbec\nyfiOQkVyA7w3G1pl2KaLtpRNpji2Co6LejpSkEOSJfe6AFQ8+S67j39fNDVxoXuA\n6vmIHYTO+qZk8YVrtXJ4shA9SSDogd3FUlOtnEIk9QDasFlzzmsJcwFBD4sk/bXo\n9PlARWXW2D9GELu8nDdzWNNZodE6E7eBkutFZ1+TU5uLuECRX/AUEDTdJ5hTKIsQ\nJbAnt9sZ/Ue3xNt8DOPLRAcLskmiblrdF5gUwAFy+5Y5JIETNEk6192Pv2gADz1C\nKzgbXPx65VM9qL+0TFUBVzGX2Uvecgd4Vp8ZxdSKSlNuVGvQjx24g7eJfzj2moz4\nZNESLJGBNRXjQqz1ZcsATFyphAQZmGd/BJdSIMMK8Lw+nO6jJldLz8mNYOMBI0pO\nzQavJCQJmmzUxWI4YcHMSjGkIYuGkxmNYMx73XF5bJigNCH3d3QBQ7NROT0SST4L\nwT9y0ayRuzeHidqRSBFihhDQZYB8vmKioWIdPgt+yx9ourQoJRDZHDRJfUh5taiT\n6rX7MRqBijw23seMt7Ol5zRhNcgmq8JXw2vsVBuUC2GITALpQnKaKLdypCPVikFS\n43COmHgLzyGehTJvChP8\n=HqNE\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree d911260f1a57f518d59b3a12127fcc3b2293c918\nparent 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\nparent 32c643f9be41f04a6e824ca40d3a0649da87a050\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795852582 -0500\ncommitter GitHub <noreply@github.com> 1795852582 -0500\n\nMerge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+        "verified_at": "2026-11-28T07:56:23Z"
+      }
+    }
+  },
+  "comparison": {
+    "status": "ahead",
+    "ahead_by": 4,
+    "behind_by": 0,
+    "total_commits": 4,
+    "merge_base_commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "commits": [
+      {
+        "sha": "7c3ac5b690cf97fa4f3125ec3a61af2de7b1c45e",
+        "commit": {
+          "author": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-27T11:24:22Z"
+          },
+          "committer": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-27T11:24:22Z"
+          },
+          "message": "perf: reuse scalar token ends in fused parser",
+          "tree": {
+            "sha": "6a96424c45c9eb3a5c80e6ecd893238896d53e24",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/6a96424c45c9eb3a5c80e6ecd893238896d53e24"
+          },
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/7c3ac5b690cf97fa4f3125ec3a61af2de7b1c45e",
+          "comment_count": 0,
+          "verification": {
+            "verified": false,
+            "reason": "unsigned",
+            "signature": null,
+            "payload": null,
+            "verified_at": null
+          }
+        },
+        "parents": [
+          {
+            "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+            "html_url": "https://github.com/ManabiIO/manabitan/commit/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+          }
+        ]
+      },
+      {
+        "sha": "05a20e5879c8904a7fb1d25f62b080262fa8d986",
+        "commit": {
+          "author": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-27T21:47:54Z"
+          },
+          "committer": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-27T21:47:54Z"
+          },
+          "message": "perf: fast path compact structured glossary lists",
+          "tree": {
+            "sha": "d3a7e0e82b76996cfc95240d05faed12a41a65c6",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d3a7e0e82b76996cfc95240d05faed12a41a65c6"
+          },
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/05a20e5879c8904a7fb1d25f62b080262fa8d986",
+          "comment_count": 0,
+          "verification": {
+            "verified": false,
+            "reason": "unsigned",
+            "signature": null,
+            "payload": null,
+            "verified_at": null
+          }
+        },
+        "parents": [
+          {
+            "sha": "7c3ac5b690cf97fa4f3125ec3a61af2de7b1c45e",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/7c3ac5b690cf97fa4f3125ec3a61af2de7b1c45e",
+            "html_url": "https://github.com/ManabiIO/manabitan/commit/7c3ac5b690cf97fa4f3125ec3a61af2de7b1c45e"
+          }
+        ]
+      },
+      {
+        "sha": "32c643f9be41f04a6e824ca40d3a0649da87a050",
+        "commit": {
+          "author": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-28T02:08:07Z"
+          },
+          "committer": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-28T02:08:07Z"
+          },
+          "message": "test: format structured glossary parser cases",
+          "tree": {
+            "sha": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d911260f1a57f518d59b3a12127fcc3b2293c918"
+          },
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/32c643f9be41f04a6e824ca40d3a0649da87a050",
+          "comment_count": 0,
+          "verification": {
+            "verified": false,
+            "reason": "unsigned",
+            "signature": null,
+            "payload": null,
+            "verified_at": null
+          }
+        },
+        "parents": [
+          {
+            "sha": "05a20e5879c8904a7fb1d25f62b080262fa8d986",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/05a20e5879c8904a7fb1d25f62b080262fa8d986",
+            "html_url": "https://github.com/ManabiIO/manabitan/commit/05a20e5879c8904a7fb1d25f62b080262fa8d986"
+          }
+        ]
+      },
+      {
+        "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "commit": {
+          "author": {
+            "name": "Alex Ehlke",
+            "email": "alex.ehlke@gmail.com",
+            "date": "2026-11-28T07:56:22Z"
+          },
+          "committer": {
+            "name": "GitHub",
+            "email": "noreply@github.com",
+            "date": "2026-11-28T07:56:22Z"
+          },
+          "message": "Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+          "tree": {
+            "sha": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d911260f1a57f518d59b3a12127fcc3b2293c918"
+          },
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "comment_count": 0,
+          "verification": {
+            "verified": true,
+            "reason": "valid",
+            "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCokmCRC1aQ7uu5UhlAAAgGEQAG1Dz8u/g+ETemEkUpAsVbqi\nIAjNBBjCIt3S4gg9r4VkyV6jwCMUUixE+gVdQj0bGLeHd/WP6T4XrEEj4B5yLbec\nyfiOQkVyA7w3G1pl2KaLtpRNpji2Co6LejpSkEOSJfe6AFQ8+S67j39fNDVxoXuA\n6vmIHYTO+qZk8YVrtXJ4shA9SSDogd3FUlOtnEIk9QDasFlzzmsJcwFBD4sk/bXo\n9PlARWXW2D9GELu8nDdzWNNZodE6E7eBkutFZ1+TU5uLuECRX/AUEDTdJ5hTKIsQ\nJbAnt9sZ/Ue3xNt8DOPLRAcLskmiblrdF5gUwAFy+5Y5JIETNEk6192Pv2gADz1C\nKzgbXPx65VM9qL+0TFUBVzGX2Uvecgd4Vp8ZxdSKSlNuVGvQjx24g7eJfzj2moz4\nZNESLJGBNRXjQqz1ZcsATFyphAQZmGd/BJdSIMMK8Lw+nO6jJldLz8mNYOMBI0pO\nzQavJCQJmmzUxWI4YcHMSjGkIYuGkxmNYMx73XF5bJigNCH3d3QBQ7NROT0SST4L\nwT9y0ayRuzeHidqRSBFihhDQZYB8vmKioWIdPgt+yx9ourQoJRDZHDRJfUh5taiT\n6rX7MRqBijw23seMt7Ol5zRhNcgmq8JXw2vsVBuUC2GITALpQnKaKLdypCPVikFS\n43COmHgLzyGehTJvChP8\n=HqNE\n-----END PGP SIGNATURE-----\n",
+            "payload": "tree d911260f1a57f518d59b3a12127fcc3b2293c918\nparent 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\nparent 32c643f9be41f04a6e824ca40d3a0649da87a050\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795852582 -0500\ncommitter GitHub <noreply@github.com> 1795852582 -0500\n\nMerge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+            "verified_at": "2026-11-28T07:56:23Z"
+          }
+        },
+        "parents": [
+          {
+            "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+            "html_url": "https://github.com/ManabiIO/manabitan/commit/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+          },
+          {
+            "sha": "32c643f9be41f04a6e824ca40d3a0649da87a050",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/32c643f9be41f04a6e824ca40d3a0649da87a050",
+            "html_url": "https://github.com/ManabiIO/manabitan/commit/32c643f9be41f04a6e824ca40d3a0649da87a050"
+          }
+        ]
+      }
+    ],
+    "files": [
+      {
+        "sha": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+        "filename": "dev/data/dictionary-wasm/manifest.json",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "changes": 4,
+        "blob_url": "https://github.com/ManabiIO/manabitan/blob/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fdata%2Fdictionary-wasm%2Fmanifest.json",
+        "raw_url": "https://github.com/ManabiIO/manabitan/raw/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fdata%2Fdictionary-wasm%2Fmanifest.json",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/dev%2Fdata%2Fdictionary-wasm%2Fmanifest.json?ref=dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "patch": "@@ -4,7 +4,7 @@\n         \"compilerVersion\": \"21.1.8\",\n         \"linkerVersion\": \"21.1.8\"\n     },\n-    \"sourceDigest\": \"3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6\",\n+    \"sourceDigest\": \"7b5bb45309d141eaa296ecef6c3cef7a94f22760266217a7c26dc467ea6db39c\",\n     \"sourceFileCount\": 14,\n     \"targets\": [\n         {\n@@ -59,7 +59,7 @@\n                 \"-Wl,--export=encode_term_content_token_binary_dedup\",\n                 \"-Wl,--strip-all\"\n             ],\n-            \"sha256\": \"8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee\"\n+            \"sha256\": \"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695\"\n         }\n     ]\n }"
+      },
+      {
+        "sha": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+        "filename": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "status": "modified",
+        "additions": 0,
+        "deletions": 0,
+        "changes": 0,
+        "blob_url": "https://github.com/ManabiIO/manabitan/blob/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fdata%2Fdictionary-wasm%2Fterm-bank-parser.wasm",
+        "raw_url": "https://github.com/ManabiIO/manabitan/raw/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fdata%2Fdictionary-wasm%2Fterm-bank-parser.wasm",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/dev%2Fdata%2Fdictionary-wasm%2Fterm-bank-parser.wasm?ref=dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+      },
+      {
+        "sha": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f",
+        "filename": "dev/perf/import-lookup-screen.js",
+        "status": "modified",
+        "additions": 7,
+        "deletions": 1,
+        "changes": 8,
+        "blob_url": "https://github.com/ManabiIO/manabitan/blob/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fperf%2Fimport-lookup-screen.js",
+        "raw_url": "https://github.com/ManabiIO/manabitan/raw/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/dev%2Fperf%2Fimport-lookup-screen.js",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/dev%2Fperf%2Fimport-lookup-screen.js?ref=dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "patch": "@@ -30,7 +30,7 @@ import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'\n /** @typedef {import('dictionary-importer').ImportExperiments} Flags */\n /** @typedef {Parameters<Parameters<typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunks>[2]>[0] & {preparedLookupIndexes?: Map<string, import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>}} Chunk */\n /** @typedef {{cacheFile: string, sha256: string, termRows: number}} Lock */\n-/** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, ownedCompactExpressionRows: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */\n+/** @typedef {{elapsedMs: number, wasmParserMs: number, wasmContentEncodeMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, ownedCompactExpressionRows: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */\n /** @typedef {Measurement & {flags: Flags, validateGlossaryTypes: boolean, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */\n /** @typedef {{pair: number, arm: string, result: ScreenResult}} Observation */\n const root = fileURLToPath(new URL('../../', import.meta.url))\n@@ -129,6 +129,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {\n      */\n     const execute = async (verify) => {\n         let elapsedMs = 0\n+        let wasmParserMs = 0\n+        let wasmContentEncodeMs = 0\n         let lookupMs = 0\n         let rows = 0\n         let nativeSegments = 0\n@@ -159,6 +161,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {\n             elapsedMs += safePerformance.now() - before\n             const profile = parser.consumeLastTermBankWasmParseProfile()\n             if (resultChunk === null || !profile) { throw new Error('Missing parser results') }\n+            wasmParserMs += profile.parseBankMs\n+            wasmContentEncodeMs += profile.encodeContentMs\n             const chunk = /** @type {Chunk} */ (resultChunk)\n             const indexes = chunk.preparedLookupIndexes\n             if (!indexes || !prep.hasCompletePreparedTermLookupIndexes(indexes, chunk.rowCount)) { throw new Error('Incomplete indexes') }\n@@ -204,6 +208,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {\n         return {scratchReusedBytes,\n             scratchReuseMisses,\n             elapsedMs,\n+            wasmParserMs,\n+            wasmContentEncodeMs,\n             lookupMs,\n             rows,\n             nativeSegments,"
+      },
+      {
+        "sha": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+        "filename": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "status": "modified",
+        "additions": 66,
+        "deletions": 14,
+        "changes": 80,
+        "blob_url": "https://github.com/ManabiIO/manabitan/blob/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/ext%2Fjs%2Fdictionary%2Fwasm%2Fterm-bank-parser.c",
+        "raw_url": "https://github.com/ManabiIO/manabitan/raw/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/ext%2Fjs%2Fdictionary%2Fwasm%2Fterm-bank-parser.c",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/ext%2Fjs%2Fdictionary%2Fwasm%2Fterm-bank-parser.c?ref=dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "patch": "@@ -1474,6 +1474,51 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*\n     return 1;\n }\n \n+/* Recognize one compact structured-content list. A change in key order, list\n+ * structure or styling returns control to the general JSON parser with its\n+ * cursor and hints intact. Only leaf text varies; it uses the JSON string\n+ * validator, including for escapes. */\n+static inline int consume_glossary_literal(\n+    const uint8_t* src, uint32_t len, uint32_t* pos, const char* literal, uint32_t size\n+) {\n+    if (size > len - *pos ||\n+        !content_bytes_equal_between(src, *pos, (const uint8_t*)literal, 0u, size)) { return 0; }\n+    *pos += size;\n+    return 1;\n+}\n+\n+static int parse_compact_glossary_list(\n+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, int media_hints\n+) {\n+    static const char opening[] = \"[{\\\"content\\\":{\\\"content\\\":\";\n+    static const char leaf_open[] = \"{\\\"content\\\":\";\n+    static const char leaf_close[] = \",\\\"tag\\\":\\\"li\\\"}\";\n+    static const char closing[] =\n+        \",\\\"data\\\":{\\\"content\\\":\\\"glossary\\\"},\\\"lang\\\":\\\"en\\\",\\\"style\\\":{\\\"listStyleType\\\":\\\"circle\\\"},\"\n+        \"\\\"tag\\\":\\\"ul\\\"},\\\"type\\\":\\\"structured-content\\\"}]\";\n+    uint32_t pos = start;\n+    if (!consume_glossary_literal(src, len, &pos, opening, sizeof(opening) - 1u)) { return 0; }\n+    const int multiple = pos < len && src[pos] == '[';\n+    if (multiple) { ++pos; }\n+    for (;;) {\n+        if (!consume_glossary_literal(src, len, &pos, leaf_open, sizeof(leaf_open) - 1u)) { return 0; }\n+        const uint32_t text = pos;\n+        if (!parse_string_span(src, len, text, &pos)) { return 0; }\n+        // The general scan treats a literal or escaped media name as a hint\n+        // even when it appears as leaf text. Let it classify those rare rows.\n+        if (media_hints && is_media_marker_at(src, pos, text)) { return 0; }\n+        if (!consume_glossary_literal(src, len, &pos, leaf_close, sizeof(leaf_close) - 1u)) { return 0; }\n+        if (!multiple) { break; }\n+        if (pos >= len) { return 0; }\n+        const uint8_t delimiter = src[pos++];\n+        if (delimiter == ']') { break; }\n+        if (delimiter != ',') { return 0; }\n+    }\n+    if (!consume_glossary_literal(src, len, &pos, closing, sizeof(closing) - 1u)) { return 0; }\n+    *out_end = pos;\n+    return 1;\n+}\n+\n /* Strict source validation has exactly eight fields with known token types.\n  * Keep its grammar explicit instead of dispatching each field twice through\n  * the permissive row parser and set_field. Every metadata word is assigned\n@@ -1489,7 +1534,9 @@ static int parse_format3_row(\n     uint32_t prior_count,\n     uint32_t* glossary_witness,\n     uint32_t glossary_lookback,\n-    uint32_t* key_escape_mask\n+    uint32_t* key_escape_mask,\n+    uint32_t* score_token_end,\n+    uint32_t* sequence_token_end\n ) {\n     if (row_start >= len || src[row_start] != '[') { return 0; }\n     uint32_t i = skip_ws(src, len, row_start + 1u);\n@@ -1529,6 +1576,7 @@ static int parse_format3_row(\n \n     if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }\n     meta->score_start = i;\n+    if (score_token_end != 0) { *score_token_end = end; }\n     i = end;\n     if (!next_format3_field(src, len, &i)) { return 0; }\n \n@@ -1540,6 +1588,7 @@ static int parse_format3_row(\n         !(glossary_witness != 0 && reuse_validated_glossary(\n             src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback\n         )) &&\n+        !parse_compact_glossary_list(src, len, i, &end, media_hints) &&\n         !parse_value_span_with_glossary_hints(\n             src, len, i, &end,\n             media_hints ? &meta->glossary_may_contain_media : 0,\n@@ -1558,6 +1607,7 @@ static int parse_format3_row(\n     } else {\n         if (!is_valid_json_number(src, i, end)) { return 0; }\n         meta->sequence_start = i;\n+        if (sequence_token_end != 0) { *sequence_token_end = end; }\n     }\n     i = end;\n     if (!next_format3_field(src, len, &i)) { return 0; }\n@@ -1583,12 +1633,15 @@ static int parse_row_single_pass(\n     uint32_t* glossary_witness,\n     uint32_t glossary_lookback,\n     int validate_glossary_types,\n-    uint32_t* key_escape_mask\n+    uint32_t* key_escape_mask,\n+    uint32_t* score_token_end,\n+    uint32_t* sequence_token_end\n ) {\n     if (validate_glossary_types) {\n         return parse_format3_row(\n             src, len, row_start, out_meta, media_hints, out_next,\n-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask\n+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask,\n+            score_token_end, sequence_token_end\n         );\n     }\n     if (row_start >= len || src[row_start] != '[') { return 0; }\n@@ -1616,6 +1669,8 @@ static int parse_row_single_pass(\n             if (has_escape == 0u) { *key_escape_mask &= ~(1u << field_index); }\n         } else if (field_index == 4u || field_index == 6u) {\n             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }\n+            if (field_index == 4u && score_token_end != 0) { *score_token_end = value_end; }\n+            if (field_index == 6u && sequence_token_end != 0) { *sequence_token_end = value_end; }\n         } else if (field_index == 5u) {\n             if (validate_glossary_types && src[i] != '[') { return 0; }\n             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;\n@@ -2229,7 +2284,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len,\n             }\n         }\n         uint32_t row_end = 0u;\n-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {\n+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0)) {\n             return -1;\n         }\n         ++row_count;\n@@ -2267,7 +2322,7 @@ static int32_t parse_term_bank_impl(\n     while (status > 0) {\n         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }\n         uint32_t row_end = 0u;\n-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {\n+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0)) {\n             return -1;\n         }\n         ++row_count;\n@@ -3378,8 +3433,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(\n             }\n         }\n         uint32_t key_escape_mask;\n+        uint32_t score_token_end = 0u;\n+        uint32_t sequence_token_end = 0u;\n         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,\n-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {\n+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback,\n+                validate_glossary_types != 0u, &key_escape_mask, &score_token_end, &sequence_token_end)) {\n             return -1;\n         }\n         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }\n@@ -3513,11 +3571,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(\n         reading_indexes[row_count] = string_indexes[1];\n         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;\n         // The row parser already validated the JSON grammar of both numbers.\n-        uint32_t score_end = 0u;\n         int32_t score = 0;\n         if (\n-            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||\n-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||\n+            !parse_int32_token(src, parsed_row->score_start, score_token_end, 0, &score) ||\n             // Integer storage cannot preserve a negative zero score. Use the\n             // ordinary number-preserving path, even in otherwise integer banks.\n             (score == 0 && src[parsed_row->score_start] == '-')\n@@ -3528,11 +3584,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(\n         scores[row_count] = score;\n         int32_t sequence = -1;\n         if (parsed_row->sequence_start != 0xffffffffu) {\n-            uint32_t sequence_end = 0u;\n-            if (\n-                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||\n-                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)\n-            ) {\n+            if (!parse_int32_token(src, parsed_row->sequence_start, sequence_token_end, -1, &sequence)) {\n                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count;\n                 return -5;\n             }"
+      },
+      {
+        "sha": "4d988074b666954887ca14ce9aeb6364143d19c0",
+        "filename": "test/term-bank-format3-row.test.js",
+        "status": "modified",
+        "additions": 44,
+        "deletions": 0,
+        "changes": 44,
+        "blob_url": "https://github.com/ManabiIO/manabitan/blob/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/test%2Fterm-bank-format3-row.test.js",
+        "raw_url": "https://github.com/ManabiIO/manabitan/raw/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/test%2Fterm-bank-format3-row.test.js",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fterm-bank-format3-row.test.js?ref=dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "patch": "@@ -90,6 +90,50 @@ describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns\n         }\n     })\n \n+    test('preserves compact list bytes, media hints and changed list structures', async () => {\n+        const item = (/** @type {string} */ text) => ({content: text, tag: 'li'})\n+        const leafSets = [\n+            item('definition'),\n+            [\n+                item('doubled \"quotation\"'),\n+                item('second\\\\entry'),\n+                item('日本語'),\n+            ],\n+            [item('img'), item('image')],\n+            [\n+                item('image'),\n+                {tag: 'img', path: 'cover.webp'},\n+            ],\n+            [],\n+        ]\n+        const rows = leafSets.map((content, i) => [\n+            String(i),\n+            '',\n+            null,\n+            '',\n+            0,\n+            [{\n+                content: {\n+                    content,\n+                    data: {content: 'glossary'},\n+                    lang: 'en',\n+                    style: {listStyleType: 'circle'},\n+                    tag: 'ul',\n+                },\n+                type: 'structured-content',\n+            }],\n+            i,\n+            '',\n+        ])\n+        const source = JSON.stringify(rows).replace('\"image\"', '\"\\\\u0069mage\"')\n+        expect((await parse(source, true, columns)).rows).toStrictEqual((await parse(source, false, columns)).rows)\n+    })\n+\n+    test('rejects an invalid escape inside a compact structured list', async () => {\n+        const glossary = '[{\"content\":{\"content\":{\"content\":\"bad\\\\q\",\"tag\":\"li\"},\"data\":{\"content\":\"glossary\"},\"lang\":\"en\",\"style\":{\"listStyleType\":\"circle\"},\"tag\":\"ul\"},\"type\":\"structured-content\"}]'\n+        await expect(parse('[[\"key\",\"\",null,\"\",0,' + glossary + ',null,\"\"]]', true, columns)).rejects.toThrow()\n+    })\n+\n     test.each(['-0', '0.5', '1e3', '-2147483649'])('preserves valid numeric fallback for score %s', async (score) => {\n         const source = `[[\"key\",\"\",null,\"\",${score},[\"meaning\"],null,\"\"]]`\n         const actual = await parse(source, true, columns)"
+      }
+    ]
+  },
+  "decision": "No mid-cohort rebase or result transfer. Any worthwhile old-base result requires separate correct composition and qualification against current develop before product PR."
+}

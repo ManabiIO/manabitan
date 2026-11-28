@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T08:07:33.389786+00:00",
+  "status": "Final root source composition prepared before successor native compilation, execution or timing; final independent composition review and publication manifest are separate records",
+  "source": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "worktreeClean": true,
+    "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+    "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+    "candidateCompiledWasmSha256": null,
+    "diagnosticCompiledWasmSha256": null,
+    "candidateNativeExecuted": false,
+    "candidateTimingObserved": false
+  },
+  "study": {
+    "branch": "perf/jmdict-prior-streak-selector-screen-20261128-c563d487",
+    "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "prospectiveComponentCriteria": "prospective-component-review.json",
+    "prospectiveCompleteImportCriteria": "prospective-complete-import-criteria.json",
+    "fixedCellOrder": [
+      "jmdict",
+      "negative-1",
+      "negative-2",
+      "negative-3",
+      "negative-4",
+      "negative-5",
+      "negative-6",
+      "jitendex",
+      "vndb"
+    ],
+    "measuredChildren": 144,
+    "componentOnly": true,
+    "noSourceOrThresholdSelectionAfterResults": true,
+    "originalPrefixTimingsNotPooled": true
+  },
+  "localValidation": {
+    "nativeCandidateCompiled": false,
+    "nativeCandidateExecuted": false,
+    "nativeCandidateTestsExecuted": false,
+    "baselineOnlySmokes": 2,
+    "scope": "Source-only diagnostic preparation, lint/strict fixture types, baseline-only fixture parity, independent source/fixture/control-flow reviews, ONE excluded pure negative generator/model pass, source syntax/composition/static algebra.",
+    "negativeModelAssertions": 288,
+    "jmdictProspectiveMechanicalValues": 387,
+    "negativeFixtureHashes": {
+      "manifest.json": "7291d348f059862bbb51df976902d0cd21cb2115757e49d0020e59ae4483be54",
+      "state-model-result.json": "fbd0863047d88d3f358b7ee54de924c4caf18e201e52f196918df3c8a12f10dd",
+      "preparation-receipt.json": "20b77f4351b8530e97de097153eb4dc6a39a50df1051c491277140c455c44822"
+    },
+    "preservedPreparationFailure": "Initial fixture ESLint formatting failure (264 errors); original files/AST identity/report/receipt retained in the evidence follow-up. Formatting-only correction, no semantic fixture change.",
+    "fullCorrectnessPending": "Pinned hosted compiler reproduction, all six smoke modes, focused tests, type/lint lanes, raw 17-word native oracle, exact corpus/negative mechanics and rich output checks remain gates before each applicable timing cell."
+  },
+  "snapshotSupersession": {
+    "core-preparation.json": "Earlier root preparation snapshot. Its helper/run/workflow hashes predate final guards and are historical; the final hashes below govern this cohort.",
+    "reviews/implementation-preparation-snapshot.json": "Original implementation-owner snapshot; pending independent fixture review is superseded by the separately completed fixture-diagnostic-review.json. Native compilation/execution/timing remain pending.",
+    "reviews/negative-tooling-snapshot.json": "Original negative-tooling snapshot; final common helper/workflow composition is bound here. Native execution and timing remain pending.",
+    "reviews/initial-hosted-protocol-review.json": "Review before deterministic generation identity-only guard. Final independent composition review separately binds the resulting helper/workflow/criteria/verifier hashes."
+  },
+  "hostedFiles": {
+    "candidate.patch": {
+      "bytes": 5645,
+      "sha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1"
+    },
+    "cohort_tools.py": {
+      "bytes": 9094,
+      "sha256": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0"
+    },
+    "core-preparation.json": {
+      "bytes": 1500,
+      "sha256": "cd5d7d4458372b87035e38ffc90bc6a1dcd7352bac3fb4c35cd7eecc8c0752c5"
+    },
+    "diagnostic-fields.json": {
+      "bytes": 1116,
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+    },
+    "expected-counts.json": {
+      "bytes": 14485,
+      "sha256": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64"
+    },
+    "expected-mechanics.json": {
+      "bytes": 15884,
+      "sha256": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952"
+    },
+    "final-composition-checks.json": {
+      "bytes": 2573,
+      "sha256": "bef3c2bab1ffaff5961dbe829e78e332d78b5b6d9be17d02b14d2f7bf06dc9d1"
+    },
+    "fixture-model.mjs": {
+      "bytes": 6570,
+      "sha256": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac"
+    },
+    "generation-audit.json": {
+      "bytes": 5048,
+      "sha256": "3600f7f1d7c6181274b1657385fe1a7e3660673da9db053366a3e1bb0256be54"
+    },
+    "legacy-fixture-manifest.json": {
+      "bytes": 9311,
+      "sha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1"
+    },
+    "native-oracle.mjs": {
+      "bytes": 13002,
+      "sha256": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419"
+    },
+    "negative-fixtures.mjs": {
+      "bytes": 5840,
+      "sha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d"
+    },
+    "negative-protocol.json": {
+      "bytes": 4587,
+      "sha256": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652"
+    },
+    "negative-run.py": {
+      "bytes": 10239,
+      "sha256": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2"
+    },
+    "negative-screen.mjs": {
+      "bytes": 11757,
+      "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c"
+    },
+    "output-digest.mjs": {
+      "bytes": 2507,
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61"
+    },
+    "preflight.py": {
+      "bytes": 2882,
+      "sha256": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9"
+    },
+    "prepare.py": {
+      "bytes": 13281,
+      "sha256": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b"
+    },
+    "prospective-complete-import-criteria.json": {
+      "bytes": 4104,
+      "sha256": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a"
+    },
+    "prospective-component-review.json": {
+      "bytes": 4916,
+      "sha256": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36"
+    },
+    "run.py": {
+      "bytes": 7766,
+      "sha256": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf"
+    },
+    "screen-change-proof.json": {
+      "bytes": 704,
+      "sha256": "bd4fc8c22677256b6dfc560d8e80d376dd5a59787a7c05ad5c90d3df1b40a553"
+    },
+    "screen.mjs": {
+      "bytes": 19878,
+      "sha256": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a"
+    },
+    "setup.sh": {
+      "bytes": 1068,
+      "sha256": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963"
+    },
+    "smoke.mjs": {
+      "bytes": 18004,
+      "sha256": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a"
+    },
+    "state-model.mjs": {
+      "bytes": 11009,
+      "sha256": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08"
+    },
+    "verify-negative-fixtures.py": {
+      "bytes": 758,
+      "sha256": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e"
+    },
+    "workflow.yml": {
+      "bytes": 9542,
+      "sha256": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed"
+    }
+  },
+  "qualificationFiles": {
+    "term-bank-prior-streak-selector-fixtures.js": {
+      "bytes": 22868,
+      "sha256": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d"
+    },
+    "term-bank-prior-streak-selector.test.js": {
+      "bytes": 13906,
+      "sha256": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+    }
+  },
+  "reviews": {
+    "implementation-preparation-snapshot.json": {
+      "bytes": 11974,
+      "sha256": "ae5e1c41cf6462248df49c3afd29eeaa25fb6794061c4180a338ad01b4735253"
+    },
+    "source-review.json": {
+      "bytes": 4187,
+      "sha256": "9c266010ab9c13409a2ca4d7da33eb4c97aee9fbcab1787ad13898173cb4156d"
+    },
+    "fixture-diagnostic-review.json": {
+      "bytes": 57236,
+      "sha256": "b086f40e5ee1c95ecc02ca820b3eb42a227e22a65f88237548447f32e4261715"
+    },
+    "baseline-and-source-checks.json": {
+      "bytes": 1357,
+      "sha256": "93050f3030fbb336410c85bfafd105e304d76f7f77ec375fc33e451f08770440"
+    },
+    "expected-mechanics-review.json": {
+      "bytes": 1027,
+      "sha256": "2520059f787fc4aac10ebd666d41ea97a7872f185d96d323b0e55070702bfb44"
+    },
+    "initial-hosted-protocol-review.json": {
+      "bytes": 8053,
+      "sha256": "94948c29023d654b050029e8e70f21c999a3b2f2ccae37056204a12958c0d867"
+    },
+    "negative-tooling-snapshot.json": {
+      "bytes": 4647,
+      "sha256": "f25d05a0c9e2dd7cdbd0f6428862fb2f20cdb4dfe6a6829e024faa3907f06875"
+    }
+  }
+}

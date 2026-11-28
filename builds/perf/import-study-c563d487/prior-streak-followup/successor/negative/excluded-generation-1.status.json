@@ -1,0 +1,34 @@
+{
+  "scope": "ONE excluded pure fixture generation and independent state/byte-model validation; no native parser and no performance observation",
+  "command": [
+    "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+    "--max-old-space-size=256",
+    "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-negative/negative-fixtures.mjs",
+    "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-negative/excluded-generation-1"
+  ],
+  "sourceHashes": {
+    "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+    "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+    "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+    "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+    "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+    "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+  },
+  "nodeBinarySha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "startedEpoch": 1795852652.955598,
+  "availableBytesBefore": 214351872,
+  "complete": true,
+  "exitCode": 0,
+  "finishedEpoch": 1795852655.633863,
+  "sourceHashesAfter": {
+    "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+    "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+    "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+    "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+    "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+    "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+  },
+  "availableBytesAfter": 107220992,
+  "generatedFileCount": 33,
+  "generatedLogicalBytes": 106985330
+}

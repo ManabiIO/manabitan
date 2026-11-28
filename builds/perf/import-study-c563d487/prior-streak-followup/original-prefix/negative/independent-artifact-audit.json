@@ -1,0 +1,1459 @@
+{
+  "completeAudit": true,
+  "cohortComplete": true,
+  "run": 46119683668,
+  "jobId": 140901220379,
+  "scope": "Independent raw original-prefix corrected synthetic component audit; successor negatives and original failed preflight remain separate; no full-import claim",
+  "toolingHead": "59530bb6db9320063c955d0a42219690bcabb47d",
+  "observations": 48,
+  "excludedChildren": 6,
+  "measuredRepetitionsPerChild": 16,
+  "excludedWarmupsPerMeasuredChild": 2,
+  "retainedPassReceipts": 870,
+  "productFiles": {
+    "dev/data/dictionary-wasm/manifest.json": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68"
+  },
+  "wasmBytes": 69209,
+  "smokeModes": 6,
+  "nativeSyntheticCases": 1112,
+  "nativeSyntheticComparisons": 2224,
+  "fixtureManifestSha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+  "fixtureByteVerification": [
+    {
+      "case": 1,
+      "bank": "case-1/term_bank_1.json",
+      "rawSha256": "5bb07c139b5c2176a1ed793ec72c60939787394ec70ffb479b725d966a0017f6",
+      "compressedSha256": "938a017e1a28dc96f0060b3a0dd33cd9a5a143160b79a4df8a1999907bc6993e",
+      "rawBytes": 2710001,
+      "compressedBytes": 61141,
+      "crc32": 3790676514
+    },
+    {
+      "case": 1,
+      "bank": "case-1/term_bank_2.json",
+      "rawSha256": "caf34ed0882476de6bf32b03db24b489c7fda56bf499448ca3f32e987f048ab4",
+      "compressedSha256": "83d76e11afea3899a86570f314b2611c2070aa4064300aa8d6b4dfa35e718f36",
+      "rawBytes": 2710001,
+      "compressedBytes": 61142,
+      "crc32": 722769397
+    },
+    {
+      "case": 2,
+      "bank": "case-2/term_bank_1.json",
+      "rawSha256": "313919eb11461456cc381dfe92c6fa675e4eeba71c86dba5573a7d2309479423",
+      "compressedSha256": "40a8b54dae6d6c61098e1551c287f997a0a52c56122c3c7a719377e3d5cf6bac",
+      "rawBytes": 2700001,
+      "compressedBytes": 37374,
+      "crc32": 558818720
+    },
+    {
+      "case": 2,
+      "bank": "case-2/term_bank_2.json",
+      "rawSha256": "8d4ba8b9dc6e4ff467d7865c983708e3bc66d78508776a82bf502008d7bb12e7",
+      "compressedSha256": "cb188ccb8ae24b05a972708e3799ba3a30050f3f16a4d9e42217ae80e2a029eb",
+      "rawBytes": 2700001,
+      "compressedBytes": 37396,
+      "crc32": 270405730
+    },
+    {
+      "case": 3,
+      "bank": "case-3/term_bank_1.json",
+      "rawSha256": "fab1eebccac2a8a6bbac425ac4bca0c3d0e3ecea1e6fa26d702786187ff33e1e",
+      "compressedSha256": "675f798e1537e5f668a67d07c6a62f4a401fd0fd4cd25efcce4df023427efade",
+      "rawBytes": 21980001,
+      "compressedBytes": 65785,
+      "crc32": 3847112808
+    },
+    {
+      "case": 3,
+      "bank": "case-3/term_bank_2.json",
+      "rawSha256": "2f8704bda110c8267995f0bbc830ceb842aebba440d1e2897881bafdc09f6e29",
+      "compressedSha256": "fc586503cc24091cd84eedcd1bbb1feda9916ccd7fdf8ff89c4b8fa04fc20d28",
+      "rawBytes": 21980001,
+      "compressedBytes": 65801,
+      "crc32": 1098449885
+    }
+  ],
+  "rawChildren": [
+    {
+      "label": "negative-case-1-baseline-verification",
+      "rawSha256": "50148b2dbad109017beb9b5991bf0ef58cf41977e72d9979f19838db61695745",
+      "statusSha256": "8c7b3760aeb767d07527a0e25774066ce7ea531365abd152b9fccd8889aeeebc",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-diagnostic",
+      "rawSha256": "923dca7ec5c43a37a31932569e9a6a8d1aa997b222c623406e8e5e929f9c4a1e",
+      "statusSha256": "49a3bbfecae306dc58d0e3ead16d09f7e0d275f9e123514edbb6dd8843d4f944",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-0-A",
+      "rawSha256": "c4cf74d2795efe9bac378c9dd989ee31ab923fd4b70e80df445847a11fb9dc17",
+      "statusSha256": "a456071da5d37182708dcf3f2eae06da93a122e1afb95b43c5a469f2f909b20c",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-0-B",
+      "rawSha256": "5021e961a8e77e65cf680c6f0eaf68d597025c329cc11ceeac7fb3af35615069",
+      "statusSha256": "c928cf1467fdfb066ffddd987f634464fbda5e817e3bc0a958fd279e9db3c96f",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-0-C",
+      "rawSha256": "c65f095527682fbbac23b5a1e426530cb625355ffb8b4e97a20c37f9eaa36ee6",
+      "statusSha256": "306eb818adbaf3dd3c321647830f153aa05cd79b46ee0f16e42c6cb8fd758072",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-0-D",
+      "rawSha256": "3986e3bfd4339f355fbb8721380eee94d3f8faf37fc6a64d76dd07f75813de90",
+      "statusSha256": "698148820aff8a73be6d4f3be4c46337aadcad00be77cac10dd1a75c3d00e300",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-1-D",
+      "rawSha256": "068cb47872347832145d737b1a3731578fa43751d032a3ae2324767c674dc5e1",
+      "statusSha256": "d11890806cdbb31c18de47c9212f199c92c9898725716abd3b1c171ffe1ff68c",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-1-C",
+      "rawSha256": "31fc528825042955b1f7ef682c7d904d116f3c0eebc21f31dce8ada1b08c4173",
+      "statusSha256": "77ea04b1c39d7d59a1599176d87e0f868245142d9dea4392ecae5414e4df085f",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-1-B",
+      "rawSha256": "19285d6c3b3ae63a454dc2b299845525bfdfce6668019899116caa55b50a1349",
+      "statusSha256": "f99fbb65b50cf37ee4bcd5101fa0cddd476fb22c766141dd5744876c6e54a674",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-1-A",
+      "rawSha256": "9072216426d3b60a058c82897cc435b478712cfce5cd56c042c6e61fd9d61b1a",
+      "statusSha256": "1d808e13187b237b6d7071df4a29a8ee3f2dfd3870380a0bc5cd2d8ea3b9bc93",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-2-A",
+      "rawSha256": "c8b40bbf84d70754b4a86c3d529f38cba20c35b465e403020cb0d5113a912412",
+      "statusSha256": "406e1ecd3a0614f3d8d031652c63c892b8f6b4d47816562d719d513cac421581",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-2-B",
+      "rawSha256": "34ef058b8a965edfd08424b84136506498ca6abcdfe8617d49644347a1773993",
+      "statusSha256": "8e4aebf192140c2c71e3ff1130ae331579baeb570f13e74cf3fdd98718f5e4bd",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-2-C",
+      "rawSha256": "c53aba529bda60b654bda7c02504d4466188f8ef136d84e3fc301eb36e011d1d",
+      "statusSha256": "dbcc22b228a17d51d9b8966235492d9778e5fb974feb3bc20aec258d87a8d8b1",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-2-D",
+      "rawSha256": "d22fe60e9020688603c003edbd422e97fd0669ab69f3b6cf785e3eff7f5d46db",
+      "statusSha256": "9ea8514e9037db2632bf7a663ee94db1a589a611ba068e76f17a25724b248a02",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-3-D",
+      "rawSha256": "007cca57ef5a3bcb36bdc6a00a7a29ee9e9ed0422cae33aa85e0b92316d8f658",
+      "statusSha256": "125c782e8f9fba2fb34c7b18ad14ba1521285e37cbf9525d81380e72850ab15f",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-3-C",
+      "rawSha256": "8ba78fbb77c3189da7817940791503da6553bae2a843b2e3c34c4aa244b045b6",
+      "statusSha256": "5e3856a17aa644f61acef8000858481483bb7b85591a31ea8be7ff477faf9f15",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-3-B",
+      "rawSha256": "28ec9701ca1ede4c0d3987240356b6bb298d4eb938ea93db67dd2534a6249f55",
+      "statusSha256": "257141a917b8371f7d6531957951ccb8591a9f8a4bd55c968fd74278df8c334b",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-1-pair-3-A",
+      "rawSha256": "17d016ad946e4c272178ecdc0af4f5586c7feebf0ca91c36433f0cd42c95e43f",
+      "statusSha256": "765fe892a129af4508d37a46da63d5bcbebce7bc8e327c95f5ef127318c10046",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-baseline-verification",
+      "rawSha256": "a6b5e2fde23e2a5ea154d26a85f42dbeab3b5a7f3e43bd1c303900c65d1f8d0b",
+      "statusSha256": "435dccea841fbd878ede9c35002da25621f00fcffd5fc19e93c37f59fecf9de6",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-diagnostic",
+      "rawSha256": "a22cff6ecd4f2b3b7181bb4c404d698d1deeeaab586d7584332ad41098380aeb",
+      "statusSha256": "91e099baa31059aec81010406e27a39bb2af8dc22481df037850a044f65f88ae",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-0-A",
+      "rawSha256": "a1f9edba361e4d9dfb5b363797f80d9d74703618a6992c1b0f1fcff9f3d66e26",
+      "statusSha256": "20c645f76f96413e2adef043f52e4b2935ab92b5c53ff09dc9d9a4f1577f3890",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-0-B",
+      "rawSha256": "4d1a8f786d22fb8e67f2ffb01f299d1af5baa789032e0d940d74f7920d761602",
+      "statusSha256": "95df5de4e14e32c47fec12e82c9a3e7a30847a972eb9582cea464923c6f3f07d",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-0-C",
+      "rawSha256": "55567131b6b111076f96130769b5fcb5a88aec390d986a15cf07c20e8cea9804",
+      "statusSha256": "daa3d23416ec0b2915646f0f1ce01b4d081781d69e460ffad7db7d48bcf4a469",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-0-D",
+      "rawSha256": "4eb48fbc0e9b202ec32b0eb8b2d819b3b0af5f82b60b4ff6aac90ab5c9cec8f2",
+      "statusSha256": "1a29f004efa7c33076c95d8103820d4c8dd90dde7ca2e3a107d51bc5ff09cedc",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-1-D",
+      "rawSha256": "1136fc2a71c0136484b51d6398f36bced060858f5d24cf9f8dc844d4806c1d22",
+      "statusSha256": "1423b53596f30a7adb4f3cfec451268f994e9e5288730638d71684bf8fc215ff",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-1-C",
+      "rawSha256": "d9c63d43693885a5d59276ce37629ccae8854c362cbad8e0483c298ba572a260",
+      "statusSha256": "0a56910393fa0ed75d7b2a86bc244e833b175c003c923f234791311a888b42ab",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-1-B",
+      "rawSha256": "e013200e25dd2c1757ae6b31fe5ebf0676f0b3645b16e0dc18f667f9d9bc2905",
+      "statusSha256": "732c378807e52acf1fd2fb0fcce5c09766c2a58c0dee81e32d1a6cdaa36c9d6d",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-1-A",
+      "rawSha256": "a9e9f2df9c2da2b987c8c0e0050a289c79cafd856a50d88c600d29427a1e54b4",
+      "statusSha256": "ca2746eaa1230f8cf9817401ab85a1f49b7b9f9ad1da7f0f7b64ee75889d5e6e",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-2-A",
+      "rawSha256": "0dd6b76ec1128aaecc26c94bc13b248d830167aa78ec5959d5490e476421952b",
+      "statusSha256": "6fe49cd56bb2364597ee55677db41842daf5f8d8b62fe39dde3813dd28fcd2ce",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-2-B",
+      "rawSha256": "21a9eb8b360af3f8fee87983be9f3ada858708cc5bb9ee36d34795903849e076",
+      "statusSha256": "06fe6edadfbca0f11eba571ed3d80c9a505fe194148438f43d0e50389c362b7e",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-2-C",
+      "rawSha256": "a3657ee06bc79a990faa83a5aed845f48fe76731c8fe3693c65b7ae459f10054",
+      "statusSha256": "f173ccd0088e33055895836a990f1597d19b2d18808035ced13b0f057bde2f31",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-2-D",
+      "rawSha256": "06c31d79fb19759c5b7820d3af86fcd793a6dd4eff013cf1dd29855810b7ea5c",
+      "statusSha256": "6ae3f780272207f1f6dde13e1153266f144982e7ccd9bb99e594fe6b3228bd25",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-3-D",
+      "rawSha256": "44e6c5d2756473c702bd94fe71908859d02b88f8a4afc2ad68a0b553d076b3a7",
+      "statusSha256": "993e531543d7567d4746b0b2fde2d0f7546bdb91db18b5623c1a879120282a7e",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-3-C",
+      "rawSha256": "67bf95e4bd4cb183216253c2e82fe65fd1f6c09cafb3b3eec637be30786cbe3e",
+      "statusSha256": "3e9070ead3bd2863b430af91784f2dbf2ebc531399919c4b6eb7d4baa4c4bb50",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-3-B",
+      "rawSha256": "9bb8a2aa92878ec8c0c201f7983f51723893eac584ffceaa633599230710507b",
+      "statusSha256": "9cbb0698d8c602a8e1e2a39eee2048554ab142e28b2013932772b23b35fb6da0",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-2-pair-3-A",
+      "rawSha256": "081de8224cf5fc4e670a94996d2f0f24d079ccc4276397227865517060c05dbc",
+      "statusSha256": "cd416bef579306f8b489fa6bdab95a47be605d8e1d168bd0a16ede247c49fe14",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-baseline-verification",
+      "rawSha256": "9be0ef51a6cbc5af6ece8dd5ba26b4ef33b335361f66f82597f34743593cb230",
+      "statusSha256": "af3d0fb2e4746c15007cf011dccaedcc9f30b9f192494d18b2da5b2b4f61f212",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-diagnostic",
+      "rawSha256": "936343b6c995f902c7395284ebadea189cd3cc463591232b57aa8e86bed0b838",
+      "statusSha256": "e608c21b9a62d09945bdf493ba335a30f11728fc668da020503e900997096d01",
+      "excluded": true,
+      "measuredRepetitions": 0,
+      "retainedPassReceipts": 1,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-0-A",
+      "rawSha256": "2ac16b911c67e8eceb396c7428a25bb7959552143ba3d048c65084095ba19233",
+      "statusSha256": "707f22432db78aebe500cad29e9fc9f04234d01da5bb565f85398819da1f86a0",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-0-B",
+      "rawSha256": "ec1a2cbc2d4856cfb0ae9a813515856496338bacc8bbd5090b059bb193d0aa9d",
+      "statusSha256": "22a091cb2008d4f51dd711faaad9b2c18840e419560f13fe2f25552114bf6e31",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-0-C",
+      "rawSha256": "f0d5cf76fb1c60d95ba9d82cc60395441274b8c0e73eadcb862adb5255cf7606",
+      "statusSha256": "fdcf218a1754b4a384a72ecb7fb531ccc4a85c25f2327aad021a50de8ad9baf9",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-0-D",
+      "rawSha256": "032ffe35cb5d68f01d5b8407ed1e4924f959932730d1d59417ece7d19b87ff9a",
+      "statusSha256": "f8f90b7b933a62c79a5a13df1daa04b2345ed58028744147df8d27808bf16b56",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-1-D",
+      "rawSha256": "e4db15cbb89ad709662c46602ef8b8f5ac1a006f5636e30cafdee85e3bac0732",
+      "statusSha256": "26d15b1fc94b18d300cd656897dada2937832d1f149c82fa11b832caad67ec69",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-1-C",
+      "rawSha256": "52f799dd586b1fac860e851b6960abc764d6be776d5e22d5d0c2838ba2975f5d",
+      "statusSha256": "a2aa85648aa96a8452e6cf34dccffb31343b4dd390673c80b76caa544efc2e0f",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-1-B",
+      "rawSha256": "894f06b57806f15fe4be344eb8a14620b9dd6ecebb56a6c0f61247acd7b11613",
+      "statusSha256": "cb3f789aef37c3e1b7325624a79baca18683157f00342152203fcaf48a05b96a",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-1-A",
+      "rawSha256": "e72dc1c27bd913d7993040fca5cca47d39ad0d3edcb80dab518cb4a5ecb610de",
+      "statusSha256": "3bfbc1aa875caea94bbd30b82f21da3262a4da16990dcfe87fc1b3de3d54c4e7",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-2-A",
+      "rawSha256": "818a81328d5b03f4d7dd267f272e5a246ddb2e51e5f383ba84613b8813aacbbe",
+      "statusSha256": "73c10952eb56a5c56002d5a339e48d4d7e57d4ee7e98b59e036cd4d4e1af5ba6",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-2-B",
+      "rawSha256": "64d08920f0a3d151d2949fc1d5a915e33a26495fc1e82728c18592c4573f82c4",
+      "statusSha256": "80e0a0d45b76bbd21213cb64536d98a23dc14fc6d541caa849a7cac9bf0e59dd",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-2-C",
+      "rawSha256": "64d9fd2cee4022ba15d04c59cebcd5033321dea0e028af884cabd1b36fd1578d",
+      "statusSha256": "80737e5b38ea7251acf00b53bbfcfe2eb2506c457a3cae67b11a22832e3bb96a",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-2-D",
+      "rawSha256": "39ac0c8544ad4959e368a419720d6feca6eda5313b50641c77aa63bd28c0c812",
+      "statusSha256": "ba6e28f7ecb09e1272593de6e31f0ffeb79006c510ff5c37b8aa875db4a83050",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-3-D",
+      "rawSha256": "f677ffad7dd140325a17c3123fcc3c54c165a49953151fc055fd3b79bdf32065",
+      "statusSha256": "8d50b7f541be61027dcdcf67d258c7341cc1fca0ac8beb32345e241ac62c3d5a",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-3-C",
+      "rawSha256": "ca21d110b1467d9b07c472892855dbb079261dd2ed081a298c60d2268360661b",
+      "statusSha256": "5796c755ca1d4f1a9e424868878d9874664ee45fdca8b904188dfbff83edd460",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-3-B",
+      "rawSha256": "d8c1511664fa70987eeb975f1dbae140c1f78a30dcdcaaeece90975c0f161a92",
+      "statusSha256": "2cf0c08cb2f43b862f259b0b4314c8748bc023d22dfc48e730028184ebba8b6d",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    },
+    {
+      "label": "negative-case-3-pair-3-A",
+      "rawSha256": "a9fb3dd03b47fcdee459d6beac1aaabec13900fffcf608dca7e5c3d16f9be8f8",
+      "statusSha256": "496a3c901f0d13d2336f674bca7e39cde3dd91178b013ed23f85de7f38c46aa5",
+      "excluded": false,
+      "measuredRepetitions": 16,
+      "retainedPassReceipts": 18,
+      "otherStderr": []
+    }
+  ],
+  "cases": [
+    {
+      "id": 1,
+      "name": "unique-short-keys",
+      "digest": "295552e0c005fe3a7a17201d88e6aa70b931490fee3da5cce71fe3e56d722fd9",
+      "observations": 16,
+      "mechanicalCounts": {
+        "keyIdentityRows": 19999,
+        "admissions": 0,
+        "candidateRecordsInspected": 0,
+        "noPrefixCandidate": 0,
+        "selected": 0,
+        "selectedDistance1": 0,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 0,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 0,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 0,
+        "failedFullBytesOffered": 0,
+        "maxSelectedBytes": 0,
+        "maxFailedFullBytes": 0,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0
+      },
+      "summaries": {
+        "candidate.elapsedMs": {
+          "baselineValues": [
+            182.48195999999993,
+            176.205341,
+            173.86934899999994,
+            174.59855899999994
+          ],
+          "comparisonValues": [
+            188.05508500000005,
+            176.01960299999988,
+            188.63045999999994,
+            178.41663999999997
+          ],
+          "pairedChangesPercent": [
+            3.0540690159181327,
+            -0.10540997165354286,
+            8.489771822864538,
+            2.1867769252322615
+          ],
+          "medianPairedChangePercent": 2.620422970575197,
+          "equalWorkChangePercent": 3.3891539926420924,
+          "fasterPairs": 1
+        },
+        "identicalControl.elapsedMs": {
+          "baselineValues": [
+            176.03135100000014,
+            180.36685499999996,
+            190.133006,
+            176.580901
+          ],
+          "comparisonValues": [
+            175.9419780000001,
+            176.74499699999998,
+            178.74851000000012,
+            179.9142880000001
+          ],
+          "pairedChangesPercent": [
+            -0.05077106975112154,
+            -2.008050758549832,
+            -5.987648456996399,
+            1.8877392634892611
+          ],
+          "medianPairedChangePercent": -1.0294109141504768,
+          "equalWorkChangePercent": -1.6266274328058123,
+          "fasterPairs": 3
+        },
+        "candidate.cpuMs": {
+          "baselineValues": [
+            187.65900000000002,
+            181.76000000000002,
+            177.71900000000002,
+            180.051
+          ],
+          "comparisonValues": [
+            192.20200000000003,
+            180.45200000000003,
+            192.84,
+            182.672
+          ],
+          "pairedChangesPercent": [
+            2.4208804267314683,
+            -0.7196302816901368,
+            8.508375581676681,
+            1.4556986631565554
+          ],
+          "medianPairedChangePercent": 1.9382895449440118,
+          "equalWorkChangePercent": 2.8846695975874184,
+          "fasterPairs": 1
+        },
+        "identicalControl.cpuMs": {
+          "baselineValues": [
+            180.892,
+            185.27,
+            196.543,
+            182.46399999999997
+          ],
+          "comparisonValues": [
+            180.77199999999996,
+            182.83700000000002,
+            183.89400000000003,
+            185.40699999999995
+          ],
+          "pairedChangesPercent": [
+            -0.06633792539196481,
+            -1.313218545905971,
+            -6.435741796960448,
+            1.6129209049456243
+          ],
+          "medianPairedChangePercent": -0.6897782356489679,
+          "equalWorkChangePercent": -1.6451301651034886,
+          "fasterPairs": 3
+        },
+        "candidate.parseMs": {
+          "baselineValues": [
+            170.729558,
+            164.61955000000003,
+            162.65042800000003,
+            163.3265079999999
+          ],
+          "comparisonValues": [
+            174.277756,
+            164.81434300000006,
+            176.57117399999996,
+            167.009727
+          ],
+          "pairedChangesPercent": [
+            2.078256420016043,
+            0.11832920209053699,
+            8.558690051525668,
+            2.2551262774809926
+          ],
+          "medianPairedChangePercent": 2.1666913487485178,
+          "equalWorkChangePercent": 3.2279019091527106,
+          "fasterPairs": 0
+        },
+        "identicalControl.parseMs": {
+          "baselineValues": [
+            164.66249599999992,
+            168.63607700000014,
+            178.09489700000003,
+            165.1658469999999
+          ],
+          "comparisonValues": [
+            164.504328,
+            165.0945900000001,
+            167.12786000000008,
+            168.333614
+          ],
+          "pairedChangesPercent": [
+            -0.09605587419246484,
+            -2.1000767232032107,
+            -6.157973745873216,
+            1.9179310114881762
+          ],
+          "medianPairedChangePercent": -1.0980662986978378,
+          "equalWorkChangePercent": -1.699618157797058,
+          "fasterPairs": 3
+        },
+        "candidate.nativeParseMs": {
+          "baselineValues": [
+            156,
+            146,
+            149,
+            149
+          ],
+          "comparisonValues": [
+            155,
+            149,
+            163,
+            150
+          ],
+          "pairedChangesPercent": [
+            -0.641025641025641,
+            2.054794520547945,
+            9.395973154362416,
+            0.6711409395973155
+          ],
+          "medianPairedChangePercent": 1.3629677300726302,
+          "equalWorkChangePercent": 2.833333333333333,
+          "fasterPairs": 1
+        },
+        "identicalControl.nativeParseMs": {
+          "baselineValues": [
+            148,
+            152,
+            161,
+            152
+          ],
+          "comparisonValues": [
+            147,
+            151,
+            153,
+            151
+          ],
+          "pairedChangesPercent": [
+            -0.6756756756756757,
+            -0.6578947368421052,
+            -4.968944099378882,
+            -0.6578947368421052
+          ],
+          "medianPairedChangePercent": -0.6667852062588904,
+          "equalWorkChangePercent": -1.794453507340946,
+          "fasterPairs": 4
+        },
+        "candidate.lookupMs": {
+          "baselineValues": [
+            7.605531999999982,
+            7.4006420000001185,
+            7.626887999999951,
+            7.270696999999927
+          ],
+          "comparisonValues": [
+            8.381148999999937,
+            7.420966000000135,
+            7.2527769999999805,
+            7.4154920000001425
+          ],
+          "pairedChangesPercent": [
+            10.198063725193137,
+            0.2746248230898902,
+            -4.905159220903378,
+            1.9914871985480431
+          ],
+          "medianPairedChangePercent": 1.1330560108189667,
+          "equalWorkChangePercent": 1.8948286735464108,
+          "fasterPairs": 1
+        },
+        "identicalControl.lookupMs": {
+          "baselineValues": [
+            7.405140999999901,
+            7.896797000000021,
+            7.488783000000069,
+            7.530032999999889
+          ],
+          "comparisonValues": [
+            7.336627000000163,
+            7.457110999999998,
+            7.550333000000165,
+            7.286972000000077
+          ],
+          "pairedChangesPercent": [
+            -0.9252220855718807,
+            -5.56790303714306,
+            0.8218958941672605,
+            -3.2278875803043108
+          ],
+          "medianPairedChangePercent": -2.0765548329380956,
+          "equalWorkChangePercent": -2.274715859636866,
+          "fasterPairs": 3
+        }
+      },
+      "clearSlowdownRuleTriggered": false,
+      "largestAbsoluteControlChangePercent": 5.987648456996399,
+      "maxWasmHeapBytesByArm": {
+        "A": [
+          16318464
+        ],
+        "B": [
+          16318464
+        ],
+        "C": [
+          16318464
+        ],
+        "D": [
+          16318464
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "same-key-short-full-misses",
+      "digest": "65d62adc67b2ab593651f8a26a18c1d8916bf9bc84c2ef380d4b72afabe88d17",
+      "observations": 16,
+      "mechanicalCounts": {
+        "keyIdentityRows": 19999,
+        "admissions": 19999,
+        "candidateRecordsInspected": 19999,
+        "noPrefixCandidate": 0,
+        "selected": 19999,
+        "selectedDistance1": 19999,
+        "selectedDistance2": 0,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 4799760,
+        "selectedAtLeast512": 0,
+        "selectedAtLeast512Bytes": 0,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 19999,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 4799760,
+        "failedFullBytesOffered": 4799760,
+        "maxSelectedBytes": 240,
+        "maxFailedFullBytes": 240,
+        "originalLookbackZeroRows": 19999,
+        "originalLookbackPositiveRows": 0,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 0,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0
+      },
+      "summaries": {
+        "candidate.elapsedMs": {
+          "baselineValues": [
+            158.51268900000005,
+            161.302506,
+            160.82758600000005,
+            158.02963100000002
+          ],
+          "comparisonValues": [
+            166.84046499999988,
+            176.00261599999996,
+            167.26716100000013,
+            168.28814400000013
+          ],
+          "pairedChangesPercent": [
+            5.2536967560999654,
+            9.11337980080729,
+            4.00402391166903,
+            6.491512341758303
+          ],
+          "medianPairedChangePercent": 5.872604548929134,
+          "equalWorkChangePercent": 6.220086112001961,
+          "fasterPairs": 0
+        },
+        "identicalControl.elapsedMs": {
+          "baselineValues": [
+            161.47681500000004,
+            157.66073700000013,
+            159.65519799999984,
+            158.99823500000005
+          ],
+          "comparisonValues": [
+            161.4421319999999,
+            160.8327329999999,
+            160.436975,
+            160.0997109999999
+          ],
+          "pairedChangesPercent": [
+            -0.0214786252751785,
+            2.0119124522421696,
+            0.48966586105148185,
+            0.6927598913282582
+          ],
+          "medianPairedChangePercent": 0.5912128761898701,
+          "equalWorkChangePercent": 0.7871804585007697,
+          "fasterPairs": 1
+        },
+        "candidate.cpuMs": {
+          "baselineValues": [
+            165.08,
+            168.81999999999996,
+            168.973,
+            163.31600000000003
+          ],
+          "comparisonValues": [
+            172.14199999999997,
+            183.001,
+            172.36399999999998,
+            174.54399999999998
+          ],
+          "pairedChangesPercent": [
+            4.277925854131303,
+            8.400071081625425,
+            2.0068294934693487,
+            6.875015307746914
+          ],
+          "medianPairedChangePercent": 5.576470580939109,
+          "equalWorkChangePercent": 5.383157032013415,
+          "fasterPairs": 0
+        },
+        "identicalControl.cpuMs": {
+          "baselineValues": [
+            168.66600000000003,
+            162.571,
+            164.70299999999997,
+            164.25699999999998
+          ],
+          "comparisonValues": [
+            167.891,
+            166.34999999999997,
+            166.02599999999998,
+            166.616
+          ],
+          "pairedChangesPercent": [
+            -0.4594879821659576,
+            2.324522823873857,
+            0.8032640571210043,
+            1.4361640599792018
+          ],
+          "medianPairedChangePercent": 1.119714058550103,
+          "equalWorkChangePercent": 1.0127280190609653,
+          "fasterPairs": 1
+        },
+        "candidate.parseMs": {
+          "baselineValues": [
+            147.87061899999995,
+            150.33975999999993,
+            150.05509700000005,
+            147.58999600000004
+          ],
+          "comparisonValues": [
+            156.35817100000006,
+            164.71194699999995,
+            156.747075,
+            157.66937399999998
+          ],
+          "pairedChangesPercent": [
+            5.739850186195616,
+            9.559804405700815,
+            4.459680566532136,
+            6.829309758908003
+          ],
+          "medianPairedChangePercent": 6.28457997255181,
+          "equalWorkChangePercent": 6.651125459497326,
+          "fasterPairs": 0
+        },
+        "identicalControl.parseMs": {
+          "baselineValues": [
+            150.48403900000005,
+            147.11859499999994,
+            148.87617199999994,
+            148.33287199999998
+          ],
+          "comparisonValues": [
+            150.25102200000012,
+            150.20701599999998,
+            148.7699750000001,
+            149.25785300000024
+          ],
+          "pairedChangesPercent": [
+            -0.15484499322877202,
+            2.099273038870471,
+            -0.07133243592523206,
+            0.6235846360476716
+          ],
+          "medianPairedChangePercent": 0.27612610006121974,
+          "equalWorkChangePercent": 0.6177060968867742,
+          "fasterPairs": 2
+        },
+        "candidate.nativeParseMs": {
+          "baselineValues": [
+            135,
+            137,
+            138,
+            138
+          ],
+          "comparisonValues": [
+            144,
+            154,
+            144,
+            147
+          ],
+          "pairedChangesPercent": [
+            6.666666666666667,
+            12.408759124087592,
+            4.3478260869565215,
+            6.521739130434782
+          ],
+          "medianPairedChangePercent": 6.594202898550725,
+          "equalWorkChangePercent": 7.481751824817519,
+          "fasterPairs": 0
+        },
+        "identicalControl.nativeParseMs": {
+          "baselineValues": [
+            142,
+            134,
+            137,
+            137
+          ],
+          "comparisonValues": [
+            139,
+            138,
+            136,
+            136
+          ],
+          "pairedChangesPercent": [
+            -2.112676056338028,
+            2.9850746268656714,
+            -0.7299270072992701,
+            -0.7299270072992701
+          ],
+          "medianPairedChangePercent": -0.7299270072992701,
+          "equalWorkChangePercent": -0.18181818181818182,
+          "fasterPairs": 3
+        },
+        "candidate.lookupMs": {
+          "baselineValues": [
+            3.869464999999906,
+            3.92688299999989,
+            3.983975999999899,
+            3.8678759999998817
+          ],
+          "comparisonValues": [
+            3.8630979999999226,
+            4.0521119999999655,
+            4.016685999999936,
+            3.835396000000088
+          ],
+          "pairedChangesPercent": [
+            -0.16454471096090262,
+            3.189017854621058,
+            0.8210390825657065,
+            -0.8397373648947006
+          ],
+          "medianPairedChangePercent": 0.3282471858024019,
+          "equalWorkChangePercent": 0.7610587799257368,
+          "fasterPairs": 2
+        },
+        "identicalControl.lookupMs": {
+          "baselineValues": [
+            3.8958669999999813,
+            3.8823859999999684,
+            3.888492000000042,
+            3.8376490000000274
+          ],
+          "comparisonValues": [
+            4.0833179999999345,
+            3.9611749999999404,
+            4.072138999999851,
+            4.010388000000091
+          ],
+          "pairedChangesPercent": [
+            4.811534890691958,
+            2.029396355745479,
+            4.7228334274522545,
+            4.501167251097291
+          ],
+          "medianPairedChangePercent": 4.612000339274773,
+          "equalWorkChangePercent": 4.0158035199556785,
+          "fasterPairs": 0
+        }
+      },
+      "clearSlowdownRuleTriggered": true,
+      "largestAbsoluteControlChangePercent": 2.0119124522421696,
+      "maxWasmHeapBytesByArm": {
+        "A": [
+          16252928
+        ],
+        "B": [
+          16252928
+        ],
+        "C": [
+          16252928
+        ],
+        "D": [
+          16252928
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "name": "alternating-older-long-full-misses",
+      "digest": "bf165f09fc0b7c5c8271a92e33ec19f20d3e8263c4052fded4128d2b0dd9867c",
+      "observations": 16,
+      "mechanicalCounts": {
+        "keyIdentityRows": 10000,
+        "admissions": 10000,
+        "candidateRecordsInspected": 19999,
+        "noPrefixCandidate": 1,
+        "selected": 9999,
+        "selectedDistance1": 0,
+        "selectedDistance2": 9999,
+        "selectedDistance3": 0,
+        "selectedDistance4": 0,
+        "selectedBytes": 40955904,
+        "selectedAtLeast512": 9999,
+        "selectedAtLeast512Bytes": 40955904,
+        "boundsRejected": 0,
+        "openerRejected": 0,
+        "tailRejected": 0,
+        "middleRejected": 0,
+        "fullRejected": 9999,
+        "hits": 0,
+        "hitBytes": 0,
+        "fullBytesOffered": 40955904,
+        "failedFullBytesOffered": 40955904,
+        "maxSelectedBytes": 4096,
+        "maxFailedFullBytes": 4096,
+        "originalLookbackZeroRows": 10000,
+        "originalLookbackPositiveRows": 9999,
+        "originalGlossaryReuses": 0,
+        "totalGlossaryReuses": 0,
+        "priorStreakRows": 0,
+        "recentContentHits": 0,
+        "rows": 20000,
+        "budgetPositiveRows": 0,
+        "budgetRefreshByRecentStreak": 0,
+        "definitionLengthRejected": 0,
+        "rulesLengthRejected": 0,
+        "definitionSignatureRejected": 10000,
+        "rulesSignatureRejected": 0,
+        "hitDistance1": 0,
+        "hitDistance2": 0,
+        "hitDistance3": 0,
+        "hitDistance4": 0
+      },
+      "summaries": {
+        "candidate.elapsedMs": {
+          "baselineValues": [
+            1011.1406390000004,
+            1001.8859519999995,
+            989.7540810000002,
+            988.4770289999997
+          ],
+          "comparisonValues": [
+            1038.4352800000004,
+            1026.0973280000003,
+            1034.3020600000002,
+            1015.3170349999998
+          ],
+          "pairedChangesPercent": [
+            2.6993911575934537,
+            2.4165800460291096,
+            4.500913899237567,
+            2.7152887940302497
+          ],
+          "medianPairedChangePercent": 2.707339975811852,
+          "equalWorkChangePercent": 3.0790796086459196,
+          "fasterPairs": 0
+        },
+        "identicalControl.elapsedMs": {
+          "baselineValues": [
+            993.7376350000002,
+            999.7382790000004,
+            993.0009280000002,
+            994.4299959999996
+          ],
+          "comparisonValues": [
+            985.441788,
+            1008.3667150000003,
+            1006.6840259999998,
+            998.82878
+          ],
+          "pairedChangesPercent": [
+            -0.8348126012154311,
+            0.8630694834082633,
+            1.3779542006631065,
+            0.44234224809128087
+          ],
+          "medianPairedChangePercent": 0.6527058657497721,
+          "equalWorkChangePercent": 0.4625697548162415,
+          "fasterPairs": 1
+        },
+        "candidate.cpuMs": {
+          "baselineValues": [
+            1015.4159999999998,
+            1006.7129999999999,
+            994.0659999999999,
+            993.0180000000001
+          ],
+          "comparisonValues": [
+            1043.598,
+            1029.7330000000002,
+            1038.6270000000002,
+            1020.1969999999999
+          ],
+          "pairedChangesPercent": [
+            2.775414214469748,
+            2.2866497204268073,
+            4.482700343840375,
+            2.7370098024406144
+          ],
+          "medianPairedChangePercent": 2.756212008455181,
+          "equalWorkChangePercent": 3.066487113555726,
+          "fasterPairs": 0
+        },
+        "identicalControl.cpuMs": {
+          "baselineValues": [
+            998.346,
+            1004.282,
+            997.694,
+            999.141
+          ],
+          "comparisonValues": [
+            990.0659999999999,
+            1013.3360000000001,
+            1010.9639999999999,
+            1002.887
+          ],
+          "pairedChangesPercent": [
+            -0.8293717809256597,
+            0.901539607401117,
+            1.3300671348128768,
+            0.3749220580478612
+          ],
+          "medianPairedChangePercent": 0.6382308327244891,
+          "equalWorkChangePercent": 0.4448097157043324,
+          "fasterPairs": 1
+        },
+        "candidate.parseMs": {
+          "baselineValues": [
+            966.7925050000001,
+            958.7913580000002,
+            947.2099659999997,
+            945.405113
+          ],
+          "comparisonValues": [
+            995.5198300000004,
+            983.0399050000001,
+            991.0397770000004,
+            972.2946269999995
+          ],
+          "pairedChangesPercent": [
+            2.9714054309926916,
+            2.5290744224667816,
+            4.627253995763043,
+            2.844231920289975
+          ],
+          "medianPairedChangePercent": 2.9078186756413333,
+          "equalWorkChangePercent": 3.239621582819046,
+          "fasterPairs": 0
+        },
+        "identicalControl.parseMs": {
+          "baselineValues": [
+            950.6933669999999,
+            956.5265710000003,
+            949.4693140000003,
+            951.6875009999999
+          ],
+          "comparisonValues": [
+            942.848047,
+            964.9131319999999,
+            963.7415349999995,
+            956.293648
+          ],
+          "pairedChangesPercent": [
+            -0.825220862196244,
+            0.8767724028023443,
+            1.5031787535999568,
+            0.48399784542300917
+          ],
+          "medianPairedChangePercent": 0.6803851241126767,
+          "equalWorkChangePercent": 0.5099182738341504,
+          "fasterPairs": 1
+        },
+        "candidate.nativeParseMs": {
+          "baselineValues": [
+            953,
+            946,
+            935,
+            930
+          ],
+          "comparisonValues": [
+            983,
+            973,
+            978,
+            961
+          ],
+          "pairedChangesPercent": [
+            3.147953830010493,
+            2.854122621564482,
+            4.598930481283422,
+            3.3333333333333335
+          ],
+          "medianPairedChangePercent": 3.2406435816719132,
+          "equalWorkChangePercent": 3.4803400637619553,
+          "fasterPairs": 0
+        },
+        "identicalControl.nativeParseMs": {
+          "baselineValues": [
+            939,
+            943,
+            934,
+            940
+          ],
+          "comparisonValues": [
+            932,
+            952,
+            952,
+            943
+          ],
+          "pairedChangesPercent": [
+            -0.7454739084132056,
+            0.9544008483563097,
+            1.9271948608137044,
+            0.3191489361702127
+          ],
+          "medianPairedChangePercent": 0.6367748922632612,
+          "equalWorkChangePercent": 0.6123535676251332,
+          "fasterPairs": 1
+        },
+        "candidate.lookupMs": {
+          "baselineValues": [
+            3.9430549999998448,
+            4.216294999999832,
+            4.029458000000147,
+            3.9283750000001305
+          ],
+          "comparisonValues": [
+            4.1714079999995874,
+            4.062876000000188,
+            3.9254069999998364,
+            3.7994729999997503
+          ],
+          "pairedChangesPercent": [
+            5.791270981504231,
+            -3.6387159816770502,
+            -2.5822579612520387,
+            -3.2813058834855613
+          ],
+          "medianPairedChangePercent": -2.9317819223688,
+          "equalWorkChangePercent": -0.9804380827629321,
+          "fasterPairs": 3
+        },
+        "identicalControl.lookupMs": {
+          "baselineValues": [
+            3.95920099999978,
+            4.0480650000002925,
+            3.979780000000062,
+            4.4049750000001495
+          ],
+          "comparisonValues": [
+            3.920081000000039,
+            3.9726800000002527,
+            4.21384299999994,
+            4.003826999999831
+          ],
+          "pairedChangesPercent": [
+            -0.9880781501051175,
+            -1.8622477652911782,
+            5.881304996755463,
+            -9.10670321625674
+          ],
+          "medianPairedChangePercent": -1.4251629576981477,
+          "equalWorkChangePercent": -1.7178479700594378,
+          "fasterPairs": 3
+        }
+      },
+      "clearSlowdownRuleTriggered": false,
+      "largestAbsoluteControlChangePercent": 1.3779542006631065,
+      "maxWasmHeapBytesByArm": {
+        "A": [
+          92864512
+        ],
+        "B": [
+          92864512
+        ],
+        "C": [
+          92864512
+        ],
+        "D": [
+          92864512
+        ]
+      }
+    }
+  ],
+  "rawReportSha256": "7e89467aa720104e06cac4da4bc6388608ad0ea27e20614ff6754ebfb0a26f74",
+  "auditScriptSha256": "83fd33efb3510b56ccd088c8e9e51e4aed9a3b7b3de13bc649e7473b1fce1fbc"
+}

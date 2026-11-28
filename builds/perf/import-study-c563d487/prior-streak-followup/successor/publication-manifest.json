@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "branch": "perf/jmdict-prior-streak-selector-screen-20261128-c563d487",
+  "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baseTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "recordSha256": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+  "files": [
+    {
+      "path": ".github/workflows/jmdict-prior-streak-selector-screen-c563d487.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/.github/workflows/jmdict-prior-streak-selector-screen-c563d487.yml",
+      "bytes": 9542,
+      "sha256": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+      "gitBlobSha": "4504e5dca93895823533f2188c2d0fe0c03ff250",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/candidate.patch",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/candidate.patch",
+      "bytes": 5645,
+      "sha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+      "gitBlobSha": "68371bd4f612a1912a3cecde039a3fd16eb5452c",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/cohort_tools.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/cohort_tools.py",
+      "bytes": 9094,
+      "sha256": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+      "gitBlobSha": "0f133effda75f6b5240ce61e579d8e5ff071c1ee",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/core-preparation.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/core-preparation.json",
+      "bytes": 1500,
+      "sha256": "cd5d7d4458372b87035e38ffc90bc6a1dcd7352bac3fb4c35cd7eecc8c0752c5",
+      "gitBlobSha": "10630526303cf60b9238416c172b1c7a3ca878a4",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/diagnostic-fields.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/diagnostic-fields.json",
+      "bytes": 1116,
+      "sha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+      "gitBlobSha": "c5c2d1f00a0b07557770d60fbbd5a33b1d54e47e",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-counts.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-counts.json",
+      "bytes": 14485,
+      "sha256": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+      "gitBlobSha": "cd6fb7a0254ed3ed860d88a836744277cedcaffc",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-mechanics.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/expected-mechanics.json",
+      "bytes": 15884,
+      "sha256": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+      "gitBlobSha": "ddd737a0031f268f7d8962f1f7dc0fb86b0b74e0",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/final-composition-checks.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/final-composition-checks.json",
+      "bytes": 2573,
+      "sha256": "bef3c2bab1ffaff5961dbe829e78e332d78b5b6d9be17d02b14d2f7bf06dc9d1",
+      "gitBlobSha": "5ab57c6fe1f8ed77353b25845ca5b3332c1baf08",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/fixture-model.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/fixture-model.mjs",
+      "bytes": 6570,
+      "sha256": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+      "gitBlobSha": "ab74b398ffdfc81aea819a82e6a748da788f05b5",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/generation-audit.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/generation-audit.json",
+      "bytes": 5048,
+      "sha256": "3600f7f1d7c6181274b1657385fe1a7e3660673da9db053366a3e1bb0256be54",
+      "gitBlobSha": "5dbfabfecc13b384da999373537930841597be5a",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/legacy-fixture-manifest.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/legacy-fixture-manifest.json",
+      "bytes": 9311,
+      "sha256": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+      "gitBlobSha": "3cfa2fe36a64af9d24881cd31f66fbd5c6a5ad2a",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/native-oracle.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/native-oracle.mjs",
+      "bytes": 13002,
+      "sha256": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+      "gitBlobSha": "31092901c621e3fb447ccc20dbe4c372e1ddf6c4",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-fixtures.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-fixtures.mjs",
+      "bytes": 5840,
+      "sha256": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+      "gitBlobSha": "0655757b169ff5551ded2766a1a15b70cd0e8a35",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-protocol.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-protocol.json",
+      "bytes": 4587,
+      "sha256": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+      "gitBlobSha": "c39f1e4fd146e4c9e37be403d530061e1bb5d631",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-run.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-run.py",
+      "bytes": 10239,
+      "sha256": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+      "gitBlobSha": "463bcca849028a5c8d9572a6026c681385af8182",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-screen.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/negative-screen.mjs",
+      "bytes": 11757,
+      "sha256": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+      "gitBlobSha": "7705a04dfab9b7221c99d946118c3cdbbc0741d7",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/output-digest.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/output-digest.mjs",
+      "bytes": 2507,
+      "sha256": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+      "gitBlobSha": "44b6b2d14558b086b2df423b72595013af90b0e7",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preflight.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preflight.py",
+      "bytes": 2882,
+      "sha256": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+      "gitBlobSha": "4337557a775c8503a1c2d7abc5d3f7f8016c48c5",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preparation-record.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/preparation-record.json",
+      "bytes": 9150,
+      "sha256": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+      "gitBlobSha": "ac12fe1a528621e50e97a72f3cf56182d20c81c5",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prepare.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prepare.py",
+      "bytes": 13281,
+      "sha256": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+      "gitBlobSha": "c60114acd9af850a3ba0454ab512a7f2329f4659",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-complete-import-criteria.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-complete-import-criteria.json",
+      "bytes": 4104,
+      "sha256": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+      "gitBlobSha": "392e60c9aa729f2f13b722864c42e8d9c19c0bc5",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-component-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/prospective-component-review.json",
+      "bytes": 4916,
+      "sha256": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+      "gitBlobSha": "162dab82a08bf2ab39f65e14ad09126eacdf00be",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/baseline-and-source-checks.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/baseline-and-source-checks.json",
+      "bytes": 1357,
+      "sha256": "93050f3030fbb336410c85bfafd105e304d76f7f77ec375fc33e451f08770440",
+      "gitBlobSha": "b1c14acfa7b1580ae3a99b0d4b24f45a9333b109",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/expected-mechanics-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/expected-mechanics-review.json",
+      "bytes": 1027,
+      "sha256": "2520059f787fc4aac10ebd666d41ea97a7872f185d96d323b0e55070702bfb44",
+      "gitBlobSha": "9ab903a024879cccae02ba29f3417433b3173b9c",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/fixture-diagnostic-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/fixture-diagnostic-review.json",
+      "bytes": 57236,
+      "sha256": "b086f40e5ee1c95ecc02ca820b3eb42a227e22a65f88237548447f32e4261715",
+      "gitBlobSha": "2da9c3d9b244e3d6b282e0990347ec767e393d85",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/implementation-preparation-snapshot.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/implementation-preparation-snapshot.json",
+      "bytes": 11974,
+      "sha256": "ae5e1c41cf6462248df49c3afd29eeaa25fb6794061c4180a338ad01b4735253",
+      "gitBlobSha": "004778ac04fe12ef55a2dd19dbf7e425ef25328e",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/initial-hosted-protocol-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/initial-hosted-protocol-review.json",
+      "bytes": 8053,
+      "sha256": "94948c29023d654b050029e8e70f21c999a3b2f2ccae37056204a12958c0d867",
+      "gitBlobSha": "30a231ef171e67abcbd8db56383215e2411ffcd1",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/negative-tooling-snapshot.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/negative-tooling-snapshot.json",
+      "bytes": 4647,
+      "sha256": "f25d05a0c9e2dd7cdbd0f6428862fb2f20cdb4dfe6a6829e024faa3907f06875",
+      "gitBlobSha": "47293b4165d2b1de88206822d40f9e0732fa8c9f",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/source-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/reviews/source-review.json",
+      "bytes": 4187,
+      "sha256": "9c266010ab9c13409a2ca4d7da33eb4c97aee9fbcab1787ad13898173cb4156d",
+      "gitBlobSha": "7de10ca7bcf0e7e47598aac82a0c4628c1b9ddac",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/run.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/run.py",
+      "bytes": 7766,
+      "sha256": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+      "gitBlobSha": "5eabedbfed4f43ba26d9ec1c5f1ff5d62ede9ae5",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen-change-proof.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen-change-proof.json",
+      "bytes": 704,
+      "sha256": "bd4fc8c22677256b6dfc560d8e80d376dd5a59787a7c05ad5c90d3df1b40a553",
+      "gitBlobSha": "518fa88e1009614ac24ccf042e3525ddd7ef6e89",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/screen.mjs",
+      "bytes": 19878,
+      "sha256": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+      "gitBlobSha": "4e6e5b44b3a003b520645e167fd68b44dcf6d03b",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/setup.sh",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/setup.sh",
+      "bytes": 1068,
+      "sha256": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+      "gitBlobSha": "e1082d5c8c00767169b1cca22f29d91dd0e20382",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+      "bytes": 18004,
+      "sha256": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+      "gitBlobSha": "faafca1bb9a3adec29088e4ce429c7f1c8e7307e",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/state-model.mjs",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/state-model.mjs",
+      "bytes": 11009,
+      "sha256": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+      "gitBlobSha": "14831fc6924a67c6fc9ca8beeeb8bff99d17437f",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/verify-negative-fixtures.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/verify-negative-fixtures.py",
+      "bytes": 758,
+      "sha256": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+      "gitBlobSha": "bce15840d07390a3b623292ab701d033c790680b",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/hosted/workflow.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/workflow.yml",
+      "bytes": 9542,
+      "sha256": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+      "gitBlobSha": "4504e5dca93895823533f2188c2d0fe0c03ff250",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector-fixtures.js",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector-fixtures.js",
+      "bytes": 22868,
+      "sha256": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+      "gitBlobSha": "d7c36b9ae487564a9b155d9c09a33710356f8e9d",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector.test.js",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-publication/tree/dev/perf/jmdict-prior-streak-selector-c563d487/qualification/term-bank-prior-streak-selector.test.js",
+      "bytes": 13906,
+      "sha256": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5",
+      "gitBlobSha": "ba86065b515af694f0b43ae55fbd9845fc699030",
+      "encoding": "utf-8"
+    }
+  ],
+  "totalBytes": 357017,
+  "status": "Staged final source composition; final independent review and publication pending"
+}

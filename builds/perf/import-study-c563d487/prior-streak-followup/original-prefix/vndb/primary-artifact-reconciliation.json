@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T08:07:30.994555+00:00",
+  "scope": "Exact independently fetched primary-log/original-artifact reconciliation; no new acquisition",
+  "passed": true,
+  "runId": 46119683668,
+  "jobId": 140901220416,
+  "primaryAuditSha256": "5594150cc05b36275c0b7809c20ddbcb3f6988bb578cb4093da2f098a9d1f273",
+  "primaryRecordsSha256": "bbdb2d97f08968d13053c77aada4cfc75fca13076eb3dfdb708ace1fa26886be",
+  "artifactReportSha256": "d818eefec341af65adb8de327019a7265708f6b8e92b51f85bec5cbd25f7bf6f",
+  "artifactDownloadReceiptSha256": "d7dbc36b9b08d986704ad07cd4065e4354097925cd0a0a9d39e9b02d7ba39fe9",
+  "artifactAuditSha256": "7f10a6ba9d7f46c43f19b2b221de62fd689de4bdb452ab9ba0ad41531d5e8df7",
+  "exactFullRawObservationsEqual": 16,
+  "allSourceToolingRuntimeIdentitiesEqual": true,
+  "allMechanicalCountersEqual": true
+}

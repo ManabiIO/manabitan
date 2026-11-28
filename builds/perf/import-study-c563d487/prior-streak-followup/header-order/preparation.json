@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:53:40.026234+00:00",
+  "scope": "Prospective untimed opportunity replay only; prepared before one locked-JMdict pass; no product change, build or benchmark",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceC": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "runtimeWasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "previousResultPath": "experiments/sequence-probe-opportunity/run-4-prior-streak/result.json",
+  "previousResultSha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31",
+  "previousMetadataDigest": "d6965c13c73fbe3312802d1e4800b0acd8942f317b3ed065d7c8edd25c1c0809",
+  "archivePath": "experiments/sequence-probe-opportunity/JMdict.zip",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "expectedCounts": {
+    "rows": 528299,
+    "banks": 53,
+    "groups": 8,
+    "existingGlossaryReuses": 54629,
+    "recentRawContentHits": 154413,
+    "priorStreakRows": 154409,
+    "firstRows": 8,
+    "groupEndingRawHits": 4,
+    "existingLookbackZero": 353880,
+    "existingLookbackPositive": 174411
+  },
+  "scopeControls": {
+    "strictBaselineNativeMetadataOnly": true,
+    "originalBudgetStreakAndGroupBoundaries": true,
+    "exactQuickSignatureWithUint32Wrapping": true,
+    "witnessShortcutAndSignatureCopy": true,
+    "noHypotheticalSelectorCalls": true,
+    "semanticEquivalenceEveryPredicateAndRecentMatchIndex": true,
+    "allPriorBankGroupAndTotalCountsAndMetadataReconciled": true,
+    "witnessGlossaryBytesExcluded": true,
+    "newHeaderWorkBeforeOldGlossaryRejectionCounted": true,
+    "timingsCollected": false,
+    "candidateBuildOrExecution": false,
+    "warmups": 0,
+    "measuredRepetitions": 0
+  },
+  "rangeInterpretation": "Offered byte ranges, logical first-mismatch prefixes and source-specified 32/8/byte and 8/byte block prefixes per operand; not CPU timing, physical traffic, cache reads, or speedup predictions. Header length guards and all equality calls are counted separately.",
+  "resources": {
+    "nodeVersion": "v22.22.0",
+    "javaScriptHeapMiB": 256,
+    "decodedBanksRetained": 1,
+    "copiedPriorTuples": 4,
+    "existingFixtureOnly": true,
+    "preserveOriginalObserverAndResults": true
+  },
+  "selfTests": {
+    "sourceRangeCases": 145,
+    "independentBigIntSignatureCases": 105,
+    "predicateSemanticCases": 18,
+    "passed": true,
+    "originalWarningsRetained": true
+  },
+  "files": [
+    {
+      "path": "observer.mjs",
+      "bytes": 30435,
+      "sha256": "9a227bb089dc9972d139b64458477de8f6413f8c75a301e90d864924b89bd65c"
+    },
+    {
+      "path": "self-tests.stdout-and-stderr.log",
+      "bytes": 453,
+      "sha256": "5e5d54491b7600bd8899e26ccfbb0bf1eade52701c95adac249e140c8019390a"
+    },
+    {
+      "path": "history-review.json",
+      "bytes": 3025,
+      "sha256": "c3dc0ddc4f9c0239c0f268eaef3130415ede0870633d500246a6ad984c732706"
+    },
+    {
+      "path": "pull-inventory.json",
+      "bytes": 150466,
+      "sha256": "0dfe0a72585925efe67c09606335a74bbd4f8d0319e6134657c70ad4a222976d"
+    },
+    {
+      "path": "pr-740-files.json",
+      "bytes": 20959,
+      "sha256": "9aa453a667a044336e7634bad69e18173c5055786e04473f8ee1daf92a4bd3d0"
+    },
+    {
+      "path": "pr-743-files.json",
+      "bytes": 19325,
+      "sha256": "4fdb9280bfc375ede38ec3a79175f2c6121c13569ac60803ca3583c5d4488695"
+    }
+  ],
+  "acquisitionStatus": "not run",
+  "failurePolicy": "Preserve any partial result and raw stderr; no silent replacement or timing-driven rerun"
+}

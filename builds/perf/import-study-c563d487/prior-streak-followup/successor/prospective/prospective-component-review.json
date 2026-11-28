@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 07:49:09 UTC",
+  "scope": "One separately frozen component screening cohort for the prior-streak selector. It can justify full-browser qualification, never a full-import speedup or automatic PR.",
+  "source": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+    "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+    "diagnosticFieldsSha256": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b"
+  },
+  "timingObservedForThisSource": false,
+  "selection": "Exactly one source design, derived from earlier untimed prior-streak counts and restored baseline late interning. No compare-and-pick source variants.",
+  "hostPlan": {
+    "hosts": 1,
+    "runtime": "Node 22.22.0, pinned Clang/LLD 21.1.8, Ubuntu 26.04",
+    "serialCohortOrder": [
+      "jmdict",
+      "negative cases 1 through 6",
+      "jitendex",
+      "vndb"
+    ],
+    "candidatePairsPerCell": 4,
+    "identicalCodePairsPerCell": 4,
+    "freshNodeChildrenPerCell": 16,
+    "totalPlannedMeasuredChildren": 144,
+    "corpusGrouping": {
+      "jmdict": 7,
+      "jitendex": 10,
+      "vndb": 4
+    },
+    "negativeGrouping": "20,000 rows in two 10,000-row banks, one fused group; 16 measured repetitions per child",
+    "excludedWarmupsPerChild": 2,
+    "diagnosticWasmTimed": false,
+    "parallelTimedWorkInJob": false
+  },
+  "targetPromotionScreen": {
+    "target": "jmdict",
+    "metric": "Enclosing compressed inflate + CRC + strict parse + completed lookup elapsed time, one complete corpus child per arm",
+    "minimumMedianReductionPercent": 1,
+    "allFourCandidatePairsFaster": true,
+    "controlRule": "Absolute candidate median effect exceeds the largest absolute same-code C/D paired elapsed change in that cell",
+    "additionalRequirements": [
+      "Complete exact source/fixture/workload identity",
+      "All raw observations retained",
+      "All output/dedup/key/index/media and native metadata checks pass",
+      "Prospective total and per-group mechanics match",
+      "No qualifying clear negative/non-target regression"
+    ],
+    "failureToMeet": "Do not promote this source based on CPU, native-only, individual groups, the earlier candidate, or another selected metric."
+  },
+  "nonTargetConcern": {
+    "clearHoldRule": "A median enclosing-component slowdown greater than 3%, with all four candidate pairs slower and larger than the largest absolute same-code control change, holds or rejects this exact source.",
+    "inconclusivePolicy": "Report every unfavorable direction and noisy/overlapping control. Inconclusive results do not establish nonregression. Any subsequent full qualification must explicitly retain the concern."
+  },
+  "negativeControlRule": {
+    "reference": "negative-protocol.json",
+    "sameThresholdsAsOriginal": true,
+    "allSixRequired": true,
+    "oldThreeScope": "Inactive-path/parity cost only under prior-streak admission; they do not qualify active futile probes.",
+    "activeThreeScope": "Adjacent 242-byte miss after an exact duplicate; older 4096-byte miss after a short duplicate; first-prefix failure with a later exact glossary that must not be tried.",
+    "ambiguousPolicy": "Ambiguity is a hold or explicit qualification limitation, not an automatic pass."
+  },
+  "fullQualification": "The separate source-bound prospective-complete-import-criteria.json retains the prior JMdict 1% per-host full-import threshold, two independent hosts per corpus, 12 pairs and four A/A controls per host, production defaults, unchanged full observer and all semantic/storage/media/restart/memory gates.",
+  "preservation": [
+    "No retries, resumed or replacement children, added samples, control subtraction, pooling across sources/hosts/corpora, or result-directed exclusions.",
+    "Every preparation failure, raw repetition, completed child, outlier, mechanics receipt and incomplete cell remains evidence.",
+    "A changed source or fixture is a separately identified experiment; this cohort is never relabeled."
+  ],
+  "negativeFixtureIdentityGate": {
+    "addedBeforeAnySuccessorCompilationOrExecution": true,
+    "addedAtUtc": "2026-11-28T08:06:38.860859+00:00",
+    "scope": "Deterministic generation identity only. Thresholds, source, fixtures, clock boundaries, schedule and counts unchanged.",
+    "expectedSha256": {
+      "manifest.json": "7291d348f059862bbb51df976902d0cd21cb2115757e49d0020e59ae4483be54",
+      "state-model-result.json": "fbd0863047d88d3f358b7ee54de924c4caf18e201e52f196918df3c8a12f10dd",
+      "preparation-receipt.json": "20b77f4351b8530e97de097153eb4dc6a39a50df1051c491277140c455c44822"
+    },
+    "mismatchPolicy": "Fail preparation and preserve the mismatch; no replacement generation or adaptive identity update within this cohort."
+  }
+}

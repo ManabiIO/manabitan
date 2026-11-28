@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "runId": 46124542684,
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/46124542684",
+  "statusAtFetch": "queued",
+  "createdAt": "2026-11-28T08:10:13Z",
+  "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+  "path": ".github/workflows/jmdict-prior-streak-selector-screen-c563d487.yml",
+  "cohort": "Single fixed source, nine serial component cells, 144 measured children planned",
+  "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "currentDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "notCurrentDevelopQualification": true
+}

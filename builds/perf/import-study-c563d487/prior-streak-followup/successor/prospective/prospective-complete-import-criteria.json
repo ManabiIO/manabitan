@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 07:48:00 UTC",
+  "source": {
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineCSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+    "candidatePatchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+    "candidateCSourceFile": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "candidateCommit": null,
+    "bindingRule": "At publication, bind the exact product commit and rebuilt WASM/manifest identities to this frozen C source and patch. A different C source is not qualified by this registration."
+  },
+  "criterionSource": "Root prospective registration for the single prior-streak successor before any candidate execution/timing; retains the previous candidate full-import review threshold unchanged.",
+  "timingDataObservedForThisCandidate": false,
+  "rationale": "JMdict priority retains the previously declared 1% full-import review threshold. This separate source has no runtime observations; previous-candidate data do not qualify it.",
+  "target": "jmdict",
+  "nonTargets": [
+    "jitendex",
+    "vndb"
+  ],
+  "protocol": {
+    "observer": "dev/perf/import-qualification-20261125-a7f7.py",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "independentHostsPerCorpus": 2,
+    "candidatePairsPerHost": 12,
+    "initialOrders": [
+      "AB",
+      "BA"
+    ],
+    "orderWithinHost": "Alternating paired order under unchanged observer",
+    "identicalCodeControlPairsPerHost": 4,
+    "productionFlags": {},
+    "timingBoundary": "Page file-input change event to post-UI import-complete event; raw browser monotonic clock",
+    "pairChangeDefinition": "100 * (candidate elapsed / baseline elapsed - 1), summarized by median within each host",
+    "prospectiveVndbSahUnits": [
+      37,
+      37
+    ]
+  },
+  "promotionReview": {
+    "minimumMedianReductionPercentOnEachTargetHost": 1,
+    "minimumFasterPairsOnEachTargetHost": 9,
+    "totalPairsPerHost": 12,
+    "descriptivePaired95Interval": "Both endpoints strictly below zero on each independent target host",
+    "identicalCodeControls": "Variation materially smaller than candidate effect, explicitly assessed per host; no subtraction",
+    "requiredUnchangedGates": [
+      "exact source and package identities",
+      "fixture integrity",
+      "correctness and semantic parity",
+      "restart/lookup/media validation",
+      "storage allocation and byte parity",
+      "separate whole-tree memory qualification"
+    ]
+  },
+  "nonTargetRejection": {
+    "minimumMedianSlowdownPercentOnEachHost": 1,
+    "minimumSlowerPairsOnEachHost": 9,
+    "totalPairsPerHost": 12,
+    "descriptivePaired95Interval": "Both endpoints strictly above zero on each independent host",
+    "identicalCodeControls": "Variation smaller than the regression effect",
+    "consequence": "A qualifying replicated slowdown on either non-target corpus rejects or holds this exact candidate",
+    "inconclusivePolicy": "Report uncertainty explicitly; an inconclusive non-target cohort does not prove nonregression"
+  },
+  "inferenceLimits": [
+    "No pooling hosts or dictionaries",
+    "No subtracting controls",
+    "No timing-directed removal, replacement, or retries",
+    "No substitution of profiled/component results for complete-import evidence",
+    "Descriptive intervals are not a universal-speedup guarantee"
+  ],
+  "earlierRegistrations": "Receipt, numeric-suffix and original prefix-selector registrations remain unchanged.",
+  "publicationStatus": "Prospective new-source registration; no successor CI or timing launched.",
+  "parentRegistration": {
+    "sha256": "402b582d02f5dfee93c833e82081380c5110b6334d418ceab4b07039b6a5ef18",
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/hosted/prospective-complete-import-criteria.json",
+    "relationship": "Unchanged full-import thresholds and observer; new exact source binding only"
+  }
+}
