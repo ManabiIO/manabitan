@@ -14,7 +14,7 @@ import zipfile
 
 
 BASE = "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
-CANDIDATE = "7e50f6db762ab5ddbeb6413782c399053cad39dc"
+CANDIDATE = "8dee0ebccd93dc3d64d3abcc581a17e93cc40af6"
 FIXTURE_LOCK_SHA256 = "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
 PATCHED_HARNESS_SHA256 = "d07ba020462b9421097a20e88cb1031b3c2aef19bfe1de407073b6e45058c6b6"
 EXPECTED_ENTRIES = sorted("js/dictionary/" + name + ".js" for name in (

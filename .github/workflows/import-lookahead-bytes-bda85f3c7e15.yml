@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: import-lookahead-bytes-bda85f3c7e15-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   byte-parity:
@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex
-          for spec in A:9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 B:7e50f6db762ab5ddbeb6413782c399053cad39dc; do
+          for spec in A:9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 B:8dee0ebccd93dc3d64d3abcc581a17e93cc40af6; do
             audit_arm="${spec%%:*}"
             audit_sha="${spec#*:}"
             audit_root="$RUNNER_TEMP/import-lookahead-bytes-bda85f3c7e15-$audit_arm"
