@@ -19,7 +19,7 @@ import {deferPromise} from '../core/utilities.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './term-bank-source-limits.js';
 
-export {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES};
+export {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './term-bank-source-limits.js';
 
 const SOURCE_TERM_BANK_BATCH_MAX_FILES = 80;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
