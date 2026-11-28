@@ -2193,6 +2193,11 @@ export class DictionaryImporter {
                 let streamedFastPathChunkCount = 0;
                 let termParseAlreadyAccounted = false;
                 let streamChunkWorkMs = 0;
+                // Per-consumer elapsed times can overlap. Only their union may
+                // be subtracted from the enclosing read's wall time.
+                let streamChunkWorkWallMs = 0;
+                let activeStreamChunkWorkCount = 0;
+                let activeStreamChunkWorkStartedAt = 0;
                 const artifactMetrics = createTermImportMetrics();
                 let artifactMetadataRebaseMs = 0;
                 let streamedProgressAllowance = termFileProgressAllowance;
@@ -2224,7 +2229,10 @@ export class DictionaryImporter {
                             const chunkMetrics = await processTermChunk(termFile, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex);
                             addTermImportMetrics(artifactMetrics, chunkMetrics);
                             step4ArtifactMetadataAppendMs += chunkMetrics.contentAppendMs;
-                            streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
+                            const chunkWorkMs = Math.max(0, Date.now() - tChunkWorkStart);
+                            streamChunkWorkMs += chunkWorkMs;
+                            // Artifact callbacks still complete serially.
+                            streamChunkWorkWallMs += chunkWorkMs;
                             if (Array.isArray(termListChunk)) {
                                 termListChunk.length = 0;
                             }
@@ -2264,7 +2272,7 @@ export class DictionaryImporter {
                             step4ArtifactMetadataRebaseMs += Math.max(0, lastArtifactTermBankReadProfile.metadataRebaseMs ?? 0);
                             artifactMetadataRebaseMs += Math.max(0, lastArtifactTermBankReadProfile.metadataRebaseMs ?? 0);
                         }
-                        step4TimingBreakdown.termParseMs += Math.max(0, totalArtifactReadMs - streamChunkWorkMs);
+                        step4TimingBreakdown.termParseMs += Math.max(0, totalArtifactReadMs - streamChunkWorkWallMs);
                         termParseAlreadyAccounted = true;
                     } else {
                         let termReadResult;
@@ -2362,9 +2370,25 @@ export class DictionaryImporter {
                                 const consume = async (onPublished) => {
                                     ++streamedFastPathChunkCount;
                                     const tChunkWorkStart = Date.now();
-                                    const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance, onPublished);
-                                    addTermImportMetrics(artifactMetrics, chunkMetrics);
-                                    streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
+                                    if (activeStreamChunkWorkCount === 0) {
+                                        activeStreamChunkWorkStartedAt = tChunkWorkStart;
+                                    }
+                                    ++activeStreamChunkWorkCount;
+                                    let chunkWorkSucceeded = false;
+                                    try {
+                                        const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance, onPublished);
+                                        addTermImportMetrics(artifactMetrics, chunkMetrics);
+                                        chunkWorkSucceeded = true;
+                                    } finally {
+                                        const tChunkWorkEnd = Date.now();
+                                        if (chunkWorkSucceeded) {
+                                            streamChunkWorkMs += Math.max(0, tChunkWorkEnd - tChunkWorkStart);
+                                        }
+                                        --activeStreamChunkWorkCount;
+                                        if (activeStreamChunkWorkCount === 0) {
+                                            streamChunkWorkWallMs += Math.max(0, tChunkWorkEnd - activeStreamChunkWorkStartedAt);
+                                        }
+                                    }
                                     termListChunk.length = 0;
                                     if (requirementsChunk !== null) {
                                         requirementsChunk.length = 0;
@@ -2411,7 +2435,7 @@ export class DictionaryImporter {
                 if (streamedImportCompleted) {
                     if (!termParseAlreadyAccounted) {
                         const totalFastReadMs = Math.max(0, Date.now() - tFastParseStart);
-                        step4TimingBreakdown.termParseMs += Math.max(0, totalFastReadMs - streamChunkWorkMs);
+                        step4TimingBreakdown.termParseMs += Math.max(0, totalFastReadMs - streamChunkWorkWallMs);
                     }
                     if (lastFastTermBankReadProfile !== null) {
                         /** @type {Partial<NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>> & {parallelSkipReason?: string|null}} */

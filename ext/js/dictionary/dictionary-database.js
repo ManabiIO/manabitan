@@ -908,7 +908,8 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
-            errors.push(...await this._closeArtifactTermChunkPipeline(true));
+            const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+            errors.push(...(Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors));
             const db = this._requireDb();
             if (this._bulkImportJournalRecord !== null) {
                 await this._rollbackBulkImport(db, errors, true, true);
@@ -987,6 +988,8 @@ export class DictionaryDatabase {
     }
 
     /**
+     * Claims finalization before admitted writes drain, preventing competing
+     * close, purge, or finalization operations from taking the same lifecycle.
      * @returns {import('@sqlite.org/sqlite-wasm').Database|null}
      * @throws {Error} If finalization already owns the lifecycle or the database is closed.
      */
@@ -1023,17 +1026,27 @@ export class DictionaryDatabase {
 
     /**
      * Closes admission and joins every append before lifecycle cleanup. Retain
-     * the closed owner until the lifecycle ends, including the await gap before
-     * finalization claims the database.
+     * the closed owner until the lifecycle ends. With no append owner, closing
+     * admission is synchronous and preserves the existing cleanup scheduling.
      * @param {boolean} cancel
-     * @returns {Promise<Error[]>}
+     * @returns {Error[]|Promise<Error[]>}
      */
-    async _closeArtifactTermChunkPipeline(cancel) {
+    _closeArtifactTermChunkPipeline(cancel) {
         this._artifactTermChunkAdmissionClosed = true;
         const pipeline = this._artifactTermChunkPipeline;
         if (pipeline === null) { return []; }
         const cancellation = this._artifactTermChunkCancellation ??= new Error('Artifact term chunk import was cancelled');
         if (cancel) { pipeline.cancel(cancellation); }
+        return this._drainArtifactTermChunkPipeline(pipeline, cancel, cancellation);
+    }
+
+    /**
+     * @param {ArtifactTermChunkPipeline} pipeline
+     * @param {boolean} cancel
+     * @param {Error} cancellation
+     * @returns {Promise<Error[]>}
+     */
+    async _drainArtifactTermChunkPipeline(pipeline, cancel, cancellation) {
         let failed = false;
         /** @type {unknown} */
         let failure = void 0;
@@ -1490,12 +1503,13 @@ export class DictionaryDatabase {
         await this._waitForBulkImportSetup();
         this._assertBulkImportSessionOwner(expectedSessionId);
         const importOwner = this._bulkImportJournalRecord;
-        const errors = await this._closeArtifactTermChunkPipeline(true);
+        const db = this._beginBulkImportFinalization();
+        const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+        const errors = Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors;
         if (this._bulkImportJournalRecord !== importOwner) {
             throw new Error('Dictionary bulk import session ownership changed');
         }
         this._assertBulkImportSessionOwner(expectedSessionId);
-        const db = this._beginBulkImportFinalization();
         if (db === null) {
             if (errors.length === 1) { throw errors[0]; }
             if (errors.length > 1) { throw new AggregateError(errors, 'Failed to drain dictionary term chunks'); }
@@ -1527,7 +1541,9 @@ export class DictionaryDatabase {
         await this._waitForBulkImportSetup();
         this._assertBulkImportSessionOwner(expectedSessionId);
         const importOwner = this._bulkImportJournalRecord;
-        const appendErrors = await this._closeArtifactTermChunkPipeline(false);
+        const db = this._beginBulkImportFinalization();
+        const chunkErrors = this._closeArtifactTermChunkPipeline(false);
+        const appendErrors = Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors;
         if (this._bulkImportJournalRecord !== importOwner) {
             throw new Error('Dictionary bulk import session ownership changed');
         }
@@ -1535,7 +1551,6 @@ export class DictionaryDatabase {
         const appendError = appendErrors.length === 1 ? appendErrors[0] : (
             appendErrors.length > 1 ? new AggregateError(appendErrors, 'Failed to drain dictionary term chunks') : null
         );
-        const db = this._beginBulkImportFinalization();
         if (db !== null) {
             const tFinishBulkImportStart = safePerformance.now();
             let commitMs = 0;
@@ -2001,7 +2016,8 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
-            errors.push(...await this._closeArtifactTermChunkPipeline(true));
+            const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+            errors.push(...(Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors));
             // An early media writer may still be waiting for the index the
             // abandoned import will never supply. Cancel before joining it.
             const mediaWrite = this._generationMediaWrite;

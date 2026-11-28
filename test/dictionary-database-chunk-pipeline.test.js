@@ -361,7 +361,7 @@ describe('ordered artifact term chunk persistence', () => {
 
     test('fences empty finalization and resets admission only for a new lifecycle', async () => {
         const h = createHarness();
-        await expect(h.database._closeArtifactTermChunkPipeline(false)).resolves.toEqual([]);
+        expect(await h.database._closeArtifactTermChunkPipeline(false)).toEqual([]);
         expect(() => h.begin(createChunk(1))).toThrow('finalizing');
         await expect(h.database.bulkAddArtifactTermsChunk(createChunk(1))).rejects.toThrow('finalizing');
         expect(h.content).toHaveLength(0);
@@ -512,9 +512,67 @@ describe('ordered artifact term chunk persistence', () => {
         }
     });
 
+    test('reserves finalization before draining admitted owners and rejects competing cleanup', async () => {
+        const h = createHarness();
+        const first = h.begin(createChunk(1));
+        try {
+            await first.published;
+            const second = h.begin(createChunk(2));
+            await vi.waitFor(() => expect(h.content).toHaveLength(2));
+            const db = {exec: vi.fn(), close: vi.fn()};
+            const contentEnd = vi.fn().mockResolvedValue(void 0);
+            const recordEnd = vi.fn().mockResolvedValue(void 0);
+            Reflect.set(h.database, '_db', db);
+            Reflect.set(h.database, '_termContentStore', {
+                endImportSession: contentEnd,
+                getLastEndImportSessionMetrics: vi.fn(() => null),
+            });
+            Object.assign(Reflect.get(h.database, '_termRecordStore'), {
+                endImportSession: recordEnd,
+                getLastEndImportSessionMetrics: vi.fn(() => null),
+            });
+            Object.assign(Reflect.get(h.database, '_termContentBlockImportSession'), {close: vi.fn()});
+            Reflect.set(h.database, '_importJournal', {clear: vi.fn().mockResolvedValue(void 0)});
+            vi.spyOn(h.database, '_syncTermsVirtualTableFromRecordStore').mockResolvedValue();
+            vi.spyOn(h.database, '_applyRuntimePragmas').mockImplementation(() => {});
+            const purgeRoot = vi.spyOn(h.database, '_getDictionaryPurgeRoot');
+            const finishing = h.database.finishBulkImport(null, null, 'test-owner');
+            void finishing.catch(() => {});
+            await Promise.resolve();
+            expect(Reflect.get(h.database, '_bulkImportState')).toBe('finalizing');
+            expect(contentEnd).not.toHaveBeenCalled();
+            expect(recordEnd).not.toHaveBeenCalled();
+            expect(() => h.begin(createChunk(3))).toThrow('finalizing');
+            await expect(h.database.close()).rejects.toThrow('Dictionary bulk import finalization is already active');
+            await expect(h.database.purge()).rejects.toThrow('Dictionary bulk import finalization is already active');
+            await expect(h.database.abortBulkImport('test-owner')).rejects.toThrow('Dictionary bulk import finalization is already active');
+            await expect(h.database.finishBulkImport(null, null, 'test-owner')).rejects.toThrow('Dictionary bulk import finalization is already active');
+            expect(purgeRoot).not.toHaveBeenCalled();
+            expect(db.close).not.toHaveBeenCalled();
+
+            h.finish(0);
+            await first.completion;
+            await second.published;
+            expect(h.records).toHaveLength(2);
+            expect(contentEnd).not.toHaveBeenCalled();
+            h.finish(1);
+            await second.completion;
+            await expect(finishing).resolves.toMatchObject({published: true, housekeepingErrors: []});
+            expect(contentEnd).toHaveBeenCalledOnce();
+            expect(recordEnd).toHaveBeenCalledOnce();
+            expect(db.exec).toHaveBeenCalledWith('COMMIT');
+            expect(Reflect.get(h.database, '_bulkImportState')).toBe('idle');
+        } finally {
+            await h.cleanup();
+        }
+    });
+
     test.each(['abort', 'finish'])('rejects a stale %s owner after the append drain', async (operation) => {
         const h = createHarness();
+        Reflect.set(h.database, '_db', {exec: vi.fn()});
         vi.spyOn(h.database, '_closeArtifactTermChunkPipeline').mockImplementation(async () => {
+            h.database._endBulkImportLifecycle();
+            h.database._beginBulkImportLifecycle();
             Reflect.set(h.database, '_bulkImportJournalRecord', {sessionId: 'replacement-owner'});
             return [];
         });
