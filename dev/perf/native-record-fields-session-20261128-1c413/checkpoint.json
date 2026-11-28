@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "kind": "manabitan-import-optimization-session-checkpoint",
+  "observedAt": "2026-11-28 10:22:12 UTC",
+  "startedAt": "2026-11-28 02:43 UTC",
+  "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
+  "constraints": [
+    "No Work mode",
+    "No original timing reruns, exclusions, replacements, pooling or post-result gate changes",
+    "No default-branch/peer changes",
+    "No PR opened by this task",
+    "Local executor unavailable since06:57UTC; remote GitHub-only source/CI",
+    "Functions transient state reset10:19UTC; durable Git sources and original artifacts preserved"
+  ],
+  "current": {
+    "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "productTree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d",
+    "control": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+    "controlTree": "4c916a995f996afe56cecf0714c20d5b7e5ef346",
+    "controlRefPublished": false,
+    "productPaths": 13,
+    "controlPaths": 9,
+    "productFilesUnchangedFromPrior": 11,
+    "packageDifference": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "mergedPeerChanges": "PR981 preserved; exact old native additions commute with all merged DB/store changes",
+    "rebaseReviews": [
+      "3f1760c6664232c76d2a77efac7093e17ef11ba7",
+      "7291c46996453c3e34350ec109d38a94e89f13d4",
+      "b7b1e9914f663fa0c18f94f58b844642522614ce"
+    ],
+    "helper": {
+      "blob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "bytes": 16843,
+      "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec"
+    },
+    "store": {
+      "blob": "4dc746075254a31016759e808e72582b7bda8afc",
+      "bytes": 368779,
+      "sha256": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028"
+    },
+    "database": {
+      "blob": "b144b0f9bb4dda83547c9865d3407643c890d741",
+      "bytes": 617901,
+      "sha256": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f"
+    },
+    "kernel": {
+      "blob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "bytes": 1753,
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+    },
+    "sourceC": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+    "nativeManifest": "0921b1806a239e1b753f199af642849afdad4077",
+    "currentParser": {
+      "blob": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    }
+  },
+  "currentCorrectness": {
+    "branch": "test/native-record-fields-current-20261128-1c413",
+    "head": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "tree": "71bb7a59810ebdfcd2ee896d8d269ed83e92ebaf",
+    "source": "ada57c0663679241e943023fa3e536294826d3d5",
+    "digest": "95fe6764ac16451b9257b9224a2b1bdbc286536ddeb3ad69b6323601baec9a71",
+    "run": 46133913032,
+    "attempt": 1,
+    "jobs": {
+      "validation": 140944881152,
+      "corpus": 140944880913
+    },
+    "status": "Both originals success; complete artifact audit pending",
+    "tests": {
+      "unitFiles": 673,
+      "unitPassed": 15301,
+      "unitSkipped": 47,
+      "optionsPassed": 32
+    },
+    "allNativeLintTypesBuilds": true,
+    "allThreeCorpusComparisons": true,
+    "validationArtifact": {
+      "id": 15259375276,
+      "bytes": 344007,
+      "sha256": "88dc4436039992f3819f186357e1736701a0a0a15a60e37b2bbf9dde0ed01433"
+    },
+    "corpusArtifact": {
+      "id": 15259500068,
+      "bytes": 1043287,
+      "sha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c"
+    },
+    "validationLog": {
+      "blob": "a8b61df444377a501906638f5d3a5b226a2aa44c",
+      "bytes": 1100318,
+      "sha256": "af2cdc7c71bb36ec833a3611cfa3e91d8cef4f84c454b7a400471558e8601183"
+    },
+    "corpusLog": {
+      "blob": "64edb1d821edd20dfad5010491d3caffa1b5b816",
+      "bytes": 684561,
+      "sha256": "7aafc2e48de8fd4818a7010c47ca9735b6bcc575f80ca576413c8e0ef642bf1b"
+    },
+    "completionReceipt": "af558285347a7e5e941509a5ee69def401bd0014",
+    "rootPublicationReview": "91cb372af58dab2578a15981d2ff59b49e14a1b1",
+    "independentAssemblyReview": "d8dc561caab2c839437feb82a974b7d698bf1d3b",
+    "workflow": "67ca8a3945bf506b53bcc61bd420b0f8992b402a",
+    "guard": "2d8d4be5a4e23127de0c720cc343d86f8dcfbff1",
+    "recovery": "87ad1c4806d467a73bf19255896047e387865a22",
+    "runAll": "ebbfddf86e8b2f6ce1f008a3ac88ffe8bf0cca4b",
+    "corpusBinding": "9f821dd13a46f9865468747cb013335d2be896a8",
+    "driver": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+    "archiveWriter": "82913f3e5a0091affdfa870c630c748dd20b150a",
+    "archiveTests": "42f5543f35b0bd06c792487dba7d63759aa078bd",
+    "limitations": "Nonpersistent real memory SQLite plus disk OPFS adapter; full term/field hashes; retired raw sinks; no browser/restart/full-media/performance substitution"
+  },
+  "browser": {
+    "status": "Disabled; no native-field whole-browser timing acquired",
+    "protocol": {
+      "cells": 6,
+      "dictionaries": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "orders": [
+        "AB",
+        "BA"
+      ],
+      "pairsPerCell": 24,
+      "controlsPerCell": 8,
+      "warmupImports": 4,
+      "fullMediaImports": 2,
+      "memoryImports": 4,
+      "reportsPerCell": 74,
+      "armCounts": {
+        "A": 37,
+        "B": 29,
+        "C": 8
+      },
+      "expectedWorkers": null,
+      "flags": {}
+    },
+    "gates": {
+      "jmdictEachHostMedianPercentAtMost": -2,
+      "jmdictEachHostWinsAtLeast": 18,
+      "jmdictAbsControlMedianAndEqualAtMost": 1,
+      "otherAbsControlMedianAndEqualAtMost": 3,
+      "rejectRepeatedOtherMedianRegressionAbove": 3,
+      "memoryMedianIncreaseAtMost": 5,
+      "memoryMaxIncreaseAtMost": 10,
+      "strictMemoryCoverage": true,
+      "allSemanticsMediaSourceActivation": true
+    },
+    "readinessDecision": "293adf44d2172d8da91f707386356dcb093cd4f8",
+    "readinessPolicy": "Prospective engineering budget only. Allow at most first actual source-group field calls and rows before readiness; require remaining native calls/rows and zero ready-state declines. Derive exact numbers only from audited current source receipts, include startup/fallback costs, never force readiness or retry/exclude a failure.",
+    "numericPoliciesSealed": false,
+    "modeReview": "f4c850fcf932f21038932643717db43f866e29a2",
+    "oldDisabledProducer": {
+      "commit": "97de439695816465c34b1da52193869ba54167aa",
+      "tree": "24256518364b496fd587ca481bdbed56e1e05a22",
+      "source": "8748b886dbe63855c04550f923fc3f35f9c12dc2",
+      "study": "f0b8f35252f5e455b8d98e3571bf68c12fa47f50",
+      "workflow": "755b674910ef74e7335f393ef81a7b329156d9af",
+      "guard": "6ce33bd5bbf4b4cc7a7b09d979c878050265ed31"
+    },
+    "currentProducer": "Native rebuilding unpublished disabled f28 rebind after transient state reset",
+    "reader": {
+      "commit": "2443419f919ff0ca6d578d681484cf43cb07a866",
+      "tree": "2531c5db6ac73bb7e341c96a094826d51587acdd",
+      "source": "23c8d994bf815a3e9498dda67087591ffb4eaeb8",
+      "tests": "0e8f10d0802357ee3ff65fce70892b5d8592a691",
+      "cases": 19,
+      "rootCoreReview": "567b805fd40629243db747057b2fab8126eb0ecb",
+      "assemblyProof": "13d00893f1bfe94f4563fb96b367cda8b7015fb8",
+      "published": false
+    },
+    "numericEvaluator": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
+    "activationChecker": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+    "activationTests": "ac9583fe30aeca15364b7e0d1fc89f188dac7668"
+  },
+  "historicalCorrectness": {
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "product": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+    "control": "1cf7869c1dbab89b7c4da9895fb7b0f2e7fc178f",
+    "head": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+    "tree": "68b87c1b0121b82f3321260525b9d0836f858577",
+    "run": 46132025311,
+    "attempt": 1,
+    "status": "Both jobs success; never transfers to current source",
+    "jobs": {
+      "validation": 140939066469,
+      "corpus": 140939066689
+    },
+    "validationArtifact": {
+      "id": 15258022480,
+      "bytes": 343135,
+      "sha256": "d0c9a526f185b06f314a82d85e17efae61999f97983613a17c48e6fd1fa4713f"
+    },
+    "corpusArtifact": {
+      "id": 15257853500,
+      "bytes": 1041067,
+      "sha256": "494be69997cc8f581c9e8b706ab65f355a3880ce48230830ac8817191e5385e6"
+    },
+    "completion": "56ee96368e7abc499ac8de3093c6122f895a5fd8",
+    "manifest": "916e0e96e8dc30603f91a348378e215aeabec1b0",
+    "recordsBranch": "audit/native-fields-correctness-20261128-1c413",
+    "firstReader": {
+      "head": "56408685baab2d9469cdb7dc68e394cb7616523a",
+      "run": 46133246828,
+      "job": 140942854198,
+      "testsPassed": 30,
+      "failure": "Reader fetched correctly absent optional baseline WASM before absence check",
+      "artifact": 15257888534,
+      "log": "67225cabe4cff944f9c9aa7a02c6a7d522da2a08",
+      "failureReceipt": "7e58e2fe3a4e51a2d4c957e92b39ed45d851d10a"
+    },
+    "optionalRepair": {
+      "head": "5c68e5d88564941358e104d5dc7221962c58b809",
+      "tree": "c59f28669e4854f55b4f970c724d38f57445e6fe",
+      "source": "1c0db521bf12e67cb16e15a019c890b5a2f48683",
+      "tests": "848913907d0533ffbf405eeaf472a38a53208c2a",
+      "run": 46133974806,
+      "testsPassed": 31,
+      "artifact": 15258921486,
+      "log": "c053156959dd418c7fe4ef7552b561f7743c843d",
+      "failure": "Added reader CRC equation assumed all-input optional-counter coverage; actual counters only cover deferred groups",
+      "rootReview": "c2c8235d6d63ee1c3ea7a4c31f4a83f9bfbc747e"
+    },
+    "crcScopeReviews": [
+      "90db5f071bd7bbf748dd32fff5800c2eac5ad1e9",
+      "ebd27ad90c92d4c87998dc1def281af2a1bf577b"
+    ],
+    "crcScope": "Bound default version3 validated route; deferred iff >1banks, >=4MiB and compressed<=floor(uncompressed/32). Only deferred groups emit scanned+reused counters; immediate groups verify CRC in inflation and report zero. Keep full input and exact A/B checks. No per-request version/options retained; derive route from bound source, never invent recorded fields.",
+    "nextReader": "CRC scope repair under independent review; new current reader must differ only in fixed source/run/job identities",
+    "earlierFailures": [
+      {
+        "run": 46125649822,
+        "reason": "Source-mode guard before product execution"
+      },
+      {
+        "run": 46127174624,
+        "reason": "Actual lint/type/unit failures; generated runtime mismatch; raw filename archive upload failure"
+      },
+      {
+        "run": 46129727075,
+        "reason": "1lint/1type failure and intentional smoke symlink archive failure; full corpus console parity retained but no corpus artifact",
+        "failureReceipt": "5696251e503c805ba476299a026feb5aab13aca9"
+      }
+    ]
+  },
+  "component": {
+    "name": "Native compact record fields",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "originalFailed": {
+      "run": 46115204690,
+      "head": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+      "artifact": 15254144071,
+      "reason": "Invalid linker-driver name; zero timing/warmup observations"
+    },
+    "corrected": {
+      "run": 46123144616,
+      "head": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+      "artifact": 15254998779,
+      "sha256": "e4b76382586a00d8824e85804e3a978942fd452f61c2006aedc1342c5d84d654",
+      "timedIntervals": 36,
+      "warmupIntervals": 6
+    },
+    "cpu": {
+      "BA": {
+        "medianPercent": -25.380375097163345,
+        "medianSavedMs": 7.8255,
+        "faster": 12
+      },
+      "BC": {
+        "medianPercent": -26.56422753665435,
+        "medianSavedMs": 8.3165,
+        "faster": 12
+      },
+      "CA": {
+        "medianPercent": -0.06733724617924985,
+        "equalWorkPercent": 0.3975255684219414
+      }
+    },
+    "fullAudit": {
+      "run": 46126612006,
+      "head": "b99e1a9daf7fe0885291ec25245959f731619373",
+      "artifact": 15255898869,
+      "result": "c41c034efa9021adc77c328ffc50066912e6e195",
+      "passed": true,
+      "componentOnly": true
+    },
+    "wholeImportGainProven": false
+  },
+  "closedStudies": [
+    {
+      "name": "Watchdog timer reuse",
+      "run": 46111030045,
+      "result": "Rejected: JMdict median−0.3933%, Jitendex+0.7196%; target gate missed",
+      "auditRun": 46126226404,
+      "auditResult": "26fcbf36e47c2494027f65fdab6353f1931029ad",
+      "disposition": "d54f58d7d75fecfa6755745ccb730f4c3ff7b0a5"
+    },
+    {
+      "name": "CRC 8+4 tail slicing",
+      "run": 46115840063,
+      "result": "Rejected: VNDB both medians slower +0.403645/+0.275396%; target gates missed independently of memory scan gaps",
+      "auditRun": 46127351497,
+      "auditResult": "d08462bbf9abe4c286bbc00a8c4f5bd666fc642b",
+      "disposition": "e47c9940dedda3d0dd08abfb5ab11e579ef36955",
+      "peerPR": 979,
+      "doNotDuplicate": true
+    },
+    {
+      "name": "Span coalescing",
+      "run": 46108849200,
+      "result": "Both JMdict gates missed; AB−1.969594%8/12; BA−0.7026%7/12; testtypes also failed"
+    },
+    {
+      "name": "Native write checksum",
+      "run": 46107096221,
+      "result": "No qualified replicated gain; noisy controls/target failure; original correctness failures retained"
+    },
+    {
+      "name": "Terminal structured tags",
+      "run": 46102137528,
+      "result": "No replicated browser gain"
+    },
+    {
+      "name": "Quote-first",
+      "run": 46107734068,
+      "result": "Held component-only; no browser acquisition/PR"
+    }
+  ],
+  "sharedEvidence": {
+    "transport": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+    "sha256Helper": "cdbd14e06ea0f882ce302a23126dbe5108740f24",
+    "sourceRouteReview": "c7cb79322568af5815ac7349e799d442c9dc0608",
+    "fixtures": {
+      "jmdict": {
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "rows": 528299,
+        "banks": 53
+      },
+      "jitendex": {
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "rows": 436555,
+        "banks": 219
+      },
+      "vndb": {
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "rows": 6648310,
+        "banks": 665
+      }
+    },
+    "totalRows": 7613164
+  },
+  "next": [
+    "Finish narrow source-bound CRC reader repair; retain both failed reader attempts",
+    "Read same historical artifacts with fixed reader and read exact new f28 artifacts with identity-only rebound reader; no new imports",
+    "Seal first-group native-readiness policy only from verified current receipts; finalize disabled current producer",
+    "Publish reviewed inert control ref then frozen six-cell browser experiment, once prerequisites fully pass",
+    "Read every original browser artifact independently; apply unchanged gates; PR only for a worthwhile qualified gain"
+  ]
+}
