@@ -28,7 +28,7 @@ import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
-import {registerOwnedTermContent} from './term-content-ownership.js';
+import {hasOwnedTermContent, registerOwnedTermContent} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -80,6 +80,7 @@ const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {void|{completion: Promise<void>}} TermBankChunkSinkResult */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -2876,13 +2877,29 @@ class ParallelTermBankParserPool {
     }
 }
 
+/**
+ * @param {TermBankChunkSinkResult} result
+ * @returns {Promise<void>|null}
+ * @throws {TypeError} If an internal sink returns an invalid completion ticket.
+ */
+function getTermBankChunkSinkCompletion(result) {
+    if (typeof result === 'undefined') { return null; }
+    if (
+        result === null || typeof result !== 'object' ||
+        typeof result.completion?.then !== 'function'
+    ) {
+        throw new TypeError('Term-bank chunk sink returned an invalid completion ticket');
+    }
+    return Promise.resolve(result.completion);
+}
+
 class ParallelTermBankPipelineRun {
     /**
      * @param {ParallelTermBankSource[]} sources
      * @param {ParallelTermBankSource[][]} groups
      * @param {number} totalBytes
      * @param {number} version
-     * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+     * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
      * @param {Record<string, unknown>} options
      * @param {() => boolean} shouldCancel
      * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} poolLease
@@ -2897,7 +2914,7 @@ class ParallelTermBankPipelineRun {
         this._totalBytes = totalBytes;
         /** @type {number} */
         this._version = version;
-        /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
+        /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} */
         this._onChunk = onChunk;
         const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
@@ -2973,6 +2990,26 @@ class ParallelTermBankPipelineRun {
         }
         this._activateLeadSources();
         this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
+        /** @typedef {{groupIndex: number, completion: Promise<void>|null, release: () => void}} SinkOwner */
+        /** @type {Set<SinkOwner>} */
+        const sinkOwners = new Set();
+        /**
+         * Retires only completed work. Publication alone cannot open another
+         * source group or subtract its content from the parser's byte budget.
+         * @param {SinkOwner} owner
+         * @returns {Promise<void>}
+         */
+        const retireSink = async (owner) => {
+            try {
+                if (owner.completion !== null) { await owner.completion; }
+                this._throwIfStopped();
+            } finally {
+                owner.release();
+            }
+            this._nextSinkGroupIndex = owner.groupIndex + 1;
+            this._activateLeadSources();
+            this._wakeLeadWaiters();
+        };
         try {
             // Start the ordered sink as soon as group zero is available. Waiting
             // for every worker's first group creates a full parse/storage
@@ -2994,6 +3031,8 @@ class ParallelTermBankPipelineRun {
             let exactTotalRows = 0;
             let processedRows = 0;
             let workersFinishedAt = this._startedAt;
+            /** @type {SinkOwner|null} */
+            let pendingSink = null;
             for (let i = 0; i < this._resultSlots.length; ++i) {
                 this._throwIfStopped();
                 const result = await this._resultSlots[i].promise;
@@ -3003,37 +3042,89 @@ class ParallelTermBankPipelineRun {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
                 const {chunk, consume} = result;
-                // Settled slot promises live until the pipeline drains. Keep
-                // the chunk alive only through its ordered sink callback.
+                // The database may consume the cache's ownership witness while
+                // publishing this chunk, so capture it before invoking the sink.
+                const mayOverlap = (
+                    chunk !== null && consume === null &&
+                    typeof SharedArrayBuffer === 'function' &&
+                    chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    hasOwnedTermContent(chunk.contentBytesBuffer)
+                );
+                if (pendingSink !== null && !mayOverlap) {
+                    const previousSink = pendingSink;
+                    pendingSink = null;
+                    await retireSink(previousSink);
+                }
+                // Settled slot promises live until the pipeline drains. The
+                // sink owner retains its chunk until actual completion.
                 result.chunk = null;
                 result.consume = null;
-                if (chunk !== null && consume !== null) { chunk.releaseBorrowedContent = consume; }
                 result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
                 profiles.push(result.profile);
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
                 processedRows += result.rowCount;
                 exactTotalRows += result.rowCount;
                 if (chunk !== null) {
-                    try {
-                        await this._onChunk(chunk, {
-                            processedRows,
-                            totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
-                            chunkIndex: i + 1,
-                            chunkCount: this._resultSlots.length,
-                        });
-                    } finally {
-                        consume?.();
-                        delete chunk.releaseBorrowedContent;
-                        this._queuedOwnedContentBytes -= result.ownedContentBytes ?? 0;
+                    let released = false;
+                    /** @type {SinkOwner} */
+                    const owner = {
+                        groupIndex: i,
+                        completion: null,
+                        release: () => {
+                            if (released) { return; }
+                            released = true;
+                            consume?.();
+                            delete chunk.releaseBorrowedContent;
+                            this._queuedOwnedContentBytes -= result.ownedContentBytes ?? 0;
+                            sinkOwners.delete(owner);
+                        },
+                    };
+                    sinkOwners.add(owner);
+                    if (consume !== null) {
+                        // An active sink owns this lease even if a peer parser
+                        // fails. Its completion, not _fail's queued-result
+                        // cleanup, releases borrowed bytes still in use.
+                        this._pendingResultConsumers.delete(consume);
+                        chunk.releaseBorrowedContent = consume;
                     }
+                    const sinkResult = await this._onChunk(chunk, {
+                        processedRows,
+                        totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
+                        chunkIndex: i + 1,
+                        chunkCount: this._resultSlots.length,
+                    });
+                    const completion = getTermBankChunkSinkCompletion(sinkResult);
+                    if (completion !== null) {
+                        owner.completion = completion.catch((error) => {
+                            // Wake result-slot waits on storage failure. All
+                            // admitted sink owners are still drained below.
+                            this._fail(error);
+                            throw error;
+                        });
+                        void owner.completion.catch(() => {});
+                    }
+                    if (pendingSink !== null) {
+                        const previousSink = pendingSink;
+                        pendingSink = null;
+                        await retireSink(previousSink);
+                    }
+                    if (mayOverlap && owner.completion !== null) {
+                        // The next callback may prepare one immutable group.
+                        // No third callback starts before this owner retires.
+                        pendingSink = owner;
+                    } else {
+                        await retireSink(owner);
+                    }
+                } else {
+                    this._throwIfStopped();
+                    // Empty groups advance completed order without inventing
+                    // a sink callback or a storage operation.
+                    this._nextSinkGroupIndex = i + 1;
+                    this._activateLeadSources();
+                    this._wakeLeadWaiters();
                 }
-                this._throwIfStopped();
-                // Empty groups still advance the bounded lead and wake peers,
-                // but must not invent a row or an empty storage operation.
-                this._nextSinkGroupIndex = i + 1;
-                this._activateLeadSources();
-                this._wakeLeadWaiters();
             }
+            if (pendingSink !== null) { await retireSink(pendingSink); }
             await Promise.all(this._workerLoops);
             if (this._error !== null) { throw this._error; }
             // The final sink can outlive every worker job. Cancellation during
@@ -3055,6 +3146,11 @@ class ParallelTermBankPipelineRun {
             };
         } catch (error) {
             this._fail(error);
+            // A callback can fail while its predecessor is still persisting,
+            // or a peer can fail while the sink awaits another parser result.
+            // Drain both admitted tickets before releasing any active lease.
+            await Promise.allSettled([...sinkOwners].map(({completion}) => completion));
+            for (const owner of sinkOwners) { owner.release(); }
             await Promise.allSettled(this._workerLoops);
             throw this._error ?? new Error('Parallel term-bank pipeline failed');
         }
@@ -3240,7 +3336,7 @@ export async function disposeParallelTermBankParser() {
  * begin as soon as the first group is available and overlap later parsing.
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3260,7 +3356,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {Promise<Uint8Array>[]} contentBytePromises
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3284,7 +3380,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3309,7 +3405,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3330,7 +3426,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
 /**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<TermBankChunkSinkResult>|TermBankChunkSinkResult} onChunk
  * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
