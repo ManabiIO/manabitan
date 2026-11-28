@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "scope": "Analysis only of one already completed ordinary-default Chromium JMdict import. No product checkout, build, import, browser launch, timing acquisition, performance comparison, or candidate change.",
+  "repository": "ManabiIO/manabitan",
+  "researchBranch": "perf/bounded-content-overlap-20261128-da6c4",
+  "workflowPath": ".github/workflows/jmdict-completed-trace-analysis-da6c4.yml",
+  "analysisScriptPath": "dev/perf/jmdict-completed-trace-analysis-da6c4/analyze.py",
+  "analysisScriptSha256": "a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b",
+  "analysisTestsPath": "dev/perf/jmdict-completed-trace-analysis-da6c4/test_analyze.py",
+  "analysisTestsSha256": "e999800fe64fc8e03159a8d6646bc90ea3daf1bbadaa2442f6c003a038407ec2",
+  "productSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "acquisition": {
+    "runId": 46127144239,
+    "jobId": 140924149519,
+    "headSha": "e2786268b7576849fc4e84358623cd9d2277dcc0",
+    "runAttempt": 1,
+    "artifactId": 15256811856,
+    "artifactName": "jmdict-current-trace-dcfc-da6c4-46127144239-1",
+    "artifactBytes": 17735478,
+    "artifactSha256": "7fe6bcea3930b9c8782903c1d4db874dbe132e473156ca8fab1f2fc241995143",
+    "traceBytes": 5005552,
+    "artifactCreatedAt": "2026-11-28T08:59:32Z",
+    "sourceWorkflowPath": ".github/workflows/jmdict-current-trace-da6c4.yml",
+    "sourceWorkflowRunConclusion": "success",
+    "sourceJobConclusion": "success",
+    "rawAcquisitionJobLogBlob": "039cbe5fb48981d6d0d9cc223cfb72dd517e454c"
+  },
+  "acquiredFileSha256": {
+    "run-1.trace.json": "39058e1688a428e68d6c97180c9cfcad2d3a68e6fbe5850870d790c2ae0e5458",
+    "run-1.json": "92a8de64567230d8d8ec6cdb65a80b469e7b99a7151cc5ec0983ec47a23cb27e",
+    "summary.json": "45d28dcad4c87a929e20eddd5a05fc650241b9060dd88d0678bef3bab9d7b868",
+    "control-plan.json": "d69fe647ba93a521d9696fd0e685284268673f654f1ad6cbd17f58b77f6fa3df",
+    "control-receipt.py": "9b63bbb64e640b5fcef5bfe6cc8e2125dead16669debdbecbf9e4d4ee2549771",
+    "control-jmdict-current-trace-da6c4.yml": "e469471135ce931c9825a749c3de9f5f55a35a68845b15c3bab544a5ba92adb2"
+  },
+  "expectedReceipt": {
+    "productSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "productTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "researchHead": "e2786268b7576849fc4e84358623cd9d2277dcc0",
+    "githubSha": "e2786268b7576849fc4e84358623cd9d2277dcc0",
+    "githubRunId": "46127144239",
+    "githubRunAttempt": "1",
+    "packageSha256": "b601d269b4412ccbd54edaf2e37af4d5466f086ff531aced1ec287cb28f416fa",
+    "node": "v22.22.0",
+    "trackedManifestSha256": "3ddad67f9282a0ec75b00eda47c004c2a363506c114a30968c30e02cb675cc79",
+    "runtimeManifestSha256": "c3f03aa09a1719e37b168c7c918659c5cf1938ece0798817bd6e76ad5004d2fc",
+    "workflowSha256": "e469471135ce931c9825a749c3de9f5f55a35a68845b15c3bab544a5ba92adb2",
+    "planSha256": "d69fe647ba93a521d9696fd0e685284268673f654f1ad6cbd17f58b77f6fa3df",
+    "receiptScriptSha256": "9b63bbb64e640b5fcef5bfe6cc8e2125dead16669debdbecbf9e4d4ee2549771",
+    "controlSha256": {
+      "dev/perf/jmdict-current-trace-da6c4/receipt.py": "9b63bbb64e640b5fcef5bfe6cc8e2125dead16669debdbecbf9e4d4ee2549771",
+      "dev/perf/jmdict-current-trace-da6c4/plan.json": "d69fe647ba93a521d9696fd0e685284268673f654f1ad6cbd17f58b77f6fa3df",
+      ".github/workflows/jmdict-current-trace-da6c4.yml": "e469471135ce931c9825a749c3de9f5f55a35a68845b15c3bab544a5ba92adb2"
+    }
+  },
+  "canonicalValidationSha256": "17f14094237951302eb25da4e16f2cb1d3179cb8820610dd5d04cea359c7385d",
+  "expectedRoleCounts": {
+    "other": 3,
+    "import": 1,
+    "parser": 3,
+    "compression": 4
+  },
+  "originalProfileInventory": [
+    {
+      "pid": 3327,
+      "profileId": "0x1",
+      "tid": 3327,
+      "threadName": "CrRendererMain",
+      "role": "other",
+      "sampleCount": 6132,
+      "nodeCount": 235,
+      "negativeRawDeltaCount": 128,
+      "startTimeUs": 67707205,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x2",
+      "tid": 3355,
+      "threadName": "DedicatedWorker thread",
+      "role": "other",
+      "sampleCount": 6800,
+      "nodeCount": 2,
+      "negativeRawDeltaCount": 0,
+      "startTimeUs": 67707335,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x3",
+      "tid": 3337,
+      "threadName": "ServiceWorker thread",
+      "role": "other",
+      "sampleCount": 5253,
+      "nodeCount": 44,
+      "negativeRawDeltaCount": 19,
+      "startTimeUs": 67873882,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x4",
+      "tid": 3353,
+      "threadName": "DedicatedWorker thread",
+      "role": "import",
+      "sampleCount": 4223,
+      "nodeCount": 822,
+      "negativeRawDeltaCount": 117,
+      "startTimeUs": 67965135,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x5",
+      "tid": 3406,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3176,
+      "nodeCount": 71,
+      "negativeRawDeltaCount": 8,
+      "startTimeUs": 68180491,
+      "endTimeUs": 69058331
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x6",
+      "tid": 3405,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3344,
+      "nodeCount": 63,
+      "negativeRawDeltaCount": 9,
+      "startTimeUs": 68182982,
+      "endTimeUs": 69058122
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x7",
+      "tid": 3407,
+      "threadName": "DedicatedWorker thread",
+      "role": "parser",
+      "sampleCount": 3017,
+      "nodeCount": 64,
+      "negativeRawDeltaCount": 7,
+      "startTimeUs": 68187106,
+      "endTimeUs": 69060111
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x8",
+      "tid": 3358,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2840,
+      "nodeCount": 34,
+      "negativeRawDeltaCount": 36,
+      "startTimeUs": 68434976,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0x9",
+      "tid": 3359,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2937,
+      "nodeCount": 37,
+      "negativeRawDeltaCount": 42,
+      "startTimeUs": 68435048,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0xa",
+      "tid": 3357,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2989,
+      "nodeCount": 42,
+      "negativeRawDeltaCount": 46,
+      "startTimeUs": 68435095,
+      "endTimeUs": null
+    },
+    {
+      "pid": 3327,
+      "profileId": "0xb",
+      "tid": 3360,
+      "threadName": "DedicatedWorker thread",
+      "role": "compression",
+      "sampleCount": 2739,
+      "nodeCount": 36,
+      "negativeRawDeltaCount": 39,
+      "startTimeUs": 68437964,
+      "endTimeUs": null
+    }
+  ],
+  "analysisProtocol": {
+    "primary": "Exact leaf sample counts, grouped by role/source frame. Inclusive ancestors explicitly overlap.",
+    "identity": "Exact original run/job/artifact IDs, complete success, artifact digest and byte count; exact trace/report/summary/control hashes; unchanged acquired tracked/runtime manifests and release package hash.",
+    "source": "Use only source bytes read from the exact acquired release ZIP and checked against its runtime manifest. Parse actual WASM export section without compiling or guessing internal C symbols. Preserve unmapped indices and document dynamic ancestor inference. CallFrame source lines are labelled function-declaration locations, never sampled executed lines.",
+    "profile": "Retain ProfileChunks in original trace-array order, with original event index/timestamp/emitter/data. Reconstruct each(pid,id) after stable chunk sorting by(event ts,original event index), preserving per-chunk sample and signed-delta order. Validate node identity, references, parents, cycles, sample/delta counts, and acquisition inventory. Persist chunkMergeOrder.",
+    "weighting": "After chronological chunk reconstruction, cumulatively apply every signed delta from profile start; stable-sort(timestamp,reconstructionOrder) for adjacent weights. Assign only each sorted sample's gap to its successor. Do not assign prefix/tail or synthesize endTime. Preserve original chunks plus reconstructed and chronological views.",
+    "intervalInterpretation": "Adjacent weights and observed non-idle sample ranges are wall attribution, not CPU time, utilization, continuous busy periods, additive critical-path costs, removable costs, or speedup bounds. No trace time enters promotion or any comparative cohort.",
+    "correctness": "Bind the already completed acquisition canonical validation to exact coverage/report/summary bytes. Do not claim new decoding, fresh lookups, or an independent new import.",
+    "output": "Full raw reconstructed profiles, stable chronological sample views, exact per-role leaf/inclusive/native owner tables, 50ms sample-count bins, source/module identities, original before/after/coverage receipts, analysis source/plan/workflow hashes, and compact readable job-log tables.",
+    "failure": "No retry or replacement import. Preserve every analysis failure. A later analysis-source repair can read the same immutable artifact as a distinct analysis revision; it is not a new timing cohort.",
+    "window": "Read exact frozen trace harness source by dcfc and verify its acquired SHA256. Record source-ordered trace-start/completion/awaited-stop/explicit-validation anchors, actual trace-stop log lines, complete raw report phases, compact phase/import timings, trace timestamp/user-timing events. No automatic shared-clock timed-import window mapping or crop is asserted. Tables describe all captured samples."
+  },
+  "execution": {
+    "permissions": {
+      "actions": "read"
+    },
+    "runtime": "Ubuntu runner's standard Python only. No third-party Python packages, Node setup, npm, compiler, browser, database, or importer. One checksum-bound frozen harness source file is read without credentials to preserve boundary evidence; it is never executed.",
+    "controlBinding": "Fetch analysis controls without credentials from raw.githubusercontent.com at the invoking GITHUB_SHA; workflow hard-codes their SHA256 checks. Download original artifact using actions:read; never forward GitHub Authorization to its signed-storage redirect.",
+    "localStatus": "Source authored in V8 while the executor is explicitly unavailable. Deterministic Python tests will execute before the hosted analysis. No local Python/YAML/actionlint execution is claimed.",
+    "tests": 13
+  },
+  "boundaryHarnessSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+}

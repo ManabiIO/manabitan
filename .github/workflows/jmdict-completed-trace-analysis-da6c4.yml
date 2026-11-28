@@ -1,0 +1,81 @@
+name: Analyze completed JMdict trace (no acquisition)
+
+on:
+  push:
+    branches: [perf/bounded-content-overlap-20261128-da6c4]
+    paths:
+      - .github/workflows/jmdict-completed-trace-analysis-da6c4.yml
+      - dev/perf/jmdict-completed-trace-analysis-da6c4/**
+
+permissions:
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze immutable completed trace only
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Fetch the invoking analysis controls without a product checkout
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$GITHUB_REPOSITORY" == "ManabiIO/manabitan" ]]
+          mkdir analysis-controls
+          for name in analyze.py test_analyze.py plan.json; do
+            curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \
+              "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/dev/perf/jmdict-completed-trace-analysis-da6c4/$name" \
+              --output "analysis-controls/$name"
+          done
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \
+            "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/.github/workflows/jmdict-completed-trace-analysis-da6c4.yml" \
+            --output analysis-controls/workflow.yml
+          sha256sum --check <<'SHA256'
+          a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b  analysis-controls/analyze.py
+          e999800fe64fc8e03159a8d6646bc90ea3daf1bbadaa2442f6c003a038407ec2  analysis-controls/test_analyze.py
+          58ba98bc4b0e3fd0ab6dbc3ce9d9ea93bc9fae3457e948a1a6d4840bf449e460  analysis-controls/plan.json
+          SHA256
+
+      - name: Test reconstruction and source-binding guards without an import
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s analysis-controls -p test_analyze.py -v 2>&1 | tee analysis-tests.log
+
+      - name: Download and analyze the exact completed artifact without a build or import
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 analysis-controls/analyze.py \
+            --plan analysis-controls/plan.json \
+            --output analysis-output 2>&1 | tee analysis-run.log
+
+      - name: Print terminal outcome even after setup or analysis failure
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('analysis-output/analysis-receipt.json')
+          value = json.loads(path.read_text()) if path.exists() else {
+              'complete': False,
+              'missingReceipt': str(path),
+              'scope': 'Analysis only of the existing run46127144239/artifact15256811856; no product build or import occurred.'
+          }
+          print('FROZEN_TRACE_ANALYSIS_TERMINAL ' + json.dumps(value, separators=(',', ':')))
+          PY
+
+      - name: Preserve analysis controls, all outcomes and reconstructed profiles
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-completed-trace-analysis-da6c4-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            analysis-controls
+            analysis-output
+            analysis-tests.log
+            analysis-run.log
+          if-no-files-found: warn
+          retention-days: 30
