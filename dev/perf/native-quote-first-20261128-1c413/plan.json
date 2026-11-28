@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "study": "native-quote-first-20261128-1c413",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "nodeVersion": "v24.22.3",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "dictionary": "jmdict",
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "termBankCount": 53,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "canonicalScannerSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "runtimeSourceDigest": "73c774fb00b81979769ffbd0b244a78a10b07afb4fd159c44404344d1d5144a2",
+  "runtimeSourceFileCount": 323,
+  "arms": {
+    "A": "baseline",
+    "B": "native-quote-first",
+    "C": "baseline"
+  },
+  "variants": {
+    "baseline": {
+      "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+      "wasmBytes": 67659
+    },
+    "native-quote-first": {
+      "cSha256": "2ac26ebfefdc870ce42dde83b01076eac512ba94e2c04d6b12ace260a4c6a527",
+      "wasmSha256": "998dd8d6b7d691c18e4c592294d6687353642362b69e14c1e890c2d2da0b9203",
+      "manifestSha256": "ee5d83ee67eb5cac3e155d5939339666be64d3916188f182310452c49fc1efe4",
+      "patchSha256": "d3b6d6cf16f4bf05e813e12e2fec6b59dd7df2f64ddf6511984c0f9c52a41338",
+      "wasmBytes": 67659,
+      "directory": "variants/native-quote-first"
+    }
+  },
+  "schedule": [
+    "ABC",
+    "ACB",
+    "BAC",
+    "BCA",
+    "CAB",
+    "CBA",
+    "ABC",
+    "ACB",
+    "BAC",
+    "BCA",
+    "CAB",
+    "CBA"
+  ],
+  "warmupOrder": [
+    "ABC",
+    "CBA"
+  ],
+  "warmupsPerInstance": 2,
+  "observationsPerArm": 12,
+  "passesPerObservation": 1,
+  "rowChunkSize": 2048,
+  "options": {
+    "singleChunk": true,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "mediaHintFastScan": false,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true
+  },
+  "timedExports": [
+    "parse_term_bank",
+    "parse_term_bank_with_media_hints",
+    "parse_and_encode_term_bank_token_binary_dedup",
+    "build_term_string_plan",
+    "compact_term_lookup_keys",
+    "encode_term_lookup_index",
+    "encode_term_content",
+    "encode_term_content_no_hash",
+    "encode_term_content_token_binary",
+    "encode_term_content_token_binary_dedup"
+  ],
+  "primaryExport": "parse_and_encode_term_bank_token_binary_dedup",
+  "primaryMetric": "current-thread CPU milliseconds in primary native export",
+  "secondaryMetrics": [
+    "same-export wall milliseconds",
+    "all selected native exports CPU and wall milliseconds",
+    "JavaScript parser plus lookup API wall milliseconds (diagnostic only)"
+  ],
+  "affinity": "Pin Node to the second CPU in sorted initial allowed affinity; use the sole CPU if only one is available. Record original and selected affinity.",
+  "scope": "Resident serial native component screen only. Decompressed term banks use unchanged lazy 24 MiB balancing for an explicit three-worker/four-groups policy; those groups execute serially in each arm. No ZIP, worker scheduling, compression, storage, browser UI, GC or digest work is inside native-call timers.",
+  "selectionPolicy": "All three arms and all twelve blocks are fixed before acquisition. Retain all observations; no adaptive reruns, warmup changes, outlier deletion or control-based resampling. A component signal can only nominate an independent complete-browser import confirmation; this screen cannot qualify a PR.",
+  "grouping": {
+    "policy": "unchanged lazy byte balancing with explicit worker count",
+    "parserWorkers": 3,
+    "plainGroupsPerWorker": 4,
+    "mediaGroupsPerWorker": 3,
+    "targetBytes": 25165824,
+    "expectedGroupCount": 12,
+    "executionConcurrency": 1,
+    "reference": "test/perf/segmented-lookup-ownership-20261125/replay.mjs",
+    "referenceSha256": "6027c6de77b581254333b3790d7acf1dcfe140f51bd6b3e25ddaa0bd884342d6"
+  },
+  "archiveMediaPolicy": "Derive hasArchiveImages from every locked ZIP filename with the production getImageMediaTypeFromFileName helper; require false for the locked JMdict fixture. Set mediaHintFastScan to this observed flag."
+}

@@ -1,0 +1,34 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index ccfba94ced..873f5914f1 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -942,13 +942,8 @@ static int parse_composite_span_impl(
+     uint32_t i = start + 1u;
+     while (i < len) {
+         const uint8_t c = src[i];
+-        if (is_ws(c)) {
+-            if (normalization_hint != 0 && *normalization_hint == 0u) {
+-                *normalization_hint = 1u;
+-            }
+-            ++i;
+-            continue;
+-        }
++        // Compact glossaries enter string tokens frequently. Their complete
++        // dispatch does not need the whitespace classification first.
+         if (c == '"') {
+             uint32_t s_end = 0u;
+             const int object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
+@@ -1043,6 +1038,13 @@ static int parse_composite_span_impl(
+             }
+             continue;
+         }
++        if (is_ws(c)) {
++            if (normalization_hint != 0 && *normalization_hint == 0u) {
++                *normalization_hint = 1u;
++            }
++            ++i;
++            continue;
++        }
+         if (c == ']' || c == '}') {
+             if (c == ']') {
+                 if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }

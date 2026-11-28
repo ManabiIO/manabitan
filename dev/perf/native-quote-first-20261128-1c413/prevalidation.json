@@ -1,0 +1,105 @@
+{
+  "scope": "Local correctness before hosted quote-first component acquisition; no timing claim. Full parser-output checks do not include image decoding, persistence or query readback.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": {
+    "source": {
+      "cSha256": "2ac26ebfefdc870ce42dde83b01076eac512ba94e2c04d6b12ace260a4c6a527",
+      "wasmSha256": "998dd8d6b7d691c18e4c592294d6687353642362b69e14c1e890c2d2da0b9203",
+      "manifestSha256": "ee5d83ee67eb5cac3e155d5939339666be64d3916188f182310452c49fc1efe4",
+      "patchSha256": "d3b6d6cf16f4bf05e813e12e2fec6b59dd7df2f64ddf6511984c0f9c52a41338",
+      "wasmBytes": 67659,
+      "directory": "variants/native-quote-first"
+    },
+    "focusedTests": {
+      "files": 5,
+      "passed": 1087,
+      "newCases": 25,
+      "log": "focused-tests-1.log"
+    },
+    "focusedTestFile": {
+      "size": 9511,
+      "sha256": "99fd575682e575b2fd2620608854029e4728cb8ea8ae8459e769cd6e2428d467"
+    },
+    "pinnedRebuildCheck": true,
+    "changedTestEslint": true
+  },
+  "corpusResults": {
+    "complete": true,
+    "banks": 937,
+    "rows": 7613164,
+    "dictionaries": [
+      {
+        "dictionary": "jmdict",
+        "archiveBytes": 15645766,
+        "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "title": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "rows": 528299,
+        "banks": 53,
+        "groupDigest": "0d406c57d2ec3f7b513ec411d81768b1264b5fdd6a7a9a90c7ee58a75b93b1d0",
+        "fusedParseFallbacks": 0,
+        "maxWasmHeapBytes": 18284544
+      },
+      {
+        "dictionary": "jitendex",
+        "archiveBytes": 38831822,
+        "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "title": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "rows": 436555,
+        "banks": 219,
+        "groupDigest": "201ea3a5f9f8aedf97290dd5ddddd94a52a735011232cba46356566468cb8954",
+        "fusedParseFallbacks": 0,
+        "maxWasmHeapBytes": 22347776
+      },
+      {
+        "dictionary": "vndb",
+        "archiveBytes": 291705969,
+        "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "title": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "rows": 6648310,
+        "banks": 665,
+        "groupDigest": "2acbbe4b44ce66631a5e4b57bc94ae3021bcebd19dccb425ae3362e61fbdcabf",
+        "fusedParseFallbacks": 28,
+        "maxWasmHeapBytes": 22347776
+      }
+    ]
+  },
+  "stockPolicyJMdict": {
+    "scope": "Separate one-pass-per-arm A/B untimed stock-policy verification before constructing this ABC kit. Same partition and full-output digest as the frozen native-components kit.",
+    "complete": true,
+    "expected": {
+      "rows": 528299,
+      "indexBytes": 19508472,
+      "contentBytes": 145957292,
+      "mediaRows": 0,
+      "nativeSegments": 0,
+      "fusedParseAttempts": 12,
+      "fusedParseFallbacks": 0,
+      "digest": "51292350ceb9c320e06a40cb60ccbe353827efead2dc3ad0b69cc163cee0a8c8"
+    },
+    "summarySha256": "5ca3b497c1bfd82beaa984f7c838b937fa27dded67de853ba902a668c62579b0",
+    "acquisitionSha256": "60a10107e90990ee8e4bbf005273cfebb1ba6a13163dab142b2e3365ce876ebf",
+    "runnerSha256": "81270707dee9fcada534924b047d9f0beb414996aab6cd8a28cccd013064e1a2",
+    "helperBindings": {
+      "partition": {
+        "sha256": "ef5e15e828d106caa69760d10f9fe51d26686d20992155add24c8fad226f84a4",
+        "copiedVerbatim": true
+      },
+      "fingerprint": {
+        "sha256": "77e14b57eda17750afa1d896ce73d93c37d15735e93519506a8c45f1d779a3a3",
+        "copiedVerbatim": true
+      }
+    }
+  },
+  "corpusReceiptHashes": {
+    "corpus-parity/plan.json": "c6f70eb16d33fdeefe2482147fff4a9e667ef56d730a241d971bdfac10d8bf53",
+    "corpus-parity/summary.json": "f26b9bb5a45b2e69d59d63ae9f7c316ce1e4724738e57f10faa47aae8d9a6f42",
+    "corpus-parity.mjs": "ea15442d832cece862ba06afb37fcd2685825fb200a5071f14a07d8446c05d76",
+    "stream-locked-banks.py": "9dd51128ff3a9e469e35ed4049eb50863a410a2951ee43d3d22e3ac2063882c3",
+    "focused-tests-1.log": "b433f8c08d1e3a37b050705ee42532b81d6e57815a7118319462a2f5596bb680",
+    "build-check.log": "2511be80bc4b534a048057db9d77aaba5656334b336bfe7cfb15e3fbc90a8b2b"
+  },
+  "retainedFailure": "build-write-1-failed.log: missing LLVM shared-library directory; subsequent build-write-2.log succeeds with correct LD_LIBRARY_PATH"
+}

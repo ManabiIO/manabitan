@@ -1,0 +1,70 @@
+name: Quote-first native component screen 20261128
+
+on:
+  push:
+    branches: [perf/native-quote-first-screen-20261128-1c413]
+    paths:
+      - 'dev/perf/native-quote-first-20261128-1c413/plan.json'
+      - 'dev/perf/native-quote-first-20261128-1c413/*.mjs'
+      - 'dev/perf/native-quote-first-20261128-1c413/*.py'
+      - 'dev/perf/native-quote-first-20261128-1c413/variants/**'
+      - '.github/workflows/native-quote-first-1c413.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-quote-first-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  screen:
+    name: Frozen three-arm quote-first JMdict native screen
+    if: github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.22.3'
+      - name: Install exact-version checked native toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Rebuild every frozen source patch and verify exact artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf
+          node dev/perf/native-quote-first-20261128-1c413/prepare.mjs \
+            builds/perf/native-quote-first-1c413 \
+            2>&1 | tee builds/perf/native-quote-first-preparation.log
+      - name: Restore locked dictionary archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch and verify the locked JMdict bytes
+        run: node dev/perf/native-quote-first-20261128-1c413/fetch-fixture.mjs builds/e2e-dictionary-cache/JMdict.zip
+      - name: Run the prospective fixed component schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/native-quote-first-20261128-1c413/pin-cpu.py \
+            builds/perf/native-quote-first-1c413/affinity.json \
+            node --expose-gc dev/perf/native-quote-first-20261128-1c413/run.mjs \
+            builds/perf/native-quote-first-1c413 builds/e2e-dictionary-cache/JMdict.zip \
+            2>&1 | tee builds/perf/native-quote-first-1c413/screen.log
+      - name: Preserve every observation, identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-quote-first-1c413-${{ github.sha }}
+          path: |
+            builds/perf/native-quote-first-1c413
+            builds/perf/native-quote-first-preparation.log
+          if-no-files-found: error
+          retention-days: 14
