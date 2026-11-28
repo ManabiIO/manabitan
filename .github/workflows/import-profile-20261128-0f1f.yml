@@ -31,13 +31,15 @@ jobs:
         run: |
           mkdir -p "$PERF_EVIDENCE"
           test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
-          git rev-parse HEAD HEAD^{tree} > "$PERF_EVIDENCE/source.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/source.txt"
           git status --porcelain=v1 > "$PERF_EVIDENCE/source-status-before.txt"
           test ! -s "$PERF_EVIDENCE/source-status-before.txt"
-          uname -a > "$PERF_EVIDENCE/host.txt"
-          lscpu >> "$PERF_EVIDENCE/host.txt"
-          free -b >> "$PERF_EVIDENCE/host.txt"
-          df -B1 . >> "$PERF_EVIDENCE/host.txt"
+          {
+            uname -a
+            lscpu
+            free -b
+            df -B1 .
+          } > "$PERF_EVIDENCE/host.txt"
           sha256sum test/perf/dictionaries.lock.json \
             dev/perf/import-benchmark.js dev/perf/benchmark-support.js \
             test/chromium/extension-two-dictionary-import.e2e.js \
@@ -57,11 +59,13 @@ jobs:
           node --input-type=module <<'JS' > "$PERF_EVIDENCE/fixture.json"
           import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'
           import {chromium} from '@playwright/test'
+          import {execFileSync} from 'node:child_process'
+          import {writeFileSync} from 'node:fs'
+          import path from 'node:path'
           const result = await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.PERF_DICTIONARY])
           console.log(JSON.stringify({node: process.version, browserExecutable: chromium.executablePath(), fixture: result.fixtures[process.env.PERF_DICTIONARY], paths: result.paths}, null, 2))
+          writeFileSync(path.join(process.env.PERF_EVIDENCE, 'browser-version.txt'), execFileSync(chromium.executablePath(), ['--version']))
           JS
-          node --input-type=module -e "import {chromium} from '@playwright/test'; console.log(chromium.executablePath())" \
-            | xargs -r -I '{}' '{}' --version > "$PERF_EVIDENCE/browser-version.txt"
           node dev/bin/build.js --target chrome > "$PERF_EVIDENCE/build.log" 2>&1
           sha256sum builds/manabitan-chrome.zip > "$PERF_EVIDENCE/package-before.sha256"
       - name: Acquire three ordinary complete imports
@@ -78,7 +82,7 @@ jobs:
       - name: Verify package stability and preserve final identity
         if: always()
         run: |
-          git rev-parse HEAD HEAD^{tree} > "$PERF_EVIDENCE/source-after.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/source-after.txt"
           git status --porcelain=v1 > "$PERF_EVIDENCE/source-status-after.txt"
           if test -f "$PERF_EVIDENCE/package-before.sha256"; then
             sha256sum --check "$PERF_EVIDENCE/package-before.sha256" > "$PERF_EVIDENCE/package-check.txt"
