@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "status": "Final reviewed-source candidate for parent publication; no refs changed by this agent.",
+  "qualificationBranch": "perf/native-record-alias-qualification-20261128-da6c4",
+  "qualificationParent": "eaee9b0e408307410558adc69d7695e9ea506fbb",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+  "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
+  "identicalRuntimeExtTree": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "workflowUnchanged": {
+    "path": ".github/workflows/native-record-alias-qualification-da6c4.yml",
+    "blob": "67394899be7329237fa6a3af656344139b0cb781",
+    "sha256": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc"
+  },
+  "sources": [
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/run.py",
+      "blob": "dbb663617bff38c3ac08249674bc9b8a6dc17740",
+      "bytes": 45443,
+      "sha256": "edb2bf3ebfdd8239ec650ea98a435994fffd97c99dda8878344ca19c9b3841d5"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
+      "blob": "6ed9f2a3d8f05bbac0c28699c619598ddbfb0a0b",
+      "bytes": 25812,
+      "sha256": "fecfc01fc190f289e83ded42aa97fe49f5f184e2ef5e27d812e0133d1dafa0e9"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser_proof.py",
+      "blob": "239641c869d40493244a574f6751733d5f2318c2",
+      "bytes": 9004,
+      "sha256": "aff713c25c323af02d0b12dde187576e45730c748eeeb80c0a19da87057b6e5d"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_browser_proof.py",
+      "blob": "40279ca4a6fe927df27c3236faa4d264a1a525a3",
+      "bytes": 10640,
+      "sha256": "ab8cd2259a0a7153b962271fd1e0a849fc41403f875a949b92a118b2276d89d1"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/candidate-test-amendment.json",
+      "blob": "6e6a9c598d9ad35cef050bbd09b489e39e571614",
+      "bytes": 752,
+      "sha256": "a388c1443215b688e3a96c074a130507822fd98ac77db46b78ccb7d1b5a93325"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_candidate_identity.py",
+      "blob": "1561355cd234c855bf2bd9cfeff6005590be26e5",
+      "bytes": 2794,
+      "sha256": "493c12e15e694250c31ecf475e809bdf54d253a1f015d5b4b3db62655bf58204"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/probe_projection.py",
+      "blob": "eae9e24a256430d14d44493e6757d1fb4f4c5206",
+      "bytes": 12425,
+      "sha256": "097beded3bfa05eee7322950f435fbb1bda15bed54cd020e8c90ad3ee07731ae"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_probe_projection.py",
+      "blob": "152e3c66e40bb533c6bea1be96f8994e6a8f89b5",
+      "bytes": 8189,
+      "sha256": "e6ede75ec15dfd57014855a5f5661bcc1d8188fa5b5912ac712ca4b4da7c41ee"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py",
+      "blob": "579ad31c74733a7af0d36c5e395e884be691b16f",
+      "bytes": 17965,
+      "sha256": "6adf7417a6e524073cd765e369618dbf2b791da9fbbf3ae904e68be854bea1d9"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_receipt_adapter.py",
+      "blob": "adc2b6e50b8176687c95d973e93d58128209c3c8",
+      "bytes": 19223,
+      "sha256": "ec1d8f1c012fe0adb6877d521dea7fad0f72b5a96ee4cc37e8856d46d46a5ed6"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/plan.json",
+      "blob": "70200364f5c3bdd32d4bf1bca9d6e12448b51682",
+      "bytes": 19368,
+      "sha256": "d11d11c9ed54a5d374a9904d1e004aff034fc7b62e9a97ee3319f9b88d95f4cb"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/source-manifest.json",
+      "blob": "c2e5998eca9c710912f038d6a955010f245e09a3",
+      "bytes": 9294,
+      "sha256": "d0800c3da8c90736d821f2a434d484d4ecf67d8b9d7167aacfdaf873e9d8d842"
+    }
+  ],
+  "evidence": [
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/combined-tests.log",
+      "path": "combined-tests.log",
+      "bytes": 5951,
+      "sha256": "a3abbaf32398a5bc2b5888b7720c54f3672cba5f9a60daf2cf40f60705214d5a",
+      "blob": "975dfbe00b54b7e9c6d583e95915cd6d7abfc5d8"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/saved-binder-replay-attempt1.log",
+      "path": "saved-binder-replay-attempt1.log",
+      "bytes": 557,
+      "sha256": "99c7345a8395ca9510a9ab17dc58cd710eccab83883ee61ac22553872b9c2119",
+      "blob": "f2056db4658f9cf3c9c630b59106a6aab2c42cb6"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/rebind-saved-preflight-attempt1.py",
+      "path": "rebind-saved-preflight-attempt1.py",
+      "bytes": 3957,
+      "sha256": "57e07d8abcb28b0f45c6208ba8353b6431d1a492e4ab0126ce9f68b106452020",
+      "blob": "df78a6a545be0cce2b855b3dc682d83b60941e8f"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/saved-binder-replay-attempt2.log",
+      "path": "saved-binder-replay-attempt2.log",
+      "bytes": 233,
+      "sha256": "c941a0414ebf839c1afc8ea7cbf53145b5fc5936fc69e97b969de511d815e24d",
+      "blob": "8a269a1f9ca931145e30a5a8c3adb873a82e2f90"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/rebind-saved-preflight.py",
+      "path": "rebind-saved-preflight.py",
+      "bytes": 4191,
+      "sha256": "25872e4244612960116625c1805f48f3ca71b1f7ea065641309696773d14b957",
+      "blob": "3d85f3a6490b2f2a54cbe9ef0c999cd0a1bcb37b"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/attempt4-member-hashes.json",
+      "path": "attempt4-member-hashes.json",
+      "bytes": 1001,
+      "sha256": "b16322e14aa844fbaeac51e5d6de515d83bbd80e47c08ee7fbcd2bbfbdd6e3c0",
+      "blob": "96ea4f2ae4c482f08a027923fcf7d841283b95ba"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/attempt4-corrected-binding.json.gz",
+      "path": "attempt4-corrected-binding.json.gz",
+      "bytes": 16054,
+      "sha256": "f76c24b5291ba93fd1112360bbb961e087ba2d7e486ebdc7e92c6750d801069b",
+      "originalBytes": 288244,
+      "originalSha256": "a0f4375a72d5b14bb70a0d478d39b26c53dc4240443cd7b3324083d04fdb8f4f",
+      "blob": "152df7966ab8785f590bc5bde0e2819d7ad9e57e"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/validation-final.json",
+      "path": "validation-final.json",
+      "bytes": 4581,
+      "sha256": "bcca55e7f90523833e9a9cf241b3739a8e38d66a1625fb0a6c4b2944a820bc06",
+      "blob": "1bcf66f2c424758cbe0c4cf348118da133e91e86"
+    },
+    {
+      "suggestedPath": "builds/perf/import-overlap-20261128-da6c4/alias-qualification-repair5/combined-tests-final.log",
+      "path": "combined-tests-final.log",
+      "bytes": 5951,
+      "sha256": "c2261dab1bf4929af3636245ca8b95fbd938fdca0d1ca9ac87269bba70fe3c7f",
+      "blob": "069171cc26c2ab1ac0c4096bc72fe9b824fdf8c8"
+    }
+  ],
+  "priorEvidence": {
+    "attempt4Outcome": "fb3d3169d49e2e3f542b3e8f323b764b66814dc2",
+    "verifyLog": "4ade1b606860c67211229187efb51aaa2fbace85",
+    "preflightLog": "5522ff02328928a9736bb5b8d10c34f7d5858514",
+    "testFixtureValidation": "80ae0ba9ae111e1d0be75ded8238868ebc48f1ee",
+    "originalProjectionDiff": "3b1219cfdc133100efa79bddbdcff0f5d4edb490",
+    "peerProjectionHandoff": "7728f44f263eb0768a9d3aadc01d0c3f67a52b94",
+    "peerSavedFileProof": "165ea78060c4735fa50509c4a4129120d12ce211",
+    "peer22TestLog": "9379e060cc26d5748ca4b796be8f1440f3c20d1c"
+  },
+  "changes": [
+    "Use cce635 only as an explicitly registered test-only descendant; keep all original natural core/pipeline/verification receipt bytes and2c023 identities. Prove exact sole parent, complete old/new trees, old/new one-test blobs, exactly one changed test path and identical ext subtree before setup and in the full browser verifier.",
+    "After both full per-arm file decoders pass, prove each raw diagnostic preview against saved content bytes, original170-span relocation and unchanged compressed frames. Keep original physical/semantic digests and complete full own-arm previews exact. Only the separately proved rawContentPreview moves out of the cross-arm logical view; all stable row/decoded/error/order fields remain strict.",
+    "Register the focused source-identity and raw-preview mutation tests in hosted setup/helper gates. No package/product/runtime setting, browser exporter, observation endpoint, full persisted decoder body, numerical schedule/gate or stopping-rule changes."
+  ],
+  "validation": {
+    "finalCombinedPassed": 34,
+    "finalCombinedFailed": 0,
+    "sourceHashesStableBeforeAfter": true,
+    "actualGitObjectOnlyAmendmentProof": true,
+    "pythonSyntax": true,
+    "nodeSyntax": true,
+    "localNode": "v24.22.3",
+    "freshHostedNode22Required": true,
+    "observationMethodByteIdentical": true,
+    "fullPersistedDecoderBodyByteIdentical": true,
+    "savedArtifactBinder": {
+      "complete": true,
+      "rows": 29,
+      "compactReferences": 132,
+      "changedPreviews": 20,
+      "originalWorkflowStillFailed": true,
+      "qualifiesNewCandidate": false,
+      "authoritativeTiming": false
+    },
+    "preservedFailures": [
+      "Original four unit fixture failures and cross-arm preflight failure",
+      "First standalone saved-artifact binder launch missing stock validator module path; zero acquisition",
+      "Aggregate evidence output budget failure; exact original binding subsequently compressed and checksum verified"
+    ]
+  },
+  "pending": [
+    "Parent final manifest/source review and publication",
+    "Fresh exact-source repository verification and full all-media browser preflight",
+    "Six ordinary/control/all-media/memory cells after both prerequisites succeed",
+    "Independent complete gain/non-regression/control/memory audit",
+    "Separate current-develop integration and requalification if frozen-base gain qualifies"
+  ],
+  "interpretation": "No new browser imports or ordinary timing acquired during this repair. The original failed workflow remains failed. All earlier observations/failures stay retained. No alias PR or whole-import gain claim is supported yet."
+}

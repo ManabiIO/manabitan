@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+  "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
+  "runtimeExtTree": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+  "changedPath": "test/term-bank-wasm-parser.test.js",
+  "beforeBlob": "a5fd77814ee365a0a852544957b38fc3103b4534",
+  "afterBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+  "scope": "One test-only source-count fixture repair. Natural B7 receipts keep their original candidate identity. Product runtime, parser settings, package inputs, storage oracle and numerical qualification gates are unchanged."
+}

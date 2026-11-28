@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from receipt_adapter import AliasReceiptComparator, file_vector, route_receipt, same
+from probe_projection import probe_views, prove_probe_relocations
 
 
 def file_sha(path):
@@ -35,8 +36,18 @@ def bind_preflight(*, core, core_sha256, comparison_path, arms, common_binding):
     same(len(comparison['normalSpanProofs']), 170, 'Normal content span proof is incomplete')
     same(comparison['addedContentBytes'], 2260, 'Alias storage geometry changed')
     binding = deepcopy(common_binding)
-    for key in ('baseline', 'candidate'):
-        same(core[key], binding[key], 'Natural/browser source identity differs: ' + key)
+    same(core['baseline'], binding['baseline'], 'Natural/browser baseline differs')
+    if core['candidate'] == binding['candidate']:
+        same(binding.get('candidateTestAmendment'), None, 'Unexpected source amendment for original candidate')
+    else:
+        amendment = load(Path(__file__).with_name('candidate-test-amendment.json'))
+        same(binding['candidateTestAmendment'], amendment, 'Unknown candidate source amendment')
+        same(binding['naturalCandidate'], core['candidate'], 'Historical natural candidate was replaced')
+        same(amendment['naturalCandidate'], core['candidate'], 'Wrong original candidate')
+        same(amendment['naturalCandidateTree'], core['arms']['B']['localTreeIncludingWorkingChanges'], 'Wrong original candidate tree')
+        same(amendment['candidate'], binding['candidate'], 'Wrong amended candidate')
+        same(amendment['candidate'], binding['sources']['B']['commit'], 'Wrong amended source commit')
+        same(amendment['candidateTree'], binding['sources']['B']['tree'], 'Wrong amended source tree')
     same(binding['dictionary'], 'vndb', 'The alternate physical proof is VNDB-only')
     witnesses, verification_hashes = {}, {}
     loaded = {}
@@ -48,6 +59,9 @@ def bind_preflight(*, core, core_sha256, comparison_path, arms, common_binding):
         same(verification['complete'], True, 'Full browser verification failed')
         same(verification['browserNaturalTermFileEqualityEstablished'], True, 'Browser/natural bytes were not proved equal')
         same(verification['failures'], [], 'Browser verifier retained a failure')
+        if binding.get('candidateTestAmendment') is not None:
+            same(verification['candidateTestAmendment'], binding['candidateTestAmendment'],
+                 'Full verifier did not prove the test-only source amendment')
         for key, expected in (
             ('arm', arm), ('protocolBlob', binding['protocolBlob']),
             ('sourceCommit', identity['commit']), ('sourceTree', identity['tree']),
@@ -94,6 +108,7 @@ def bind_preflight(*, core, core_sha256, comparison_path, arms, common_binding):
             'semanticProbeDigestSha256': layout['probes']['semanticProbeDigestSha256'],
             'files': files, 'route': route,
         }
+        witnesses[arm].update(probe_views(layout['probes']))
         verification_hashes[arm] = file_sha(item['verificationPath'])
         loaded[arm] = (item['receipt'], layout)
     binding['witnesses'] = witnesses
@@ -106,10 +121,15 @@ def bind_preflight(*, core, core_sha256, comparison_path, arms, common_binding):
         'canonicalEntries': core['canonicalEntries'], 'normalContentSpansVerified': 170,
         'aliasRows': core['aliasRows'], 'aliasGroups': core['aliasGroups'],
         'logicalSha256': core['logicalSha256'],
+        'naturalCandidate': core['candidate'],
+        'candidateTestAmendment': binding.get('candidateTestAmendment'),
         'proofMethod': 'Each complete exported browser term-file set equals its fully decoded natural arm after only linked16-byte generation normalization. The exact natural canonical-relocation and ordinary-content-span proof therefore transfers through this equality. Transient browser canonical metadata was not exported or fabricated.',
     }
+    binding['physicalProof']['rawProbeRelocationProof'] = prove_probe_relocations(
+        arms, comparison, core['comparisonSha256'])
     comparator = AliasReceiptComparator(binding)
     for arm, (receipt, layout) in loaded.items():
         comparator.check(receipt, layout, arm)
     comparator.compare(loaded['A'][0], loaded['B'][0], 'A', 'B', compare_media=True)
     return binding
+

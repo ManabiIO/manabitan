@@ -15,6 +15,8 @@ sys.path.insert(0, str(ROOT / 'dev/perf/import-memory-20261125-a7f7'))
 from test_qualification_receipts import observation, validate, change_validation, set_active_sah_units
 from receipt_adapter import AliasReceiptComparator, CURRENT_BASE, PROTOCOL_BLOB, ROUTE_KEYS, file_vector, route_receipt, term_paths
 from harness_overlay import ANCHOR, layout_overlay
+from probe_projection import js_json_sha, original_semantic_projection, physical_probes, probe_views
+from test_probe_projection import synthetic_probes
 
 
 def sha(value):
@@ -33,6 +35,8 @@ def corpus(dictionary='vndb', arm='A', generation='1'):
                     item['bytes'] += 10
                     value['storage']['bytes'] += 10
         change_validation(summary, report, move)
+    probes = synthetic_probes(dictionary, arm)
+    change_validation(summary, report, lambda value: value.__setitem__('outputDigestSha256', probes['physicalOutputDigestSha256']))
     receipt = validate(summary, report, vndb_sah_allocation_units=(37, 37) if dictionary == 'vndb' else None)
     validation = deepcopy(summary['runs'][0]['validation'])
     fixture = summary['fixture']
@@ -68,7 +72,7 @@ def corpus(dictionary='vndb', arm='A', generation='1'):
         'cleanupFailures': [], 'failure': None, 'files': files, 'fixture': fixture, 'validation': validation,
         'beforeInventory': inventory, 'afterInventory': deepcopy(inventory),
         'headerLinkage': {'pairs': len(indexes), 'rows': fixture['termRows']},
-        'probes': {'physicalOutputDigestSha256': validation['outputDigestSha256'], 'semanticProbeDigestSha256': 'f' * 64},
+        'probes': probes,
         'importDebug': {'hasResult': True, 'errorCount': 0, 'addSettingsErrorCount': 0, 'usesFallbackStorage': False,
             'importerPhaseTimings': [{'phase': 'term-file-fast-path:all-source-banks', 'details': route}]}}
     return receipt, layout
@@ -88,8 +92,14 @@ def binding(a, b, dictionary='vndb'):
             'physicalOutputDigestSha256': layout['probes']['physicalOutputDigestSha256'],
             'semanticProbeDigestSha256': layout['probes']['semanticProbeDigestSha256'],
             'files': file_vector(layout, dictionary, layout['fixture']['termRows']),
-            'route': route_receipt(layout['importDebug'])[0]}
+            'route': route_receipt(layout['importDebug'])[0], **probe_views(layout['probes'])}
             for arm, layout in [('A', a), ('B', b)]}
+        result['physicalProof']['rawProbeRelocationProof'] = {
+            'schemaVersion': 1, 'complete': True, 'naturalComparisonSha256': '5' * 64,
+            'contentFiles': {arm: {'bytes': next(item['bytes'] for item in layout['files'] if item['header']['kind'] == 'content'),
+                                  'sha256': next(item['normalizedSha256'] for item in layout['files'] if item['header']['kind'] == 'content')}
+                             for arm, layout in [('A', a), ('B', b)]},
+        }
     return result
 
 
@@ -119,6 +129,38 @@ class AliasReceipts(unittest.TestCase):
         self.rb['common']['validation']['additionalSemanticField'] = 'must survive'
         with self.assertRaises(ValueError):
             self.comparator.compare(self.ra, self.rb, 'A', 'B')
+
+    def test_wrong_own_arm_preview_is_rejected_with_stale_or_recomputed_digests(self):
+        for arm, receipt, layout in [('A', self.ra, self.la), ('B', self.rb, self.lb)]:
+            changed = deepcopy(layout)
+            for phase in ('before', 'after'):
+                changed['probes'][phase][0]['probes'][0]['diagnostics']['offscreenState']['rowSample'][0]['rawContentPreview'] = 'wrong'
+            with self.subTest(arm=arm), self.assertRaises(ValueError):
+                self.comparator.check(receipt, changed, arm)
+            physical = physical_probes(changed['probes']['before'])
+            semantic = original_semantic_projection(physical)
+            changed['probes'].update(physicalBefore=physical, physicalAfter=deepcopy(physical),
+                semanticProjection=semantic, physicalOutputDigestSha256=js_json_sha(physical),
+                semanticProbeDigestSha256=js_json_sha(semantic))
+            changed['validation']['outputDigestSha256'] = js_json_sha(physical)
+            changed_receipt = deepcopy(receipt)
+            changed_receipt['common']['validation']['outputDigestSha256'] = js_json_sha(physical)
+            with self.subTest(arm=arm, self_consistent=True), self.assertRaisesRegex(ValueError, 'frozen arm oracle'):
+                self.comparator.check(changed_receipt, changed, arm)
+
+    def test_logical_id_decoded_error_and_row_order_mutations_are_not_projected(self):
+        for key, value in [('id', 999), ('id', True), ('expression', 'wrong'), ('reading', 'wrong'),
+                           ('decodedContentDebug', {'length': 1}), ('readErrorDetails', {'error': 'failed'})]:
+            changed = deepcopy(self.lb)
+            for phase in ('before', 'after'):
+                changed['probes'][phase][0]['probes'][0]['diagnostics']['offscreenState']['rowSample'][0][key] = value
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.comparator.check(self.rb, changed, 'B')
+        changed = deepcopy(self.lb)
+        for phase in ('before', 'after'):
+            changed['probes'][phase][0]['probes'][0]['diagnostics']['offscreenState']['rowSample'].reverse()
+        with self.assertRaises(ValueError):
+            self.comparator.check(self.rb, changed, 'B')
 
     def test_fresh_random_generation_is_the_only_within_arm_file_normalization(self):
         self.check_both()

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "scope": "Source-bound local control/synthetic mutation validation and saved-artifact analysis only; no new browser imports or timing acquisition.",
+  "sourceHashesBeforeAndAfter": {
+    "run.py": "edb2bf3ebfdd8239ec650ea98a435994fffd97c99dda8878344ca19c9b3841d5",
+    "browser-verify.mjs": "fecfc01fc190f289e83ded42aa97fe49f5f184e2ef5e27d812e0133d1dafa0e9",
+    "browser_proof.py": "aff713c25c323af02d0b12dde187576e45730c748eeeb80c0a19da87057b6e5d",
+    "test_browser_proof.py": "ab8cd2259a0a7153b962271fd1e0a849fc41403f875a949b92a118b2276d89d1",
+    "candidate-test-amendment.json": "a388c1443215b688e3a96c074a130507822fd98ac77db46b78ccb7d1b5a93325",
+    "test_candidate_identity.py": "493c12e15e694250c31ecf475e809bdf54d253a1f015d5b4b3db62655bf58204",
+    "probe_projection.py": "097beded3bfa05eee7322950f435fbb1bda15bed54cd020e8c90ad3ee07731ae",
+    "test_probe_projection.py": "e6ede75ec15dfd57014855a5f5661bcc1d8188fa5b5912ac712ca4b4da7c41ee",
+    "receipt_adapter.py": "6adf7417a6e524073cd765e369618dbf2b791da9fbbf3ae904e68be854bea1d9",
+    "test_receipt_adapter.py": "ec1d8f1c012fe0adb6877d521dea7fad0f72b5a96ee4cc37e8856d46d46a5ed6",
+    "plan.json": "d11d11c9ed54a5d374a9904d1e004aff034fc7b62e9a97ee3319f9b88d95f4cb",
+    "source-manifest.json": "d0800c3da8c90736d821f2a434d484d4ecf67d8b9d7167aacfdaf873e9d8d842"
+  },
+  "combinedTests": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "-v",
+      "test_candidate_identity.py",
+      "test_setup_sources.py",
+      "test_browser_proof.py",
+      "test_probe_projection.py",
+      "test_receipt_adapter.py"
+    ],
+    "exitCode": 0,
+    "passed": 34,
+    "failed": 0,
+    "logSha256": "c2261dab1bf4929af3636245ca8b95fbd938fdca0d1ca9ac87269bba70fe3c7f"
+  },
+  "syntax": {
+    "pythonAstAllChangedPythonFiles": true,
+    "nodeCheckBrowserVerifierExitCode": 0,
+    "localNode": "v24.22.3"
+  },
+  "actualGitObjectAmendmentProof": {
+    "schemaVersion": 1,
+    "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+    "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+    "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+    "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
+    "runtimeExtTree": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+    "changedPath": "test/term-bank-wasm-parser.test.js",
+    "beforeBlob": "a5fd77814ee365a0a852544957b38fc3103b4534",
+    "afterBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+    "scope": "One test-only source-count fixture repair. Natural B7 receipts keep their original candidate identity. Product runtime, parser settings, package inputs, storage oracle and numerical qualification gates are unchanged."
+  },
+  "actualGitObjectQueryContext": {
+    "repository": "/tmp/manabitan-da6c4-alias-tests",
+    "head": "2c02336b135ee01661ca2a788395afec75e66712",
+    "porcelain": "M test/term-bank-wasm-parser.test.js",
+    "meaning": "Object-only parent/tree/blob/ext/diff proof; this was not a browser execution of the new commit."
+  },
+  "observationMethodByteIdenticalToAttempt4": true,
+  "fullPersistedDecoderBodyByteIdenticalToAttempt4": true,
+  "numericalProtocolAndSchedulesChanged": false,
+  "originalProtocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "savedArtifactBinderReplay": {
+    "complete": true,
+    "reportSha256": "a0f4375a72d5b14bb70a0d478d39b26c53dc4240443cd7b3324083d04fdb8f4f",
+    "originalWorkflowStillFailed": true,
+    "qualifiesNewCandidate": false,
+    "rows": 29,
+    "compactReferences": 132,
+    "changedPreviews": 20
+  },
+  "preservedLocalFailures": [
+    {
+      "source": "rebind-saved-preflight-attempt1.py",
+      "log": "saved-binder-replay-attempt1.log",
+      "reason": "Analysis-only first launch lacked stock qualification_receipts import path; failed before reading artifact files, no acquisition.",
+      "repair": "Add explicit original stock validator module path to the standalone analysis script; production hosted runner already has this path."
+    },
+    {
+      "phase": "evidence-upload-read",
+      "reason": "Initial aggregate JSON read exceeded tool output budget and could not be parsed; no data/source mutation.",
+      "repair": "Preserve exact288244-byte corrected-binding JSON as verified deterministicgzip,16054bytes; decoded SHA unchanged."
+    }
+  ],
+  "pending": [
+    "Fresh hosted complete candidate repository gates",
+    "Fresh hosted source-bound all-media browser preflight",
+    "All six ordinary/control/media/memory qualification cells",
+    "Independent final performance audit"
+  ]
+}

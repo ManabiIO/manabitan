@@ -1,0 +1,11 @@
+{
+  "pre-acquisition-binding.json": "eb28bd06df7403b0b36cccb9003551e8823f0e227156a70c47309a376ec6a1f1",
+  "browser-preflight-A/browser-verification.json": "fb0f7571fe44fae3e4ee17d741ce0779d678247a5f8e322df58dfea40ebbcc91",
+  "browser-preflight-A/canonical-receipt.json": "72d9c2f3d7248b35ea76c0b33aa00cb55bc5aa252d9753977ef0449920c360bb",
+  "browser-preflight-A/layout/layout.json": "68565d4bf0443849c43f872d673463a08291b228b29c8ee46bf07e1907205193",
+  "browser-preflight-B/browser-verification.json": "7c1c3068ccb5b3403b5560bec34af0fb02f267a79de136a01fa31206c1cb70ec",
+  "browser-preflight-B/canonical-receipt.json": "6f1cb69a52e166a7640bd33c817f8152c0dd0dc3044c92e0ef731c7d71f6d7f5",
+  "browser-preflight-B/layout/layout.json": "0e377e9626ade4119f2d819b7acc33b0982bb75ae4668ed483687307c13b8a5b",
+  "natural-oracle/core.json": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+  "natural-oracle/comparison.json": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964"
+}

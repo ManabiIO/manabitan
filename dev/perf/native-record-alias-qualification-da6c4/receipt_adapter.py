@@ -14,6 +14,10 @@ from qualification_receipts import (
     EXPECTED_PRODUCT_PATHS, GENERATION_MEDIA_PATH, canonicalize_validation,
     require_matching_receipts,
 )
+from probe_projection import (
+    js_json_sha, logical_projection, original_physical_from_full,
+    original_semantic_projection, probe_views,
+)
 
 CURRENT_BASE = 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'
 PROTOCOL_BLOB = '7801b5fd696fffe4f250b98a19d6d80406518705'
@@ -163,7 +167,19 @@ class AliasReceiptComparator:
             for witness in self.witnesses.values():
                 for key in ['preflightLayoutSha256', 'physicalOutputDigestSha256', 'semanticProbeDigestSha256']:
                     digest(witness[key], key)
-            same(self.witnesses['A']['semanticProbeDigestSha256'], self.witnesses['B']['semanticProbeDigestSha256'], 'Logical browser probe projection differs across arms')
+                physical = original_physical_from_full(witness['fullProbeProjection'])
+                same(js_json_sha(physical), witness['physicalOutputDigestSha256'], 'Preflight physical probe witness changed')
+                same(js_json_sha(original_semantic_projection(physical)), witness['semanticProbeDigestSha256'], 'Preflight original projection witness changed')
+                same(logical_projection(witness['fullProbeProjection']), witness['logicalProbeProjection'], 'Broadened logical probe projection')
+            relocation = proof['rawProbeRelocationProof']
+            same(relocation['schemaVersion'], 1, 'Unknown raw-preview relocation proof')
+            same(relocation['complete'], True, 'Incomplete raw-preview relocation proof')
+            same(relocation['naturalComparisonSha256'], proof['naturalReplayComparisonSha256'], 'Raw-preview relocation map changed')
+            for arm, witness in self.witnesses.items():
+                content = [entry for entry in witness['files'] if entry['path'] == 'manabitan-term-content.bin']
+                same(len(content), 1, 'Missing preview content-file witness')
+                same(relocation['contentFiles'][arm], {'bytes': content[0]['bytes'], 'sha256': content[0]['normalizedSha256']}, 'Raw-preview proof used different file bytes')
+            same(self.witnesses['A']['logicalProbeProjection'], self.witnesses['B']['logicalProbeProjection'], 'Logical browser probe projection differs across arms')
             same(self.witnesses['A']['route'], self.witnesses['B']['route'], 'Current-base logical route differs across arms')
             self.route = deepcopy(self.witnesses['A']['route'])
         else:
@@ -219,6 +235,9 @@ class AliasReceiptComparator:
             same(files, witness['files'], 'Complete term-file bytes differ from frozen arm oracle')
             same(probes['physicalOutputDigestSha256'], witness['physicalOutputDigestSha256'], 'Physical digest differs from frozen arm oracle')
             same(probes['semanticProbeDigestSha256'], witness['semanticProbeDigestSha256'], 'Semantic probe projection differs from oracle')
+            actual_probes = probe_views(probes)
+            same(actual_probes['fullProbeProjection'], witness['fullProbeProjection'], 'Complete original preview/identity/decoded probe differs from its own arm oracle')
+            same(actual_probes['logicalProbeProjection'], witness['logicalProbeProjection'], 'Logical probe fields differ from oracle')
         else:
             if self.shared_files is None:
                 self.shared_files = deepcopy(files)

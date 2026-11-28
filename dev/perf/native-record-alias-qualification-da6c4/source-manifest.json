@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "kind": "source-bound-current-native-record-alias-browser-controls",
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
-  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
   "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
   "workflowPath": ".github/workflows/native-record-alias-qualification-da6c4.yml",
   "workflowSha256": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc",
   "stockHarnessSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
   "files": {
-    "dev/perf/native-record-alias-qualification-da6c4/run.py": "3adcd6da4a6cedc353b7c4a8e23bc0a11304896c945545dd56c492d22603ccaa",
-    "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs": "c5ab510afa69ecda6daf19beb01e95dbf2fc3f9e8d6f13b22c120740945dae24",
-    "dev/perf/native-record-alias-qualification-da6c4/browser_proof.py": "a44391645e5677692eda1b1e0d88078d1985a48b7d795f08343348751eb9a0d1",
+    "dev/perf/native-record-alias-qualification-da6c4/run.py": "edb2bf3ebfdd8239ec650ea98a435994fffd97c99dda8878344ca19c9b3841d5",
+    "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs": "fecfc01fc190f289e83ded42aa97fe49f5f184e2ef5e27d812e0133d1dafa0e9",
+    "dev/perf/native-record-alias-qualification-da6c4/browser_proof.py": "aff713c25c323af02d0b12dde187576e45730c748eeeb80c0a19da87057b6e5d",
     "dev/perf/native-record-alias-qualification-da6c4/qualification_stats.py": "9aba4cfad039e815cedfc821b61e9fee923cf5b41f34969b11cb5660dc89dc20",
     "dev/perf/native-record-alias-qualification-da6c4/test_qualification_stats.py": "cc5ca5e5a7f4e53fe3ff925118d4619131146509a7f898a3152239d3e4d5643e",
-    "dev/perf/native-record-alias-qualification-da6c4/test_browser_proof.py": "b8a22693f65804d6bc181b50ed0a020ba3f1355bf3a7b078f16fadbdc2204514",
+    "dev/perf/native-record-alias-qualification-da6c4/test_browser_proof.py": "ab8cd2259a0a7153b962271fd1e0a849fc41403f875a949b92a118b2276d89d1",
     "dev/perf/native-record-alias-qualification-da6c4/pack_artifacts.py": "a74effd61a687a4ab4176b9ec93f5d135cae135fcf838d9a7854f742a701bf83",
     "dev/perf/native-record-alias-qualification-da6c4/test_pack_artifacts.py": "ae76f916b732b5caf4a46721594821817105e77c4bbc8ed628b38e6df78923a2",
     "dev/perf/native-record-alias-qualification-da6c4/report_results.py": "0512d71e5970585d3dca34d01d08f312b7dedaf3109dc9a4397cab5356b87fb9",
@@ -22,12 +22,12 @@
     "dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.test.mjs": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39",
     "dev/perf/native-record-alias-qualification-da6c4/browser-layout-export.mjs": "300bfdf6f0dddb9cd545b5c2b6aee779480a352b4f2369e2666193966a6fc022",
     "dev/perf/native-record-alias-qualification-da6c4/test-browser-layout-export.mjs": "64d61a1d6de5c2a34e00af32c5411faf41455215dd12acb5163aba41b51192b4",
-    "dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py": "00436c3a81419c2af64d4ae0ca026889f2a9caaa7a60fe228008961bc2c1cdea",
-    "dev/perf/native-record-alias-qualification-da6c4/test_receipt_adapter.py": "2103e4cc147f6d70e4ac5954f2bdaf3f46b43e8cc47124049c011a62a8eb6fd6",
+    "dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py": "6adf7417a6e524073cd765e369618dbf2b791da9fbbf3ae904e68be854bea1d9",
+    "dev/perf/native-record-alias-qualification-da6c4/test_receipt_adapter.py": "ec1d8f1c012fe0adb6877d521dea7fad0f72b5a96ee4cc37e8856d46d46a5ed6",
     "dev/perf/native-record-alias-qualification-da6c4/harness_overlay.py": "e98b5d457dff320fecb5ed4a8df8bd5419ff18eab1ce676b797c408d02d418f0",
     "dev/perf/native-record-alias-qualification-da6c4/README.md": "b3131569c50a18f178924c47fcb85d1e985fb0c26442986c8fc7f7e504991aa6",
     "dev/perf/native-record-alias-qualification-da6c4/protocol.json": "7fd1da46b56c7579c4369a0dcc32cc4c6cd46acb31d19335328b9204fd500389",
-    "dev/perf/native-record-alias-qualification-da6c4/plan.json": "0645b1d830d38057e2ac568c24766c0d9503d3f30963be0f9e2cb51c138278af",
+    "dev/perf/native-record-alias-qualification-da6c4/plan.json": "d11d11c9ed54a5d374a9904d1e004aff034fc7b62e9a97ee3319f9b88d95f4cb",
     "dev/perf/native-record-alias-qualification-da6c4/oracles/core.json": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
     "dev/perf/native-record-alias-qualification-da6c4/oracles/comparison.json": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
     ".github/workflows/native-record-alias-qualification-da6c4.yml": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc",
@@ -38,7 +38,11 @@
     "dev/perf/native-record-alias-qualification-da6c4/test_setup_sources.py": "153ecf913c556a6f51acb6442a18f9851d6cf96f58cd914b987bd81fc1183939",
     "dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs": "8135a8acae03281afbf418ed1c790f1e544e3d1685ff5e20fa41655a178d70dc",
     "dev/perf/native-record-alias-qualification-da6c4/generated-runtime-source-proof.json": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e",
-    "dev/perf/native-record-alias-qualification-da6c4/test-runtime-source-guard.mjs": "e9cd531bc93345fa32d231179045c7e164e0b5effe6f7c33bc6d5897195b2c47"
+    "dev/perf/native-record-alias-qualification-da6c4/test-runtime-source-guard.mjs": "e9cd531bc93345fa32d231179045c7e164e0b5effe6f7c33bc6d5897195b2c47",
+    "dev/perf/native-record-alias-qualification-da6c4/candidate-test-amendment.json": "a388c1443215b688e3a96c074a130507822fd98ac77db46b78ccb7d1b5a93325",
+    "dev/perf/native-record-alias-qualification-da6c4/test_candidate_identity.py": "493c12e15e694250c31ecf475e809bdf54d253a1f015d5b4b3db62655bf58204",
+    "dev/perf/native-record-alias-qualification-da6c4/probe_projection.py": "097beded3bfa05eee7322950f435fbb1bda15bed54cd020e8c90ad3ee07731ae",
+    "dev/perf/native-record-alias-qualification-da6c4/test_probe_projection.py": "e6ede75ec15dfd57014855a5f5661bcc1d8188fa5b5912ac712ca4b4da7c41ee"
   },
   "oracles": {
     "pipeline-A": {
@@ -91,6 +95,19 @@
     }
   },
   "selfBinding": "This manifest is held by its initial SHA256; its exact Git blob is part of the clean research HEAD/tree and GITHUB_SHA. It excludes its own hash to avoid a circular digest.",
-  "status": "Prospectively frozen source controls; no browser observations acquired. Hosted syntax/helper/product/proof gates remain required.",
-  "runtimeSourceProofSha256": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e"
+  "status": "Prospectively frozen repairs after attempt4. Prior failed gates/two excluded imports retained; no ordinary timing or memory observations acquired. Fresh exactcce635 repository and browser proof gates remain required.",
+  "runtimeSourceProofSha256": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e",
+  "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "candidateTestAmendment": {
+    "schemaVersion": 1,
+    "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+    "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+    "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+    "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
+    "runtimeExtTree": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+    "changedPath": "test/term-bank-wasm-parser.test.js",
+    "beforeBlob": "a5fd77814ee365a0a852544957b38fc3103b4534",
+    "afterBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+    "scope": "One test-only source-count fixture repair. Natural B7 receipts keep their original candidate identity. Product runtime, parser settings, package inputs, storage oracle and numerical qualification gates are unchanged."
+  }
 }

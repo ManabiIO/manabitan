@@ -11,6 +11,7 @@ import {createNodeOpfs, assertNodeOpfsQuiescent} from './archived/raw-alias-node
 import {sha, asBytes, readRange, fileInventory, rowDigest, definitionDigest, referenceKey, saveJson, hashFile, utf8} from './product-common.mjs';
 
 const config = JSON.parse(await readFile(process.argv[2]));
+const candidateTestAmendment = JSON.parse(await readFile(new URL('./candidate-test-amendment.json', import.meta.url)));
 assert.equal(sha(await readFile(new URL(import.meta.url))), config.verifierSourceSha256, 'Verifier source changed');
 const pipelineBytes = await readFile(config.pipelineReport);
 assert.equal(sha(pipelineBytes), config.pipelineReportSha256, 'Natural pipeline receipt changed');
@@ -31,6 +32,7 @@ const report = {schemaVersion: 1, complete: false, pipelineReport: config.pipeli
     naturalCoreSha256: config.naturalCoreSha256,
     browserLayoutReportSha256: config.browserLayoutReportSha256,
     sourceCommit: config.expectedCommit, sourceTree: config.expectedTree,
+    candidateTestAmendment,
     packageSha256: config.packageSha256, sourceManifestSha256: config.sourceManifestSha256,
     arm: config.arm, protocolBlob: config.protocolBlob,
     scope: 'Untimed complete streaming decode of actual exported browser record/index rows and referenced definitions, exact normalized equality with the current-source natural oracle, independent persisted framing/fields checks and actual cold runtime reader probes. Browser media resolution and full import must reproduce the exact natural term files; no tolerance or performance claim.',
@@ -55,8 +57,12 @@ async function verifyBrowserBindings() {
     assert.equal(core.comparisonSha256, config.naturalComparisonReportSha256);
     assert.equal(oracle.pipelineSha256, config.pipelineReportSha256);
     assert.equal(oracle.verificationSha256, config.naturalVerificationReportSha256);
-    assert.equal(oracle.localTreeIncludingWorkingChanges, config.expectedTree);
-    assert.equal(config.expectedCommit, config.arm === 'B' ? core.candidate : core.baseline);
+    assert.deepEqual(config.candidateTestAmendment, candidateTestAmendment);
+    assert.equal(candidateTestAmendment.naturalCandidate, core.candidate);
+    assert.equal(oracle.localTreeIncludingWorkingChanges,
+        config.arm === 'B' ? candidateTestAmendment.naturalCandidateTree : config.expectedTree);
+    assert.equal(config.expectedCommit, config.arm === 'B' ? candidateTestAmendment.candidate : core.baseline);
+    if (config.arm === 'B') { assert.equal(config.expectedTree, candidateTestAmendment.candidateTree); }
     const verifiedBytes = await readFile(config.naturalVerificationReport);
     assert.equal(sha(verifiedBytes), config.naturalVerificationReportSha256);
     const verified = JSON.parse(verifiedBytes);
@@ -72,7 +78,7 @@ async function verifyBrowserBindings() {
     assert.equal(config.protocolBlob, '7801b5fd696fffe4f250b98a19d6d80406518705');
     assert.equal(browserLayout.request.arm, config.arm);
     assert.equal(browserLayout.request.baseline, core.baseline);
-    assert.equal(browserLayout.request.candidate, core.candidate);
+    assert.equal(browserLayout.request.candidate, candidateTestAmendment.candidate);
     assert.equal(browserLayout.request.protocolBlob, config.protocolBlob);
     assert.equal(browserLayout.request.dictionary, 'vndb');
     assert.equal(browserLayout.request.sourceCommit, config.expectedCommit);
@@ -93,9 +99,25 @@ async function verifyBrowserBindings() {
     assert.equal(git('rev-parse', 'HEAD'), config.expectedCommit);
     assert.equal(git('rev-parse', 'HEAD^{tree}'), config.expectedTree);
     assert.equal(git('status', '--porcelain'), config.expectedGitStatus);
+    if (config.arm === 'B') {
+        const amendment = candidateTestAmendment;
+        assert.equal(git('rev-list', '--parents', '-n', '1', amendment.candidate),
+            `${amendment.candidate} ${amendment.naturalCandidate}`);
+        for (const [commit, tree, blob] of [
+            [amendment.naturalCandidate, amendment.naturalCandidateTree, amendment.beforeBlob],
+            [amendment.candidate, amendment.candidateTree, amendment.afterBlob],
+        ]) {
+            assert.equal(git('rev-parse', `${commit}^{tree}`), tree);
+            assert.equal(git('rev-parse', `${commit}:ext`), amendment.runtimeExtTree);
+            assert.equal(git('rev-parse', `${commit}:${amendment.changedPath}`), blob);
+        }
+        assert.equal(git('diff-tree', '--no-commit-id', '--name-status', '-r', amendment.naturalCandidate, amendment.candidate),
+            `M\t${amendment.changedPath}`);
+    }
     const runtimeManifestBytes = await readFile(config.sourceManifestPath);
     assert.equal(sha(runtimeManifestBytes), config.sourceManifestSha256);
     const runtimeManifest = JSON.parse(runtimeManifestBytes);
+    assert.deepEqual(runtimeManifest.candidateTestAmendment, candidateTestAmendment);
     assert.deepEqual(runtimeManifest.naturalSourceHashes, pipeline.configuration.sourceHashes);
     const runtimeSourceProof = await verifyRuntimeSources(root, pipeline.configuration.sourceHashes);
     assert.equal(runtimeSourceProof.proofSha256, runtimeManifest.generatedRuntimeSourceProofSha256);

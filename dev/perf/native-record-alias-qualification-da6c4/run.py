@@ -20,8 +20,10 @@ import zipfile
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 BASELINE = 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'
-CANDIDATE = '2c02336b135ee01661ca2a788395afec75e66712'
-TREES = {'A': 'd911260f1a57f518d59b3a12127fcc3b2293c918', 'B': '17995fab3d9e2fd226f0cc37d306f5dfc7e39505'}
+NATURAL_CANDIDATE = '2c02336b135ee01661ca2a788395afec75e66712'
+CANDIDATE = 'cce6353276f92b80fc6c377bf543354ea59edce3'
+TREES = {'A': 'd911260f1a57f518d59b3a12127fcc3b2293c918', 'B': 'b65955a62da72c55e24a681011684601fa089f07'}
+CANDIDATE_TEST_AMENDMENT = json.loads((HERE / 'candidate-test-amendment.json').read_text())
 PROTOCOL_BLOB = '7801b5fd696fffe4f250b98a19d6d80406518705'
 HARNESS = 'test/chromium/extension-two-dictionary-import.e2e.js'
 MEMORY_DIRECTORY = 'dev/perf/import-memory-20261125-a7f7'
@@ -62,6 +64,25 @@ def git(root, *args):
 def copy_dependency_tree(source, destination):
     """Use the stock qualifier's real ignored directory and shared immutable files."""
     shutil.copytree(source, destination, copy_function=os.link, symlinks=True)
+
+
+def verify_candidate_test_amendment(root):
+    amendment = CANDIDATE_TEST_AMENDMENT
+    same(amendment['naturalCandidate'], NATURAL_CANDIDATE, 'Wrong historical natural candidate')
+    same(amendment['candidate'], CANDIDATE, 'Wrong test-only candidate')
+    same(amendment['candidateTree'], TREES['B'], 'Wrong test-only candidate tree')
+    same(git(root, 'rev-list', '--parents', '-n', '1', CANDIDATE),
+         CANDIDATE + ' ' + NATURAL_CANDIDATE, 'Test-only amendment must have exactly the natural candidate parent')
+    for commit, expected_tree, expected_blob in (
+        (NATURAL_CANDIDATE, amendment['naturalCandidateTree'], amendment['beforeBlob']),
+        (CANDIDATE, amendment['candidateTree'], amendment['afterBlob']),
+    ):
+        same(git(root, 'rev-parse', commit + '^{tree}'), expected_tree, 'Amended source tree differs')
+        same(git(root, 'rev-parse', commit + ':ext'), amendment['runtimeExtTree'], 'Runtime subtree changed')
+        same(git(root, 'rev-parse', commit + ':' + amendment['changedPath']), expected_blob, 'Amended test blob differs')
+    same(git(root, 'diff-tree', '--no-commit-id', '--name-status', '-r', NATURAL_CANDIDATE, CANDIDATE),
+         'M\t' + amendment['changedPath'], 'Unexpected product amendment paths')
+    return dict(amendment)
 
 
 def package_entries(filename):
@@ -113,7 +134,7 @@ class Study:
         self.core = json.loads(self.oracle['core'].read_text())
         same(self.core['complete'], True, 'Natural proof incomplete')
         same(self.core['baseline'], BASELINE, 'Stale natural baseline')
-        same(self.core['candidate'], CANDIDATE, 'Wrong natural candidate')
+        same(self.core['candidate'], NATURAL_CANDIDATE, 'Wrong historical natural candidate')
         self.native = {arm: json.loads(self.oracle['pipeline-' + arm].read_text()) for arm in ('A', 'B')}
         self.fixture = json.loads((self.root / 'test/perf/dictionaries.lock.json').read_text())['dictionaries'][args.dictionary]
         write_json(self.evidence / 'host-identity.json', {
@@ -150,6 +171,9 @@ class Study:
         same(digest(HERE / 'source-manifest.json'), self.source_manifest_sha256, 'Control manifest changed')
         same(self.source_manifest['baseline'], BASELINE, 'Control baseline changed')
         same(self.source_manifest['candidate'], CANDIDATE, 'Control candidate changed')
+        same(self.source_manifest['naturalCandidate'], NATURAL_CANDIDATE, 'Historical natural identity changed')
+        same(self.source_manifest['candidateTestAmendment'], CANDIDATE_TEST_AMENDMENT, 'Test-only source amendment changed')
+        same(self.plan['candidateTestAmendment'], CANDIDATE_TEST_AMENDMENT, 'Plan test-only source amendment changed')
         same(self.source_manifest['protocolBlob'], PROTOCOL_BLOB, 'Protocol Git blob changed')
         same(git(self.root, 'rev-parse', 'HEAD'), self.research_commit, 'Research checkout moved')
         same(git(self.root, 'rev-parse', 'HEAD^{tree}'), self.research_tree, 'Research tree changed')
@@ -214,7 +238,7 @@ class Study:
 
     def setup_sources(self):
         self.phase('source-and-release-package-setup')
-        self.run(['python', '-m', 'unittest', '-v', 'test_setup_sources.py'], HERE,
+        self.run(['python', '-m', 'unittest', '-v', 'test_setup_sources.py', 'test_candidate_identity.py'], HERE,
                  self.evidence / 'dependency-setup-test.log')
         tooling = {}
         tree_output = git(self.root, 'ls-tree', '-r', BASELINE, '--', 'dev/perf', 'test/chromium', 'test/e2e', '.github/actions/setup')
@@ -232,6 +256,8 @@ class Study:
             same(git(target, 'rev-parse', 'HEAD'), commit, 'Wrong runtime source')
             same(git(target, 'rev-parse', 'HEAD^{tree}'), TREES[arm], 'Wrong complete runtime tree')
             same(git(target, 'status', '--porcelain'), '', 'Runtime checkout dirty before build')
+            if arm == 'B':
+                write_json(self.evidence / 'candidate-test-amendment.json', verify_candidate_test_amendment(target))
             for relative in ('package.json', 'package-lock.json', 'test/perf/dictionaries.lock.json'):
                 require((target / relative).read_bytes() == (self.root / relative).read_bytes(), 'Research/dependency/fixture mismatch: ' + relative)
             for relative, blob in tooling.items():
@@ -268,6 +294,7 @@ class Study:
             runtime = compatibility['actualSourceHashes']
             archive = target / 'builds/manabitan-chrome.zip'
             runtime_manifest = {'commit': commit, 'tree': TREES[arm], 'files': runtime,
+                                'candidateTestAmendment': CANDIDATE_TEST_AMENDMENT,
                                 'naturalSourceHashes': natural_runtime,
                                 'generatedRuntimeSourceProofSha256': compatibility['proofSha256'],
                                 'runtimeSourceProofReceiptSha256': digest(compatibility_path)}
@@ -377,7 +404,8 @@ class Study:
         self.run(['node', str(HERE / 'archived/raw-alias-node-opfs.test.mjs'), str(HERE / 'archived/raw-alias-node-opfs.mjs')],
                  self.root, self.evidence / 'decoder-adapter-tests.log')
         helper_env = dict(self.env, MANABITAN_RECEIPT_SOURCE=str(self.sources['A']))
-        self.run(['python', '-m', 'unittest', '-v', 'test_receipt_adapter.py', 'test_qualification_stats.py', 'test_pack_artifacts.py', 'test_browser_proof.py'],
+        self.run(['python', '-m', 'unittest', '-v', 'test_receipt_adapter.py', 'test_probe_projection.py',
+                  'test_qualification_stats.py', 'test_pack_artifacts.py', 'test_browser_proof.py'],
                  HERE, self.evidence / 'receipt-stats-tests.log', helper_env)
         self.set_overlay(self.overlay)
         self.guard_sources()
@@ -393,6 +421,7 @@ class Study:
 
     def common_binding(self):
         return {'schemaVersion': 1, 'baseline': BASELINE, 'candidate': CANDIDATE, 'protocolBlob': PROTOCOL_BLOB,
+                'naturalCandidate': NATURAL_CANDIDATE, 'candidateTestAmendment': CANDIDATE_TEST_AMENDMENT,
                 'dictionary': self.args.dictionary, 'fixtureSha256': self.fixture['sha256'],
                 'exporterSha256': digest(HERE / 'browser-layout-export.mjs'),
                 'receiptAdapterSha256': digest(HERE / 'receipt_adapter.py'),
@@ -490,6 +519,7 @@ class Study:
                 'naturalCoreReport': str(self.oracle['core']), 'naturalCoreSha256': digest(self.oracle['core']),
                 'browserLayoutReport': item['layoutPath'], 'browserLayoutReportSha256': digest(item['layoutPath']),
                 'expectedCommit': identity['commit'], 'expectedTree': identity['tree'],
+                'candidateTestAmendment': CANDIDATE_TEST_AMENDMENT,
                 'expectedGitStatus': git(self.sources[arm], 'status', '--porcelain'),
                 'packageSha256': identity['packageSha256'], 'sourceManifestSha256': identity['sourceManifestSha256'],
                 'sourceManifestPath': identity['sourceManifestPath'],
@@ -497,7 +527,8 @@ class Study:
                 'exporterSha256': digest(HERE / 'browser-layout-export.mjs'), 'fixtureSha256': self.fixture['sha256'],
                 'verifierSourceSha256': digest(HERE / 'browser-verify.mjs'),
                 'dependencyHashes': {name: digest(HERE / name) for name in ('product-common.mjs', 'archived/raw-alias-node-opfs.mjs',
-                                                                          'runtime-source-guard.mjs', 'generated-runtime-source-proof.json')},
+                                                                          'runtime-source-guard.mjs', 'generated-runtime-source-proof.json',
+                                                                          'candidate-test-amendment.json')},
             }
             write_json(output / 'browser-verifier-config.json', config)
             self.run(['node', '--expose-gc', str(HERE / 'browser-verify.mjs'), str(output / 'browser-verifier-config.json')],

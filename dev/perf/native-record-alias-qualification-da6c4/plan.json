@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "kind": "native-record-alias-current-browser-qualification",
-  "status": "prospective; no browser observations acquired",
+  "status": "Prospective repair after attempt4; both excluded preflight imports and all failed gates retained. No ordinary timing or memory observations acquired.",
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
   "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
-  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
-  "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+  "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
   "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
   "naturalCoreBlob": "008adf754595f36087bad627099208ca241d0773",
   "naturalCoreSha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
@@ -206,7 +206,56 @@
     "runtimeFiles": "Do not rewrite any generated library, source, release package, or natural oracle. Preserve the clean stock dependency/build setup. Runtime manifests and all later source guards bind every actual hosted file hash.",
     "proofInterpretation": "Zip and resvg, the mismatched generated libraries reachable in the natural component, have identical executable ASTs. Other changes are source comments, sourcemap sources paths and 70 esbuild CommonJS source-label method keys; diagnostic function names/stacks can differ. All non-label AST fields and all other sourcemap fields are identical. A/B/C browser arms use the same stock library bytes.",
     "validation": "Run the 28 focused acceptance/mutation checks against the actual first stock-built ext/lib directory before setup acceptance. The shared source guard is used by setup and by the full browser verifier before/after decoding.",
-    "unchanged": "Product commits/trees, fixture bytes, Git cleanliness, exact package delta, full logical/physical/media/restart proof, all schedules/statistical/memory gates and no-retry rule are unchanged.",
-    "sourceScope": "These controls intentionally remain pinned to dcfc02a and 2c02336. Later develop changes, including #981, are outside this cohort; no result transfers to a rebased combination without separate validation."
+    "unchanged": "At the attempt3 setup amendment: product commits/trees, fixture bytes, Git cleanliness, exact package delta, full logical/physical/media/restart proof, all schedules/statistical/memory gates and no-retry rule were unchanged. The later explicit test-only candidate amendment is separately recorded.",
+    "sourceScope": "Runtime remains frozen to dcfc02a plus the original2c023 alias product bytes; cce635 is its separately proved test-only descendant. Later develop changes, including #981, are outside this cohort; no result transfers to a rebased combination without separate validation."
+  },
+  "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "candidateTestAmendment": {
+    "schemaVersion": 1,
+    "naturalCandidate": "2c02336b135ee01661ca2a788395afec75e66712",
+    "naturalCandidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+    "candidate": "cce6353276f92b80fc6c377bf543354ea59edce3",
+    "candidateTree": "b65955a62da72c55e24a681011684601fa089f07",
+    "runtimeExtTree": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+    "changedPath": "test/term-bank-wasm-parser.test.js",
+    "beforeBlob": "a5fd77814ee365a0a852544957b38fc3103b4534",
+    "afterBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+    "scope": "One test-only source-count fixture repair. Natural B7 receipts keep their original candidate identity. Product runtime, parser settings, package inputs, storage oracle and numerical qualification gates are unchanged."
+  },
+  "testFixtureRepair": {
+    "failureRunId": 46134500034,
+    "failureResearchCommit": "eaee9b0e408307410558adc69d7695e9ea506fbb",
+    "outcomeBlob": "fb3d3169d49e2e3f542b3e8f323b764b66814dc2",
+    "patchBlob": "e97824beede77e4a1052ae0ee05286e1d8775980",
+    "validationBlob": "80ae0ba9ae111e1d0be75ded8238868ebc48f1ee",
+    "reason": "Four-CPU hosted execution selects3parserworkers, but the import-wide parser requires at least4sources. Four new ownership matrix cases incorrectly used the worker count as their fixture source count. Only the fixture now uses max(4,workerCount); production admission is unchanged.",
+    "checks": "Require exactly the original natural candidate as parent, exactly one modified test path with fixed old/new blobs, both complete trees and identical ext subtree before source setup; repeat in the full browser verifier. Natural B7 receipt bytes and source identity remain original2c023.",
+    "numericalProtocolChanged": false
+  },
+  "probeProjectionAmendment": {
+    "prospective": true,
+    "reason": "Attempt4 full per-arm browser decoders passed, then cross-arm comparator failed because the prior semantic probe projection retained20 rawContentPreview strings whose compact pointers moved. These are physical byte previews, not decoded definitions.",
+    "failedAttempt": {
+      "runId": 46134500034,
+      "researchCommit": "eaee9b0e408307410558adc69d7695e9ea506fbb",
+      "outcomeBlob": "fb3d3169d49e2e3f542b3e8f323b764b66814dc2",
+      "ordinaryTimingObservations": 0,
+      "excludedPreflightImports": 2
+    },
+    "originalProjectionDiffBlob": "3b1219cfdc133100efa79bddbdcff0f5d4edb490",
+    "savedFileProofBlob": "165ea78060c4735fa50509c4a4129120d12ce211",
+    "savedFileProofSha256": "f08e14acc90260c9c0416f74fab9b90c7e02d67081b1b8ba79cb36fdcf88a1a9",
+    "independentHelperHandoffBlob": "7728f44f263eb0768a9d3aadc01d0c3f67a52b94",
+    "coverage": {
+      "sampledRows": 29,
+      "compactReferences": 132,
+      "changedTextPreviews": 20,
+      "otherOriginalProjectionChanges": 0
+    },
+    "admission": "After both complete persisted browser file decoders succeed, verify every preview against its exact saved content-file range and original170-span relocation. Compact references may change only their uint64 frame pointer by that exact span delta; lengths, entry offsets and pointed compressed frame bytes remain exact. Retain out-of-file behavior.",
+    "ordinaryValidation": "Recompute the unchanged original physical/semantic digests from raw diagnostics. Require complete original physical previews plus row IDs, dictionary, match source, headword/reading, decoded-content diagnostics and error fields to match their own arm exactly before/after restart and in every observation. Across arms remove only the separately proved raw preview in addition to the existing totalLength/rawEntryContentOffset projection; keep all other fields/order exact.",
+    "unchanged": "Browser exporter, original stock validator/probe bytes, observation endpoint, complete per-arm file hashes/decodes, media and non-target comparisons, schedules, numerical/statistical/memory gates and stopping rule.",
+    "retrospectiveStatus": "The corrected binder accepts the saved original2c023 attempt4 files, but the original workflow remains failed and cannot authorize newcce635 timing cells. Fresh exact-source prerequisite jobs remain required."
   }
 }

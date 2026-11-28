@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from test_receipt_adapter import corpus, binding
 from receipt_adapter import file_vector
@@ -41,6 +42,16 @@ class FullBrowserProofBindings(unittest.TestCase):
         self.common = binding(layouts['A'], layouts['B'])
         self.common.pop('witnesses')
         self.common.pop('physicalProof')
+        preview_proof = {'schemaVersion': 1, 'complete': True,
+            'naturalComparisonSha256': self.core['comparisonSha256'], 'contentFiles': {}}
+        for arm, layout in layouts.items():
+            content = next(entry for entry in layout['files'] if entry['path'] == 'manabitan-term-content.bin')
+            preview_proof['contentFiles'][arm] = {'bytes': content['bytes'], 'sha256': content['normalizedSha256']}
+        # These tests exercise binder ordering/identity only. Actual range reads,
+        # pointer relocations and corrupt-file rejection have separate tests.
+        relocation_patch = patch('browser_proof.prove_probe_relocations', return_value=preview_proof)
+        self.relocation = relocation_patch.start()
+        self.addCleanup(relocation_patch.stop)
         self.core.update(baseline=self.common['baseline'], candidate=self.common['candidate'])
         for arm, item in self.arms.items():
             identity = self.common['sources'][arm]
@@ -86,6 +97,48 @@ class FullBrowserProofBindings(unittest.TestCase):
         result = self.call()
         self.assertTrue(result['physicalProof']['complete'])
         self.assertEqual(set(result['witnesses']), {'A', 'B'})
+        self.relocation.assert_called_once()
+        self.assertEqual(result['physicalProof']['rawProbeRelocationProof'], self.relocation.return_value)
+
+    def use_test_amendment(self):
+        amendment = json.loads(Path(__file__).with_name('candidate-test-amendment.json').read_text())
+        self.core['candidate'] = amendment['naturalCandidate']
+        self.core['arms']['B']['localTreeIncludingWorkingChanges'] = amendment['naturalCandidateTree']
+        self.common.update(candidate=amendment['candidate'], naturalCandidate=amendment['naturalCandidate'],
+                           candidateTestAmendment=deepcopy(amendment))
+        self.common['sources']['B'].update(commit=amendment['candidate'], tree=amendment['candidateTree'])
+        for arm, item in self.arms.items():
+            item['layout']['request']['candidate'] = amendment['candidate']
+            identity = self.common['sources'][arm]
+            item['layout']['request'].update(sourceCommit=identity['commit'], sourceTree=identity['tree'])
+            item['layoutPath'].write_text(json.dumps(item['layout']))
+            self.mutate_verification(arm, lambda value: value.update(
+                sourceCommit=identity['commit'], sourceTree=identity['tree'],
+                browserLayoutReportSha256=file_sha(item['layoutPath']), candidateTestAmendment=deepcopy(amendment)))
+        return amendment
+
+    def test_known_test_only_descendant_preserves_original_natural_identity(self):
+        amendment = self.use_test_amendment()
+        result = self.call()
+        self.assertEqual(result['candidate'], amendment['candidate'])
+        self.assertEqual(result['physicalProof']['naturalCandidate'], amendment['naturalCandidate'])
+        self.assertEqual(result['physicalProof']['candidateTestAmendment'], amendment)
+
+    def test_unregistered_candidate_or_relabelled_natural_oracle_is_rejected(self):
+        self.use_test_amendment()
+        original_core, original_common = deepcopy(self.core), deepcopy(self.common)
+        mutations = (
+            lambda: self.common['candidateTestAmendment'].__setitem__('runtimeExtTree', '0' * 40),
+            lambda: self.common.__setitem__('naturalCandidate', '0' * 40),
+            lambda: self.common.__setitem__('candidate', '0' * 40),
+            lambda: self.common['sources']['B'].__setitem__('tree', '0' * 40),
+            lambda: self.core['arms']['B'].__setitem__('localTreeIncludingWorkingChanges', '0' * 40),
+        )
+        for mutation in mutations:
+            self.core, self.common = deepcopy(original_core), deepcopy(original_common)
+            mutation()
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                self.call()
 
     def test_stale_pipeline_or_layout_hash_is_rejected(self):
         for key in ('pipelineSha256', 'naturalPipelineReportSha256', 'browserLayoutReportSha256'):
