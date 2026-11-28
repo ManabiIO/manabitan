@@ -1,0 +1,40 @@
+{
+    "schemaVersion": 1,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "a9171ea47b086474fa176c04b5531beee4d69e7c",
+    "candidateTree": "cadfb45a302871b8fd1263473f6b62d6b8a9a2c7",
+    "localCandidateEquivalent": "ebe3cb418a67c2fb65c0949ea0defdd38458ffcf",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "browserVersion": "153.0.8010.12",
+    "nodeVersion": "v22.22.0",
+    "parserWasmSha256": {
+        "A": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "B": "b362d9b0106c28e9cb495d66c650463c771e165cb8ebadc4a66adda973466fd9"
+    },
+    "expectedPackageChanges": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+    ],
+    "vndbSahAllocationUnits": [
+        37,
+        37
+    ],
+    "vndbSahAllocationPolicy": "Current baseline-bound 4096-byte allocation units; exact complete file-size equality remains required across every observation.",
+    "control": "A and C use the same immutable baseline package in independent fresh browser profiles.",
+    "timingPlan": "Three warmups followed by twelve balanced ABC blocks. The second independent hosted job reverses each block. No retries or appended observations.",
+    "timingBoundary": "Unchanged file-input change through post-UI import completion. No product or timing-harness overlay. Source CRC admission, byte-exact witnesses, completion and rejection remain at their original boundaries.",
+    "diagnostics": "Before timing, actual compressed-source replay compares all three complete pinned corpora, with independent zlib CRC/size checks, strict native output parity, unchanged CRC admission/reuse, and thirty corruption/boundary rejections. Exhaustive media and four separate process-memory observations follow timing. Separate baseline/candidate browser traces follow all observations.",
+    "memoryPolicy": "Existing complete-process-tree observer and fixed coverage rules, median PSS/private growth at most 5%, each individual pair at most 10%. Both independent host results remain separate.",
+    "statistics": "Twelve within-block B/A, B/C and unchanged C/A comparisons per host. Descriptive paired percentile bootstrap, 10000 resamples, seed 20261127. No control subtraction or pooling across hosts/corpora.",
+    "promotion": "No automatic promotion. Review requires a repeatable complete-import benefit compared with both unchanged controls on both hosts, assessed against control variation, plus all correctness and memory gates. An inconclusive result is not a speed claim; all raw observations and failures remain available.",
+    "hypothesis": "Consume the final complete eight-byte and four-byte words in CRC row gaps with the existing IEEE slicing tables, retaining scalar handling for the final zero to three bytes and all original span bounds.",
+    "selection": "Only native function5 crc32_update_gap changes; every other function body and non-code section matches baseline. Actual compressed replay proves this function is inactive for JMdict and Jitendex under unchanged default admission. Timing is therefore prospectively limited to VNDB; all three corpora retain complete compressed parity. No JMdict/Jitendex speed claim is made.",
+    "timingDictionaries": [
+        "vndb"
+    ],
+    "parityDictionaries": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+    ]
+}
