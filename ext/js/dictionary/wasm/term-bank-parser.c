@@ -1474,6 +1474,22 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*
     return 1;
 }
 
+/* The preceding successful fused row has already validated its raw key.
+ * Check the same bounded bytes before scanning them again, and carry the
+ * proof into the interner. The closing quote rejects different lengths
+ * before the equality scan; source/bank bounds remain authoritative. */
+static inline int reuse_validated_key_span(
+    const uint8_t* src, uint32_t len, uint32_t start,
+    uint32_t previous_start, uint32_t previous_length, uint32_t* out_end
+) {
+    if (previous_length < 2u || previous_length > 34u || start >= len ||
+        previous_length > len - start || src[start] != '"' ||
+        src[start + previous_length - 1u] != '"' ||
+        !content_bytes_equal_between(src, start + 1u, src, previous_start + 1u, previous_length - 2u)) { return 0; }
+    *out_end = start + previous_length;
+    return 1;
+}
+
 /* Strict source validation has exactly eight fields with known token types.
  * Keep its grammar explicit instead of dispatching each field twice through
  * the permissive row parser and set_field. Every metadata word is assigned
@@ -1496,17 +1512,25 @@ static int parse_format3_row(
     uint32_t end = 0u;
     uint32_t expression_escaped = 0u;
     uint32_t reading_escaped = 0u;
+    uint32_t adjacent_key_mask = 0u;
+    const TermRowMeta* previous_row = key_escape_mask != 0 && prior_count > 0u ? &prior_rows[prior_count - 1u] : 0;
 
-    if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
+    if (previous_row != 0 && reuse_validated_key_span(
+            src, len, i, previous_row->expression_start, previous_row->expression_length, &end)) {
+        adjacent_key_mask |= 4u;
+    } else if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
     meta->expression_start = i;
     meta->expression_length = end - i;
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
-    if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+    if (previous_row != 0 && reuse_validated_key_span(
+            src, len, i, previous_row->reading_start, previous_row->reading_length, &end)) {
+        adjacent_key_mask |= 8u;
+    } else if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
     meta->reading_start = i;
     meta->reading_length = end - i;
-    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
+    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u) | adjacent_key_mask; }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
@@ -3428,8 +3452,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            if ((key_escape_mask & (4u << field)) != 0u) {
+                string_indexes[field] = field == 0u ?
+                    expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+                continue;
+            }
             // Cap the extra equality scan at 32 raw token-body bytes.
-            if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
+            if (!validate_glossary_types && row_count > 0u && token_length >= 2u && token_length <= 34u) {
                 const TermRowMeta* previous_row = &rows[row_count - 1u];
                 const uint32_t previous_start = field == 0u ?
                     previous_row->expression_start : previous_row->reading_start;
