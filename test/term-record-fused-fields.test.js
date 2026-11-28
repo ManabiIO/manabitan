@@ -67,7 +67,7 @@ function fixture(branded, count = 128) {
     const prepared = new Map();
     for (const [key, entry] of generated.indexes) {
         prepared.set(key, branded ?
-            createPreparedTermLookupIndexForRecordFields(entry.bytes, entry.preinternedPlan, entry.routeFilter) :
+            createPreparedTermLookupIndexForRecordFields(entry.bytes, entry.preinternedPlan) :
             {...entry});
     }
     const uniqueCount = Math.ceil(count / 2);
@@ -186,14 +186,19 @@ function forgeColumnKind(value, columnName, kind) {
         BigInt64Array.from(original, (number) => BigInt(number)) :
         Float32Array.from(original);
     Object.setPrototypeOf(replacement, Object.getPrototypeOf(original));
-    if (columnName === 'scores') {
-        value.chunk.scoreList = /** @type {Int32Array} */ (/** @type {unknown} */ (replacement));
-    } else if (columnName === 'offsets') {
-        value.references.offsets = /** @type {Float64Array} */ (/** @type {unknown} */ (replacement));
-    } else if (columnName === 'indexes') {
-        value.references.uniqueIndexList = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
-    } else {
-        value.references.lengths = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
+    switch (columnName) {
+        case 'scores':
+            value.chunk.scoreList = /** @type {Int32Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        case 'offsets':
+            value.references.offsets = /** @type {Float64Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        case 'indexes':
+            value.references.uniqueIndexList = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        default:
+            value.references.lengths = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
+            break;
     }
 }
 
@@ -395,15 +400,18 @@ describe('fused whole-run content bounds and compact record fields', () => {
             const column = columns[columnName];
             const target = location === 'own' ? column : (location === 'concrete' ? Object.getPrototypeOf(column) : typedPrototype);
             const original = Object.getOwnPropertyDescriptor(target, property);
-            Object.defineProperty(target, property, {configurable: true, get() {
-                if (this === column) {
-                    ++reads[position];
-                    if (behavior === 'throw') { throw new Error('Typed-array metadata getter'); }
-                    if (behavior === 'change-offset' && reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
-                }
-                if (typeof nativeDescriptor?.get !== 'function') { throw new Error('Missing native typed-array getter'); }
-                return nativeDescriptor.get.call(this);
-            }});
+            Object.defineProperty(target, property, {
+                configurable: true,
+                get() {
+                    if (this === column) {
+                        ++reads[position];
+                        if (behavior === 'throw') { throw new Error('Typed-array metadata getter'); }
+                        if (behavior === 'change-offset' && reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
+                    }
+                    if (typeof nativeDescriptor?.get !== 'function') { throw new Error('Missing native typed-array getter'); }
+                    return nativeDescriptor.get.call(this);
+                },
+            });
             try {
                 return await capture(value);
             } finally {

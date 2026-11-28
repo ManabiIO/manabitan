@@ -116,11 +116,11 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
-const RECORD_FIELD_TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const RECORD_FIELD_TYPED_ARRAY_PROTOTYPE = /** @type {object} */ (Reflect.getPrototypeOf(Uint8Array.prototype));
 const RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS = Object.getOwnPropertyDescriptors(RECORD_FIELD_TYPED_ARRAY_PROTOTYPE);
 const RECORD_FIELD_TYPED_ARRAY_PROPERTIES = ['buffer', 'length', 'byteOffset', 'byteLength'];
 const RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(RECORD_FIELD_TYPED_ARRAY_PROTOTYPE, Symbol.toStringTag);
-const RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR = Object.getPrototypeOf(Uint8Array);
+const RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR = /** @type {object} */ (Reflect.getPrototypeOf(Uint8Array));
 const RECORD_FIELD_CONSTRUCTORS = [ArrayBuffer, Uint32Array, Float64Array, Int32Array];
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
