@@ -1,0 +1,70 @@
+name: Complete import corpus proof 5a86
+
+on:
+  push:
+    branches: ['perf/import-corpus-proof-20261128-5a86']
+    paths:
+      - '.github/workflows/import-corpus-proof-5a86.yml'
+      - 'test/perf/import-corpus-20261128-5a86/**'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: import-corpus-proof-5a86-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    name: Complete ${{ matrix.dictionary }} row parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify frozen tooling and independently test audit guards
+        run: |
+          python test/perf/import-corpus-20261128-5a86/driver.py check
+          python test/perf/import-corpus-20261128-5a86/verify.py --self-test
+          node --check test/perf/import-corpus-20261128-5a86/replay.mjs
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare the exact complete archive
+        run: node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
+      - name: Compare every row across the three frozen parser builds
+        run: |
+          python test/perf/import-corpus-20261128-5a86/driver.py run \
+            --dictionary "$PERF_DICTIONARY" \
+            --evidence "builds/perf/import-corpus-proof-5a86/$PERF_DICTIONARY"
+      - name: Independently verify all output and work receipts
+        if: always()
+        run: |
+          python test/perf/import-corpus-20261128-5a86/verify.py \
+            "builds/perf/import-corpus-proof-5a86/$PERF_DICTIONARY/report.json" \
+            2>&1 | tee "builds/perf/import-corpus-proof-5a86/$PERF_DICTIONARY/audit.log"
+      - name: Retain the exact proof, checkpoints and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-corpus-proof-${{ matrix.dictionary }}-5a86
+          path: |
+            builds/perf/import-corpus-proof-5a86/${{ matrix.dictionary }}
+            test/perf/import-corpus-20261128-5a86
+          if-no-files-found: warn
+          retention-days: 30

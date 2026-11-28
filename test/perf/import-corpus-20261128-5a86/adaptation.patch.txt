@@ -1,0 +1,215 @@
+--- upstream/replay.mjs
++++ study/replay.mjs
+@@ -23,21 +23,32 @@
+ const {values, positionals} = parseArgs({allowPositionals: true,
+     options: {
+         'baseline-root': {type: 'string'},
+-        'candidate-root': {type: 'string', default: root},
++        'mask-root': {type: 'string'},
++        'suffix-root': {type: 'string'},
+         'cache-dir': {type: 'string', default: path.join(root, 'builds/e2e-dictionary-cache')},
+         'parser-workers': {type: 'string'},
+         'out': {type: 'string'},
+     }})
+-assert(values['baseline-root'], 'Provide --baseline-root')
++assert(values['baseline-root'] && values['mask-root'] && values['suffix-root'], 'Provide all three exact source worktrees')
++const planBytes = await readFile(new URL('plan.json.txt', import.meta.url))
++const plan = JSON.parse(planBytes)
++const provenance = JSON.parse(await readFile(new URL('provenance.json.txt', import.meta.url)))
+ const parserWorkers = Number(values['parser-workers'])
+-assert([2, 3, 5].includes(parserWorkers), 'Provide --parser-workers 2, 3 or 5; the browser selects this policy from hardware and memory hints')
++assert.equal(parserWorkers, 3, 'This fixed study uses the observed production three-worker grouping policy')
++assert.equal(parserWorkers, plan.parserWorkers)
++assert.equal(process.version, 'v22.22.0')
+ assert.equal(positionals.length, 1, 'Run each corpus in a fresh process so WASM heaps do not carry over')
+ const dictionaries = positionals
+-const output = values.out ?? path.join(root, `builds/perf/native-metadata/workers-${parserWorkers}-${positionals[0]}.json`)
++assert(values.out, 'Provide --out; no previous report may be overwritten')
++const output = values.out
+ const lockBytes = await readFile(path.join(root, 'test/perf/dictionaries.lock.json'))
+ const fixtures = JSON.parse(lockBytes).dictionaries
+-for (const id of dictionaries) { assert(fixtures[id], `Unknown dictionary: ${id}`) }
++for (const id of dictionaries) { assert(plan.dictionaries.includes(id) && fixtures[id], `Unknown dictionary: ${id}`) }
+ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
++assert.equal(sha256(planBytes), provenance.planSha256)
++assert.equal(sha256(await readFile(fileURLToPath(import.meta.url))), provenance.adaptedSha256)
++assert.equal(sha256(await readFile(new URL('upstream-replay.mjs.txt', import.meta.url))), provenance.upstream.sha256)
++assert.equal(sha256(await readFile(new URL('adaptation.patch.txt', import.meta.url))), provenance.patchSha256)
+ const viewBytes = (view) => new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
+ const sourceFiles = [
+     'ext/js/dictionary/term-bank-wasm-parser.js',
+@@ -56,11 +67,18 @@
+     'dev/data/dictionary-wasm/manifest.json',
+     'dev/data/dictionary-wasm/term-bank-parser.wasm',
+     'ext/lib/term-bank-parser.wasm',
++    'dev/dictionary-wasm.js',
++    'package-lock.json',
++    'test/perf/dictionaries.lock.json',
+ ]
+ const sourceIdentity = async (sourceRoot) => Object.fromEntries(await Promise.all(sourceFiles.map(async (file) => [file, sha256(await readFile(path.join(sourceRoot, file)))])))
+-const roots = {baseline: path.resolve(values['baseline-root']), candidate: path.resolve(values['candidate-root'])}
++const roots = {baseline: path.resolve(values['baseline-root']), mask: path.resolve(values['mask-root']), suffix: path.resolve(values['suffix-root'])}
+ const sources = {}
+ for (const [arm, sourceRoot] of Object.entries(roots)) {
++    // Validate every native input and recipe against the checked-in manifest.
++    // eslint-disable-next-line no-unsanitized/method
++    const nativeArtifacts = await import(pathToFileURL(path.join(sourceRoot, 'dev/dictionary-wasm.js')))
++    nativeArtifacts.loadDictionaryWasm()
+     // Explicit local CLI paths, never paths from dictionary contents.
+     // eslint-disable-next-line no-unsanitized/method
+     const parser = await import(pathToFileURL(path.join(sourceRoot, sourceFiles[0])))
+@@ -75,12 +93,22 @@
+     const pinnedWasm = manifest.targets.find((target) => target.name === 'term-bank-parser.wasm').sha256
+     assert.equal(identity['ext/lib/term-bank-parser.wasm'], pinnedWasm, `${arm}: runtime WASM must match the manifest`)
+     assert.equal(identity['dev/data/dictionary-wasm/term-bank-parser.wasm'], pinnedWasm, `${arm}: checked-in WASM must match the manifest`)
+-    if (arm === 'baseline') { assert.equal(pinnedWasm, 'b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa', 'Control must retain the exact current-baseline WASM') }
++    assert.equal(pinnedWasm, plan.sources[arm].wasmSha256, `${arm}: unexpected frozen native module`)
++    assert.equal(identity['ext/js/dictionary/wasm/term-bank-parser.c'], plan.sources[arm].nativeSourceSha256, `${arm}: unexpected native source`)
+     parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(sourceRoot, 'ext/lib/term-bank-parser.wasm'))))
+     const git = (...args) => execFileSync('git', args, {cwd: sourceRoot, encoding: 'utf8'}).trim()
+-    sources[arm] = {parser, preparation, route, experiments, identity, git: {sha: git('rev-parse', 'HEAD'), tree: git('rev-parse', 'HEAD^{tree}'), status: git('status', '--porcelain')}}
+-}
+-assert.notEqual(sources.baseline.identity['ext/lib/term-bank-parser.wasm'], sources.candidate.identity['ext/lib/term-bank-parser.wasm'], 'Expected a native candidate')
++    const gitIdentity = {sha: git('rev-parse', 'HEAD'), tree: git('rev-parse', 'HEAD^{tree}'), status: git('status', '--porcelain')}
++    assert.equal(gitIdentity.sha, plan.sources[arm].commit, `${arm}: unexpected source commit`)
++    assert.equal(gitIdentity.tree, plan.sources[arm].tree, `${arm}: unexpected source tree`)
++    assert.equal(gitIdentity.status, '', `${arm}: source must be clean`)
++    sources[arm] = {parser, preparation, route, experiments, identity, git: gitIdentity}
++}
++for (const arm of ['mask', 'suffix']) {
++    assert.notEqual(sources.baseline.identity['ext/lib/term-bank-parser.wasm'], sources[arm].identity['ext/lib/term-bank-parser.wasm'], 'Expected a native candidate')
++    for (const file of sourceFiles.filter((name) => name.endsWith('.js') || name === 'package-lock.json' || name === 'test/perf/dictionaries.lock.json')) {
++        assert.equal(sources[arm].identity[file], sources.baseline.identity[file], `${arm}: unexpected shared JavaScript, dependency or fixture change: ${file}`)
++    }
++}
+ 
+ // Model lazy byte balancing for an explicitly selected worker count. Actual
+ // browser selection depends on hardware and memory hints. Plain banks use four
+@@ -166,6 +194,7 @@
+     let result
+     await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+         assert.equal(result, undefined, 'Expected one complete group')
++        if (preloadedSource.crcSignaturesPtr) { assert.equal(preloadedSource.crcVerified, true, 'Deferred CRC must finish before the callback receives any output') }
+         const nativePrepared = chunk.preparedLookupIndexes instanceof Map
+         const owned = parser.copyWasmBackedColumnChunk(chunk, false, policy.projectImagePaths, policy.prepareLookupRoute, preloadedSource)
+         owned.preparedLookupIndexes ??= preparation.prepareTermLookupIndexesFromPreinternedPlan(owned)?.indexes
+@@ -247,16 +276,57 @@
+         metaCapacity: profile.metaCapacity,
+         encodedContentBytes: profile.encodedContentBytes,
+         contentCapacity: profile.contentCapacity,
++        validatedGlossaryReuseCount: profile.validatedGlossaryReuseCount ?? 0,
++        mediaHintRowsSkipped: profile.mediaHintRowsSkipped ?? 0,
++        bankSpanCount: profile.bankSpanCount ?? 0,
++        recentContentDedupHitCount: profile.recentContentDedupHitCount ?? 0,
++        escapedKeyDecodeCount: profile.escapedKeyDecodeCount ?? 0,
++        fastGlossaryNormalizationCount: profile.fastGlossaryNormalizationCount ?? 0,
++        fastGlossaryNormalizationFallbackCount: profile.fastGlossaryNormalizationFallbackCount ?? 0,
++        crcDeferred: Boolean(preloadedSource.crcSignaturesPtr),
++        crcVerified: !preloadedSource.crcSignaturesPtr || preloadedSource.crcVerified === true,
+         crcScannedBytes: preloadedSource.crcScannedBytes ?? 0,
+         crcReusedBytes: preloadedSource.crcReusedBytes ?? 0,
+         crcReusedGlossaries: preloadedSource.crcReusedGlossaryCount ?? 0}
+ }
+ 
+-const report = {schema: 1,
++function requireOutputParity(baseline, candidate, arm, sourceBytes, label) {
++    const variable = new Set(arm === 'suffix' ? plan.allowedCounterDifferences.suffix : [])
++    assert.deepEqual(Object.keys(candidate), Object.keys(baseline), `${label}: output schema`)
++    for (const key of Object.keys(baseline)) {
++        if (variable.has(key)) { continue }
++        assert.deepEqual(candidate[key], baseline[key], `${label}: ${key}`)
++    }
++    for (const value of [baseline, candidate]) {
++        assert.equal(value.nativePrepared, true, `${label}: native lookup admission`)
++        assert.equal(value.scratchReuseGroups, 1, `${label}: native scratch reuse`)
++        for (const key of ['scratchReuseMisses', 'nativeFallbacks', 'fusedFallbacks']) { assert.equal(value[key], 0, `${label}: ${key}`) }
++        assert.equal(value.crcVerified, true, `${label}: CRC completion`)
++        if (value.crcDeferred) {
++            assert.equal(value.crcScannedBytes + value.crcReusedBytes, sourceBytes, `${label}: complete deferred CRC coverage`)
++        } else {
++            assert.equal(value.crcScannedBytes, 0)
++            assert.equal(value.crcReusedBytes, 0)
++            assert.equal(value.crcReusedGlossaries, 0)
++        }
++    }
++    if (arm === 'suffix') {
++        for (const key of ['validatedGlossaryReuseCount', 'crcReusedBytes', 'crcReusedGlossaries']) {
++            assert(candidate[key] >= baseline[key], `${label}: ${key} may only increase`)
++        }
++        assert(candidate.crcScannedBytes <= baseline.crcScannedBytes, `${label}: scanned bytes may only decrease`)
++    }
++}
++
++const report = {schema: 2,
+     complete: false,
+     boundary: 'Sequential compressed-source native parser, production image projection and completed lookup/route construction with owned output. All locked term banks; independent zlib/CRC checks, canonical row content, metadata, media rows, every lookup byte and semantic key-plan columns compared. Fresh process per corpus/policy; no browser scheduling, storage, media payload import, performance or process peak-memory claim.',
+     grouping: {kind: 'component model of lazy byte balancing with an explicit worker count', parserWorkers, targetBytes: 24 * 1024 * 1024, executionConcurrency: 1},
+     node: process.version,
++    studyPlan: plan,
++    planSha256: sha256(planBytes),
++    upstreamReplay: provenance.upstream,
++    adaptationPatchSha256: provenance.patchSha256,
+     lockSha256: sha256(lockBytes),
+     runnerSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
+     sources: Object.fromEntries(Object.entries(sources).map(([arm, source]) => [arm, {root: roots[arm], hashes: source.identity, git: source.git}])),
+@@ -285,6 +355,7 @@
+         const policy = {mediaHintFastScan, projectImagePaths: mediaHintFastScan && totalSourceBytes >= 1024 * 1024 * 1024, prepareLookupRoute: totalSourceBytes >= 128 * 1024 * 1024}
+         const groupsPerWorker = mediaHintFastScan ? 3 : 4
+         const groups = partition(entries, groupsPerWorker)
++        assert.equal(groups.length, plan.expectedGroups[dictionary], 'Production grouping changed')
+         const result = {dictionary,
+             archiveSha256: fixture.sha256,
+             policy,
+@@ -295,40 +366,30 @@
+             rows: 0,
+             nativeSegments: 0,
+             nativeFallbacks: 0,
+-            baseline: {scratchReuseGroups: 0, scratchReuseBytes: 0, scratchReuseMisses: 0, fusedAttempts: 0, fusedFallbacks: 0, maxHeapBytes: 0, metadataBytes: 0},
+-            candidate: {scratchReuseGroups: 0, scratchReuseBytes: 0, scratchReuseMisses: 0, fusedAttempts: 0, fusedFallbacks: 0, maxHeapBytes: 0, metadataBytes: 0},
++            ...Object.fromEntries(Object.keys(roots).map((arm) => [arm, {scratchReuseGroups: 0, scratchReuseBytes: 0, scratchReuseMisses: 0, fusedAttempts: 0, fusedFallbacks: 0, maxHeapBytes: 0, metadataBytes: 0, validatedGlossaryReuseCount: 0, crcScannedBytes: 0, crcReusedBytes: 0, crcReusedGlossaries: 0}])),
+             groups: []}
+         report.dictionaries.push(result)
+         for (const [index, group] of groups.entries()) {
+             const banks = []
+             for (const entry of group) { banks.push(await reader.read(entry)) }
+-            const baseline = await replayGroup(sources.baseline, banks, policy)
+-            const candidate = await replayGroup(sources.candidate, banks, policy)
+             const observation = {firstBank: group[0].filename,
+                 lastBank: group.at(-1).filename,
+                 sourceBytes: banks.reduce((sum, bank) => sum + bank.uncompressedSize, 0),
+-                baseline,
+-                candidate}
++                arms: {}}
+             result.groups.push(observation)
+-            await save()
+-            assert.equal(candidate.digest, baseline.digest, `${dictionary} group ${index}: output mismatch`)
+-            assert.equal(candidate.rows, baseline.rows)
+-            assert.equal(candidate.nativeSegments, baseline.nativeSegments)
+-            assert.equal(candidate.nativeFallbacks, baseline.nativeFallbacks)
+-            assert.equal(candidate.keys, baseline.keys)
+-            for (const key of ['nativePrepared', 'scratchReuseGroups', 'scratchReuseMisses', 'fusedAttempts', 'fusedFallbacks', 'crcScannedBytes', 'crcReusedBytes', 'crcReusedGlossaries', 'mediaRows']) {
+-                assert.equal(candidate[key], baseline[key], `${dictionary} group ${index}: ${key}`)
+-            }
+-            assert.equal(candidate.scratchReuseMisses, 0, 'Compacted metadata must retain native lookup scratch capacity')
+-            for (const [arm, value] of Object.entries({baseline, candidate})) {
+-                for (const key of ['scratchReuseGroups', 'scratchReuseBytes', 'scratchReuseMisses', 'fusedAttempts', 'fusedFallbacks', 'metadataBytes']) { result[arm][key] += value[key] }
++            for (const [arm, source] of Object.entries(sources)) {
++                const value = await replayGroup(source, banks, policy)
++                observation.arms[arm] = value
++                await save()
++                if (arm !== 'baseline') { requireOutputParity(observation.arms.baseline, value, arm, observation.sourceBytes, `${dictionary} group ${index}: ${arm}`) }
++                for (const key of ['scratchReuseGroups', 'scratchReuseBytes', 'scratchReuseMisses', 'fusedAttempts', 'fusedFallbacks', 'metadataBytes', 'validatedGlossaryReuseCount', 'crcScannedBytes', 'crcReusedBytes', 'crcReusedGlossaries']) { result[arm][key] += value[key] }
+                 result[arm].maxHeapBytes = Math.max(result[arm].maxHeapBytes, value.heapBytes)
+             }
+-            result.rows += candidate.rows
+-            result.nativeSegments += candidate.nativeSegments
+-            result.nativeFallbacks += candidate.nativeFallbacks
++            result.rows += observation.arms.baseline.rows
++            result.nativeSegments += observation.arms.baseline.nativeSegments
++            result.nativeFallbacks += observation.arms.baseline.nativeFallbacks
+             await save()
+-            if (index === 0 || index + 1 === groups.length || (index + 1) % 20 === 0) { console.log(`${dictionary} ${index + 1}/${groups.length}: ${candidate.rows} rows, scratch misses ${candidate.scratchReuseMisses}, exact output/CRC/route parity`) }
++            if (index === 0 || index + 1 === groups.length || (index + 1) % 20 === 0) { console.log(`${dictionary} ${index + 1}/${groups.length}: ${observation.arms.baseline.rows} rows, exact three-arm output/CRC/route parity`) }
+             globalThis.gc?.()
+         }
+         assert.equal(result.rows, fixture.termRows)

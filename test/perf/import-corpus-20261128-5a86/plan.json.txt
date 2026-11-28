@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "kind": "Complete-corpus correctness proof, no timing or memory-peak estimate",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "parserWorkers": 3,
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "expectedGroups": {
+    "jmdict": 12,
+    "jitendex": 22,
+    "vndb": 170
+  },
+  "expectedBanks": {
+    "jmdict": 53,
+    "jitendex": 219,
+    "vndb": 665
+  },
+  "expectedSourceBytes": {
+    "jmdict": 171617523,
+    "jitendex": 538927310,
+    "vndb": 4267992967
+  },
+  "fixtures": {
+    "jmdict": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "jitendex": {
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    "vndb": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    }
+  },
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "allowedCounterDifferences": {
+    "mask": [],
+    "suffix": [
+      "validatedGlossaryReuseCount",
+      "crcScannedBytes",
+      "crcReusedBytes",
+      "crcReusedGlossaries"
+    ]
+  },
+  "counterDirection": "Suffix validated/reused counters may only increase and scanned CRC bytes may only decrease per group. Deferred CRC scanned+reused must equal each complete source group. All other output, admission, allocation and work counters remain exact.",
+  "failurePolicy": "Fresh process per dictionary; retain checkpoints and all failures; no retries, resume, replacement, or changed guards after observation.",
+  "sources": {
+    "baseline": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "nativeSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "mask": {
+      "commit": "2cdcc90241fa19221b7fc4e5d793eb70896c3258",
+      "tree": "df0f1f9fc77d931381a9f687f4e9bb0c4a225d1d",
+      "nativeSourceSha256": "3c5c6d89a44356e2f0c3af8636f82a4a77a1f7212891161707e4465acaa2ca5e",
+      "wasmSha256": "6b327b4b5c85a973b1e2344276bb5476b6d036b197d87ab03b2a930ed50059eb"
+    },
+    "suffix": {
+      "commit": "38031a752b26c9b630e5f2f1d45e780786656c74",
+      "tree": "a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5",
+      "nativeSourceSha256": "5fb1656504b65502f396d23d1222342f9c9b6485f90b949207758cb8058fa3ca",
+      "wasmSha256": "a9e15a67b2f72adf2288f4c981c0fb78362273953d94440706c41cf44515292f"
+    }
+  }
+}

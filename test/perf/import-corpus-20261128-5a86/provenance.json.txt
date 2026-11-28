@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "upstream": {
+    "commit": "61e3e059c95b208e2167141e70488add99e3b1a7",
+    "path": "test/perf/native-metadata-20261126-21d3/replay.mjs",
+    "gitBlob": "aa4b1c289facb1b477e3397dd66de4b2dddae31c",
+    "sha256": "a16c19e1030c4f9e7681c063507017f3413f4b770299e7505b77ef4894666a7f",
+    "measuredArchiveMember": "test/perf/native-metadata-20261126-21d3/proofs.tar.gz:measured-replay.mjs",
+    "measuredSha256": "37c3e11594960afc7c35317f9a143a0db18c25696450610c0842e7877a992395",
+    "checkedSourceRelationship": "The upstream repository records AST equivalence after lint-only formatting/annotation changes; this study adapts the preserved checked-in bytes."
+  },
+  "adaptedSha256": "fd7a947fcd095a66691713bc9d4e9b83f2da889ff2fb8473925c34bfd5f81190",
+  "patchSha256": "35ce022da643b66a15be55d17f6932f4a121010a710aa9136dda22dc4c53ef56",
+  "planSha256": "bed21e0745adeb4ebb9ce503cefc21ef8ef20f6d303715ce66fa15a1e2fa8042",
+  "verifierSha256": "bbd20512358f34665cc6192e4c7e8c0e2125e877f58b8517563ae9c1778c988b",
+  "driverSha256": "db915f869c75053e0b6d5e59ef48e5a41c9000a118fb1cfa466f59b253fc1f79",
+  "workflowSha256": "07c1ca270f1a0e30ed0192fc0624482454776e831905ae1ad3244a6716428dde",
+  "changes": [
+    "Freeze three exact current source trees and modules; add current native source/manifest loader and clean-source checks.",
+    "Use the observed three-worker grouping policy only; retain byte balancing and all complete compressed-source paths.",
+    "Reuse each bounded compressed group for baseline, mask and suffix arms with identical output oracle.",
+    "Record additional reuse, hint, normalization and CRC completion counters. Require strict mask equality; predeclare only monotonic suffix reuse/CRC counter changes, with full per-group CRC coverage.",
+    "Keep all row/key/index/route/media/dedup digests, native admission and fallback guards; independently audit complete coverage and frozen inputs."
+  ],
+  "noTimingClaim": true
+}
