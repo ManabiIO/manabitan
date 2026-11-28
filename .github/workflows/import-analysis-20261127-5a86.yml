@@ -1,0 +1,88 @@
+name: Import diagnostics analysis 20261127 5a86
+
+on:
+  push:
+    branches: [perf/import-analysis-20261127-5a86]
+    paths:
+      - .github/workflows/import-analysis-20261127-5a86.yml
+      - dev/perf/profile-analysis-20261127-5a86.mjs
+      - dev/perf/suffix-census-20261127-5a86.mjs
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: import-analysis-20261127-5a86
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    name: Analyze fixed baseline traces and full suffix census
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: ./.github/actions/setup
+      - name: Verify diagnostics-only source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          git diff --exit-code 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 HEAD -- ext dev/data test/perf/dictionaries.lock.json
+          mkdir -p builds/perf/analysis-20261127-5a86/original
+          git rev-parse HEAD HEAD^{tree} > builds/perf/analysis-20261127-5a86/analysis-source.txt
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Census every raw suffix and semantic field difference
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="builds/perf/analysis-20261127-5a86"
+          node dev/perf/prepare-dictionaries.js jmdict jitendex 2>&1 | tee "$evidence/fixtures.log"
+          node dev/perf/suffix-census-20261127-5a86.mjs "$evidence/results" 2>&1 | tee "$evidence/suffix-census.log"
+      - name: Download exact baseline artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          evidence="builds/perf/analysis-20261127-5a86"
+          gh api repos/ManabiIO/manabitan/actions/artifacts/15245426709/zip > "$evidence/original/jmdict.zip"
+          gh api repos/ManabiIO/manabitan/actions/artifacts/15245318838/zip > "$evidence/original/jitendex.zip"
+          gh api repos/ManabiIO/manabitan/actions/artifacts/15245219407/zip > "$evidence/original/vndb.zip"
+          python3 - <<'PY'
+          import hashlib, pathlib, zipfile
+          base = pathlib.Path('builds/perf/analysis-20261127-5a86')
+          expected = {
+              'jmdict': '4000809bac65e05a2ac9ede1087b8bb88b13148aa84d5ca5a56a2b4aeb7f4468',
+              'jitendex': '51f1c5e180ecf60b7c4124855632036362e3f470eb2edee2d32a267523077d98',
+              'vndb': '76a8164a862b563d93af07345ea4cb68ea7b6bc70ab2818ac56c1edb05ff8748',
+          }
+          for name, digest in expected.items():
+              source = base / 'original' / (name + '.zip')
+              actual = hashlib.sha256(source.read_bytes()).hexdigest()
+              if actual != digest: raise RuntimeError('Artifact SHA mismatch: ' + name)
+              with zipfile.ZipFile(source) as archive:
+                  archive.extractall(base / 'unpacked' / name)
+              print('EXACT_ARTIFACT', name, digest, source.stat().st_size)
+          PY
+      - name: Analyze import-only samples and phase diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/profile-analysis-20261127-5a86.mjs builds/perf/analysis-20261127-5a86/unpacked builds/perf/analysis-20261127-5a86/results 2>&1 | tee builds/perf/analysis-20261127-5a86/profile-analysis.log
+      - name: Preserve exact inputs, reports and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-analysis-20261127-5a86
+          path: builds/perf/analysis-20261127-5a86
+          if-no-files-found: error
+          retention-days: 30
