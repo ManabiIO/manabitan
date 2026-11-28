@@ -1,0 +1,54 @@
+name: Import laboratory 20261127 2ed
+
+on:
+  push:
+    branches: ['perf/import-lab-20261127-2ed']
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    name: Baseline profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare complete dictionary
+        run: node dev/perf/prepare-dictionaries.js '${{ matrix.dictionary }}'
+      - name: Build release package
+        run: node dev/bin/build.js --target chrome
+      - name: Record frozen source and runtime
+        run: |
+          mkdir -p builds/perf/lab-2ed
+          git rev-parse HEAD HEAD^{tree} > builds/perf/lab-2ed/source.txt
+          git status --porcelain > builds/perf/lab-2ed/source-status.txt
+          sha256sum package-lock.json test/perf/dictionaries.lock.json builds/manabitan-chrome.zip > builds/perf/lab-2ed/hashes.txt
+          node dev/perf/host-environment.js > builds/perf/lab-2ed/host-before.json
+      - name: Ordinary full import with exhaustive media verification
+        run: node dev/perf/import-benchmark.js '${{ matrix.dictionary }}' --build-target chrome --no-build --runs 1 --output builds/perf/lab-2ed/ordinary
+      - name: Separate non-authoritative CPU trace
+        run: node dev/perf/import-benchmark.js '${{ matrix.dictionary }}' --build-target chrome --no-build --runs 1 --trace --media-check sample --output builds/perf/lab-2ed/trace
+      - name: Record final host state
+        if: always()
+        run: node dev/perf/host-environment.js > builds/perf/lab-2ed/host-after.json
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: import-lab-2ed-${{ matrix.dictionary }}
+          path: builds/perf/lab-2ed
+          retention-days: 14
