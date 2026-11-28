@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-result handoff, not recovered raw evidence",
+  "provenance": "Retained baseline_profile conversation summaries and messages recorded while original local files were accessible. Original post-v2 raw files are currently inaccessible after executor outage. No observations, logs, census rows, or capture bytes are reconstructed here.",
+  "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "subset": {
+    "disposition": "stopped; no production integration, rerun, or tuning",
+    "fixedDesign": {
+      "observations": 36,
+      "blocks": 12,
+      "orders": "all six ABC permutations twice",
+      "repetitionsPerObservation": 3,
+      "affectedGroups": 8,
+      "groupRebuildsPerObservation": 24,
+      "groupDurationsRetained": 864
+    },
+    "aggregateResults": {
+      "A": {
+        "medianMs": 78.6754818333,
+        "meanMs": 84.7375698889,
+        "minMs": 76.0073933333,
+        "maxMs": 131.1948803333
+      },
+      "B": {
+        "medianMs": 95.570841,
+        "meanMs": 95.9363483333,
+        "minMs": 86.4723746667,
+        "maxMs": 104.076752
+      },
+      "C": {
+        "medianMs": 84.9496871667,
+        "meanMs": 87.4543206667,
+        "minMs": 74.546196,
+        "maxMs": 102.7146033333
+      },
+      "BvsA": {
+        "pairedMedianPercent": 21.8749968443,
+        "pairedMedianMs": 17.0079676667,
+        "fasterBlocks": 2,
+        "equalWorkPercent": 13.2158362095
+      },
+      "BvsC": {
+        "pairedMedianPercent": 13.3169241431,
+        "pairedMedianMs": 11.2745561667,
+        "fasterBlocks": 3,
+        "equalWorkPercent": 9.6988091635
+      },
+      "CvsA": {
+        "pairedMedianPercent": 7.1683077275,
+        "pairedMedianMs": 5.5623373333,
+        "fasterBlocks": 4,
+        "equalWorkPercent": 3.2060758662
+      }
+    },
+    "semanticSummary": {
+      "affectedRows": 320000,
+      "ranges": 30,
+      "outputPayloadBytes": 17306784,
+      "unitCases": 209,
+      "decodedUnitRows": 80045,
+      "exactUnitPayloads": 836,
+      "allSourceBeforeAfterHashesPassed": true,
+      "allMeasuredWitnessesPassed": true
+    },
+    "auditScope": "Independent arithmetic/source/harness audit completed before outage; did not rerun timing, tests, or ephemeral byte-output generation.",
+    "reasonToStop": "Preparation-inclusive B rehashed 8,852,853 source-key bytes versus 9,051,685 selected bytes in A/C, saving only about2.2% of key hashing while adding whole-source posting/hash/column-agreement validation and allocating the same17.3MB outputs. Browser216.9ms wall-counter residual was not a guaranteed removable CPU or whole-import budget.",
+    "originalFiles": [
+      {
+        "path": "profiling/vndb-subset-component/first-screen.json",
+        "bytes": 134204,
+        "sha256": "3fbcee4bd75f3373212f904cae915a19c4c4721add84ea99771d5ad9346be97a"
+      },
+      {
+        "path": "profiling/vndb-subset-component/first-screen.plan.json",
+        "sha256": "ec1ecda46e96861724760962a2dc40bf8de367960f088a985d6a5aa3ab1f3f78"
+      },
+      {
+        "path": "profiling/vndb-subset-component/semantic.json",
+        "sha256": "cbca0e216d6cbdc886fa4bf1030b53fe9da0808e0992d9cc7ca2461d54007f4f"
+      },
+      {
+        "path": "profiling/vndb-subset-component/unit-final209.log",
+        "sha256": "c86d58a013ec34aa6f183762f263cd13ec3376c6ae8d200e6478a7e73827c614"
+      },
+      {
+        "path": "profiling/vndb-subset-component/independent-audit.json",
+        "sha256": null
+      },
+      {
+        "path": "profiling/vndb-subset-component/independent-audit-summary.md",
+        "sha256": null
+      },
+      {
+        "path": "profiling/audit-vndb-subset.py",
+        "sha256": null
+      }
+    ],
+    "sourceIdentities": [
+      {
+        "path": "lookup-subset-experiment/dev/perf/lookup-subset-da6c4/subset-prototype.mjs",
+        "sha256": "f1a58b6deb9a6da1da76827d35600a5f5e496b0310e680ec3f4df4dbe12077e8"
+      },
+      {
+        "path": "lookup-subset-experiment/dev/perf/lookup-subset-da6c4/subset-prototype.test.mjs",
+        "sha256": "59eb7335f7dcbbd4b192f9d9a4f75f5e69c9dbd5a66a251717175c0a63ac4725"
+      },
+      {
+        "path": "lookup-subset-experiment/dev/perf/lookup-subset-da6c4/corpus-screen.mjs",
+        "sha256": "7dd9e7f0369d4adbd38ba13e0047c66dcfd1b5a6fbfa5f2a5a40a6087ad2c95f"
+      }
+    ]
+  },
+  "capture": {
+    "directory": "/home/agent/manabitan-da6c4dbd0097/vndb-record-sink-capture",
+    "groups": [
+      0,
+      1,
+      2,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "rows": 400000,
+    "binaryBytes": 43338896,
+    "manifestBytes": 169647,
+    "totalBytes": 43508543,
+    "originalManifestSha256": "9b0e9360aa091613674d6288491d5f9f7c520e8bb2801b9bfc83a18393c09460",
+    "fullRouteWitnessSha256": "569d56dd9e4fb94ef3c33561f43439d61c2858ab360116d9657a1bcfe9a74a82",
+    "seed": {
+      "file": "manabitan-term-content.bin",
+      "bytes": 7533449,
+      "sha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e"
+    },
+    "validation": "All10 groups/400000 rows/32 actual final runs and every row key/ID/reference matched before outage. No timing claim.",
+    "files": [
+      {
+        "path": "profiling/vndb-record-capture-hook.mjs",
+        "sha256": "cc4a7b4964d13cdead45ad88c46cffdc5f97b87e2e78455510e2312e76ab61cc"
+      },
+      {
+        "path": "profiling/vndb-record-capture-loader.mjs",
+        "sha256": "9b3404f66da26dd121f04450916eaae47686d7a40281c9b56d444603f590146a"
+      },
+      {
+        "path": "profiling/vndb-record-capture-validate.mjs",
+        "sha256": "737fc949ad67bff59e55979d8cfb9bac2105ccf25c9c1b3a8952652ce55201ec"
+      },
+      {
+        "path": "profiling/vndb-record-capture-validation.json",
+        "sha256": "efdb41707c8538a92a2621a6fb0141ee1c354b1afcae63374b30ce53a55bd9be"
+      },
+      {
+        "path": "profiling/vndb-record-capture-route.json",
+        "sha256": "8fe01ee1786a7d012d7b255ae863376a81628aa2b62be345a9114de793c716d5"
+      }
+    ]
+  },
+  "jitendex": {
+    "disposition": "Media-free adjacent-group overlap extension rejected",
+    "groups": 22,
+    "rows": 436555,
+    "mediaHintRows": 339,
+    "emptyMediaGroups": [
+      21
+    ],
+    "emptyMediaGroupRows": 22555,
+    "adjacentEmptyMediaPairs": 0,
+    "ownedGroups": 0,
+    "borrowedGroups": 22,
+    "completeOwnedEligibleGroups": 0,
+    "eligibleAdjacentPairs": 0,
+    "actualNativeSourceHashesCompared": 22,
+    "sourceByteAveragesPerUniqueRange": [
+      874.404,
+      1661.474
+    ],
+    "originalFiles": [
+      {
+        "path": "profiling/jitendex-media-ownership-census.mjs",
+        "bytes": 12093,
+        "sha256": "fb1419ae606eabbc2a6bea68b76677cd8f6944535943ab4192fbf9279eb6c1d8"
+      },
+      {
+        "path": "profiling/jitendex-media-ownership-census.json",
+        "bytes": 57006,
+        "sha256": "f50be777e981535167d41657caaf1656397b4bc8ae7299e783db707dd1596c0a"
+      },
+      {
+        "path": "profiling/jitendex-media-ownership-census.log",
+        "bytes": 2940,
+        "sha256": "c8475d617b08801ac986b83e36d4a36633353d82b5ca2e1afbcf8fcf47dcac88"
+      }
+    ],
+    "scope": "Actual unchanged native worker with mediaHintFastScan; hint rows are not distinct media files or actual requirements. No timing."
+  },
+  "rawAliasCensus": {
+    "owner": "/root",
+    "originalPath": "profiling/vndb-raw-reference-census.json",
+    "rawPayloadAvailableHere": false,
+    "aggregateFromParentMessages": {
+      "mixedGroups": [
+        1,
+        87,
+        91,
+        92,
+        105,
+        123,
+        126,
+        139
+      ],
+      "rawRows": 175,
+      "distinctRawRecords": 2,
+      "recordBytes": [
+        617,
+        338
+      ],
+      "distinctBytes": 955,
+      "perGroupAliasInputBytes": 2983
+    },
+    "status": "Design/capture preparation only; no executed alias observation exists."
+  },
+  "preservationStatus": {
+    "rawPayloadsRecovered": [],
+    "exactLifetimeReviewBlob": "cb62f246c350a4192f105ef92d14d5e58b6711bf",
+    "lifetimeReviewSha256": "0832ef9cedd851d6db3c2e522580ba17a1fb56b160f5d1a6b34763fb3209eb44",
+    "earlierRawEvidenceArchive": {
+      "commit": "1ea411e5d6409cb61503985a2a6cef8aa04eb9d3",
+      "path": "builds/perf/import-overlap-20261128-da6c4/components-v2.tar.gz",
+      "sha256": "8d426c47c2921d0f66d7b963ce66cefde4c26a8330ce87419aeec743d2112fae"
+    },
+    "note": "v2 predates the completed original10-group capture and these post-v2 raw negative/census files. New authored helpers have new identities and do not replace recovered original evidence."
+  }
+}

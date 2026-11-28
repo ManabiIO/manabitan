@@ -783,13 +783,13 @@ decodes correctly. This is not an import-speed percentage.
 A separate prospective five-arm ablation retains 100 observations over 20
 balanced Williams rounds and decodes all 103 blocks separately for every arm.
 
-| Arm | Median elapsed | Paired change vs A | Equal-work change | Faster pairs |
-| --- | ---: | ---: | ---: | ---: |
-| Serial reset A | 80.577 ms | — | — | — |
-| Identical serial C | 85.018 ms | +4.092% | +13.312% | 7/20 |
-| Serial rotation | 78.235 ms | +2.899% | −1.906% | 9/20 |
-| Lookahead, reset assignment | 76.190 ms | −4.887% | −3.293% | 16/20 |
-| Lookahead and rotation | 71.275 ms | −8.581% | −12.539% | 17/20 |
+| Arm                         | Median elapsed | Paired change vs A | Equal-work change | Faster pairs |
+| --------------------------- | -------------: | -----------------: | ----------------: | -----------: |
+| Serial reset A              |      80.577 ms |                  — |                 — |            — |
+| Identical serial C          |      85.018 ms |            +4.092% |          +13.312% |         7/20 |
+| Serial rotation             |      78.235 ms |            +2.899% |           −1.906% |         9/20 |
+| Lookahead, reset assignment |      76.190 ms |            −4.887% |           −3.293% |        16/20 |
+| Lookahead and rotation      |      71.275 ms |            −8.581% |          −12.539% |        17/20 |
 
 The identical-control variation makes exact ablation magnitudes inconclusive.
 Rotation alone does not establish a reviewable gain. No observations are replaced.
@@ -826,9 +826,9 @@ research source `347856807519a564d259955fe2a17ed34d73fda7`. Both cover all
 with identical encoded field/lookup hashes.
 
 | Replication | Baseline median | Preparation + sink median | Paired total saving | Sink-only saving |
-| --- | ---: | ---: | ---: | ---: |
-| EPYC 9V74 | 10.420 ms | 10.026 ms | 0.380 ms / 3.65% | 6.709 ms |
-| EPYC 9V45 | 7.775 ms | 7.431 ms | 0.314 ms / 4.06% | 5.484 ms |
+| ----------- | --------------: | ------------------------: | ------------------: | ---------------: |
+| EPYC 9V74   |       10.420 ms |                 10.026 ms |    0.380 ms / 3.65% |         6.709 ms |
+| EPYC 9V45   |        7.775 ms |                  7.431 ms |    0.314 ms / 4.06% |         5.484 ms |
 
 Preparation costs about 6.005/4.887 ms. The sink ceiling partly overlaps #855's
 direct length access. The five-arm schedule is mildly position-imbalanced.
@@ -951,11 +951,11 @@ Source-identical baseline A observations from external run `46102526376` were
 reused only for attribution while this study's own hosted jobs queued. They are
 not pooled with component timings or presented as a candidate comparison.
 
-| Corpus / retained baseline cohort | Complete import median | Relevant overlapping counters |
-| --- | ---: | --- |
-| JMdict, BA, 12 observations | 1,070.1 ms | Compression 357.4 ms; canonical scan 106.8 ms; metadata publication 73.4 ms; recent cache 42.45 ms; finalization 129 ms |
-| Jitendex, AB, 6 observations | 1,583.55 ms | Compression 622.8 ms; canonical scan 80.1 ms; exact comparison 51.7 ms |
-| VNDB, AB, 6 observations | 5,955.45 ms | Worker parsing sum 8,552.5 ms; CRC 1,878.85 ms; result copy 1,863.6 ms; mixed lookup preparation/encoding 846.25 ms |
+| Corpus / retained baseline cohort | Complete import median | Relevant overlapping counters                                                                                           |
+| --------------------------------- | ---------------------: | ----------------------------------------------------------------------------------------------------------------------- |
+| JMdict, BA, 12 observations       |             1,070.1 ms | Compression 357.4 ms; canonical scan 106.8 ms; metadata publication 73.4 ms; recent cache 42.45 ms; finalization 129 ms |
+| Jitendex, AB, 6 observations      |            1,583.55 ms | Compression 622.8 ms; canonical scan 80.1 ms; exact comparison 51.7 ms                                                  |
+| VNDB, AB, 6 observations          |            5,955.45 ms | Worker parsing sum 8,552.5 ms; CRC 1,878.85 ms; result copy 1,863.6 ms; mixed lookup preparation/encoding 846.25 ms     |
 
 These counters overlap and must not be summed. VNDB's lookup counter includes
 worker preparation; subtracting its worker counterpart per observation leaves
@@ -1015,5 +1015,117 @@ uncompressed bytes, 1,295,660 compressed bytes, SHA-256
 exclusions. It preserves original baseline reports used above and the original
 diagnostic trace; large unrelated external product packages are excluded with
 their archive identities retained. The immutable v1 archive remains unchanged.
+
+### Subsequent checkpoint: rejected subset route and completed ordinary profiles
+
+The original ten-group VNDB record capture completed before the executor became
+unavailable. It covers 400,000 rows, the eight mixed groups, two unchanged
+controls, original global ID gaps, and all 32 baseline final runs. Its manifest
+SHA-256 is
+`9b0e9360aa091613674d6288491d5f9f7c520e8bb2801b9bfc83a18393c09460`.
+This capture is separate from the full-corpus route witness already in v2.
+
+The prepared-index subset prototype passed 209 semantic cases and reproduced
+all 17,306,784 lookup payload bytes across the eight affected groups. Its fixed
+twelve-block A/B/C screen completed all 36 observations and 864 timed group
+rebuilds. Preparation-inclusive medians were A 78.675 ms, B 95.571 ms, and
+identical C 84.950 ms. B/A paired median was **+17.008 ms / +21.875%**, faster
+in only 2/12 blocks; B/C was **+11.275 ms / +13.317%**, faster in 3/12.
+Equal-work changes were +13.216% and +9.699%, respectively. Identical C/A
+paired-median drift was +7.168%. Every affected group was slower in B than
+both controls by its group median. The candidate rehashed almost as many key
+bytes while adding whole-source validation and recreating the same outputs.
+This route is stopped, without a production implementation or timing rerun.
+
+These post-v2 raw observation, capture, and census files were not uploaded before
+the executor outage. The separately committed
+`post-v2-known-results-handoff.json` records the findings, original known
+file hashes, and the prior independent audit's scope; it is explicitly a
+known-result receipt, not reconstructed raw data. Neither immutable archive
+contains those later original payloads. Regenerated experiments receive new
+source/capture identities and do not replace the unavailable originals.
+
+The actual unchanged Jitendex worker census also rejects the proposed
+media-free overlap extension: all 22 groups are borrowed, and only the final
+group has no media hints. There are zero eligible complete-owned groups and
+zero adjacent media-free pairs. No implementation or timing is justified by
+that census. The separate current-source early-release study on
+`perf/early-content-release-20261128-81585d` already covers a useful borrowed
+worker route; this branch does not duplicate it.
+
+#### Completed current-source diagnostic profiles
+
+All three jobs in
+[run 46105395307](https://github.com/ManabiIO/manabitan/actions/runs/46105395307)
+completed successfully against exact source `9e10d3b3`. Before/after tracked
+and runtime manifests match, exhaustive media checks pass, and cold restart
+plus 72 lookup observations pass per dictionary. Each is one ordinary,
+untraced observation on its own hosted machine; the following values are
+diagnostic attribution, not paired improvements or cross-host comparisons.
+
+- JMdict on EPYC 7763: page import 977.6 ms, worker 939.5 ms, parser wall
+  814.2 ms, sink 577.0 ms, compression 385.1 ms, canonical scan 107.4 ms,
+  and finalization 27.2 ms. All 12 groups use the owned native route.
+- Jitendex on EPYC 9V74: page import 1,475.9 ms, worker 1,449.5 ms, parser
+  wall 1,087.6 ms, sink 700.0 ms, compression 493.4 ms, media writes
+  140.0 ms, and finalization 131.8 ms. All 22 groups use borrowed results.
+- VNDB on EPYC 7763: page import 6,953.1 ms, worker 6,913.9 ms, parser wall
+  6,675.1 ms, sink 3,099.0 ms, compression 351.5 ms, record fields 545.0 ms,
+  and record writes 828.2 ms. Mixed lookup attribution is 908.9 ms including
+  687.8 ms worker preparation, leaving 221.1 ms owner-side attribution.
+  All 170 groups use owned native results. Finalization is 33.7 ms.
+
+The phase clocks overlap. VNDB's larger lookup total is not removable serial
+work, and neither worker CPU sums nor allocation counts establish a whole-import
+latency or peak-memory gain. The exact content seed is 7,533,449 bytes, matching
+the preserved route witness.
+
+`current-baseline-profiles.json` preserves all three full parsed reports,
+source identities, original decoded job logs, and artifact metadata as separate
+entries. Artifact ZIP digests are GitHub-advertised identities; the ZIPs were
+not freshly downloaded or rehashed during the outage. The retained artifact
+IDs are 15249815569 (JMdict), 15249047935 (Jitendex), and 15249408881 (VNDB).
+
+#### Prospective scheduling and alias screens
+
+The shared-span first-free-worker FIFO component is now
+[run 46111938461](https://github.com/ManabiIO/manabitan/actions/runs/46111938461),
+tooling `587d684fa2cd356bb150fe48d167f7e36f309aa5`. It regenerates
+checksum-bound inputs from `9e10d3b3` and executes the frozen `5048ba3e`
+codec runtime with the actual 1 MiB / 103-block JMdict plan. A and C are
+identical current two-group rotating dispatch; B changes only the physical
+worker scheduling policy. Four workers, two admitted groups, output order,
+codec settings, and ownership barriers remain fixed.
+
+The screen retains 36 balanced observations, three warmups, and three
+source-poisoning ownership checks. Every output must match the original block
+hashes and exhaustively decode after compressor workers terminate. The two
+incomplete local exit-137 attempts remain separately described; they support
+no performance conclusion. No unchanged local retry or pooling is permitted.
+
+Before hosted acquisition, the plan froze a mechanical advance rule: B must
+save at least 5 ms and 5% by paired median against both controls, be faster
+in at least 9/12 pairs against each, have lower equal-work sums, and have
+strictly negative upper endpoints for the specified 20,000-resample paired
+bootstrap intervals. Identical-control drift must be less than half the
+smaller measured saving. Even a passing component would require a separately
+source-bound production implementation and full browser qualification.
+
+The next distinct VNDB screen considers record-only compressed aliases for
+the two old raw records responsible for the eight mixed groups. The static
+work census is 2,983 bytes of alias input across eight groups and 429,824
+fewer lookup payload bytes, before measured frame/envelope/reference overhead.
+These are byte counts, not timing gains. The prospective component bounds
+are at most 64 canonical raw entries and 64 KiB input per mixed group, an
+already selected compression session, and one existing target block family.
+Canonical dedup/cache mappings remain unchanged.
+
+That experiment must include canonical reads, compression, append, private
+reference construction, the real record sink, and both stores' finalization
+in one endpoint. Its input is explicitly an immutable capture; generic
+post-await mutation and production provenance remain separate design gates.
+The candidate intentionally changes physical layout and therefore requires
+semantic/layout-aware verification rather than claiming byte-identical A/B
+storage. No alias observation or product modification is claimed here.
 
 <!-- da6c4 evidence checkpoint end -->
