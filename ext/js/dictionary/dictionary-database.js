@@ -6988,6 +6988,66 @@ void 0 :
         if (pendingLengths.length !== count) {
             throw new RangeError('In-flight term content offset and length counts do not match');
         }
+        // Reserved native slabs use a uniform codec and private numeric columns.
+        // Validate that shape once, retaining every per-span bounds/equality check.
+        // Unordered or overlapping reservations retain the general path below.
+        if (
+            count > 0 && pendingContentSpans !== null &&
+            pendingOffsets instanceof Float64Array && pendingOffsets.buffer instanceof ArrayBuffer &&
+            pendingLengths instanceof Uint32Array && pendingLengths.buffer instanceof ArrayBuffer &&
+            typeof pendingResolvedDictNames === 'string'
+        ) {
+            const buffer = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'buffer')?.value);
+            const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'offsets')?.value);
+            const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'lengths')?.value);
+            if (
+                buffer instanceof Uint8Array &&
+                offsets instanceof Uint32Array && offsets.buffer instanceof ArrayBuffer && offsets.length >= count &&
+                lengths instanceof Uint32Array && lengths.buffer instanceof ArrayBuffer && lengths.length >= count
+            ) {
+                let valid = true;
+                let previous = -1;
+                const sourceByteLength = buffer.byteLength;
+                for (let i = 0; i < count; ++i) {
+                    const persistedOffset = pendingOffsets[i];
+                    const sourceOffset = offsets[i];
+                    const length = lengths[i];
+                    if (
+                        !Number.isSafeInteger(persistedOffset) || persistedOffset <= previous ||
+                        !Number.isSafeInteger(sourceOffset) || sourceOffset < 0 ||
+                        !Number.isSafeInteger(length) || length < 0 ||
+                        length !== pendingLengths[i] || length > sourceByteLength - sourceOffset
+                    ) {
+                        valid = false;
+                        break;
+                    }
+                    previous = persistedOffset;
+                }
+                const minimumOffset = pendingOffsets[0];
+                if (valid) {
+                    for (const batch of this._inFlightTermContentSourceBatches) {
+                        if (minimumOffset <= batch.maximumOffset && previous >= batch.minimumOffset) {
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+                if (valid) {
+                    const batch = {
+                        offsets: pendingOffsets,
+                        lengths: pendingLengths,
+                        dictNames: pendingResolvedDictNames,
+                        contentBytes: pendingContentBytes,
+                        contentSpans: pendingContentSpans,
+                        sortedOffsets: true,
+                        minimumOffset,
+                        maximumOffset: previous,
+                    };
+                    this._inFlightTermContentSourceBatches.add(batch);
+                    return () => { this._inFlightTermContentSourceBatches.delete(batch); };
+                }
+            }
+        }
         let sortedOffsets = true;
         let minimumOffset = Infinity;
         let maximumOffset = -Infinity;
