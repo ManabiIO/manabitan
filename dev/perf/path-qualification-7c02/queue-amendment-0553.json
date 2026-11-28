@@ -1,5 +1,4 @@
 {
-  "observedAtUtc": "2026-11-28T05:53:00Z",
   "reason": "The obsolete pre-style-repair run has remained queued since 04:42 UTC and prevents the amended current run from starting in this branch-specific concurrency group.",
   "superseded": [
     {
@@ -41,5 +40,10 @@
     "gates": true,
     "dictionaryLocks": true
   },
-  "interpretation": "This cancels unused setup runs before any step or browser observation. Their history remains retained. It does not rerun, replace, append, filter, or reinterpret a measured cohort."
+  "interpretation": "This cancels unused setup runs before any step or browser observation. Their history remains retained. It does not rerun, replace, append, filter, or reinterpret a measured cohort.",
+  "observationWindowUtc": {
+    "start": "2026-11-28T05:42:45Z",
+    "end": "2026-11-28T05:45:31Z"
+  },
+  "timestampCorrection": "The prior receipt used an estimated future minute; this replaces it with the clock-tool-bracketed observation window. No measurement or acceptance data changed."
 }
