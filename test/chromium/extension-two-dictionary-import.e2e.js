@@ -270,6 +270,8 @@ if (quickImportBenchmarkDictionaryId === 'vndb' && !usePinnedPerfDictionaries) {
 const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
 const benchmarkMediaCheck = process.env.MANABITAN_E2E_BENCH_MEDIA_CHECK ?? 'all';
 if (benchmarkMediaCheck !== 'all' && benchmarkMediaCheck !== 'sample') { fail('MANABITAN_E2E_BENCH_MEDIA_CHECK must be all or sample'); }
+const benchmarkLookupQueryTerm = (process.env.MANABITAN_E2E_IMPORT_BENCH_QUERY_TERM ?? '').trim();
+const benchmarkLookupLimit = parsePositiveIntegerEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_LOOKUP_LIMIT, 16);
 const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
 const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
 const captureProcessSamples = parseBooleanEnv(process.env.MANABITAN_E2E_PROCESS_SAMPLING, !quickImportBenchmarkMode);
@@ -1176,6 +1178,19 @@ async function evalSendMessage(page, expression, arg = null) {
             return {dictionaryInfo, counts: counts.counts};
         }
         if (expression === 'benchmarkLookups') {
+            if (Number.isInteger(arg.maxResults) && Number.isInteger(arg.scanLength)) {
+                const optionsFull = structuredClone(await send('optionsGetFull', undefined));
+                for (const profile of optionsFull.profiles || []) {
+                    if (!profile?.options) { continue; }
+                    profile.options.general.maxResults = arg.maxResults;
+                    profile.options.scanning.length = arg.scanLength;
+                }
+                await send('setAllSettings', {value: optionsFull, source: 'chromium-e2e-benchmark-lookup-limits'});
+                const options = await send('optionsGet', {optionsContext: {index: 0}});
+                if (options.general.maxResults !== arg.maxResults || options.scanning.length !== arg.scanLength) {
+                    throw new Error(`Benchmark lookup limits did not apply: ${JSON.stringify({maxResults: options.general.maxResults, scanLength: options.scanning.length})}`);
+                }
+            }
             const observations = [];
             for (let pass = 0; pass < 6; ++pass) {
                 for (const term of arg.terms) {
@@ -1200,7 +1215,12 @@ async function evalSendMessage(page, expression, arg = null) {
                     observations.push({pass, term, elapsedMs, results: entries.length, originalTextLength: result.originalTextLength, hasExactHeadwordMatch, sha256});
                 }
             }
-            return {timingBoundary: 'settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing', observations};
+            return {
+                timingBoundary: 'settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing',
+                maxResults: arg.maxResults ?? null,
+                scanLength: arg.scanLength ?? null,
+                observations,
+            };
         }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
@@ -4229,6 +4249,9 @@ async function main() {
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
                 if (probeTerms.length !== 12) { fail('Insufficient benchmark content probes'); }
+                if (benchmarkLookupQueryTerm.length > 0 && !probeTerms.includes(benchmarkLookupQueryTerm)) {
+                    probeTerms.push(benchmarkLookupQueryTerm);
+                }
                 const probeResults = [];
                 for (const term of probeTerms) {
                     const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
@@ -4272,7 +4295,12 @@ async function main() {
                 (typeof fixture.mediaFiles === 'number' && restartedState.counts[0]?.media !== fixture.mediaFiles)) {
                     fail(`Persisted benchmark fixture changed across restart: ${JSON.stringify(restartedState)}`);
                 }
-                const lookup = await evalSendMessage(page, 'benchmarkLookups', {title: fixture.expectedTitle, terms: probeTerms});
+                const lookup = await evalSendMessage(page, 'benchmarkLookups', {
+                    title: fixture.expectedTitle,
+                    terms: probeTerms,
+                    maxResults: benchmarkLookupLimit,
+                    scanLength: benchmarkLookupLimit,
+                });
                 const restartedProbeResults = [];
                 for (const term of probeTerms) {
                     const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
