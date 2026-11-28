@@ -1,0 +1,16 @@
+{
+  "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+  "sourcePath": "lib/compress/zstd_compress_internal.h",
+  "sourceSha256": "e99de778a2a733bde856172057fe380256c379f082bd3513cac600b005ac2b98",
+  "candidateSha256": "a73b46ef7da6463bb529c8cea4c366ab7d1583c51a26e58d64b35248fbcc2b8e",
+  "patchSha256": "b33a7f887b7142faf3e12caff0570bc1d15c656e00985ce5b2c019bc2ca38502",
+  "emscripten": "5.0.1-git",
+  "emscriptenRevision": "8c5f43157a3f069ade75876e23061330521eabde",
+  "sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "count64PatchSha256": "bdca115498c52d22960c9feb9686a4c234b3a237e4577a9f2da5849a0c40a749",
+  "count64CandidateSha256": "9b5f241b61f9a6cccb9fea5f7adbed41af75ed4c08e55aabfd83fe06162411f4",
+  "scope": "Separate bounded16-byte SIMD count experiment with count64 tail; baseline source, compiler and runtime settings unchanged",
+  "supersededPatchSha256": "d53ff8061308fbcbfb030e3d12425fe095ab10e404652e8dfc9b244931a1d52d",
+  "supersededCandidateSha256": "e3c517266f6d6487c5ff5facdd9eb307a8009b7488bb9e5a0d19739b4c849033",
+  "reversedLimitGuard": true
+}
