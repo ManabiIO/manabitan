@@ -1,0 +1,204 @@
+name: Seed context WASM experiment 20261128 a7c4
+
+on:
+  push:
+    branches: [test/seed-cctx-wasm-20261128-a7c4]
+    paths:
+      - '.github/workflows/seed-cctx-wasm-20261128-a7c4.yml'
+      - 'dev/perf/seed-cctx-probe.c'
+      - 'dev/perf/build-seed-cctx-wasm-a7c4.py'
+      - 'dev/perf/seed-cctx-wasm-a7c4.js'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: seed-cctx-wasm-20261128-a7c4
+  cancel-in-progress: false
+
+jobs:
+  screen:
+    name: Reproduce stock WASM then screen seeded contexts
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_OUT: builds/perf/seed-cctx-wasm-20261128-a7c4
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Freeze source and component protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_OUT"
+          git diff --exit-code "$PERF_BASELINE" HEAD -- \
+            ext dev/lib dev/data dev/bin dev/dictionary-wasm.js \
+            package.json package-lock.json test/perf/dictionaries.lock.json
+          git diff --stat "$PERF_BASELINE" HEAD > "$PERF_OUT/source-diff-stat.txt"
+          git rev-parse HEAD > "$PERF_OUT/workflow-commit.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          protocol = {
+              "scope": "Packed-block WASM component feasibility only; no runtime integration or browser/import claim. One fresh compressor context handles all103 blocks per pass; production worker assignment/context count is not simulated.",
+              "baselineCommit": os.environ["PERF_BASELINE"],
+              "workflowCommit": os.environ["GITHUB_SHA"],
+              "captureRun": 46103453785,
+              "captureArtifactId": 15247590230,
+              "captureArtifactZipSha256": "1b6dfb9bb2a96af93fa990795ee8c2171ab80a447644fa860c36f19cb1044719",
+              "captureManifestSha256": "589185f792e3e9a80ec0d912173b64443362a221a9852d54d298db7ffe1f0a5e",
+              "emsdkCommit": "14c18b569f55138fe4963924162244251f454fb0",
+              "sdkRelease": "5.0.1",
+              "sdkBuild": "bf32ae8b61ac8efeb7eca01b54c8307f992724f7",
+              "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+              "arms": {"A": "reproduced stock/raw", "B": "candidate/seeded", "C": "same candidate/raw"},
+              "orders": ["AA", "ABC", "BCA", "CAB", "ACB", "CBA", "BAC", "AA"],
+              "freshTimedProcesses": 22,
+              "warmupCorpusPasses": 2,
+              "measuredCorpusPasses": 5,
+              "blocksPerCorpus": 103,
+              "packedBytesPerCorpus": 100300626,
+              "measured": "Fresh context and scratch allocation, dictionary/input copies, compression, owned frame copies, diagnostics and frees",
+              "excluded": "Module initialization, capture/file I/O, full byte/decode/input oracles",
+              "reruns": 0,
+          }
+          Path(os.environ["PERF_OUT"], "protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
+          PY
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Record exact Node and install locked dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version > "$PERF_OUT/node-version.txt"
+          printf 'A7C4_NODE22=%s\n' "$(command -v node)" >> "$GITHUB_ENV"
+          npm ci 2>&1 | tee "$PERF_OUT/npm-ci.log"
+          node --check dev/perf/seed-cctx-wasm-a7c4.js
+          python3 -m py_compile dev/perf/build-seed-cctx-wasm-a7c4.py
+      - name: Install frozen official Emscripten SDK candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk="$RUNNER_TEMP/a7c4-emsdk"
+          git init --quiet "$sdk"
+          git -C "$sdk" remote add origin https://github.com/emscripten-core/emsdk.git
+          git -C "$sdk" fetch --quiet --depth=1 origin 14c18b569f55138fe4963924162244251f454fb0
+          git -C "$sdk" checkout --quiet FETCH_HEAD
+          git -C "$sdk" rev-parse HEAD > "$PERF_OUT/emsdk-commit.txt"
+          "$sdk/emsdk" install 5.0.1 2>&1 | tee "$PERF_OUT/emsdk-install.log"
+          "$sdk/emsdk" activate 5.0.1 2>&1 | tee "$PERF_OUT/emsdk-activate.log"
+          source "$sdk/emsdk_env.sh"
+          emcc --version > "$PERF_OUT/emcc-version.txt"
+          cat "$sdk/upstream/emscripten/emscripten-version.txt" > "$PERF_OUT/emscripten-version.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          assert (root / "emsdk-commit.txt").read_text().strip() == "14c18b569f55138fe4963924162244251f454fb0"
+          assert (root / "emscripten-version.txt").read_text().strip() == "5.0.1-git"
+          sdk = Path(os.environ["RUNNER_TEMP"], "a7c4-emsdk")
+          releases = json.loads((sdk / "emscripten-releases-tags.json").read_text())
+          assert releases["releases"]["5.0.1"] == "bf32ae8b61ac8efeb7eca01b54c8307f992724f7"
+          PY
+      - name: Require exact stock JavaScript and WASM reproduction
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/a7c4-emsdk/emsdk_env.sh"
+          "$A7C4_NODE22" dev/bin/build-zstd-wasm.js 2>&1 | tee "$PERF_OUT/stock-reproduction.log"
+          git diff --exit-code -- dev/lib/zstd-simd-module.js dev/data/zstd-simd.wasm
+          sha256sum dev/lib/zstd-simd-module.js dev/data/zstd-simd.wasm > "$PERF_OUT/stock-identities.txt"
+      - name: Fetch the already captured full canonical corpus
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: 15247590230
+          run-id: 46103453785
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: builds/perf/seed-cctx-wasm-20261128-a7c4/capture-artifact
+      - name: Verify immutable capture before building candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          source = root / "capture-artifact/blocks/manifest.json"
+          data = source.read_bytes()
+          assert hashlib.sha256(data).hexdigest() == "589185f792e3e9a80ec0d912173b64443362a221a9852d54d298db7ffe1f0a5e"
+          manifest = json.loads(data)
+          assert manifest["partial"] is False and manifest["rows"] == 528299
+          assert len(manifest["blocks"]) == 103 and manifest["packedBytes"] == 100300626
+          for item in manifest["blocks"]:
+              assert Path(item["filename"]).name == item["filename"]
+              block = (source.parent / item["filename"]).read_bytes()
+              assert len(block) == item["bytes"] and hashlib.sha256(block).hexdigest() == item["sha256"]
+          (root / "capture-manifest.json").write_bytes(data)
+          PY
+      - name: Build candidate from the same pinned source and flags
+        shell: bash
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/a7c4-emsdk/emsdk_env.sh"
+          source_tree="$RUNNER_TEMP/a7c4-zstd-wasm-source"
+          git init --quiet "$source_tree"
+          git -C "$source_tree" remote add origin https://github.com/facebook/zstd.git
+          git -C "$source_tree" fetch --quiet --depth=1 origin 82d322c4973d9e2968d94047a40892bc6d9a9bdf
+          git -C "$source_tree" checkout --quiet FETCH_HEAD
+          python3 dev/perf/build-seed-cctx-wasm-a7c4.py "$PERF_OUT/modules" "$source_tree" \
+            2>&1 | tee "$PERF_OUT/candidate-build.log"
+      - name: Verify exact frames then run the fixed component protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$A7C4_NODE22" --expose-gc dev/perf/seed-cctx-wasm-a7c4.js \
+            --capture "$PERF_OUT/capture-artifact/blocks" \
+            --build "$PERF_OUT/modules" \
+            --dictionary dev/data/zstd-dicts/jmdict.zdict \
+            --out "$PERF_OUT/wasm-component.json" \
+            2>&1 | tee "$PERF_OUT/screen.log"
+      - name: Print compact observations and preserve source identity
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- ext dev/lib dev/data dev/bin package.json package-lock.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          result = {"job": "seed-context-wasm"}
+          for filename in ["protocol.json", "modules/build-receipt.json"]:
+              file = root / filename
+              if file.exists():
+                  result[filename] = json.loads(file.read_text())
+          file = root / "wasm-component.json"
+          if file.exists():
+              report = json.loads(file.read_text())
+              result["report"] = {key: value for key, value in report.items() if key not in ["observations"]}
+              result["observations"] = [{key: item.get(key) for key in ["file", "arm", "passed", "totals", "initializationMs", "memoryBefore", "memoryAfter", "host"]} for item in report["observations"]]
+          for filename in ["stock-identities.txt", "emsdk-commit.txt", "emcc-version.txt", "node-version.txt"]:
+              file = root / filename
+              if file.exists():
+                  result[filename] = file.read_text()
+          print("A7C4_RESULT_BEGIN")
+          print(json.dumps(result, separators=(",", ":")))
+          print("A7C4_RESULT_END")
+          PY
+      - name: Retain all observations, frames, build receipts and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: seed-context-wasm-a7c4
+          path: |
+            builds/perf/seed-cctx-wasm-20261128-a7c4
+            !builds/perf/seed-cctx-wasm-20261128-a7c4/capture-artifact/**
+          if-no-files-found: error
+          retention-days: 14
