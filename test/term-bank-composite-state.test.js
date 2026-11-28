@@ -19,7 +19,7 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, encode_term_content: (...args: number[]) => number}} ParserExports */
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
@@ -33,16 +33,18 @@ beforeAll(async () => {
 /**
  * @param {string} glossary
  * @param {boolean} [hints]
- * @returns {{count: number, metadata: number[]}}
+ * @param {boolean} [strict]
+ * @returns {{count: number, metadata: number[], input: number, output: number}}
  */
-function parseGlossary(glossary, hints = true) {
+function parseGlossary(glossary, hints = true, strict = false) {
     const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
     parser.wasm_reset_heap()
     const input = parser.wasm_alloc(bytes.length)
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
-    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
-    return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
+    new Uint8Array(parser.memory.buffer, output, 17 * 4).fill(0xa5)
+    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1, 0, 0, strict ? 1 : 0)
+    return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)], input, output}
 }
 
 /**
@@ -189,5 +191,50 @@ describe('composite parser state transitions', () => {
                 expect(parseGlossary(glossary).count > 0).toBe(accepted)
             }
         }
+    })
+
+    test.each([
+        {json: '[]', flags: [0, 0, 0], status: [1, 1]},
+        {json: '[ "plain" ]', flags: [0, 1, 0], status: [1, 1]},
+        {json: '[{"t\\u0079pe":"te\\u0078t","text":"ok"}]', flags: [0, 1, 1], status: [1, 1]},
+        {json: '[{"type":"image","path":"x"}]', flags: [1, 0, 0], status: [1, 1]},
+        {json: '[{"type":"structured-content","content":{"tag":"i\\u006dg","path":"x"}}]', flags: [1, 0, 0], status: [1, 1]},
+        {json: '[{"type":"text","text":"ok","type":"image","path":"x"}]', flags: [1, 1, 1], status: [1, 1]},
+        {json: '[{"type":"text","text":"ok","text":false}]', flags: [0, 1, 1], status: [1, -1]},
+        {json: '[{"type":"image","path":"x","type":"unknown"}]', flags: [1, 0, 0], status: [1, -1]},
+        {json: '[ "image", ]', flags: [1, 1, 0], status: [-1, -1]},
+        {json: '[{"type":"text","text":"bad\\q"}]', flags: [0, 1, 1], status: [-1, -1]},
+        {json: '[{"type":"structured-content","content":[ "image", ]}]', flags: [1, 1, 0], status: [-1, -1]},
+        {json: '[{"type":"text","text":"ok","content":' + nested(256) + '}]', flags: [0, 1, 1], status: [-1, -1]},
+    ])('publishes completed and partial glossary hints from dirty metadata: $json', ({json, flags, status}) => {
+        for (const strict of [false, true]) {
+            for (const media of [false, true]) {
+                const result = parseGlossary(json, media, strict)
+                expect(result.count).toBe(status[Number(strict)])
+                expect(result.metadata.slice(14)).toEqual([media ? flags[0] : 0, flags[1], flags[2]])
+            }
+        }
+        // A failed or media-bearing row must not carry hints into the next
+        // parse, even when the allocator reuses the same native addresses.
+        expect(parseGlossary('["plain"]', true, true).metadata.slice(14)).toEqual([0, 0, 0])
+    })
+
+    test('preserves nested values when legacy encoding reparses without hint outputs', () => {
+        const content = {tag: 'span', content: ['word', {tag: 'img', path: 'x'}]}
+        const glossary = [{type: 'structured-content', content}, {type: 'text', text: 'plain'}]
+        const parsed = parseGlossary(JSON.stringify(glossary, null, 2), true, true)
+        expect(parsed.count).toBe(1)
+        expect(parsed.metadata.slice(14)).toEqual([1, 1, 1])
+        const output = parser.wasm_alloc(2048)
+        const metadata = parser.wasm_alloc(4 * 4)
+        const length = parser.encode_term_content(parsed.input, parsed.output, 1, output, 2048, metadata)
+        expect(length).toBeGreaterThan(0)
+        const bytes = new Uint8Array(parser.memory.buffer, output, length)
+        expect(JSON.parse(new TextDecoder().decode(bytes))).toEqual({
+            rules: '',
+            definitionTags: '',
+            termTags: '',
+            glossary: [{type: 'structured-content', content}, 'plain'],
+        })
     })
 })

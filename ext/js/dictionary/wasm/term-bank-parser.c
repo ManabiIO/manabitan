@@ -923,6 +923,15 @@ static int parse_composite_span_impl(
     };
     if (start >= len || (src[start] != '[' && src[start] != '{')) { return 0; }
 
+    // Each caller supplies distinct, zeroed fields in its current row (or
+    // null); failed reuse probes leave those fields untouched.
+    // Keep the hints private while walking tokens, then publish the same
+    // accumulated values on both success and failure.
+    uint32_t local_media_hint = 0u;
+    uint32_t local_normalization_hint = 0u;
+    uint32_t local_text_normalization_hint = 0u;
+    int result = 0;
+
     // The active frame stays in a local. Only suspended parents need stack
     // storage; the state also encodes the matching container type.
     uint8_t parents[MAX_JSON_NESTING];
@@ -943,8 +952,8 @@ static int parse_composite_span_impl(
     while (i < len) {
         const uint8_t c = src[i];
         if (is_ws(c)) {
-            if (normalization_hint != 0 && *normalization_hint == 0u) {
-                *normalization_hint = 1u;
+            if (normalization_hint != 0 && local_normalization_hint == 0u) {
+                local_normalization_hint = 1u;
             }
             ++i;
             continue;
@@ -955,22 +964,22 @@ static int parse_composite_span_impl(
             const int common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
-                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+                if (!parse_string_span(src, len, i, &s_end)) { goto finished; }
                 // A validated token can match these markers only with a literal or escaped i.
                 const uint8_t first = src[i + 1u];
-                if ((first == 'i' || first == '\\') && media_hint != 0 && *media_hint == 0u &&
+                if ((first == 'i' || first == '\\') && media_hint != 0 && local_media_hint == 0u &&
                     is_media_marker_at(src, s_end, i)) {
-                    *media_hint = 1u;
+                    local_media_hint = 1u;
                 }
             }
             if (object_key) {
                 if (common_key_kind == COMMON_STRUCTURED_KEY_TAG) {
                     const uint32_t tag_end = common_structured_tag_end(src, len, s_end);
                     if (tag_end != 0u) {
-                        if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
+                        if (normalization_hint != 0 && src[s_end + 1u] == ' ') { local_normalization_hint = 1u; }
                         if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
                         state = OBJECT_KEY;
-                        i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
+                        i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint != 0 ? &local_normalization_hint : 0);
                         continue;
                     }
                 }
@@ -986,25 +995,25 @@ static int parse_composite_span_impl(
                     common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
                     (src[i + 1u] == 't' || src[i + 1u] == '\\') &&
                     (
-                        (normalization_hint != 0 && *normalization_hint == 0u) ||
-                        (text_normalization_hint != 0 && *text_normalization_hint == 0u)
+                        (normalization_hint != 0 && local_normalization_hint == 0u) ||
+                        (text_normalization_hint != 0 && local_text_normalization_hint == 0u)
                     ) &&
                     type_text_pair_at(src, len, i, s_end)
                 ) {
-                    if (normalization_hint != 0) { *normalization_hint = 1u; }
-                    if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                    if (normalization_hint != 0) { local_normalization_hint = 1u; }
+                    if (text_normalization_hint != 0) { local_text_normalization_hint = 1u; }
                 }
                 // The key was already validated; consume an adjacent colon
                 // without redispatching it through the object state machine.
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
-                    i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
+                    i = advance_glossary_delimiter(src, len, s_end, normalization_hint != 0 ? &local_normalization_hint : 0);
                     // A literal content key and its colon already establish
                     // the parent state. Enter an adjacent child here without
                     // dispatching its opener through the general token loop.
                     if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
                         i < len && (src[i] == '[' || src[i] == '{')) {
-                        if (depth >= MAX_JSON_NESTING) { return 0; }
+                        if (depth >= MAX_JSON_NESTING) { goto finished; }
                         if (validate_top_level_objects && depth == 2u) {
                             glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
                         }
@@ -1032,28 +1041,29 @@ static int parse_composite_span_impl(
             } else if (state == ARRAY_FIRST || state == ARRAY_VALUE) {
                 state = ARRAY_AFTER_VALUE;
             } else {
-                return 0;
+                goto finished;
             }
             i = s_end;
             // A validated string value also establishes its comma transition.
             // Keys still require a colon; whitespace retains normal hint handling.
             if (!object_key && i < len && src[i] == ',') {
                 state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
-                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+                i = advance_glossary_delimiter(src, len, i, normalization_hint != 0 ? &local_normalization_hint : 0);
             }
             continue;
         }
         if (c == ']' || c == '}') {
             if (c == ']') {
-                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
+                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { goto finished; }
             } else {
-                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
-                if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
+                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { goto finished; }
+                if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { goto finished; }
             }
             ++i;
             if (--depth == 0u) {
                 *out_end = i;
-                return 1;
+                result = 1;
+                goto finished;
             }
             state = parents[depth - 1u];
             continue;
@@ -1061,20 +1071,20 @@ static int parse_composite_span_impl(
         if (c == ',') {
             if (state == ARRAY_AFTER_VALUE) { state = ARRAY_VALUE; }
             else if (state == OBJECT_AFTER_VALUE) { state = OBJECT_KEY; }
-            else { return 0; }
-            i = advance_glossary_delimiter(src, len, i, normalization_hint);
+            else { goto finished; }
+            i = advance_glossary_delimiter(src, len, i, normalization_hint != 0 ? &local_normalization_hint : 0);
             continue;
         }
         if (c == ':') {
-            if (state != OBJECT_COLON) { return 0; }
+            if (state != OBJECT_COLON) { goto finished; }
             state = OBJECT_VALUE;
-            i = advance_glossary_delimiter(src, len, i, normalization_hint);
+            i = advance_glossary_delimiter(src, len, i, normalization_hint != 0 ? &local_normalization_hint : 0);
             continue;
         }
         uint8_t next_state;
         if (state == ARRAY_FIRST || state == ARRAY_VALUE) { next_state = ARRAY_AFTER_VALUE; }
         else if (state == OBJECT_VALUE) { next_state = OBJECT_AFTER_VALUE; }
-        else { return 0; }
+        else { goto finished; }
         if (validate_top_level_objects && depth == 2u && state == OBJECT_VALUE) {
             if (glossary_key == GLOSSARY_TYPE_FIELD) {
                 glossary_object_type = 0u;
@@ -1087,7 +1097,7 @@ static int parse_composite_span_impl(
             }
         }
         if (c == '[' || c == '{') {
-            if (depth >= MAX_JSON_NESTING) { return 0; }
+            if (depth >= MAX_JSON_NESTING) { goto finished; }
             if (validate_top_level_objects && depth == 1u && c == '{') {
                 glossary_object_type = 0u;
                 glossary_valid_fields = 0u;
@@ -1100,11 +1110,23 @@ static int parse_composite_span_impl(
             continue;
         }
         uint32_t scalar_end = 0u;
-        if (!parse_scalar_span(src, len, i, &scalar_end)) { return 0; }
+        if (!parse_scalar_span(src, len, i, &scalar_end)) { goto finished; }
         state = next_state;
         i = scalar_end;
     }
-    return 0;
+finished:
+    // Avoid writing unchanged zero values for the common compact,
+    // nonmedia glossary.
+    if (media_hint != 0 && local_media_hint != 0u) {
+        *media_hint = local_media_hint;
+    }
+    if (normalization_hint != 0 && local_normalization_hint != 0u) {
+        *normalization_hint = local_normalization_hint;
+    }
+    if (text_normalization_hint != 0 && local_text_normalization_hint != 0u) {
+        *text_normalization_hint = local_text_normalization_hint;
+    }
+    return result;
 }
 
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
