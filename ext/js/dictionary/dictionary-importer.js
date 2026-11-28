@@ -2715,7 +2715,7 @@ export class DictionaryImporter {
 
             for (const tagFile of tagFiles) {
                 const tTagFile = Date.now();
-                let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle));
+                let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle, rawZipPayloadReader));
                 step4TimingBreakdown.tagReadMs += Math.max(0, Date.now() - tTagFile);
 
                 const tTagWriteStart = Date.now();
@@ -4948,12 +4948,13 @@ export class DictionaryImporter {
      * @param {ImportFileEntry[]} files
      * @param {(entry: TEntry, dictionaryTitle: string) => TResult} convertEntry
      * @param {string} dictionaryTitle
+     * @param {RawZipPayloadReader|null} [rawZipPayloadReader]
      * @returns {Promise<TResult[]>}
      */
-    async _readFileSequence(files, convertEntry, dictionaryTitle) {
+    async _readFileSequence(files, convertEntry, dictionaryTitle, rawZipPayloadReader = null) {
         const results = [];
         for (const file of files) {
-            const content = await this._getData(file, new TextWriter());
+            const content = await this._getData(file, new TextWriter(), void 0, rawZipPayloadReader);
             let entries;
 
             try {
@@ -6394,9 +6395,10 @@ null;
      * @param {ImportFileEntry} entry
      * @param {import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter} writer
      * @param {AbortSignal} [signal]
+     * @param {RawZipPayloadReader|null} [rawZipPayloadReader]
      * @returns {Promise<T>}
      */
-    async _getData(entry, writer, signal) {
+    async _getData(entry, writer, signal, rawZipPayloadReader = null) {
         signal?.throwIfAborted();
         const entryBytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
         const bytes = entryBytes instanceof Uint8Array ? entryBytes : void 0;
@@ -6422,7 +6424,10 @@ null;
         // defer the startup avoided for index.json. Binary/media reads retain
         // their existing worker policy.
         let useWebWorkers = this._zipUseWebWorkers;
-        if (useWebWorkers && writer instanceof TextWriter) {
+        /* eslint-disable @stylistic/semi */
+        let useCachedNativeText = false
+        /* eslint-enable @stylistic/semi */
+        if ((useWebWorkers || rawZipPayloadReader !== null) && writer instanceof TextWriter) {
             const entryMetadata = /** @type {{uncompressedSize?: unknown, compressedSize?: unknown}} */ (/** @type {unknown} */ (entry));
             const uncompressedSize = entryMetadata.uncompressedSize;
             const compressedSize = entryMetadata.compressedSize;
@@ -6433,9 +6438,32 @@ null;
                 compressedSize >= 0 && compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES
             ) {
                 useWebWorkers = false;
+                /* eslint-disable-next-line @stylistic/semi */
+                useCachedNativeText = rawZipPayloadReader?.supportsCachedBatchReads() === true
             }
         }
         const read = async (/** @type {AbortSignal|undefined} */ readSignal) => {
+            /* eslint-disable @stylistic/semi */
+            if (useCachedNativeText && rawZipPayloadReader !== null) {
+                // Term parsing already owns this small archive cache. Reuse it
+                // for bounded trailing tags without another ZIP stream setup.
+                const batch = await rawZipPayloadReader.readBatch([entry], readSignal)
+                if (batch !== null) {
+                    let decoded
+                    try {
+                        decoded = await inflateCompressedZipMediaBatchWasm(batch.sources)
+                    } catch (error) {
+                        if (error instanceof DictionarySourceIntegrityError || error instanceof TermBankWasmResourceError) { throw error }
+                        // A missing native asset retains the ordinary ZIP path.
+                        readSignal?.throwIfAborted()
+                    }
+                    if (typeof decoded !== 'undefined') {
+                        readSignal?.throwIfAborted()
+                        return /** @type {T} */ (new TextDecoder().decode(decoded.sources[0]))
+                    }
+                }
+            }
+            /* eslint-enable @stylistic/semi */
             const result = await getData.call(entry, writer, {
                 useWebWorkers,
                 // zip.js leaves CRC verification disabled unless explicitly requested.
