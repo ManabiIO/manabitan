@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "archiveName": "sequence64-rejected.zip",
+  "archiveBytes": 2886657,
+  "archiveSha256": "77f3de74192a095a91ca49f7ecb639758e2b4cf12284db1ef8ca83cd1c6890e7",
+  "fileCount": 393,
+  "uniqueBlobCount": 168,
+  "rawBytes": 22162152,
+  "uniqueRawBytes": 9781461,
+  "parts": [
+    {
+      "name": "sequence64-rejected.part-001",
+      "bytes": 262144,
+      "sha256": "3e1f0ec8790019e4b3b32b3d193953f82f6c83bc48b8382b559dae7bc415cea0",
+      "gitBlobSha1": "b113563dfca9d9a29657206445e17c7cd9a5f692"
+    },
+    {
+      "name": "sequence64-rejected.part-002",
+      "bytes": 262144,
+      "sha256": "56548fd51bcdeb24c2c9d8192b188522c7a29ec15f6e13dbcc621b9aef0c54fc",
+      "gitBlobSha1": "acfdee918e70961f1b1ee282121876de3dfa0932"
+    },
+    {
+      "name": "sequence64-rejected.part-003",
+      "bytes": 262144,
+      "sha256": "089a9a09621835899da74c67801b3f7e1aebf5cffb54cb0052d0eb7b787d8b57",
+      "gitBlobSha1": "9bc10f46b75e5eb7162fe96b1cd6bef386ab13d4"
+    },
+    {
+      "name": "sequence64-rejected.part-004",
+      "bytes": 262144,
+      "sha256": "6fd9b9904415de6882d538159544f4def09efe881d72b23b38d2a8fcbcc36e00",
+      "gitBlobSha1": "362cfe30eca3996c3d2f9ce0465614162d144556"
+    },
+    {
+      "name": "sequence64-rejected.part-005",
+      "bytes": 262144,
+      "sha256": "44c8a25d91e94ffb188f638b0a3d8308601b179c1a180959dec4063a84e444bb",
+      "gitBlobSha1": "206537ceb24ce09ff9deda39105ea01a198e6991"
+    },
+    {
+      "name": "sequence64-rejected.part-006",
+      "bytes": 262144,
+      "sha256": "9d60ae5d64783b05989a0b6ef243f9e595aa2c011963d0e86a0bd55abb52c13a",
+      "gitBlobSha1": "295a78294751090f99ea8c39d166ccc15d8c2012"
+    },
+    {
+      "name": "sequence64-rejected.part-007",
+      "bytes": 262144,
+      "sha256": "a0671009b3a279805b3362449cd887212b05e00c5e59e45fb0ade91aa34c1ca4",
+      "gitBlobSha1": "f5239fe83365ec9f05025aed89db7b83c8dadb67"
+    },
+    {
+      "name": "sequence64-rejected.part-008",
+      "bytes": 262144,
+      "sha256": "18c5d6f24143155251a309d632a934c6deb272e7c1a1913b35804243de628392",
+      "gitBlobSha1": "75f28d5c12d9a0616006e1a836bfb7605f110b3d"
+    },
+    {
+      "name": "sequence64-rejected.part-009",
+      "bytes": 262144,
+      "sha256": "829427db892d42883311c03127cea5960d23ca1003059abad8851d89931ebaf5",
+      "gitBlobSha1": "3f5cb5aaaa094450dabc057894815f57c540d111"
+    },
+    {
+      "name": "sequence64-rejected.part-010",
+      "bytes": 262144,
+      "sha256": "9bdf44f91c9de726fb8c1eaab07f7286b6b8b02d38259e6c61b9ac8fb23c154d",
+      "gitBlobSha1": "f018f6b9029534c5307b1f23efd39b77d0715d3c"
+    },
+    {
+      "name": "sequence64-rejected.part-011",
+      "bytes": 262144,
+      "sha256": "bdf444fbd1cb47ab5273b76c24a92d7f2a392f38f03054e33238aafa8f6a59e1",
+      "gitBlobSha1": "c98cc843caddfa6b8b328ba61c612d5342690bce"
+    },
+    {
+      "name": "sequence64-rejected.part-012",
+      "bytes": 3073,
+      "sha256": "e49a51c2068f4d936c66a2f46c032bae02314c5ca5c1a836285af2f89a64b447",
+      "gitBlobSha1": "3b148f3765717133156b997eb0155d888e0207c9"
+    }
+  ],
+  "createdAtUtc": "2026-11-28T06:42:09.113123+00:00",
+  "sourceResultSha256": "12c5a6907079b795b23db9f28ca4c87e158e51b02951d9e69d05ca8a12ce1564",
+  "sourceFreezeSha256": "eac97931d021c35c814aab71a0da19dcad17d90ad17163fb1a5010182cdf960c",
+  "omissions": {
+    "canonicalPayloads": "Full dictionary/canonical payloads excluded; immutable lock/source identities and reconstruction scripts retained.",
+    "dictionary": "Existing pinned repository dictionary excluded as a duplicate; SHA remains bound in receipts.",
+    "largeDerivedFiles": "Generated amalgamations and WAT excluded; original source/patch/SDK pins and compiled WASM retained.",
+    "SDK": "SDK/package binaries and generated Python cache bytes excluded; identities and diagnostics retained."
+  }
+}
