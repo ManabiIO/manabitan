@@ -68,6 +68,8 @@ import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
+import {beginArtifactTermChunkSink} from './artifact-term-chunk-pipeline.js';
+import {hasOwnedTermContent} from './term-content-ownership.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
@@ -1958,9 +1960,10 @@ export class DictionaryImporter {
                  * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
                  * @param {number} streamedProgressStartIndex
                  * @param {number} [streamedProgressAllowance]
+                 * @param {(() => void)|null} [onPublished]
                  * @returns {Promise<Record<string, number>>}
                  */
-            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
+            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance, onPublished = null) => {
                 if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 const trackProgress = streamedProgress === null;
                 /** @type {DirectTermChunk|null} */
@@ -2103,9 +2106,32 @@ export class DictionaryImporter {
                     step4TimingBreakdown.termSerializationMs += importMetrics.serializationMs;
                 }
                 const tTermsWriteStart = Date.now();
-                await (directArtifactChunk !== null ?
-                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
-                    bulkAdd('terms', termList, {trackProgress}));
+                /** @type {Record<string, number>|null} */
+                let bulkAddTermsMetrics = null;
+                if (
+                    directArtifactChunk !== null && onPublished !== null &&
+                    hasOwnedTermContent(directArtifactChunk.contentBytesBuffer)
+                ) {
+                    const operation = importSession.beginArtifactTermChunk({
+                        ...directArtifactChunk,
+                        contentHash1List: directArtifactChunk.contentHash1List ?? new Uint32Array(0),
+                        contentHash2List: directArtifactChunk.contentHash2List ?? new Uint32Array(0),
+                    });
+                    try {
+                        await operation.published;
+                        onPublished();
+                        bulkAddTermsMetrics = await operation.completion;
+                    } catch (error) {
+                        // Publication may fail before terminal rollback. Keep
+                        // this sink's source alive until every owner drains.
+                        await operation.completion.catch(() => {});
+                        throw error;
+                    }
+                } else {
+                    await (directArtifactChunk !== null ?
+                        dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
+                        bulkAdd('terms', termList, {trackProgress}));
+                }
                 const tTermsWriteEnd = Date.now();
                 importMetrics.bulkAddTermsMs += Math.max(0, tTermsWriteEnd - tTermsWriteStart);
                 if (directArtifactChunk !== null) {
@@ -2125,7 +2151,7 @@ export class DictionaryImporter {
                     }
                     directArtifactChunk.termRecordPreinternedPlan = null;
                 }
-                const bulkAddTermsMetrics = dictionaryDatabase.getLastBulkAddTermsMetrics();
+                bulkAddTermsMetrics ??= dictionaryDatabase.getLastBulkAddTermsMetrics();
                 if (bulkAddTermsMetrics !== null) {
                     addTermImportMetrics(importMetrics, bulkAddTermsMetrics);
                 }
@@ -2167,6 +2193,11 @@ export class DictionaryImporter {
                 let streamedFastPathChunkCount = 0;
                 let termParseAlreadyAccounted = false;
                 let streamChunkWorkMs = 0;
+                // Per-consumer elapsed times can overlap. Only their union may
+                // be subtracted from the enclosing read's wall time.
+                let streamChunkWorkWallMs = 0;
+                let activeStreamChunkWorkCount = 0;
+                let activeStreamChunkWorkStartedAt = 0;
                 const artifactMetrics = createTermImportMetrics();
                 let artifactMetadataRebaseMs = 0;
                 let streamedProgressAllowance = termFileProgressAllowance;
@@ -2198,7 +2229,10 @@ export class DictionaryImporter {
                             const chunkMetrics = await processTermChunk(termFile, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex);
                             addTermImportMetrics(artifactMetrics, chunkMetrics);
                             step4ArtifactMetadataAppendMs += chunkMetrics.contentAppendMs;
-                            streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
+                            const chunkWorkMs = Math.max(0, Date.now() - tChunkWorkStart);
+                            streamChunkWorkMs += chunkWorkMs;
+                            // Artifact callbacks still complete serially.
+                            streamChunkWorkWallMs += chunkWorkMs;
                             if (Array.isArray(termListChunk)) {
                                 termListChunk.length = 0;
                             }
@@ -2238,7 +2272,7 @@ export class DictionaryImporter {
                             step4ArtifactMetadataRebaseMs += Math.max(0, lastArtifactTermBankReadProfile.metadataRebaseMs ?? 0);
                             artifactMetadataRebaseMs += Math.max(0, lastArtifactTermBankReadProfile.metadataRebaseMs ?? 0);
                         }
-                        step4TimingBreakdown.termParseMs += Math.max(0, totalArtifactReadMs - streamChunkWorkMs);
+                        step4TimingBreakdown.termParseMs += Math.max(0, totalArtifactReadMs - streamChunkWorkWallMs);
                         termParseAlreadyAccounted = true;
                     } else {
                         let termReadResult;
@@ -2332,16 +2366,39 @@ export class DictionaryImporter {
                             enableTermEntryContentDedup,
                             termContentStorageMode,
                             async (termListChunk, requirementsChunk, streamProgress) => {
-                                ++streamedFastPathChunkCount;
-                                const tChunkWorkStart = Date.now();
-                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance);
-                                addTermImportMetrics(artifactMetrics, chunkMetrics);
-                                streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
-                                termListChunk.length = 0;
-                                if (requirementsChunk !== null) {
-                                    requirementsChunk.length = 0;
+                                /** @param {(() => void)|null} onPublished */
+                                const consume = async (onPublished) => {
+                                    ++streamedFastPathChunkCount;
+                                    const tChunkWorkStart = Date.now();
+                                    if (activeStreamChunkWorkCount === 0) {
+                                        activeStreamChunkWorkStartedAt = tChunkWorkStart;
+                                    }
+                                    ++activeStreamChunkWorkCount;
+                                    let chunkWorkSucceeded = false;
+                                    try {
+                                        const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance, onPublished);
+                                        addTermImportMetrics(artifactMetrics, chunkMetrics);
+                                        chunkWorkSucceeded = true;
+                                    } finally {
+                                        const tChunkWorkEnd = Date.now();
+                                        if (chunkWorkSucceeded) {
+                                            streamChunkWorkMs += Math.max(0, tChunkWorkEnd - tChunkWorkStart);
+                                        }
+                                        --activeStreamChunkWorkCount;
+                                        if (activeStreamChunkWorkCount === 0) {
+                                            streamChunkWorkWallMs += Math.max(0, tChunkWorkEnd - activeStreamChunkWorkStartedAt);
+                                        }
+                                    }
+                                    termListChunk.length = 0;
+                                    if (requirementsChunk !== null) {
+                                        requirementsChunk.length = 0;
+                                    }
+                                    await eventLoopYielder.yield();
+                                };
+                                if (!useTermMediaRequirements) {
+                                    return await beginArtifactTermChunkSink(consume);
                                 }
-                                await eventLoopYielder.yield();
+                                await consume(null);
                             },
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
@@ -2378,7 +2435,7 @@ export class DictionaryImporter {
                 if (streamedImportCompleted) {
                     if (!termParseAlreadyAccounted) {
                         const totalFastReadMs = Math.max(0, Date.now() - tFastParseStart);
-                        step4TimingBreakdown.termParseMs += Math.max(0, totalFastReadMs - streamChunkWorkMs);
+                        step4TimingBreakdown.termParseMs += Math.max(0, totalFastReadMs - streamChunkWorkWallMs);
                     }
                     if (lastFastTermBankReadProfile !== null) {
                         /** @type {Partial<NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>> & {parallelSkipReason?: string|null}} */
@@ -5070,7 +5127,7 @@ export class DictionaryImporter {
      * @param {boolean} useMediaPipeline
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
-     * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
+     * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} [onChunk]
      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @param {boolean} [allowNativeImageProjection]
@@ -5172,8 +5229,9 @@ export class DictionaryImporter {
             /**
              * @param {unknown} parsedRows
              * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} chunkProgress
+             * @returns {Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>}
              */
-            const handleParsedChunk = async (parsedRows, chunkProgress) => {
+            const handleParallelParsedChunk = async (parsedRows, chunkProgress) => {
                 ++importerChunkCount;
                 importerTotalRows = chunkProgress.processedRows;
                 /** @type {import('dictionary-importer').ImportRequirement[]|null} */
@@ -5235,7 +5293,7 @@ export class DictionaryImporter {
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                     const tChunkSinkStart = Date.now();
-                    await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
+                    const sinkResult = await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} */ (/** @type {unknown} */ (onChunk))(
                         {
                             ...columnPayload,
                             dictionary: dictionaryTitle,
@@ -5246,6 +5304,13 @@ export class DictionaryImporter {
                         requirementsForChunk,
                         chunkProgress,
                     );
+                    if (typeof sinkResult !== 'undefined') {
+                        const completion = sinkResult.completion.then(() => {
+                            importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+                        });
+                        void completion.catch(() => {});
+                        return {completion};
+                    }
                     importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
                     return;
                 }
@@ -5406,11 +5471,12 @@ export class DictionaryImporter {
 
                 const tChunkSinkStart = Date.now();
                 if (streamToChunkHandler) {
-                    await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (onChunk)(
+                    const sinkResult = await /** @type {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-bank-wasm-parser.js').TermBankChunkSinkResult>|import('./term-bank-wasm-parser.js').TermBankChunkSinkResult} */ (onChunk)(
                         termListChunk,
                         requirementsForChunk,
                         chunkProgress,
                     );
+                    if (typeof sinkResult !== 'undefined') { await sinkResult.completion; }
                 } else {
                     termList.push(...termListChunk);
                     if (requirements !== null && requirementsForChunk !== null) {
@@ -5420,6 +5486,17 @@ export class DictionaryImporter {
                     }
                 }
                 importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
+            };
+            /**
+             * Sequential/native-overlapped parsers retain their completion-only
+             * callback contract and never release a reusable heap at publication.
+             * @param {unknown} parsedRows
+             * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} chunkProgress
+             * @returns {Promise<void>}
+             */
+            const handleParsedChunk = async (parsedRows, chunkProgress) => {
+                const result = await handleParallelParsedChunk(parsedRows, chunkProgress);
+                if (typeof result !== 'undefined') { await result.completion; }
             };
             const parserOptions = {
                 ...this._termBankExperiments,
@@ -5456,7 +5533,7 @@ export class DictionaryImporter {
                             /** @type {Array<() => Promise<{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>} */ (lazySourceBatch.loaders),
                             lazySourceBatch.estimatedByteLengths,
                             version,
-                            handleParsedChunk,
+                            handleParallelParsedChunk,
                             parserOptions,
                             () => this._isCancelled(),
                         ) :
@@ -5464,7 +5541,7 @@ export class DictionaryImporter {
                             /** @type {Array<() => Promise<Uint8Array>>} */ (lazySourceBatch.loaders),
                             lazySourceBatch.estimatedByteLengths,
                             version,
-                            handleParsedChunk,
+                            handleParallelParsedChunk,
                             parserOptions,
                             () => this._isCancelled(),
                         );
@@ -5473,7 +5550,7 @@ export class DictionaryImporter {
                         deferredSourceBatch.promises,
                         deferredSourceBatch.estimatedByteLengths,
                         version,
-                        handleParsedChunk,
+                        handleParallelParsedChunk,
                         parserOptions,
                         () => this._isCancelled(),
                     );
@@ -5481,7 +5558,7 @@ export class DictionaryImporter {
                     usedParallelParser = await parseTermBankWithWasmColumnChunksParallel(
                         bytes,
                         version,
-                        handleParsedChunk,
+                        handleParallelParsedChunk,
                         parserOptions,
                         () => this._isCancelled(),
                     );

@@ -21,6 +21,7 @@
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
 import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
+import {ArtifactTermChunkPipeline} from './artifact-term-chunk-pipeline.js';
 import {TermContentMetadataArena} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
@@ -75,7 +76,7 @@ import {
     scoreGlossarySearchMatch,
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
-import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {hasOwnedTermContent, takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
 import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
@@ -559,6 +560,12 @@ export class DictionaryDatabase {
         this._bulkImportSetupPromise = null;
         /** @type {boolean} */
         this._bulkImportTransactionOpen = false;
+        /** @type {ArtifactTermChunkPipeline|null} */
+        this._artifactTermChunkPipeline = null;
+        /** @type {boolean} */
+        this._artifactTermChunkAdmissionClosed = false;
+        /** @type {Error|null} */
+        this._artifactTermChunkCancellation = null;
         /** @type {DictionaryImportJournal} */
         this._importJournal = new DictionaryImportJournal();
         /** @type {import('dictionary-import-journal').DictionaryImportJournalRecord|null} */
@@ -901,6 +908,8 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
+            const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+            errors.push(...(Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors));
             const db = this._requireDb();
             if (this._bulkImportJournalRecord !== null) {
                 await this._rollbackBulkImport(db, errors, true, true);
@@ -973,10 +982,14 @@ export class DictionaryDatabase {
         if (this._bulkImportState !== BULK_IMPORT_STATE_IDLE) {
             throw new Error('A dictionary bulk import is already active');
         }
+        this._artifactTermChunkAdmissionClosed = false;
+        this._artifactTermChunkCancellation = null;
         this._transitionBulkImportState(BULK_IMPORT_STATE_IDLE, BULK_IMPORT_STATE_ACTIVE);
     }
 
     /**
+     * Claims finalization before admitted writes drain, preventing competing
+     * close, purge, or finalization operations from taking the same lifecycle.
      * @returns {import('@sqlite.org/sqlite-wasm').Database|null}
      * @throws {Error} If finalization already owns the lifecycle or the database is closed.
      */
@@ -1012,6 +1025,45 @@ export class DictionaryDatabase {
     }
 
     /**
+     * Closes admission and joins every append before lifecycle cleanup. Retain
+     * the closed owner until the lifecycle ends. With no append owner, closing
+     * admission is synchronous and preserves the existing cleanup scheduling.
+     * @param {boolean} cancel
+     * @returns {Error[]|Promise<Error[]>}
+     */
+    _closeArtifactTermChunkPipeline(cancel) {
+        this._artifactTermChunkAdmissionClosed = true;
+        const pipeline = this._artifactTermChunkPipeline;
+        if (pipeline === null) { return []; }
+        const cancellation = this._artifactTermChunkCancellation ??= new Error('Artifact term chunk import was cancelled');
+        if (cancel) { pipeline.cancel(cancellation); }
+        return this._drainArtifactTermChunkPipeline(pipeline, cancel, cancellation);
+    }
+
+    /**
+     * @param {ArtifactTermChunkPipeline} pipeline
+     * @param {boolean} cancel
+     * @param {Error} cancellation
+     * @returns {Promise<Error[]>}
+     */
+    async _drainArtifactTermChunkPipeline(pipeline, cancel, cancellation) {
+        let failed = false;
+        /** @type {unknown} */
+        let failure = void 0;
+        try {
+            await pipeline.close();
+        } catch (error) {
+            failed = true;
+            failure = error;
+        }
+        const errors = pipeline.getFailures().filter((error) => !cancel || error !== cancellation);
+        if (errors.length === 0 && failed && (!cancel || failure !== cancellation)) {
+            errors.push(failure);
+        }
+        return errors.map(toError);
+    }
+
+    /**
      * A successful start can become stale after an explicit abort, close, or
      * recovery. Check the identity before claiming the next finalization owner.
      * @param {string|null} expectedSessionId
@@ -1029,6 +1081,7 @@ export class DictionaryDatabase {
 
     /** Returns the lifecycle to idle after setup or finalization cleanup. */
     _endBulkImportLifecycle() {
+        this._artifactTermChunkPipeline = null;
         this._generationMediaWrite = null;
         if (this._bulkImportState === BULK_IMPORT_STATE_IDLE) { return; }
         if (this._bulkImportState === BULK_IMPORT_STATE_ACTIVE) {
@@ -1449,10 +1502,19 @@ export class DictionaryDatabase {
     async abortBulkImport(expectedSessionId = null) {
         await this._waitForBulkImportSetup();
         this._assertBulkImportSessionOwner(expectedSessionId);
+        const importOwner = this._bulkImportJournalRecord;
         const db = this._beginBulkImportFinalization();
-        if (db === null) { return; }
-        /** @type {Error[]} */
-        const errors = [];
+        const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+        const errors = Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors;
+        if (this._bulkImportJournalRecord !== importOwner) {
+            throw new Error('Dictionary bulk import session ownership changed');
+        }
+        this._assertBulkImportSessionOwner(expectedSessionId);
+        if (db === null) {
+            if (errors.length === 1) { throw errors[0]; }
+            if (errors.length > 1) { throw new AggregateError(errors, 'Failed to drain dictionary term chunks'); }
+            return;
+        }
         let rollbackSucceeded = true;
         try {
             rollbackSucceeded = await this._rollbackBulkImport(db, errors, true, true);
@@ -1478,7 +1540,17 @@ export class DictionaryDatabase {
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
         this._assertBulkImportSessionOwner(expectedSessionId);
+        const importOwner = this._bulkImportJournalRecord;
         const db = this._beginBulkImportFinalization();
+        const chunkErrors = this._closeArtifactTermChunkPipeline(false);
+        const appendErrors = Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors;
+        if (this._bulkImportJournalRecord !== importOwner) {
+            throw new Error('Dictionary bulk import session ownership changed');
+        }
+        this._assertBulkImportSessionOwner(expectedSessionId);
+        const appendError = appendErrors.length === 1 ?
+            appendErrors[0] :
+            (appendErrors.length > 1 ? new AggregateError(appendErrors, 'Failed to drain dictionary term chunks') : null);
         if (db !== null) {
             const tFinishBulkImportStart = safePerformance.now();
             let commitMs = 0;
@@ -1535,6 +1607,9 @@ export class DictionaryDatabase {
             let termRecordSessionEnded = false;
             let sqlitePublished = false;
             try {
+                // A late append failure still owns the active transaction and
+                // journal. Route it through the ordinary finalization rollback.
+                if (appendError !== null) { throw appendError; }
                 const generationMedia = publication?.summary.generationMedia;
                 if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
                     await this._awaitGenerationMediaPublication(generationMedia);
@@ -1839,6 +1914,7 @@ export class DictionaryDatabase {
             }
             return result;
         }
+        if (appendError !== null) { throw appendError; }
         return null;
     }
 
@@ -1940,6 +2016,8 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
+            const chunkErrors = this._closeArtifactTermChunkPipeline(true);
+            errors.push(...(Array.isArray(chunkErrors) ? chunkErrors : await chunkErrors));
             // An early media writer may still be waiting for the index the
             // abandoned import will never supply. Cancel before joining it.
             const mediaWrite = this._generationMediaWrite;
@@ -5074,6 +5152,93 @@ void 0 :
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
+        if (
+            this._bulkImportState === BULK_IMPORT_STATE_FINALIZING ||
+            (this._artifactTermChunkAdmissionClosed && this._isBulkImportInProgress())
+        ) {
+            throw new Error('Artifact term chunk import is finalizing');
+        }
+        if (
+            this._bulkImportState === BULK_IMPORT_STATE_ACTIVE &&
+            this._bulkImportTransactionOpen && this._bulkImportJournalRecord !== null
+        ) {
+            const pipeline = this._getArtifactTermChunkPipeline(this._bulkImportJournalRecord.sessionId);
+            this._lastBulkAddTermsMetrics = await pipeline.appendSerial(chunk);
+            return;
+        }
+        if (this._artifactTermChunkPipeline !== null) {
+            this._lastBulkAddTermsMetrics = await this._artifactTermChunkPipeline.appendSerial(chunk);
+            return;
+        }
+        await this._bulkAddArtifactTermsChunk(chunk);
+    }
+
+    /**
+     * Begins one ordered import chunk. Only complete, immutable shared parser
+     * groups may prepare compression before the preceding chunk completes.
+     * @param {ArtifactTermRecordChunk} chunk
+     * @param {string} expectedSessionId
+     * @returns {import('./artifact-term-chunk-pipeline.js').ArtifactTermChunkAppend}
+     */
+    beginBulkAddArtifactTermsChunk(chunk, expectedSessionId) {
+        return this._getArtifactTermChunkPipeline(expectedSessionId).begin(chunk);
+    }
+
+    /**
+     * @param {string} expectedSessionId
+     * @returns {ArtifactTermChunkPipeline}
+     * @throws {Error} If admission is closed or the session no longer owns the import.
+     */
+    _getArtifactTermChunkPipeline(expectedSessionId) {
+        if (typeof expectedSessionId !== 'string' || expectedSessionId.length === 0) {
+            throw new Error('Artifact term chunk import requires a session owner');
+        }
+        this._assertBulkImportSessionOwner(expectedSessionId);
+        if (this._artifactTermChunkAdmissionClosed) {
+            throw new Error('Artifact term chunk import is finalizing');
+        }
+        if (this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE || !this._bulkImportTransactionOpen) {
+            throw new Error('Artifact term chunk import is not active');
+        }
+        if (this._artifactTermChunkPipeline === null) {
+            const journal = this._bulkImportJournalRecord;
+            this._artifactTermChunkPipeline = new ArtifactTermChunkPipeline({
+                validateOwner: () => {
+                    if (
+                        this._bulkImportJournalRecord !== journal ||
+                        this._bulkImportState === BULK_IMPORT_STATE_IDLE ||
+                        !this._bulkImportTransactionOpen
+                    ) {
+                        throw new Error('Artifact term chunk import ownership changed');
+                    }
+                },
+                canOverlap: (value) => (
+                    this._enableTermEntryContentDedup && this._termContentZstdInitialized &&
+                    this._termContentBlockImportSession !== null &&
+                    resolveTermContentZstdDictName(value.dictionary) === 'jmdict' &&
+                    typeof SharedArrayBuffer === 'function' &&
+                    value.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    hasOwnedTermContent(value.contentBytesBuffer) &&
+                    typeof value.releaseBorrowedContent === 'undefined' &&
+                    value.contentRowStart === 0 && value.rowCount > 0 &&
+                    value.contentDedupPlan?.sourceRowCount === value.rowCount &&
+                    value.contentUniqueIndexList instanceof Uint32Array &&
+                    value.contentUniqueIndexList.length === value.rowCount &&
+                    value.contentMetaList instanceof Uint32Array &&
+                    (value.contentMetaByUniqueIndex === true || value.contentMetaList.length >= value.rowCount * 4)
+                ),
+                append: async (value, context) => await this._bulkAddArtifactTermsChunk(value, context),
+            });
+        }
+        return this._artifactTermChunkPipeline;
+    }
+
+    /**
+     * @param {ArtifactTermRecordChunk} chunk
+     * @param {import('./artifact-term-chunk-pipeline.js').ArtifactTermChunkAppendContext|null} [pipelineContext]
+     * @returns {Promise<Record<string, number>>}
+     */
+    async _bulkAddArtifactTermsChunk(chunk, pipelineContext = null) {
         this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
@@ -5092,14 +5257,14 @@ void 0 :
                 (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
             );
             if (hasHashArrays || hasContentSlab) {
-                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
-                return;
+                return await this._bulkAddArtifactTermsChunkWithContentDedup(chunk, pipelineContext);
             }
             const rows = this._materializeArtifactChunkTermEntries(chunk);
             await this._bulkAddTerms(rows, 0, rows.length);
-            return;
+            return this._lastBulkAddTermsMetrics ?? createTermImportMetrics();
         }
         await this._bulkAddArtifactTermsChunkWithoutContentDedup(chunk);
+        return this._lastBulkAddTermsMetrics ?? createTermImportMetrics();
     }
 
     /**
@@ -8370,14 +8535,15 @@ this._readTermContentSignature(
 
     /**
      * @param {ArtifactTermRecordChunk} chunk
-     * @returns {Promise<void>}
+     * @param {import('./artifact-term-chunk-pipeline.js').ArtifactTermChunkAppendContext|null} [pipelineContext]
+     * @returns {Promise<Record<string, number>>}
      */
-    async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
+    async _bulkAddArtifactTermsChunkWithContentDedup(chunk, pipelineContext = null) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
             this._lastBulkAddTermsMetrics = createTermImportMetrics();
-            return;
+            return this._lastBulkAddTermsMetrics;
         }
         const hasContentSlab = chunk.contentBytesBuffer instanceof Uint8Array && chunk.contentMetaList instanceof Uint32Array;
         if (
@@ -8451,6 +8617,7 @@ this._readTermContentSignature(
                     previousResolvedUniformDictName: contentDedupPlan.resolvedUniformDictName,
                 };
             }
+            pipelineContext?.throwIfStopped();
             const tContentStoreStart = safePerformance.now();
             let preparedLookupIndexes = null;
             let recordAppended = false;
@@ -8473,6 +8640,9 @@ this._readTermContentSignature(
                         pendingContentSpans,
                     ) :
                     null;
+                if (pipelineContext !== null) {
+                    void (earlyContentPersistence?.completion ?? pendingContentPersistence)?.catch(pipelineContext.failed);
+                }
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
                 /** @type {(() => void)|null} */
@@ -8517,10 +8687,14 @@ this._readTermContentSignature(
                             importMetrics.termLookupIndexEncodeMs += preparedLookupResult.encodeMs;
                         }
                     }
+                    // Compression already owns the immutable source, while
+                    // metadata and records still follow predecessor completion.
+                    if (pipelineContext !== null) { await pipelineContext.beforePublication(); }
                     /** @type {{pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], blockProfile?: {packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null} & Partial<Record<symbol, boolean>>} */
                     const persistenceResult = earlyContentPersistence === null ?
                         await pendingContentPersistence :
                         await earlyContentPersistence.storage;
+                    pipelineContext?.throwIfStopped();
                     const {
                         pendingOffsets,
                         pendingLengths,
@@ -8592,6 +8766,7 @@ this._readTermContentSignature(
                             resolvedContentDictNames,
                             importMetrics,
                         );
+                        if (pipelineContext !== null) { void pendingRecordAppend.catch(pipelineContext.failed); }
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
                         const measuredContentCompletion = earlyContentPersistence.completion
@@ -8600,6 +8775,7 @@ this._readTermContentSignature(
                                 return blockProfile;
                             })
                             .finally(releaseInFlightContentSources);
+                        pipelineContext?.published();
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
@@ -8647,6 +8823,8 @@ this._readTermContentSignature(
                 importMetrics.contentStoreMs += safePerformance.now() - tContentStoreStart;
             }
             if (!recordAppended) {
+                if (pipelineContext !== null) { await pipelineContext.beforePublication(); }
+                pipelineContext?.throwIfStopped();
                 resolvedContentDictNames = this._compactUniformContentDictNames(resolvedContentDictNames);
                 importMetrics.contentAppendMs += safePerformance.now() - tContentAppendStart;
                 const recordChunk = this._createResolvedArtifactTermRecordChunk(
@@ -8666,10 +8844,13 @@ this._readTermContentSignature(
             if (useLocalTransaction) {
                 this._requireDb().exec('COMMIT');
             }
+            pipelineContext?.throwIfStopped();
             stagedContentMetadata = null;
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
+            return importMetrics;
         } catch (e) {
+            if (pipelineContext !== null) { await pipelineContext.beforeRollback(e); }
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {
