@@ -4,6 +4,7 @@
 from collections import Counter, defaultdict
 import hashlib
 import json
+import runpy
 from pathlib import Path
 import zipfile
 
@@ -248,6 +249,19 @@ def audit_trace(raw):
     same_number(gap['allRunTaskOverlapMs'], overlap)
     same_number(critical['visibleMidstreamWait']['noCoordinatorRunTaskMs'], 60.662 - overlap)
     audit_points(events, origin)
+    extracted = runpy.run_path(str(HERE / 'startup/extract_startup.py'))['analyze'](events)
+    assert extracted == read('startup/current-startup-trace.json')
+    assert extracted['copyLine176'] == {'points': 45, 'firstPointMs': -21.204, 'lastPointMs': -2.163}
+    assert extracted['noTimingClaim'] is True
+    assert read('startup/current-source-bindings.json')['commit'] == '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+    history = read('startup/historical-provenance.json')
+    assert history['originalArchive']['sha256'] == 'e7f8be4c29ff90c212bac8960ec119b3432e9cf4e47531492849d77f008c047c'
+    assert history['oldPrefetchBudgetCharge'] == history['oldJmdictArchiveBytes'] + history['oldFirstBankDecodedBytes']
+    key_audit = read('native-key-fusion-audit-20261128.json')
+    assert key_audit['noNewMeasurement'] and key_audit['noRuntimeChanges']
+    assert key_audit['disposition'] == 'HOLD_NO_PROTOTYPE'
+    assert key_audit['source']['commit'] == '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+    assert key_audit['corpusOpportunity']['stringArenaBytes'] == 7345650
     return {'parserJobs': 12, 'compressionJobs': 103, 'compressionBatches': 12,
             'noCoordinatorRunTaskMsInRequiredGroup4Gap': 60.662 - overlap}
 

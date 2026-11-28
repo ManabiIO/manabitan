@@ -1,0 +1,34 @@
+{
+  "kind": "External historical provenance observed before reset; no recovered old binary archive in this follow-up",
+  "candidate": "2ae43ece52ab621fa1af763bf65635f1bedc0fad",
+  "baseline": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/765",
+  "originalArchive": {
+    "commit": "75d3cd7272cb2af5a4531d5d42be01ab798af26b",
+    "path": "builds/perf/20261119-round2/browser-evidence.tar.xz",
+    "bytes": 2857968,
+    "sha256": "e7f8be4c29ff90c212bac8960ec119b3432e9cf4e47531492849d77f008c047c",
+    "gitBlob": "ebf6e7797c0c53410733624201a015eab643f581"
+  },
+  "previouslyObservedReports": [
+    {
+      "member": "notes/chromium-forward-independent-analysis.json",
+      "sha256": "6304204d05085e464f42d5a00dba33c6f554518b4ff46a4037a09ff6cf76d03a",
+      "wholeImportMedianPairedPercent": 1.2797189106570461,
+      "readMedianBaselineMs": 50.79999999998836,
+      "readMedianCandidateMs": 40.249999999970896
+    },
+    {
+      "member": "notes/chromium-reverse-independent-analysis.json",
+      "sha256": "b5a5726a5e1e8e0c65a51e2334c81f27fe62183077134f62b4b8662780819ef1",
+      "wholeImportMedianPairedPercent": 2.259021210721923,
+      "readMedianBaselineMs": 52.40000000002328,
+      "readMedianCandidateMs": 41.79999999998836
+    }
+  ],
+  "oldJmdictArchiveBytes": 15587032,
+  "oldFirstBankDecodedBytes": 3226520,
+  "oldPrefetchBudgetCharge": 18813552,
+  "inference": "One first-bank raw read already initiates whole small-archive materialization. Additional early lead-window reads share that same promise and only add other local-header/name checks and owned compressed payload copies; they do not newly overlap the entire archive read.",
+  "qualification": "Historical fixture/source differ; observations do not qualify a new broader startup-overlap candidate. Current follow-up re-verifies only retained current trace and source bindings."
+}

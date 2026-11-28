@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent read-only review of startup and native key fusion HOLD evidence",
+  "status": "PASS",
+  "noNewAcquisition": true,
+  "sourceParent": "e99ac6fc7ce6f6e80ecffe718fa53e5a957ceb42",
+  "files": {
+    "startup/extract_startup.py": {
+      "bytes": 5224,
+      "sha256": "5e212524f7e016f132b8d0ae61399ebeeb07234829bc39936ccd771d918e422d"
+    },
+    "startup/current-startup-trace.json": {
+      "bytes": 9078,
+      "sha256": "23db55ee12112a54a65862f07a327c351988208744a6d22df640c5c74f231460"
+    },
+    "startup/current-source-bindings.json": {
+      "bytes": 16091,
+      "sha256": "5edb94eb4fad3384b6d73d7a3268ba58ec3ed82913e6bb896fa423262eadb9af"
+    },
+    "startup/historical-provenance.json": {
+      "bytes": 1909,
+      "sha256": "2e5346247fd54c997768dd14e9ea634fa4f0cc140fceb8872dd7ef416b82f493"
+    },
+    "native-key-fusion-audit-20261128.json": {
+      "bytes": 9085,
+      "sha256": "dd0f32bba6809b96521b19efa893ac9ded5200045e2ac84b9faa1babae44d1fa"
+    },
+    "verify.py": {
+      "bytes": 17928,
+      "sha256": "a67110b10e2102a99c1e8cb453ae1fdc82f5e7e7b4444cd3733ea69e257fcf7d"
+    },
+    "manifest.json.txt": {
+      "bytes": 5679,
+      "sha256": "56bb2bb93bf06643800a33f4538f828d811c323e7d3c86a74d213a03cd7930f0"
+    }
+  },
+  "trackedDelta": [
+    "builds/perf/import-analysis-20261128-5a86/manifest.json.txt",
+    "builds/perf/import-analysis-20261128-5a86/verify.py",
+    "dev/perf/import-experiments-20260914.md"
+  ],
+  "checks": {
+    "exactCurrentSourceFilesAgainstFrozenGit": 3,
+    "exactExcerptRangesAgainstFrozenGit": 6,
+    "unchangedKeyAuditMatchesOriginal": true,
+    "fullExistingEvidenceVerifierPassed": true,
+    "optimizedPythonRejected": true,
+    "historicalEvidenceNotReacquired": true
+  },
+  "executionReceipts": [
+    {
+      "mode": "verify",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/home/agent/manabitan-startup-followup-5a86/builds/perf/import-analysis-20261128-5a86/verify.py"
+      ],
+      "exitCode": 0,
+      "startedUnixSeconds": 1795844731.521528,
+      "finishedUnixSeconds": 1795844731.8094518,
+      "stdoutSha256": "d6b799f6cc47e6db8d91d3eae5062d5d9685541ad2e7ea38c3de233a2db64dd2",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "optimized",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "/home/agent/manabitan-startup-followup-5a86/builds/perf/import-analysis-20261128-5a86/verify.py"
+      ],
+      "exitCode": 1,
+      "startedUnixSeconds": 1795844731.8096235,
+      "finishedUnixSeconds": 1795844732.0588374,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "27afefc48fb5bcb0cdb46e663ba5294d52b946da53a0a40ae6d2f8b60b5fb0e2"
+    }
+  ],
+  "interpretation": [
+    "Current raw reader memoizes the whole small-archive byte promise. An already-started first read is therefore sufficient to overlap archive materialization; expanding the read window adds other entry checks and owned copies.",
+    "#765 and #900 remain separate historical mechanisms: admitted first-bank prefetch versus earlier parser prewarm. PR765 metadata independently confirms the +1.28% and +2.26% historical Chromium prefetch medians and old archive hash; old binary/report bytes were not recovered or re-audited in this follow-up.",
+    "Fresh extraction reproduces 115 idle samples in the source-inferred archive-wait window and 45 of60 samples at the reader copy line in the following window. The45point range is diagnostic location evidence, not a 19ms copy-cost or improvement claim. Negative profile increments remain explicitly retained.",
+    "Current generic startup cancellation tests require zero loader invocations in their failure modes. This does not establish that an importer-owned compressed-source prefetch is impossible; it establishes lifecycle work required before proposing it.",
+    "The native key fusion HOLD note preserves the exact reviewed source audit and its 7,345,650-byte opportunity bound without upgrading it to a latency estimate."
+  ],
+  "limitations": [
+    "No new browser import, parser replay, performance cohort, or runtime/test change.",
+    "The historical original binary and raw report values are external provenance, not newly reproduced inputs.",
+    "The fresh trace is already published instrumented diagnostic evidence; its windows are source-inferred and are not ordinary wall/CPU durations.",
+    "Passing this evidence review does not establish a runtime gain."
+  ]
+}

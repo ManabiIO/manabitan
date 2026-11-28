@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "kind": "Read-only opportunity and prior-work audit",
+  "inspectedAtUtc": "2026-11-28T05:35:05Z",
+  "repository": "https://github.com/ManabiIO/manabitan",
+  "disposition": "HOLD_NO_PROTOTYPE",
+  "requestedMechanism": "Fuse XXH32 hashing, UTF-8 validation, and copying for newly interned literal term keys in parse_and_encode_term_bank_token_binary_dedup.",
+  "noNewMeasurement": true,
+  "noRuntimeChanges": true,
+  "source": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "url": "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/ext/js/dictionary/wasm/term-bank-parser.c",
+    "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "controlFlow": [
+    {
+      "lines": [
+        2534,
+        2568
+      ],
+      "finding": "copy_valid_utf8 already combines UTF-8 validation and arena copying, including specialized valid multibyte widths. Partial failed writes are unpublished."
+    },
+    {
+      "lines": [
+        3462,
+        3489
+      ],
+      "finding": "XXH32 is computed before the hash-table probe. A matched existing key returns its ID before any new-literal UTF-8/copy pass."
+    },
+    {
+      "lines": [
+        3490,
+        3502
+      ],
+      "finding": "New-key count/table/capacity checks occur only after no match was found; only then is a literal validated and copied."
+    },
+    {
+      "lines": [
+        3504,
+        3510
+      ],
+      "finding": "The validated bytes, hash, length, offset and ID are published together after copying succeeds."
+    }
+  ],
+  "ownershipAndCorrectness": [
+    "Whether a literal is new is not known until its complete hash/table/equality probe finishes. A hash+copy pass before that decision would speculatively copy and validate nonadjacent duplicates that currently avoid those operations.",
+    "A duplicate currently can succeed without remaining arena space. Moving a capacity failure before the lookup would change fallback/error behavior. A correct speculative design needs a no-capacity fallback while preserving the existing shortcuts.",
+    "Existing empty/equal-reading and bounded adjacent-key reuse already avoid some hash/probe/copy work. Replacing them or increasing their bounds is outside this audit.",
+    "Hash arithmetic, table lookup, and mandatory copies cannot simply be removed. The potentially shared work is a source traversal on qualifying new literal keys; this is not a latency estimate."
+  ],
+  "corpusOpportunity": {
+    "provenanceCommit": "f4afec3dfe68139abff937ad83b87c14e291442e",
+    "path": "dev/perf/import-corpus-5a86/hosted-jmdict-vndb.json.txt",
+    "url": "https://github.com/ManabiIO/manabitan/blob/f4afec3dfe68139abff937ad83b87c14e291442e/dev/perf/import-corpus-5a86/hosted-jmdict-vndb.json.txt",
+    "dictionary": "JMdict",
+    "groups": 12,
+    "rows": 528299,
+    "banks": 53,
+    "decodedSourceBytes": 171617523,
+    "encodedContentBytes": 101143985,
+    "stringArenaBytes": 7345650,
+    "stringArenaMiB": 7.00535774230957,
+    "reportedLookupKeys": 488011,
+    "statement": "7,345,650 bytes bounds the byte volume of the new literal-key source traversal that might be shared with hashing; it is not a copy_valid_utf8 call count, whole-import speedup, peak-memory result, or bound on the cost of hashing all occurrences.",
+    "limitations": [
+      "No isolated critical-path timing for copy_valid_utf8 is available in the retained trace analysis.",
+      "Generic hash samples include larger canonical-content work; they cannot be assigned wholesale to term keys.",
+      "The 7.0 MiB key arena is 7.26% of encoded content and 4.28% of decoded source by byte volume, which does not imply corresponding timing shares."
+    ]
+  },
+  "priorAndConcurrentWork": [
+    {
+      "kind": "Historical completed browser comparison",
+      "pr": 858,
+      "url": "https://github.com/ManabiIO/manabitan/pull/858",
+      "stateAtInspection": "closed",
+      "merged": false,
+      "head": "cb9f241106ab1529fa21c112f1733849c188511c",
+      "scope": "Fuse continuation-byte validation and copying, without hashing.",
+      "result": "69/69 browser observations completed; PR explicitly closed because they did not establish an import-time improvement.",
+      "jmdictMedianPairedElapsedPercent": {
+        "BA": -1.212,
+        "BC": -2.529,
+        "CA": 2.002
+      },
+      "qualification": "Exploratory single-runner cohort with six balanced ABC blocks; same-code JMdict control pairs ranged from -15.932% to +10.901%. This does not establish the performance of the newly proposed hash fusion.",
+      "evidence": "https://github.com/ManabiIO/manabitan/blob/aaa92511de63b6b67e033b297b4a7bc26cdbd8cd/dev/perf/import-screen-20261123-results.md"
+    },
+    {
+      "kind": "Nearby historical candidates",
+      "prs": [
+        {
+          "number": 932,
+          "head": "1284daa53d3a921c5f3ef29f98056542c3664c15",
+          "url": "https://github.com/ManabiIO/manabitan/pull/932",
+          "scope": "Shared UTF-8 validation/copy loop",
+          "state": "closed",
+          "merged": false
+        },
+        {
+          "number": 941,
+          "head": "964fa0395533343eb3e44d80d3bbb0bb889bd778",
+          "url": "https://github.com/ManabiIO/manabitan/pull/941",
+          "scope": "Width-specialized UTF-8 validation/copy",
+          "state": "closed",
+          "merged": false
+        }
+      ],
+      "qualification": "Current baseline already contains validation/copy fusion and specialized widths. This audit does not infer an exact merge lineage or uninspected final browser disposition for these two PRs."
+    },
+    {
+      "kind": "Active adjacent-key grammar proof",
+      "branch": "test/import-keyproof-study-20261127-4990",
+      "head": "92b45b257e48a44afa7b304f6d7c98b75da18526",
+      "product": "23781611da3b3c86f8524ac774487692490c4040",
+      "url": "https://github.com/ManabiIO/manabitan/tree/92b45b257e48a44afa7b304f6d7c98b75da18526",
+      "scope": "Exact bounded previous-token equality before key grammar parsing, plus reuse of the previous interned ID. Owns early adjacent-key proof, not hashing/copying new unique keys."
+    },
+    {
+      "kind": "Active overlapping adjacent-key candidate",
+      "branch": "lab/native-key-witness-20261128-d2d132",
+      "head": "b00e6c899270ac636a397945a19cd0825bdc6b5d",
+      "url": "https://github.com/ManabiIO/manabitan/tree/b00e6c899270ac636a397945a19cd0825bdc6b5d",
+      "scope": "Earlier bounded raw-token proof and interned-ID reuse; no whole-import gain inferred here."
+    },
+    {
+      "kind": "Later output ownership reuse",
+      "pr": 820,
+      "stateAtInspection": "open",
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "url": "https://github.com/ManabiIO/manabitan/pull/820",
+      "scope": "Reuse owned lookup key/length/ID buffers in parser-worker transfer; current addition uses owned Uint16 expression IDs. This is after native key construction."
+    },
+    {
+      "kind": "Segmented output ownership reuse",
+      "pr": 939,
+      "head": "f6d685c0b2511257da4a9a83e7bd977087a42176",
+      "url": "https://github.com/ManabiIO/manabitan/pull/939",
+      "scope": "Reuse owned segmented v7 expression-ID views; not native input validation or hashing."
+    },
+    {
+      "kind": "Misleading similarly named content work",
+      "branches": [
+        {
+          "branch": "perf/jmdict-copy-hash-fusion-20261119",
+          "head": "7ac62861701ad726331f46b39eace466437c77ac"
+        },
+        {
+          "branch": "perf/jitendex-hash-copy-20261123",
+          "head": "44686ef6ebaafa624e6d228494719bbed4cb8ef4"
+        }
+      ],
+      "scope": "Raw glossary/MBR6 content copying with paired content hashes; distinct from term-key interning."
+    }
+  ],
+  "searchCoverage": {
+    "method": "GitHub PR/issue and branch search, followed by direct immutable source/patch inspection. Relevant PR/ref identities refreshed at audit completion.",
+    "issueTerms": [
+      "\"UTF-8\" \"hash\"",
+      "\"fused\" \"key\"",
+      "\"copy_valid_utf8\"",
+      "\"hash_content_xxh32\"",
+      "\"hash\" \"UTF8\"",
+      "\"key\" \"hashing\"",
+      "\"intern\" \"copy\""
+    ],
+    "branchTerms": [
+      "utf",
+      "hash",
+      "key",
+      "intern",
+      "native-key",
+      "keyproof",
+      "hash-copy"
+    ],
+    "conclusion": "No exact prior hash+UTF-8-validation+copy implementation for newly interned literal keys was identified in this bounded search. This is not a claim that every repository branch/history object was exhaustively searched."
+  },
+  "recommendation": "Do not prototype or open a PR on current evidence. Revisit only if fresh attribution identifies a material new-literal-key critical-path cost and a design removes a pass without speculative duplicate work, earlier capacity failure, changed validation, or overlap with adjacent-key studies."
+}

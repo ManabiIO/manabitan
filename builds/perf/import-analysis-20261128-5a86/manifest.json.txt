@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "kind": "Evidence-only current JMdict diagnostic follow-up; no new performance observation",
+  "kind": "Evidence-only current JMdict trace/census and source-backed HOLD follow-up; no new performance observation",
   "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
   "suffixCandidateCommit": "38031a752b26c9b630e5f2f1d45e780786656c74",
   "originalArtifact": {
@@ -128,8 +128,32 @@
       "sha256": "e4ad5cf962b75a4a85dc67e687448343de97e717345ae439bfef847342434943"
     },
     "verify.py": {
-      "bytes": 16845,
-      "sha256": "450b21345e696d6452fdefc285600863dd60f2dd54ea2583dab9122884808df6"
+      "bytes": 17928,
+      "sha256": "a67110b10e2102a99c1e8cb453ae1fdc82f5e7e7b4444cd3733ea69e257fcf7d"
+    },
+    "startup/extract_startup.py": {
+      "bytes": 5224,
+      "sha256": "5e212524f7e016f132b8d0ae61399ebeeb07234829bc39936ccd771d918e422d"
+    },
+    "startup/current-startup-trace.json": {
+      "bytes": 9078,
+      "sha256": "23db55ee12112a54a65862f07a327c351988208744a6d22df640c5c74f231460"
+    },
+    "startup/current-source-bindings.json": {
+      "bytes": 16091,
+      "sha256": "5edb94eb4fad3384b6d73d7a3268ba58ec3ed82913e6bb896fa423262eadb9af"
+    },
+    "startup/historical-provenance.json": {
+      "bytes": 1909,
+      "sha256": "2e5346247fd54c997768dd14e9ea634fa4f0cc140fceb8872dd7ef416b82f493"
+    },
+    "native-key-fusion-audit-20261128.json": {
+      "bytes": 9085,
+      "sha256": "dd0f32bba6809b96521b19efa893ac9ded5200045e2ac84b9faa1babae44d1fa"
+    },
+    "startup/independent-review.json": {
+      "bytes": 4674,
+      "sha256": "adb01b40b33c1ce36d4bf240014dcf0f8bdbc0575116f83216721cfd2ade6556"
     }
   }
 }

@@ -1,0 +1,393 @@
+{
+  "kind": "Fresh extraction of already-published diagnostic trace; no new acquisition",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "artifactSha256": "4000809bac65e05a2ac9ede1087b8bb88b13148aa84d5ca5a56a2b4aeb7f4468",
+  "traceSha256": "3f2c3f7c560219286840f777bbedf4988411e9c162f39eb177e0d156dbd02bcb",
+  "profileId": "0x4",
+  "originTs": 74762565,
+  "profilePoints": 4795,
+  "negativeDeltaPoints": 131,
+  "negativeDeltaTotalUs": -34595,
+  "noTimingClaim": true,
+  "limitations": "Windows are source-inferred; no archive-I/O or copy phase marks exist. Negative sample increments and instrumentation prevent treating point windows as ordinary wall or CPU durations.",
+  "windows": [
+    {
+      "name": "worker startup",
+      "startMs": -155.613,
+      "endMs": -55.956,
+      "pointCount": 339,
+      "negativeDeltaPoints": 3,
+      "self": [
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": 0,
+          "points": 231
+        },
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": null,
+          "points": 100
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 3635,
+          "points": 3
+        },
+        {
+          "name": "clearTimeout",
+          "url": "",
+          "line": 3620,
+          "points": 2
+        },
+        {
+          "name": "setTimeout",
+          "url": "",
+          "line": 3594,
+          "points": 2
+        },
+        {
+          "name": "(program)",
+          "url": "",
+          "line": 0,
+          "points": 1
+        }
+      ],
+      "ancestors": {
+        "": 5,
+        "(idle)": 331,
+        "(program)": 1,
+        "(root)": 339,
+        "cleanup": 2,
+        "clearTimeout": 2,
+        "createParallelParserWorkers": 5,
+        "onMessage": 2,
+        "postMessage": 3,
+        "setTimeout": 2,
+        "waitForParallelParserWorkerReady": 5
+      }
+    },
+    {
+      "name": "source activation",
+      "startMs": -55.956,
+      "endMs": -49.307,
+      "pointCount": 34,
+      "negativeDeltaPoints": 1,
+      "self": [
+        {
+          "name": "arrayBuffer",
+          "url": "",
+          "line": 469,
+          "points": 4
+        },
+        {
+          "name": "setInterval",
+          "url": "",
+          "line": 3849,
+          "points": 4
+        },
+        {
+          "name": "readCompressed",
+          "url": "dictionary-importer.js",
+          "line": 1536,
+          "points": 3
+        },
+        {
+          "name": "",
+          "url": "term-bank-wasm-parser.js",
+          "line": 2975,
+          "points": 2
+        },
+        {
+          "name": "AbortController",
+          "url": "",
+          "line": 509,
+          "points": 2
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 108,
+          "points": 2
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 503,
+          "points": 2
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 509,
+          "points": 2
+        },
+        {
+          "name": "",
+          "url": "term-bank-source-pipeline.js",
+          "line": 850,
+          "points": 1
+        },
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": 0,
+          "points": 1
+        },
+        {
+          "name": "_getArchiveBytes",
+          "url": "term-bank-source-pipeline.js",
+          "line": 468,
+          "points": 1
+        },
+        {
+          "name": "_runPipeline",
+          "url": "term-bank-wasm-parser.js",
+          "line": 2975,
+          "points": 1
+        },
+        {
+          "name": "_runWorkerLoop",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3081,
+          "points": 1
+        },
+        {
+          "name": "clearInterval",
+          "url": "",
+          "line": 3827,
+          "points": 1
+        },
+        {
+          "name": "clearTimeout",
+          "url": "",
+          "line": 3620,
+          "points": 1
+        },
+        {
+          "name": "deferPromise",
+          "url": "utilities.js",
+          "line": 270,
+          "points": 1
+        },
+        {
+          "name": "loadParallelTermBankSource",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3430,
+          "points": 1
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 134,
+          "points": 1
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 510,
+          "points": 1
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 511,
+          "points": 1
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 514,
+          "points": 1
+        }
+      ],
+      "ancestors": {
+        "": 29,
+        "(idle)": 1,
+        "(root)": 34,
+        "AbortController": 2,
+        "_activateLeadSources": 23,
+        "_getArchiveBytes": 5,
+        "_runPipeline": 27,
+        "_runWorkerLoop": 5,
+        "arrayBuffer": 4,
+        "cleanup": 2,
+        "clearInterval": 1,
+        "clearTimeout": 1,
+        "deferPromise": 1,
+        "loadParallelTermBankSource": 23,
+        "onMessage": 1,
+        "read": 21,
+        "readCompressed": 11,
+        "run": 27,
+        "setInterval": 4,
+        "settleResolve": 1,
+        "waitForParallelWork": 4
+      }
+    },
+    {
+      "name": "archive wait",
+      "startMs": -49.307,
+      "endMs": -21.302,
+      "pointCount": 115,
+      "negativeDeltaPoints": 1,
+      "self": [
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": 0,
+          "points": 115
+        }
+      ],
+      "ancestors": {
+        "(idle)": 115,
+        "(root)": 115
+      }
+    },
+    {
+      "name": "source copy continuations",
+      "startMs": -21.302,
+      "endMs": 0,
+      "pointCount": 60,
+      "negativeDeltaPoints": 1,
+      "self": [
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 176,
+          "points": 45
+        },
+        {
+          "name": "clearInterval",
+          "url": "",
+          "line": 3827,
+          "points": 3
+        },
+        {
+          "name": "setTimeout",
+          "url": "",
+          "line": 3699,
+          "points": 2
+        },
+        {
+          "name": "",
+          "url": "term-bank-source-pipeline.js",
+          "line": 855,
+          "points": 1
+        },
+        {
+          "name": "",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3801,
+          "points": 1
+        },
+        {
+          "name": "(program)",
+          "url": "",
+          "line": 0,
+          "points": 1
+        },
+        {
+          "name": "_runWorkerLoop",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3087,
+          "points": 1
+        },
+        {
+          "name": "_runWorkerLoop",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3103,
+          "points": 1
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 3804,
+          "points": 1
+        },
+        {
+          "name": "read",
+          "url": "term-bank-source-pipeline.js",
+          "line": 152,
+          "points": 1
+        },
+        {
+          "name": "runParallelParserJob",
+          "url": "term-bank-wasm-parser.js",
+          "line": 3653,
+          "points": 1
+        },
+        {
+          "name": "setInterval",
+          "url": "",
+          "line": 3715,
+          "points": 1
+        },
+        {
+          "name": "sumParallelSourceByteLengths",
+          "url": "term-bank-wasm-parser.js",
+          "line": 4009,
+          "points": 1
+        }
+      ],
+      "ancestors": {
+        "": 6,
+        "(program)": 1,
+        "(root)": 60,
+        "_runWorkerLoop": 9,
+        "cleanup": 3,
+        "clearInterval": 3,
+        "postMessage": 1,
+        "read": 46,
+        "runParallelParserJob": 6,
+        "setInterval": 1,
+        "setTimeout": 2,
+        "settleResolve": 3,
+        "sumParallelSourceByteLengths": 1
+      }
+    },
+    {
+      "name": "parser dispatches",
+      "startMs": 0,
+      "endMs": 3.989,
+      "pointCount": 12,
+      "negativeDeltaPoints": 3,
+      "self": [
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 3804,
+          "points": 7
+        },
+        {
+          "name": "setTimeout",
+          "url": "",
+          "line": 3699,
+          "points": 3
+        },
+        {
+          "name": "setInterval",
+          "url": "",
+          "line": 3715,
+          "points": 2
+        }
+      ],
+      "ancestors": {
+        "": 12,
+        "(root)": 12,
+        "_runWorkerLoop": 12,
+        "postMessage": 7,
+        "runParallelParserJob": 12,
+        "setInterval": 2,
+        "setTimeout": 3
+      }
+    }
+  ],
+  "copyLine176": {
+    "points": 45,
+    "firstPointMs": -21.204,
+    "lastPointMs": -2.163
+  }
+}
