@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source manifest for analysis-only exact symbol recovery; no execution result",
+  "head": "a7d2cfb7b1b64976350936b531e4adadf526b126",
+  "files": [
+    {
+      "path": ".github/workflows/jmdict-trace-symbols-da6c4.yml",
+      "blob": "8e1bf60fe86de516cf2b74e1e8aa0b4d9a100506",
+      "sha256": "d331190fe3f1676ca46333ee1b30ae97a2639dfd04ba25aeeb16ceeb512db46e",
+      "bytes": 4889
+    },
+    {
+      "path": "dev/perf/jmdict-trace-symbols-da6c4/recover.py",
+      "blob": "fc3b770615807fded676400d12c1e601a12f1126",
+      "sha256": "60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a",
+      "bytes": 16970
+    },
+    {
+      "path": "dev/perf/jmdict-trace-symbols-da6c4/test_recover.py",
+      "blob": "ee958d0d91ab91d7e91913dfb9b09b62ed402c1e",
+      "sha256": "c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c",
+      "bytes": 4353
+    },
+    {
+      "path": "dev/perf/jmdict-trace-symbols-da6c4/plan.json",
+      "blob": "c75ee5fe5a9836110c5eec6562ff1c634d197254",
+      "sha256": "b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527",
+      "bytes": 5494
+    }
+  ],
+  "independentReviewBlob": "6df59b02037ff83b33a5b365c911086b99d526d0",
+  "runId": 46131812603,
+  "actionlintRunId": 46131812582
+}

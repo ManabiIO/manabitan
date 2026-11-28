@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "scope": "Test-only repair of hosted lint diagnostics; no production runtime, assertion, or qualification gate changes.",
+  "source": {
+    "head": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
+    "qualification": "53a00db6a070a02f40b4111d69dc439b868e1fe4",
+    "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  },
+  "failure": {
+    "runId": 46130837802,
+    "jobId": 140935388109,
+    "stage": "npm run test:js",
+    "exitCode": 1,
+    "logBlob": "895cc73d7494d4cdf3d88d66456323c134317b62",
+    "logCharacters": 26032,
+    "diagnostics": [
+      "2026-11-28T09:38:59.0885366Z ##[error]  35:55  error  Do not add `then` to an object                    unicorn/no-thenable",
+      "2026-11-28T09:38:59.0893941Z ##[error]  44:63  error  This line has 3 statements. Maximum allowed is 2  @stylistic/max-statements-per-line",
+      "2026-11-28T09:38:59.0896724Z ##[error]  92:52  error  Unexpected newline after '('   @stylistic/function-paren-newline",
+      "2026-11-28T09:38:59.0898180Z ##[error]  94:9   error  Unexpected newline before ')'  @stylistic/function-paren-newline",
+      "2026-11-28T09:38:59.0900721Z ##[error]  26:23  error  Should have no text on the \"0th\" line (after the `/**`)  jsdoc/multiline-blocks",
+      "2026-11-28T09:38:59.0902301Z ##[error]  27:1   error  Expected JSDoc block to be aligned                       jsdoc/check-alignment",
+      "2026-11-28T09:38:59.0904093Z ##[error]  31:1   error  Should be no multiple asterisks on end lines             jsdoc/no-multi-asterisks",
+      "2026-11-28T09:38:59.0905647Z ##[error]  32:1   error  Expected indentation of 12 spaces but found 8            @stylistic/indent",
+      "2026-11-28T09:38:59.0907166Z ##[error]  33:1   error  Expected indentation of 12 spaces but found 8            @stylistic/indent",
+      "2026-11-28T09:38:59.0908750Z ##[error]  34:1   error  Expected indentation of 12 spaces but found 8            @stylistic/indent",
+      "2026-11-28T09:38:59.0933947Z ##[error]  35:1   error  Expected indentation of 12 spaces but found 8            @stylistic/indent",
+      "2026-11-28T09:38:59.0935881Z ##[error]  36:1   error  Expected indentation of 8 spaces but found 4             @stylistic/indent",
+      "2026-11-28T09:38:59.7389071Z ##[error]Process completed with exit code 1."
+    ],
+    "skipped": [
+      "runtime/test types",
+      "full unit",
+      "dry-run build gate",
+      "qualification Python",
+      "all browser cells"
+    ]
+  },
+  "files": [
+    {
+      "path": "test/artifact-term-chunk-pipeline.test.js",
+      "blob": "ce42be05f52afb26da5f0bf3eeb0dbbdd8251ba9",
+      "characters": 20174,
+      "sha256": "8d48c8c8e86790b784e8ba6f2e4972a64fa59b726826b485c79429c597a30776"
+    },
+    {
+      "path": "test/dictionary-importer-chunk-completion.test.js",
+      "blob": "71b51c6cccf7e0d0bb775fc935d25a1e1c6822fa",
+      "characters": 10596,
+      "sha256": "5d8985b02fa3551c2d0391cfa5a0c5843d69e4a109717a5cfdb8aeb9d9aff4ae"
+    },
+    {
+      "path": "test/term-bank-pipeline-completion.test.js",
+      "blob": "1c89a4b5fdf1e34a144486b6f8cfeec156f090a8",
+      "characters": 23640,
+      "sha256": "1f76ea2ef6e353f3496fe8717662038acfe8f38a0b6c41e40164fd6bcb667588"
+    }
+  ],
+  "changes": [
+    "Expand promise executor assignment to multiple lines; no statement ordering change.",
+    "Put the importer call arguments on a single line as required by existing paren-newline style.",
+    "Move the identical @satisfies object contract to a standard leading JSDoc block; preserve all four real callback API types and test values.",
+    "Retain the deliberately invalid {then:12} producer-input regression and explain one adjacent no-thenable exemption. No global config/rule or other test exemption changed."
+  ],
+  "validation": {
+    "adaptedV8Syntax": [
+      {
+        "path": "test/artifact-term-chunk-pipeline.test.js",
+        "parse": "pass",
+        "scope": "V8 adapted script parse only; imports removed and import.meta replaced, no test execution or ESLint/TypeScript claim"
+      },
+      {
+        "path": "test/dictionary-importer-chunk-completion.test.js",
+        "parse": "pass",
+        "scope": "V8 adapted script parse only; imports removed and import.meta replaced, no test execution or ESLint/TypeScript claim"
+      },
+      {
+        "path": "test/term-bank-pipeline-completion.test.js",
+        "parse": "pass",
+        "scope": "V8 adapted script parse only; imports removed and import.meta replaced, no test execution or ESLint/TypeScript claim"
+      }
+    ],
+    "firstPublicCallbackRegression": {
+      "executed": [
+        "public parallel callbacks retain their legacy result assignability"
+      ],
+      "passed": true,
+      "assertions": 4
+    },
+    "assertionCounts": [
+      {
+        "path": "test/artifact-term-chunk-pipeline.test.js",
+        "testCalls": 5,
+        "expectCalls": 16
+      },
+      {
+        "path": "test/dictionary-importer-chunk-completion.test.js",
+        "testCalls": 4,
+        "expectCalls": 18
+      },
+      {
+        "path": "test/term-bank-pipeline-completion.test.js",
+        "testCalls": 3,
+        "expectCalls": 11
+      }
+    ],
+    "eslint": "Pending required hosted full gate; executor unavailable.",
+    "typescript": "Pending required hosted main/test gate for this comment relocation; earlier current2e82 types pass remains separately preserved.",
+    "runtime": "Production bytes unchanged; no native/browser acquisition repeated."
+  },
+  "priorSuccess": {
+    "current2e82StaticWebReceiptBlob": "246a67f9fa5118e9f5b08ee03523181282f1a4cb",
+    "caveat": "That passing source differs only in these tests; it is not relabeled as a new-source lint result."
+  },
+  "publication": "Only unreferenced blobs created; root owns clean PR and qualification refs."
+}

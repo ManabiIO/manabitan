@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent exact-artifact recomputation of two current JMdict tag-prefetch cohorts. No observations excluded, pooled or reacquired.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+  "run": 46125860840,
+  "decision": "REJECT_FOR_PRODUCT_PR_NO_REPLICATED_JMDICT_GAIN",
+  "cells": [
+    {
+      "order": "AB",
+      "artifactId": 15258606134,
+      "artifactBytes": 35571002,
+      "artifactSha256": "77aa4614ee24bc123aef1356e7c5cf398a06337b4b0620fc8c5d3f568e0a195c",
+      "prescribedTimingObservations": 36,
+      "allTimingSummariesSourceBound": true,
+      "allCanonicalReceiptsEqual": true,
+      "candidate": {
+        "count": 12,
+        "medianPairedChangeMs": 11.749999999956344,
+        "medianPairedChangePercent": 1.3013364818786677,
+        "equalWorkChangePercent": 1.0108558842037763,
+        "fasterPairs": 4,
+        "bootstrap95ChangeMs": [
+          -13.549999999988358,
+          37.75
+        ],
+        "bootstrap95ChangePercent": [
+          -1.62823702521111,
+          4.682455484088788
+        ],
+        "baselineMedianMs": 845.7500000000146,
+        "candidateMedianMs": 840.1000000000058,
+        "pairedMs": [
+          38.0,
+          45.80000000001746,
+          21.499999999970896,
+          27.60000000000582,
+          0.39999999999417923,
+          37.5,
+          -48.70000000001164,
+          -11.700000000011642,
+          54.20000000001164,
+          -15.399999999965075,
+          1.9999999999417923,
+          -48.399999999965075
+        ],
+        "pairedRatios": [
+          1.048549891401559,
+          1.0587857784623502,
+          1.0235332749561852,
+          1.0324896998234323,
+          1.0004723107804867,
+          1.0450992182802166,
+          0.9470882225119384,
+          0.9861472886573394,
+          1.0602021548372902,
+          0.9812879708384386,
+          1.0024934546813884,
+          0.9447425505195034
+        ]
+      },
+      "control": {
+        "count": 4,
+        "medianPairedChangeMs": 22.39999999999418,
+        "medianPairedChangePercent": 2.7247546252591848,
+        "equalWorkChangePercent": 0.709558165880364,
+        "fasterPairs": 1,
+        "bootstrap95ChangeMs": [
+          -72.10000000000582,
+          51.09999999997672
+        ],
+        "bootstrap95ChangePercent": [
+          -8.120283815745722,
+          6.263022429216236
+        ],
+        "baselineMedianMs": 826.4500000000116,
+        "candidateMedianMs": 847.5999999999913,
+        "pairedMs": [
+          28.0,
+          -72.10000000000582,
+          16.79999999998836,
+          51.09999999997672
+        ],
+        "pairedRatios": [
+          1.034423407917384,
+          0.9187971618425428,
+          1.0200716845877997,
+          1.0626302242921624
+        ]
+      },
+      "timingGates": {
+        "savingMsAtLeast5": false,
+        "savingPercentAtLeast0_5": false,
+        "fasterPairsAtLeast9": false,
+        "equalWorkLower": false,
+        "upper95MsNegative": false,
+        "upper95PercentNegative": false,
+        "controlMedianBelowHalfBenefit": false,
+        "controlEqualWorkBelowHalfBenefit": false
+      },
+      "passesAllTimingGates": false,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 0.2684940915689715,
+            "medianPairedChangePercent": -0.44639429785163776
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.7825034903681916,
+            "medianPairedChangePercent": 0.10363219146681812
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 286,
+        "schemaVersion": 1
+      },
+      "sourceIdentityChangedEntries": [
+        "js/dictionary/dictionary-importer.js"
+      ],
+      "sourceIdentityAddedEntries": [
+        "js/dictionary/bounded-zip-text-writer.js"
+      ],
+      "rawArchiveMembers": 313,
+      "rawArchiveValidatedEveryMember": true
+    },
+    {
+      "order": "BA",
+      "artifactId": 15257688856,
+      "artifactBytes": 35558473,
+      "artifactSha256": "8cb14a29ab85a7e3e6fefffc80f6806e49506a01788a2e0ef3c71980330ff991",
+      "prescribedTimingObservations": 36,
+      "allTimingSummariesSourceBound": true,
+      "allCanonicalReceiptsEqual": true,
+      "candidate": {
+        "count": 12,
+        "medianPairedChangeMs": -6.649999999994179,
+        "medianPairedChangePercent": -0.8167718045717698,
+        "equalWorkChangePercent": -0.8311122866285214,
+        "fasterPairs": 9,
+        "bootstrap95ChangeMs": [
+          -9.55000000000291,
+          0.5499999999592546
+        ],
+        "bootstrap95ChangePercent": [
+          -1.1657223670288763,
+          0.06773675686162495
+        ],
+        "baselineMedianMs": 814.1999999999971,
+        "candidateMedianMs": 810.0999999999913,
+        "pairedMs": [
+          -37.10000000000582,
+          -6.899999999994179,
+          -6.399999999994179,
+          -5.800000000017462,
+          -8.39999999999418,
+          8.299999999988358,
+          4.099999999976717,
+          -3.0000000000582077,
+          -10.700000000011642,
+          7.600000000034925,
+          -7.300000000046566,
+          -16.100000000034925
+        ],
+        "pairedRatios": [
+          0.955722639933159,
+          0.9915202162959394,
+          0.9921443476126252,
+          0.9928279955483895,
+          0.989759843959534,
+          1.0102875557758906,
+          1.0050717466600403,
+          0.9962829884771923,
+          0.9869257086998884,
+          1.0093665269904304,
+          0.9914399624764937,
+          0.9806024096385121
+        ]
+      },
+      "control": {
+        "count": 4,
+        "medianPairedChangeMs": -9.200000000011642,
+        "medianPairedChangePercent": -1.119779781747321,
+        "equalWorkChangePercent": -0.7119819874640609,
+        "fasterPairs": 3,
+        "bootstrap95ChangeMs": [
+          -9.699999999953434,
+          4.699999999982538
+        ],
+        "bootstrap95ChangePercent": [
+          -1.1685339115713456,
+          0.577963600588105
+        ],
+        "baselineMedianMs": 821.6500000000233,
+        "candidateMedianMs": 817.1500000000087,
+        "pairedMs": [
+          4.699999999982538,
+          -9.099999999976717,
+          -9.300000000046566,
+          -9.699999999953434
+        ],
+        "pairedRatios": [
+          1.005779636005881,
+          0.9889763779527841,
+          0.9886280264122694,
+          0.9883146608842865
+        ]
+      },
+      "timingGates": {
+        "savingMsAtLeast5": true,
+        "savingPercentAtLeast0_5": true,
+        "fasterPairsAtLeast9": true,
+        "equalWorkLower": true,
+        "upper95MsNegative": false,
+        "upper95PercentNegative": false,
+        "controlMedianBelowHalfBenefit": false,
+        "controlEqualWorkBelowHalfBenefit": false
+      },
+      "passesAllTimingGates": false,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 2.0444485477029373,
+            "medianPairedChangePercent": -0.6387971576987839
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.3497556561799628,
+            "medianPairedChangePercent": -0.4342728000527041
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 277,
+        "schemaVersion": 1
+      },
+      "sourceIdentityChangedEntries": [
+        "js/dictionary/dictionary-importer.js"
+      ],
+      "sourceIdentityAddedEntries": [
+        "js/dictionary/bounded-zip-text-writer.js"
+      ],
+      "rawArchiveMembers": 313,
+      "rawArchiveValidatedEveryMember": true
+    }
+  ]
+}

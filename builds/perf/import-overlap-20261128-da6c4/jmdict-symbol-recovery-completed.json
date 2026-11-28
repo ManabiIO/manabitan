@@ -1,0 +1,1031 @@
+{
+  "schemaVersion": 1,
+  "status": "completed_success",
+  "purpose": "Analysis-only exact current parser symbol recovery; no new import or timing cohort.",
+  "source": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+  },
+  "controls": {
+    "commit": "a7d2cfb7b1b64976350936b531e4adadf526b126",
+    "tree": "c6b05dbda44efd907b8791c10f1a367186d2607d"
+  },
+  "run": {
+    "id": 46131812603,
+    "jobId": 140938419570,
+    "conclusion": "success",
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46131812603"
+  },
+  "actionlint": {
+    "runId": 46131812582,
+    "jobId": 140938419362,
+    "conclusion": "success"
+  },
+  "fullJobLog": {
+    "blob": "28c92d3a54ddf4d41d8764d45ee1b2ee49bfdfa3",
+    "characters": 69780
+  },
+  "artifact": {
+    "id": 15257554486,
+    "name": "jmdict-trace-symbols-da6c4-46131812603-1",
+    "size_in_bytes": 168492,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257554486",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257554486/zip",
+    "expired": false,
+    "created_at": "2026-11-28T09:46:29Z",
+    "expires_at": "2026-12-28T09:46:28Z",
+    "updated_at": "2026-11-28T09:46:29Z",
+    "digest": "sha256:a6908461c592bf0c0884c4257cfe144b1e662a5f2f1836efdfb2c1c903d125b4",
+    "workflow_run": {
+      "id": 46131812603,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/bounded-content-overlap-20261128-da6c4",
+      "head_sha": "a7d2cfb7b1b64976350936b531e4adadf526b126"
+    }
+  },
+  "verification": {
+    "testsPassed": 7,
+    "stockRebuildCheckPassed": true,
+    "separateStrippedBinaryExact": true,
+    "everyOrderedNoncustomSectionExact": true,
+    "namedFunctionCount": 52,
+    "scriptReceipt": {
+      "schemaVersion": 1,
+      "complete": true,
+      "scope": "Recover names only after exact executable-section parity; no import or timing acquisition.",
+      "commands": [
+        {
+          "argv": [
+            "node",
+            "dev/bin/build-dictionary-wasm.js",
+            "--check"
+          ],
+          "cwd": "/home/runner/work/manabitan/manabitan/product",
+          "log": "/home/runner/work/manabitan/manabitan/symbol-output/unchanged-stock-rebuild.log",
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/clang-21",
+            "-fuse-ld=/usr/bin/wasm-ld-21",
+            "--target=wasm32-freestanding",
+            "-O3",
+            "-matomics",
+            "-mbulk-memory",
+            "-msimd128",
+            "-nostdlib",
+            "-Wl,--no-entry",
+            "-Wl,--shared-memory",
+            "-Wl,--max-memory=4294967296",
+            "-Wl,--export=wasm_reset_heap",
+            "-Wl,--export=wasm_alloc",
+            "-Wl,--export=wasm_get_last_parse_capacity",
+            "-Wl,--export=wasm_get_last_content_capacity",
+            "-Wl,--export=inflate_and_join_term_banks",
+            "-Wl,--export=verify_term_bank_source_crcs",
+            "-Wl,--export=inflate_zip_media_batch",
+            "-Wl,--export=project_single_glossary_image_path",
+            "-Wl,--export=parse_term_bank",
+            "-Wl,--export=parse_term_bank_with_media_hints",
+            "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+            "-Wl,--export=build_term_string_plan",
+            "-Wl,--export=encode_term_lookup_index",
+            "-Wl,--export=compact_term_lookup_keys",
+            "-Wl,--export=encode_term_content",
+            "-Wl,--export=encode_term_content_no_hash",
+            "-Wl,--export=encode_term_content_token_binary",
+            "-Wl,--export=encode_term_content_token_binary_dedup",
+            "-Wl,--strip-all",
+            "-o",
+            "/home/runner/work/manabitan/manabitan/symbol-output/reproduced-stripped.wasm",
+            "/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c",
+            "/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"
+          ],
+          "cwd": "/home/runner/work/manabitan/manabitan/product",
+          "log": "/home/runner/work/manabitan/manabitan/symbol-output/stripped-build.log",
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/clang-21",
+            "-fuse-ld=/usr/bin/wasm-ld-21",
+            "--target=wasm32-freestanding",
+            "-O3",
+            "-matomics",
+            "-mbulk-memory",
+            "-msimd128",
+            "-nostdlib",
+            "-Wl,--no-entry",
+            "-Wl,--shared-memory",
+            "-Wl,--max-memory=4294967296",
+            "-Wl,--export=wasm_reset_heap",
+            "-Wl,--export=wasm_alloc",
+            "-Wl,--export=wasm_get_last_parse_capacity",
+            "-Wl,--export=wasm_get_last_content_capacity",
+            "-Wl,--export=inflate_and_join_term_banks",
+            "-Wl,--export=verify_term_bank_source_crcs",
+            "-Wl,--export=inflate_zip_media_batch",
+            "-Wl,--export=project_single_glossary_image_path",
+            "-Wl,--export=parse_term_bank",
+            "-Wl,--export=parse_term_bank_with_media_hints",
+            "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+            "-Wl,--export=build_term_string_plan",
+            "-Wl,--export=encode_term_lookup_index",
+            "-Wl,--export=compact_term_lookup_keys",
+            "-Wl,--export=encode_term_content",
+            "-Wl,--export=encode_term_content_no_hash",
+            "-Wl,--export=encode_term_content_token_binary",
+            "-Wl,--export=encode_term_content_token_binary_dedup",
+            "-o",
+            "/home/runner/work/manabitan/manabitan/symbol-output/recovered-names.wasm",
+            "/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c",
+            "/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"
+          ],
+          "cwd": "/home/runner/work/manabitan/manabitan/product",
+          "log": "/home/runner/work/manabitan/manabitan/symbol-output/names-build.log",
+          "exitCode": 0
+        }
+      ],
+      "githubSha": "a7d2cfb7b1b64976350936b531e4adadf526b126",
+      "githubRunId": "46131812603",
+      "githubRunAttempt": "1",
+      "controls": {
+        "recover.py": "60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a",
+        "test_recover.py": "c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c",
+        "plan.json": "b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527",
+        "workflow.yml": "d331190fe3f1676ca46333ee1b30ae97a2639dfd04ba25aeeb16ceeb512db46e",
+        "analysis_helpers.py": "a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b"
+      },
+      "toolchain": {
+        "compiler": "/usr/bin/clang-21",
+        "linker": "/usr/bin/wasm-ld-21",
+        "compilerVersionOutput": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+        "linkerVersionOutput": "Ubuntu LLD 21.1.8\n",
+        "node": "v22.22.0"
+      },
+      "parser": {
+        "tracedSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "reproducedStrippedSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "namedSha256": "ef3fb2b007a82de68b7eb1ea8edc98d6cfc7b9574433c8f6f46cc14b49838453",
+        "onlyArgumentRemoved": "-Wl,--strip-all",
+        "noncustomParity": {
+          "everyOrderedNoncustomSectionByteIdentical": true,
+          "noncustomSectionCount": 9,
+          "functionCount": 52,
+          "noncustomSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+          "sections": [
+            {
+              "id": 1,
+              "bytes": 256,
+              "sha256": "fbd8f6f0b188cdda3e885bacc21d5b202d815cf69e958c9e0d22144fb3e19f7b"
+            },
+            {
+              "id": 3,
+              "bytes": 55,
+              "sha256": "f9b175dc10f5420eb6e09816c2e8edec43c385cee1602cd9230bc4fa43c87875"
+            },
+            {
+              "id": 5,
+              "bytes": 8,
+              "sha256": "b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8"
+            },
+            {
+              "id": 6,
+              "bytes": 15,
+              "sha256": "355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b"
+            },
+            {
+              "id": 7,
+              "bytes": 540,
+              "sha256": "37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da"
+            },
+            {
+              "id": 8,
+              "bytes": 3,
+              "sha256": "9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e"
+            },
+            {
+              "id": 12,
+              "bytes": 3,
+              "sha256": "39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba"
+            },
+            {
+              "id": 10,
+              "bytes": 66653,
+              "sha256": "27365295af3877a1e9c38d3fc2a7616244f2c33ab527d962f321336098132f41"
+            },
+            {
+              "id": 11,
+              "bytes": 1527,
+              "sha256": "391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59"
+            }
+          ],
+          "namedCustomSections": [
+            {
+              "name": "name",
+              "bytes": 1388,
+              "sha256": "25744a7624c1bc00f3197a77e0bec066f421960ad301c6557ed8f85452c4205b"
+            },
+            {
+              "name": "producers",
+              "bytes": 58,
+              "sha256": "706abcc157ba291bf625b52c8e3e7c203ebe927c89047892c14a224250018ca7"
+            },
+            {
+              "name": "target_features",
+              "bytes": 169,
+              "sha256": "9cc544793e4a50dc85d2919dbfaeee021c8ccc096a4f0429c07c2e7d4c279499"
+            }
+          ],
+          "functionNameCount": 52
+        }
+      },
+      "analysisInputDownload": {
+        "bytes": 1599208,
+        "sha256": "c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a"
+      },
+      "inputAnalysis": {
+        "headSha": "a4fb865b8d926053d661b3a390aed28352cc8f27",
+        "runId": 46130295082,
+        "jobId": 140933725716,
+        "artifactId": 15257800501,
+        "artifactName": "jmdict-completed-trace-analysis-da6c4-46130295082-1",
+        "artifactBytes": 1599208,
+        "artifactSha256": "c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a",
+        "analysisSha256": "b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca",
+        "completedReceiptBlob": "93464af3e88bd89841d0a349cc04ee4fce15c477",
+        "fullJobLogBlob": "a280549674dfd898f9eafc8051944ac95733c2fb"
+      },
+      "symbolicatedRows": 28,
+      "limitations": [
+        "Names are accepted only after all executable/index/data/memory sections match the actual traced module byte for byte. A successful source rebuild alone is insufficient.",
+        "The name section identifies emitted functions, including surviving static helpers. It does not recover inlined source locations or per-instruction C line attribution.",
+        "Sample counts and adjacent wall weights come from the prior immutable diagnostic. They remain non-comparative wall/sample attribution, not CPU time, additive critical-path cost, or a speedup ceiling.",
+        "The original timed-import clock window remains unestablished; explicit benchmark readback/probes occur after trace stop by the source-bound harness.",
+        "No product runtime/package/source change, new import, or performance promotion is authorized by this analysis.",
+        "All seven new Python tests are authored but unexecuted locally during the executor outage; they run before hosted recovery. Frozen helper's13tests passed in46130295082. Current actionlint will run on publication."
+      ]
+    }
+  },
+  "functionNames": {
+    "0": "__wasm_init_memory",
+    "1": "inflate_and_join_term_banks",
+    "2": "crc32_bytes",
+    "3": "inflate_zip_media_batch",
+    "4": "verify_term_bank_source_crcs",
+    "5": "crc32_update_gap",
+    "6": "wasm_reset_heap",
+    "7": "wasm_alloc",
+    "8": "wasm_get_last_parse_capacity",
+    "9": "wasm_get_last_content_capacity",
+    "10": "project_single_glossary_image_path",
+    "11": "project_glossary_image_value",
+    "12": "parse_value_span",
+    "13": "parse_composite_span_impl",
+    "14": "json_string_matches_ascii_escaped",
+    "15": "parse_term_bank",
+    "16": "parse_term_bank_impl",
+    "17": "next_term_bank",
+    "18": "parse_row_single_pass",
+    "19": "next_term_row",
+    "20": "parse_term_bank_with_media_hints",
+    "21": "encode_term_content",
+    "22": "encode_term_content_impl",
+    "23": "write_normalized_glossary_value",
+    "24": "hash_content_xxh32_pair",
+    "25": "encode_term_content_no_hash",
+    "26": "encode_term_content_token_binary",
+    "27": "encode_term_content_token_binary_row",
+    "28": "build_term_string_plan",
+    "29": "decode_escaped_key",
+    "30": "hash_content_xxh32",
+    "31": "copy_valid_utf8",
+    "32": "content_bytes_equal",
+    "33": "key_hex4",
+    "34": "encode_term_lookup_index",
+    "35": "encode_term_content_token_binary_dedup",
+    "36": "parse_and_encode_term_bank_token_binary_dedup",
+    "37": "raw_term_content_hash",
+    "38": "raw_term_content_tokens_equal",
+    "39": "raw_term_content_quick_signature",
+    "40": "reuse_validated_glossary",
+    "41": "is_valid_json_number",
+    "42": "next_format3_field",
+    "43": "scan_scalar_span",
+    "44": "parse_compact_glossary_list",
+    "45": "parse_value_span_with_glossary_hints",
+    "46": "compact_term_lookup_keys",
+    "47": "parse_scalar_span",
+    "48": "is_media_marker_at",
+    "49": "libdeflate_deflate_decompress_ex",
+    "50": "build_decode_table",
+    "51": "term_bank_inflate"
+  },
+  "parserSampleContexts": [
+    {
+      "functionIndex": 36,
+      "recoveredName": "parse_and_encode_term_bank_token_binary_dedup",
+      "samples": 1248,
+      "adjacentWallUs": 330178,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 50453,
+        "function": "wasm-function[36]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 13,
+      "recoveredName": "parse_composite_span_impl",
+      "samples": 694,
+      "adjacentWallUs": 163593,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 17821,
+        "function": "wasm-function[13]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 49,
+      "recoveredName": "libdeflate_deflate_decompress_ex",
+      "samples": 631,
+      "adjacentWallUs": 228123,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "inflate_and_join_term_banks"
+        ],
+        "functionIndex": 1
+      },
+      "nearestJsAncestor": {
+        "column": 59,
+        "function": "inflateCompressedTermBankSourcesWasm",
+        "functionDeclarationSourceLine": "export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {",
+        "line": 228,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 61667,
+        "function": "wasm-function[49]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 2,
+      "recoveredName": "crc32_bytes",
+      "samples": 535,
+      "adjacentWallUs": 197903,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "inflate_and_join_term_banks"
+        ],
+        "functionIndex": 1
+      },
+      "nearestJsAncestor": {
+        "column": 59,
+        "function": "inflateCompressedTermBankSourcesWasm",
+        "functionDeclarationSourceLine": "export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {",
+        "line": 228,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 1788,
+        "function": "wasm-function[2]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 18,
+      "recoveredName": "parse_row_single_pass",
+      "samples": 428,
+      "adjacentWallUs": 119633,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 25970,
+        "function": "wasm-function[18]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 27,
+      "recoveredName": "encode_term_content_token_binary_row",
+      "samples": 360,
+      "adjacentWallUs": 95870,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 37722,
+        "function": "wasm-function[27]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 24,
+      "recoveredName": "hash_content_xxh32_pair",
+      "samples": 214,
+      "adjacentWallUs": 59654,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 36161,
+        "function": "wasm-function[24]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 44,
+      "recoveredName": "parse_compact_glossary_list",
+      "samples": 112,
+      "adjacentWallUs": 22984,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 58463,
+        "function": "wasm-function[44]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 41,
+      "recoveredName": "is_valid_json_number",
+      "samples": 70,
+      "adjacentWallUs": 16273,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 57718,
+        "function": "wasm-function[41]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 34,
+      "recoveredName": "encode_term_lookup_index",
+      "samples": 68,
+      "adjacentWallUs": 19454,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "encode_term_lookup_index"
+        ],
+        "functionIndex": 34
+      },
+      "nearestJsAncestor": {
+        "column": 37,
+        "function": "encodeNativeTermLookupIndex",
+        "functionDeclarationSourceLine": "function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {",
+        "line": 1596,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 45484,
+        "function": "wasm-function[34]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 42,
+      "recoveredName": "next_format3_field",
+      "samples": 63,
+      "adjacentWallUs": 17014,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 58126,
+        "function": "wasm-function[42]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 40,
+      "recoveredName": "reuse_validated_glossary",
+      "samples": 59,
+      "adjacentWallUs": 16448,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 57016,
+        "function": "wasm-function[40]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 38,
+      "recoveredName": "raw_term_content_tokens_equal",
+      "samples": 56,
+      "adjacentWallUs": 12574,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 55472,
+        "function": "wasm-function[38]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 31,
+      "recoveredName": "copy_valid_utf8",
+      "samples": 51,
+      "adjacentWallUs": 11240,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 44559,
+        "function": "wasm-function[31]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 30,
+      "recoveredName": "hash_content_xxh32",
+      "samples": 50,
+      "adjacentWallUs": 10788,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 44066,
+        "function": "wasm-function[30]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 39,
+      "recoveredName": "raw_term_content_quick_signature",
+      "samples": 33,
+      "adjacentWallUs": 7717,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 56578,
+        "function": "wasm-function[39]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 50,
+      "recoveredName": "build_decode_table",
+      "samples": 26,
+      "adjacentWallUs": 7997,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "inflate_and_join_term_banks"
+        ],
+        "functionIndex": 1
+      },
+      "nearestJsAncestor": {
+        "column": 59,
+        "function": "inflateCompressedTermBankSourcesWasm",
+        "functionDeclarationSourceLine": "export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {",
+        "line": 228,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 65582,
+        "function": "wasm-function[50]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 43,
+      "recoveredName": "scan_scalar_span",
+      "samples": 9,
+      "adjacentWallUs": 1558,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 58308,
+        "function": "wasm-function[43]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 19,
+      "recoveredName": "next_term_row",
+      "samples": 7,
+      "adjacentWallUs": 2265,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 32028,
+        "function": "wasm-function[19]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 38,
+      "recoveredName": "raw_term_content_tokens_equal",
+      "samples": 4,
+      "adjacentWallUs": 808,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 55472,
+        "function": "wasm-function[38]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 30,
+      "recoveredName": "hash_content_xxh32",
+      "samples": 4,
+      "adjacentWallUs": 734,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 44066,
+        "function": "wasm-function[30]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 45,
+      "recoveredName": "parse_value_span_with_glossary_hints",
+      "samples": 4,
+      "adjacentWallUs": 685,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "parse_and_encode_term_bank_token_binary_dedup"
+        ],
+        "functionIndex": 36
+      },
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 59868,
+        "function": "wasm-function[45]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 31,
+      "recoveredName": "copy_valid_utf8",
+      "samples": 2,
+      "adjacentWallUs": 1505,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 44559,
+        "function": "wasm-function[31]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 1,
+      "recoveredName": "inflate_and_join_term_banks",
+      "samples": 2,
+      "adjacentWallUs": 425,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "inflate_and_join_term_banks"
+        ],
+        "functionIndex": 1
+      },
+      "nearestJsAncestor": {
+        "column": 59,
+        "function": "inflateCompressedTermBankSourcesWasm",
+        "functionDeclarationSourceLine": "export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {",
+        "line": 228,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 988,
+        "function": "wasm-function[1]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 51,
+      "recoveredName": "term_bank_inflate",
+      "samples": 1,
+      "adjacentWallUs": 168,
+      "nearestExportedAncestor": {
+        "exportNames": [
+          "inflate_and_join_term_banks"
+        ],
+        "functionIndex": 1
+      },
+      "nearestJsAncestor": {
+        "column": 59,
+        "function": "inflateCompressedTermBankSourcesWasm",
+        "functionDeclarationSourceLine": "export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {",
+        "line": 228,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 67415,
+        "function": "wasm-function[51]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 39,
+      "recoveredName": "raw_term_content_quick_signature",
+      "samples": 1,
+      "adjacentWallUs": 167,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 56578,
+        "function": "wasm-function[39]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 19,
+      "recoveredName": "next_term_row",
+      "samples": 1,
+      "adjacentWallUs": 157,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 49,
+        "function": "parseTermBankWasmBuffersUnchecked",
+        "functionDeclarationSourceLine": "async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =",
+        "line": 868,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 32028,
+        "function": "wasm-function[19]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    },
+    {
+      "functionIndex": 0,
+      "recoveredName": "__wasm_init_memory",
+      "samples": 1,
+      "adjacentWallUs": 107,
+      "nearestExportedAncestor": null,
+      "nearestJsAncestor": {
+        "column": 32,
+        "function": "",
+        "functionDeclarationSourceLine": "return await wasmCache.get(async () => {",
+        "line": 171,
+        "sourceSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "url": "js/dictionary/term-bank-wasm-parser.js"
+      },
+      "originalLeaf": {
+        "column": 895,
+        "function": "wasm-function[0]",
+        "line": 1,
+        "url": "wasm://wasm/00043732"
+      }
+    }
+  ],
+  "interpretation": [
+    "Recovered emitted function names are valid because every noncustom section (including section ID, encoded length and payload), order and count matches the exact traced module.",
+    "Seven authored recovery tests and actionlint completed successfully in hosted jobs; the frozen plan text saying they were pending refers only to its preregistration state.",
+    "Sample counts and adjacent wall weights are inherited from the immutable diagnostic; they are not CPU time, additive critical-path cost, a saving ceiling or comparative timing.",
+    "No new browser import, performance acquisition, product source or package mutation was performed."
+  ]
+}

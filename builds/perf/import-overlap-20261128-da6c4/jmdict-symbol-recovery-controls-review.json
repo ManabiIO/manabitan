@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent source and control-hash review only; no compiler/Python/browser/import execution.",
+  "reviewedUtc": "2026-11-28 09:43:17 UTC",
+  "reviewer": "/root/import_history",
+  "source": {
+    "product": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "tracedParserSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "nativeSourceDigest": "7b5bb45309d141eaa296ecef6c3cef7a94f22760266217a7c26dc467ea6db39c",
+    "nativeSourceFileCount": 14
+  },
+  "controls": {
+    "scriptBlob": "fc3b770615807fded676400d12c1e601a12f1126",
+    "testsBlob": "ee958d0d91ab91d7e91913dfb9b09b62ed402c1e",
+    "planBlob": "c75ee5fe5a9836110c5eec6562ff1c634d197254",
+    "workflowBlob": "8e1bf60fe86de516cf2b74e1e8aa0b4d9a100506",
+    "hashes": {
+      "script": "60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a",
+      "tests": "c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c",
+      "plan": "b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527",
+      "workflow": "d331190fe3f1676ca46333ee1b30ae97a2639dfd04ba25aeeb16ceeb512db46e",
+      "helper": "a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b",
+      "manifest": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+    },
+    "checks": {
+      "script": true,
+      "tests": true,
+      "helper": true,
+      "manifest": true,
+      "workflowPlan": true
+    }
+  },
+  "findings": [
+    "Fetched and inspected all four exact tooling Git blobs plus frozen manifest. Sparse checkout contains the complete ESM dependency chain, package.json, both checked native modules, and all 14 C/header inputs. The stock builder requires Node built-ins only.",
+    "Stock --check verifies both targets against manifest SHA and WebAssembly.validate. The separately retained stripped parser command matches stock compiler/linker/target argv/source order except output path, and must reproduce the complete traced parser bytes before names are considered.",
+    "Named parser differs only by removal of the single -Wl,--strip-all argument. Ordered raw noncustom sections, including section ID/length bytes, must match the valid traced parser exactly. No-import admission and matching function/code counts preserve zero-based function-index alignment.",
+    "Name parser rejects malformed section bounds, invalid UTF-8, repeated name sections/function-name subsections, duplicate/out-of-range/empty names and trailing name-map bytes. It leaves any absent name null rather than inventing attribution.",
+    "Downloaded input run/head/attempt/completion, artifact identity/name/size/digest and analysis JSON hash are bound. Reused helper verifies endpoint, HTTPS redirect without forwarding GitHub token, download length/SHA and safe unique ZIP paths.",
+    "Symbolization checks exact sampled module SHA and copies original function index, sample count, adjacent elapsed weight and ancestor data without reweighting. It is not CPU-time attribution or a new import.",
+    "Workflow runs seven authored deterministic tests before source recovery, records failures, uses pinned actions/Node and exact compiler/linker versions, and retains controls/binaries/commands/parity/source snapshots even on failure."
+  ],
+  "validation": {
+    "sourceReview": "pass; no concrete blocker found",
+    "v8ControlSha256Checks": "all pass; SHA-256 implementation checked against empty and abc vectors before use",
+    "pythonTests": "Not executed by this reviewer; required hosted seven-case suite remains pending",
+    "nativeRebuild": "Not executed by this reviewer; required hosted exact-byte proof remains pending"
+  },
+  "limits": [
+    "Names identify surviving emitted functions; they do not recover inlined C locations or per-instruction line attribution.",
+    "Removing strip-all is accepted only after exact noncustom parity, not because compiler/source versions match.",
+    "Missing sampled function names may remain null; source review does not promise recovery coverage.",
+    "The prior trace's timed-import window is not established; original counts and weights remain diagnostic and are not a speedup ceiling.",
+    "No production refs/source, acquisition protocol, or measurement results were changed."
+  ],
+  "analysisInput": {
+    "headSha": "a4fb865b8d926053d661b3a390aed28352cc8f27",
+    "runId": 46130295082,
+    "jobId": 140933725716,
+    "artifactId": 15257800501,
+    "artifactName": "jmdict-completed-trace-analysis-da6c4-46130295082-1",
+    "artifactBytes": 1599208,
+    "artifactSha256": "c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a",
+    "analysisSha256": "b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca",
+    "completedReceiptBlob": "93464af3e88bd89841d0a349cc04ee4fce15c477",
+    "fullJobLogBlob": "a280549674dfd898f9eafc8051944ac95733c2fb"
+  }
+}

@@ -1,0 +1,1159 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed hosted setup failure; no corpus import, benchmark, or memory observations acquired",
+  "runId": 46131421197,
+  "commit": "cfa026b01684ff4815e2fbfe12c70a8448a6637a",
+  "tree": "40e3deba69effa1eef1b3bf0947455931d83f5ac",
+  "outcome": "failure",
+  "phase": "source-and-release-package-setup",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "naturalConfigBlob": "1dde9ce887b0de4fa8a8c9714a95967ed61ed92a",
+  "naturalExpectedHashesOrigin": "Exact natural prepare-bindings.py 5cfdb757776cea6c0da368e5a617e70275459410 source_hashes() exhaustively enumerated ext/js, ext/lib and ext/data plus package/lock/fixture. These are inventory hashes, not an executed-module census.",
+  "dependencySetup": {
+    "focusedTestPassedBothJobs": true,
+    "actualCheckpoints": [
+      "before-dependencies",
+      "after-dependencies",
+      "after-build"
+    ],
+    "allRawPorcelainEmpty": true,
+    "allWorkingAndStagedDiffsZeroBytes": true,
+    "allUntrackedEmpty": true,
+    "unchangedFailedAttempt2PorcelainStillUnknown": true
+  },
+  "firstError": "Current natural/browser runtime differs: ext/lib/handlebars.js",
+  "fullObservedGeneratedMismatchSet": [
+    {
+      "path": "ext/lib/handlebars.js",
+      "expectedNaturalSha256": "691429be5a0d86e84c13de4083c53da47f02b6aa451da5a85346721ea6518e1d",
+      "hostedSha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2",
+      "bytes": 258561
+    },
+    {
+      "path": "ext/lib/handlebars.js.map",
+      "expectedNaturalSha256": "6e7e3a17818657e2ad4c71d9f6e1a071b2baacef5c7715e26fdd4d3edf9715e9",
+      "hostedSha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706",
+      "bytes": 456262
+    },
+    {
+      "path": "ext/lib/hangul-js.js",
+      "expectedNaturalSha256": "b502ecd41a13474800ba6f5927ca5034d2a60760a0af5acfd4c7c3f69c05e7ab",
+      "hostedSha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62",
+      "bytes": 19816
+    },
+    {
+      "path": "ext/lib/hangul-js.js.map",
+      "expectedNaturalSha256": "4bb7fbdce5497a1fdf9ee703f38d2c91687685b9677d65c3a03ef80b8db7fb03",
+      "hostedSha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1",
+      "bytes": 38207
+    },
+    {
+      "path": "ext/lib/kanji-processor.js",
+      "expectedNaturalSha256": "58b02d0065f7e87284a970d7ed53bd64373e78528dde60a71d9b1325fe44b4de",
+      "hostedSha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a",
+      "bytes": 151595
+    },
+    {
+      "path": "ext/lib/kanji-processor.js.map",
+      "expectedNaturalSha256": "f3bc307b6b055da9e16536eca1eebd048c92c153f2dd25188fbe8d6dbd4901f7",
+      "hostedSha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446",
+      "bytes": 418612
+    },
+    {
+      "path": "ext/lib/linkedom.js",
+      "expectedNaturalSha256": "622a36f7daef69024459cefe7d5893b592d829b6b6e938e87740aa1df4fbe147",
+      "hostedSha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e",
+      "bytes": 462324
+    },
+    {
+      "path": "ext/lib/linkedom.js.map",
+      "expectedNaturalSha256": "ed841a77f81a342b4ffa28c0cd8ff75f0188c07958dc907a1827cc26260c60e3",
+      "hostedSha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c",
+      "bytes": 658516
+    },
+    {
+      "path": "ext/lib/parse5.js",
+      "expectedNaturalSha256": "390643db239d5ee1a5f332a34ec7d5ec256eb041188e1d8215cda98a09683c13",
+      "hostedSha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7",
+      "bytes": 298992
+    },
+    {
+      "path": "ext/lib/parse5.js.map",
+      "expectedNaturalSha256": "513ca791a3ed589d555a44c224fbe6dcb3146e70b81d62f83d41ab61d23368a9",
+      "hostedSha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6",
+      "bytes": 448119
+    },
+    {
+      "path": "ext/lib/resvg-wasm.js",
+      "expectedNaturalSha256": "fcede82a0615c28850e3c6a99e5180b7aa1e064ee4deecd781e1e519ceac4edd",
+      "hostedSha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988",
+      "bytes": 17105
+    },
+    {
+      "path": "ext/lib/resvg-wasm.js.map",
+      "expectedNaturalSha256": "f3d38657bff5f97de3d03d9fc2342157b2b0a427dabd8d779132f40c9e50681b",
+      "hostedSha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3",
+      "bytes": 29304
+    },
+    {
+      "path": "ext/lib/ucs2length.js",
+      "expectedNaturalSha256": "9e6022a65c17dff69c8ebe0c17f569b38b191a98e80eaeca3f578aa8a9a39e76",
+      "hostedSha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513",
+      "bytes": 2305
+    },
+    {
+      "path": "ext/lib/ucs2length.js.map",
+      "expectedNaturalSha256": "ab1f0ef9b18cf0316224a3c789a9c50b1518e95afbc5e56c6e29d6e0f8b68354",
+      "hostedSha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f",
+      "bytes": 2087
+    },
+    {
+      "path": "ext/lib/z-worker.js",
+      "expectedNaturalSha256": "699fd93541c04cc79b2a53d6cffd3a72811972c3059b665ea1d6fa078ca6f1e2",
+      "hostedSha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c",
+      "bytes": 136716
+    },
+    {
+      "path": "ext/lib/z-worker.js.map",
+      "expectedNaturalSha256": "c9a7b6d1f2e198a66f51bf5e4bed7baae2b575a68d787cbbe2028ecab55bf896",
+      "hostedSha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a",
+      "bytes": 322119
+    },
+    {
+      "path": "ext/lib/zip.js",
+      "expectedNaturalSha256": "a917201677eb8eac5c86de5d4e64825d8a2b7acf193d84a8f26fc0072a56e211",
+      "hostedSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+      "bytes": 191228
+    },
+    {
+      "path": "ext/lib/zip.js.map",
+      "expectedNaturalSha256": "bbd10e8ce1c419186ee2998b257d33fa416ff458c70f85ce6d34b5766b9babab",
+      "hostedSha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb",
+      "bytes": 337267
+    }
+  ],
+  "matchingGeneratedAssets": [
+    {
+      "path": "ext/lib/resvg.wasm",
+      "expectedNaturalSha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+      "hostedSha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+      "bytes": 2478606
+    },
+    {
+      "path": "ext/lib/sqlite/index.d.mts",
+      "expectedNaturalSha256": "e3dea737552877bf3d0ef4a1381ba2a3b358043ea726dbeb3c81c9f9690c426b",
+      "hostedSha256": "e3dea737552877bf3d0ef4a1381ba2a3b358043ea726dbeb3c81c9f9690c426b",
+      "bytes": 284888
+    },
+    {
+      "path": "ext/lib/sqlite/index.mjs",
+      "expectedNaturalSha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2",
+      "hostedSha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2",
+      "bytes": 373254
+    },
+    {
+      "path": "ext/lib/sqlite/node.mjs",
+      "expectedNaturalSha256": "30ae528ed7f6f36c6dd6e542080dacb49820e3b85ba67023959229cac169c38d",
+      "hostedSha256": "30ae528ed7f6f36c6dd6e542080dacb49820e3b85ba67023959229cac169c38d",
+      "bytes": 316057
+    },
+    {
+      "path": "ext/lib/sqlite/sqlite3-opfs-async-proxy.js",
+      "expectedNaturalSha256": "eddca1c43e34e0f69c477d1e1154ad229c3bfcb33dc49392b70201402bec2dc7",
+      "hostedSha256": "eddca1c43e34e0f69c477d1e1154ad229c3bfcb33dc49392b70201402bec2dc7",
+      "bytes": 18411
+    },
+    {
+      "path": "ext/lib/sqlite/sqlite3-worker1.mjs",
+      "expectedNaturalSha256": "40b871be67f36d7912b00ce493cc85b2a735920c5e6544f7e16361a1668d7503",
+      "hostedSha256": "40b871be67f36d7912b00ce493cc85b2a735920c5e6544f7e16361a1668d7503",
+      "bytes": 370128
+    },
+    {
+      "path": "ext/lib/sqlite/sqlite3.wasm",
+      "expectedNaturalSha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+      "hostedSha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+      "bytes": 859730
+    },
+    {
+      "path": "ext/lib/term-bank-parser.wasm",
+      "expectedNaturalSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+      "hostedSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+      "bytes": 69068
+    },
+    {
+      "path": "ext/lib/term-content-canonical-scan-v1.wasm",
+      "expectedNaturalSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "hostedSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "bytes": 1624
+    },
+    {
+      "path": "ext/lib/validate-schemas.js",
+      "expectedNaturalSha256": "876821eca8cbf74e295dae3c974e56fe9b49551d4e201c7098888aa7250aca60",
+      "hostedSha256": "876821eca8cbf74e295dae3c974e56fe9b49551d4e201c7098888aa7250aca60",
+      "bytes": 468823
+    },
+    {
+      "path": "ext/lib/zstd-dicts/jmdict.zdict",
+      "expectedNaturalSha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "hostedSha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "bytes": 16384
+    },
+    {
+      "path": "ext/lib/zstd-simd-module.d.ts",
+      "expectedNaturalSha256": "05eaf8b24ed5457f0848d3742d57caa8343d67ac41b60d625b0902d6754380ad",
+      "hostedSha256": "05eaf8b24ed5457f0848d3742d57caa8343d67ac41b60d625b0902d6754380ad",
+      "bytes": 62
+    },
+    {
+      "path": "ext/lib/zstd-simd-module.d.ts.map",
+      "expectedNaturalSha256": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9",
+      "hostedSha256": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9",
+      "bytes": 93
+    },
+    {
+      "path": "ext/lib/zstd-simd-module.js",
+      "expectedNaturalSha256": "79a18a4a7c88a0e97663e11c80f5754e82b9f6514f0014f02a250b8a25802fa9",
+      "hostedSha256": "79a18a4a7c88a0e97663e11c80f5754e82b9f6514f0014f02a250b8a25802fa9",
+      "bytes": 12116
+    },
+    {
+      "path": "ext/lib/zstd-simd-module.js.map",
+      "expectedNaturalSha256": "d254f9e0c518c8b6d22cdccf89ca69db4b623e01928adb23f354035cf87bbbf7",
+      "hostedSha256": "d254f9e0c518c8b6d22cdccf89ca69db4b623e01928adb23f354035cf87bbbf7",
+      "bytes": 16912
+    },
+    {
+      "path": "ext/lib/zstd-wasm.js",
+      "expectedNaturalSha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "hostedSha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "bytes": 26084
+    },
+    {
+      "path": "ext/lib/zstd-wasm.js.map",
+      "expectedNaturalSha256": "ba387a56fb70f7de9356df2dea1b0ffe8ac8c5dc96f1a69754bb860f3186333a",
+      "hostedSha256": "ba387a56fb70f7de9356df2dea1b0ffe8ac8c5dc96f1a69754bb860f3186333a",
+      "bytes": 46378
+    },
+    {
+      "path": "ext/lib/zstd.wasm",
+      "expectedNaturalSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "hostedSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "bytes": 433631
+    }
+  ],
+  "bothHostedGeneratedLibVectorsEqual": true,
+  "causeStatus": "Undetermined. Default esbuild realpath resolution plus natural symlinked versus hosted real dependencies is a hypothesis pending exact byte comparison; neither harmlessness nor dependency equivalence is inferred from the hash set alone.",
+  "actionlint": {
+    "runId": 46131421194,
+    "jobId": 140937192994,
+    "conclusion": "success"
+  },
+  "artifacts": {
+    "total_count": 2,
+    "artifacts": [
+      {
+        "id": 15258291434,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1ODI5MTQzNA==",
+        "name": "alias-native-preflight-cfa026b01684ff4815e2fbfe12c70a8448a6637a-46131421197-1",
+        "size_in_bytes": 371039,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15258291434",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15258291434/zip",
+        "expired": false,
+        "digest": "sha256:f163ae708e0be44076a02f7f1d74caf044d315776036f347f3368a710bc6cc9c",
+        "created_at": "2026-11-28T09:40:02Z",
+        "updated_at": "2026-11-28T09:40:02Z",
+        "expires_at": "2026-12-28T09:40:01Z",
+        "workflow_run": {
+          "id": 46131421197,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/native-record-alias-qualification-20261128-da6c4",
+          "head_sha": "cfa026b01684ff4815e2fbfe12c70a8448a6637a"
+        }
+      },
+      {
+        "id": 15257601859,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1NzYwMTg1OQ==",
+        "name": "alias-native-verify-cfa026b01684ff4815e2fbfe12c70a8448a6637a-46131421197-1",
+        "size_in_bytes": 371096,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257601859",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15257601859/zip",
+        "expired": false,
+        "digest": "sha256:7a37a1424f8ea1857951fe79f17d98fa8d92cb067ac9cfbd46a29a22f3c00ebd",
+        "created_at": "2026-11-28T09:40:02Z",
+        "updated_at": "2026-11-28T09:40:02Z",
+        "expires_at": "2026-12-28T09:40:01Z",
+        "workflow_run": {
+          "id": 46131421197,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/native-record-alias-qualification-20261128-da6c4",
+          "head_sha": "cfa026b01684ff4815e2fbfe12c70a8448a6637a"
+        }
+      }
+    ]
+  },
+  "jobs": {
+    "verification": {
+      "jobId": 140937193600,
+      "rawLog": {
+        "blob": "2194f0b20041483cc51cc730038d9bedb3028714",
+        "bytes": 311192,
+        "sha256": "d18c6c788b718fe10a9a30335c553956608858f20646344799c166fd9ac9ba9b"
+      },
+      "setupStates": [
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "before-dependencies",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-before-dependencies-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-before-dependencies-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": null,
+              "sha256": null
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": null,
+              "sha256": null
+            }
+          ],
+          "untracked": []
+        },
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "after-dependencies",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-after-dependencies-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-after-dependencies-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": null,
+              "sha256": null
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": null,
+              "sha256": null
+            }
+          ],
+          "untracked": []
+        },
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "after-build",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-after-build-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-after-build-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": 16806965,
+              "sha256": "08878705f0386fd15c0bd076def82fa2c3c315949272d2aaa78cb3cdc5390353"
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/lib/handlebars.js",
+              "bytes": 258561,
+              "sha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2"
+            },
+            {
+              "path": "ext/lib/handlebars.js.map",
+              "bytes": 456262,
+              "sha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706"
+            },
+            {
+              "path": "ext/lib/hangul-js.js",
+              "bytes": 19816,
+              "sha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62"
+            },
+            {
+              "path": "ext/lib/hangul-js.js.map",
+              "bytes": 38207,
+              "sha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1"
+            },
+            {
+              "path": "ext/lib/kanji-processor.js",
+              "bytes": 151595,
+              "sha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a"
+            },
+            {
+              "path": "ext/lib/kanji-processor.js.map",
+              "bytes": 418612,
+              "sha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446"
+            },
+            {
+              "path": "ext/lib/linkedom.js",
+              "bytes": 462324,
+              "sha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e"
+            },
+            {
+              "path": "ext/lib/linkedom.js.map",
+              "bytes": 658516,
+              "sha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c"
+            },
+            {
+              "path": "ext/lib/parse5.js",
+              "bytes": 298992,
+              "sha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7"
+            },
+            {
+              "path": "ext/lib/parse5.js.map",
+              "bytes": 448119,
+              "sha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6"
+            },
+            {
+              "path": "ext/lib/resvg-wasm.js",
+              "bytes": 17105,
+              "sha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988"
+            },
+            {
+              "path": "ext/lib/resvg-wasm.js.map",
+              "bytes": 29304,
+              "sha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3"
+            },
+            {
+              "path": "ext/lib/resvg.wasm",
+              "bytes": 2478606,
+              "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70"
+            },
+            {
+              "path": "ext/lib/sqlite/index.d.mts",
+              "bytes": 284888,
+              "sha256": "e3dea737552877bf3d0ef4a1381ba2a3b358043ea726dbeb3c81c9f9690c426b"
+            },
+            {
+              "path": "ext/lib/sqlite/index.mjs",
+              "bytes": 373254,
+              "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+            },
+            {
+              "path": "ext/lib/sqlite/node.mjs",
+              "bytes": 316057,
+              "sha256": "30ae528ed7f6f36c6dd6e542080dacb49820e3b85ba67023959229cac169c38d"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3-opfs-async-proxy.js",
+              "bytes": 18411,
+              "sha256": "eddca1c43e34e0f69c477d1e1154ad229c3bfcb33dc49392b70201402bec2dc7"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3-worker1.mjs",
+              "bytes": 370128,
+              "sha256": "40b871be67f36d7912b00ce493cc85b2a735920c5e6544f7e16361a1668d7503"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3.wasm",
+              "bytes": 859730,
+              "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+            },
+            {
+              "path": "ext/lib/term-bank-parser.wasm",
+              "bytes": 69068,
+              "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+            },
+            {
+              "path": "ext/lib/term-content-canonical-scan-v1.wasm",
+              "bytes": 1624,
+              "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            },
+            {
+              "path": "ext/lib/ucs2length.js",
+              "bytes": 2305,
+              "sha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513"
+            },
+            {
+              "path": "ext/lib/ucs2length.js.map",
+              "bytes": 2087,
+              "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f"
+            },
+            {
+              "path": "ext/lib/validate-schemas.js",
+              "bytes": 468823,
+              "sha256": "876821eca8cbf74e295dae3c974e56fe9b49551d4e201c7098888aa7250aca60"
+            },
+            {
+              "path": "ext/lib/z-worker.js",
+              "bytes": 136716,
+              "sha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c"
+            },
+            {
+              "path": "ext/lib/z-worker.js.map",
+              "bytes": 322119,
+              "sha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a"
+            },
+            {
+              "path": "ext/lib/zip.js",
+              "bytes": 191228,
+              "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+            },
+            {
+              "path": "ext/lib/zip.js.map",
+              "bytes": 337267,
+              "sha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb"
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384,
+              "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.d.ts",
+              "bytes": 62,
+              "sha256": "05eaf8b24ed5457f0848d3742d57caa8343d67ac41b60d625b0902d6754380ad"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.d.ts.map",
+              "bytes": 93,
+              "sha256": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.js",
+              "bytes": 12116,
+              "sha256": "79a18a4a7c88a0e97663e11c80f5754e82b9f6514f0014f02a250b8a25802fa9"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.js.map",
+              "bytes": 16912,
+              "sha256": "d254f9e0c518c8b6d22cdccf89ca69db4b623e01928adb23f354035cf87bbbf7"
+            },
+            {
+              "path": "ext/lib/zstd-wasm.js",
+              "bytes": 26084,
+              "sha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e"
+            },
+            {
+              "path": "ext/lib/zstd-wasm.js.map",
+              "bytes": 46378,
+              "sha256": "ba387a56fb70f7de9356df2dea1b0ffe8ac8c5dc96f1a69754bb860f3186333a"
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631,
+              "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": 3571,
+              "sha256": "808a74cb7fd69d3704f089b3913606e609eab385e1d1af7e451c89213ad62129"
+            }
+          ],
+          "untracked": []
+        }
+      ],
+      "printedReceipts": [
+        {
+          "data": {
+            "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+            "cleanupFailures": [],
+            "commands": [
+              {
+                "command": [
+                  "python",
+                  "-m",
+                  "unittest",
+                  "-v",
+                  "test_setup_sources.py"
+                ],
+                "cwd": "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858795482,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/dependency-setup-test.log",
+                "startedUnixMs": 1795858795397
+              },
+              {
+                "command": [
+                  "git",
+                  "worktree",
+                  "add",
+                  "--detach",
+                  "--no-checkout",
+                  "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                  "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+                ],
+                "cwd": "/home/runner/work/manabitan/manabitan",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858795489,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/worktree-A.log",
+                "startedUnixMs": 1795858795486
+              },
+              {
+                "command": [
+                  "git",
+                  "sparse-checkout",
+                  "set",
+                  "--no-cone",
+                  "/*",
+                  "!/builds/perf/"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858795493,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/sparse-A.log",
+                "startedUnixMs": 1795858795490
+              },
+              {
+                "command": [
+                  "git",
+                  "checkout",
+                  "--detach",
+                  "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858795905,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/checkout-A.log",
+                "startedUnixMs": 1795858795494
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "build:libs"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858797459,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/libs-A.log",
+                "startedUnixMs": 1795858796938
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "license-report:html"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858797880,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/license-A.log",
+                "startedUnixMs": 1795858797460
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "build",
+                  "--",
+                  "--target",
+                  "chrome"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-verify-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858801069,
+                "log": "/home/runner/work/_temp/alias-native-verify-46131421197-1/build-A.log",
+                "startedUnixMs": 1795858797881
+              }
+            ],
+            "complete": false,
+            "dictionary": "vndb",
+            "failures": [
+              {
+                "message": "Current natural/browser runtime differs: ext/lib/handlebars.js",
+                "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 605, in main\n    study.setup_sources()\n    ~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 257, in setup_sources\n    same(digest(target / relative), expected, 'Current natural/browser runtime differs: ' + relative)\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 55, in same\n    require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False), message)\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 51, in require\n    raise RuntimeError(message)\nRuntimeError: Current natural/browser runtime differs: ext/lib/handlebars.js\n",
+                "type": "RuntimeError"
+              }
+            ],
+            "initialOrder": "AB",
+            "mode": "verify",
+            "observations": [],
+            "phase": "source-and-release-package-setup"
+          },
+          "path": "run-state.json",
+          "sha256": "6648acbc9a7f9d31507c5813d14561f09ae547a6cffa3b9e32d93e9231c90cc5"
+        }
+      ]
+    },
+    "preflight": {
+      "jobId": 140937193817,
+      "rawLog": {
+        "blob": "e908555d091e252a5b046d357ef9cbbc7cf20a98",
+        "bytes": 327041,
+        "sha256": "1fbdb7708bcdf15ba41c2acde66947a44102ad2f00f3d3e2bd8165dc49f664b4"
+      },
+      "setupStates": [
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "before-dependencies",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-before-dependencies-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-before-dependencies-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": null,
+              "sha256": null
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": null,
+              "sha256": null
+            }
+          ],
+          "untracked": []
+        },
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "after-dependencies",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-after-dependencies-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-after-dependencies-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": null,
+              "sha256": null
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": null,
+              "sha256": null
+            }
+          ],
+          "untracked": []
+        },
+        {
+          "kind": "source-setup-state",
+          "arm": "A",
+          "stage": "after-build",
+          "gitHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "gitTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+          "rawPorcelain": "",
+          "diffs": {
+            "working": {
+              "path": "source-A-after-build-working.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "staged": {
+              "path": "source-A-after-build-staged.diff",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "generated": [
+            {
+              "path": "builds/manabitan-chrome.zip",
+              "bytes": 16806965,
+              "sha256": "d04743957494fb258f52917310956d4a6c9219b0c4efd08eb10ee46caf1c7fe6"
+            },
+            {
+              "path": "ext/legal-npm.html",
+              "bytes": 2788,
+              "sha256": "b67f231e9793c550c73c8e3ffbe38c02915d25af75b768d554d5c8f65561f5b6"
+            },
+            {
+              "path": "ext/lib/handlebars.js",
+              "bytes": 258561,
+              "sha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2"
+            },
+            {
+              "path": "ext/lib/handlebars.js.map",
+              "bytes": 456262,
+              "sha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706"
+            },
+            {
+              "path": "ext/lib/hangul-js.js",
+              "bytes": 19816,
+              "sha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62"
+            },
+            {
+              "path": "ext/lib/hangul-js.js.map",
+              "bytes": 38207,
+              "sha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1"
+            },
+            {
+              "path": "ext/lib/kanji-processor.js",
+              "bytes": 151595,
+              "sha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a"
+            },
+            {
+              "path": "ext/lib/kanji-processor.js.map",
+              "bytes": 418612,
+              "sha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446"
+            },
+            {
+              "path": "ext/lib/linkedom.js",
+              "bytes": 462324,
+              "sha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e"
+            },
+            {
+              "path": "ext/lib/linkedom.js.map",
+              "bytes": 658516,
+              "sha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c"
+            },
+            {
+              "path": "ext/lib/parse5.js",
+              "bytes": 298992,
+              "sha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7"
+            },
+            {
+              "path": "ext/lib/parse5.js.map",
+              "bytes": 448119,
+              "sha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6"
+            },
+            {
+              "path": "ext/lib/resvg-wasm.js",
+              "bytes": 17105,
+              "sha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988"
+            },
+            {
+              "path": "ext/lib/resvg-wasm.js.map",
+              "bytes": 29304,
+              "sha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3"
+            },
+            {
+              "path": "ext/lib/resvg.wasm",
+              "bytes": 2478606,
+              "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70"
+            },
+            {
+              "path": "ext/lib/sqlite/index.d.mts",
+              "bytes": 284888,
+              "sha256": "e3dea737552877bf3d0ef4a1381ba2a3b358043ea726dbeb3c81c9f9690c426b"
+            },
+            {
+              "path": "ext/lib/sqlite/index.mjs",
+              "bytes": 373254,
+              "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+            },
+            {
+              "path": "ext/lib/sqlite/node.mjs",
+              "bytes": 316057,
+              "sha256": "30ae528ed7f6f36c6dd6e542080dacb49820e3b85ba67023959229cac169c38d"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3-opfs-async-proxy.js",
+              "bytes": 18411,
+              "sha256": "eddca1c43e34e0f69c477d1e1154ad229c3bfcb33dc49392b70201402bec2dc7"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3-worker1.mjs",
+              "bytes": 370128,
+              "sha256": "40b871be67f36d7912b00ce493cc85b2a735920c5e6544f7e16361a1668d7503"
+            },
+            {
+              "path": "ext/lib/sqlite/sqlite3.wasm",
+              "bytes": 859730,
+              "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+            },
+            {
+              "path": "ext/lib/term-bank-parser.wasm",
+              "bytes": 69068,
+              "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+            },
+            {
+              "path": "ext/lib/term-content-canonical-scan-v1.wasm",
+              "bytes": 1624,
+              "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            },
+            {
+              "path": "ext/lib/ucs2length.js",
+              "bytes": 2305,
+              "sha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513"
+            },
+            {
+              "path": "ext/lib/ucs2length.js.map",
+              "bytes": 2087,
+              "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f"
+            },
+            {
+              "path": "ext/lib/validate-schemas.js",
+              "bytes": 468823,
+              "sha256": "876821eca8cbf74e295dae3c974e56fe9b49551d4e201c7098888aa7250aca60"
+            },
+            {
+              "path": "ext/lib/z-worker.js",
+              "bytes": 136716,
+              "sha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c"
+            },
+            {
+              "path": "ext/lib/z-worker.js.map",
+              "bytes": 322119,
+              "sha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a"
+            },
+            {
+              "path": "ext/lib/zip.js",
+              "bytes": 191228,
+              "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+            },
+            {
+              "path": "ext/lib/zip.js.map",
+              "bytes": 337267,
+              "sha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb"
+            },
+            {
+              "path": "ext/lib/zstd-dicts/jmdict.zdict",
+              "bytes": 16384,
+              "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.d.ts",
+              "bytes": 62,
+              "sha256": "05eaf8b24ed5457f0848d3742d57caa8343d67ac41b60d625b0902d6754380ad"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.d.ts.map",
+              "bytes": 93,
+              "sha256": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.js",
+              "bytes": 12116,
+              "sha256": "79a18a4a7c88a0e97663e11c80f5754e82b9f6514f0014f02a250b8a25802fa9"
+            },
+            {
+              "path": "ext/lib/zstd-simd-module.js.map",
+              "bytes": 16912,
+              "sha256": "d254f9e0c518c8b6d22cdccf89ca69db4b623e01928adb23f354035cf87bbbf7"
+            },
+            {
+              "path": "ext/lib/zstd-wasm.js",
+              "bytes": 26084,
+              "sha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e"
+            },
+            {
+              "path": "ext/lib/zstd-wasm.js.map",
+              "bytes": 46378,
+              "sha256": "ba387a56fb70f7de9356df2dea1b0ffe8ac8c5dc96f1a69754bb860f3186333a"
+            },
+            {
+              "path": "ext/lib/zstd.wasm",
+              "bytes": 433631,
+              "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+            },
+            {
+              "path": "ext/manifest.json",
+              "bytes": 3571,
+              "sha256": "808a74cb7fd69d3704f089b3913606e609eab385e1d1af7e451c89213ad62129"
+            }
+          ],
+          "untracked": []
+        }
+      ],
+      "printedReceipts": [
+        {
+          "data": {
+            "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+            "cleanupFailures": [],
+            "commands": [
+              {
+                "command": [
+                  "python",
+                  "-m",
+                  "unittest",
+                  "-v",
+                  "test_setup_sources.py"
+                ],
+                "cwd": "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858796919,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/dependency-setup-test.log",
+                "startedUnixMs": 1795858796814
+              },
+              {
+                "command": [
+                  "git",
+                  "worktree",
+                  "add",
+                  "--detach",
+                  "--no-checkout",
+                  "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                  "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+                ],
+                "cwd": "/home/runner/work/manabitan/manabitan",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858796925,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/worktree-A.log",
+                "startedUnixMs": 1795858796921
+              },
+              {
+                "command": [
+                  "git",
+                  "sparse-checkout",
+                  "set",
+                  "--no-cone",
+                  "/*",
+                  "!/builds/perf/"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858796929,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/sparse-A.log",
+                "startedUnixMs": 1795858796925
+              },
+              {
+                "command": [
+                  "git",
+                  "checkout",
+                  "--detach",
+                  "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858797258,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/checkout-A.log",
+                "startedUnixMs": 1795858796929
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "build:libs"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858798511,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/libs-A.log",
+                "startedUnixMs": 1795858798124
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "license-report:html"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858798819,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/license-A.log",
+                "startedUnixMs": 1795858798512
+              },
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "build",
+                  "--",
+                  "--target",
+                  "chrome"
+                ],
+                "cwd": "/home/runner/work/_temp/alias-native-preflight-46131421197-1-sources/A",
+                "exitCode": 0,
+                "finishedUnixMs": 1795858801294,
+                "log": "/home/runner/work/_temp/alias-native-preflight-46131421197-1/build-A.log",
+                "startedUnixMs": 1795858798819
+              }
+            ],
+            "complete": false,
+            "dictionary": "vndb",
+            "failures": [
+              {
+                "message": "Current natural/browser runtime differs: ext/lib/handlebars.js",
+                "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 605, in main\n    study.setup_sources()\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 257, in setup_sources\n    same(digest(target / relative), expected, 'Current natural/browser runtime differs: ' + relative)\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 55, in same\n    require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False), message)\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 51, in require\n    raise RuntimeError(message)\nRuntimeError: Current natural/browser runtime differs: ext/lib/handlebars.js\n",
+                "type": "RuntimeError"
+              }
+            ],
+            "initialOrder": "AB",
+            "mode": "preflight",
+            "observations": [],
+            "phase": "source-and-release-package-setup"
+          },
+          "path": "run-state.json",
+          "sha256": "2419f13b0d62dd3199e8768a2546bb637fa9c92ddfb580a4de613bba4c6d95c0"
+        }
+      ]
+    }
+  },
+  "claimLimitations": [
+    "Original generated natural bundle bytes are currently inaccessible; their retained hashes remain exact.",
+    "Strict source guard stopped at A, so B checkout/build and all product verification/preflight/timing were not reached.",
+    "No guard exceptions, source restoration, ignored tracked changes or retrospective sample exclusions have been applied."
+  ]
+}

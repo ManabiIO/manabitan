@@ -1,0 +1,49 @@
+{
+  "candidateVsBaseline": {
+    "count": 12,
+    "descriptiveBootstrap95Percent": [
+      -1.62823702521111,
+      4.682455484088788
+    ],
+    "equalWorkChangePercent": 1.0108558842037763,
+    "fasterPairs": 4,
+    "medianPairedChangePercent": 1.3013364818786677,
+    "ratios": [
+      1.048549891401559,
+      1.0587857784623502,
+      1.0235332749561852,
+      1.0324896998234323,
+      1.0004723107804867,
+      1.0450992182802166,
+      0.9470882225119384,
+      0.9861472886573394,
+      1.0602021548372902,
+      0.9812879708384386,
+      1.0024934546813884,
+      0.9447425505195034
+    ],
+    "worstPairChangePercent": 6.020215483729019
+  },
+  "identicalCodeControl": {
+    "count": 4,
+    "descriptiveBootstrap95Percent": [
+      -8.120283815745722,
+      6.263022429216236
+    ],
+    "equalWorkChangePercent": 0.709558165880364,
+    "fasterPairs": 1,
+    "medianPairedChangePercent": 2.7247546252591848,
+    "ratios": [
+      1.034423407917384,
+      0.9187971618425428,
+      1.0200716845877997,
+      1.0626302242921624
+    ],
+    "worstPairChangePercent": 6.263022429216236
+  },
+  "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+  "memoryPassed": true,
+  "status": "correctness-memory-passed",
+  "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+  "timingScope": "File input change through post-UI completion; fresh profile per observation"
+}

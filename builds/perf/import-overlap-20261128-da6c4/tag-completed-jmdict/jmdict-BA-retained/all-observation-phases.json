@@ -1,0 +1,3854 @@
+[
+  {
+    "id": "warmup-1-B",
+    "arm": "B",
+    "kind": "warmup",
+    "pair": 1,
+    "totalImportMs": 801.6000000000058,
+    "workerImportMs": 777.3999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 202,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 407,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 617,
+          "otherMs": 9,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 202,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 407,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 617,
+        "otherMs": 9
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.39999999999418,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 629.2000000000116,
+              "heapDeltaBytes": -467480,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 143,
+              "heapDeltaBytes": 241612,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.39999999999418
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 629.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 143
+        }
+      ]
+    }
+  },
+  {
+    "id": "warmup-1-A",
+    "arm": "A",
+    "kind": "warmup",
+    "pair": 1,
+    "totalImportMs": 974.8999999999942,
+    "workerImportMs": 950.6999999999825,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 243,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 529,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 780,
+          "otherMs": 20,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 243,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 529,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 780,
+        "otherMs": 20
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.10000000000582077,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.399999999994179,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.60000000000582,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 802.2999999999884,
+              "heapDeltaBytes": 693200,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 142.29999999998836,
+              "heapDeltaBytes": 292000,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.10000000000582077
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.399999999994179
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.60000000000582
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 802.2999999999884
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 142.29999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "warmup-2-A",
+    "arm": "A",
+    "kind": "warmup",
+    "pair": 2,
+    "totalImportMs": 826.1999999999825,
+    "workerImportMs": 800.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 204,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 423,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 635,
+          "otherMs": 16,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 204,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 423,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 635,
+        "otherMs": 16
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.10000000000582077,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.100000000005821,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.39999999999418,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 653.8999999999942,
+              "heapDeltaBytes": -430528,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 143.20000000001164,
+              "heapDeltaBytes": 293828,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.10000000000582077
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.100000000005821
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.39999999999418
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 653.8999999999942
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 143.20000000001164
+        }
+      ]
+    }
+  },
+  {
+    "id": "warmup-2-B",
+    "arm": "B",
+    "kind": "warmup",
+    "pair": 2,
+    "totalImportMs": 802.3000000000175,
+    "workerImportMs": 778.1000000000058,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 206,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 397,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 612,
+          "otherMs": 11,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 206,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 397,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 612,
+        "otherMs": 11
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.299999999988358,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 625.8999999999942,
+              "heapDeltaBytes": -497328,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 147.60000000000582,
+              "heapDeltaBytes": 301640,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.299999999988358
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 625.8999999999942
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 147.60000000000582
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-01-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 1,
+    "totalImportMs": 800.7999999999884,
+    "workerImportMs": 776.8000000000175,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 201,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 402,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 612,
+          "otherMs": 9,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 201,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 402,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 612,
+        "otherMs": 9
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.300000000017462,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 624.1000000000058,
+              "heapDeltaBytes": -452712,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 147.29999999998836,
+              "heapDeltaBytes": 277924,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.300000000017462
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 624.1000000000058
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 147.29999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-01-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 1,
+    "totalImportMs": 837.8999999999942,
+    "workerImportMs": 811.8999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 199,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 433,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 639,
+          "otherMs": 21,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 199,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 433,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 639,
+        "otherMs": 21
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.399999999994179,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.89999999999418,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 663.2999999999884,
+              "heapDeltaBytes": -429564,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 145.30000000001746,
+              "heapDeltaBytes": 305996,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.399999999994179
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.89999999999418
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 663.2999999999884
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 145.30000000001746
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-02-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 2,
+    "totalImportMs": 813.7000000000116,
+    "workerImportMs": 791.6000000000058,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 196,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 420,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 624,
+          "otherMs": 17,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 196,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 420,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 624,
+        "otherMs": 17
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7.300000000017462,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 12.199999999982538,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 644.8000000000175,
+              "heapDeltaBytes": -489061,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 140,
+              "heapDeltaBytes": 292508,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7.300000000017462
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 12.199999999982538
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 644.8000000000175
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 140
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-02-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 2,
+    "totalImportMs": 806.8000000000175,
+    "workerImportMs": 781.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 194,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 420,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 622,
+          "otherMs": 10,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 194,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 420,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 622,
+        "otherMs": 10
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.399999999994179,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.800000000017462,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 635.3999999999942,
+              "heapDeltaBytes": -442300,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 141.89999999999418,
+              "heapDeltaBytes": 304600,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.399999999994179
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.800000000017462
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 635.3999999999942
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 141.89999999999418
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-03-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 3,
+    "totalImportMs": 808.2999999999884,
+    "workerImportMs": 783.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 193,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 418,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 619,
+          "otherMs": 12,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 193,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 418,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 619,
+        "otherMs": 12
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2999999999883585,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.900000000023283,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 633.5999999999767,
+              "heapDeltaBytes": -460204,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 145.40000000002328,
+              "heapDeltaBytes": 303948,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2999999999883585
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.900000000023283
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 633.5999999999767
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 145.40000000002328
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-03-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 3,
+    "totalImportMs": 814.6999999999825,
+    "workerImportMs": 789.3999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 207,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 408,
+          "bulkAddTagsMetaMs": 6,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 621,
+          "otherMs": 23,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 207,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 408,
+        "bulkAddTagsMetaMs": 6,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 621,
+        "otherMs": 23
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.89999999999418,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 646.5,
+              "heapDeltaBytes": -436800,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 140.60000000000582,
+              "heapDeltaBytes": 293684,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.89999999999418
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 646.5
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 140.60000000000582
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-01-C",
+    "arm": "C",
+    "kind": "control",
+    "pair": 1,
+    "totalImportMs": 817.8999999999942,
+    "workerImportMs": 795.3999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 201,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 418,
+          "bulkAddTagsMetaMs": 6,
+          "mediaResolveMs": 3,
+          "mediaWriteMs": 0,
+          "accountedMs": 628,
+          "otherMs": 22,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 201,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 418,
+        "bulkAddTagsMetaMs": 6,
+        "mediaResolveMs": 3,
+        "mediaWriteMs": 0,
+        "accountedMs": 628,
+        "otherMs": 22
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 652.5,
+              "heapDeltaBytes": 594679,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 140.89999999999418,
+              "heapDeltaBytes": 290052,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 652.5
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 140.89999999999418
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-01-A",
+    "arm": "A",
+    "kind": "control",
+    "pair": 1,
+    "totalImportMs": 813.2000000000116,
+    "workerImportMs": 791,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 204,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 404,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 617,
+          "otherMs": 20,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 204,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 404,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 617,
+        "otherMs": 20
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.29999999998835847,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 8,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 638.5,
+              "heapDeltaBytes": -496921,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 145.39999999999418,
+              "heapDeltaBytes": 291788,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.29999999998835847
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 8
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 638.5
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 145.39999999999418
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-04-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 4,
+    "totalImportMs": 808.7000000000116,
+    "workerImportMs": 785.8999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 194,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 414,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 617,
+          "otherMs": 14,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 194,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 414,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 617,
+        "otherMs": 14
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.10000000000582077,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 9.10000000000582,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.200000000011642,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 633.2999999999884,
+              "heapDeltaBytes": -470541,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 146.29999999998836,
+              "heapDeltaBytes": 304700,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.10000000000582077
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.10000000000582
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.200000000011642
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 633.2999999999884
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 146.29999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-04-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 4,
+    "totalImportMs": 802.8999999999942,
+    "workerImportMs": 779.8999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 189,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 421,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 619,
+          "otherMs": 12,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 189,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 421,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 619,
+        "otherMs": 12
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.700000000011642,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 633.1000000000058,
+              "heapDeltaBytes": -516846,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 143.60000000000582,
+              "heapDeltaBytes": 278972,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.700000000011642
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 633.1000000000058
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 143.60000000000582
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-05-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 5,
+    "totalImportMs": 811.8999999999942,
+    "workerImportMs": 788.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 197,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 421,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 627,
+          "otherMs": 12,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 197,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 421,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 627,
+        "otherMs": 12
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.299999999988358,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 643.2000000000116,
+              "heapDeltaBytes": -439812,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 140.79999999998836,
+              "heapDeltaBytes": 304760,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.299999999988358
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 643.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 140.79999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-05-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 5,
+    "totalImportMs": 820.2999999999884,
+    "workerImportMs": 795.8999999999942,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 211,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 410,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 628,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 211,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 410,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 628,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1999999999825377,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.300000000017462,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.099999999976717,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 649.1000000000058,
+              "heapDeltaBytes": -435616,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 143.5,
+              "heapDeltaBytes": 292692,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1999999999825377
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.300000000017462
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.099999999976717
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 649.1000000000058
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 143.5
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-06-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 6,
+    "totalImportMs": 806.7999999999884,
+    "workerImportMs": 784.3000000000466,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 200,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 410,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 617,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 200,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 410,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 617,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.19999999995343387,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.400000000023283,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 12,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 639.5999999999767,
+              "heapDeltaBytes": -457617,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 138.40000000002328,
+              "heapDeltaBytes": 303232,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.19999999995343387
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.400000000023283
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 12
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 639.5999999999767
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 138.40000000002328
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-06-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 6,
+    "totalImportMs": 815.0999999999767,
+    "workerImportMs": 790.7999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 200,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 424,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 633,
+          "otherMs": 8,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 200,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 424,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 633,
+        "otherMs": 8
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.09999999997671694,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7.2999999999883585,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.800000000046566,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 643.6999999999534,
+              "heapDeltaBytes": -451936,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 141.80000000004657,
+              "heapDeltaBytes": 289944,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.09999999997671694
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7.2999999999883585
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.800000000046566
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 643.6999999999534
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 141.80000000004657
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-02-A",
+    "arm": "A",
+    "kind": "control",
+    "pair": 2,
+    "totalImportMs": 825.5,
+    "workerImportMs": 801.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 194,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 435,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 637,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 194,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 435,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 637,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.899999999965075,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 658.2000000000116,
+              "heapDeltaBytes": -450144,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 140,
+              "heapDeltaBytes": 292392,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.899999999965075
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 658.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 140
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-02-C",
+    "arm": "C",
+    "kind": "control",
+    "pair": 2,
+    "totalImportMs": 816.4000000000233,
+    "workerImportMs": 790.1000000000349,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 198,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 420,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 626,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 198,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 420,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 626,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7.399999999965075,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 646.7000000000116,
+              "heapDeltaBytes": -455793,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 138.79999999998836,
+              "heapDeltaBytes": 293196,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7.399999999965075
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 646.7000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 138.79999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-07-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 7,
+    "totalImportMs": 812.5,
+    "workerImportMs": 788,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 198,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 423,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 628,
+          "otherMs": 13,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 198,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 423,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 628,
+        "otherMs": 13
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.09999999997671694,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7.100000000034925,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.599999999976717,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 643.5999999999767,
+              "heapDeltaBytes": -432548,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 139.80000000004657,
+              "heapDeltaBytes": 240312,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.09999999997671694
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7.100000000034925
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.599999999976717
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 643.5999999999767
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 139.80000000004657
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-07-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 7,
+    "totalImportMs": 808.4000000000233,
+    "workerImportMs": 784.3000000000466,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 186,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 424,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 618,
+          "otherMs": 16,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 186,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 424,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 618,
+        "otherMs": 16
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.19999999995343387,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.800000000046566,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 636.6999999999534,
+              "heapDeltaBytes": -447112,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 142.70000000001164,
+              "heapDeltaBytes": 292820,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.19999999995343387
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.800000000046566
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 636.6999999999534
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 142.70000000001164
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-08-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 8,
+    "totalImportMs": 807.1000000000349,
+    "workerImportMs": 785.9000000000233,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 185,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 422,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 615,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 185,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 422,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 615,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.599999999976717,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 637.2000000000116,
+              "heapDeltaBytes": -507462,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 144.29999999998836,
+              "heapDeltaBytes": 291612,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.599999999976717
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 637.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 144.29999999998836
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-08-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 8,
+    "totalImportMs": 804.0999999999767,
+    "workerImportMs": 780.3000000000466,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 180,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 430,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 619,
+          "otherMs": 11,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 180,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 430,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 619,
+        "otherMs": 11
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.19999999995343387,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 633,
+              "heapDeltaBytes": -430192,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 141.20000000001164,
+              "heapDeltaBytes": 304604,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.19999999995343387
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 633
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 141.20000000001164
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-09-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 9,
+    "totalImportMs": 807.7000000000116,
+    "workerImportMs": 783.3000000000466,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 216,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 393,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 617,
+          "otherMs": 9,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 216,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 393,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 617,
+        "otherMs": 9
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 9.400000000023283,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 629.2999999999884,
+              "heapDeltaBytes": -469856,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 147.70000000001164,
+              "heapDeltaBytes": 303876,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.400000000023283
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 629.2999999999884
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 147.70000000001164
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-09-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 9,
+    "totalImportMs": 818.4000000000233,
+    "workerImportMs": 795.7999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 200,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 419,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 627,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 200,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 419,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 627,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 647.5999999999767,
+              "heapDeltaBytes": -491869,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 142.90000000002328,
+              "heapDeltaBytes": 294104,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 647.5999999999767
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 142.90000000002328
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-03-C",
+    "arm": "C",
+    "kind": "control",
+    "pair": 3,
+    "totalImportMs": 808.5,
+    "workerImportMs": 784.9000000000233,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 212,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 401,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 621,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 212,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 401,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 621,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.09999999997671694,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 11.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 643.3999999999651,
+              "heapDeltaBytes": -445872,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 136,
+              "heapDeltaBytes": 292464,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.09999999997671694
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 11.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 643.3999999999651
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 136
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-03-A",
+    "arm": "A",
+    "kind": "control",
+    "pair": 3,
+    "totalImportMs": 817.8000000000466,
+    "workerImportMs": 794.4000000000233,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 197,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 419,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 625,
+          "otherMs": 18,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 197,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 419,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 625,
+        "otherMs": 18
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.7000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 652.2999999999884,
+              "heapDeltaBytes": -436220,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 137.20000000001164,
+              "heapDeltaBytes": 293828,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.7000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 652.2999999999884
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 137.20000000001164
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-10-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 10,
+    "totalImportMs": 811.3999999999651,
+    "workerImportMs": 785.5,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 194,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 419,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 620,
+          "otherMs": 20,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 194,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 419,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 620,
+        "otherMs": 20
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.900000000023283,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 642.1999999999534,
+              "heapDeltaBytes": -438400,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 141,
+              "heapDeltaBytes": 291652,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.900000000023283
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 642.1999999999534
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 141
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-10-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 10,
+    "totalImportMs": 819,
+    "workerImportMs": 796,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 196,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 432,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 637,
+          "otherMs": 12,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 196,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 432,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 637,
+        "otherMs": 12
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1000000000349246,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.7000000000116415,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 12,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 650.8999999999651,
+              "heapDeltaBytes": -446356,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 139.10000000003492,
+              "heapDeltaBytes": 305508,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1000000000349246
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.7000000000116415
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 12
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 650.8999999999651
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 139.10000000003492
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-11-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 11,
+    "totalImportMs": 845.5,
+    "workerImportMs": 821.5,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 194,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 453,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 656,
+          "otherMs": 10,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 194,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 453,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 656,
+        "otherMs": 10
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.09999999997671694,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.599999999976717,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 675.4000000000233,
+              "heapDeltaBytes": -420396,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 142.59999999997672,
+              "heapDeltaBytes": 305796,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.09999999997671694
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.599999999976717
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 675.4000000000233
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 142.59999999997672
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-11-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 11,
+    "totalImportMs": 852.8000000000466,
+    "workerImportMs": 827.7999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 212,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 417,
+          "bulkAddTagsMetaMs": 7,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 636,
+          "otherMs": 19,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 212,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 417,
+        "bulkAddTagsMetaMs": 7,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 636,
+        "otherMs": 19
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.900000000023283,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.199999999953434,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 660.4000000000233,
+              "heapDeltaBytes": -446836,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 163,
+              "heapDeltaBytes": 318248,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.900000000023283
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.199999999953434
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 660.4000000000233
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 163
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-12-A",
+    "arm": "A",
+    "kind": "candidate",
+    "pair": 12,
+    "totalImportMs": 830,
+    "workerImportMs": 804.2999999999884,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 188,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 440,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 636,
+          "otherMs": 19,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 188,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 440,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 636,
+        "otherMs": 19
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.2999999999883585,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 12.299999999988358,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 657.2000000000116,
+              "heapDeltaBytes": -437140,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 141.59999999997672,
+              "heapDeltaBytes": 292460,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.2999999999883585
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 12.299999999988358
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 657.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 141.59999999997672
+        }
+      ]
+    }
+  },
+  {
+    "id": "pair-12-B",
+    "arm": "B",
+    "kind": "candidate",
+    "pair": 12,
+    "totalImportMs": 813.8999999999651,
+    "workerImportMs": 790,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 198,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 422,
+          "bulkAddTagsMetaMs": 9,
+          "mediaResolveMs": 0,
+          "mediaWriteMs": 0,
+          "accountedMs": 629,
+          "otherMs": 11,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 198,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 422,
+        "bulkAddTagsMetaMs": 9,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 629,
+        "otherMs": 11
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 642.5999999999767,
+              "heapDeltaBytes": -440396,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 144,
+              "heapDeltaBytes": 304340,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 642.5999999999767
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 144
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-04-A",
+    "arm": "A",
+    "kind": "control",
+    "pair": 4,
+    "totalImportMs": 830.0999999999767,
+    "workerImportMs": 804,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 200,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 431,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 640,
+          "otherMs": 17,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 200,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 431,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 640,
+        "otherMs": 17
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.20000000001164153,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 6.099999999976717,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 10.5,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 658,
+              "heapDeltaBytes": -440924,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 142.09999999997672,
+              "heapDeltaBytes": 304312,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.20000000001164153
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 6.099999999976717
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 10.5
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 658
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 142.09999999997672
+        }
+      ]
+    }
+  },
+  {
+    "id": "control-04-C",
+    "arm": "C",
+    "kind": "control",
+    "pair": 4,
+    "totalImportMs": 820.4000000000233,
+    "workerImportMs": 796.8999999999651,
+    "step4": {
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-11-22]",
+          "termParseMs": 200,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 424,
+          "bulkAddTagsMetaMs": 8,
+          "mediaResolveMs": 1,
+          "mediaWriteMs": 0,
+          "accountedMs": 633,
+          "otherMs": 17,
+          "parserWorkerCount": 3,
+          "parserPipelineGroupsPerWorker": 4,
+          "parserGroupCount": 12
+        }
+      ],
+      "aggregate": {
+        "termParseMs": 200,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 424,
+        "bulkAddTagsMetaMs": 8,
+        "mediaResolveMs": 1,
+        "mediaWriteMs": 0,
+        "accountedMs": 633,
+        "otherMs": 17
+      }
+    },
+    "steps": {
+      "dictionaries": [
+        {
+          "dictionaryIndex": 1,
+          "steps": [
+            {
+              "stepDisplay": "Step 1 of 5",
+              "label": "Starting import state",
+              "elapsedMs": 0.1000000000349246,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 2 of 5",
+              "label": "Initializing import",
+              "elapsedMs": 7,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 3 of 5",
+              "label": "Loading dictionary",
+              "elapsedMs": 9.299999999988358,
+              "heapDeltaBytes": 0,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 4 of 5",
+              "label": "Importing data",
+              "elapsedMs": 658.2000000000116,
+              "heapDeltaBytes": -422053,
+              "finalOpenStep": false
+            },
+            {
+              "stepDisplay": "Step 5 of 5",
+              "label": "Finalizing import",
+              "elapsedMs": 135,
+              "heapDeltaBytes": 293680,
+              "finalOpenStep": true
+            }
+          ]
+        }
+      ],
+      "aggregateByStep": [
+        {
+          "stepDisplay": "Step 1 of 5",
+          "count": 1,
+          "totalElapsedMs": 0.1000000000349246
+        },
+        {
+          "stepDisplay": "Step 2 of 5",
+          "count": 1,
+          "totalElapsedMs": 7
+        },
+        {
+          "stepDisplay": "Step 3 of 5",
+          "count": 1,
+          "totalElapsedMs": 9.299999999988358
+        },
+        {
+          "stepDisplay": "Step 4 of 5",
+          "count": 1,
+          "totalElapsedMs": 658.2000000000116
+        },
+        {
+          "stepDisplay": "Step 5 of 5",
+          "count": 1,
+          "totalElapsedMs": 135
+        }
+      ]
+    }
+  }
+]

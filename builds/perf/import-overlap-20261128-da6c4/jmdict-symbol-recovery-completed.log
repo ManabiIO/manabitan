@@ -1,0 +1,377 @@
+﻿2026-11-28T09:46:02.9937701Z Current runner version: '2.338.2'
+2026-11-28T09:46:02.9962627Z ##[group]Runner Image Provisioner
+2026-11-28T09:46:02.9963532Z Hosted Compute Agent
+2026-11-28T09:46:02.9964248Z Version: 20261111.635
+2026-11-28T09:46:02.9964912Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T09:46:02.9966103Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T09:46:02.9967225Z Worker ID: {e9bde670-ae4a-42a5-a661-2a36d4eb94d6}
+2026-11-28T09:46:02.9968032Z Region: westus
+2026-11-28T09:46:02.9968671Z Cloud: Azure
+2026-11-28T09:46:02.9969235Z ##[endgroup]
+2026-11-28T09:46:02.9971044Z ##[group]Operating System
+2026-11-28T09:46:02.9971890Z Ubuntu
+2026-11-28T09:46:02.9972434Z 26.04.1
+2026-11-28T09:46:02.9973020Z LTS
+2026-11-28T09:46:02.9973555Z ##[endgroup]
+2026-11-28T09:46:02.9974147Z ##[group]Runner Image
+2026-11-28T09:46:02.9974851Z Image: ubuntu-26.04
+2026-11-28T09:46:02.9975443Z Version: 20261122.9.1
+2026-11-28T09:46:02.9977052Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T09:46:02.9978890Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T09:46:02.9980021Z ##[endgroup]
+2026-11-28T09:46:02.9981267Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T09:46:02.9983469Z Actions: read
+2026-11-28T09:46:02.9984090Z Contents: read
+2026-11-28T09:46:02.9984760Z Metadata: read
+2026-11-28T09:46:02.9985343Z ##[endgroup]
+2026-11-28T09:46:02.9987863Z Secret source: Actions
+2026-11-28T09:46:02.9988922Z Cache mode: write
+2026-11-28T09:46:02.9989657Z Prepare workflow directory
+2026-11-28T09:46:03.0412959Z Prepare all required actions
+2026-11-28T09:46:03.0460956Z Getting action download info
+2026-11-28T09:46:03.3857190Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T09:46:03.5141813Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-28T09:46:03.5847522Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-28T09:46:03.7783855Z Complete job name: Verify executable identity and recover parser names
+2026-11-28T09:46:03.8567954Z ##[group]Run set -euo pipefail
+2026-11-28T09:46:03.8568662Z [36;1mset -euo pipefail[0m
+2026-11-28T09:46:03.8569250Z [36;1m[[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]][0m
+2026-11-28T09:46:03.8569977Z [36;1m[[ "$GITHUB_REPOSITORY" == "ManabiIO/manabitan" ]][0m
+2026-11-28T09:46:03.8570684Z [36;1mmkdir symbol-controls[0m
+2026-11-28T09:46:03.8571367Z [36;1mfor name in recover.py test_recover.py plan.json; do[0m
+2026-11-28T09:46:03.8572388Z [36;1m  curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \[0m
+2026-11-28T09:46:03.8573822Z [36;1m    "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/dev/perf/jmdict-trace-symbols-da6c4/$name" \[0m
+2026-11-28T09:46:03.8575001Z [36;1m    --output "symbol-controls/$name"[0m
+2026-11-28T09:46:03.8575643Z [36;1mdone[0m
+2026-11-28T09:46:03.8576387Z [36;1mcurl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \[0m
+2026-11-28T09:46:03.8578090Z [36;1m  "https://raw.githubusercontent.com/ManabiIO/manabitan/$GITHUB_SHA/.github/workflows/jmdict-trace-symbols-da6c4.yml" \[0m
+2026-11-28T09:46:03.8579338Z [36;1m  --output symbol-controls/workflow.yml[0m
+2026-11-28T09:46:03.8580276Z [36;1mcurl --proto '=https' --tlsv1.2 --fail --silent --show-error --location --retry 0 \[0m
+2026-11-28T09:46:03.8582069Z [36;1m  "https://raw.githubusercontent.com/ManabiIO/manabitan/a4fb865b8d926053d661b3a390aed28352cc8f27/dev/perf/jmdict-completed-trace-analysis-da6c4/analyze.py" \[0m
+2026-11-28T09:46:03.8583658Z [36;1m  --output symbol-controls/analysis_helpers.py[0m
+2026-11-28T09:46:03.8584363Z [36;1msha256sum --check <<'SHA256'[0m
+2026-11-28T09:46:03.8585409Z [36;1m60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a  symbol-controls/recover.py[0m
+2026-11-28T09:46:03.8587325Z [36;1mc35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c  symbol-controls/test_recover.py[0m
+2026-11-28T09:46:03.8588771Z [36;1mb9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527  symbol-controls/plan.json[0m
+2026-11-28T09:46:03.8590230Z [36;1ma73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b  symbol-controls/analysis_helpers.py[0m
+2026-11-28T09:46:03.8591282Z [36;1mSHA256[0m
+2026-11-28T09:46:03.8629318Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:46:03.8630339Z ##[endgroup]
+2026-11-28T09:46:04.6419708Z symbol-controls/recover.py: OK
+2026-11-28T09:46:04.6420995Z symbol-controls/test_recover.py: OK
+2026-11-28T09:46:04.6422184Z symbol-controls/plan.json: OK
+2026-11-28T09:46:04.6423091Z symbol-controls/analysis_helpers.py: OK
+2026-11-28T09:46:04.6538587Z ##[group]Run set -euo pipefail
+2026-11-28T09:46:04.6539305Z [36;1mset -euo pipefail[0m
+2026-11-28T09:46:04.6540396Z [36;1mpython3 -m unittest discover -s symbol-controls -p test_recover.py -v 2>&1 | tee symbol-tests.log[0m
+2026-11-28T09:46:04.6575943Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:46:04.6576768Z ##[endgroup]
+2026-11-28T09:46:04.7783505Z test_any_code_byte_change_forbids_symbol_attribution (test_recover.ParityTests.test_any_code_byte_change_forbids_symbol_attribution) ... ok
+2026-11-28T09:46:04.7788648Z test_duplicate_out_of_range_or_missing_names_are_rejected (test_recover.ParityTests.test_duplicate_out_of_range_or_missing_names_are_rejected) ... ok
+2026-11-28T09:46:04.7792697Z test_noncustom_section_reordering_is_not_treated_as_equal (test_recover.ParityTests.test_noncustom_section_reordering_is_not_treated_as_equal) ... ok
+2026-11-28T09:46:04.7796591Z test_only_custom_names_change_and_indices_remain_exact (test_recover.ParityTests.test_only_custom_names_change_and_indices_remain_exact) ... ok
+2026-11-28T09:46:04.7800844Z test_sample_counts_and_weights_are_only_relabelled_after_identity (test_recover.ParityTests.test_sample_counts_and_weights_are_only_relabelled_after_identity) ... ok
+2026-11-28T09:46:04.7805107Z test_truncated_sections_and_wrong_magic_are_rejected (test_recover.ParityTests.test_truncated_sections_and_wrong_magic_are_rejected) ... ok
+2026-11-28T09:46:04.7809338Z test_unrelated_custom_section_does_not_change_code_identity (test_recover.ParityTests.test_unrelated_custom_section_does_not_change_code_identity) ... ok
+2026-11-28T09:46:04.7811587Z 
+2026-11-28T09:46:04.7812314Z ----------------------------------------------------------------------
+2026-11-28T09:46:04.7813785Z Ran 7 tests in 0.001s
+2026-11-28T09:46:04.7814309Z 
+2026-11-28T09:46:04.7814703Z OK
+2026-11-28T09:46:04.8107292Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T09:46:04.8108261Z with:
+2026-11-28T09:46:04.8108848Z   ref: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:46:04.8109548Z   path: product
+2026-11-28T09:46:04.8110046Z   fetch-depth: 1
+2026-11-28T09:46:04.8110602Z   persist-credentials: false
+2026-11-28T09:46:04.8111215Z   sparse-checkout-cone-mode: false
+2026-11-28T09:46:04.8112827Z   sparse-checkout: /package.json
+/dev/bin/build-dictionary-wasm.js
+/dev/dictionary-wasm.js
+/dev/json.js
+/dev/data/dictionary-wasm/
+/ext/js/core/json.js
+/ext/js/dictionary/wasm/
+
+2026-11-28T09:46:04.8114505Z   repository: ManabiIO/manabitan
+2026-11-28T09:46:04.8119427Z   token: ***
+2026-11-28T09:46:04.8119946Z   ssh-strict: true
+2026-11-28T09:46:04.8120482Z   ssh-user: git
+2026-11-28T09:46:04.8120977Z   clean: true
+2026-11-28T09:46:04.8121475Z   fetch-tags: false
+2026-11-28T09:46:04.8122008Z   show-progress: true
+2026-11-28T09:46:04.8122550Z   lfs: false
+2026-11-28T09:46:04.8123079Z   submodules: false
+2026-11-28T09:46:04.8123613Z   set-safe-directory: true
+2026-11-28T09:46:04.8124209Z   allow-unsafe-pr-checkout: false
+2026-11-28T09:46:04.8124827Z ##[endgroup]
+2026-11-28T09:46:05.1511863Z Syncing repository: ManabiIO/manabitan
+2026-11-28T09:46:05.1514851Z ##[group]Getting Git version info
+2026-11-28T09:46:05.1517137Z Working directory is '/home/runner/work/manabitan/manabitan/product'
+2026-11-28T09:46:05.1519574Z [command]/usr/bin/git version
+2026-11-28T09:46:05.1520631Z git version 2.56.1
+2026-11-28T09:46:05.1524108Z ##[endgroup]
+2026-11-28T09:46:05.1531213Z Temporarily overriding HOME='/home/runner/work/_temp/feeebc85-e7b0-47a5-91bd-8dbc3a67c805' before making global git config changes
+2026-11-28T09:46:05.1534980Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T09:46:05.1538614Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/product
+2026-11-28T09:46:05.1546108Z ##[group]Determining repository object format
+2026-11-28T09:46:05.1549544Z ##[endgroup]
+2026-11-28T09:46:05.1551815Z ##[group]Initializing the repository
+2026-11-28T09:46:05.1554973Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/product
+2026-11-28T09:46:05.1708637Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T09:46:05.1712314Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T09:46:05.1715827Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T09:46:05.1718811Z hint: call:
+2026-11-28T09:46:05.1720407Z hint:
+2026-11-28T09:46:05.1722464Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T09:46:05.1724968Z hint:
+2026-11-28T09:46:05.1728393Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T09:46:05.1732220Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T09:46:05.1735181Z hint:
+2026-11-28T09:46:05.1737043Z hint: 	git branch -m <name>
+2026-11-28T09:46:05.1738891Z hint:
+2026-11-28T09:46:05.1741432Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T09:46:05.1745685Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/product/.git/
+2026-11-28T09:46:05.1759820Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T09:46:05.1832603Z ##[endgroup]
+2026-11-28T09:46:05.1835818Z ##[group]Disabling automatic garbage collection
+2026-11-28T09:46:05.1838391Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T09:46:05.1868054Z ##[endgroup]
+2026-11-28T09:46:05.1878728Z ##[group]Setting up auth
+2026-11-28T09:46:05.1880292Z Removing SSH command configuration
+2026-11-28T09:46:05.1887525Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T09:46:05.2591136Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T09:46:05.2599918Z Removing HTTP extra header
+2026-11-28T09:46:05.2603174Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T09:46:05.2638055Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T09:46:05.2924641Z Removing includeIf entries pointing to credentials config files
+2026-11-28T09:46:05.2930980Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T09:46:05.2972894Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T09:46:05.3258680Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T09:46:05.3300300Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/product/.git.path /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:05.3336402Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/product/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:05.3373532Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/product/.git.path /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:05.3409918Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/product/.git/worktrees/*.path /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:05.3439671Z ##[endgroup]
+2026-11-28T09:46:05.3441733Z ##[group]Fetching the repository
+2026-11-28T09:46:05.3448731Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:46:05.7536459Z From https://github.com/ManabiIO/manabitan
+2026-11-28T09:46:05.7539153Z  * branch            dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16 -> FETCH_HEAD
+2026-11-28T09:46:05.7551170Z [command]/usr/bin/git rev-parse --verify --quiet dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16^{object}
+2026-11-28T09:46:05.7580758Z dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:46:05.7588017Z ##[endgroup]
+2026-11-28T09:46:05.7590749Z ##[group]Determining the checkout info
+2026-11-28T09:46:05.7593293Z ##[endgroup]
+2026-11-28T09:46:05.7595042Z ##[group]Setting up sparse checkout
+2026-11-28T09:46:05.7596620Z [command]/usr/bin/git config core.sparseCheckout true
+2026-11-28T09:46:05.7627688Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+2026-11-28T09:46:05.7650432Z .git/info/sparse-checkout
+2026-11-28T09:46:05.7658739Z ##[endgroup]
+2026-11-28T09:46:05.7661126Z ##[group]Checking out the ref
+2026-11-28T09:46:05.7664154Z [command]/usr/bin/git checkout --progress --force dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:46:06.3294600Z Note: switching to 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'.
+2026-11-28T09:46:06.3295571Z 
+2026-11-28T09:46:06.3296027Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T09:46:06.3297351Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T09:46:06.3298359Z state without impacting any branches by switching back to a branch.
+2026-11-28T09:46:06.3298928Z 
+2026-11-28T09:46:06.3299362Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T09:46:06.3300333Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T09:46:06.3300879Z 
+2026-11-28T09:46:06.3301120Z   git switch -c <new-branch-name>
+2026-11-28T09:46:06.3301473Z 
+2026-11-28T09:46:06.3302011Z Or undo this operation with:
+2026-11-28T09:46:06.3302372Z 
+2026-11-28T09:46:06.3302552Z   git switch -
+2026-11-28T09:46:06.3302804Z 
+2026-11-28T09:46:06.3303275Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T09:46:06.3303927Z 
+2026-11-28T09:46:06.3304558Z HEAD is now at dcfc02a Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127
+2026-11-28T09:46:06.3312729Z ##[endgroup]
+2026-11-28T09:46:06.3370969Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T09:46:06.3398112Z dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+2026-11-28T09:46:06.3408322Z ##[group]Removing auth
+2026-11-28T09:46:06.3409055Z Removing SSH command configuration
+2026-11-28T09:46:06.3412021Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T09:46:06.3448885Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T09:46:06.3753644Z Removing HTTP extra header
+2026-11-28T09:46:06.3761129Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T09:46:06.3805246Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T09:46:06.4088790Z Removing includeIf entries pointing to credentials config files
+2026-11-28T09:46:06.4093173Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T09:46:06.4120372Z includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git.path
+2026-11-28T09:46:06.4121823Z includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git/worktrees/*.path
+2026-11-28T09:46:06.4123074Z includeif.gitdir:/github/workspace/product/.git.path
+2026-11-28T09:46:06.4124094Z includeif.gitdir:/github/workspace/product/.git/worktrees/*.path
+2026-11-28T09:46:06.4145331Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git.path
+2026-11-28T09:46:06.4164510Z /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4176040Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git.path /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4214714Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git/worktrees/*.path
+2026-11-28T09:46:06.4239024Z /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4251608Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/product/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4288525Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/product/.git.path
+2026-11-28T09:46:06.4315261Z /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4334659Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/product/.git.path /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4373588Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/product/.git/worktrees/*.path
+2026-11-28T09:46:06.4397872Z /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4405741Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/product/.git/worktrees/*.path /github/runner_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config
+2026-11-28T09:46:06.4442075Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T09:46:06.4718850Z Removing credentials config '/home/runner/work/_temp/git-credentials-e4c6a38b-db0a-492f-ac21-f301d51ff2c7.config'
+2026-11-28T09:46:06.4730106Z ##[endgroup]
+2026-11-28T09:46:06.4950567Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-28T09:46:06.4951039Z with:
+2026-11-28T09:46:06.4951258Z   node-version: 22.22.0
+2026-11-28T09:46:06.4951501Z   always-auth: false
+2026-11-28T09:46:06.4951732Z   check-latest: false
+2026-11-28T09:46:06.4954301Z   token: ***
+2026-11-28T09:46:06.4954523Z ##[endgroup]
+2026-11-28T09:46:06.6475532Z Attempting to download 22.22.0...
+2026-11-28T09:46:06.6647726Z (node:2502) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:46:06.6649801Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:46:07.3877282Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-28T09:46:07.8968454Z Extracting ...
+2026-11-28T09:46:07.9108787Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/2e215082-2ea5-4581-a848-f29ba92f6523 -f /home/runner/work/_temp/c5bcfc76-e902-4e6c-ab8e-711a21cfa7cd
+2026-11-28T09:46:08.7211550Z Adding to the cache ...
+2026-11-28T09:46:10.5850783Z ##[group]Environment details
+2026-11-28T09:46:10.8342629Z node: v22.22.0
+2026-11-28T09:46:10.8343059Z npm: 10.9.4
+2026-11-28T09:46:10.8343407Z yarn: 1.22.22
+2026-11-28T09:46:10.8343955Z ##[endgroup]
+2026-11-28T09:46:10.8527215Z ##[group]Run set -euo pipefail
+2026-11-28T09:46:10.8527631Z [36;1mset -euo pipefail[0m
+2026-11-28T09:46:10.8527958Z [36;1msudo apt-get update[0m
+2026-11-28T09:46:10.8528408Z [36;1msudo apt-get install -y --no-install-recommends clang-21 lld-21[0m
+2026-11-28T09:46:10.8566669Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:46:10.8567413Z ##[endgroup]
+2026-11-28T09:46:10.9419883Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-28T09:46:10.9637561Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-28T09:46:10.9945292Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-28T09:46:10.9974821Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-28T09:46:11.0007959Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-28T09:46:11.0028366Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-28T09:46:11.0143788Z Get:7 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [178 kB]
+2026-11-28T09:46:11.0353164Z Get:8 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [192 kB]
+2026-11-28T09:46:11.0486103Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [928 kB]
+2026-11-28T09:46:11.0557709Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [205 kB]
+2026-11-28T09:46:11.0640163Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [402 kB]
+2026-11-28T09:46:11.0656546Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [127 kB]
+2026-11-28T09:46:11.0675233Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-28T09:46:11.0721629Z Get:14 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-28T09:46:11.0817857Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [765 kB]
+2026-11-28T09:46:11.0864766Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [165 kB]
+2026-11-28T09:46:11.0878540Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [229 kB]
+2026-11-28T09:46:11.0905821Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [74.4 kB]
+2026-11-28T09:46:11.1339417Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-28T09:46:11.1388535Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-28T09:46:14.7016709Z Fetched 5199 kB in 0s (11.5 MB/s)
+2026-11-28T09:46:15.4029889Z Reading package lists...
+2026-11-28T09:46:15.4402067Z Reading package lists...
+2026-11-28T09:46:15.6245591Z Building dependency tree...
+2026-11-28T09:46:15.6254118Z Reading state information...
+2026-11-28T09:46:15.6586033Z clang-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T09:46:15.6587016Z lld-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T09:46:15.7147682Z Solving dependencies...
+2026-11-28T09:46:15.8304280Z 0 upgraded, 0 newly installed, 0 to remove and 38 not upgraded.
+2026-11-28T09:46:15.8373945Z ##[group]Run set -euo pipefail
+2026-11-28T09:46:15.8374320Z [36;1mset -euo pipefail[0m
+2026-11-28T09:46:15.8374664Z [36;1mpython3 symbol-controls/recover.py \[0m
+2026-11-28T09:46:15.8375131Z [36;1m  --product product --plan symbol-controls/plan.json \[0m
+2026-11-28T09:46:15.8375645Z [36;1m  --output symbol-output 2>&1 | tee symbol-recovery.log[0m
+2026-11-28T09:46:15.8409409Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:46:15.8409813Z env:
+2026-11-28T09:46:15.8412945Z   GITHUB_TOKEN: ***
+2026-11-28T09:46:15.8413219Z ##[endgroup]
+2026-11-28T09:46:28.3594422Z EXACT_FUNCTION_NAMES {"0":"__wasm_init_memory","1":"inflate_and_join_term_banks","2":"crc32_bytes","3":"inflate_zip_media_batch","4":"verify_term_bank_source_crcs","5":"crc32_update_gap","6":"wasm_reset_heap","7":"wasm_alloc","8":"wasm_get_last_parse_capacity","9":"wasm_get_last_content_capacity","10":"project_single_glossary_image_path","11":"project_glossary_image_value","12":"parse_value_span","13":"parse_composite_span_impl","14":"json_string_matches_ascii_escaped","15":"parse_term_bank","16":"parse_term_bank_impl","17":"next_term_bank","18":"parse_row_single_pass","19":"next_term_row","20":"parse_term_bank_with_media_hints","21":"encode_term_content","22":"encode_term_content_impl","23":"write_normalized_glossary_value","24":"hash_content_xxh32_pair","25":"encode_term_content_no_hash","26":"encode_term_content_token_binary","27":"encode_term_content_token_binary_row","28":"build_term_string_plan","29":"decode_escaped_key","30":"hash_content_xxh32","31":"copy_valid_utf8","32":"content_bytes_equal","33":"key_hex4","34":"encode_term_lookup_index","35":"encode_term_content_token_binary_dedup","36":"parse_and_encode_term_bank_token_binary_dedup","37":"raw_term_content_hash","38":"raw_term_content_tokens_equal","39":"raw_term_content_quick_signature","40":"reuse_validated_glossary","41":"is_valid_json_number","42":"next_format3_field","43":"scan_scalar_span","44":"parse_compact_glossary_list","45":"parse_value_span_with_glossary_hints","46":"compact_term_lookup_keys","47":"parse_scalar_span","48":"is_media_marker_at","49":"libdeflate_deflate_decompress_ex","50":"build_decode_table","51":"term_bank_inflate"}
+2026-11-28T09:46:28.3609151Z EXACT_PARSER_SAMPLE {"functionIndex":36,"recoveredName":"parse_and_encode_term_bank_token_binary_dedup","samples":1248,"adjacentWallUs":330178,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":50453,"function":"wasm-function[36]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3619024Z EXACT_PARSER_SAMPLE {"functionIndex":13,"recoveredName":"parse_composite_span_impl","samples":694,"adjacentWallUs":163593,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":17821,"function":"wasm-function[13]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3627257Z EXACT_PARSER_SAMPLE {"functionIndex":49,"recoveredName":"libdeflate_deflate_decompress_ex","samples":631,"adjacentWallUs":228123,"nearestExportedAncestor":{"exportNames":["inflate_and_join_term_banks"],"functionIndex":1},"nearestJsAncestor":{"column":59,"function":"inflateCompressedTermBankSourcesWasm","functionDeclarationSourceLine":"export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {","line":228,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":61667,"function":"wasm-function[49]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3633956Z EXACT_PARSER_SAMPLE {"functionIndex":2,"recoveredName":"crc32_bytes","samples":535,"adjacentWallUs":197903,"nearestExportedAncestor":{"exportNames":["inflate_and_join_term_banks"],"functionIndex":1},"nearestJsAncestor":{"column":59,"function":"inflateCompressedTermBankSourcesWasm","functionDeclarationSourceLine":"export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {","line":228,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":1788,"function":"wasm-function[2]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3641200Z EXACT_PARSER_SAMPLE {"functionIndex":18,"recoveredName":"parse_row_single_pass","samples":428,"adjacentWallUs":119633,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":25970,"function":"wasm-function[18]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3649275Z EXACT_PARSER_SAMPLE {"functionIndex":27,"recoveredName":"encode_term_content_token_binary_row","samples":360,"adjacentWallUs":95870,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":37722,"function":"wasm-function[27]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3656644Z EXACT_PARSER_SAMPLE {"functionIndex":24,"recoveredName":"hash_content_xxh32_pair","samples":214,"adjacentWallUs":59654,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":36161,"function":"wasm-function[24]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3664128Z EXACT_PARSER_SAMPLE {"functionIndex":44,"recoveredName":"parse_compact_glossary_list","samples":112,"adjacentWallUs":22984,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":58463,"function":"wasm-function[44]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3671393Z EXACT_PARSER_SAMPLE {"functionIndex":41,"recoveredName":"is_valid_json_number","samples":70,"adjacentWallUs":16273,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":57718,"function":"wasm-function[41]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3677661Z EXACT_PARSER_SAMPLE {"functionIndex":34,"recoveredName":"encode_term_lookup_index","samples":68,"adjacentWallUs":19454,"nearestExportedAncestor":{"exportNames":["encode_term_lookup_index"],"functionIndex":34},"nearestJsAncestor":{"column":37,"function":"encodeNativeTermLookupIndex","functionDeclarationSourceLine":"function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {","line":1596,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":45484,"function":"wasm-function[34]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3683910Z EXACT_PARSER_SAMPLE {"functionIndex":42,"recoveredName":"next_format3_field","samples":63,"adjacentWallUs":17014,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":58126,"function":"wasm-function[42]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3691013Z EXACT_PARSER_SAMPLE {"functionIndex":40,"recoveredName":"reuse_validated_glossary","samples":59,"adjacentWallUs":16448,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":57016,"function":"wasm-function[40]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3698444Z EXACT_PARSER_SAMPLE {"functionIndex":38,"recoveredName":"raw_term_content_tokens_equal","samples":56,"adjacentWallUs":12574,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":55472,"function":"wasm-function[38]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3705594Z EXACT_PARSER_SAMPLE {"functionIndex":31,"recoveredName":"copy_valid_utf8","samples":51,"adjacentWallUs":11240,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":44559,"function":"wasm-function[31]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3712740Z EXACT_PARSER_SAMPLE {"functionIndex":30,"recoveredName":"hash_content_xxh32","samples":50,"adjacentWallUs":10788,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":44066,"function":"wasm-function[30]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3719885Z EXACT_PARSER_SAMPLE {"functionIndex":39,"recoveredName":"raw_term_content_quick_signature","samples":33,"adjacentWallUs":7717,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":56578,"function":"wasm-function[39]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3726356Z EXACT_PARSER_SAMPLE {"functionIndex":50,"recoveredName":"build_decode_table","samples":26,"adjacentWallUs":7997,"nearestExportedAncestor":{"exportNames":["inflate_and_join_term_banks"],"functionIndex":1},"nearestJsAncestor":{"column":59,"function":"inflateCompressedTermBankSourcesWasm","functionDeclarationSourceLine":"export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {","line":228,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":65582,"function":"wasm-function[50]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3735476Z EXACT_PARSER_SAMPLE {"functionIndex":43,"recoveredName":"scan_scalar_span","samples":9,"adjacentWallUs":1558,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":58308,"function":"wasm-function[43]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3742792Z EXACT_PARSER_SAMPLE {"functionIndex":19,"recoveredName":"next_term_row","samples":7,"adjacentWallUs":2265,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":32028,"function":"wasm-function[19]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3749490Z EXACT_PARSER_SAMPLE {"functionIndex":38,"recoveredName":"raw_term_content_tokens_equal","samples":4,"adjacentWallUs":808,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":55472,"function":"wasm-function[38]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3755739Z EXACT_PARSER_SAMPLE {"functionIndex":30,"recoveredName":"hash_content_xxh32","samples":4,"adjacentWallUs":734,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":44066,"function":"wasm-function[30]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3762614Z EXACT_PARSER_SAMPLE {"functionIndex":45,"recoveredName":"parse_value_span_with_glossary_hints","samples":4,"adjacentWallUs":685,"nearestExportedAncestor":{"exportNames":["parse_and_encode_term_bank_token_binary_dedup"],"functionIndex":36},"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":59868,"function":"wasm-function[45]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3769766Z EXACT_PARSER_SAMPLE {"functionIndex":31,"recoveredName":"copy_valid_utf8","samples":2,"adjacentWallUs":1505,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":44559,"function":"wasm-function[31]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3775508Z EXACT_PARSER_SAMPLE {"functionIndex":1,"recoveredName":"inflate_and_join_term_banks","samples":2,"adjacentWallUs":425,"nearestExportedAncestor":{"exportNames":["inflate_and_join_term_banks"],"functionIndex":1},"nearestJsAncestor":{"column":59,"function":"inflateCompressedTermBankSourcesWasm","functionDeclarationSourceLine":"export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {","line":228,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":988,"function":"wasm-function[1]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3781059Z EXACT_PARSER_SAMPLE {"functionIndex":51,"recoveredName":"term_bank_inflate","samples":1,"adjacentWallUs":168,"nearestExportedAncestor":{"exportNames":["inflate_and_join_term_banks"],"functionIndex":1},"nearestJsAncestor":{"column":59,"function":"inflateCompressedTermBankSourcesWasm","functionDeclarationSourceLine":"export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {","line":228,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":67415,"function":"wasm-function[51]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3786725Z EXACT_PARSER_SAMPLE {"functionIndex":39,"recoveredName":"raw_term_content_quick_signature","samples":1,"adjacentWallUs":167,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":56578,"function":"wasm-function[39]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3792878Z EXACT_PARSER_SAMPLE {"functionIndex":19,"recoveredName":"next_term_row","samples":1,"adjacentWallUs":157,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":49,"function":"parseTermBankWasmBuffersUnchecked","functionDeclarationSourceLine":"async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource =","line":868,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":32028,"function":"wasm-function[19]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3797882Z EXACT_PARSER_SAMPLE {"functionIndex":0,"recoveredName":"__wasm_init_memory","samples":1,"adjacentWallUs":107,"nearestExportedAncestor":null,"nearestJsAncestor":{"column":32,"function":"","functionDeclarationSourceLine":"return await wasmCache.get(async () => {","line":171,"sourceSha256":"31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca","url":"js/dictionary/term-bank-wasm-parser.js"},"originalLeaf":{"column":895,"function":"wasm-function[0]","line":1,"url":"wasm://wasm/00043732"}}
+2026-11-28T09:46:28.3832657Z EXACT_SYMBOL_RECOVERY_RECEIPT {"schemaVersion":1,"complete":true,"scope":"Recover names only after exact executable-section parity; no import or timing acquisition.","commands":[{"argv":["node","dev/bin/build-dictionary-wasm.js","--check"],"cwd":"/home/runner/work/manabitan/manabitan/product","log":"/home/runner/work/manabitan/manabitan/symbol-output/unchanged-stock-rebuild.log","exitCode":0},{"argv":["/usr/bin/clang-21","-fuse-ld=/usr/bin/wasm-ld-21","--target=wasm32-freestanding","-O3","-matomics","-mbulk-memory","-msimd128","-nostdlib","-Wl,--no-entry","-Wl,--shared-memory","-Wl,--max-memory=4294967296","-Wl,--export=wasm_reset_heap","-Wl,--export=wasm_alloc","-Wl,--export=wasm_get_last_parse_capacity","-Wl,--export=wasm_get_last_content_capacity","-Wl,--export=inflate_and_join_term_banks","-Wl,--export=verify_term_bank_source_crcs","-Wl,--export=inflate_zip_media_batch","-Wl,--export=project_single_glossary_image_path","-Wl,--export=parse_term_bank","-Wl,--export=parse_term_bank_with_media_hints","-Wl,--export=parse_and_encode_term_bank_token_binary_dedup","-Wl,--export=build_term_string_plan","-Wl,--export=encode_term_lookup_index","-Wl,--export=compact_term_lookup_keys","-Wl,--export=encode_term_content","-Wl,--export=encode_term_content_no_hash","-Wl,--export=encode_term_content_token_binary","-Wl,--export=encode_term_content_token_binary_dedup","-Wl,--strip-all","-o","/home/runner/work/manabitan/manabitan/symbol-output/reproduced-stripped.wasm","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"],"cwd":"/home/runner/work/manabitan/manabitan/product","log":"/home/runner/work/manabitan/manabitan/symbol-output/stripped-build.log","exitCode":0},{"argv":["/usr/bin/clang-21","-fuse-ld=/usr/bin/wasm-ld-21","--target=wasm32-freestanding","-O3","-matomics","-mbulk-memory","-msimd128","-nostdlib","-Wl,--no-entry","-Wl,--shared-memory","-Wl,--max-memory=4294967296","-Wl,--export=wasm_reset_heap","-Wl,--export=wasm_alloc","-Wl,--export=wasm_get_last_parse_capacity","-Wl,--export=wasm_get_last_content_capacity","-Wl,--export=inflate_and_join_term_banks","-Wl,--export=verify_term_bank_source_crcs","-Wl,--export=inflate_zip_media_batch","-Wl,--export=project_single_glossary_image_path","-Wl,--export=parse_term_bank","-Wl,--export=parse_term_bank_with_media_hints","-Wl,--export=parse_and_encode_term_bank_token_binary_dedup","-Wl,--export=build_term_string_plan","-Wl,--export=encode_term_lookup_index","-Wl,--export=compact_term_lookup_keys","-Wl,--export=encode_term_content","-Wl,--export=encode_term_content_no_hash","-Wl,--export=encode_term_content_token_binary","-Wl,--export=encode_term_content_token_binary_dedup","-o","/home/runner/work/manabitan/manabitan/symbol-output/recovered-names.wasm","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"],"cwd":"/home/runner/work/manabitan/manabitan/product","log":"/home/runner/work/manabitan/manabitan/symbol-output/names-build.log","exitCode":0}],"githubSha":"a7d2cfb7b1b64976350936b531e4adadf526b126","githubRunId":"46131812603","githubRunAttempt":"1","controls":{"recover.py":"60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a","test_recover.py":"c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c","plan.json":"b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527","workflow.yml":"d331190fe3f1676ca46333ee1b30ae97a2639dfd04ba25aeeb16ceeb512db46e","analysis_helpers.py":"a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b"},"toolchain":{"compiler":"/usr/bin/clang-21","linker":"/usr/bin/wasm-ld-21","compilerVersionOutput":"Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n","linkerVersionOutput":"Ubuntu LLD 21.1.8\n","node":"v22.22.0"},"parser":{"tracedSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695","reproducedStrippedSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695","namedSha256":"ef3fb2b007a82de68b7eb1ea8edc98d6cfc7b9574433c8f6f46cc14b49838453","onlyArgumentRemoved":"-Wl,--strip-all","noncustomParity":{"everyOrderedNoncustomSectionByteIdentical":true,"noncustomSectionCount":9,"functionCount":52,"noncustomSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695","sections":[{"id":1,"bytes":256,"sha256":"fbd8f6f0b188cdda3e885bacc21d5b202d815cf69e958c9e0d22144fb3e19f7b"},{"id":3,"bytes":55,"sha256":"f9b175dc10f5420eb6e09816c2e8edec43c385cee1602cd9230bc4fa43c87875"},{"id":5,"bytes":8,"sha256":"b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8"},{"id":6,"bytes":15,"sha256":"355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b"},{"id":7,"bytes":540,"sha256":"37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da"},{"id":8,"bytes":3,"sha256":"9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e"},{"id":12,"bytes":3,"sha256":"39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba"},{"id":10,"bytes":66653,"sha256":"27365295af3877a1e9c38d3fc2a7616244f2c33ab527d962f321336098132f41"},{"id":11,"bytes":1527,"sha256":"391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59"}],"namedCustomSections":[{"name":"name","bytes":1388,"sha256":"25744a7624c1bc00f3197a77e0bec066f421960ad301c6557ed8f85452c4205b"},{"name":"producers","bytes":58,"sha256":"706abcc157ba291bf625b52c8e3e7c203ebe927c89047892c14a224250018ca7"},{"name":"target_features","bytes":169,"sha256":"9cc544793e4a50dc85d2919dbfaeee021c8ccc096a4f0429c07c2e7d4c279499"}],"functionNameCount":52}},"analysisInputDownload":{"bytes":1599208,"sha256":"c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a"},"inputAnalysis":{"headSha":"a4fb865b8d926053d661b3a390aed28352cc8f27","runId":46130295082,"jobId":140933725716,"artifactId":15257800501,"artifactName":"jmdict-completed-trace-analysis-da6c4-46130295082-1","artifactBytes":1599208,"artifactSha256":"c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a","analysisSha256":"b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca","completedReceiptBlob":"93464af3e88bd89841d0a349cc04ee4fce15c477","fullJobLogBlob":"a280549674dfd898f9eafc8051944ac95733c2fb"},"symbolicatedRows":28,"limitations":["Names are accepted only after all executable/index/data/memory sections match the actual traced module byte for byte. A successful source rebuild alone is insufficient.","The name section identifies emitted functions, including surviving static helpers. It does not recover inlined source locations or per-instruction C line attribution.","Sample counts and adjacent wall weights come from the prior immutable diagnostic. They remain non-comparative wall/sample attribution, not CPU time, additive critical-path cost, or a speedup ceiling.","The original timed-import clock window remains unestablished; explicit benchmark readback/probes occur after trace stop by the source-bound harness.","No product runtime/package/source change, new import, or performance promotion is authorized by this analysis.","All seven new Python tests are authored but unexecuted locally during the executor outage; they run before hosted recovery. Frozen helper's13tests passed in46130295082. Current actionlint will run on publication."]}
+2026-11-28T09:46:28.3913388Z ##[group]Run python3 - <<'PY'
+2026-11-28T09:46:28.3913716Z [36;1mpython3 - <<'PY'[0m
+2026-11-28T09:46:28.3913965Z [36;1mimport json, pathlib[0m
+2026-11-28T09:46:28.3914326Z [36;1mpath = pathlib.Path('symbol-output/recovery-receipt.json')[0m
+2026-11-28T09:46:28.3914812Z [36;1mvalue = json.loads(path.read_text()) if path.exists() else {[0m
+2026-11-28T09:46:28.3915197Z [36;1m    'complete': False,[0m
+2026-11-28T09:46:28.3915475Z [36;1m    'missingReceipt': str(path),[0m
+2026-11-28T09:46:28.3915970Z [36;1m    'scope': 'Exact-code symbol recovery only; no import, browser or performance acquisition.'[0m
+2026-11-28T09:46:28.3916451Z [36;1m}[0m
+2026-11-28T09:46:28.3917071Z [36;1mprint('EXACT_SYMBOL_RECOVERY_TERMINAL ' + json.dumps(value, separators=(',', ':')))[0m
+2026-11-28T09:46:28.3917631Z [36;1mPY[0m
+2026-11-28T09:46:28.3950822Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T09:46:28.3951219Z ##[endgroup]
+2026-11-28T09:46:28.4298020Z EXACT_SYMBOL_RECOVERY_TERMINAL {"analysisInputDownload":{"bytes":1599208,"sha256":"c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a"},"commands":[{"argv":["node","dev/bin/build-dictionary-wasm.js","--check"],"cwd":"/home/runner/work/manabitan/manabitan/product","exitCode":0,"log":"/home/runner/work/manabitan/manabitan/symbol-output/unchanged-stock-rebuild.log"},{"argv":["/usr/bin/clang-21","-fuse-ld=/usr/bin/wasm-ld-21","--target=wasm32-freestanding","-O3","-matomics","-mbulk-memory","-msimd128","-nostdlib","-Wl,--no-entry","-Wl,--shared-memory","-Wl,--max-memory=4294967296","-Wl,--export=wasm_reset_heap","-Wl,--export=wasm_alloc","-Wl,--export=wasm_get_last_parse_capacity","-Wl,--export=wasm_get_last_content_capacity","-Wl,--export=inflate_and_join_term_banks","-Wl,--export=verify_term_bank_source_crcs","-Wl,--export=inflate_zip_media_batch","-Wl,--export=project_single_glossary_image_path","-Wl,--export=parse_term_bank","-Wl,--export=parse_term_bank_with_media_hints","-Wl,--export=parse_and_encode_term_bank_token_binary_dedup","-Wl,--export=build_term_string_plan","-Wl,--export=encode_term_lookup_index","-Wl,--export=compact_term_lookup_keys","-Wl,--export=encode_term_content","-Wl,--export=encode_term_content_no_hash","-Wl,--export=encode_term_content_token_binary","-Wl,--export=encode_term_content_token_binary_dedup","-Wl,--strip-all","-o","/home/runner/work/manabitan/manabitan/symbol-output/reproduced-stripped.wasm","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"],"cwd":"/home/runner/work/manabitan/manabitan/product","exitCode":0,"log":"/home/runner/work/manabitan/manabitan/symbol-output/stripped-build.log"},{"argv":["/usr/bin/clang-21","-fuse-ld=/usr/bin/wasm-ld-21","--target=wasm32-freestanding","-O3","-matomics","-mbulk-memory","-msimd128","-nostdlib","-Wl,--no-entry","-Wl,--shared-memory","-Wl,--max-memory=4294967296","-Wl,--export=wasm_reset_heap","-Wl,--export=wasm_alloc","-Wl,--export=wasm_get_last_parse_capacity","-Wl,--export=wasm_get_last_content_capacity","-Wl,--export=inflate_and_join_term_banks","-Wl,--export=verify_term_bank_source_crcs","-Wl,--export=inflate_zip_media_batch","-Wl,--export=project_single_glossary_image_path","-Wl,--export=parse_term_bank","-Wl,--export=parse_term_bank_with_media_hints","-Wl,--export=parse_and_encode_term_bank_token_binary_dedup","-Wl,--export=build_term_string_plan","-Wl,--export=encode_term_lookup_index","-Wl,--export=compact_term_lookup_keys","-Wl,--export=encode_term_content","-Wl,--export=encode_term_content_no_hash","-Wl,--export=encode_term_content_token_binary","-Wl,--export=encode_term_content_token_binary_dedup","-o","/home/runner/work/manabitan/manabitan/symbol-output/recovered-names.wasm","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-parser.c","/home/runner/work/manabitan/manabitan/product/ext/js/dictionary/wasm/term-bank-inflate.c"],"cwd":"/home/runner/work/manabitan/manabitan/product","exitCode":0,"log":"/home/runner/work/manabitan/manabitan/symbol-output/names-build.log"}],"complete":true,"controls":{"analysis_helpers.py":"a73beba2498c14ea7aee11f7448198a99de4f3b152216f4b5794897d94bb1a6b","plan.json":"b9c2d5657a19feb3cf0c734dfd70f28a7eb79b88e73bfc547688ab4f256d7527","recover.py":"60418c796795acceaaeba00539d83fcdd8e2dcc17a202aebf3b8d72de19f015a","test_recover.py":"c35194bcd9976b6c747d6642aa03c696dc9e357d67894255b5ace3c887ff997c","workflow.yml":"d331190fe3f1676ca46333ee1b30ae97a2639dfd04ba25aeeb16ceeb512db46e"},"githubRunAttempt":"1","githubRunId":"46131812603","githubSha":"a7d2cfb7b1b64976350936b531e4adadf526b126","inputAnalysis":{"analysisSha256":"b723590d7a7f712d254031ff880054d502317427dd3bb5a603ae136412c20dca","artifactBytes":1599208,"artifactId":15257800501,"artifactName":"jmdict-completed-trace-analysis-da6c4-46130295082-1","artifactSha256":"c1c3dcd7288634238c057a08b5cfe0ffb980dd8374034afa31399415608f375a","completedReceiptBlob":"93464af3e88bd89841d0a349cc04ee4fce15c477","fullJobLogBlob":"a280549674dfd898f9eafc8051944ac95733c2fb","headSha":"a4fb865b8d926053d661b3a390aed28352cc8f27","jobId":140933725716,"runId":46130295082},"limitations":["Names are accepted only after all executable/index/data/memory sections match the actual traced module byte for byte. A successful source rebuild alone is insufficient.","The name section identifies emitted functions, including surviving static helpers. It does not recover inlined source locations or per-instruction C line attribution.","Sample counts and adjacent wall weights come from the prior immutable diagnostic. They remain non-comparative wall/sample attribution, not CPU time, additive critical-path cost, or a speedup ceiling.","The original timed-import clock window remains unestablished; explicit benchmark readback/probes occur after trace stop by the source-bound harness.","No product runtime/package/source change, new import, or performance promotion is authorized by this analysis.","All seven new Python tests are authored but unexecuted locally during the executor outage; they run before hosted recovery. Frozen helper's13tests passed in46130295082. Current actionlint will run on publication."],"parser":{"namedSha256":"ef3fb2b007a82de68b7eb1ea8edc98d6cfc7b9574433c8f6f46cc14b49838453","noncustomParity":{"everyOrderedNoncustomSectionByteIdentical":true,"functionCount":52,"functionNameCount":52,"namedCustomSections":[{"bytes":1388,"name":"name","sha256":"25744a7624c1bc00f3197a77e0bec066f421960ad301c6557ed8f85452c4205b"},{"bytes":58,"name":"producers","sha256":"706abcc157ba291bf625b52c8e3e7c203ebe927c89047892c14a224250018ca7"},{"bytes":169,"name":"target_features","sha256":"9cc544793e4a50dc85d2919dbfaeee021c8ccc096a4f0429c07c2e7d4c279499"}],"noncustomSectionCount":9,"noncustomSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695","sections":[{"bytes":256,"id":1,"sha256":"fbd8f6f0b188cdda3e885bacc21d5b202d815cf69e958c9e0d22144fb3e19f7b"},{"bytes":55,"id":3,"sha256":"f9b175dc10f5420eb6e09816c2e8edec43c385cee1602cd9230bc4fa43c87875"},{"bytes":8,"id":5,"sha256":"b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8"},{"bytes":15,"id":6,"sha256":"355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b"},{"bytes":540,"id":7,"sha256":"37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da"},{"bytes":3,"id":8,"sha256":"9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e"},{"bytes":3,"id":12,"sha256":"39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba"},{"bytes":66653,"id":10,"sha256":"27365295af3877a1e9c38d3fc2a7616244f2c33ab527d962f321336098132f41"},{"bytes":1527,"id":11,"sha256":"391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59"}]},"onlyArgumentRemoved":"-Wl,--strip-all","reproducedStrippedSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695","tracedSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"},"schemaVersion":1,"scope":"Recover names only after exact executable-section parity; no import or timing acquisition.","symbolicatedRows":28,"toolchain":{"compiler":"/usr/bin/clang-21","compilerVersionOutput":"Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n","linker":"/usr/bin/wasm-ld-21","linkerVersionOutput":"Ubuntu LLD 21.1.8\n","node":"v22.22.0"}}
+2026-11-28T09:46:28.4404932Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-28T09:46:28.4405431Z with:
+2026-11-28T09:46:28.4405727Z   name: jmdict-trace-symbols-da6c4-46131812603-1
+2026-11-28T09:46:28.4406253Z   path: symbol-controls
+symbol-output
+symbol-tests.log
+symbol-recovery.log
+
+2026-11-28T09:46:28.4406742Z   if-no-files-found: warn
+2026-11-28T09:46:28.4407301Z   retention-days: 30
+2026-11-28T09:46:28.4407564Z   compression-level: 6
+2026-11-28T09:46:28.4407824Z   overwrite: false
+2026-11-28T09:46:28.4408080Z   include-hidden-files: false
+2026-11-28T09:46:28.4408370Z ##[endgroup]
+2026-11-28T09:46:28.6310473Z (node:2796) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:46:28.6312714Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:46:28.6541024Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-11-28T09:46:28.6546084Z The least common ancestor is /home/runner/work/manabitan/manabitan. This will be the root directory of the artifact
+2026-11-28T09:46:28.6547603Z With the provided path, there will be 27 files uploaded
+2026-11-28T09:46:28.6548830Z Artifact name is valid!
+2026-11-28T09:46:28.6549506Z Root directory input is valid!
+2026-11-28T09:46:29.0684481Z Beginning upload of artifact content to blob storage
+2026-11-28T09:46:29.1289602Z (node:2796) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T09:46:29.5957346Z Uploaded bytes 168492
+2026-11-28T09:46:29.6732785Z Finished uploading artifact content to blob storage!
+2026-11-28T09:46:29.6734899Z SHA256 digest of uploaded artifact zip is a6908461c592bf0c0884c4257cfe144b1e662a5f2f1836efdfb2c1c903d125b4
+2026-11-28T09:46:29.6736182Z Finalizing artifact upload
+2026-11-28T09:46:30.0789218Z Artifact jmdict-trace-symbols-da6c4-46131812603-1.zip successfully finalized. Artifact ID 15257554486
+2026-11-28T09:46:30.0792911Z Artifact jmdict-trace-symbols-da6c4-46131812603-1 has been successfully uploaded! Final size is 168492 bytes. Artifact ID is 15257554486
+2026-11-28T09:46:30.0798936Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/46131812603/artifacts/15257554486
+2026-11-28T09:46:30.1030624Z Post job cleanup.
+2026-11-28T09:46:30.2355572Z (node:2808) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T09:46:30.2358154Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T09:46:30.2522021Z Post job cleanup.
+2026-11-28T09:46:30.3682142Z [command]/usr/bin/git version
+2026-11-28T09:46:30.3737986Z git version 2.56.1
+2026-11-28T09:46:30.3788040Z Temporarily overriding HOME='/home/runner/work/_temp/aaab06ee-e534-411e-b219-15a76918b604' before making global git config changes
+2026-11-28T09:46:30.3795626Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T09:46:30.3799660Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/product
+2026-11-28T09:46:30.3839025Z Removing SSH command configuration
+2026-11-28T09:46:30.3845785Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T09:46:30.3891119Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T09:46:30.4285446Z Removing HTTP extra header
+2026-11-28T09:46:30.4286298Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T09:46:30.4336301Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T09:46:30.4667541Z Removing includeIf entries pointing to credentials config files
+2026-11-28T09:46:30.4680338Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T09:46:30.4730983Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T09:46:30.5181466Z Cleaning up orphan processes
+2026-11-28T09:46:30.5740209Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
