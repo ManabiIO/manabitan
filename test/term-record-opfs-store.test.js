@@ -18,7 +18,7 @@
 import assert from 'node:assert/strict';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
-import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
@@ -6816,5 +6816,212 @@ describe('TermRecordOpfsStore exact dictionary identity', () => {
         expect(reader.getDictionaryHealth('Damaged').status).toBe('reimportRequired');
         const unrelatedId = reader.findTermIds('Unrelated', '三', 'expression')[0];
         expect((await reader.getByIdsAsync([unrelatedId])).get(unrelatedId)?.dictionary).toBe('Unrelated');
+    });
+});
+
+/** @typedef {Parameters<TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']>[0]} ReferenceTableArtifactChunk */
+
+/**
+ * @param {string} dictionary
+ * @param {number} group
+ * @returns {ReferenceTableArtifactChunk & {resolvedContentReferences: NonNullable<ReferenceTableArtifactChunk['resolvedContentReferences']>}}
+ */
+function createReferenceTableChunk(dictionary, group) {
+    const count = 128;
+    const expressions = Array.from({length: count}, (_, row) => new TextEncoder().encode(`g${group}-row${row}`));
+    return createArtifactTermRecordChunkWithResolvedContent({
+        dictionary,
+        dictionaryTotalRows: 528299,
+        rowCount: count,
+        expressionBytesList: expressions,
+        readingBytesList: expressions,
+        readingEqualsExpressionList: new Uint8Array(count).fill(1),
+        scoreList: Int32Array.from({length: count}, (_, row) => (row % 5) - 2),
+        sequenceList: Int32Array.from({length: count}, (_, row) => group * count + row),
+    }, Uint32Array.from({length: count}, (_, row) => row % 3), Float64Array.of(16, 40, 100), Uint32Array.of(7, 9, 11));
+}
+
+/**
+ * @param {number} [groups=1]
+ * @returns {Promise<{writer: TermRecordOpfsStore, dictionary: string, files: Map<string, Uint8Array>, directory: FileSystemDirectoryHandle}>}
+ */
+async function importReferenceTableFixture(groups = 1) {
+    const dictionary = 'Reference table fields';
+    /** @type {Map<string, Uint8Array>} */
+    const files = new Map();
+    const directory = createFakeDirectoryHandle(files);
+    const writer = new TermRecordOpfsStore();
+    writer._recordsDirectoryHandle = directory;
+    writer.setRawTermBankSourceBytes(128 * 1024 * 1024);
+    writer.setImportExperiments({experimentalReferenceTableFields: true});
+    await writer.beginImportSession();
+    for (let group = 0; group < groups; ++group) {
+        await writer.appendBatchFromArtifactChunkResolvedContent(createReferenceTableChunk(dictionary, group), [], [], 'raw');
+    }
+    await writer.endImportSession();
+    return {writer, dictionary, files, directory};
+}
+
+/**
+ * @param {Map<string, Uint8Array>} files
+ * @returns {{name: string, bytes: Uint8Array, view: DataView, fieldsOffset: number, fieldsLength: number}}
+ */
+function getReferenceTableFile(files) {
+    const item = [...files].find(([name]) => name.endsWith('.mbti'));
+    if (typeof item === 'undefined') { throw new Error('Missing reference-table container'); }
+    const [name, bytes] = item;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    expect(view.getUint32(76, true)).toBe(4);
+    const fieldsOffset = 80 + view.getUint32(56, true);
+    return {name, bytes, view, fieldsOffset, fieldsLength: bytes.byteLength - fieldsOffset};
+}
+
+describe('TermRecordOpfsStore persisted reference-table fields', () => {
+    test('reads legacy, compact, float64 and reference fields together after reopening', async () => {
+        const files = new Map();
+        const directory = createFakeDirectoryHandle(files);
+        const dictionary = 'Mixed field formats';
+        const writer = new TermRecordOpfsStore();
+        writer._recordsDirectoryHandle = directory;
+        writer.setImportExperiments({experimentalReferenceTableFields: true});
+        await writer.beginImportSession();
+        for (let group = 0; group < 4; ++group) {
+            let chunk = createReferenceTableChunk(dictionary, group);
+            if (group === 0) { chunk.resolvedContentReferences.lengths[2] = 70000; }
+            if (group === 1) { chunk = {...chunk}; }
+            if (group === 2) { chunk.scoreList = Float64Array.from({length: 128}, (_, i) => i + 0.5); }
+            if (group === 3) { chunk.resolvedContentReferences.offsets[0] = -1; }
+            await writer.appendBatchFromArtifactChunkResolvedContent(chunk, [], [], 'raw');
+        }
+        await writer.endImportSession();
+        expect(writer.getLastEndImportSessionMetrics()?.referenceTableFieldChunkCount).toBe(1);
+        const bytes = [...files].find(([name]) => name.endsWith('.mbti'))?.[1];
+        if (typeof bytes === 'undefined') { throw new Error('Missing mixed-format container'); }
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        const formats = [];
+        let cursor = 40;
+        while (cursor < bytes.byteLength) {
+            const count = view.getUint32(cursor + 4, true);
+            const format = view.getUint32(cursor + 36, true);
+            formats.push(format);
+            cursor += 40 + view.getUint32(cursor + 16, true);
+            if (format === 1 || format === 3) {
+                cursor += count * (format === 1 ? 12 : 16);
+            } else {
+                const scores = view.getUint32(cursor + 8, true);
+                const references = format === 4 ? view.getUint32(cursor + 16, true) : 0;
+                cursor += format === 4 ? 20 + scores * 4 + references * 4 + Math.ceil(references / 2) * 4 + count * 4 : 16 + scores * 4 + count * 8;
+            }
+        }
+        expect(cursor).toBe(bytes.byteLength);
+        expect(formats).toEqual([1, 2, 3, 4]);
+        const reader = new TermRecordOpfsStore();
+        reader._recordsDirectoryHandle = directory;
+        await reader._loadShardFiles(false);
+        await reader.ensureDictionariesLoaded([dictionary]);
+        const records = await reader.getByIdsAsync(Array.from({length: 512}, (_, i) => i + 1));
+        expect(records.size).toBe(512);
+        for (let i = 0; i < 512; ++i) {
+            const row = i % 128;
+            const group = Math.floor(i / 128);
+            expect(records.get(i + 1)).toMatchObject({
+                expression: `g${group}-row${row}`,
+                entryContentOffset: group === 3 && row % 3 === 0 ? -1 : [16, 40, 100][row % 3],
+                entryContentLength: group === 0 && row % 3 === 2 ? 70000 : [7, 9, 11][row % 3],
+                score: group === 2 ? row + 0.5 : (row % 5) - 2,
+                sequence: i,
+            });
+        }
+    });
+
+    test('supports cold ID reservation, full hydration and scoped random-access reads', async () => {
+        const {writer, dictionary, files, directory} = await importReferenceTableFixture(3);
+        expect(writer.getLastEndImportSessionMetrics()?.referenceTableFieldChunkCount).toBe(3);
+        writer.publishExactLookupRoute(dictionary);
+        const scoped = await writer.prepareExactLookupView(dictionary, ['g1-row4']);
+        expect(scoped).not.toBeNull();
+        expect((await writer.getByIdsAsync([133], scoped)).get(133)).toMatchObject({
+            expression: 'g1-row4', entryContentOffset: 40, entryContentLength: 9, score: 2, sequence: 132,
+        });
+        const reader = new TermRecordOpfsStore();
+        reader._recordsDirectoryHandle = directory;
+        await reader._loadShardFiles(false);
+        reader._nextIdMayNeedShardScan = true;
+        await reader._ensureNextIdReadyForAppend(1);
+        expect(reader._nextId).toBe(385);
+        const index = [...files].find(([name]) => name.endsWith('.mbti'))?.[1];
+        expect(index).toBeDefined();
+        expect(reader._scanPersistentIndexMaxRecordId(/** @type {Uint8Array} */ (index))).toBe(384);
+        await reader.ensureDictionariesLoaded([dictionary]);
+        const ids = Array.from({length: 384}, (_, i) => i + 1);
+        const records = await reader.getByIdsAsync(ids);
+        expect(records.size).toBe(384);
+        for (let i = 0; i < ids.length; ++i) {
+            const row = i % 128;
+            expect(records.get(i + 1)).toMatchObject({
+                expression: `g${Math.floor(i / 128)}-row${row}`,
+                reading: `g${Math.floor(i / 128)}-row${row}`,
+                entryContentOffset: [16, 40, 100][row % 3],
+                entryContentLength: [7, 9, 11][row % 3],
+                score: (row % 5) - 2,
+                sequence: i,
+            });
+        }
+        expect(reader.getDictionaryHealth(dictionary).status).toBe('available');
+    });
+
+    test('repairs only derived lookup data and preserves exact authoritative reference fields', async () => {
+        const {dictionary, files, directory} = await importReferenceTableFixture();
+        const {name, bytes, view, fieldsOffset} = getReferenceTableFile(files);
+        const fields = bytes.slice(fieldsOffset);
+        view.setUint32(68, view.getUint32(68, true) ^ 1, true);
+        const reader = new TermRecordOpfsStore();
+        reader._recordsDirectoryHandle = directory;
+        await reader._loadShardFiles(false);
+        await reader.ensureDictionariesLoaded([dictionary]);
+        expect(reader.getDictionaryHealth(dictionary).status).toBe('available');
+        expect(files.get(name)?.subarray(fieldsOffset)).toEqual(fields);
+        expect((await reader.getByIdsAsync([1, 128])).size).toBe(2);
+    });
+
+    test.each(['reference-count-zero', 'reference-count-sentinel', 'reference-key', 'reference-key-sentinel', 'score-key', 'padding', 'checksum', 'truncation'])('fails closed on %s without replacing authoritative bytes', async (kind) => {
+        const {dictionary, files, directory} = await importReferenceTableFixture();
+        const {name, bytes, view, fieldsOffset, fieldsLength} = getReferenceTableFile(files);
+        const scoreCount = view.getUint32(fieldsOffset + 8, true);
+        const referenceCount = view.getUint32(fieldsOffset + 16, true);
+        const lengths = fieldsOffset + 20 + scoreCount * 4 + referenceCount * 4;
+        const keys = lengths + Math.ceil(referenceCount / 2) * 4;
+        if (kind === 'reference-count-zero') { view.setUint32(fieldsOffset + 16, 0, true); }
+        if (kind === 'reference-count-sentinel') { view.setUint32(fieldsOffset + 16, 65535, true); }
+        if (kind === 'reference-key') { view.setUint16(keys, referenceCount, true); }
+        if (kind === 'reference-key-sentinel') { view.setUint16(keys, 65535, true); }
+        if (kind === 'score-key') { view.setUint16(keys + 256, scoreCount, true); }
+        if (kind === 'padding') { view.setUint16(lengths + referenceCount * 2, 1, true); }
+        if (kind === 'checksum') { bytes[fieldsOffset + 20] ^= 1; }
+        if (kind === 'truncation') { files.set(name, bytes.slice(0, -1)); }
+        if (kind !== 'checksum' && kind !== 'truncation') {
+            view.setUint32(72, hashTermLookupKeyBytes(bytes.subarray(fieldsOffset, fieldsOffset + fieldsLength)), true);
+        }
+        const damaged = files.get(name)?.slice();
+        const reader = new TermRecordOpfsStore();
+        reader._recordsDirectoryHandle = directory;
+        await reader._loadShardFiles(false);
+        await reader.ensureDictionariesLoaded([dictionary]);
+        expect(reader.getDictionaryHealth(dictionary).status).toBe('reimportRequired');
+        expect((await reader.getByIdsAsync([1])).size).toBe(0);
+        expect(files.get(name)).toEqual(damaged);
+    });
+
+    test('retains pre-import bytes and clears format-use accounting after rollback', async () => {
+        const {writer, dictionary, files} = await importReferenceTableFixture();
+        const original = new Map([...files].map(([name, bytes]) => [name, Uint8Array.from(bytes)]));
+        const checkpoint = await writer.createImportCheckpoint();
+        writer.setImportExperiments({experimentalReferenceTableFields: true});
+        await writer.beginImportSession();
+        await writer.appendBatchFromArtifactChunkResolvedContent(createReferenceTableChunk(`${dictionary} new`, 1), [], [], 'raw');
+        await writer.rollbackImportSession(checkpoint);
+        expect(files).toEqual(original);
+        expect(writer._referenceTableFieldChunkCount).toBe(0);
+        expect(writer._experimentalReferenceTableFields).toBe(false);
     });
 });

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "baseTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "previousRuntime": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+  "previousBase": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "status": "unexecuted cloud draft; no timing or correctness claim",
+  "files": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df112949e5092ded1ce1f584bff4ff56be18480e",
+      "characters": 796923
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fcf4b908938d818a456574352446d95e71623713",
+      "characters": 406584
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-experiments.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "200c8cef686070c0fdd8c35d7fe6002a2d12e046",
+      "characters": 3616
+    },
+    {
+      "path": "types/ext/dictionary-importer.d.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a1a094c403c1bf77aee836e37c1d53963b99c37",
+      "characters": 9531
+    },
+    {
+      "path": "test/dictionary-database-open-schema.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52d3a86497ee0a9af7515a4bbeef7cdad9d40842",
+      "characters": 8044
+    },
+    {
+      "path": "test/dictionary-import-publication-cleanup.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67be2d8e97065500806c8bbd7db8df346628f153",
+      "characters": 33636
+    },
+    {
+      "path": "test/dictionary-schema-upgrade.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f524bd91369c48550c6105de33457d7e9b844593",
+      "characters": 14866
+    },
+    {
+      "path": "test/term-record-opfs-store.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "609c076863aa2818ce5a790f4bbf6537650acdda",
+      "characters": 352655
+    },
+    {
+      "path": "test/term-record-reference-table-fields.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d77055a9da64b0c1aca4a2a79eb3d90c816d471",
+      "characters": 10357
+    },
+    {
+      "path": "test/term-record-split-reference-origin.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e19a36d9187c7c4d225dbb8600ce762961e6ac3",
+      "characters": 12044
+    },
+    {
+      "path": "test/term-record-content-reference-iterator.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a574cb93ee42cae2445dea91fd510ff0d8d028b6",
+      "characters": 35562
+    },
+    {
+      "path": "test/dictionary-database-online-optimization-schema.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d66d2425b4a19c6e39728dbcd7429f9b51c22ba",
+      "characters": 103496
+    }
+  ]
+}

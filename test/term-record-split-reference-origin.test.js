@@ -83,6 +83,45 @@ async function encode(store, chunk) {
 afterEach(() => { vi.restoreAllMocks() })
 
 describe('resolved reference origin through internal record splits', () => {
+    test('reference tables keep original IDs and decline a split whose unused offset precedes its base', async () => {
+        const chunk = fixture(65536)
+        chunk.resolvedContentReferences.offsets[1] = 100
+        chunk.preparedLookupIndexes = prepareTermLookupIndexesFromPreinternedPlan(chunk)?.indexes
+        const candidate = createStore()
+        candidate.store.setImportExperiments({experimentalReferenceTableFields: true})
+        await candidate.store.beginImportSession()
+        await encode(candidate.store, chunk)
+        expect(candidate.append.mock.calls.map((args) => args[2])).toEqual([30000, 30000, 5536])
+        expect(candidate.append.mock.calls.map((args) => args[7])).toEqual([4, 4, 2])
+        for (const args of candidate.append.mock.calls) {
+            const count = args[2]
+            const first = args[1] - 1
+            const fields = /** @type {Uint8Array} */ (args[6])
+            const view = new DataView(fields.buffer, fields.byteOffset, fields.byteLength)
+            const scores = view.getUint32(8, true)
+            const references = args[7] === 4 ? view.getUint32(16, true) : count
+            const offsetStart = (args[7] === 4 ? 20 : 16) + scores * 4
+            const keysStart = offsetStart + references * 4 + Math.ceil(references / 2) * 4
+            for (const row of [0, count - 1]) {
+                const key = args[7] === 4 ? view.getUint16(keysStart + row * 2, true) : row
+                const offset = /** @type {number} */ (args[4]) + view.getUint32(offsetStart + key * 4, true)
+                expect(offset).toBe(chunk.resolvedContentReferences.offsets[chunk.resolvedContentReferences.uniqueIndexList[first + row]])
+            }
+        }
+    })
+
+    test('reference-table selection does not survive the await between two actual splits', async () => {
+        const chunk = fixture(65536)
+        chunk.resolvedContentReferences.offsets[1] = 100
+        chunk.preparedLookupIndexes = prepareTermLookupIndexesFromPreinternedPlan(chunk)?.indexes
+        const candidate = createStore(() => { chunk.resolvedContentReferences.offsets[1] = Number.NaN })
+        candidate.store.setImportExperiments({experimentalReferenceTableFields: true})
+        await candidate.store.beginImportSession()
+        await expect(encode(candidate.store, chunk)).rejects.toThrow('Invalid term content offset')
+        expect(candidate.append).toHaveBeenCalledTimes(1)
+        expect(candidate.append.mock.calls[0][7]).toBe(4)
+    })
+
     test('keeps direct output columns through the 30,000-row prepared-index segments', async () => {
         const chunk = fixture(65536)
         chunk.resolvedContentReferences.offsets[1] = 100

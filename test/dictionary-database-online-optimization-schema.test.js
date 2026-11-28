@@ -22,7 +22,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-test('creates additive online-layout metadata around the untouched legacy content root', async () => {
+test.each([10, 13])('creates additive online-layout metadata and preserves initial floor %i', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     const database = new DictionaryDatabase();
@@ -36,6 +36,7 @@ test('creates additive online-layout metadata around the untouched legacy conten
     vi.spyOn(database, '_createDropIndexesSql').mockReturnValue([]);
 
     await database._initializeSchema();
+    connection.exec('PRAGMA user_version = ' + version);
     connection.exec({
         sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, 1, $summary)',
         bind: {$title: 'JMdict', $summary: JSON.stringify({title: 'JMdict', importSuccess: true, storageGenerationId: 'generation-1'})},
@@ -190,6 +191,7 @@ test('creates additive online-layout metadata around the untouched legacy conten
         cursor: {frame: 0},
         checkpoint: {nextAction: 'reclaim'},
     })).toEqual({rootId: 'root-1', epoch: 2, logicalHighWater: 20});
+    expect(connection.selectValue('PRAGMA user_version')).toBe(Math.max(12, version));
     expect(connection.selectObject('SELECT activeRootId, activeEpoch FROM termContentStorageState')).toEqual({
         activeRootId: 'root-1',
         activeEpoch: 2,
@@ -377,15 +379,17 @@ test('identity layout reads the registered legacy file without copying or fabric
     } finally { frame.release(); }
 });
 
-test('activates immutable legacy addressing once and publishes an exact partial-tail arena', async () => {
+test.each([10, 13])('activates immutable legacy addressing and publishes an arena with initial floor %i', async (version) => {
     const f = await createLayoutDatabase(4);
     f.database._sqlite3 = sqlite3;
+    f.connection.exec('PRAGMA user_version = ' + version);
     const inventory = vi.spyOn(f.database._termContentStore, 'inventoryLegacyFiles').mockResolvedValue([
         {fileId: 'legacy-0', path: 'manabitan-term-content.bin', byteLength: 4, logicalStart: 0, logicalEnd: 4},
     ]);
     vi.spyOn(f.database._termContentStore, 'activateCommittedRoot').mockResolvedValue();
     const state = await f.database.activateOnlineContentStorage();
     expect(state).toMatchObject({epoch: 1, logicalHighWater: 4});
+    expect(f.connection.selectValue('PRAGMA user_version')).toBe(Math.max(12, version));
     expect((await f.database.activateOnlineContentStorage()).rootId).toBe(state.rootId);
     expect(inventory).toHaveBeenCalledTimes(1);
     const physical = vi.spyOn(f.database._onlineContentPhysicalFileStore, 'readSlice').mockImplementation(async (file, offset, length) => {
@@ -415,6 +419,7 @@ test('activates immutable legacy addressing once and publishes an exact partial-
         f.connection.exec('BEGIN IMMEDIATE');
         f.database._insertOnlineContentIdentityRoot(state, 'root-with-arena', plan, 'import-owner');
         f.connection.exec('COMMIT');
+        expect(f.connection.selectValue('PRAGMA user_version')).toBe(Math.max(12, version));
         expect(f.connection.selectValue('SELECT activeRootId FROM termContentStorageState WHERE singleton = 1')).toBe('root-with-arena');
         f.database.getOnlineContentStorageState();
         expect(await old.isCurrentRange(0, 4)).toBe(true);
