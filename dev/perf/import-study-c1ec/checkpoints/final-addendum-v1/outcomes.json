@@ -1,0 +1,794 @@
+{
+  "schemaVersion": 1,
+  "archiveState": "terminal-evidence-snapshot-performance-qualification-separate",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "priorCheckpoint": "0ab2ff5050dba9b528eefdeffcb4f0eb8c6357b0",
+  "writer": {
+    "runId": 46118417081,
+    "status": "verified-partial-failure-no-statistics",
+    "timingObservations": 0,
+    "sourceAndIntegrityGatesPassed": true,
+    "failure": "Production-planner preflight rejected serialized metadata missing getData presence and ZIP offsets.",
+    "diagnosis": "Metadata-only smoke; no reads, decompression, parser, worker, browser or timing. Original failure unchanged."
+  },
+  "nativeExport": {
+    "status": "complete-held-mechanism-stopped",
+    "planSha256": "d62d1d287215f76008e6e2dd98cb8e55f5b25c63dc35e7518a913a7433076a8e",
+    "counts": {
+      "freshCorrectnessChildren": 3,
+      "freshTimedChildren": 36,
+      "completePassesIncludingExcludedWarmups": 183,
+      "completeGroupTransactions": 2196,
+      "completeOriginalFusedCalls": 2196,
+      "groupsPerPass": 12,
+      "banksPerPass": 53,
+      "rowsPerPass": 528299,
+      "rowVisitsIncludingExcludedWarmups": 96678717,
+      "replacedObservations": 0,
+      "extraObservations": 0
+    },
+    "primaryScope": "One fresh-child observation is the arithmetic mean of three measured pass totals for the complete captured original fused export, including the common Reflect/call/clock boundary and any engine work inside it. This is not isolated copy_valid_utf8 cost, complete parser CPU, actual browser timing or an import measurement; passes/groups are not independent samples.",
+    "controlQualified": false,
+    "comparisons": {
+      "B/A": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 817.3033333333333,
+            "numeratorMs": 729.8696666666666,
+            "ratio": 0.8930217667043243
+          },
+          {
+            "block": 2,
+            "denominatorMs": 663.9643333333333,
+            "numeratorMs": 713.0436666666668,
+            "ratio": 1.0739186291633136
+          },
+          {
+            "block": 3,
+            "denominatorMs": 466.047,
+            "numeratorMs": 551.535,
+            "ratio": 1.1834321431100296
+          },
+          {
+            "block": 4,
+            "denominatorMs": 605.8716666666667,
+            "numeratorMs": 601.621,
+            "ratio": 0.9929842128283493
+          },
+          {
+            "block": 5,
+            "denominatorMs": 589.651,
+            "numeratorMs": 450.64300000000003,
+            "ratio": 0.7642537704506566
+          },
+          {
+            "block": 6,
+            "denominatorMs": 506.76000000000005,
+            "numeratorMs": 685.4526666666666,
+            "ratio": 1.3526179388007469
+          },
+          {
+            "block": 7,
+            "denominatorMs": 530.6216666666667,
+            "numeratorMs": 685.6673333333334,
+            "ratio": 1.2921962603612744
+          },
+          {
+            "block": 8,
+            "denominatorMs": 415.1383333333333,
+            "numeratorMs": 488.9753333333333,
+            "ratio": 1.1778611948627566
+          },
+          {
+            "block": 9,
+            "denominatorMs": 450.32766666666674,
+            "numeratorMs": 568.591,
+            "ratio": 1.2626161839194125
+          },
+          {
+            "block": 10,
+            "denominatorMs": 510.229,
+            "numeratorMs": 401.4346666666667,
+            "ratio": 0.7867735206479184
+          },
+          {
+            "block": 11,
+            "denominatorMs": 439.94666666666666,
+            "numeratorMs": 490.549,
+            "ratio": 1.1150192447569403
+          },
+          {
+            "block": 12,
+            "denominatorMs": 505.3993333333333,
+            "numeratorMs": 465.52366666666666,
+            "ratio": 0.921100674186353
+          }
+        ],
+        "medianPairedChangePercent": 9.446893696012681,
+        "equalWorkChangePercent": 5.1012572947397805,
+        "fasterPairs": 5,
+        "worstPairChangePercent": 35.26179388007469,
+        "descriptiveBootstrap95Percent": [
+          -9.293877955466135,
+          22.302416351472097
+        ]
+      },
+      "B/C": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 798.3046666666665,
+            "numeratorMs": 729.8696666666666,
+            "ratio": 0.9142745835549837
+          },
+          {
+            "block": 2,
+            "denominatorMs": 726.2673333333333,
+            "numeratorMs": 713.0436666666668,
+            "ratio": 0.981792287688372
+          },
+          {
+            "block": 3,
+            "denominatorMs": 660.398,
+            "numeratorMs": 551.535,
+            "ratio": 0.835155466854836
+          },
+          {
+            "block": 4,
+            "denominatorMs": 523.4963333333334,
+            "numeratorMs": 601.621,
+            "ratio": 1.1492363206619083
+          },
+          {
+            "block": 5,
+            "denominatorMs": 496.326,
+            "numeratorMs": 450.64300000000003,
+            "ratio": 0.9079576729810649
+          },
+          {
+            "block": 6,
+            "denominatorMs": 494.3776666666667,
+            "numeratorMs": 685.4526666666666,
+            "ratio": 1.38649601890053
+          },
+          {
+            "block": 7,
+            "denominatorMs": 589.4163333333335,
+            "numeratorMs": 685.6673333333334,
+            "ratio": 1.1632988340443002
+          },
+          {
+            "block": 8,
+            "denominatorMs": 503.153,
+            "numeratorMs": 488.9753333333333,
+            "ratio": 0.9718223548966881
+          },
+          {
+            "block": 9,
+            "denominatorMs": 502.2003333333334,
+            "numeratorMs": 568.591,
+            "ratio": 1.1321995671050264
+          },
+          {
+            "block": 10,
+            "denominatorMs": 418.0133333333333,
+            "numeratorMs": 401.4346666666667,
+            "ratio": 0.9603393831137764
+          },
+          {
+            "block": 11,
+            "denominatorMs": 441.811,
+            "numeratorMs": 490.549,
+            "ratio": 1.1103141388512283
+          },
+          {
+            "block": 12,
+            "denominatorMs": 629.2713333333332,
+            "numeratorMs": 465.52366666666666,
+            "ratio": 0.7397820971769465
+          }
+        ],
+        "medianPairedChangePercent": -2.3192678707469883,
+        "equalWorkChangePercent": 0.7352264025751287,
+        "fasterPairs": 7,
+        "worstPairChangePercent": 38.649601890053,
+        "descriptiveBootstrap95Percent": [
+          -8.888387173197575,
+          14.071794388346737
+        ]
+      },
+      "C/A": {
+        "count": 12,
+        "pairs": [
+          {
+            "block": 1,
+            "denominatorMs": 817.3033333333333,
+            "numeratorMs": 798.3046666666665,
+            "ratio": 0.9767544485727453
+          },
+          {
+            "block": 2,
+            "denominatorMs": 663.9643333333333,
+            "numeratorMs": 726.2673333333333,
+            "ratio": 1.0938348596034024
+          },
+          {
+            "block": 3,
+            "denominatorMs": 466.047,
+            "numeratorMs": 660.398,
+            "ratio": 1.417020171785249
+          },
+          {
+            "block": 4,
+            "denominatorMs": 605.8716666666667,
+            "numeratorMs": 523.4963333333334,
+            "ratio": 0.8640383139443722
+          },
+          {
+            "block": 5,
+            "denominatorMs": 589.651,
+            "numeratorMs": 496.326,
+            "ratio": 0.8417284122302855
+          },
+          {
+            "block": 6,
+            "denominatorMs": 506.76000000000005,
+            "numeratorMs": 494.3776666666667,
+            "ratio": 0.9755656852685032
+          },
+          {
+            "block": 7,
+            "denominatorMs": 530.6216666666667,
+            "numeratorMs": 589.4163333333335,
+            "ratio": 1.1108033658633114
+          },
+          {
+            "block": 8,
+            "denominatorMs": 415.1383333333333,
+            "numeratorMs": 503.153,
+            "ratio": 1.2120128631821523
+          },
+          {
+            "block": 9,
+            "denominatorMs": 450.32766666666674,
+            "numeratorMs": 502.2003333333334,
+            "ratio": 1.1151887181407907
+          },
+          {
+            "block": 10,
+            "denominatorMs": 510.229,
+            "numeratorMs": 418.0133333333333,
+            "ratio": 0.8192661203760142
+          },
+          {
+            "block": 11,
+            "denominatorMs": 439.94666666666666,
+            "numeratorMs": 441.811,
+            "ratio": 1.004237634864832
+          },
+          {
+            "block": 12,
+            "denominatorMs": 505.3993333333333,
+            "numeratorMs": 629.2713333333332,
+            "ratio": 1.245097276213265
+          }
+        ],
+        "medianPairedChangePercent": 4.903624723411726,
+        "equalWorkChangePercent": 4.334164966996146,
+        "fasterPairs": 5,
+        "worstPairChangePercent": 41.70201717852491,
+        "descriptiveBootstrap95Percent": [
+          -8.019800039356229,
+          16.360079066147158
+        ]
+      }
+    },
+    "candidateDecision": {
+      "checks": [
+        {
+          "baseline": "A",
+          "primaryCpu": false
+        },
+        {
+          "baseline": "C",
+          "primaryCpu": false
+        }
+      ],
+      "supportsNativeExportCostHypothesis": false,
+      "decision": "Held; this fixed native-export diagnostic supplies no qualified mechanism signal",
+      "priorBroadComponentDecisionsUnchanged": true,
+      "mechanismLineStoppedForFailedControl": true,
+      "automaticBrowserPromotion": false,
+      "productPrQualified": false
+    },
+    "independentAudit": {
+      "path": "profile-evidence/utf8-fused-export-study-c1ec/completed-cohort-independent-audit.json",
+      "sha256": "294d762ec618b0534e7bafb01ea9b81bcebe675b83fbaf8cc66895fa0902943b"
+    }
+  },
+  "simd": {
+    "status": "retired-exact-prior-source",
+    "pr": 19,
+    "head": "61588714864a58b22793dc8f17de4878ae29b315",
+    "scope": "Explicit16-byte v128 quote/backslash/control scanner already exists. Historical C also changed memmove; no isolated-SIMD regression claim.",
+    "receipt": {
+      "path": "profile-evidence/simd-pr19-prior-art.json",
+      "sha256": "d77cfad10c701cd482f4066d1c23e99f8fdc210800e2b25330ddee911d8d18e6"
+    }
+  },
+  "groupBurst": {
+    "localCommit": "e88cf52a4f4a2ad99e7a2f7fcb038cab06dd6af1",
+    "hostedCommit": "9e14b5304ab1153e9720d112c830d325021eb07f",
+    "tree": "e9a70a78ee4e6b499dbafb5fcc8318f74afcd867",
+    "focusedTestsPassed": 52,
+    "changedTestLint": "passed-0-errors-0-warnings",
+    "staticReviews": "runtime-and-real-stream-policy-canary-clear",
+    "performanceQualified": false
+  },
+  "chrome": {
+    "state": "terminal-observed",
+    "runId": 46126332612,
+    "wrapperCommit": "18661492d92ba99d85a26363d562c996c0fff287",
+    "ciConclusion": "success",
+    "auditStatus": "verified-complete-component-diagnostic-only",
+    "auditedObservationCount": 22,
+    "summary": "**Neither native candidate earned advancement or a product PR.** The final Chrome component study completed and passed its correctness checks, but both variants decisively regressed against the baseline. The native-inflate line is stopped: no rerun, full-import advancement, current-develop transplant, or product PR follows from these results.\n\n## Final JMdict Chrome result\n\nThe primary metric is the **source inflation/CRC component**, measured on the frozen 9e baseline under pinned Chrome 153.0.8010.12. It is not complete-import elapsed time. A is baseline 9e; B is the direct native writer (b00df9); C adds guarded group-sized input bursts (9e14b530); D is byte-identical to A.\n\n| Comparison | Paired median change | Equal-work change | Faster pairs | Descriptive 95% interval |\n| --- | ---: | ---: | ---: | ---: |\n| B / A: direct writer versus baseline | +99.258% | +99.824% | 0/6 | +96.723% to +103.494% |\n| C / A: group burst versus baseline | +85.475% | +84.438% | 0/6 | +79.556% to +88.280% |\n| D / A: identical-code control | −0.113% | −0.113% | 2/2 | −0.149% to −0.076% |\n\nAll 22 scheduled fresh-browser observations completed; none was dropped, replaced, or retried. Each observation retained two excluded full warmups and one measured corpus: 12 production groups, 53 banks, and 528,299 rows. Exact source/browser identities, actual native admission, complete semantic projection, the general integrity canary, and the 12-case resource-policy canary all passed. The frozen reader audited every observation, and root independently checked all 12 metric comparisons from its recorded pairs.\n\nC improved inflation relative to B by 7.663% paired median, but B was itself an unmerged, slower candidate. C still regressed by 85.475% against baseline. The separately measured inflation-plus-parse/lookup sums also regressed: B/A +29.315% and C/A +24.615% paired median. These are component sums, not contiguous import elapsed time or memory qualification.\n\n[Completed Chrome run](https://github.com/ManabiIO/manabitan/actions/runs/46126332612) · [Frozen wrapper/source protocol](https://github.com/ManabiIO/manabitan/tree/18661492d92ba99d85a26363d562c996c0fff287)\n\n## Native-export diagnostic also remains held\n\nThe separate paired-CJK diagnostic retained all 3 preflights and 36 timed children: 183 full passes and 2,196 captured original export calls. It measured the complete fused WASM export plus a common call/clock boundary, including memory growth; it did not isolate the UTF-8 helper or measure complete parser/import time. The identical control failed its frozen limit: C/A +4.904% paired median and +4.334% equal work. B/A was +9.447% median; B/C was −2.319%. No benefit was qualified, and this mechanism line was stopped without replacement observations or browser promotion.\n\n## Earlier full-import evidence and immutable checkpoints\n\nThe earlier full JMdict, Jitendex, and VNDB screens, memory qualification failures and sampling-coverage limits, source variants, exact readers, failed attempts, and prospective decisions remain in the [published prior results](https://github.com/ManabiIO/manabitan/blob/0ab2ff5050dba9b528eefdeffcb4f0eb8c6357b0/dev/perf/import-study-c1ec/checkpoints/postutf8-v2/results.json) and [checkpoint guide](https://github.com/ManabiIO/manabitan/blob/0ab2ff5050dba9b528eefdeffcb4f0eb8c6357b0/dev/perf/import-study-c1ec/checkpoints/postutf8-v2/README.md). Those negative and inconclusive outcomes are unchanged; this component study does not replace them.\n\nThe [published progress checkpoint](https://github.com/ManabiIO/manabitan/tree/2079fca6f98a44858a650c69a8b87dfce1427a21/dev/perf/import-study-c1ec/checkpoints/progress-final-addendum-v1) preserved the completed native-export evidence and prospective Chrome inputs while this last run was pending. Its pending state remains accurate at its original cutoff. The final addendum adds the terminal artifact, frozen-reader audit, root review, and stop decision without altering that record.\n\nThe final Chrome component study and UTF-8 diagnostics used exact baseline 9e10d3b3. Earlier studies retain their explicitly recorded comparators, including the expanded VNDB comparison against `20c8`. Develop later advanced to dcfc02a0 through PR #972. The static integration assessment and unused conditional advancement map are retained as planning evidence only; no rebase or new performance qualification was performed, and no credit is claimed for #972.\n",
+    "specSha256": "387678cad17175a609ad54d31fce368e401a8c8e79c6067dd493c2b346710017",
+    "artifact": {
+      "id": 15256192943,
+      "sha256": "2f971a9424a418910c6ab500656ff8327e2333fa549763069600b002b41980d3",
+      "bytes": 196899,
+      "payloadIncluded": false,
+      "allExtractedMembersVerified": [
+        {
+          "name": "component/control-01-A.json",
+          "bytes": 44486,
+          "sha256": "210accc3dc4c840f40dbe6421b52796c64d42222e28878a9e679413db2427d4f"
+        },
+        {
+          "name": "component/control-01-D.json",
+          "bytes": 44464,
+          "sha256": "ca86237d5d05436a2cd1a55e8c2dd5e6f560b7fc8d35c29377bab3a128812974"
+        },
+        {
+          "name": "component/control-02-A.json",
+          "bytes": 44409,
+          "sha256": "fd72724372da85d38982730195d418c591b351b34c540c1644af60a844fc79ae"
+        },
+        {
+          "name": "component/control-02-D.json",
+          "bytes": 44469,
+          "sha256": "0f088b1956c8d2c34ecb4f26cbcf0a761303b2311ee80200a48f76efe0fdfcd8"
+        },
+        {
+          "name": "component/registered-plan.json",
+          "bytes": 24901,
+          "sha256": "fd39b31be1ad929bf1e8865db76f47268784d076b1153c852f08ded5389c11e3"
+        },
+        {
+          "name": "component/report.json",
+          "bytes": 1202199,
+          "sha256": "cc6e8e60ef41c6e901809aff4acdab509aee81fdab32ea59793000d7c9b7c00b"
+        },
+        {
+          "name": "component/triple-01-A.json",
+          "bytes": 44471,
+          "sha256": "752ae25f6f42a0c8b6462660f752e10c8b4ecfdce8b59136ccf2dee3ce587f7a"
+        },
+        {
+          "name": "component/triple-01-B.json",
+          "bytes": 44435,
+          "sha256": "6e4a871b56d87c3e2441337a022f388c54124a4635666e087d30b8a3fb2cd056"
+        },
+        {
+          "name": "component/triple-01-C.json",
+          "bytes": 44420,
+          "sha256": "cafe3b24bb0c31991e2433d774754d19c1951c14b15ffc2d00822b4af9c21482"
+        },
+        {
+          "name": "component/triple-02-A.json",
+          "bytes": 44444,
+          "sha256": "7e7ad427fa5afdb802c885b44c66ea665a82ba032cbd904021b3aae2f0db3503"
+        },
+        {
+          "name": "component/triple-02-B.json",
+          "bytes": 44475,
+          "sha256": "6b2b50df3962804ee511f72ce6b18b1616c721087f12e9c64bb3b8dfcecdb778"
+        },
+        {
+          "name": "component/triple-02-C.json",
+          "bytes": 44422,
+          "sha256": "971045548dd23bdd8c5057dcff5cc6b4d8b1910f41e10036f15ba9a13b70a486"
+        },
+        {
+          "name": "component/triple-03-A.json",
+          "bytes": 44476,
+          "sha256": "d4ee69c6b1ef7952b08d058ca0ccbfa1e9ce9b54da50cc4e47d60cbd5a8e68d7"
+        },
+        {
+          "name": "component/triple-03-B.json",
+          "bytes": 44452,
+          "sha256": "b0ae2d90d9cff9adc81f71e8290ce4325c5d40b8e018efab0ce7e59606a6c3fe"
+        },
+        {
+          "name": "component/triple-03-C.json",
+          "bytes": 44471,
+          "sha256": "90e08fdaccb0178c811ff109aca4a82a6f16b770add64f5de77f2c4f8f073418"
+        },
+        {
+          "name": "component/triple-04-A.json",
+          "bytes": 44469,
+          "sha256": "8d199a363abc147477f60c8d4c4c843bd6bc92ddd56a28e427d4efab19fbf959"
+        },
+        {
+          "name": "component/triple-04-B.json",
+          "bytes": 44463,
+          "sha256": "faeabbc71cb8cf09f2a8bf65b575aca6536e9c53d2fb813567c8636ab81cdcc5"
+        },
+        {
+          "name": "component/triple-04-C.json",
+          "bytes": 44444,
+          "sha256": "97bbc1a994cf6e39403926315b3911c97402070d98a873d0135e340f248f1715"
+        },
+        {
+          "name": "component/triple-05-A.json",
+          "bytes": 44467,
+          "sha256": "396de58760e911711cfef9452a8c61b184b6a74b818296e93eb425c75ac73685"
+        },
+        {
+          "name": "component/triple-05-B.json",
+          "bytes": 44413,
+          "sha256": "9d61042365cfe83dd670d2af6818d2e93e2e8f5e9711fa86846df28c7f0b83d1"
+        },
+        {
+          "name": "component/triple-05-C.json",
+          "bytes": 44445,
+          "sha256": "13521ff8faa789f1edaa11c56ecce10785d978ab0305756774263a80dc511703"
+        },
+        {
+          "name": "component/triple-06-A.json",
+          "bytes": 44474,
+          "sha256": "905f5557f5cce507ea46cd96ef4073f6480974081f5bd155d2fd8b63b3c37492"
+        },
+        {
+          "name": "component/triple-06-B.json",
+          "bytes": 44451,
+          "sha256": "e43d415b0aed3e77f0bf17cf5bc48fbd886d0efa2fe5aaac1f55bdce88f21a7f"
+        },
+        {
+          "name": "component/triple-06-C.json",
+          "bytes": 44494,
+          "sha256": "9d10a7f070eb6a85f24431bc824df009a9b31d1040936a2227b4aad800f3b207"
+        },
+        {
+          "name": "component.log",
+          "bytes": 12513,
+          "sha256": "2ab0626dea13c1783c148d5060546d237ec8e3b2178d9bc23c2e1d52ebabc99a"
+        },
+        {
+          "name": "fixtures.log",
+          "bytes": 157,
+          "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+        },
+        {
+          "name": "focused.json",
+          "bytes": 18387,
+          "sha256": "96aa07beac459dab2835bbfb0aeb5d7445fc9124529afbf42a37170dde83702f"
+        },
+        {
+          "name": "focused.log",
+          "bytes": 1080,
+          "sha256": "6106b4562a90c6b7f1017f864bb92f5dc6b197f540d630640324bcb324dc3434"
+        },
+        {
+          "name": "group-burst-canary.json",
+          "bytes": 111583,
+          "sha256": "a8a6ac67596714c8139d2ed0a75d0a514d3baf09706c8a354182956b42b28c92"
+        },
+        {
+          "name": "group-burst-canary.log",
+          "bytes": 109,
+          "sha256": "27864ff7b1cff7eaaf1807d20517a7258493fc874915a9845d4c5fea1db3a9cd"
+        },
+        {
+          "name": "integrity-canary.json",
+          "bytes": 35743,
+          "sha256": "b0a1c9b7bd1ee73c0d96e14577ceb9ead98c849b853a92c8762624cf038f8d07"
+        },
+        {
+          "name": "integrity-canary.log",
+          "bytes": 142,
+          "sha256": "a44d05030196819e181a271cc6ef4488f998e2f88402188aa226bc30a50825af"
+        },
+        {
+          "name": "lint.log",
+          "bytes": 694,
+          "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        {
+          "name": "main-types.log",
+          "bytes": 74,
+          "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+        },
+        {
+          "name": "node-metadata-admission/registered-plan.json",
+          "bytes": 24901,
+          "sha256": "fd39b31be1ad929bf1e8865db76f47268784d076b1153c852f08ded5389c11e3"
+        },
+        {
+          "name": "node-metadata-admission/report.json",
+          "bytes": 23169,
+          "sha256": "2f03d2f091863d45ec738b3812e59ca20430cde5ebed02d0b6b8c3a7fe7b8445"
+        },
+        {
+          "name": "node-metadata-admission.log",
+          "bytes": 71,
+          "sha256": "ccfd17577352b6476b1d488add890e159c14d17e27044e1c7acc2d4a8a751ce5"
+        },
+        {
+          "name": "source-identities-before-gates.json",
+          "bytes": 1418,
+          "sha256": "aca871c1dd153b31ee4786c5cecab2d7c743b9965aafe34ceff694c378053328"
+        },
+        {
+          "name": "prospective-plan.json",
+          "bytes": 24901,
+          "sha256": "fd39b31be1ad929bf1e8865db76f47268784d076b1153c852f08ded5389c11e3"
+        },
+        {
+          "name": "test-types.log",
+          "bytes": 89,
+          "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+        },
+        {
+          "name": "wrapper-identity.json",
+          "bytes": 575,
+          "sha256": "3d793b5304faf096268054eeb46c492e49a4d683796b65680792d0cbdcf35786"
+        }
+      ]
+    },
+    "productPrQualified": false,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "qualificationBoundary": "Exact9e component evidence only; current-develop rebase/reverification and full-import gates remain separate."
+  },
+  "externalDevelopAdvance": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "mergePr": 972,
+    "receipt": {
+      "path": "profile-evidence/develop-advance-dcfc02a0-c1ec.json",
+      "sha256": "b6a890bc6a5c74ff496d41ac0f6e4148faff0a7c216eeeccafad9b4d4aa22f56"
+    },
+    "qualificationBoundary": "No frozen study changed. Any worthwhile signal needs current-develop rebase/reverification before a PR. No credit taken for972."
+  },
+  "productPrQualified": false,
+  "publishedAddendum": false,
+  "publishedProgressCheckpoint": {
+    "commit": "2079fca6f98a44858a650c69a8b87dfce1427a21",
+    "tree": "c3dded139464d64e7d092b1da12f135c2ab6816d",
+    "parent": "0ab2ff5050dba9b528eefdeffcb4f0eb8c6357b0",
+    "payloadSha256": "8cf643dc9f27387335d35a0893765f6be98cfef1099fc42a973afa14a523d1b9",
+    "payloadBytes": 1039433,
+    "payloadEmbedded": false,
+    "publicationReceiptSha256": "b9daf7da82ee580e3dea9c3465c1f5f8acb0696c5c4364f642fa8dbe14290196",
+    "qualificationState": "progress-only; pending Chrome at immutable snapshot cutoff",
+    "url": "https://github.com/ManabiIO/manabitan/tree/2079fca6f98a44858a650c69a8b87dfce1427a21/dev/perf/import-study-c1ec/checkpoints/progress-final-addendum-v1"
+  },
+  "chromeAuditedOutcome": {
+    "status": "complete-negative-screen; both candidates rejected; native optimization line stopped",
+    "decision": "No further native variants, retries, full-import advancement, current-develop transplant or product PR. This decision follows the fixed prospective screen and root instruction after the complete audit.",
+    "scope": "Exact9e JMdict source inflation/CRC and separately measured parse/lookup/route components, under pinned Chrome153.0.8010.12. No whole-import, memory or productPR qualification. Currentdevelop has advanced; no transplant or new evaluation is authorized.",
+    "observations": {
+      "scheduled": 22,
+      "completed": 22,
+      "excludedWarmupFullCorpora": 44,
+      "measuredFullCorpora": 22,
+      "groupsPerCorpus": 12,
+      "banksPerCorpus": 53,
+      "rowsPerCorpus": 528299,
+      "dropped": 0,
+      "replaced": 0,
+      "retries": 0,
+      "allRawObservationsRetained": true,
+      "eachWorkerHasTwoExcludedWarmupsAndOneMeasuredPass": true
+    },
+    "gates": {
+      "allSourceGatesPassed": true,
+      "focusedTestsPassed": true,
+      "nodeMetadataAdmissionVerified": true,
+      "integrityCanaryVerified": {
+        "parserCasesPerArm": 20,
+        "directNativeCasesPerArm": 8,
+        "nativePositiveCases": 5,
+        "protectedFallbackCases": 4,
+        "nativeErrorFallbackCases": 11
+      },
+      "policyCanaryVerified": {
+        "casesPerArm": 12,
+        "nativePositive": 3,
+        "protectedFallback": 6,
+        "nativeErrorFallback": 3,
+        "realNativeOversizedReadCases": 1,
+        "independentHeldOperationSnapshots": 3
+      },
+      "sourceWasmHarnessBrowserVerified": true
+    },
+    "componentAdvanceScreen": {
+      "scope": "Frozen component screen only; no whole-import, memory or PR qualification. A future current-develop evaluation remains separate.",
+      "primaryMetric": "inflateMs",
+      "identicalControlPassed": true,
+      "allSourceAndCorrectnessGatesVerified": true,
+      "candidates": {
+        "B/A": {
+          "checks": {
+            "pairedMedianAtMostMinus5Percent": false,
+            "equalWorkAtMostMinus5Percent": false,
+            "atLeastFiveOfSixFaster": false,
+            "DescriptiveIntervalUpperBelowZero": false
+          },
+          "primaryThresholdsPassed": false,
+          "mayConsiderSeparateFullImportExperiment": false
+        },
+        "C/A": {
+          "checks": {
+            "pairedMedianAtMostMinus5Percent": false,
+            "equalWorkAtMostMinus5Percent": false,
+            "atLeastFiveOfSixFaster": false,
+            "DescriptiveIntervalUpperBelowZero": false
+          },
+          "primaryThresholdsPassed": false,
+          "mayConsiderSeparateFullImportExperiment": false
+        }
+      },
+      "mechanismComparison": "C/B descriptive only; secondary metrics retained without filtering."
+    },
+    "comparisons": {
+      "C/B": {
+        "inflateMs": {
+          "count": 6,
+          "medianPairedChangePercent": -7.663339691604598,
+          "equalWorkChangePercent": -7.699951781979242,
+          "fasterPairs": 6,
+          "worstPairChangePercent": -5.972242728457289,
+          "descriptiveBootstrap95Percent": [
+            -9.257291569897575,
+            -6.166760308704267
+          ]
+        },
+        "parseLookupMs": {
+          "count": 6,
+          "medianPairedChangePercent": -1.3725354213770968,
+          "equalWorkChangePercent": -1.1688277998626484,
+          "fasterPairs": 4,
+          "worstPairChangePercent": 3.20968980256755,
+          "descriptiveBootstrap95Percent": [
+            -4.1458121650828295,
+            2.156112817500744
+          ]
+        },
+        "measuredComponentsMs": {
+          "count": 6,
+          "medianPairedChangePercent": -3.7041713155549494,
+          "equalWorkChangePercent": -3.9828230408255227,
+          "fasterPairs": 6,
+          "worstPairChangePercent": -1.7651909171536362,
+          "descriptiveBootstrap95Percent": [
+            -5.651313858770424,
+            -2.5582821866215855
+          ]
+        }
+      },
+      "C/A": {
+        "inflateMs": {
+          "count": 6,
+          "medianPairedChangePercent": 85.47508454831485,
+          "equalWorkChangePercent": 84.43803188886154,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 90.54185164492998,
+          "descriptiveBootstrap95Percent": [
+            79.55605947607137,
+            88.2795251863663
+          ]
+        },
+        "parseLookupMs": {
+          "count": 6,
+          "medianPairedChangePercent": 0.8243100721769814,
+          "equalWorkChangePercent": 0.8586766810940061,
+          "fasterPairs": 1,
+          "worstPairChangePercent": 4.471660495585006,
+          "descriptiveBootstrap95Percent": [
+            -1.8557676990115013,
+            3.686206694459959
+          ]
+        },
+        "measuredComponentsMs": {
+          "count": 6,
+          "medianPairedChangePercent": 24.615095727883187,
+          "equalWorkChangePercent": 24.162515324617107,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 27.426733145741,
+          "descriptiveBootstrap95Percent": [
+            21.53122699984329,
+            26.392335057995542
+          ]
+        }
+      },
+      "B/A": {
+        "inflateMs": {
+          "count": 6,
+          "medianPairedChangePercent": 99.258328736149,
+          "equalWorkChangePercent": 99.82441553356813,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 106.95910387199268,
+          "descriptiveBootstrap95Percent": [
+            96.72277418205677,
+            103.49421297275319
+          ]
+        },
+        "parseLookupMs": {
+          "count": 6,
+          "medianPairedChangePercent": 2.5302268044987475,
+          "equalWorkChangePercent": 2.0514827820223402,
+          "fasterPairs": 2,
+          "worstPairChangePercent": 7.025720697391491,
+          "descriptiveBootstrap95Percent": [
+            -1.5041238939935475,
+            5.2124926478963385
+          ]
+        },
+        "measuredComponentsMs": {
+          "count": 6,
+          "medianPairedChangePercent": 29.31521652497999,
+          "equalWorkChangePercent": 29.312815953139037,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 33.237254399928176,
+          "descriptiveBootstrap95Percent": [
+            26.868860389331807,
+            31.813615672113738
+          ]
+        }
+      },
+      "D/A": {
+        "inflateMs": {
+          "count": 2,
+          "medianPairedChangePercent": -0.11257859148952054,
+          "equalWorkChangePercent": -0.11261590661686416,
+          "fasterPairs": 2,
+          "worstPairChangePercent": -0.07613024124293322,
+          "descriptiveBootstrap95Percent": [
+            -0.14902694173609676,
+            -0.07613024124293322
+          ]
+        },
+        "parseLookupMs": {
+          "count": 2,
+          "medianPairedChangePercent": 1.255379224517128,
+          "equalWorkChangePercent": 1.2578795907230322,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 1.5750172798752349,
+          "descriptiveBootstrap95Percent": [
+            0.9357411691590434,
+            1.5750172798752349
+          ]
+        },
+        "measuredComponentsMs": {
+          "count": 2,
+          "medianPairedChangePercent": 0.8717547426233985,
+          "equalWorkChangePercent": 0.873064761208342,
+          "fasterPairs": 0,
+          "worstPairChangePercent": 1.0932843437495565,
+          "descriptiveBootstrap95Percent": [
+            0.6502251414972182,
+            1.0932843437495565
+          ]
+        }
+      }
+    },
+    "compactOutcomeSha256": "0770816e91b812eeee2bc5f4b845125d3a0ccc0aef2085b8fcc26f27f99a8e0e",
+    "rootReviewSha256": "03fc64eb6d9bc4833ba2f408cb88e418dd5333f1851f69827606e4b827d3f732",
+    "artifactSha256": "2f971a9424a418910c6ab500656ff8327e2333fa549763069600b002b41980d3",
+    "auditSha256": "abe51698c156b40ca10bf26a8d8c15e5a27cd87ecccdcaefc319c0e2a635fd0d"
+  }
+}

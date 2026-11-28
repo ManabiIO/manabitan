@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-11-28T08:57:53.725266+00:00",
+  "finishedAt": "2026-11-28T08:57:54.138492+00:00",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/final-checkpoint-01/restore_addendum.py",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/final-checkpoint-01/payload.tar.gz",
+    "--expected-payload-sha256",
+    "f8536158b3a2d31d7c056eba8ba17bb0af1237c47344ff2f9fd1a5ef0a5e86ec",
+    "--prior-payload",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/payload.tar.gz",
+    "--output",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/verification-final-restore-01"
+  ],
+  "exitCode": 0,
+  "payloadSha256": "f8536158b3a2d31d7c056eba8ba17bb0af1237c47344ff2f9fd1a5ef0a5e86ec",
+  "priorPayloadSha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+  "sourceExperimentsExecuted": false,
+  "published": false,
+  "status": "all-final-and-prior-referenced-members-restored-and-verified",
+  "archiveMembers": 249,
+  "logicalEvidenceFiles": 409,
+  "controlFiles": 6,
+  "priorReferencedFiles": 151,
+  "allRestoredDiskDigestsMatched": true,
+  "symlinksCreated": 0,
+  "temporaryRestorationRemovedAfterVerification": true,
+  "terminalRunId": 46126332612,
+  "terminalObservationCount": 22,
+  "productPrQualified": false
+}

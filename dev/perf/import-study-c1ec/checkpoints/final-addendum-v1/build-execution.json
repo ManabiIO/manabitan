@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/build_addendum.py",
+    "finalize",
+    "--terminal-spec",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/terminal-observed-46126332612.json",
+    "--output",
+    "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-final-addendum-c1ec/final-checkpoint-01"
+  ],
+  "startedAt": "2026-11-28T08:57:23.026386+00:00",
+  "finishedAt": "2026-11-28T08:57:24.332171+00:00",
+  "elapsedSeconds": 1.3057992980029667,
+  "exitCode": 0,
+  "sourceExperimentsExecuted": false,
+  "published": false
+}
