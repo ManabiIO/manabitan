@@ -3,13 +3,13 @@
 
 import {prepareTermLookupIndexesFromPreinternedPlan} from '../../ext/js/dictionary/term-lookup-index-preparation.js'
 import {registerOwnedTermLookupIndexes} from '../../ext/js/dictionary/term-lookup-index-ownership.js'
-import {TermRecordOpfsStore} from '../../ext/js/dictionary/term-record-opfs-store.js'
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../../ext/js/dictionary/term-record-opfs-store.js'
 
 /**
  * @param {number} [rowCount=128]
  * @param {number} [score=0]
  * @param {boolean} [owned=true]
- * @returns {Promise<{chunk: import('../../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk, prepared: import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex, store: TermRecordOpfsStore, encoded: Awaited<ReturnType<TermRecordOpfsStore['_encodeArtifactChunkRecords']>>, expected: Uint8Array, adopt: () => import('../../ext/js/dictionary/term-record-opfs-store.js').PendingLookupIndexChunk}>}
+ * @returns {Promise<{chunk: import('../../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk, prepared: import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex, consumer: import('../../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk & {dictionary: string, dictionaryTotalRows: number, resolvedContentReferences: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}, store: TermRecordOpfsStore, encoded: Awaited<ReturnType<TermRecordOpfsStore['_encodeArtifactChunkRecords']>>, expected: Uint8Array, adopt: () => import('../../ext/js/dictionary/term-record-opfs-store.js').PendingLookupIndexChunk}>}
  * @throws {Error} If the fixture cannot produce a complete lookup index.
  */
 export async function createImportIndexChunkFixture(rowCount = 128, score = 0, owned = true) {
@@ -46,13 +46,18 @@ export async function createImportIndexChunkFixture(rowCount = 128, score = 0, o
     const store = new TermRecordOpfsStore()
     store.setRawTermBankSourceBytes(128 * 1024 ** 2)
     Reflect.set(store, '_importSessionActive', true)
-    const recordChunk = {dictionary: 'Envelope parity', ...chunk}
     const offsets = Float64Array.from({length: rowCount}, (_, i) => 2 ** 40 + i * 16)
     const lengths = new Uint32Array(rowCount).fill(8)
-    const encoded = await store._encodeArtifactChunkRecords(
-        recordChunk,
+    const consumer = createArtifactTermRecordChunkWithResolvedContent(
+        {dictionary: 'Envelope parity', dictionaryTotalRows: 528299, ...chunk},
+        Uint32Array.from({length: rowCount}, (_, i) => i),
         offsets,
         lengths,
+    )
+    const encoded = await store._encodeArtifactChunkRecords(
+        consumer,
+        new Float64Array(0),
+        new Uint32Array(0),
         prepared.preinternedPlan,
         prepared.bytes,
     )
@@ -72,8 +77,9 @@ export async function createImportIndexChunkFixture(rowCount = 128, score = 0, o
         encoded.recordFields,
         encoded.recordFieldsFormat,
         prepared,
+        consumer,
     )
-    return {chunk, prepared, store, encoded, expected, adopt}
+    return {chunk, prepared, consumer, store, encoded, expected, adopt}
 }
 
 /**
@@ -81,5 +87,5 @@ export async function createImportIndexChunkFixture(rowCount = 128, score = 0, o
  * @returns {Uint8Array[]}
  */
 export function getImportIndexChunkParts(chunks) {
-    return chunks.flatMap((chunk) => chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields])
+    return chunks.flatMap((chunk) => (chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields]))
 }

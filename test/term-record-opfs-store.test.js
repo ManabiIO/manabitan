@@ -3295,41 +3295,55 @@ describe('TermRecordOpfsStore', () => {
         const {store} = fixture;
         const fileBytesByName = new Map();
         let writeCount = 0;
-        const directory = createFakeDirectoryHandle(fileBytesByName, backend === 'sync-short-writes' ? {
-            syncAccessHandleFactory(name) {
-                return {
-                    write(buffer, {at = 0} = {}) {
-                        ++writeCount;
-                        const length = Math.min(173, buffer.byteLength);
-                        const current = fileBytesByName.get(name) ?? new Uint8Array();
-                        const next = new Uint8Array(Math.max(current.byteLength, at + length));
-                        next.set(current);
-                        next.set(buffer.subarray(0, length), at);
-                        fileBytesByName.set(name, next);
-                        return length;
-                    },
-                    truncate(size) { fileBytesByName.set(name, (fileBytesByName.get(name) ?? new Uint8Array()).slice(0, size)); },
-                    flush() {},
-                    close() {},
-                };
-            },
-        } : {});
+        const directory = createFakeDirectoryHandle(fileBytesByName, backend === 'sync-short-writes' ?
+            {
+                syncAccessHandleFactory(name) {
+                    return {
+                        write(buffer, {at = 0} = {}) {
+                            ++writeCount;
+                            const length = Math.min(173, buffer.byteLength);
+                            const current = fileBytesByName.get(name) ?? new Uint8Array();
+                            const next = new Uint8Array(Math.max(current.byteLength, at + length));
+                            next.set(current);
+                            next.set(buffer.subarray(0, length), at);
+                            fileBytesByName.set(name, next);
+                            return length;
+                        },
+                        truncate(size) { fileBytesByName.set(name, (fileBytesByName.get(name) ?? new Uint8Array()).slice(0, size)); },
+                        flush() {},
+                        close() {},
+                    };
+                },
+            } :
+            {});
         Reflect.set(store, '_recordsDirectoryHandle', directory);
         const descriptorName = store._getShardSegmentFileName('Envelope parity', 'raw', 0);
         const descriptor = await directory.getFileHandle(descriptorName, {create: true});
         const state = store._createShardState(descriptorName, descriptor, 0);
         Reflect.get(store, '_shardStateByFileName').set(descriptorName, state);
         const expectedFallback = store._createLookupIndexChunk(
-            fixture.chunk.rowCount + 1, fallback.chunk.rowCount, fallback.encoded.contentOffsetBase,
-            fallback.prepared.bytes, fallback.encoded.recordFields, fallback.encoded.recordFieldsFormat,
+            fixture.chunk.rowCount + 1,
+            fallback.chunk.rowCount,
+            fallback.encoded.contentOffsetBase,
+            fallback.prepared.bytes,
+            fallback.encoded.recordFields,
+            fallback.encoded.recordFieldsFormat,
         );
         /** @type {[typeof fixture, number][]} */
         const chunks = [[fixture, 1], [fallback, fixture.chunk.rowCount + 1]];
         for (const [current, firstId] of chunks) {
             await store._appendEncodedChunk(
-                state, firstId, current.chunk.rowCount, 'raw', current.encoded.contentOffsetBase,
-                current.prepared.bytes, current.encoded.recordFields, current.encoded.recordFieldsFormat,
-                null, current.prepared,
+                state,
+                firstId,
+                current.chunk.rowCount,
+                'raw',
+                current.encoded.contentOffsetBase,
+                current.prepared.bytes,
+                current.encoded.recordFields,
+                current.encoded.recordFieldsFormat,
+                null,
+                current.prepared,
+                current.consumer,
             );
         }
         expect(state.pendingLookupIndexChunks[0]).not.toBeInstanceOf(Uint8Array);

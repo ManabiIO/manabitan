@@ -6,7 +6,7 @@ import {Worker as ThreadWorker} from 'node:worker_threads'
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest'
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {getImportIndexChunkParts} from './util/import-index-chunk-fixture.js'
-import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
 
 /** @type {ParserWorker[]} */
 const workers = []
@@ -21,10 +21,9 @@ class ParserWorker extends EventTarget {
         this.terminated = null
         this.thread.on('message', (data) => {
             if (rejectOwnership && data.type === 'result') {
-                data.chunk.preparedLookupIndexes = new Map([['invalid', {
-                    get bytes() { throw new Error('Ownership registration witness') },
-                    preinternedPlan: {},
-                }]])
+                Object.defineProperty(data.chunk, 'preparedLookupIndexes', {
+                    get() { throw new Error('Ownership registration witness') },
+                })
             }
             this.dispatchEvent(new MessageEvent('message', {data}))
         })
@@ -78,7 +77,10 @@ const options = {
 }
 
 describe('production parser-worker local lookup ownership', () => {
-    test.each([384, 6_648_310])('actual transferred results reach scatter envelopes for dictionary size %i', async (dictionaryTotalRows) => {
+    test.each([
+        {dictionaryTotalRows: 384, expectedAdoptions: 0},
+        {dictionaryTotalRows: 6_648_310, expectedAdoptions: 12},
+    ])('actual transferred results preserve ownership for dictionary size $dictionaryTotalRows', async ({dictionaryTotalRows, expectedAdoptions}) => {
         vi.stubGlobal('Worker', ParserWorker)
         vi.stubGlobal('navigator', {hardwareConcurrency: 4, deviceMemory: 8})
         const store = new TermRecordOpfsStore()
@@ -91,27 +93,32 @@ describe('production parser-worker local lookup ownership', () => {
             const [firstId, count, base, payload, fields, format] = args
             const expected = store._createLookupIndexChunk(firstId, count, base, payload, fields, format)
             const pending = original(...args)
-            expect(pending).not.toBeInstanceOf(Uint8Array)
+            if (expectedAdoptions === 0) {
+                expect(pending).toBeInstanceOf(Uint8Array)
+            } else {
+                expect(pending).not.toBeInstanceOf(Uint8Array)
+                ++adopted
+            }
             const parts = getImportIndexChunkParts([pending])
             expect(Buffer.concat(parts)).toEqual(Buffer.from(expected))
-            ++adopted
             return pending
         })
         let rows = 0
         const used = await parser.parseTermBankWithWasmColumnChunksParallel(sources(), 3, async (chunk) => {
             const keys = Uint8Array.from(chunk.termRecordPreinternedPlan.stringsBuffer)
-            await store.appendBatchFromArtifactChunkResolvedContent(
+            const consumer = createArtifactTermRecordChunkWithResolvedContent(
                 {dictionary: 'Worker ownership', dictionaryTotalRows, ...chunk},
+                Uint32Array.from({length: chunk.rowCount}, (_, row) => row),
                 Float64Array.from({length: chunk.rowCount}, (_, row) => row * 16),
                 new Uint32Array(chunk.rowCount).fill(8),
-                'raw',
             )
+            await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
             expect(chunk.termRecordPreinternedPlan.stringsBuffer).toEqual(keys)
             rows += chunk.rowCount
         }, options)
         expect(used).toBe(true)
         expect(rows).toBe(384)
-        expect(adopted).toBe(12)
+        expect(adopted).toBe(expectedAdoptions)
     })
 
     test('native segmented runs retain their key aliases and preserve every envelope', async () => {
@@ -151,12 +158,13 @@ describe('production parser-worker local lookup ownership', () => {
                 bytes: preinternedPlan.stringsBuffer,
                 expected: Uint8Array.from(preinternedPlan.stringsBuffer),
             }))
-            await store.appendBatchFromArtifactChunkResolvedContent(
+            const consumer = createArtifactTermRecordChunkWithResolvedContent(
                 {dictionary: 'Segment ownership', dictionaryTotalRows: 6_648_310, ...chunk},
+                Uint32Array.from({length: chunk.rowCount}, (_, row) => row),
                 Float64Array.from({length: chunk.rowCount}, (_, row) => row * 16),
                 new Uint32Array(chunk.rowCount).fill(8),
-                'raw',
             )
+            await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
             expect(Buffer.from(chunk.termRecordPreinternedPlan.stringsBuffer).equals(Buffer.from(keys))).toBe(true)
             for (const {bytes, expected} of plans) { expect(Buffer.from(bytes).equals(Buffer.from(expected))).toBe(true) }
             rows += chunk.rowCount

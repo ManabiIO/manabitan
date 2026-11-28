@@ -1,9 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* eslint @stylistic/semi: ["error", "never"] */
 
-import {describe, expect, test} from 'vitest'
+import {describe, expect, test, vi} from 'vitest'
 import {
     canTakeOwnedTermLookupIndex,
+    getTermLookupIndexConsumer,
     registerOwnedTermLookupIndexes,
     registerOwnedTermRecordFields,
     takeOwnedTermLookupIndex,
@@ -41,9 +42,9 @@ describe('local owned import index envelopes', () => {
         expect(payload.byteLength).toBe(0)
         expect(fields.byteLength).toBe(0)
         expect(chunk.termRecordPreinternedPlan.stringsBuffer).toEqual(originalKeys)
-        expect(canTakeOwnedTermLookupIndex(prepared, payload, fields)).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(prepared, payload, fields, fixture.consumer)).toBe(false)
         expect(concatenate(getImportIndexChunkParts([pending]))).toEqual(expected)
-        expect(() => takeOwnedTermLookupIndex(prepared, payload, fields)).toThrow('ownership')
+        expect(() => takeOwnedTermLookupIndex(prepared, payload, fields, fixture.consumer)).toThrow('ownership')
     })
 
     test('ordinary caller buffers retain eager snapshot and lifetime behavior', async () => {
@@ -97,7 +98,7 @@ describe('local owned import index envelopes', () => {
         const fixture = await createImportIndexChunkFixture()
         const {prepared, encoded, chunk} = fixture
         if (replacement === 'descriptor') {
-            expect(canTakeOwnedTermLookupIndex({...prepared}, prepared.bytes, encoded.recordFields)).toBe(false)
+            expect(canTakeOwnedTermLookupIndex({...prepared}, prepared.bytes, encoded.recordFields, fixture.consumer)).toBe(false)
             return
         }
         if (replacement === 'bytes') { prepared.bytes = Uint8Array.from(prepared.bytes) }
@@ -105,7 +106,7 @@ describe('local owned import index envelopes', () => {
         if (replacement === 'map') { chunk.preparedLookupIndexes = new Map(chunk.preparedLookupIndexes) }
         if (replacement === 'duplicate') { chunk.preparedLookupIndexes?.set('duplicate', {...prepared}) }
         if (replacement === 'row-column') { chunk.scoreList = new Int32Array(prepared.bytes.buffer, 0, 1) }
-        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, encoded.recordFields)).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, encoded.recordFields, fixture.consumer)).toBe(false)
     })
 
     test.each(['shared', 'partial', 'resizable'])('does not infer ownership from $0 payload views', async (kind) => {
@@ -119,15 +120,15 @@ describe('local owned import index envelopes', () => {
         fixture.prepared.bytes = new Uint8Array(buffer, kind === 'partial' ? 4 : 0, original.byteLength)
         fixture.prepared.bytes.set(original)
         registerOwnedTermLookupIndexes(fixture.chunk)
-        expect(canTakeOwnedTermLookupIndex(fixture.prepared, fixture.prepared.bytes, fixture.encoded.recordFields)).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(fixture.prepared, fixture.prepared.bytes, fixture.encoded.recordFields, fixture.consumer)).toBe(false)
     })
 
     test('requires fresh store field ownership and excludes aliases between both transfers', async () => {
         const fixture = await createImportIndexChunkFixture()
         const {prepared, encoded} = fixture
-        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, Uint8Array.from(encoded.recordFields))).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, Uint8Array.from(encoded.recordFields), fixture.consumer)).toBe(false)
         registerOwnedTermRecordFields(prepared.bytes)
-        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, prepared.bytes)).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(prepared, prepared.bytes, prepared.bytes, fixture.consumer)).toBe(false)
     })
 
     test.each(['contentDedupPlan', 'resolvedContentReferences', 'mediaRows'])('keeps newly retained nested $0 views alive', async (field) => {
@@ -136,9 +137,9 @@ describe('local owned import index envelopes', () => {
         if (field === 'mediaRows') {
             Reflect.set(fixture.chunk, field, [{row: {expressionBytes: bytes.subarray(0, 3)}}])
         } else {
-            Reflect.set(fixture.chunk, field, {offsets: new Uint32Array(bytes.buffer, 0, 1)})
+            Reflect.set(field === 'resolvedContentReferences' ? fixture.consumer : fixture.chunk, field, {offsets: new Uint32Array(bytes.buffer, 0, 1)})
         }
-        expect(canTakeOwnedTermLookupIndex(fixture.prepared, bytes, fixture.encoded.recordFields)).toBe(false)
+        expect(canTakeOwnedTermLookupIndex(fixture.prepared, bytes, fixture.encoded.recordFields, fixture.consumer)).toBe(false)
         expect(fixture.adopt()).toEqual(fixture.expected)
         expect(bytes.byteLength).toBeGreaterThan(0)
     })
@@ -165,4 +166,257 @@ describe('local owned import index envelopes', () => {
         )
         expect(concatenate(getImportIndexChunkParts([fixture.adopt()]))).toEqual(expected)
     })
+    test.each(['initial', 'later'])('keeps payload-backed route filters alive when introduced %s', async (when) => {
+        const fixture = await createImportIndexChunkFixture(128, 0, when === 'later')
+        fixture.prepared.routeFilter = new Uint32Array(fixture.prepared.bytes.buffer, 0, 2)
+        if (when === 'initial') { registerOwnedTermLookupIndexes(fixture.chunk) }
+        const filter = Uint32Array.from(fixture.prepared.routeFilter)
+        expect(fixture.adopt()).toEqual(fixture.expected)
+        expect(fixture.prepared.routeFilter).toEqual(filter)
+        expect(fixture.prepared.bytes.byteLength).toBeGreaterThan(0)
+    })
+
+    test('adopts a normal independent route filter and preserves its storage', async () => {
+        const fixture = await createImportIndexChunkFixture(128, 0, false)
+        fixture.prepared.routeFilter = Uint32Array.of(1, 2)
+        registerOwnedTermLookupIndexes(fixture.chunk)
+        const pending = fixture.adopt()
+        expect(pending).not.toBeInstanceOf(Uint8Array)
+        expect(fixture.prepared.routeFilter).toEqual(Uint32Array.of(1, 2))
+        expect(concatenate(getImportIndexChunkParts([pending]))).toEqual(fixture.expected)
+    })
+
+    test('keeps a late field-backed route filter alive', async () => {
+        const fixture = await createImportIndexChunkFixture()
+        fixture.prepared.routeFilter = new Uint32Array(fixture.encoded.recordFields.buffer, 0, 2)
+        const filter = Uint32Array.from(fixture.prepared.routeFilter)
+        expect(fixture.adopt()).toEqual(fixture.expected)
+        expect(fixture.prepared.routeFilter).toEqual(filter)
+        expect(fixture.encoded.recordFields.byteLength).toBeGreaterThan(0)
+    })
+
+    test.each(['owner', 'consumer', 'key-plan', 'content-plan', 'references', 'prepared'])('declines late %s accessors without invoking them', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        let reads = 0
+        let target
+        if (kind === 'owner') {
+            target = fixture.chunk
+        } else if (kind === 'consumer') {
+            target = fixture.consumer
+        } else if (kind === 'key-plan') {
+            target = fixture.prepared.preinternedPlan
+        } else if (kind === 'content-plan') {
+            target = fixture.chunk
+        } else if (kind === 'references') {
+            target = fixture.consumer.resolvedContentReferences
+        } else {
+            target = fixture.prepared
+        }
+        let name = 'mediaRows'
+        if (kind === 'content-plan') { name = 'contentDedupPlan' }
+        if (kind === 'prepared') { name = 'routeFilter' }
+        Object.defineProperty(target, name, {
+            configurable: true,
+            get() { ++reads; throw new Error('Ownership proof must not invoke this getter') },
+        })
+        expect(fixture.adopt()).toEqual(fixture.expected)
+        expect(reads).toBe(0)
+        fixture.encoded.recordFields.fill(0)
+        expect(() => fixture.adopt()).toThrow(/term-record fields/)
+        expect(reads).toBe(0)
+    })
+
+    test.each(['payload', 'fields'])('rejects per-object %s geometry and method shadows before reading them', async (kind) => {
+        for (const name of ['buffer', 'byteOffset', 'byteLength', 'length', 'constructor', 'subarray', 'slice', 'set', Symbol.iterator]) {
+            const fixture = await createImportIndexChunkFixture()
+            const target = kind === 'payload' ? fixture.prepared.bytes : fixture.encoded.recordFields
+            let reads = 0
+            Object.defineProperty(target, name, {
+                get() { ++reads; throw new Error('Shadowed view access') },
+            })
+            expect(canTakeOwnedTermLookupIndex(
+                fixture.prepared,
+                fixture.prepared.bytes,
+                fixture.encoded.recordFields,
+                fixture.consumer,
+            )).toBe(false)
+            expect(reads).toBe(0)
+        }
+    })
+
+    test.each(['byteLength', 'resizable', 'constructor', 'transfer'])('rejects backing-buffer %s shadows before reading them', async (name) => {
+        const fixture = await createImportIndexChunkFixture()
+        let reads = 0
+        Object.defineProperty(fixture.prepared.bytes.buffer, name, {
+            get() { ++reads; throw new Error('Shadowed backing-buffer access') },
+        })
+        expect(canTakeOwnedTermLookupIndex(
+            fixture.prepared,
+            fixture.prepared.bytes,
+            fixture.encoded.recordFields,
+            fixture.consumer,
+        )).toBe(false)
+        expect(reads).toBe(0)
+    })
+
+    test('preserves the eager error for a shorter shadowed payload geometry instead of transferring inconsistent parts', async () => {
+        const fixture = await createImportIndexChunkFixture(1)
+        const payload = fixture.prepared.bytes
+        const buffer = payload.buffer
+        const actualByteLength = payload.byteLength
+        new Uint32Array(buffer)[3] -= 16
+        Object.defineProperty(payload, 'byteLength', {value: actualByteLength - 16})
+        Object.defineProperty(buffer, 'byteLength', {value: actualByteLength - 16})
+        expect(() => fixture.store._createLookupIndexChunk(
+            1,
+            1,
+            fixture.encoded.contentOffsetBase,
+            payload,
+            fixture.encoded.recordFields,
+            fixture.encoded.recordFieldsFormat,
+        )).toThrow(RangeError)
+        expect(() => fixture.adopt()).toThrow(RangeError)
+        expect(new Uint8Array(buffer).length).toBe(actualByteLength)
+        expect(fixture.encoded.recordFields.byteLength).toBeGreaterThan(0)
+    })
+
+    test.each(['consumer', 'prepared'])('does not invoke Proxy traps to infer %s provenance', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        let traps = 0
+        const target = kind === 'consumer' ? fixture.consumer : fixture.prepared
+        const proxy = new Proxy(target, {
+            get() { ++traps; throw new Error('Proxy property read') },
+            getOwnPropertyDescriptor() { ++traps; throw new Error('Proxy descriptor read') },
+            getPrototypeOf() { ++traps; throw new Error('Proxy prototype read') },
+        })
+        expect(canTakeOwnedTermLookupIndex(
+            kind === 'prepared' ? /** @type {typeof fixture.prepared} */ (proxy) : fixture.prepared,
+            fixture.prepared.bytes,
+            fixture.encoded.recordFields,
+            kind === 'consumer' ? proxy : fixture.consumer,
+        )).toBe(false)
+        expect(traps).toBe(0)
+    })
+
+    test('does not brand an overridable field encoder return value', async () => {
+        const fixture = await createImportIndexChunkFixture()
+        const fields = Uint8Array.from(fixture.encoded.recordFields)
+        const override = vi.spyOn(fixture.store, '_encodeArtifactRecordFields').mockReturnValue(fields)
+        try {
+            const encoded = await fixture.store._encodeArtifactChunkRecords(
+                fixture.consumer,
+                new Float64Array(0),
+                new Uint32Array(0),
+                fixture.prepared.preinternedPlan,
+                fixture.prepared.bytes,
+            )
+            const pending = fixture.store._createPendingLookupIndexChunk(
+                1,
+                fixture.chunk.rowCount,
+                encoded.contentOffsetBase,
+                encoded.lookupIndexBytes,
+                encoded.recordFields,
+                encoded.recordFieldsFormat,
+                fixture.prepared,
+                fixture.consumer,
+            )
+            expect(pending).toEqual(fixture.expected)
+            expect(fields.byteLength).toBeGreaterThan(0)
+            expect(fixture.prepared.bytes.byteLength).toBeGreaterThan(0)
+        } finally {
+            override.mockRestore()
+        }
+    })
+
+    test('requires the original factory consumer and empty unshadowed projections', async () => {
+        const fixture = await createImportIndexChunkFixture()
+        const emptyOffsets = new Float64Array(0)
+        const emptyLengths = new Uint32Array(0)
+        expect(getTermLookupIndexConsumer(fixture.consumer, emptyOffsets, emptyLengths)).toBe(fixture.consumer)
+        expect(getTermLookupIndexConsumer({...fixture.consumer}, emptyOffsets, emptyLengths)).toBeNull()
+        expect(getTermLookupIndexConsumer(fixture.consumer, new Float64Array(1), emptyLengths)).toBeNull()
+        expect(getTermLookupIndexConsumer(fixture.consumer, emptyOffsets, new Uint32Array(1))).toBeNull()
+        let reads = 0
+        Object.defineProperty(emptyOffsets, 'length', {get() { ++reads; throw new Error('Projection shadow') }})
+        expect(getTermLookupIndexConsumer(fixture.consumer, emptyOffsets, emptyLengths)).toBeNull()
+        expect(reads).toBe(0)
+    })
+
+    test.each([false, true])('keeps materialized key-cache slices alive when the consumer plan changes across an await: %s', async (restoreDuringAwait) => {
+        const fixture = await createImportIndexChunkFixture(2)
+        const {store, consumer, chunk, prepared} = fixture
+        const originalPlan = chunk.termRecordPreinternedPlan
+        const keyBytes = Uint8Array.from(originalPlan.stringsBuffer)
+        const keyOffset = Buffer.from(prepared.bytes).indexOf(Buffer.from(keyBytes))
+        expect(keyOffset).toBeGreaterThanOrEqual(0)
+        consumer.termRecordPreinternedPlan = {
+            ...originalPlan,
+            stringsBuffer: prepared.bytes.subarray(keyOffset, keyOffset + keyBytes.length),
+        }
+        consumer.dictionaryTotalRows = 2
+        // The in-memory path retains records before storage is attached by
+        // the awaited shard owner; ordinary active OPFS imports discard them.
+        Reflect.set(store, '_importSessionActive', false)
+        await store.beginImportSession()
+        const createShard = store._getOrCreateShardState.bind(store)
+        const override = vi.spyOn(store, '_getOrCreateShardState').mockImplementation(async (...args) => {
+            Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return {} }})
+            const state = await createShard(...args)
+            if (restoreDuringAwait) {
+                consumer.termRecordPreinternedPlan = originalPlan
+                consumer.dictionaryTotalRows = 528299
+            }
+            return state
+        })
+        try {
+            await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
+            const record = Reflect.get(store, '_recordsById').get(1)
+            expect(record.expressionBytes).toEqual(keyBytes.subarray(0, 9))
+            expect(record.readingBytes).toEqual(keyBytes.subarray(9, 15))
+            expect(prepared.bytes.byteLength).toBeGreaterThan(0)
+        } finally {
+            override.mockRestore()
+        }
+    })
+
+    test.each(['normal', 'spread', 'populated-projections'])('whole persisted-only append preserves %s consumer behavior', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        const {store, prepared} = fixture
+        // The production importer removes mediaRows before creating this object.
+        Reflect.deleteProperty(fixture.consumer, 'mediaRows')
+        const consumer = kind === 'spread' ? {...fixture.consumer} : fixture.consumer
+        const rowCount = kind === 'populated-projections' ? fixture.chunk.rowCount : 0
+        Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return {} }})
+        Reflect.set(store, '_importSessionActive', false)
+        await store.beginImportSession()
+        const createPending = store._createPendingLookupIndexChunk.bind(store)
+        const pending = []
+        const override = vi.spyOn(store, '_createPendingLookupIndexChunk').mockImplementation((...args) => {
+            const [firstId, count, base, payload, fields, format] = args
+            const expected = store._createLookupIndexChunk(firstId, count, base, payload, fields, format)
+            const result = createPending(...args)
+            expect(concatenate(getImportIndexChunkParts([result]))).toEqual(expected)
+            pending.push(result)
+            return result
+        })
+        try {
+            await store.appendBatchFromArtifactChunkResolvedContent(
+                consumer,
+                new Float64Array(rowCount),
+                new Uint32Array(rowCount),
+                'raw',
+            )
+            expect(pending).toHaveLength(1)
+            if (kind === 'normal') {
+                expect(pending[0]).not.toBeInstanceOf(Uint8Array)
+                expect(prepared.bytes.byteLength).toBe(0)
+            } else {
+                expect(pending[0]).toBeInstanceOf(Uint8Array)
+                expect(prepared.bytes.byteLength).toBeGreaterThan(0)
+            }
+        } finally {
+            override.mockRestore()
+        }
+    })
+
 })

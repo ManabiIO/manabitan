@@ -17,7 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
-import {canTakeOwnedTermLookupIndex, registerOwnedTermRecordFields, takeOwnedTermLookupIndex} from './term-lookup-index-ownership.js';
+import {canTakeOwnedTermLookupIndex, getTermLookupIndexConsumer, registerOwnedTermRecordFields, registerTermLookupIndexConsumer, takeOwnedTermLookupIndex} from './term-lookup-index-ownership.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -356,6 +356,7 @@ export function createArtifactTermRecordChunkWithResolvedContent(chunk, uniqueIn
     const references = {uniqueIndexList, offsets, lengths};
     const result = {...chunk, ...(preparedLookupIndexes === null ? {} : {preparedLookupIndexes}), resolvedContentReferences: references};
     resolvedContentReferenceOrigins.set(result, references);
+    registerTermLookupIndexConsumer(result, references);
     return result;
 }
 
@@ -2210,6 +2211,11 @@ export class TermRecordOpfsStore {
             this._importSessionActive &&
             (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
         );
+        // Materialized records can retain earlier key slices across awaits.
+        // Only the existing persisted-only path can relinquish lookup buffers.
+        const lookupIndexConsumer = skipRecordMaterialization ?
+            getTermLookupIndexConsumer(chunk, contentOffsets, contentLengths) :
+            null;
         const stableStringOffsets = skipRecordMaterialization ?
             null :
             (
@@ -2293,6 +2299,7 @@ export class TermRecordOpfsStore {
                 chunk.termRecordPreinternedPlan ?? null,
                 uniformContentDictName,
                 chunk.preparedLookupIndexes ?? null,
+                lookupIndexConsumer,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -2322,6 +2329,7 @@ export class TermRecordOpfsStore {
                 chunk.termRecordPreinternedPlan ?? null,
                 firstContentDictName,
                 chunk.preparedLookupIndexes ?? null,
+                lookupIndexConsumer,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -2453,9 +2461,10 @@ export class TermRecordOpfsStore {
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
      * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} [preparedLookupIndexes=null]
+     * @param {object|null} [lookupIndexConsumer=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
+    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null, lookupIndexConsumer = null) {
         let encodeMs = 0;
         let appendWriteMs = 0;
         let validationMs = 0;
@@ -2576,6 +2585,7 @@ export class TermRecordOpfsStore {
                     preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
                     null,
                 preparedLookupIndex,
+                lookupIndexConsumer,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -5855,6 +5865,7 @@ view.chunks :
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
                 view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
             }
+            registerOwnedTermRecordFields(output);
             return output;
         }
         /* eslint-disable @stylistic/semi */
@@ -5927,6 +5938,7 @@ view.chunks :
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
                 legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
             }
+            registerOwnedTermRecordFields(legacy);
             return legacy;
         }
         const output = new Uint8Array(compactByteLength);
@@ -5960,6 +5972,7 @@ view.chunks :
         /* eslint-enable @stylistic/semi */
         cursor += count * 2;
         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
+        registerOwnedTermRecordFields(output);
         return output;
     }
 
@@ -6010,7 +6023,6 @@ view.chunks :
             contentLengths,
             contentOffsetBase,
         );
-        registerOwnedTermRecordFields(recordFields);
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
         // so the encoder remains the only owner of score representation.
@@ -6062,6 +6074,7 @@ view.chunks :
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
      * @param {Uint32Array|null} [routeFilter=null]
      * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} [preparedLookupIndex=null]
+     * @param {object|null} [lookupIndexConsumer=null]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -6075,6 +6088,7 @@ view.chunks :
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
         routeFilter = null,
         preparedLookupIndex = null,
+        lookupIndexConsumer = null,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -6113,6 +6127,7 @@ view.chunks :
                 recordFields,
                 recordFieldsFormat,
                 preparedLookupIndex,
+                lookupIndexConsumer,
             );
             if (
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
@@ -6189,7 +6204,7 @@ view.chunks :
         const start = shard.end;
         shard.end += chunk.byteLength;
         shard.recordCount += count;
-        const header = chunk instanceof Uint8Array ? chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES) : chunk.header.slice();
+        const header = chunk instanceof Uint8Array ? chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES) : new Uint8Array(chunk.header);
         shard.chunks.push({firstId, count, start, end: shard.end, header, filter});
         route.bytes += filter.byteLength;
         ++route.chunkCount;
@@ -6258,14 +6273,15 @@ view.chunks :
      * @param {Uint8Array|null} recordFields
      * @param {number} recordFieldsFormat
      * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} prepared
+     * @param {object|null} [consumer=null]
      * @returns {PendingLookupIndexChunk}
      * @throws {Error} If the authoritative fields or lookup framing are invalid.
      */
-    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat, prepared) {
+    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat, prepared, consumer = null) {
         if (
             !this._importSessionActive || this._rawTermBankSourceBytes === null ||
             this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES ||
-            !canTakeOwnedTermLookupIndex(prepared, payload, recordFields)
+            !canTakeOwnedTermLookupIndex(prepared, payload, recordFields, consumer)
         ) {
             return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
         }
@@ -6291,6 +6307,7 @@ view.chunks :
             /** @type {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex} */ (prepared),
             payload,
             recordFields,
+            consumer,
         );
         return {header, ...owned, byteLength};
     }
@@ -6455,7 +6472,7 @@ view.chunks :
                     state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
-                const parts = chunks.flatMap((chunk) => chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields]);
+                const parts = chunks.flatMap((chunk) => (chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields]));
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
                     // Each part owns its complete immutable buffer. The
                     // existing queue budget remains charged until this worker
