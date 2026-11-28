@@ -1,0 +1,1471 @@
+{
+  "schemaVersion": 1,
+  "scope": "Descriptive phase counters from all original JMdict BA reports; no new execution or observations, no change to closed whole-import decision",
+  "originalRun": 46138650386,
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+  "artifact": {
+    "id": 15261001868,
+    "sha256": "473d43afc021dd25e3947ecb57aeefa6241e663c3e02c206ac56c632ff57a4b4"
+  },
+  "limitations": [
+    "Phase counters can overlap or aggregate concurrent worker work; never add them to predict wall-clock savings",
+    "This is old frozen f28 source; no timing transfer to a300 or the unmeasured fusion prototype",
+    "One original host only; no claim of replication or qualification",
+    "All74 original raw reports are retained and SHA256 matched to the independent archive auditor"
+  ],
+  "rows": [
+    {
+      "path": "warmup-1-B",
+      "role": "warmup",
+      "arm": "B",
+      "pair": 1,
+      "rawReportSha256": "63fb6134fa1d88d769b4a26602056882e5b3bea7bcfbe3a52d6990798edafa93",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 42.40000000002328,
+        "termRecordFieldEncodeMs": 40,
+        "termRecordEncodeMs": 40.199999999953434,
+        "termRecordWriteMs": 67.09999999997672,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "warmup-1-A",
+      "role": "warmup",
+      "arm": "A",
+      "pair": 1,
+      "rawReportSha256": "2043b2a69bb7c76355141bcc451a05dbe557b8c15117065167d419ff9d21157c",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 38.40000000008149,
+        "termRecordFieldEncodeMs": 62.20000000001164,
+        "termRecordEncodeMs": 62.399999999965075,
+        "termRecordWriteMs": 55.40000000008149,
+        "termRecordBuildMs": 1.1999999999534339
+      }
+    },
+    {
+      "path": "warmup-2-A",
+      "role": "warmup",
+      "arm": "A",
+      "pair": 2,
+      "rawReportSha256": "c9d322a70e020d20cec7738a1eac188eda81808a42b4f9a9ed78cafe7ced5dd1",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 43.79999999993015,
+        "termRecordFieldEncodeMs": 47.699999999953434,
+        "termRecordEncodeMs": 48.899999999965075,
+        "termRecordWriteMs": 50.79999999998836,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "warmup-2-B",
+      "role": "warmup",
+      "arm": "B",
+      "pair": 2,
+      "rawReportSha256": "2304240f80fa1016a91418c0496d36d9ec820edb3db939d071b1ded39fe073ea",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 22.200000000128057,
+        "termRecordFieldEncodeMs": 29.70000000001164,
+        "termRecordEncodeMs": 31.999999999941792,
+        "termRecordWriteMs": 62.9000000001397,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-01-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 1,
+      "rawReportSha256": "8120a934b2678f5c293d1db9d25c7954fd4353ab483166a785b2e6ac9b824a12",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 27.000000000058208,
+        "termRecordFieldEncodeMs": 45.39999999990687,
+        "termRecordEncodeMs": 45.59999999997672,
+        "termRecordWriteMs": 56.399999999965075,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-01-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 1,
+      "rawReportSha256": "1fe83c0b69fc644f439d33b02f1bc5abd0ddae64c859acb12cc2d2fd9584c2ca",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 28.79999999993015,
+        "termRecordFieldEncodeMs": 45.5,
+        "termRecordEncodeMs": 45.899999999965075,
+        "termRecordWriteMs": 44.4000000001397,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-02-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 2,
+      "rawReportSha256": "8746e5c25cc6a7849346c11b4a2d95a92af0b659f5cd66bfade0a8d1cd02f2c1",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 36.20000000001164,
+        "termRecordFieldEncodeMs": 44.50000000005821,
+        "termRecordEncodeMs": 50.20000000001164,
+        "termRecordWriteMs": 47.300000000046566,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-02-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 2,
+      "rawReportSha256": "074030996c79f5d14072ffae12915543bd0a62ba7ea2155197ea45d752ede6ce",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 21.89999999984866,
+        "termRecordFieldEncodeMs": 27.599999999976717,
+        "termRecordEncodeMs": 28.10000000015134,
+        "termRecordWriteMs": 52.69999999977881,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-03-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 3,
+      "rawReportSha256": "9e97ca904736ffe3eaa588e0c5d6954d4323e202ee8f26215a7c432779a3da90",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 38.29999999998836,
+        "termRecordFieldEncodeMs": 25.29999999998836,
+        "termRecordEncodeMs": 26.800000000046566,
+        "termRecordWriteMs": 62,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "pair-03-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 3,
+      "rawReportSha256": "3608b5a6dd2ff5520b31bc665035d8c858db4a952e2474e1ef32a89c8e5a418d",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 26.600000000034925,
+        "termRecordFieldEncodeMs": 60,
+        "termRecordEncodeMs": 60.40000000002328,
+        "termRecordWriteMs": 41.800000000046566,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "control-01-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 1,
+      "rawReportSha256": "dfb48ea0955e000de918923fb88dd808160c7f2dc40ab3ca40aafc20f53216f0",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 36.20000000001164,
+        "termRecordFieldEncodeMs": 49.199999999953434,
+        "termRecordEncodeMs": 49.79999999993015,
+        "termRecordWriteMs": 49.800000000046566,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-01-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 1,
+      "rawReportSha256": "c4f22bcb338a60e965fbb56a52b78cb5ea5823b482ae778515625bce7662524b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 33.299999999813735,
+        "termRecordFieldEncodeMs": 52,
+        "termRecordEncodeMs": 54.40000000002328,
+        "termRecordWriteMs": 53.79999999998836,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-04-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 4,
+      "rawReportSha256": "a469a7ce4479f712e0bf3ac9b4610bcfb2fff26beede19c4a502124e1b92870b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 26.40000000008149,
+        "termRecordFieldEncodeMs": 28.599999999976717,
+        "termRecordEncodeMs": 35.199999999953434,
+        "termRecordWriteMs": 43.49999999994179,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-04-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 4,
+      "rawReportSha256": "6f70c687e5b919695b385935bfbe0f04c2414e9eb64c5685953bca0a362287a7",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 43.699999999953434,
+        "termRecordFieldEncodeMs": 33.399999999965075,
+        "termRecordEncodeMs": 34,
+        "termRecordWriteMs": 60.70000000001164,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-05-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 5,
+      "rawReportSha256": "4dae27ce4a1e9a66a5970c7547a5312a32215aa1e745f0cfa5d9641236395383",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 36.100000000034925,
+        "termRecordFieldEncodeMs": 34.59999999991851,
+        "termRecordEncodeMs": 34.999999999883585,
+        "termRecordWriteMs": 52.79999999998836,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-05-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 5,
+      "rawReportSha256": "d472c1b504613062cb159bcc60d2323957dfca4de27cc397f2e16e07fb6aaf0d",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 34.50000000005821,
+        "termRecordFieldEncodeMs": 42.29999999993015,
+        "termRecordEncodeMs": 42.79999999993015,
+        "termRecordWriteMs": 50.100000000034925,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-06-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 6,
+      "rawReportSha256": "bae7610c228a29c912413a18d375e4263702fa2c0ffe60ee32eb8d577b911623",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 29.39999999984866,
+        "termRecordFieldEncodeMs": 43.20000000001164,
+        "termRecordEncodeMs": 43.70000000006985,
+        "termRecordWriteMs": 43.20000000001164,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-06-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 6,
+      "rawReportSha256": "9e1dac0efc3535d6e3b90caf9191a1292f465fb6a18de0629cd66f054e7ae851",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 62,
+        "termRecordFieldEncodeMs": 31,
+        "termRecordEncodeMs": 32.199999999895226,
+        "termRecordWriteMs": 69.70000000012806,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-02-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 2,
+      "rawReportSha256": "ca4fa0293b4a2c16881511bad3e7357e20f876ebc39115c11f6646f859a0d8f8",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 36.20000000006985,
+        "termRecordFieldEncodeMs": 34.09999999991851,
+        "termRecordEncodeMs": 34.699999999895226,
+        "termRecordWriteMs": 40.800000000046566,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-02-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 2,
+      "rawReportSha256": "c41892195d4ac63829db08b364298b4363340d88c92430b7720b40bfb899d695",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 33.099999999743886,
+        "termRecordFieldEncodeMs": 61.10000000009313,
+        "termRecordEncodeMs": 61.70000000006985,
+        "termRecordWriteMs": 54.20000000006985,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-07-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 7,
+      "rawReportSha256": "01374bbc55485a0260f8e3ae24830b8896c1bfe0df6bf075cf29e76b2f85a7fa",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.199999999953434,
+        "termRecordFieldEncodeMs": 22.20000000001164,
+        "termRecordEncodeMs": 22.40000000008149,
+        "termRecordWriteMs": 47.29999999993015,
+        "termRecordBuildMs": 0.20000000001164153
+      }
+    },
+    {
+      "path": "pair-07-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 7,
+      "rawReportSha256": "b7018b36685fba0699a8b2881646e04326ea54045c2e68d1fc65b381cc83232b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.799999999813735,
+        "termRecordFieldEncodeMs": 48,
+        "termRecordEncodeMs": 48.600000000034925,
+        "termRecordWriteMs": 42.5,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-08-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 8,
+      "rawReportSha256": "434f0dce5eec752f59b4cc2c6532aeb30748a12b0546fe5927588dc5bd62f2c8",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 45.90000000008149,
+        "termRecordFieldEncodeMs": 41.300000000104774,
+        "termRecordEncodeMs": 45.20000000006985,
+        "termRecordWriteMs": 45.100000000034925,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-08-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 8,
+      "rawReportSha256": "db6b0bf48c9370bce8edd4f925744c2038862233376cae8ed0a6da4dd47a485b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 34.899999999965075,
+        "termRecordFieldEncodeMs": 32.79999999993015,
+        "termRecordEncodeMs": 33.09999999991851,
+        "termRecordWriteMs": 62.5,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-09-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 9,
+      "rawReportSha256": "ae123d28690ccc46bd4876e7995d0eb8d438364b87896283bc39a9927385d75b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.099999999976717,
+        "termRecordFieldEncodeMs": 26.900000000023283,
+        "termRecordEncodeMs": 27.70000000006985,
+        "termRecordWriteMs": 48,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-09-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 9,
+      "rawReportSha256": "6d2b3eac95b48828059a3fe472ca91d48844a4146caea532c3c74ed218a928ea",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.29999999998836,
+        "termRecordFieldEncodeMs": 46.5,
+        "termRecordEncodeMs": 46.800000000046566,
+        "termRecordWriteMs": 53.99999999994179,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-03-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 3,
+      "rawReportSha256": "ebaba1c1a1d3ea50998ac5903602282e4d3827f1023074d9143e2298df22f8e7",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 45.79999999998836,
+        "termRecordFieldEncodeMs": 53.90000000008149,
+        "termRecordEncodeMs": 57.70000000012806,
+        "termRecordWriteMs": 63.89999999990687,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-03-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 3,
+      "rawReportSha256": "80e24223554e2ea773e3014a430ad3d061f0b0c114f70ee28b2ef27ecd8fec61",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 41.70000000001164,
+        "termRecordFieldEncodeMs": 41.000000000116415,
+        "termRecordEncodeMs": 41.40000000008149,
+        "termRecordWriteMs": 51.299999999813735,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-10-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 10,
+      "rawReportSha256": "f3b87d2eb4d4ff7dc002015e6110abb3d78742e70429d86e3f527ace5d95316a",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 25.199999999953434,
+        "termRecordFieldEncodeMs": 49.40000000008149,
+        "termRecordEncodeMs": 49.79999999998836,
+        "termRecordWriteMs": 51.800000000046566,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-10-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 10,
+      "rawReportSha256": "20c99ca12b9a2eecb1690c147568d58cc87e557f48300af0f514bba5677a0252",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 20.20000000006985,
+        "termRecordFieldEncodeMs": 35.300000000046566,
+        "termRecordEncodeMs": 35.50000000005821,
+        "termRecordWriteMs": 45.800000000046566,
+        "termRecordBuildMs": 0.1000000000349246
+      }
+    },
+    {
+      "path": "pair-11-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 11,
+      "rawReportSha256": "c7ddaad7205a7ccd70852c923eed34b8cc36f77fbd2ca63e75d31d23f2a46dd6",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 46.09999999997672,
+        "termRecordFieldEncodeMs": 25.9000000001397,
+        "termRecordEncodeMs": 28.500000000116415,
+        "termRecordWriteMs": 58.10000000009313,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-11-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 11,
+      "rawReportSha256": "55c06beb13c3567389bf529ca53594f59957f36fe61cbd5fa03d27630ccdf265",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 25.900000000256114,
+        "termRecordFieldEncodeMs": 58.000000000116415,
+        "termRecordEncodeMs": 59.10000000020955,
+        "termRecordWriteMs": 51,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-12-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 12,
+      "rawReportSha256": "c496aa0c762264c414a4e7f882d73efce62135d9e81d01c147c7fb5962d113bb",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 56.800000000046566,
+        "termRecordFieldEncodeMs": 47.70000000006985,
+        "termRecordEncodeMs": 48.09999999997672,
+        "termRecordWriteMs": 48.0999999998603,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-12-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 12,
+      "rawReportSha256": "3fa48ef9723e3cd4adeef48f50a0b504abb233afebb6acccb4593753ddaf3970",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 31.199999999953434,
+        "termRecordFieldEncodeMs": 37.90000000002328,
+        "termRecordEncodeMs": 38.199999999953434,
+        "termRecordWriteMs": 58.700000000186265,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-04-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 4,
+      "rawReportSha256": "c6886e149e5d34c3867a8c42b67a116f0b3b96a6de7d415d53cd87f4d10a30a0",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 27.29999999993015,
+        "termRecordFieldEncodeMs": 41,
+        "termRecordEncodeMs": 43.59999999997672,
+        "termRecordWriteMs": 43.19999999983702,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-04-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 4,
+      "rawReportSha256": "a3530a3a8985e1a51d4622cbc962fcaae36088de4aa88d8a128adf2dee8767ac",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 31.900000000023283,
+        "termRecordFieldEncodeMs": 46.60000000009313,
+        "termRecordEncodeMs": 50,
+        "termRecordWriteMs": 45.9000000001397,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-13-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 13,
+      "rawReportSha256": "4aa74a837025c32e98ba3a84e6cc1af37b9aca4ac10869150f04c72b4934a343",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 35.30000000016298,
+        "termRecordFieldEncodeMs": 25.499999999883585,
+        "termRecordEncodeMs": 25.900000000023283,
+        "termRecordWriteMs": 49.400000000256114,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-13-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 13,
+      "rawReportSha256": "21ab21905f22b605ed7ffdde7d625093b6c27162efb1c7f0c04c7c51526a526f",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 44.10000000009313,
+        "termRecordFieldEncodeMs": 44.000000000116415,
+        "termRecordEncodeMs": 46.40000000002328,
+        "termRecordWriteMs": 44.50000000023283,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "pair-14-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 14,
+      "rawReportSha256": "4bccb35ca53e567a918c5c917e0008b25821e431022afc11e478ae613dbacd36",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 44.39999999967404,
+        "termRecordFieldEncodeMs": 58.699999999953434,
+        "termRecordEncodeMs": 61.199999999953434,
+        "termRecordWriteMs": 47.70000000006985,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-14-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 14,
+      "rawReportSha256": "bcc382c489bf3b18c74e68e7bdcdcf939ec04b8a9f5cdb0a5a5e7082a35fecd7",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 39.9000000001397,
+        "termRecordFieldEncodeMs": 40.1999999997206,
+        "termRecordEncodeMs": 40.599999999743886,
+        "termRecordWriteMs": 62.500000000116415,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-15-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 15,
+      "rawReportSha256": "a4d9073509c827fbb1135a617cd4f9f9fef7afc76090713c9b9753f4a7267d3c",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 38.800000000046566,
+        "termRecordFieldEncodeMs": 21.50000000023283,
+        "termRecordEncodeMs": 21.800000000279397,
+        "termRecordWriteMs": 48,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "pair-15-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 15,
+      "rawReportSha256": "30d6f62509b558fb92bb5dc7b6afe752ade27329f815b378767d40a9a1a268a3",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 37.09999999997672,
+        "termRecordFieldEncodeMs": 58.90000000037253,
+        "termRecordEncodeMs": 59.3000000002794,
+        "termRecordWriteMs": 48.59999999962747,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "control-05-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 5,
+      "rawReportSha256": "0bd0cddffb3e0262b1fa43a2351342d60e1308f8ccee0ffd60ac80514b3ddb58",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 41.60000000044238,
+        "termRecordFieldEncodeMs": 45.599999999743886,
+        "termRecordEncodeMs": 45.999999999650754,
+        "termRecordWriteMs": 50.30000000016298,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-05-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 5,
+      "rawReportSha256": "91ff4822f71eaedaa50a354281b54a6032fc13f7308f74dc5cd15986c6356cd1",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 21.300000000046566,
+        "termRecordFieldEncodeMs": 41.70000000006985,
+        "termRecordEncodeMs": 42.09999999997672,
+        "termRecordWriteMs": 46.9000000001397,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-16-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 16,
+      "rawReportSha256": "f1bd18f53cb1385988f38f662b1bc6aebcc68feda0d220768c48607afc29c50f",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 49.29999999993015,
+        "termRecordFieldEncodeMs": 57.09999999997672,
+        "termRecordEncodeMs": 57.59999999997672,
+        "termRecordWriteMs": 62.40000000002328,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-16-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 16,
+      "rawReportSha256": "631cc5a557412075f24b6cda6393fedcc03eafbfdc702e09969ea251a196462b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 32.60000000009313,
+        "termRecordFieldEncodeMs": 26.499999999883585,
+        "termRecordEncodeMs": 26.900000000023283,
+        "termRecordWriteMs": 61.59999999997672,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-17-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 17,
+      "rawReportSha256": "ad5ffa9f28d5e94ce5e739092eba32ded02a4762df5030d91a904079d010651e",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 40.09999999997672,
+        "termRecordFieldEncodeMs": 20.80000000016298,
+        "termRecordEncodeMs": 21.5,
+        "termRecordWriteMs": 51,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-17-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 17,
+      "rawReportSha256": "b6e59896f512053ef3b0703806d55c18dc2172a9da756b75b91c781dd2bde17a",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 45.3000000002794,
+        "termRecordFieldEncodeMs": 55.20000000006985,
+        "termRecordEncodeMs": 55.5,
+        "termRecordWriteMs": 53.09999999997672,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-18-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 18,
+      "rawReportSha256": "b2ee2dfc72580d9878e65ec419e579e194e36bcf182afc2c2c53080c68ad13a2",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 37.099999999743886,
+        "termRecordFieldEncodeMs": 35.9000000001397,
+        "termRecordEncodeMs": 36.9000000001397,
+        "termRecordWriteMs": 44.1999999997206,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-18-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 18,
+      "rawReportSha256": "847d945d2a64936433366726affcee4e467b75a52771ca876e68afe10437b017",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 39.90000000002328,
+        "termRecordFieldEncodeMs": 23.700000000186265,
+        "termRecordEncodeMs": 24.100000000209548,
+        "termRecordWriteMs": 53.6999999997206,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-06-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 6,
+      "rawReportSha256": "805582f35601d442a22ce950eb5453c63197b7dad90627f052acb50fb27eaeb6",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 27.600000000093132,
+        "termRecordFieldEncodeMs": 51.90000000002328,
+        "termRecordEncodeMs": 52.199999999953434,
+        "termRecordWriteMs": 52.60000000009313,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "control-06-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 6,
+      "rawReportSha256": "18ee7057c302e40235656084e6456b34f70487307cac15dfcba0d1f0844a235c",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 41.10000000032596,
+        "termRecordFieldEncodeMs": 44.3000000002794,
+        "termRecordEncodeMs": 44.60000000020955,
+        "termRecordWriteMs": 48.0999999998603,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-19-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 19,
+      "rawReportSha256": "5a14946c1f404d1afa4120eaf50d7854f5bdefaa24a25608274cb6ff75e8a4bd",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.500000000349246,
+        "termRecordFieldEncodeMs": 30.899999999906868,
+        "termRecordEncodeMs": 31.299999999813735,
+        "termRecordWriteMs": 47.90000000002328,
+        "termRecordBuildMs": 0.19999999995343387
+      }
+    },
+    {
+      "path": "pair-19-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 19,
+      "rawReportSha256": "8b1f992e56691f4000e0589d5ee7241bbc1b2b583c7402ba1ecb7a81a8720bf9",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 40.39999999967404,
+        "termRecordFieldEncodeMs": 36.499999999883585,
+        "termRecordEncodeMs": 36.999999999883585,
+        "termRecordWriteMs": 48,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-20-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 20,
+      "rawReportSha256": "51b5b2ac4670144e740254a424b57f13f475ef6bf7691849c4bcfa4b843653cc",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 33.39999999990687,
+        "termRecordFieldEncodeMs": 46.0999999998603,
+        "termRecordEncodeMs": 47.69999999983702,
+        "termRecordWriteMs": 46.00000000023283,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-20-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 20,
+      "rawReportSha256": "49c0bad7cf6b85b579bdadb0ee80c0e9596549ebd773be830cedf4faff84b8af",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 38.40000000002328,
+        "termRecordFieldEncodeMs": 24.70000000006985,
+        "termRecordEncodeMs": 25,
+        "termRecordWriteMs": 39.900000000256114,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-21-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 21,
+      "rawReportSha256": "21e81df8486f1eeaf3f7e3dec18098f03daf8a7a480791c7cb5633081de9533a",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 37.000000000116415,
+        "termRecordFieldEncodeMs": 43.0999999998603,
+        "termRecordEncodeMs": 43.69999999983702,
+        "termRecordWriteMs": 47.4000000001397,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "pair-21-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 21,
+      "rawReportSha256": "1b84aabae3bee4ba94fadc42bf88cdf0d73ebb4068407708bafb3cafbceb913a",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 47.30000000016298,
+        "termRecordFieldEncodeMs": 33.79999999969732,
+        "termRecordEncodeMs": 34.19999999983702,
+        "termRecordWriteMs": 44.79999999993015,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-07-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 7,
+      "rawReportSha256": "342bae94b13871d952502b145a9c0d71c7f2b32299f4e446b4752c9fee1138cd",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.69999999983702,
+        "termRecordFieldEncodeMs": 67.30000000004657,
+        "termRecordEncodeMs": 68.80000000004657,
+        "termRecordWriteMs": 59.79999999993015,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-07-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 7,
+      "rawReportSha256": "9022e4aa175d4cdb38badf0345b5321cd5eae9f880e60cfd73733c7407a1253c",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 26.599999999743886,
+        "termRecordFieldEncodeMs": 50.70000000006985,
+        "termRecordEncodeMs": 50.900000000256114,
+        "termRecordWriteMs": 55.9000000001397,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-22-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 22,
+      "rawReportSha256": "e5e024dd19145f17e2c28e7a6be40f96b65724c482badbb971111b33f67f8468",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 48.09999999997672,
+        "termRecordFieldEncodeMs": 58.5,
+        "termRecordEncodeMs": 59.4000000001397,
+        "termRecordWriteMs": 47.29999999969732,
+        "termRecordBuildMs": 0.10000000009313226
+      }
+    },
+    {
+      "path": "pair-22-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 22,
+      "rawReportSha256": "9972402e9d2806fa87322ae2d1509c01bafe75dee9c01f72491d5d5b0eca5f11",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 37.000000000116415,
+        "termRecordFieldEncodeMs": 37.5999999998603,
+        "termRecordEncodeMs": 39.89999999990687,
+        "termRecordWriteMs": 39.8000000002794,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-23-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 23,
+      "rawReportSha256": "eb4c2102adf9753d8aee1799608c6cf79b62e3595f75f70ea4a7554f0627cc4b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 41.40000000002328,
+        "termRecordFieldEncodeMs": 25.50000000023283,
+        "termRecordEncodeMs": 28.000000000116415,
+        "termRecordWriteMs": 52.79999999993015,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-23-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 23,
+      "rawReportSha256": "953b4d5823fa76aaa048868623aa28af7bcd518183169e61c5392f6829c1f84d",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 30.899999999906868,
+        "termRecordFieldEncodeMs": 37.80000000016298,
+        "termRecordEncodeMs": 38.000000000116415,
+        "termRecordWriteMs": 51.800000000046566,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "pair-24-A",
+      "role": "candidate",
+      "arm": "A",
+      "pair": 24,
+      "rawReportSha256": "45622328b56d66c4510ac4055c8825e56b3d064b8c3b98ad9cf0f8fde4f623d0",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 25.400000000023283,
+        "termRecordFieldEncodeMs": 54.80000000016298,
+        "termRecordEncodeMs": 55.40000000002328,
+        "termRecordWriteMs": 58.000000000116415,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "pair-24-B",
+      "role": "candidate",
+      "arm": "B",
+      "pair": 24,
+      "rawReportSha256": "3dcf6511b86cbd1cfda2ee969c93a32c8250a933a6dec7e0c87e0556cb975c67",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 42.10000000009313,
+        "termRecordFieldEncodeMs": 19.599999999976717,
+        "termRecordEncodeMs": 19.999999999883585,
+        "termRecordWriteMs": 62.09999999997672,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "control-08-A",
+      "role": "control",
+      "arm": "A",
+      "pair": 8,
+      "rawReportSha256": "1ceb5825610ae4747e76d2f806eb1ee2405a3f97b304fcd8a82a48d21f95d0f0",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 32.5999999998603,
+        "termRecordFieldEncodeMs": 70.29999999981374,
+        "termRecordEncodeMs": 71,
+        "termRecordWriteMs": 47.59999999997672,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "control-08-C",
+      "role": "control",
+      "arm": "C",
+      "pair": 8,
+      "rawReportSha256": "64b85b22cdce1773ecf1cbc8019668e92dbe866832329c50eadbf5b824809844",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 26.299999999813735,
+        "termRecordFieldEncodeMs": 45.499999999883585,
+        "termRecordEncodeMs": 45.799999999813735,
+        "termRecordWriteMs": 58.10000000009313,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "exhaustive-media-B",
+      "role": "full-media",
+      "arm": "B",
+      "pair": null,
+      "rawReportSha256": "e935da2d2b8b19612817bb358628433a73b3f11d5bed51b97334abfd5d87fee4",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 29.800000000046566,
+        "termRecordFieldEncodeMs": 24.999999999883585,
+        "termRecordEncodeMs": 25.499999999883585,
+        "termRecordWriteMs": 59.90000000002328,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "exhaustive-media-A",
+      "role": "full-media",
+      "arm": "A",
+      "pair": null,
+      "rawReportSha256": "d0dd1bd4e3148264d27eeab9c612e048c6d9002815e9e9293c61c24a4d5dd50b",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 31.4000000001397,
+        "termRecordFieldEncodeMs": 53.699999999953434,
+        "termRecordEncodeMs": 54.29999999993015,
+        "termRecordWriteMs": 50.69999999983702,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "memory/B1",
+      "role": "memory",
+      "arm": "B",
+      "pair": null,
+      "rawReportSha256": "1d0a4055f3d248d8638bca549696f1de593eecef7b97b6248f76c1745715b2b0",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 39.500000000116415,
+        "termRecordFieldEncodeMs": 61.999999999650754,
+        "termRecordEncodeMs": 65.39999999967404,
+        "termRecordWriteMs": 60.9000000001397,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "memory/A1",
+      "role": "memory",
+      "arm": "A",
+      "pair": null,
+      "rawReportSha256": "b930f23fd485d40cde26f70c3a3693323b888d6dc713f1e84b9697e884c40687",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 36.999999999883585,
+        "termRecordFieldEncodeMs": 68.20000000006985,
+        "termRecordEncodeMs": 68.60000000009313,
+        "termRecordWriteMs": 60.09999999997672,
+        "termRecordBuildMs": 0
+      }
+    },
+    {
+      "path": "memory/A2",
+      "role": "memory",
+      "arm": "A",
+      "pair": null,
+      "rawReportSha256": "9bc5a703c5c0c4a2b43a6ce390aee2e4f35dd41d50c7c6794a40eaa7055f23e2",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 33,
+        "termRecordFieldEncodeMs": 46.09999999997672,
+        "termRecordEncodeMs": 46.5999999998603,
+        "termRecordWriteMs": 46.09999999997672,
+        "termRecordBuildMs": 0.09999999997671694
+      }
+    },
+    {
+      "path": "memory/B2",
+      "role": "memory",
+      "arm": "B",
+      "pair": null,
+      "rawReportSha256": "8ac329dcc09e87b37074bd2b2d9c00d9ab0aa9c6aa65d852f1559711aaec3b89",
+      "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+      "values": {
+        "termRecordValidationMs": 48.79999999993015,
+        "termRecordFieldEncodeMs": 39.300000000046566,
+        "termRecordEncodeMs": 39.900000000256114,
+        "termRecordWriteMs": 69.1999999997206,
+        "termRecordBuildMs": 0.19999999995343387
+      }
+    }
+  ],
+  "summary": [
+    {
+      "role": "warmup",
+      "arm": "A",
+      "count": 2,
+      "mediansMs": {
+        "termRecordValidationMs": 41.10000000000582,
+        "termRecordFieldEncodeMs": 54.94999999998254,
+        "termRecordEncodeMs": 55.649999999965075,
+        "termRecordWriteMs": 53.100000000034925,
+        "termRecordBuildMs": 0.5999999999767169
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          38.40000000008149,
+          43.79999999993015
+        ],
+        "termRecordFieldEncodeMs": [
+          47.699999999953434,
+          62.20000000001164
+        ],
+        "termRecordEncodeMs": [
+          48.899999999965075,
+          62.399999999965075
+        ],
+        "termRecordWriteMs": [
+          50.79999999998836,
+          55.40000000008149
+        ],
+        "termRecordBuildMs": [
+          0,
+          1.1999999999534339
+        ]
+      }
+    },
+    {
+      "role": "warmup",
+      "arm": "B",
+      "count": 2,
+      "mediansMs": {
+        "termRecordValidationMs": 32.30000000007567,
+        "termRecordFieldEncodeMs": 34.85000000000582,
+        "termRecordEncodeMs": 36.09999999994761,
+        "termRecordWriteMs": 65.00000000005821,
+        "termRecordBuildMs": 0.0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          22.200000000128057,
+          42.40000000002328
+        ],
+        "termRecordFieldEncodeMs": [
+          29.70000000001164,
+          40
+        ],
+        "termRecordEncodeMs": [
+          31.999999999941792,
+          40.199999999953434
+        ],
+        "termRecordWriteMs": [
+          62.9000000001397,
+          67.09999999997672
+        ],
+        "termRecordBuildMs": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "role": "candidate",
+      "arm": "A",
+      "count": 24,
+      "mediansMs": {
+        "termRecordValidationMs": 35.350000000034925,
+        "termRecordFieldEncodeMs": 46.29999999993015,
+        "termRecordEncodeMs": 47.89999999990687,
+        "termRecordWriteMs": 47.50000000005821,
+        "termRecordBuildMs": 0.0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          25.199999999953434,
+          56.800000000046566
+        ],
+        "termRecordFieldEncodeMs": [
+          28.599999999976717,
+          60
+        ],
+        "termRecordEncodeMs": [
+          34.19999999983702,
+          61.199999999953434
+        ],
+        "termRecordWriteMs": [
+          41.800000000046566,
+          62.40000000002328
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.10000000009313226
+        ]
+      }
+    },
+    {
+      "role": "candidate",
+      "arm": "B",
+      "count": 24,
+      "mediansMs": {
+        "termRecordValidationMs": 37.000000000116415,
+        "termRecordFieldEncodeMs": 27.25,
+        "termRecordEncodeMs": 28.300000000133878,
+        "termRecordWriteMs": 52.799999999959255,
+        "termRecordBuildMs": 0.0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          20.20000000006985,
+          62
+        ],
+        "termRecordFieldEncodeMs": [
+          19.599999999976717,
+          45.39999999990687
+        ],
+        "termRecordEncodeMs": [
+          19.999999999883585,
+          45.59999999997672
+        ],
+        "termRecordWriteMs": [
+          39.8000000002794,
+          69.70000000012806
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.20000000001164153
+        ]
+      }
+    },
+    {
+      "role": "control",
+      "arm": "A",
+      "count": 8,
+      "mediansMs": {
+        "termRecordValidationMs": 30.099999999976717,
+        "termRecordFieldEncodeMs": 46.20000000006985,
+        "termRecordEncodeMs": 47.250000000116415,
+        "termRecordWriteMs": 49.449999999895226,
+        "termRecordBuildMs": 0.0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          21.300000000046566,
+          41.70000000001164
+        ],
+        "termRecordFieldEncodeMs": [
+          34.09999999991851,
+          70.29999999981374
+        ],
+        "termRecordEncodeMs": [
+          34.699999999895226,
+          71
+        ],
+        "termRecordWriteMs": [
+          40.800000000046566,
+          55.9000000001397
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.09999999997671694
+        ]
+      }
+    },
+    {
+      "role": "control",
+      "arm": "C",
+      "count": 8,
+      "mediansMs": {
+        "termRecordValidationMs": 34.649999999877764,
+        "termRecordFieldEncodeMs": 47.90000000002328,
+        "termRecordEncodeMs": 49.899999999965075,
+        "termRecordWriteMs": 52.250000000116415,
+        "termRecordBuildMs": 0.0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          26.299999999813735,
+          45.79999999998836
+        ],
+        "termRecordFieldEncodeMs": [
+          44.3000000002794,
+          67.30000000004657
+        ],
+        "termRecordEncodeMs": [
+          44.60000000020955,
+          68.80000000004657
+        ],
+        "termRecordWriteMs": [
+          45.9000000001397,
+          63.89999999990687
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.1000000000349246
+        ]
+      }
+    },
+    {
+      "role": "full-media",
+      "arm": "A",
+      "count": 1,
+      "mediansMs": {
+        "termRecordValidationMs": 31.4000000001397,
+        "termRecordFieldEncodeMs": 53.699999999953434,
+        "termRecordEncodeMs": 54.29999999993015,
+        "termRecordWriteMs": 50.69999999983702,
+        "termRecordBuildMs": 0.09999999997671694
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          31.4000000001397,
+          31.4000000001397
+        ],
+        "termRecordFieldEncodeMs": [
+          53.699999999953434,
+          53.699999999953434
+        ],
+        "termRecordEncodeMs": [
+          54.29999999993015,
+          54.29999999993015
+        ],
+        "termRecordWriteMs": [
+          50.69999999983702,
+          50.69999999983702
+        ],
+        "termRecordBuildMs": [
+          0.09999999997671694,
+          0.09999999997671694
+        ]
+      }
+    },
+    {
+      "role": "full-media",
+      "arm": "B",
+      "count": 1,
+      "mediansMs": {
+        "termRecordValidationMs": 29.800000000046566,
+        "termRecordFieldEncodeMs": 24.999999999883585,
+        "termRecordEncodeMs": 25.499999999883585,
+        "termRecordWriteMs": 59.90000000002328,
+        "termRecordBuildMs": 0
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          29.800000000046566,
+          29.800000000046566
+        ],
+        "termRecordFieldEncodeMs": [
+          24.999999999883585,
+          24.999999999883585
+        ],
+        "termRecordEncodeMs": [
+          25.499999999883585,
+          25.499999999883585
+        ],
+        "termRecordWriteMs": [
+          59.90000000002328,
+          59.90000000002328
+        ],
+        "termRecordBuildMs": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "role": "memory",
+      "arm": "A",
+      "count": 2,
+      "mediansMs": {
+        "termRecordValidationMs": 34.99999999994179,
+        "termRecordFieldEncodeMs": 57.15000000002328,
+        "termRecordEncodeMs": 57.59999999997672,
+        "termRecordWriteMs": 53.09999999997672,
+        "termRecordBuildMs": 0.04999999998835847
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          33,
+          36.999999999883585
+        ],
+        "termRecordFieldEncodeMs": [
+          46.09999999997672,
+          68.20000000006985
+        ],
+        "termRecordEncodeMs": [
+          46.5999999998603,
+          68.60000000009313
+        ],
+        "termRecordWriteMs": [
+          46.09999999997672,
+          60.09999999997672
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.09999999997671694
+        ]
+      }
+    },
+    {
+      "role": "memory",
+      "arm": "B",
+      "count": 2,
+      "mediansMs": {
+        "termRecordValidationMs": 44.15000000002328,
+        "termRecordFieldEncodeMs": 50.64999999984866,
+        "termRecordEncodeMs": 52.649999999965075,
+        "termRecordWriteMs": 65.04999999993015,
+        "termRecordBuildMs": 0.09999999997671694
+      },
+      "rangesMs": {
+        "termRecordValidationMs": [
+          39.500000000116415,
+          48.79999999993015
+        ],
+        "termRecordFieldEncodeMs": [
+          39.300000000046566,
+          61.999999999650754
+        ],
+        "termRecordEncodeMs": [
+          39.900000000256114,
+          65.39999999967404
+        ],
+        "termRecordWriteMs": [
+          60.9000000001397,
+          69.1999999997206
+        ],
+        "termRecordBuildMs": [
+          0,
+          0.19999999995343387
+        ]
+      }
+    }
+  ]
+}

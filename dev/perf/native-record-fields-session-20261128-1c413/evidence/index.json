@@ -63,6 +63,10 @@
     "browser-final-independent-arithmetic.json": "f2beb15fc8f605acda3ca5fc0e6fb648f47fffce",
     "browser-final-source-review.json": "3f5e6682cb68158f4c1247020e9b393431ac5509",
     "browser-final-pipeline-review.json": "fac458c07b457c5b58d11a902a2360f787f0eb9a",
-    "browser-final-publication-review.json": "effa68f0d0139f95f2b52949160de254f5909077"
+    "browser-final-publication-review.json": "effa68f0d0139f95f2b52949160de254f5909077",
+    "browser-jmdict-AB-phase-census.json": "a90b4180aaa423b54cca894dcc950fb8e5b35ce1",
+    "browser-jmdict-AB-phase-census.py": "02c3841ac2bf93d07b64e81f47fd3320a6930f2d",
+    "browser-jmdict-BA-phase-census.json": "45e7e6a70bdc7736a8a3918fc9a4e7d7cc1663ac",
+    "browser-jmdict-BA-phase-census.py": "8e34386ece144f402b2ed549deea9621771145f2"
   }
 }

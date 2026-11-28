@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 12:44 UTC",
+  "observedAt": "2026-11-28 12:51 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -1390,7 +1390,7 @@
       "pending": "Final exact-source focused tests and independent review, including proxy input callback parity and current proof at native encode boundary",
       "harness": {
         "owner": "whole_owner_benchmark",
-        "status": "Source-independent capture schema, independent Python full-base/header/field oracle and pure tests authorized only",
+        "status": "Specialized replay declined in favor of complete actual Node-import boundary; source-only adaptation design authorized",
         "noActualCapture": true,
         "noImports": true,
         "noTimings": true,
@@ -1398,9 +1398,34 @@
         "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
         "candidate": null,
         "control": null,
-        "design": "Future measured unit must include B-only producer and receiver metadata, actual worker/owner startup/copies/retirement; old field-only captured calls are insufficient",
-        "draftScreen": "Two prospectively defined replications and20ms median CPU savings are unsealed suggestions; no performance acquisition authorization"
+        "design": "Reuse full actual source-bound import with real3workers, producer/receiver ownership, append and retirement. Start before first arm-specific import; move old field-counter hook to owner/directtotals because fused work precedes field wrapper. Defer output hashes until after CPU interval.",
+        "draftScreen": "Numerical CPU nomination gates remain unsealed; revise for full actual import boundary before any observations",
+        "correctnessOwner": "pipeline_audit",
+        "correctnessScope": "Fresh full native/lint/unit/options/types/all-target builds and all3current actual corpus A/B field/finaltermbyte parity, explicit wholeNativeCalls/Rows/Attempts; source-only kit prep pending finalproductbindings androotpublicationreview"
       }
+    },
+    "originalJmdictPhaseCensus": {
+      "scope": "Records-only descriptive phase census of all148 original JMdict raw reports, SHA matched to original independent auditor. No new execution, observations, qualification or timing transfer to new source.",
+      "AB": {
+        "result": "a90b4180aaa423b54cca894dcc950fb8e5b35ce1",
+        "reader": "02c3841ac2bf93d07b64e81f47fd3320a6930f2d",
+        "reports": 74,
+        "baselineValidationMedianMs": 48.550000000032014,
+        "nativeValidationMedianMs": 44.450000000186265,
+        "baselineFieldMedianMs": 56.149999999965075,
+        "nativeFieldMedianMs": 31.399999999906868
+      },
+      "BA": {
+        "result": "45e7e6a70bdc7736a8a3918fc9a4e7d7cc1663ac",
+        "reader": "8e34386ece144f402b2ed549deea9621771145f2",
+        "reports": 74,
+        "baselineValidationMedianMs": 35.350000000034925,
+        "nativeValidationMedianMs": 37.000000000116415,
+        "baselineFieldMedianMs": 46.29999999993015,
+        "nativeFieldMedianMs": 27.25
+      },
+      "noStageAdditionOrWallPrediction": true,
+      "allRolesRetainedSeparately": true
     }
   },
   "next": [
