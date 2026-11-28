@@ -191,6 +191,123 @@ async function loadCodec() {
     return api
 }
 
+/**
+ * @param {boolean} ready
+ * @returns {Promise<{api: typeof import('../ext/js/dictionary/zstd-term-content.js'), workers: ControlledWorker[]}>}
+ */
+async function loadControlledCodec(ready) {
+    /** @type {ControlledWorker[]} */
+    const workers = []
+    class CodecWorker extends ControlledWorker {
+        constructor() { super(); workers.push(this) }
+    }
+    vi.stubGlobal('Worker', CodecWorker)
+    const api = await loadCodec()
+    expect(workers).toHaveLength(4)
+    if (ready) {
+        for (const worker of workers) { worker.emit('message', {data: {type: 'ready'}}) }
+        await flush()
+    }
+    return {api, workers}
+}
+
+describe('single packed block with an already ready compression pool', () => {
+    test.each([null, 'jmdict'])('transfers one %s block and waits for its worker result', async (dictName) => {
+        vi.resetModules()
+        const {api, workers} = await loadControlledCodec(true)
+        const source = new Uint8Array(4096).fill(7)
+        const options = {experimentalGenericSpanCompression: true}
+        const expected = api.compressWrappedTermContentZstd(source, dictName, options).bytes
+        let settled = false
+        try {
+            const pending = api.compressWrappedTermContentZstdBlocks(Uint32Array.of(source.length), () => source, dictName, options)
+            void pending.then(() => { settled = true }, () => { settled = true })
+            expect(workers.map(({calls}) => calls.length)).toEqual([1, 0, 0, 0])
+            expect(source.byteLength).toBe(0)
+            await flush()
+            expect(settled).toBe(false)
+            workers[0].reply(0, {compressed: expected.buffer, envelopeMs: 0})
+            const result = await pending
+            expect(result.wrapped).toBe(true)
+            expect(result.chunks).toEqual([expected])
+            expect(api.decompressTermContentZstd(result.chunks[0].subarray(12), dictName)).toEqual(new Uint8Array(4096).fill(7))
+            expect(workers).toHaveLength(4)
+        } finally {
+            for (const worker of workers) { worker.emit('error', {message: 'test cleanup'}) }
+        }
+    })
+
+    test.each(['absent', 'starting', 'failed'])('keeps one block synchronous when the pool is %s', async (state) => {
+        vi.resetModules()
+        /** @type {ControlledWorker[]} */
+        let workers = []
+        /** @type {typeof import('../ext/js/dictionary/zstd-term-content.js')} */
+        let api
+        if (state === 'absent') {
+            // eslint-disable-next-line unicorn/no-useless-undefined -- Initialize without a pool, then make workers available.
+            vi.stubGlobal('Worker', undefined)
+            api = await loadCodec()
+            class UnexpectedWorker extends ControlledWorker {
+                constructor() { super(); workers.push(this) }
+            }
+            vi.stubGlobal('Worker', UnexpectedWorker)
+        } else {
+            ({api, workers} = await loadControlledCodec(state === 'failed'))
+            if (state === 'failed') { workers[0].emit('error', {message: 'injected idle worker failure'}) }
+        }
+        try {
+            const source = new Uint8Array(4096).fill(8)
+            const expected = api.compressWrappedTermContentZstd(source, null).bytes
+            let settled = false
+            const pending = api.compressWrappedTermContentZstdBlocks(Uint32Array.of(source.length), () => source, null)
+            void pending.then(() => { settled = true }, () => { settled = true })
+            await flush()
+            expect(settled).toBe(true)
+            expect(source.byteLength).toBe(4096)
+            expect((await pending).chunks).toEqual([expected])
+            expect(workers).toHaveLength(state === 'absent' ? 0 : 4)
+            expect(workers.every(({calls}) => calls.length === 0)).toBe(true)
+        } finally {
+            for (const worker of workers) { worker.emit('message', {data: {type: 'ready'}}) }
+            await flush()
+            for (const worker of workers) { worker.emit('error', {message: 'test cleanup'}) }
+        }
+    })
+
+    test.each(['dispatch-throw', 'error-reply', 'invalid-reply'])('repacks the original source after a single-block %s', async (failure) => {
+        vi.resetModules()
+        const {api, workers} = await loadControlledCodec(true)
+        const {TermContentOpfsStore} = await import('../ext/js/dictionary/term-content-opfs-store.js')
+        const {TermContentBlockStore} = await import('../ext/js/dictionary/term-content-block-store.js')
+        const blockStore = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes: 8192, minInputBytes: 0})
+        const source = Uint8Array.from({length: 4096}, (_, index) => index & 255)
+        const offsets = Uint32Array.of(4, 1024, 2500)
+        const lengths = Uint32Array.of(1000, 1000, 1000)
+        const expected = Array.from(offsets, (offset, index) => source.slice(offset, offset + lengths[index]))
+        workers[0].throwOnDispatch = failure === 'dispatch-throw'
+        try {
+            const pending = blockStore.tryAppendSpans(source, offsets, lengths, null, true)
+            expect(workers[0].calls).toHaveLength(failure === 'dispatch-throw' ? 0 : 1)
+            if (failure !== 'dispatch-throw') {
+                const received = /** @type {Uint8Array} */ (workers[0].calls[0].content)
+                expect(received).toEqual(Uint8Array.from(expected.flatMap((bytes) => [...bytes])))
+                workers[0].reply(0, failure === 'error-reply' ? {error: 'injected worker failure'} : {compressed: []})
+            }
+            const result = await pending
+            if (result === null) { throw new Error('Expected fallback block storage') }
+            for (let index = 0; index < expected.length; ++index) {
+                expect(await blockStore.read(result.contentOffsets[index], lengths[index], result.contentDictName)).toEqual(expected[index])
+            }
+            expect(source.byteLength).toBe(4096)
+            expect(workers.map(({terminateCount}) => terminateCount)).toEqual([1, 1, 1, 1])
+            await api.compressWrappedTermContentZstdBlocks(Uint32Array.of(4), () => Uint8Array.of(1, 2, 3, 4), null)
+            expect(workers).toHaveLength(4)
+        } finally {
+            for (const worker of workers) { worker.emit('error', {message: 'test cleanup'}) }
+        }
+    })
+})
+
 describe('packed source snapshot boundary', () => {
     test.each([false, true])('snapshots source before await with workers ready=%s', async (ready) => {
         vi.resetModules()

@@ -613,6 +613,7 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
  * Compresses a validated block plan while packing later blocks. Every factory
  * call happens before the first await, preserving the caller's source snapshot
  * boundary. A pool that is still starting uses the existing eager batch path.
+ * One block uses a healthy ready pool without starting or waiting for workers.
  * @param {Uint32Array} blockLengths
  * @param {(index: number) => Uint8Array} createBlock
  * @param {string|null} dictName
@@ -621,8 +622,8 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
  */
 export async function compressWrappedTermContentZstdBlocks(blockLengths, createBlock, dictName, options = {}) {
     options = snapshotTermBankExperiments(options);
-    if (blockLengths.length >= 2) {
-        const pool = compressionPool;
+    const pool = compressionPool;
+    if (blockLengths.length >= 2 || (blockLengths.length === 1 && pool !== null && !pool.failed)) {
         if (pool !== null && !pool.failed) {
             try {
                 return await pool.compressWrappedBlocks(blockLengths, createBlock, dictName, options);

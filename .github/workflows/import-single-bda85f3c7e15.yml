@@ -1,0 +1,123 @@
+name: Warm single-block compression screen bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-single-bda85f3c7e15
+    paths:
+      - .github/workflows/import-single-bda85f3c7e15.yml
+      - dev/perf/import-single-bda85f3c7e15.py
+      - ext/js/dictionary/**
+      - dev/data/dictionary-wasm/**
+      - dev/data/zstd*
+      - dev/lib/zstd*
+      - dev/bin/build-zstd-wasm.js
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-single-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Validate ready-pool dispatch and native worker behavior
+        run: |
+          npx eslint ext/js/dictionary/zstd-term-content.js test/zstd-term-content-packed-dispatch.test.js
+          npm run test:ts:main
+          npm run test:ts:test
+          npx vitest run test/zstd-term-content-pool.test.js test/zstd-term-content-pool-drain.test.js test/zstd-compression-worker-context.test.js test/zstd-term-content-packed-dispatch.test.js test/zstd-prepared-lifetime.test.js --maxWorkers=2
+          npm run test:build
+      - name: Full unit coverage
+        run: npm run test:unit -- --maxWorkers=2
+  comparison:
+    needs: validation
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-single-bda85f3c7e15'
+    name: Paired screen / ${{ matrix.dictionary }} / ${{ matrix.mode }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: vndb
+            mode: control
+          - dictionary: jmdict
+            mode: candidate
+          - dictionary: jitendex
+            mode: candidate
+          - dictionary: vndb
+            mode: candidate
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare release package and complete fixtures
+        env:
+          IMPORT_LAB_DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex "$IMPORT_LAB_DICTIONARY"
+          import_baseline="$RUNNER_TEMP/import-single-bda85f3c7e15-baseline"
+          git fetch --no-tags --depth=1 origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          git worktree add --detach "$import_baseline" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          cmp package-lock.json "$import_baseline/package-lock.json"
+          cmp test/perf/dictionaries.lock.json "$import_baseline/test/perf/dictionaries.lock.json"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$import_baseline/node_modules"
+          mkdir -p "$import_baseline/builds"
+          ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$import_baseline/builds/e2e-dictionary-cache"
+          (
+            cd "$import_baseline"
+            npm run build:libs
+            npm run license-report:html
+            npm run build -- --target chrome
+          )
+          npm run build -- --target chrome
+      - name: Run fixed paired schedule and separate correctness checks
+        env:
+          IMPORT_LAB_DICTIONARY: ${{ matrix.dictionary }}
+          IMPORT_LAB_MODE: ${{ matrix.mode }}
+        run: |
+          set -euo pipefail
+          import_baseline="$RUNNER_TEMP/import-single-bda85f3c7e15-baseline"
+          import_candidate="$GITHUB_WORKSPACE"
+          extra_args=()
+          if [ "$IMPORT_LAB_MODE" = control ]; then
+            import_candidate="$import_baseline"
+          else
+            extra_args+=(--expected-package-path js/dictionary/zstd-term-content.js)
+          fi
+          python3 dev/perf/import-single-bda85f3c7e15.py "$IMPORT_LAB_DICTIONARY" \
+            --baseline-root "$import_baseline" \
+            --candidate-root "$import_candidate" \
+            "${extra_args[@]}" \
+            --output "builds/perf/import-single-bda85f3c7e15/$IMPORT_LAB_DICTIONARY-$IMPORT_LAB_MODE"
+      - name: Retain raw evidence and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-single-bda85f3c7e15-${{ matrix.dictionary }}-${{ matrix.mode }}
+          path: builds/perf/import-single-bda85f3c7e15
+          if-no-files-found: error
+          retention-days: 14
