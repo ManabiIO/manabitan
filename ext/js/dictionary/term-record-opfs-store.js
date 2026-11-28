@@ -16,6 +16,7 @@
  */
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
+import {NativeRecordFieldEncoder} from './term-record-fields-wasm.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
@@ -905,6 +906,9 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {NativeRecordFieldEncoder|null} */
+        // eslint-disable-next-line @stylistic/semi
+        this._recordFieldEncoder = null
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1185,6 +1189,10 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _prepare() {
+        /* eslint-disable @stylistic/semi */
+        this._recordFieldEncoder?.dispose()
+        this._recordFieldEncoder = null
+        /* eslint-enable @stylistic/semi */
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1267,6 +1275,12 @@ export class TermRecordOpfsStore {
                 state.lookupIndexWritePromise = null;
                 state.lookupIndexWriteError = null;
             }
+            /* eslint-disable @stylistic/semi */
+            this._recordFieldEncoder = new NativeRecordFieldEncoder()
+            // Compilation overlaps source reading/parsing; an early append can
+            // always use the existing encoder until the optional module is ready.
+            void this._recordFieldEncoder.prepare()
+            /* eslint-enable @stylistic/semi */
         }, true);
     }
 
@@ -1405,6 +1419,10 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _abandonImportWritesForRollback() {
+        /* eslint-disable @stylistic/semi */
+        this._recordFieldEncoder?.dispose()
+        this._recordFieldEncoder = null
+        /* eslint-enable @stylistic/semi */
         this._importSessionActive = false;
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
@@ -1489,6 +1507,10 @@ export class TermRecordOpfsStore {
         } finally {
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
+            /* eslint-disable @stylistic/semi */
+            this._recordFieldEncoder?.dispose()
+            this._recordFieldEncoder = null
+            /* eslint-enable @stylistic/semi */
         }
     }
 
@@ -5856,6 +5878,10 @@ view.chunks :
         }
         /* eslint-disable @stylistic/semi */
         const directReferences = getSynchronousRecordFieldReferences(chunk, count)
+        if (directReferences !== null && this._recordFieldEncoder !== null) {
+            const native = this._recordFieldEncoder.encode(count, /** @type {Int32Array} */ (chunk.scoreList), directReferences, contentOffsetBase)
+            if (native !== null) { return native }
+        }
         const offsets = directReferences === null ? new Uint32Array(count) : null
         const lengths = directReferences === null ? new Uint16Array(count) : null
         /* eslint-enable @stylistic/semi */
