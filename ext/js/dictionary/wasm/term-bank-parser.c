@@ -140,6 +140,7 @@ static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
     uint32_t state[CRC32_BRAIDS] = {0xffffffffu};
     const uint32_t final_group = (length / step - 1u) * step;
     for (uint32_t offset = 0u; offset < final_group; offset += step) {
+        #pragma clang loop unroll(disable)
         for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
             uint64_t word;
             __builtin_memcpy(&word, data + offset + i * 8u, sizeof(word));
