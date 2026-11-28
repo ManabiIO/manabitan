@@ -1,0 +1,2349 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "vndb",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "disabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/vndb/vndb-A-1",
+    "fieldsBytes": 53191776,
+    "indexBytes": 401899832,
+    "contentBytes": 7533449,
+    "allTermFileBytes": 409433345
+  },
+  "enabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/vndb/vndb-B-1",
+    "fieldsBytes": 28780532,
+    "indexBytes": 377488588,
+    "contentBytes": 7533449,
+    "allTermFileBytes": 385022101
+  },
+  "actualSavedBytes": 24411244,
+  "fieldReductionPercent": 45.89289141238675,
+  "indexReductionPercent": 6.073962230469407,
+  "termFileReductionPercent": 5.9622022236610945,
+  "rows": 6648310,
+  "groups": 170,
+  "chunks": 192,
+  "format4Chunks": 162,
+  "format4Rows": 6328310,
+  "fallbackCounts": {
+    "no-strict-size-saving": 10,
+    "unused-offset-before-split-base": 20
+  },
+  "exactParserOutputsAndLookupPayloads": true,
+  "everyActualFieldRowMatchesSource": true,
+  "everyActualFinalChunkReread": true,
+  "everyExpandedFileAndMetadataMatchesOriginalOracle": true,
+  "finalOutputOracle": {
+    "bytes": 5342,
+    "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+  },
+  "actualPersistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 7533449,
+      "sha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "bytes": 38,
+      "sha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "bytes": 375257528,
+      "sha256": "dfa4d1cf4c7ba346492ddd6d714f92a21f999cae9eedc835b7349f31bdf5f279",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "bytes": 26,
+      "sha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+      "bytes": 2231060,
+      "sha256": "d6296b49d5e9d46b56e051a19c9cd40ffb0693df66016f563eb4241fe6babc41",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "defaultOffPreservesEveryOriginalFileByte": true,
+  "legacyReadContext": {
+    "mode": "real-sqlite-epoch-zero-schema-v2",
+    "assetIdentity": {
+      "ext/lib/sqlite/index.mjs": {
+        "bytes": 373254,
+        "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+      },
+      "ext/lib/sqlite/sqlite3.wasm": {
+        "bytes": 859730,
+        "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+      }
+    },
+    "initial": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "groupStates": [
+      {
+        "group": 0,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 1,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 2,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 3,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 4,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 5,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 6,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 7,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 8,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 9,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 10,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 11,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 12,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 13,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 14,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 15,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 16,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 17,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 18,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 19,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 20,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 21,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 22,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 23,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 24,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 25,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 26,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 27,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 28,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 29,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 30,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 31,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 32,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 33,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 34,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 35,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 36,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 37,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 38,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 39,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 40,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 41,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 42,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 43,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 44,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 45,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 46,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 47,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 48,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 49,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 50,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 51,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 52,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 53,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 54,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 55,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 56,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 57,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 58,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 59,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 60,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 61,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 62,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 63,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 64,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 65,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 66,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 67,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 68,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 69,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 70,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 71,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 72,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 73,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 74,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 75,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 76,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 77,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 78,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 79,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 80,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 81,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 82,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 83,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 84,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 85,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 86,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 87,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 88,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 89,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 90,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 91,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 92,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 93,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 94,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 95,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 96,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 97,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 98,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 99,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 100,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 101,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 102,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 103,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 104,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 105,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 106,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 107,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 108,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 109,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 110,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 111,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 112,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 113,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 114,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 115,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 116,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 117,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 118,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 119,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 120,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 121,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 122,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 123,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 124,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 125,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 126,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 127,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 128,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 129,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 130,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 131,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 132,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 133,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 134,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 135,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 136,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 137,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 138,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 139,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 140,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 141,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 142,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 143,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 144,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 145,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 146,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 147,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 148,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 149,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 150,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 151,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 152,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 153,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 154,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 155,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 156,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 157,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 158,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 159,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 160,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 161,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 162,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 163,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 164,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 165,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 166,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 167,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 168,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 169,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      }
+    ],
+    "sqliteInitial": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    },
+    "final": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "sqliteFinal": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    }
+  },
+  "unchangedOwnedSqliteBoundary": true,
+  "limitations": [
+    "Sequential production-group term sink, not whole-browser import timing.",
+    "Separate media persistence/UI/persistent SQLite publication/restart/lookup are outside this corpus boundary.",
+    "Actual persisted size does not establish browser memory or elapsed-time improvement."
+  ]
+}

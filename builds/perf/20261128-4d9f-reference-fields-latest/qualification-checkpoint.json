@@ -102,7 +102,21 @@
       "independentReceiptBlob": "b940659eca76d4eff402ce2c28e38ce817585b30"
     },
     "durableProofCommit": "7b649361e2056342abe3eec46c21bcfa08913a7e",
-    "durableProofDirectory": "builds/perf/20261128-4d9f-reference-fields-latest/source-gates"
+    "durableProofDirectory": "builds/perf/20261128-4d9f-reference-fields-latest/source-gates",
+    "prCi": {
+      "runId": 46144408353,
+      "head": "dcaf1e3090cc59621f3fd96638b1bc527f6b538f",
+      "unitJob": 140977167035,
+      "unitTestsPassed": 15952,
+      "unitTestsSkipped": 47,
+      "testFilesPassed": 699,
+      "allActiveJobsPassed": true,
+      "chromiumE2E": "passed",
+      "firefoxE2E": "passed",
+      "allFourTypeScriptConfigurations": "passed",
+      "javascriptMarkdownJsonHtmlCss": "passed",
+      "dryBuild": "passed"
+    }
   },
   "compatibility": {
     "floor12ReservedForOnlineZstd": true,
@@ -192,9 +206,9 @@
     }
   },
   "latestCorpus": {
-    "status": "pending",
+    "status": "complete-all-six-observations-and-independent-audit-passed",
     "runtime": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
-    "qualification": "Fresh current-source corpus is held until the shared complete-schema public-sink contract passes. No latest-format corpus has started. Original343 producer/decoder/eight oracles remain unchanged.",
+    "qualification": "Current source proof of term-file and logical output equivalence at unpublished ingestion boundary. Browser proves actual committed floor13/restart/media separately; no timing or process-memory claim.",
     "sharedBoundaryHistory": [
       {
         "runId": 46142163868,
@@ -214,7 +228,105 @@
         "scope": "shared full-schema helper gate",
         "status": "scoped lint and parent first14 controls passed; public-sink control15 measured unloaded resident size and stopped before candidate controls/corpus; persisted loading correction pending"
       }
-    ]
+    ],
+    "runId": 46145076480,
+    "tooling": "26c5cb9ff1a19afd583f94a6c86f336dab783719",
+    "toolingTree": "f58aa97ab47e2605980b33ecdee58825b19064af",
+    "portableManifestBlob": "aeb4d01e6eae8de3655514a009c3abada9424042",
+    "nodeContractsPassed": 35,
+    "pythonContractsPassed": 5,
+    "scopedLint": "passed",
+    "previousReader": "passed-with-unchanged-SQLite-and-both-format4-files",
+    "sourceArms": "same final85 runtime; A flagoff and B flagtrue",
+    "observations": 6,
+    "groupsPerArm": 204,
+    "chunksPerArm": 226,
+    "originalOracleFilesVerified": 8,
+    "completeOutputOracles": "All parser/source rows, fields, frames, and independently expanded final-file hashes match the original unchanged oracles.",
+    "sqlite": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0,
+      "exportUnchangedAcrossAllSixFreshUnseededObservations": true,
+      "rootUnchangedEveryGroup": true
+    },
+    "cleanup": "All storage drains, worker joins, owned DB closes and resource releases fulfilled.",
+    "results": [
+      {
+        "dictionary": "jmdict",
+        "rows": 528299,
+        "termFileBytesOff": 43315677,
+        "termFileBytesOn": 43274673,
+        "bytesSaved": 41004,
+        "format4Chunks": 5,
+        "totalChunks": 12,
+        "format4Rows": 210000
+      },
+      {
+        "dictionary": "jitendex",
+        "rows": 436555,
+        "termFileBytesOff": 61977692,
+        "termFileBytesOn": 61977692,
+        "bytesSaved": 0,
+        "format4Chunks": 0,
+        "totalChunks": 22,
+        "format4Rows": 0
+      },
+      {
+        "dictionary": "vndb",
+        "rows": 6648310,
+        "termFileBytesOff": 409433345,
+        "termFileBytesOn": 385022101,
+        "bytesSaved": 24411244,
+        "format4Chunks": 162,
+        "totalChunks": 192,
+        "format4Rows": 6328310,
+        "fieldsBytesOff": 53191776,
+        "fieldsBytesOn": 28780532,
+        "contentFileBytes": 7533449,
+        "fallbackChunks": {
+          "strictSize": 10,
+          "unusedOffsetBeforeSplitBase": 20
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 15263461668,
+        "name": "reference-fields85a8-contracts-46145076480-1",
+        "bytes": 32769,
+        "sha256": "8656ab2d6d39776a6af40aeb75b4cdede5162d8e975fc6b1d31b5635bc345da2"
+      },
+      {
+        "id": 15263227579,
+        "name": "reference-fields85a8-vndb-46145076480-1",
+        "bytes": 798834,
+        "sha256": "0ee3ed9d257cf2501517c79ac6080611d7b9d27465fc6e5e9e76e4b402ebab11"
+      },
+      {
+        "id": 15263163001,
+        "name": "reference-fields85a8-jitendex-46145076480-1",
+        "bytes": 177490,
+        "sha256": "e44b05ea5687eca3fe9e61bd59444caaeef77ba0fd29ebc81b2edc2b9400b6d2"
+      },
+      {
+        "id": 15263054810,
+        "name": "reference-fields85a8-jmdict-46145076480-1",
+        "bytes": 127578,
+        "sha256": "169fe28dd94972f1aa127b00a33c213d7e8edf282e26726edcd8939ccddab232"
+      }
+    ],
+    "independentContractAudit": {
+      "manifestBlob": "712f86064fe937f107778107c7f5a9b24d3a7079",
+      "reportBlob": "883d10325b40e1f39c1c05ab362c2d576b5f9c2a",
+      "status": "passed",
+      "nodeContracts": 35,
+      "pythonContracts": 5,
+      "syntaxChecks": 22,
+      "lintExit": 0,
+      "skipped": 0
+    },
+    "finalEvidenceManifest": "2cf6de8b8450ffd3f01acdbfe515d89948f03933"
   },
   "limitations": [
     "Experimental flag remains off; enabling actual format4 raises the schema floor and prevents opening with older builds.",
@@ -222,7 +334,7 @@
     "Browser checks use orderly restart; corruption, interruption and old-reader compatibility have separate targeted tests.",
     "No latency or process-memory benefit established."
   ],
-  "updatedAt": "2026-11-28T12:20:00Z",
+  "updatedAt": "2026-11-28T12:42:00Z",
   "sourceCompatibilityReview": {
     "blob": "87063c8b45537814cce782acf03576add902d6c0",
     "metadataSource": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",

@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "sourceOnly": true,
+  "sourceHelperCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "candidateFullTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "originalFiles": {
+    "test/perf/record-reference-table-verification/activation_overlay.py": {
+      "sourceCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "gitBlob": "3d3c7039f9b9a0fba4e3880e325350866ed4352c",
+      "bytes": 8363,
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27"
+    },
+    "test/perf/record-reference-table-verification/actual-fields.contract.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "8e39882f88f9c72e16f8558e62755bba0f919b47",
+      "bytes": 5972,
+      "sha256": "f196cec9ad2e9b1789e8b168cfa95c5516c1229d9d4ee291baff46d0909a0ac2"
+    },
+    "test/perf/record-reference-table-verification/actual-fields.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "b4ca611fd643bfc31a0784356dc6fa38d0a32075",
+      "bytes": 8380,
+      "sha256": "6cc328a14fc9f497559effcbf5bc4d27646eb4fa7a16677b32595da7388a5507"
+    },
+    "test/perf/record-reference-table-verification/archive-catalog.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "ea1267f1c5cc6be84ce22c27e4441590e2d0fd7e",
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    "test/perf/record-reference-table-verification/common.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "74be89b4483209526b97150ec98a3f0d8b6464af",
+      "bytes": 9870,
+      "sha256": "949d4f8c1a9c7e500ae1fbec3f1b724a6cdacaff44eb8ceb31d98549bf1433ad"
+    },
+    "test/perf/record-reference-table-verification/compare-results.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "c1d03c132f51719c2f73babcd50d03fe19b2f365",
+      "bytes": 7898,
+      "sha256": "5a9060531d5dd2595de1e55d04f5b62478259251233e424b1787988c7102b75e"
+    },
+    "test/perf/record-reference-table-verification/expanded-file-oracle.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "5f7f464266217cf8fa6db7e785ba370ff8ab2d1b",
+      "bytes": 6774,
+      "sha256": "d7db2fa0e4e279208b42c17d26f08c2240d11c8f1b590fc4f58022ae22bddbc2"
+    },
+    "test/perf/record-reference-table-verification/file-oracle.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "1589b4b7c56e7f0763873542ad914ed1a012dda6",
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    "test/perf/record-reference-table-verification/launch.py": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "20a33abd0eeb019aa67480fee8b7b95d82fe25ea",
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    "test/perf/record-reference-table-verification/legacy-field-analysis.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "e23832e2a02797baab44896b086434123850f361",
+      "bytes": 6689,
+      "sha256": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67"
+    },
+    "test/perf/record-reference-table-verification/logical-record-ids.contract.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "b980f3132c884f33323403cc8947f39b7f33a7c0",
+      "bytes": 3046,
+      "sha256": "2e79d4909f4eab78459703ce0f1e762763f8510988da53171a3d2ee3b106965d"
+    },
+    "test/perf/record-reference-table-verification/logical-record-ids.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "2633ad1b193b1eeafaa39c389d0a92b460d03cc8",
+      "bytes": 1515,
+      "sha256": "a7900f780f101d32a0d1526983cb9aca9050790de8e0b3b847228acaa9a2baac"
+    },
+    "test/perf/record-reference-table-verification/metadata-oracle.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "83a7f5b736577767dfc1f0c8fa889ce9d7c8ac13",
+      "bytes": 6374,
+      "sha256": "66ce1e26952a9cf686869d89b10e4965cd6991b049b01646b928c54c7b95f95a"
+    },
+    "test/perf/record-reference-table-verification/node-opfs-bounded.contract.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "29c3e2d0046013fb6e22318f6cd18fe602ca8c56",
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    "test/perf/record-reference-table-verification/node-opfs-bounded.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "60044cb9e814b873410d1dcdeffc088fd9ab0730",
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    "test/perf/record-reference-table-verification/previous-reader.fixture.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "28ef2a2ef92fddc2c5e53e1e95016a7d2f9e52f7",
+      "bytes": 7622,
+      "sha256": "33570927ae238199de1f06b839ea11190caad972065e467badd7991dd9a8db9f"
+    },
+    "test/perf/record-reference-table-verification/run-old-reader-check.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "66fd6d0264982e9064d3a14969be85b71f319cf4",
+      "bytes": 5185,
+      "sha256": "59db1bf5ee5af0726a8f050d234178ee25eda3eadd1afc9fa1740092b5888a6e"
+    },
+    "test/perf/record-reference-table-verification/run.mjs": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "ba28a59ad53a35c134862942977f707396c70d78",
+      "bytes": 43880,
+      "sha256": "30b725b94a078d04e48a88319bdbb72a8b23228383dd032e363cacd4b431e6f7"
+    },
+    "test/perf/record-reference-table-verification/storage-activation.contract.mjs": {
+      "sourceCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "gitBlob": "b528451127b29c28370460b6eced025d7d673c9a",
+      "bytes": 11561,
+      "sha256": "feea0cd1b2b52594570c4615c47768bf273c205ac1821cfe8f78735eee06f54e"
+    },
+    "test/perf/record-reference-table-verification/storage-activation.mjs": {
+      "sourceCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "gitBlob": "b20a22dd097a8f551e890120851e2a7e0cdc0852",
+      "bytes": 16066,
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+    },
+    "test/perf/record-reference-table-verification/test_activation_overlay.py": {
+      "sourceCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "gitBlob": "eabdcd09be181acdd09b845669e98c6dbc5823e1",
+      "bytes": 6334,
+      "sha256": "ae52d3a38984bf0ffdaf98c064732e65e3f3694fb90b551e153bb3cbb1b03db4"
+    },
+    "test/perf/record-reference-table-verification/vndb-media-oracle.py": {
+      "sourceCommit": "343884244602d3ecbbbfdc4cb2efee0190567b58",
+      "gitBlob": "a41300f989f72f417e80ea4d9cd6116fa1c0cb2e",
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    }
+  },
+  "oracleArchive": {
+    "gitBlob": "b9400b426b5177795b1fe51160671b9837b0eb55",
+    "bytes": 95475,
+    "sha256": "7959bf4736e64ca55e2ee7176774f2c62d2802a7df968f226818f969bb642e78"
+  },
+  "inheritedGeneratedAssetPins": {
+    "ext/lib/term-bank-parser.wasm": {
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    },
+    "ext/lib/term-content-canonical-scan-v1.wasm": {
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    },
+    "ext/lib/zstd-wasm.js": {
+      "sha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    },
+    "ext/lib/zstd.wasm": {
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    },
+    "ext/lib/zstd-dicts/jmdict.zdict": {
+      "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    },
+    "ext/lib/zip.js": {
+      "sha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+      "reason": "Exact previously executed generated-asset identity; its full dev/lib/native/build-libs/package-lock inputs remain unchanged, and each actual generated asset must pass this hash at acquisition."
+    }
+  },
+  "upstreamIntegrationChanges": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-content-opfs-store.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/raw-term-content.js",
+    "ext/js/dictionary/term-content-block-store.js",
+    "ext/js/dictionary/zstd-term-content.js",
+    "ext/js/pages/settings/dictionary-import-controller.js"
+  ],
+  "candidateChanges": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/term-bank-experiments.js"
+  ],
+  "changes": [
+    {
+      "path": "test/perf/record-reference-table-verification/common.mjs",
+      "beforeSha256": "949d4f8c1a9c7e500ae1fbec3f1b724a6cdacaff44eb8ceb31d98549bf1433ad",
+      "afterSha256": "aae08ad9ef9e7cc7ac148de1fb6686f54540ef622afdc8fe9b85964ac4972a24"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/previous-reader.fixture.mjs",
+      "beforeSha256": "33570927ae238199de1f06b839ea11190caad972065e467badd7991dd9a8db9f",
+      "afterSha256": "c35310b5fac5237447601628987b16463377e3e282e99ee6d102e0e58a52794f"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/run-old-reader-check.mjs",
+      "beforeSha256": "59db1bf5ee5af0726a8f050d234178ee25eda3eadd1afc9fa1740092b5888a6e",
+      "afterSha256": "337d12fdb4ea64e871141bae0e8dc44c31f20f334ecbc55a14593dfc0d0533f8"
+    }
+  ],
+  "prospectiveLintFollowUp": {
+    "baseCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+    "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "path": "ext/js/dictionary/term-record-opfs-store.js",
+    "beforeGitBlob": "fcf4b908938d818a456574352446d95e71623713",
+    "afterGitBlob": "d056b473923f762ab2c4dca91393effa2abc0f40",
+    "afterSha256": "434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45",
+    "description": "Equivalent ordered constant rowBytes if/else and four call-formatting fixes; no corpus acquisition preceded this source-pin update."
+  }
+}

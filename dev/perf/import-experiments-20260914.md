@@ -764,7 +764,7 @@ The two original latest VNDB cells failed the inherited f28 expectation of 37 al
 
 The actual a300 previous reader rejects schema 13 before all eight recovery/prepare/schema/purge hooks. Its 16,384-byte SQLite export and both real format 4 files remain byte-identical. This uses the real writer, SQLite and old connection-opening implementation; it is not an older-browser restart measurement. Runtime tests separately cover large reference tables, sparse gathers, paused ownership, malformed or unused references, checksums, cursor reuse, schema/epoch combinations, online promotion and publication failures.
 
-### Reproduction and remaining corpus gate
+### Reproduction and complete corpus verification
 
 For the exact final-source VNDB browser verification, start from a clean repository with the pinned Node22.22.0/toolchain environment and use a new evidence directory for every intentional reproduction:
 
@@ -786,6 +786,26 @@ python dev/perf/reference-format-browser-4d9f/run-reference-format-browser-v2.py
 
 The runner verifies exact source tree, fixture archive, toolchain, package, observer and contract identities; builds the ordinary release package; uses one package for both flag modes; and retains all failures. Use `--order on-off` with another fresh output directory for the opposite order. Do not replace an unchanged failed timing or memory observation.
 
-Fresh full-corpus verification on final85 remains gated on the shared full-schema public-sink harness. Attaching only content-root tables exposed ordinary glossary invalidation; full production schema initialization fixes that scope. The next nonempty-public-sink control initially observed resident size before loading persisted indexes. Its prospective correction uses the real persisted loader and exact decoded fields, retaining the one/two-row and cold-deduplication assertions. Scoped lint and all actual-I/O controls must pass before any new format corpus acquisition. All failed metadata-harness attempts and the original format observer/floor failures remain retained, with their actual source identities. No latest-format corpus result is claimed yet.
+[The final complete corpus run](https://github.com/ManabiIO/manabitan/actions/runs/46145076480), tooling `26c5cb9ff1a19afd583f94a6c86f336dab783719`, passes all six exact85 off/on observations. It first passes 35 Node contracts, five Python contracts, 22 syntax checks, scoped lint and the actual old-reader check. Independent audits verify every source, helper, Node, fixture and oracle identity; all 204 groups and 226 chunks per arm; every parser/source column; per-chunk admission/size arithmetic; and every independently expanded complete-file oracle. The current-source saved bytes exactly reproduce the figures above. [The complete raw ZIPs, comparisons and audits](../../builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/artifact-index.json) are preserved.
+
+The full production SQLite schema is initialized once on an owned in-memory connection after store preparation. Ordinary glossary invalidation, the real terms virtual table, content-root resolver, checksums and full-byte collision comparisons remain active. Each fresh unseeded corpus retains its entire 311,296-byte SQLite export unchanged, SHA256 `9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0`, with user version, epoch and committed high-water all zero. Root state is checked after every group. All drains, worker joins, owned closes and resource releases succeed. This is unpublished term ingestion; actual committed floor 13, media and restart are proved by the separate browser gates.
+
+The earlier incomplete-schema, helper-lint and public-sink fixture failures remain retained with their exact sources. The corrected nonempty control keeps one record session across both chunks, closes the independent content session for a real cold read, finalizes records once and decodes both authoritative rows. It preserves target-only glossary deletion and verifies the unrelated dictionary's rows survive. No guard, oracle or memory/timing threshold is weakened.
+
+For standalone corpus reproduction, use frozen tooling `26c5cb9ff1a19afd583f94a6c86f336dab783719`, a runtime checkout at85 and a reader checkout at a300. Prepare their ordinary locked dependencies and normal library bundles as in the committed workflow. The Node binary must be v22.22.0 with SHA256 `1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31`. The contracts and old-reader phases can share an initially fresh tooling checkout; each corpus needs another fresh tooling checkout because original oracle extraction refuses overwrite.
+
+```sh
+python3 /absolute/tooling/test/perf/record-reference-table-verification/hosted-qualification.py \
+  --phase contracts --source-root /absolute/runtime85 --node /absolute/node22 \
+  --output /absolute/new-contract-report
+python3 /absolute/tooling/test/perf/record-reference-table-verification/hosted-qualification.py \
+  --phase old-reader --source-root /absolute/runtime85 --reader-root /absolute/readera300 \
+  --node /absolute/node22 --output /absolute/new-old-reader-report
+python3 /absolute/fresh-tooling/test/perf/record-reference-table-verification/hosted-qualification.py \
+  --phase corpus --source-root /absolute/runtime85 --node /absolute/node22 \
+  --corpus vndb --cache-dir /absolute/pinned-fixture-cache --output /absolute/new-vndb-report
+```
+
+Substitute `jmdict` or `jitendex` and fresh paths for the other corpus checks. The driver fetches only the checksum-pinned fixture and runs separate off/on processes, retaining every exit and comparison. No elapsed or process-memory gain is inferred from its diagnostic timings.
 
 [The narrow compatibility review](../../builds/perf/20261128-4d9f-reference-fields-latest/metadata-format-source-compatibility.json) finds no shared changed methods or overlapping base hunks with metadata source86. The only shared runtime file is `dictionary-database.js`; logical offset, length, row-ID and dictionary-name interfaces remain intact. This is source compatibility, not combined-source execution qualification.

@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "sourceOnly": true,
+  "baseToolingManifestBlob": "3aed6c1a760f86f9bde8167dea9627443eb9a5ef",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "reason": "Root-only real-SQLite attachment passed14 direct reader controls but public chunks failed at the missing base/glossary schema. This unexecuted prospective derivative awaits the full unchanged production initializer and its new nonempty public-sink control.",
+  "preservedOriginals": [
+    "run.mjs",
+    "launch.py",
+    "compare-results.mjs",
+    "all original field/parser/media/final-file oracles"
+  ],
+  "adapterStatus": "Exact shared15-control implementation passed on both source arms. Format85 helper/old-reader contracts remain a mandatory first job before any actual format corpus.",
+  "derivedFiles": {
+    "run-with-legacy-read-context.mjs": {
+      "bytes": 48869,
+      "sha256": "b4dc14e81e48ef49286ebaf6e9f357f31bf6924118370090bdb0294485da4616"
+    },
+    "launch-with-legacy-read-context.py": {
+      "bytes": 3270,
+      "sha256": "50da9f8f26a59964afd797be5f832637ee941a4a40f83dd3e5eb5bc817dcfe12"
+    },
+    "compare-with-legacy-read-context.mjs": {
+      "bytes": 9720,
+      "sha256": "7c1a9ff2e9957cf1b78f615aba15ca93c0bb56fdcac0158a89fd8fbaf1d3b877"
+    },
+    "hosted-qualification.py": {
+      "bytes": 7572,
+      "sha256": "31ba35d78033e7c432a0eab8b355f9ebaa3957a78d86ce052e45be5f270eb31a"
+    },
+    "legacy-import-read-context.mjs": {
+      "bytes": 5825,
+      "sha256": "247bd800ea9397ef9e6b4dd78c9a19fffe570ddea20ce884d337b4ec70b99233"
+    },
+    "legacy-import-read-context.contract.mjs": {
+      "bytes": 26052,
+      "sha256": "9aa0c71cb18e56b8711e7dfdeab9eb1d2c5f166da22da738b3a9560a2086e22c"
+    }
+  },
+  "formatPublicationBoundary": "Actual complete base schema with user_version0 and epoch0 root is initialized before import. Only actual content/record stores are drained; no DictionaryDatabase publication finalizer or version migration. Complete initial/final SQLite export equality is retained prospectively only for the fresh-empty corpus tables, after the shared nonempty public-sink control proved empty glossary invalidation preserves bytes. Seeded nonempty invalidation is permitted and tested separately; installed floor13 is a browser/old-reader assertion, not a corpus claim.",
+  "adapter": {
+    "module": {
+      "gitBlob": "15f7845ae38ee47459b53ed5066321b53f382e36",
+      "bytes": 5825,
+      "sha256": "247bd800ea9397ef9e6b4dd78c9a19fffe570ddea20ce884d337b4ec70b99233"
+    },
+    "contracts": {
+      "gitBlob": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+      "tests": 15,
+      "bytes": 26052,
+      "sha256": "9aa0c71cb18e56b8711e7dfdeab9eb1d2c5f166da22da738b3a9560a2086e22c"
+    }
+  },
+  "cleanupSource": {
+    "commit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+    "blob": "25b7f6b0deca943f54aa75db4acb152264fa0930",
+    "path": "test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
+    "boundary": "Reviewed finally block and post-finally cleanup-only failure propagation copied exactly. Stores settle before worker/owned SQLite close; ZIP/OPFS releases recorded and required; primary acquisition errors survive ordinary cleanup failures."
+  },
+  "manifestChange": "Only adds the exact real-SQLite boundary mode and two normal asset identities. Original runtime profiles and all eight oracle identities remain unchanged.",
+  "previousProspectiveManifestBlob": "3e64807981eb2870b5d0f3c96e524b188e1a71f5",
+  "publicSinkControlCorrection": "The prepared OPFS import writer deliberately does not retain resident rows, and record-session completion finalizes immutable shards. The positive control retains one record session across both public chunks, commits only the content session for a cold byte comparison, then finalizes records once and uses ordinary authoritative loading to verify exactly two original IDs and every decoded term/reference field. First unique-content persistence, cold exact reuse, scoped glossary invalidation and root invariants remain required; prior fixture failures are retained.",
+  "sharedControlValidation": {
+    "runId": 46144729522,
+    "toolingCommit": "8ec2c45d182dd7615317e1675197aadd494ae964",
+    "artifact": {
+      "id": 15263545780,
+      "bytes": 195000,
+      "sha256": "be4d01efa18294ea5b67366949267db2288635afffdf5af9f07ad7d83a4259a5"
+    },
+    "contractBlob": "0e36162adf0188cea08cfced6d3cd6bbf9bbd2ee",
+    "moduleBlob": "15f7845ae38ee47459b53ed5066321b53f382e36",
+    "controls": [
+      {
+        "arm": "A",
+        "log": "legacy-context-contracts-A.log",
+        "bytes": 10587,
+        "sha256": "0aa60269df01bbcff2da399e54ec8366e5274931d023ecc33c1169343fe42698",
+        "passed": 15,
+        "failed": 0,
+        "diagnostic": {
+          "name": "actual-public-sink-sqlite-boundary",
+          "sourceCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+          "initialSqlite": {
+            "bytes": 311296,
+            "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+            "userVersion": 0
+          },
+          "afterEmptyInvalidation": {
+            "bytes": 311296,
+            "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+            "userVersion": 0
+          },
+          "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+          "beforeRealInvalidation": {
+            "bytes": 311296,
+            "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+            "userVersion": 0
+          },
+          "afterRealInvalidation": {
+            "bytes": 311296,
+            "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+            "userVersion": 0
+          },
+          "root": {
+            "epoch": 0,
+            "logicalHighWater": 0,
+            "rootId": "legacy-root-v0",
+            "manifest": {
+              "version": 1,
+              "legacy": true,
+              "regions": []
+            }
+          },
+          "actualTermRows": 2,
+          "coldPersistedExactComparison": true,
+          "publicDuplicateExactReuse": true,
+          "actualScopedGlossaryInvalidation": true
+        },
+        "decodedIds": [
+          1,
+          2
+        ],
+        "cleanupErrors": []
+      },
+      {
+        "arm": "B",
+        "log": "legacy-context-contracts-B.log",
+        "bytes": 10592,
+        "sha256": "b2e5634ca99d947b452899b372a8e849a18219e6e663fff994838474a7346d48",
+        "passed": 15,
+        "failed": 0,
+        "diagnostic": {
+          "name": "actual-public-sink-sqlite-boundary",
+          "sourceCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+          "initialSqlite": {
+            "bytes": 311296,
+            "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+            "userVersion": 0
+          },
+          "afterEmptyInvalidation": {
+            "bytes": 311296,
+            "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+            "userVersion": 0
+          },
+          "emptyGlossaryInvalidationPreservesEverySqliteByte": true,
+          "beforeRealInvalidation": {
+            "bytes": 311296,
+            "sha256": "9d88bd5e131e74297b82eec002889507be676ee0f02c53db1f955c2fc08c8843",
+            "userVersion": 0
+          },
+          "afterRealInvalidation": {
+            "bytes": 311296,
+            "sha256": "599de15192398bb6967a3a595dcc094e40d7faa50aa05bcb5e7078daf1091b3c",
+            "userVersion": 0
+          },
+          "root": {
+            "epoch": 0,
+            "logicalHighWater": 0,
+            "rootId": "legacy-root-v0",
+            "manifest": {
+              "version": 1,
+              "legacy": true,
+              "regions": []
+            }
+          },
+          "actualTermRows": 2,
+          "coldPersistedExactComparison": true,
+          "publicDuplicateExactReuse": true,
+          "actualScopedGlossaryInvalidation": true
+        },
+        "decodedIds": [
+          1,
+          2
+        ],
+        "cleanupErrors": []
+      }
+    ],
+    "scope": "These independently audited shared controls exercised exact a300 and metadata86cd sources. The format workflow must execute the same15 controls plus its original20 on exact85 before its own actual corpus jobs."
+  }
+}

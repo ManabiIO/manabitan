@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "jitendex",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "disabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/jitendex/jitendex-A-1",
+    "fieldsBytes": 3497796,
+    "indexBytes": 23590852,
+    "contentBytes": 38386795,
+    "allTermFileBytes": 61977692
+  },
+  "enabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/jitendex/jitendex-B-1",
+    "fieldsBytes": 3497796,
+    "indexBytes": 23590852,
+    "contentBytes": 38386795,
+    "allTermFileBytes": 61977692
+  },
+  "actualSavedBytes": 0,
+  "fieldReductionPercent": 0,
+  "indexReductionPercent": 0,
+  "termFileReductionPercent": 0,
+  "rows": 436555,
+  "groups": 22,
+  "chunks": 22,
+  "format4Chunks": 0,
+  "format4Rows": 0,
+  "fallbackCounts": {
+    "no-strict-size-saving": 22
+  },
+  "exactParserOutputsAndLookupPayloads": true,
+  "everyActualFieldRowMatchesSource": true,
+  "everyActualFinalChunkReread": true,
+  "everyExpandedFileAndMetadataMatchesOriginalOracle": true,
+  "finalOutputOracle": {
+    "bytes": 4724,
+    "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+  },
+  "actualPersistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 38386795,
+      "sha256": "664c13a8f93f089d04023460fd01f56117744b41d72c3fd8608bb9ebfa217fc9",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+      "bytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "bytes": 23590852,
+      "sha256": "696c9f5506f32ceba7ecfe6834b69cd3ffdac83c0d6eec74afe4923a0b354a2b",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "defaultOffPreservesEveryOriginalFileByte": true,
+  "legacyReadContext": {
+    "mode": "real-sqlite-epoch-zero-schema-v2",
+    "assetIdentity": {
+      "ext/lib/sqlite/index.mjs": {
+        "bytes": 373254,
+        "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+      },
+      "ext/lib/sqlite/sqlite3.wasm": {
+        "bytes": 859730,
+        "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+      }
+    },
+    "initial": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "groupStates": [
+      {
+        "group": 0,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 1,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 2,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 3,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 4,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 5,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 6,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 7,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 8,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 9,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 10,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 11,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 12,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 13,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 14,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 15,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 16,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 17,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 18,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 19,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 20,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 21,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      }
+    ],
+    "sqliteInitial": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    },
+    "final": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "sqliteFinal": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    }
+  },
+  "unchangedOwnedSqliteBoundary": true,
+  "limitations": [
+    "Sequential production-group term sink, not whole-browser import timing.",
+    "Separate media persistence/UI/persistent SQLite publication/restart/lookup are outside this corpus boundary.",
+    "Actual persisted size does not establish browser memory or elapsed-time improvement."
+  ]
+}

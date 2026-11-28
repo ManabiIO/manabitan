@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "runId": 46145076480,
+  "toolingCommit": "26c5cb9ff1a19afd583f94a6c86f336dab783719",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "timingEligible": false,
+  "files": [
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/contracts.zip",
+      "blob": "5218a2f4d561d05dece9ce6fa88c982495573bd8",
+      "bytes": 32769,
+      "sha256": "8656ab2d6d39776a6af40aeb75b4cdede5162d8e975fc6b1d31b5635bc345da2"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/jmdict.zip",
+      "blob": "886f286bd6989d51d3b370e015bcc31f8c367f05",
+      "bytes": 127578,
+      "sha256": "169fe28dd94972f1aa127b00a33c213d7e8edf282e26726edcd8939ccddab232"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/jitendex.zip",
+      "blob": "e5840b58754ff804645d83fc77a6374e5bf3890f",
+      "bytes": 177490,
+      "sha256": "e44b05ea5687eca3fe9e61bd59444caaeef77ba0fd29ebc81b2edc2b9400b6d2"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/vndb.zip",
+      "blob": "b7d45ae1c125fbff0996d35411f33f846c6d1ea9",
+      "bytes": 798834,
+      "sha256": "0ee3ed9d257cf2501517c79ac6080611d7b9d27465fc6e5e9e76e4b402ebab11"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/artifact-index.json",
+      "blob": "f345be173deca552fb85bb212cc540ce8472a21d",
+      "bytes": 52367,
+      "sha256": "480c41b384090a713ab79f2c2b303b60bdcb77a273a249035cc4298ddca73a6c"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/audit.py",
+      "blob": "ce041b2136c9507f55a1e0615afd463aa2069f58",
+      "bytes": 17459,
+      "sha256": "02f38527e3476315253973f99cf56aa52725a216a6d0a1da9b5c626aee5d17b8"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/independent-audit.json",
+      "blob": "db7e50e028c0c333830641e46a630ceea06b846a",
+      "bytes": 6075,
+      "sha256": "19b7a93bd68f15582993e6eeb86f69ce02b9c898f0212093c8f614f0d0fd750c"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/jmdict-comparison.json",
+      "blob": "65e133af80aa3502e3f16ac59633c4dd0141bdc9",
+      "bytes": 7000,
+      "sha256": "12737b667020ca0baff9db5c2fa972bde20cd500efb52b8656582d4b47d49006"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/jitendex-comparison.json",
+      "blob": "8e7fa9f43ef823454ec5256224fc114e0b51ceb6",
+      "bytes": 9724,
+      "sha256": "9d966e97e86b3f61de67f0071eb6cf17877ee4d2a7bae76f68e2a64910f3d0c0"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/reports/final-current-corpus/vndb-comparison.json",
+      "blob": "d6c73407797a51fb87a7f10e145cc7da34a3f74c",
+      "bytes": 51265,
+      "sha256": "cc549276a247d43f568b7cfac979ae97cce2be2f0bf69914c62e06c189927892"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/final-current-corpus-85/independent-contract-audit.json",
+      "blob": "883d10325b40e1f39c1c05ab362c2d576b5f9c2a",
+      "bytes": 24385,
+      "sha256": "29d84b5b467cb2dbfb57720f13738c21b5fea8315b40104b5a47eaf05445ab74"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/final-current-corpus-85/independent-contract-audit.py",
+      "blob": "3c8c8a40e1986512b0fa0d665636197fe86be8a0",
+      "bytes": 11624,
+      "sha256": "f46a069671d97f45a021ff8e01da906211f9d2fa6050da6aaff93afe32aedd71"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/final-current-corpus-85/independent-contract-audit-pins.json",
+      "blob": "22151e37086a18216ae7183289ff0fcae12040ec",
+      "bytes": 21605,
+      "sha256": "bd75293a60a8d455855395d3eb98fd34e908142869653f280d1f9d3bf33236a4"
+    }
+  ],
+  "independentContractAuditManifest": "712f86064fe937f107778107c7f5a9b24d3a7079"
+}
