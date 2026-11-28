@@ -4,8 +4,8 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "7b5bb45309d141eaa296ecef6c3cef7a94f22760266217a7c26dc467ea6db39c",
-    "sourceFileCount": 14,
+    "sourceDigest": "95b81e5c076edd41574181fbbe200c6d513d35dbda3e407900fe2ef8608deeac",
+    "sourceFileCount": 15,
     "targets": [
         {
             "name": "term-content-canonical-scan-v1.wasm",
@@ -60,6 +60,23 @@
                 "-Wl,--strip-all"
             ],
             "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+        },
+        {
+            "name": "term-record-fields.wasm",
+            "sources": [
+                "ext/js/dictionary/wasm/term-record-fields.c"
+            ],
+            "arguments": [
+                "--target=wasm32",
+                "-O3",
+                "-nostdlib",
+                "-mbulk-memory",
+                "-Wl,--no-entry",
+                "-Wl,--import-memory",
+                "-Wl,-z,stack-size=65536",
+                "-Wl,--strip-all"
+            ],
+            "sha256": "1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9"
         }
     ]
 }
