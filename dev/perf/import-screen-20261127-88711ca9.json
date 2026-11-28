@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "baselineSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "dictionary": "jmdict",
+    "pairs": 6,
+    "controlEvery": 3,
+    "warmupPairs": 2,
+    "initialOrders": [
+        "AB",
+        "BA"
+    ],
+    "expectedParserWorkers": 3,
+    "bootstrapSeed": 88711027,
+    "candidates": [
+        {
+            "id": "fused-compression-spans",
+            "sha": "10ae63bf6dcfff30766dccf4edf8a1e6089a2cd4",
+            "expectedSourceChanges": [
+                "eslint.config.js",
+                "ext/js/dictionary/term-content-block-store.js",
+                "ext/js/dictionary/term-content-compression-spans.js",
+                "test/term-content-block-store.test.js",
+                "test/term-content-compression-spans.test.js"
+            ],
+            "expectedPackageChanges": [
+                "js/dictionary/term-content-block-store.js"
+            ],
+            "expectedPackageAdditions": [
+                "js/dictionary/term-content-compression-spans.js"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,79 @@
+name: Import screen 88711ca9
+
+on:
+  push:
+    branches: [perf/import-screen-20261127-88711ca9]
+    paths:
+      - .github/workflows/import-screen-88711ca9.yml
+      - dev/perf/import-screen-20261127-88711ca9.py
+      - dev/perf/import-screen-20261127-88711ca9.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-screen-88711ca9-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  plan:
+    if: github.repository == 'ManabiIO/manabitan'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - id: plan
+        run: >-
+          python3 dev/perf/import-screen-20261127-88711ca9.py
+          --config dev/perf/import-screen-20261127-88711ca9.json
+          --matrix >> "$GITHUB_OUTPUT"
+
+  screen:
+    needs: plan
+    name: ${{ matrix.candidate }} / ${{ matrix.order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      SCREEN_CANDIDATE: ${{ matrix.candidate }}
+      SCREEN_ORDER: ${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Acquire frozen opposite-order screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js
+          python3 dev/perf/import-screen-20261127-88711ca9.py \
+            --config dev/perf/import-screen-20261127-88711ca9.json \
+            --candidate "$SCREEN_CANDIDATE" \
+            --initial-order "$SCREEN_ORDER" \
+            --work "$RUNNER_TEMP/import-screen-88711ca9" \
+            --output "builds/perf/import-screen-88711ca9/$SCREEN_CANDIDATE-$SCREEN_ORDER"
+      - name: Preserve every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-screen-88711ca9-${{ matrix.candidate }}-${{ matrix.order }}
+          path: builds/perf/import-screen-88711ca9
+          if-no-files-found: error
+          retention-days: 14
