@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-fields-browser-source-only-preflight",
+  "upstream": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "target": {
+    "commit": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+    "soleParent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "sourceDigest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+    "sourceManifestPath": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+    "sources": {
+      ".github/workflows/import-native-record-fields-1c413.yml": {
+        "gitBlob": "04010c559969df24352fae867e60b7a3c32a3b4a",
+        "mode": "100644",
+        "sha256": "b582a6789c070d9465f679a0de7a9d92a1a653ecc282c4ecc8cdd51bb808fbaa",
+        "bytes": 7896
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md": {
+        "gitBlob": "4122882fef32487dfa32651c6d9ef0250e9c6ce3",
+        "mode": "100644",
+        "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933",
+        "bytes": 8815
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/README.md": {
+        "gitBlob": "bf2e18b16c95b1051119a2fec2410a815df61359",
+        "mode": "100644",
+        "sha256": "f25d5133a91cd95e7e0f6ee6ebde1e2c961c21df89a6f04fc0cc8562cf6931d0",
+        "bytes": 19995
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py": {
+        "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+        "mode": "100644",
+        "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a",
+        "bytes": 25222
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/study.json": {
+        "gitBlob": "8ca91786b116b52c12cc93421e7656864ab9e2af",
+        "mode": "100644",
+        "sha256": "5ec7546f4ce0c760410385b65b1aa195a881ac4627e5f7062f3d47a0d55a2097",
+        "bytes": 74485
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py": {
+        "gitBlob": "f290fc66fe1b74f70d815925fcaf260d47ede50e",
+        "mode": "100644",
+        "sha256": "8d0129f66268c659f2a6acd41df6ff46569a3fab01dab86d02a4c0d5b20a6733",
+        "bytes": 23398
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py": {
+        "gitBlob": "7f3df3b27de3b4012d0481884ac34a53de363402",
+        "mode": "100644",
+        "sha256": "46b3a6b9d7b6ac5aa4b1b640a619130f681001558fc26049bb22e5cfcb30c02f",
+        "bytes": 23970
+      },
+      "dev/perf/native-record-fields-browser-20261128-1c413/source.json": {
+        "gitBlob": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+        "mode": "100644",
+        "bytes": 6043,
+        "sha256": "536da70d3ae5b0485607deccb2c11043836cd7aa9db4869b468a737c49daef72"
+      },
+      ".github/actions/setup/action.yml": {
+        "gitBlob": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+        "mode": "100644",
+        "bytes": 930,
+        "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6"
+      }
+    }
+  },
+  "files": {
+    ".github/workflows/native-record-fields-browser-preflight-1c413.yml": {
+      "gitBlob": "d3d1aa187d2090e5ecfcfae6e1ddc53791b87820",
+      "mode": "100644",
+      "bytes": 11815,
+      "sha256": "ca5aeb9157ad5ad8ca0fa6f85a963cc49266be68415afd3dea4cb1a3b2b10564"
+    },
+    "dev/perf/native-record-fields-browser-preflight-20261128-1c413/README.md": {
+      "gitBlob": "2f2fb7ecebb70ee6a6ee0b3ccbd69b5365dcd700",
+      "mode": "100644",
+      "bytes": 4660,
+      "sha256": "73065b832f29616c3d52daad3ea1ff9dbd745bb4f0747a0e97edae33b6ce7951"
+    }
+  },
+  "sourceManifestExcludedFromOwnHashes": true,
+  "productExecuted": false,
+  "timingAcquired": false,
+  "scope": {
+    "jobs": 1,
+    "originalAttempt": 1,
+    "node": "22.22.0",
+    "host": "ubuntu-26.04",
+    "checks": [
+      "exact preflight and target source binding",
+      "actual launch guard",
+      "22 unchanged activation and7 fixture-guard pure cases",
+      "unchanged locked dependency/library/license setup",
+      "actual generated-source guard"
+    ],
+    "excluded": [
+      "Chromium installation or execution",
+      "qualification harness",
+      "dictionary import",
+      "native kernel execution",
+      "timing acquisition"
+    ],
+    "allFailuresRetained": true
+  },
+  "originalFailedAcquisition": {
+    "runId": 46136060186,
+    "headSha": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+    "phase": "initial source guard",
+    "error": "Pinned fixture metadata changed",
+    "timingObservations": 0
+  },
+  "correctedSourceReviews": [
+    "f95b541db8085b772226aae2f02314a7489e2f22",
+    "87f769a1999a76f967a92d9f84a45d6176846a40"
+  ]
+}
