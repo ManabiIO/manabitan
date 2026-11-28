@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-acquire-reader-literal-rebind",
+  "passed": true,
+  "reviewer": "pipeline_audit",
+  "change": {
+    "from": "perf/native-record-fields-browser-20261128-1c413",
+    "to": "perf/native-record-fields-browser-acquire-20261128-1c413"
+  },
+  "files": [
+    {
+      "kind": "caller",
+      "before": {
+        "gitBlob": "23c8d994bf815a3e9498dda67087591ffb4eaeb8",
+        "bytes": 80369,
+        "sha256": "6c0ded0ab9a952f93b0df47ffeaa1a6c39defcb771c294f5c2ccf39e8e0d8500"
+      },
+      "after": {
+        "gitBlob": "003ad2118b61b488545c595044eba7cfeaa050d5",
+        "bytes": 80377,
+        "sha256": "d95980bd01016a53f5b073c8e46b147daf6a0f7bc242bdacd95766c71a1cf97c"
+      },
+      "changedQuotedLiterals": 1,
+      "everyOtherByteIdentical": true
+    },
+    {
+      "kind": "tests",
+      "before": {
+        "gitBlob": "0e8f10d0802357ee3ff65fce70892b5d8592a691",
+        "bytes": 27104,
+        "sha256": "fac2048468f1b8f165a7fb29760e81451ec9e9c4d21f9fb99a47768ed5f7e590"
+      },
+      "after": {
+        "gitBlob": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+        "bytes": 27112,
+        "sha256": "859c0c814c22617a7cf8f894377407b84f804262136d9b36cae3350075379a4c"
+      },
+      "changedQuotedLiterals": 1,
+      "everyOtherByteIdentical": true
+    }
+  ],
+  "producerPathPrefixUnchanged": true,
+  "allMathProtocolCorrectnessSourceLogicUnchanged": true,
+  "priorExecutedPureTests": {
+    "resultBlob": "5cffb6265470b1f64493ccdff31e73023bca9cc9",
+    "fullEvidence": "39d72a583155dc5f0c0d519f4866826255e741c3",
+    "readerCases": 19,
+    "numericCases": 14,
+    "interpreter": "CPython3.12.14",
+    "exactTestedCaller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
+    "exactTestedTests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099",
+    "resultTransferredToNewSourceExecution": false
+  },
+  "scope": "Remote exact Git-blob retrieval, SHA256 and full inverse-byte comparison only. This final acquire-literal revision was not separately executed. Existing pure-test execution remains separately attributed to the prior fixtures-literal source; all nonliteral bytes are identical. No original acquisition, artifact read, protocol change or manifest activation."
+}

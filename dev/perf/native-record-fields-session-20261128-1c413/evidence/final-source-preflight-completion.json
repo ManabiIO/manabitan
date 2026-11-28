@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-original-trigger-target-source-preflight",
+  "passed": true,
+  "run": {
+    "id": 46138436711,
+    "attempt": 1,
+    "headSha": "236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
+    "branch": "test/native-record-fields-browser-preflight-trigger-20261128-1c413",
+    "jobId": 140958839281,
+    "conclusion": "success"
+  },
+  "target": {
+    "commit": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "tree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+    "sourceDigest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28",
+    "sourceManifest": {
+      "bytes": 6105,
+      "gitBlob": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+      "mode": "100644",
+      "sha256": "2d25e93de587dfc58aa0a3ad8829ede39a3cc98583ab76a4836a11b9a3a91d53"
+    }
+  },
+  "retained": {
+    "jobLog": {
+      "gitBlob": "996a38bfa0606e7b85984a62875cb887367ace21",
+      "bytes": 489210,
+      "sha256": "e5154b0ca4f575cb11e534ee4d859bfbacbfc777b75e6446d32b713eba5fcdd9"
+    },
+    "lintLog": {
+      "gitBlob": "b6a13aff2df7f4a311f9b29b22cefbca31ff4ca3",
+      "bytes": 16860,
+      "sha256": "2878dfc67080fea3e3efa1f89f1129edffa458575ef38a55bce885edfe948a09"
+    },
+    "outcomes": {
+      "gitBlob": "ab8453a542149f496a942b3aa74196c751387cc4",
+      "bytes": 5326,
+      "sha256": "f562e47ade9110dc6ad873eabe84b9e97fcc40d44624700c8fd4b085269c825b"
+    },
+    "api": {
+      "gitBlob": "57a487b85e86629d57aac40655ebe0272ec1cacf",
+      "bytes": 19406,
+      "sha256": "6d525b369c43c9ba041bdb6307dffac8825855195556f85c32e1426e9758a661"
+    }
+  },
+  "artifact": {
+    "id": 15260433927,
+    "name": "native-fields-browser-launch-preflight-236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
+    "bytes": 169388,
+    "sha256": "4d216252ca7d1a949ea852faceaad2a200b4d2d649f377519fa4e8fba2dc5a80",
+    "originalRunId": 46138436711,
+    "headSha": "236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
+    "archiveBytesIndependentlyDownloaded": false
+  },
+  "executed": {
+    "launchGuard": true,
+    "pureTestCount": 29,
+    "pureTestsPassed": true,
+    "node": "22.22.0",
+    "lockedSetupCommandsUnchanged": true,
+    "generatedGuard": true
+  },
+  "verified": {
+    "sourceFiles": 21,
+    "protectedFiles": 235,
+    "sourcesAndProtectedIdenticalBeforeAfter": true,
+    "emittedOriginalJsonHashesRecomputed": 4,
+    "allFivePrerequisiteMetadataChecksPassed": true,
+    "allTenRequiredStepsSucceeded": true,
+    "generatedNativeAssets": {
+      "ext/lib/term-bank-parser.wasm": {
+        "bytes": 69068,
+        "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "ext/lib/term-content-canonical-scan-v1.wasm": {
+        "bytes": 1624,
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      "ext/lib/term-record-fields.wasm": {
+        "bytes": 1753,
+        "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+      }
+    },
+    "setupGeneratedDocuments": {}
+  },
+  "previousSuccessfulPreflight": {
+    "runId": 46137023673,
+    "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+    "target": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "receipt": "04b6779799b477521d8644c315688a662efe7936"
+  },
+  "imports": 0,
+  "timingObservations": 0,
+  "browserExecuted": false,
+  "nativeKernelExecuted": false,
+  "scope": "Actual source launch/generated guard and29-case execution against exact8680, with unchanged setup. Complete original logs/API and outcomes preserved; four emitted JSON file hashes independently recomputed. Artifact retained remotely with exact API digest, without an independent ZIP-byte download in this review. No product performance or browser outcome follows from this source-only pass."
+}

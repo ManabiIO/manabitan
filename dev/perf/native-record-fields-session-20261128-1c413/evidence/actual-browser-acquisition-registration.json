@@ -1,0 +1,1100 @@
+{
+  "schemaVersion": 1,
+  "scope": "Initial registration of the separately frozen original six-cell browser acquisition; no performance result inferred",
+  "repository": "ManabiIO/manabitan",
+  "publication": {
+    "runId": 46138650386,
+    "headSha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "headTree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+    "headBranch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+    "runAttempt": 1,
+    "event": "push",
+    "workflowPath": ".github/workflows/import-native-record-fields-1c413.yml"
+  },
+  "publicationDecision": "fd1d14311997cda5513a1541492bc3541f01983d",
+  "preAcquisitionIndependentReview": "a6a50d761da34833aa0aa5412f52a3dccabf85d8",
+  "originalRunApi": {
+    "id": 46138650386,
+    "name": "Native record fields complete import qualification fixture guard repair 20261128",
+    "node_id": "WFR_kwLORX5CfM8AAAAKvhPvEg",
+    "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+    "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "path": ".github/workflows/import-native-record-fields-1c413.yml",
+    "display_title": "Use an unfiltered unique push trigger for native field browser qualif…",
+    "run_number": 2,
+    "event": "push",
+    "status": "in_progress",
+    "conclusion": null,
+    "workflow_id": 433615668,
+    "check_suite_id": 124815284558,
+    "check_suite_node_id": "CS_kwDORX5CfM8AAAAdD5IZTg",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+    "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386",
+    "pull_requests": [],
+    "created_at": "2026-11-28T11:10:53Z",
+    "updated_at": "2026-11-28T11:11:03Z",
+    "actor": {
+      "login": "aehlke",
+      "id": 71601,
+      "node_id": "MDQ6VXNlcjcxNjAx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/aehlke",
+      "html_url": "https://github.com/aehlke",
+      "followers_url": "https://api.github.com/users/aehlke/followers",
+      "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+      "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+      "organizations_url": "https://api.github.com/users/aehlke/orgs",
+      "repos_url": "https://api.github.com/users/aehlke/repos",
+      "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/aehlke/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-11-28T11:10:53Z",
+    "triggering_actor": {
+      "login": "aehlke",
+      "id": 71601,
+      "node_id": "MDQ6VXNlcjcxNjAx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/aehlke",
+      "html_url": "https://github.com/aehlke",
+      "followers_url": "https://api.github.com/users/aehlke/followers",
+      "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+      "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+      "organizations_url": "https://api.github.com/users/aehlke/orgs",
+      "repos_url": "https://api.github.com/users/aehlke/repos",
+      "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/aehlke/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386/jobs",
+    "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386/logs",
+    "check_suite_url": "https://api.github.com/repos/ManabiIO/manabitan/check-suites/124815284558",
+    "artifacts_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386/artifacts",
+    "cancel_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386/cancel",
+    "rerun_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/workflows/433615668",
+    "head_commit": {
+      "id": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "tree_id": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+      "message": "Use an unfiltered unique push trigger for native field browser qualification",
+      "timestamp": "2026-11-28T11:04:42Z",
+      "author": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com"
+      },
+      "committer": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1165902460,
+      "node_id": "R_kgDORX5CfA",
+      "name": "manabitan",
+      "full_name": "ManabiIO/manabitan",
+      "private": false,
+      "owner": {
+        "login": "ManabiIO",
+        "id": 22897786,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjIyODk3Nzg2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/22897786?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ManabiIO",
+        "html_url": "https://github.com/ManabiIO",
+        "followers_url": "https://api.github.com/users/ManabiIO/followers",
+        "following_url": "https://api.github.com/users/ManabiIO/following{/other_user}",
+        "gists_url": "https://api.github.com/users/ManabiIO/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/ManabiIO/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/ManabiIO/subscriptions",
+        "organizations_url": "https://api.github.com/users/ManabiIO/orgs",
+        "repos_url": "https://api.github.com/users/ManabiIO/repos",
+        "events_url": "https://api.github.com/users/ManabiIO/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/ManabiIO/received_events",
+        "type": "Organization",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/ManabiIO/manabitan",
+      "description": "Pop-up dictionary browser extension for language learning. Successor to Yomichan.",
+      "fork": true,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan",
+      "forks_url": "https://api.github.com/repos/ManabiIO/manabitan/forks",
+      "keys_url": "https://api.github.com/repos/ManabiIO/manabitan/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/ManabiIO/manabitan/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/ManabiIO/manabitan/teams",
+      "hooks_url": "https://api.github.com/repos/ManabiIO/manabitan/hooks",
+      "issue_events_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/ManabiIO/manabitan/events",
+      "assignees_url": "https://api.github.com/repos/ManabiIO/manabitan/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/ManabiIO/manabitan/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/ManabiIO/manabitan/tags",
+      "blobs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/ManabiIO/manabitan/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/ManabiIO/manabitan/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/ManabiIO/manabitan/languages",
+      "stargazers_url": "https://api.github.com/repos/ManabiIO/manabitan/stargazers",
+      "contributors_url": "https://api.github.com/repos/ManabiIO/manabitan/contributors",
+      "subscribers_url": "https://api.github.com/repos/ManabiIO/manabitan/subscribers",
+      "subscription_url": "https://api.github.com/repos/ManabiIO/manabitan/subscription",
+      "commits_url": "https://api.github.com/repos/ManabiIO/manabitan/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/ManabiIO/manabitan/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/ManabiIO/manabitan/merges",
+      "archive_url": "https://api.github.com/repos/ManabiIO/manabitan/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/ManabiIO/manabitan/downloads",
+      "issues_url": "https://api.github.com/repos/ManabiIO/manabitan/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/ManabiIO/manabitan/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/ManabiIO/manabitan/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/ManabiIO/manabitan/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/ManabiIO/manabitan/labels{/name}",
+      "releases_url": "https://api.github.com/repos/ManabiIO/manabitan/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/ManabiIO/manabitan/deployments"
+    },
+    "head_repository": {
+      "id": 1165902460,
+      "node_id": "R_kgDORX5CfA",
+      "name": "manabitan",
+      "full_name": "ManabiIO/manabitan",
+      "private": false,
+      "owner": {
+        "login": "ManabiIO",
+        "id": 22897786,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjIyODk3Nzg2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/22897786?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ManabiIO",
+        "html_url": "https://github.com/ManabiIO",
+        "followers_url": "https://api.github.com/users/ManabiIO/followers",
+        "following_url": "https://api.github.com/users/ManabiIO/following{/other_user}",
+        "gists_url": "https://api.github.com/users/ManabiIO/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/ManabiIO/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/ManabiIO/subscriptions",
+        "organizations_url": "https://api.github.com/users/ManabiIO/orgs",
+        "repos_url": "https://api.github.com/users/ManabiIO/repos",
+        "events_url": "https://api.github.com/users/ManabiIO/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/ManabiIO/received_events",
+        "type": "Organization",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/ManabiIO/manabitan",
+      "description": "Pop-up dictionary browser extension for language learning. Successor to Yomichan.",
+      "fork": true,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan",
+      "forks_url": "https://api.github.com/repos/ManabiIO/manabitan/forks",
+      "keys_url": "https://api.github.com/repos/ManabiIO/manabitan/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/ManabiIO/manabitan/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/ManabiIO/manabitan/teams",
+      "hooks_url": "https://api.github.com/repos/ManabiIO/manabitan/hooks",
+      "issue_events_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/ManabiIO/manabitan/events",
+      "assignees_url": "https://api.github.com/repos/ManabiIO/manabitan/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/ManabiIO/manabitan/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/ManabiIO/manabitan/tags",
+      "blobs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/ManabiIO/manabitan/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/ManabiIO/manabitan/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/ManabiIO/manabitan/languages",
+      "stargazers_url": "https://api.github.com/repos/ManabiIO/manabitan/stargazers",
+      "contributors_url": "https://api.github.com/repos/ManabiIO/manabitan/contributors",
+      "subscribers_url": "https://api.github.com/repos/ManabiIO/manabitan/subscribers",
+      "subscription_url": "https://api.github.com/repos/ManabiIO/manabitan/subscription",
+      "commits_url": "https://api.github.com/repos/ManabiIO/manabitan/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/ManabiIO/manabitan/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/ManabiIO/manabitan/merges",
+      "archive_url": "https://api.github.com/repos/ManabiIO/manabitan/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/ManabiIO/manabitan/downloads",
+      "issues_url": "https://api.github.com/repos/ManabiIO/manabitan/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/ManabiIO/manabitan/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/ManabiIO/manabitan/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/ManabiIO/manabitan/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/ManabiIO/manabitan/labels{/name}",
+      "releases_url": "https://api.github.com/repos/ManabiIO/manabitan/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/ManabiIO/manabitan/deployments"
+    }
+  },
+  "originalJobsApi": {
+    "total_count": 6,
+    "jobs": [
+      {
+        "id": 140959486645,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcStQ",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486645",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486645",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:55Z",
+        "completed_at": null,
+        "name": "Complete import (vndb, AB)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": "2026-11-28T11:10:56Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486645",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093316,
+        "runner_name": "GitHub Actions 1000093316",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 140959486747,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcTGw",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486747",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486747",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:55Z",
+        "completed_at": null,
+        "name": "Complete import (jitendex, BA)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:55Z",
+            "completed_at": "2026-11-28T11:10:56Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486747",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093317,
+        "runner_name": "GitHub Actions 1000093317",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 140959486755,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcTIw",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486755",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486755",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:55Z",
+        "completed_at": null,
+        "name": "Complete import (vndb, BA)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": "2026-11-28T11:10:58Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:58Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486755",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093320,
+        "runner_name": "GitHub Actions 1000093320",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 140959486757,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcTJQ",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486757",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486757",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:56Z",
+        "completed_at": null,
+        "name": "Complete import (jitendex, AB)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:57Z",
+            "completed_at": "2026-11-28T11:10:58Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:58Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486757",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093318,
+        "runner_name": "GitHub Actions 1000093318",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 140959486760,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcTKA",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486760",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486760",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:55Z",
+        "completed_at": null,
+        "name": "Complete import (jmdict, AB)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": "2026-11-28T11:10:57Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:57Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486760",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093319,
+        "runner_name": "GitHub Actions 1000093319",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 140959486803,
+        "run_id": 46138650386,
+        "workflow_name": "Native record fields complete import qualification fixture guard repair 20261128",
+        "head_branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46138650386",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAg0dcTUw",
+        "head_sha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140959486803",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46138650386/job/140959486803",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-28T11:10:54Z",
+        "started_at": "2026-11-28T11:10:55Z",
+        "completed_at": null,
+        "name": "Complete import (jmdict, BA)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-28T11:10:56Z",
+            "completed_at": "2026-11-28T11:10:57Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 2,
+            "started_at": "2026-11-28T11:10:57Z",
+            "completed_at": null
+          },
+          {
+            "name": "Bind original attempt, immutable source and completed prerequisites",
+            "status": "pending",
+            "conclusion": null,
+            "number": 3,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Prepare exact Node and locked dependencies",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Bind generated native assets and setup document",
+            "status": "pending",
+            "conclusion": null,
+            "number": 5,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Verify the pure activation receipt checker",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Restore pinned dictionary archives",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Acquire the original frozen comparisons and separate media and memory checks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Audit activation in every original receipt, including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve complete step outcomes without replacing any acquisition",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Preserve every original report, package, source proof and failure",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140959486803",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000093321,
+        "runner_name": "GitHub Actions 1000093321",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "roles": [
+    {
+      "kind": "jitendex-AB",
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "jobId": 140959486757,
+      "jobName": "Complete import (jitendex, AB)"
+    },
+    {
+      "kind": "jitendex-BA",
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "jobId": 140959486747,
+      "jobName": "Complete import (jitendex, BA)"
+    },
+    {
+      "kind": "jmdict-AB",
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "jobId": 140959486760,
+      "jobName": "Complete import (jmdict, AB)"
+    },
+    {
+      "kind": "jmdict-BA",
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "jobId": 140959486803,
+      "jobName": "Complete import (jmdict, BA)"
+    },
+    {
+      "kind": "vndb-AB",
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "jobId": 140959486645,
+      "jobName": "Complete import (vndb, AB)"
+    },
+    {
+      "kind": "vndb-BA",
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "jobId": 140959486755,
+      "jobName": "Complete import (vndb, BA)"
+    }
+  ],
+  "originalArtifactCount": 0,
+  "reader": {
+    "caller": "003ad2118b61b488545c595044eba7cfeaa050d5",
+    "tests": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+    "manifestEnabled": false,
+    "artifacts": null
+  },
+  "policy": {
+    "sameFrozen74ReportSchedule": true,
+    "allOriginalObservationsRetained": true,
+    "noReruns": true,
+    "noCandidateChanges": true,
+    "noPartialTimingDrivenActions": true
+  },
+  "priorEvidence": {
+    "failed7dZeroAcquisitionAudit": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+    "no915dRegistrationSnapshot": "232ae9f84f705cd5bdb0cb7883127289591a0b8b"
+  },
+  "performanceQualification": null
+}

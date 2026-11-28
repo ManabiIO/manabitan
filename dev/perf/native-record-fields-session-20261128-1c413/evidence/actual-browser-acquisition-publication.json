@@ -1,0 +1,70 @@
+{
+  "kind": "root-unfiltered-browser-first-acquisition-publication-decision",
+  "passed": true,
+  "producer": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+  "tree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+  "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+  "sourceManifest": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+  "sourceDigest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28",
+  "product": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+  },
+  "control": {
+    "commit": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+    "tree": "4c916a995f996afe56cecf0714c20d5b7e5ef346"
+  },
+  "upstream": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "sourceReview": "d56d6ff827007d4d1548fe48e72f3f9af37cb0d6",
+  "sourcePreflight": {
+    "run": 46138436711,
+    "job": 140958839281,
+    "head": "236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
+    "attempt": 1,
+    "passed": true,
+    "target": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "actualLaunchAndGeneratedGuardsPassed": true,
+    "all21SourceIdentitiesVerified": true,
+    "all29PureTestsPassed": true,
+    "allRequiredStepsPassed": true,
+    "fullOriginalLogSha256": "e5154b0ca4f575cb11e534ee4d859bfbacbfc777b75e6446d32b713eba5fcdd9",
+    "artifact": {
+      "id": 15260433927,
+      "bytes": 169388,
+      "sha256": "4d216252ca7d1a949ea852faceaad2a200b4d2d649f377519fa4e8fba2dc5a80",
+      "archiveBytesIndependentlyRead": false
+    }
+  },
+  "originalZeroAudit": {
+    "run": 46137216352,
+    "completion": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+    "all6OriginalArchivesVerified": true,
+    "all78MembersVerified": true,
+    "originalReports": 0,
+    "originalTimings": 0,
+    "originalStudyRemainsFailed": true
+  },
+  "prior915d": {
+    "head": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "noCustomRunOnLatestCommitWideQuery": true,
+    "onlyTwoSuccessfulLintRuns": true,
+    "absenceEvidence": "232ae9f84f705cd5bdb0cb7883127289591a0b8b",
+    "refRetained": true,
+    "causeUnconfirmed": true
+  },
+  "noProductCodeChanges": true,
+  "noGateOrScheduleOrReadinessChanges": true,
+  "noTimingResampling": true,
+  "noExistingRefMutation": true,
+  "independentReaderPureTests": {
+    "reader": 19,
+    "numeric": 14,
+    "allPassed": true,
+    "receipt": "5cffb6265470b1f64493ccdff31e73023bca9cc9"
+  },
+  "qualificationUndecided": true,
+  "prOnlyIfWorthwhileFrozenWholeBrowserGain": true
+}

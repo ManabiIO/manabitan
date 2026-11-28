@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final quoted branch literal binding only, before browser observations or artifact manifest activation",
+  "oldBranch": "perf/native-record-fields-browser-20261128-1c413",
+  "newBranch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+  "oldBlobs": {
+    "caller": "23c8d994bf815a3e9498dda67087591ffb4eaeb8",
+    "tests": "0e8f10d0802357ee3ff65fce70892b5d8592a691"
+  },
+  "newBlobs": {
+    "caller": {
+      "gitBlob": "003ad2118b61b488545c595044eba7cfeaa050d5",
+      "bytes": 80377,
+      "sha256": "d95980bd01016a53f5b073c8e46b147daf6a0f7bc242bdacd95766c71a1cf97c"
+    },
+    "tests": {
+      "gitBlob": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+      "bytes": 27112,
+      "sha256": "859c0c814c22617a7cf8f894377407b84f804262136d9b36cae3350075379a4c"
+    }
+  },
+  "checks": {
+    "oneQuotedOccurrenceEach": true,
+    "inverseByteEquality": true,
+    "producerPrefixUnchanged": true,
+    "allOtherCodeAndTestsUnchanged": true,
+    "numericAndProtocolBytesUnchanged": true
+  },
+  "acquisition": {
+    "enabled": false,
+    "manifestArtifacts": null
+  },
+  "localExistingPureTestEvidence": {
+    "result": "5cffb6265470b1f64493ccdff31e73023bca9cc9",
+    "completeBundle": "39d72a583155dc5f0c0d519f4866826255e741c3",
+    "cases": 33,
+    "source": "Previous fixtures-literal derivative; no execution claim for the current literal-only rebind"
+  },
+  "newExecution": false,
+  "refCreated": false,
+  "oldSha256": {
+    "caller": "6c0ded0ab9a952f93b0df47ffeaa1a6c39defcb771c294f5c2ccf39e8e0d8500",
+    "tests": "fac2048468f1b8f165a7fb29760e81451ec9e9c4d21f9fb99a47768ed5f7e590"
+  }
+}

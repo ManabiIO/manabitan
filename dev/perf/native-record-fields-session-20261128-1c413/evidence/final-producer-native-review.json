@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "kind": "unfiltered-native-record-fields-producer-source-proof",
+  "createdAt": "2026-11-28 11:05:06 UTC",
+  "commit": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+  "tree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+  "soleParent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+  "prior": {
+    "commit": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+    "refRetained": true,
+    "registrationAbsenceEvidence": "232ae9f84f705cd5bdb0cb7883127289591a0b8b",
+    "triggerCauseEstablished": false
+  },
+  "upstream": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+  },
+  "control": {
+    "commit": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+    "tree": "4c916a995f996afe56cecf0714c20d5b7e5ef346"
+  },
+  "sourceManifest": {
+    "gitBlob": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+    "sha256": "2d25e93de587dfc58aa0a3ad8829ede39a3cc98583ab76a4836a11b9a3a91d53",
+    "bytes": 6105,
+    "digest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28"
+  },
+  "fullRemoteTreesUntruncated": true,
+  "counts": {
+    "baselineDelta": 21,
+    "product": 13,
+    "control": 9,
+    "kit": 8,
+    "manifest": 20
+  },
+  "exactFourPathDelta": [
+    ".github/workflows/import-native-record-fields-1c413.yml",
+    "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+    "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+    "dev/perf/native-record-fields-browser-20261128-1c413/study.json"
+  ],
+  "manifestBindings": {
+    ".github/workflows/import-native-record-fields-1c413.yml": {
+      "gitBlob": "0a2c2f39c44cd4a94ccf9e6ed66922eef18570e6",
+      "mode": "100644",
+      "sha256": "d69c0d5be5f5d8df36e32ae6bd420221c6924d5c65ca793c3f2f3402d3346910",
+      "bytes": 7752
+    },
+    "dev/bin/audit-release-packages.js": {
+      "gitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "mode": "100644",
+      "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d",
+      "bytes": 4062
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "gitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+      "mode": "100644",
+      "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+      "bytes": 3159
+    },
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "mode": "100644",
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753
+    },
+    "dev/dictionary-wasm.js": {
+      "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "mode": "100644",
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "bytes": 7244
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md": {
+      "gitBlob": "4122882fef32487dfa32651c6d9ef0250e9c6ce3",
+      "mode": "100644",
+      "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933",
+      "bytes": 8815
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/README.md": {
+      "gitBlob": "b82d6285e64062a98db1386f51c463265f1861d7",
+      "mode": "100644",
+      "sha256": "0a7fdbe0661c26ee5b365d8bb3e1eb44d947291047f0844ca84e14aab88e4e95",
+      "bytes": 22129
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py": {
+      "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+      "mode": "100644",
+      "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a",
+      "bytes": 25222
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/study.json": {
+      "gitBlob": "15065d5e0cdb8fe612092c19fac4b14ba233965b",
+      "mode": "100644",
+      "sha256": "387d354058d7837b0d00a6c09e79f79ecb6ee698ba1a714703aa9b461829f7b7",
+      "bytes": 80108
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py": {
+      "gitBlob": "f290fc66fe1b74f70d815925fcaf260d47ede50e",
+      "mode": "100644",
+      "sha256": "8d0129f66268c659f2a6acd41df6ff46569a3fab01dab86d02a4c0d5b20a6733",
+      "bytes": 23398
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py": {
+      "gitBlob": "7f3df3b27de3b4012d0481884ac34a53de363402",
+      "mode": "100644",
+      "sha256": "46b3a6b9d7b6ac5aa4b1b640a619130f681001558fc26049bb22e5cfcb30c02f",
+      "bytes": 23970
+    },
+    "eslint.config.js": {
+      "gitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "mode": "100644",
+      "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b",
+      "bytes": 39532
+    },
+    "ext/js/dictionary/dictionary-database.js": {
+      "gitBlob": "b144b0f9bb4dda83547c9865d3407643c890d741",
+      "mode": "100644",
+      "sha256": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+      "bytes": 617901
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "gitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "mode": "100644",
+      "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+      "bytes": 16843
+    },
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "gitBlob": "4dc746075254a31016759e808e72582b7bda8afc",
+      "mode": "100644",
+      "sha256": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+      "bytes": 368779
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "mode": "100644",
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+      "bytes": 6660
+    },
+    "test/dictionary-wasm-build.test.js": {
+      "gitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "mode": "100644",
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+      "bytes": 7552
+    },
+    "test/release-package-native-assets.test.js": {
+      "gitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "mode": "100644",
+      "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174",
+      "bytes": 5421
+    },
+    "test/term-record-fields-native.test.js": {
+      "gitBlob": "bfdafcd86db1ca223132faa194250647321dea31",
+      "mode": "100644",
+      "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+      "bytes": 40450
+    },
+    "test/term-record-import-fields.test.js": {
+      "gitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "mode": "100644",
+      "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323",
+      "bytes": 20572
+    }
+  },
+  "workflow": {
+    "gitBlob": "0a2c2f39c44cd4a94ccf9e6ed66922eef18570e6",
+    "sha256": "d69c0d5be5f5d8df36e32ae6bd420221c6924d5c65ca793c3f2f3402d3346910",
+    "onlyEdits": [
+      "push branch literal fixtures -> acquire",
+      "remove entire top-level push.paths filter"
+    ],
+    "completeJobsByteIdentical": true,
+    "exactNewBranch": "perf/native-record-fields-browser-acquire-20261128-1c413"
+  },
+  "study": {
+    "gitBlob": "15065d5e0cdb8fe612092c19fac4b14ba233965b",
+    "changedTopLevelKeys": [
+      "status",
+      "provenance"
+    ],
+    "allExistingProvenanceRetained": true,
+    "allPrerequisiteDataUnchanged": true,
+    "scheduleNumericAndActivationPoliciesUnchanged": true
+  },
+  "productControlGuardCheckerAnd29TestsUnchanged": true,
+  "exactTrackedRuntimeDelta": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-opfs-store.js"
+  ],
+  "priorSourceOnlyPreflight": {
+    "runId": 46137023673,
+    "completionProof": "04b6779799b477521d8644c315688a662efe7936",
+    "passed": true,
+    "resultRemainsBoundTo915d": true
+  },
+  "originalFailureArchiveAudit": {
+    "runId": 46137216352,
+    "completionProof": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+    "passed": true,
+    "originalReports": 0,
+    "originalTimingObservations": 0,
+    "originalStudyRemainsNonqualifying": true
+  },
+  "publication": {
+    "refCreatedByThisAgent": false,
+    "requiresNewSourceOnlyPreflight": true,
+    "onlyNonmatchingTestRefBeforeRootAcquisitionApproval": true
+  },
+  "productExecuted": false,
+  "timingAcquired": false,
+  "scope": "Static exact-source/tree assembly only. No original source, ref, job or observation is changed. No product performance claim."
+}

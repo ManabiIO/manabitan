@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only three-path textual compatibility review while the original f28 browser cohort remains immutable",
+  "repository": "ManabiIO/manabitan",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "product": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+  },
+  "newDevelop": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "parents": [
+      "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "a7e39ddfdc4d0c6761e31f329b93e2e6cc93687a"
+    ]
+  },
+  "sources": {
+    "dev/bin/audit-release-packages.js": {
+      "base": {
+        "gitBlob": "14b132c8cc34ea59f52f5f667a654d97163ab28e",
+        "bytes": 4027,
+        "sha256": "ee8c1cb2293627bb2d04a7c30785f12e336251ca74a883d78cdeca84e99eb81a"
+      },
+      "product": {
+        "gitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+        "bytes": 4062,
+        "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d"
+      },
+      "peer": {
+        "gitBlob": "c1fd9d04969df7d32550ae47065321cc0bc02fb6",
+        "bytes": 4485,
+        "sha256": "17cc92de13917649c306842bcc76239d03ff0b668527203c721c782c9270d004"
+      }
+    },
+    "eslint.config.js": {
+      "base": {
+        "gitBlob": "0df55128f76aec524ffc8ce78ec45b4ebc419e2a",
+        "bytes": 39356,
+        "sha256": "8416562e333cf51626b49c8de2b28ab8dd3240ad98f9ff7581bbe0aac4915156"
+      },
+      "product": {
+        "gitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+        "bytes": 39532,
+        "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b"
+      },
+      "peer": {
+        "gitBlob": "c8708f8647aff665bd5f96497025c488cd46406a",
+        "bytes": 40956,
+        "sha256": "b4d167cab56958b77e218a0207e1e947e2e2d36ee8684a0b21f28c20ab1928da"
+      }
+    },
+    "test/release-package-native-assets.test.js": {
+      "base": {
+        "gitBlob": "ca8b42fa79a3e26450d7fe670626d9abfe4a49c5",
+        "bytes": 4649,
+        "sha256": "3c96e4010d206cd2be30dbf4e137226ab46d74c8c0db23ab9fba93be14ec8488"
+      },
+      "product": {
+        "gitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+        "bytes": 5421,
+        "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174"
+      },
+      "peer": {
+        "gitBlob": "11c6782d309b44f27343a5a2f6bb6725ef6bfcb3",
+        "bytes": 5052,
+        "sha256": "2eeeccd8fac3ecd84c1a5415e865609a4345919008c620ced57b1b2bdc3b6f3a"
+      }
+    }
+  },
+  "patches": {
+    "dev/bin/audit-release-packages.js": {
+      "product": "@@ -33,6 +33,7 @@ const requiredNativeAssets = new Set([\n     'lib/term-bank-parser.wasm',\n     'lib/zstd.wasm',\n     'lib/term-content-canonical-scan-v1.wasm',\n+    'lib/term-record-fields.wasm',\n ]);\n const manifestUtil = new ManifestUtil();\n /** @type {Map<string, string>} */",
+      "peer": "@@ -33,7 +33,9 @@ const requiredNativeAssets = new Set([\n     'lib/term-bank-parser.wasm',\n     'lib/zstd.wasm',\n     'lib/term-content-canonical-scan-v1.wasm',\n+    'js/dictionary/zstd-trainer.wasm',\n ]);\n+const requiredLicenseAssets = new Set(['js/dictionary/zstd-trainer.LICENSE']);\n const manifestUtil = new ManifestUtil();\n /** @type {Map<string, string>} */\n const packageVariants = new Map();\n@@ -58,6 +60,8 @@ for (const path of paths) {\n     const tree = createHash('sha256');\n     /** @type {Record<string, string>} */\n     const nativeAssets = {};\n+    /** @type {Record<string, string>} */\n+    const licenseAssets = {};\n     for (const file of files) {\n         const content = await file.async('uint8array');\n         const digest = hash(content);\n@@ -66,8 +70,10 @@ for (const path of paths) {\n             if (!WebAssembly.validate(content)) { throw new Error(`Invalid native asset: ${path}:${file.name}`); }\n             nativeAssets[file.name] = digest;\n         }\n+        if (requiredLicenseAssets.has(file.name)) { licenseAssets[file.name] = digest; }\n     }\n     if (Object.keys(nativeAssets).length !== requiredNativeAssets.size) { throw new Error(`Package is missing a required native asset: ${path}`); }\n-    packages.push({path, version, manifestVersion: 'manifest_version' in manifest ? manifest.manifest_version : null, sha256: hash(bytes), treeSha256: tree.digest('hex'), fileCount: files.length, nativeAssets});\n+    if (Object.keys(licenseAssets).length !== requiredLicenseAssets.size) { throw new Error(`Package is missing a required third-party license notice: ${path}`); }\n+    packages.push({path, version, manifestVersion: 'manifest_version' in manifest ? manifest.manifest_version : null, sha256: hash(bytes), treeSha256: tree.digest('hex'), fileCount: files.length, nativeAssets, licenseAssets});\n }\n process.stdout.write(JSON.stringify({version, sourceCommit: process.env.GITHUB_SHA ?? null, unsigned: true, packages}, null, 2) + '\\n');"
+    },
+    "eslint.config.js": {
+      "product": "@@ -81,6 +81,7 @@ const manabitanHeaderFiles = [\n     'ext/js/dictionary/dictionary-import-journal.js',\n     'ext/js/dictionary/term-content-opfs-store.js',\n     'ext/js/dictionary/term-record-opfs-store.js',\n+    'ext/js/dictionary/term-record-fields.js',\n     'ext/js/dictionary/term-record-import-index-writer.js',\n     'ext/js/dictionary/term-record-import-index-worker.js',\n     'ext/js/dictionary/term-record-import-index-worker-client.js',\n@@ -1090,4 +1091,8 @@ export default [\n             }],\n         },\n     },\n+    {\n+        files: ['ext/js/dictionary/term-record-fields.js'],\n+        rules: {'@stylistic/semi': ['error', 'never']},\n+    },\n ];",
+      "peer": "@@ -45,6 +45,32 @@ const compat = new FlatCompat({\n header.rules.header.meta.schema = false;\n \n const manabitanHeaderFiles = [\n+    'ext/js/dictionary/term-content-layout.js',\n+    'ext/js/dictionary/term-content-storage-snapshots.js',\n+    'ext/js/dictionary/term-content-immutable-file-store.js',\n+    'ext/js/dictionary/term-content-physical-file-store.js',\n+    'ext/js/dictionary/term-content-training-sampler.js',\n+    'ext/js/dictionary/term-content-optimization-checkpoint.js',\n+    'ext/js/dictionary/term-content-optimization-controller.js',\n+    'ext/js/dictionary/term-content-legacy-eligibility.js',\n+    'ext/js/dictionary/term-content-optimization-headroom.js',\n+    'ext/js/dictionary/term-content-optimization-artifacts.js',\n+    'ext/js/dictionary/term-content-optimization-batch-store.js',\n+    'ext/js/dictionary/term-content-optimization-reclaimer.js',\n+    'ext/js/dictionary/term-content-optimization-replacement.js',\n+    'ext/js/dictionary/term-content-optimization-frame-reader.js',\n+    'ext/js/dictionary/term-content-zstd-frame-inspector.js',\n+    'ext/js/dictionary/term-content-zstd-codec.js',\n+    'ext/js/dictionary/term-content-optimization-candidate-source.js',\n+    'ext/js/dictionary/term-content-region-repack-planner.js',\n+    'ext/js/dictionary/term-content-identity-layout.js',\n+    'ext/js/dictionary/term-content-idle-scheduler.js',\n+    'ext/js/dictionary/zstd-trainer-worker-owner.js',\n+    'ext/js/dictionary/trainer-worker.js',\n+    'ext/js/dictionary/term-content-frame-codec-worker-owner.js',\n+    'ext/js/dictionary/term-content-frame-codec-worker.js',\n+    'ext/js/background/term-content-optimization-control.js',\n+    'dev/bin/build-zstd-trainer-wasm.js',\n     'ext/js/comm/dictionary-import-owner-client.js',\n     'ext/js/dictionary/dictionary-zip-read-scope.js',\n     'ext/js/dictionary/dense-zip-directory.js',\n@@ -127,7 +153,7 @@ export default [\n     {\n         // Emscripten output is reproduced by build:zstd-wasm and covered by\n         // WASM behavior tests. Keep its handwritten wrapper and types linted.\n-        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],\n+        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/js/dictionary/zstd-trainer-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],\n     },\n     ...compat.extends(\n         'eslint:recommended',"
+    },
+    "test/release-package-native-assets.test.js": {
+      "product": "@@ -20,9 +20,10 @@ const wasm = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0);\n  * @param {'missing'|'corrupt'|'valid'} scanner\n  * @param {string} [variant]\n  * @param {(manifest: import('dev/manifest').Manifest) => void} [mutate]\n+ * @param {'missing'|'corrupt'|'valid'} [fields]\n  * @returns {Promise<string>}\n  */\n-async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {\n+async function packageFixture(scanner, variant = 'chrome', mutate = () => {}, fields = 'valid') {\n     const directory = await mkdtemp(join(tmpdir(), 'manabitan-package-audit-'));\n     const zip = new JSZip();\n     const manifest = new ManifestUtil().getManifest(variant);\n@@ -31,6 +32,8 @@ async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {\n     zip.file('manifest.json', JSON.stringify(manifest));\n     zip.file('lib/term-bank-parser.wasm', wasm);\n     zip.file('lib/zstd.wasm', wasm);\n+    /* eslint-disable-next-line @stylistic/semi */\n+    if (fields !== 'missing') { zip.file('lib/term-record-fields.wasm', fields === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm) }\n     if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v1.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }\n     const path = join(directory, `manabitan-${variant}.zip`);\n     await writeFile(path, await zip.generateAsync({type: 'nodebuffer'}));\n@@ -42,12 +45,19 @@ test.each(['missing', 'corrupt'])('release package audit rejects a %s canonical\n     await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u);\n });\n \n-test('release package audit validates and records the canonical scanner alongside parser and codec', async () => {\n+/* eslint-disable @stylistic/semi */\n+test.each(['missing', 'corrupt'])('release package audit rejects a %s record-field encoder', async (state) => {\n+    const path = await packageFixture('valid', 'chrome', () => {}, /** @type {'missing'|'corrupt'} */ (state))\n+    await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u)\n+})\n+/* eslint-enable @stylistic/semi */\n+\n+test('release package audit records scanner, field encoder, parser and codec', async () => {\n     const path = await packageFixture('valid');\n     const {stdout} = await run(process.execPath, ['dev/bin/audit-release-packages.js', version, path]);\n     const report = JSON.parse(stdout);\n     expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u);\n-    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(3);\n+    expect(Object.keys(report.packages[0].nativeAssets).sort()).toEqual(['lib/term-bank-parser.wasm', 'lib/term-content-canonical-scan-v1.wasm', 'lib/term-record-fields.wasm', 'lib/zstd.wasm']);\n });\n \n test.each(['chrome', 'chrome-dev', 'chrome-playwright', 'edge', 'firefox', 'firefox-dev', 'firefox-android'])('release audit accepts the canonical %s package', async (variant) => {",
+      "peer": "@@ -4,7 +4,7 @@\n  */\n \n import {execFile} from 'node:child_process';\n-import {mkdtemp, writeFile} from 'node:fs/promises';\n+import {mkdtemp, readFile, writeFile} from 'node:fs/promises';\n import {tmpdir} from 'node:os';\n import {join} from 'node:path';\n import {promisify} from 'node:util';\n@@ -31,6 +31,8 @@ async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {\n     zip.file('manifest.json', JSON.stringify(manifest));\n     zip.file('lib/term-bank-parser.wasm', wasm);\n     zip.file('lib/zstd.wasm', wasm);\n+    zip.file('js/dictionary/zstd-trainer.wasm', await readFile(new URL('../ext/js/dictionary/zstd-trainer.wasm', import.meta.url)));\n+    zip.file('js/dictionary/zstd-trainer.LICENSE', await readFile(new URL('../ext/js/dictionary/zstd-trainer.LICENSE', import.meta.url)));\n     if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v1.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }\n     const path = join(directory, `manabitan-${variant}.zip`);\n     await writeFile(path, await zip.generateAsync({type: 'nodebuffer'}));\n@@ -42,12 +44,13 @@ test.each(['missing', 'corrupt'])('release package audit rejects a %s canonical\n     await expect(run(process.execPath, ['dev/bin/audit-release-packages.js', version, path])).rejects.toThrow(/native asset/u);\n });\n \n-test('release package audit validates and records the canonical scanner alongside parser and codec', async () => {\n+test('release package audit validates and records the canonical scanner alongside parser, codec, and trainer', async () => {\n     const path = await packageFixture('valid');\n     const {stdout} = await run(process.execPath, ['dev/bin/audit-release-packages.js', version, path]);\n     const report = JSON.parse(stdout);\n     expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u);\n-    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(3);\n+    expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(4);\n+    expect(report.packages[0].licenseAssets['js/dictionary/zstd-trainer.LICENSE']).toMatch(/^[0-9a-f]{64}$/u);\n });\n \n test.each(['chrome', 'chrome-dev', 'chrome-playwright', 'edge', 'firefox', 'firefox-dev', 'firefox-android'])('release audit accepts the canonical %s package', async (variant) => {"
+    }
+  },
+  "textualChecker": {
+    "gitBlob": "5afa7a3f34f4412d1d60754b3401a7fb07c68c9c",
+    "bytes": 1669,
+    "sha256": "e6522593a8e20cfc0a4a3af8a80a346746d66187a06229b3e590a203ae1edf68"
+  },
+  "results": {
+    "dev/bin/audit-release-packages.js": {
+      "sourcePatchReproducesExactProduct": true,
+      "peerPatchReproducesExactMergedDevelop": true,
+      "ownHunks": [
+        {
+          "oldStart": 33,
+          "oldCount": 6,
+          "newStart": 33,
+          "newCount": 7
+        }
+      ],
+      "peerHunks": [
+        {
+          "oldStart": 33,
+          "oldCount": 7,
+          "newStart": 33,
+          "newCount": 9
+        },
+        {
+          "oldStart": 58,
+          "oldCount": 6,
+          "newStart": 60,
+          "newCount": 8
+        },
+        {
+          "oldStart": 66,
+          "oldCount": 8,
+          "newStart": 70,
+          "newCount": 10
+        }
+      ],
+      "ownThenPeer": {
+        "passed": false,
+        "hunk": 1,
+        "oldStart": 33,
+        "oldCount": 7,
+        "fullContextMatchCount": 0,
+        "applied": []
+      },
+      "peerThenOwn": {
+        "passed": false,
+        "hunk": 1,
+        "oldStart": 33,
+        "oldCount": 6,
+        "fullContextMatchCount": 0,
+        "applied": []
+      },
+      "commute": false
+    },
+    "eslint.config.js": {
+      "sourcePatchReproducesExactProduct": true,
+      "peerPatchReproducesExactMergedDevelop": true,
+      "ownHunks": [
+        {
+          "oldStart": 81,
+          "oldCount": 6,
+          "newStart": 81,
+          "newCount": 7
+        },
+        {
+          "oldStart": 1090,
+          "oldCount": 4,
+          "newStart": 1091,
+          "newCount": 8
+        }
+      ],
+      "peerHunks": [
+        {
+          "oldStart": 45,
+          "oldCount": 6,
+          "newStart": 45,
+          "newCount": 32
+        },
+        {
+          "oldStart": 127,
+          "oldCount": 7,
+          "newStart": 153,
+          "newCount": 7
+        }
+      ],
+      "ownThenPeer": {
+        "passed": true,
+        "bytes": 41132,
+        "sha256": "95f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266",
+        "applied": [
+          {
+            "hunk": 1,
+            "atLine": 45,
+            "oldStart": 45,
+            "oldCount": 6,
+            "newCount": 32
+          },
+          {
+            "hunk": 2,
+            "atLine": 154,
+            "oldStart": 127,
+            "oldCount": 7,
+            "newCount": 7
+          }
+        ]
+      },
+      "peerThenOwn": {
+        "passed": true,
+        "bytes": 41132,
+        "sha256": "95f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266",
+        "applied": [
+          {
+            "hunk": 1,
+            "atLine": 107,
+            "oldStart": 81,
+            "oldCount": 6,
+            "newCount": 7
+          },
+          {
+            "hunk": 2,
+            "atLine": 1117,
+            "oldStart": 1090,
+            "oldCount": 4,
+            "newCount": 8
+          }
+        ]
+      },
+      "commute": true
+    },
+    "test/release-package-native-assets.test.js": {
+      "sourcePatchReproducesExactProduct": true,
+      "peerPatchReproducesExactMergedDevelop": true,
+      "ownHunks": [
+        {
+          "oldStart": 20,
+          "oldCount": 9,
+          "newStart": 20,
+          "newCount": 10
+        },
+        {
+          "oldStart": 31,
+          "oldCount": 6,
+          "newStart": 32,
+          "newCount": 8
+        },
+        {
+          "oldStart": 42,
+          "oldCount": 12,
+          "newStart": 45,
+          "newCount": 19
+        }
+      ],
+      "peerHunks": [
+        {
+          "oldStart": 4,
+          "oldCount": 7,
+          "newStart": 4,
+          "newCount": 7
+        },
+        {
+          "oldStart": 31,
+          "oldCount": 6,
+          "newStart": 31,
+          "newCount": 8
+        },
+        {
+          "oldStart": 42,
+          "oldCount": 12,
+          "newStart": 44,
+          "newCount": 13
+        }
+      ],
+      "ownThenPeer": {
+        "passed": false,
+        "hunk": 2,
+        "oldStart": 31,
+        "oldCount": 6,
+        "fullContextMatchCount": 0,
+        "applied": [
+          {
+            "hunk": 1,
+            "atLine": 4,
+            "oldStart": 4,
+            "oldCount": 7,
+            "newCount": 7
+          }
+        ]
+      },
+      "peerThenOwn": {
+        "passed": false,
+        "hunk": 2,
+        "oldStart": 31,
+        "oldCount": 6,
+        "fullContextMatchCount": 0,
+        "applied": [
+          {
+            "hunk": 1,
+            "atLine": 20,
+            "oldStart": 20,
+            "oldCount": 9,
+            "newCount": 10
+          }
+        ]
+      },
+      "commute": false
+    }
+  },
+  "conclusions": {
+    "dev/bin/audit-release-packages.js": "Both changes insert into the same requiredNativeAssets location after the canonical scanner. The exact full-context patches do not apply in either composition order. A later reviewed merge must preserve both the record-fields WASM and the trainer WASM, along with the peer required-license validation/report.",
+    "eslint.config.js": "The two native-fields hunks and two peer hunks apply by unique complete context in both orders and produce identical 41,132-byte text, SHA25695f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266. No file was written or source executed.",
+    "test/release-package-native-assets.test.js": "Both insert after the existing zstd fixture and both rewrite the old successful-audit title/native-assets assertion. The exact context patches do not compose. A later reviewed merge must preserve field missing/corrupt cases, trainer WASM/license fixture bytes and readFile import, a five-native-asset assertion including both added binaries, and the trainer-license digest assertion."
+  },
+  "limitations": [
+    "No Git merge/rebase was executed; failure means exact-context patch noncommutation, with concrete overlapping insertions/assertions identified.",
+    "No product, unit test, build or benchmark was executed.",
+    "No source, branch or frozen browser run was modified.",
+    "This bounded review does not establish runtime compatibility; the native review lane owns database/store/runtime interactions."
+  ],
+  "candidateFilesWritten": false
+}

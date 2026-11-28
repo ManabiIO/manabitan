@@ -1,0 +1,29 @@
+{
+  "kind": "root-trigger-only-producer-publication-review",
+  "passed": true,
+  "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+  "tree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+  "parent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+  "exactFourPathDelta": [
+    ".github/workflows/import-native-record-fields-1c413.yml",
+    "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+    "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+    "dev/perf/native-record-fields-browser-20261128-1c413/study.json"
+  ],
+  "sourceManifest": {
+    "gitBlob": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+    "sha256": "2d25e93de587dfc58aa0a3ad8829ede39a3cc98583ab76a4836a11b9a3a91d53",
+    "bytes": 6105,
+    "digest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28"
+  },
+  "all20BindingsVerified": true,
+  "productControlCodeGuardTestsUnchanged": true,
+  "workflowExactlyTwoTriggerEdits": true,
+  "fullJobsByteIdentical": true,
+  "allGatesSchedulePrerequisitesReadinessUnchanged": true,
+  "oldProvenanceRetained": true,
+  "nativeReview": "c302a7bbf7fe5a8afcb45d0338e7692ac1ed77e0",
+  "inventoryReview": "a6a50d761da34833aa0aa5412f52a3dccabf85d8",
+  "onlyTestSourceRefNow": true,
+  "newExactPreflightRequiredBeforeAcquisition": true
+}

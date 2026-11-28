@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 11:04:22 UTC",
+  "observedAt": "2026-11-28 11:23 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -9,7 +9,7 @@
     "No original timing reruns, exclusions, replacements, pooling or post-result gate changes",
     "No default-branch/peer changes",
     "No PR opened by this task",
-    "Local executor unavailable since06:57UTC; remote GitHub-only source/CI",
+    "Local executor was unavailable06:57–10:55UTC; restored executor available, remote immutable Git evidence remains authoritative",
     "Functions transient state reset10:19UTC; durable Git sources and original artifacts preserved"
   ],
   "current": {
@@ -152,7 +152,7 @@
     }
   },
   "browser": {
-    "status": "No native-fields whole-browser timings acquired. First launcher failed before setup; second exact source passed preflight but acquisition workflow did not register. Trigger-only source revision in preparation.",
+    "status": "First actual native-fields six-cell whole-browser acquisition46138650386 attempt1 is in progress. All six jobs passed setup and are acquiring. No partial timing inspected or used.",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -202,22 +202,24 @@
       "guard": "6ce33bd5bbf4b4cc7a7b09d979c878050265ed31"
     },
     "currentProducer": {
-      "head": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
-      "tree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+      "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "tree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
       "parent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
-      "branch": "perf/native-record-fields-browser-20261128-1c413",
+      "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
       "published": true,
-      "source": "71108341a50c71f340252153eb18080c9753b55c",
-      "sourceDigest": "0c9aa2674e74a98d711b7a78c09906db046bd1051835049bc8e14fc973cfb02c",
-      "study": "292b25e1d99f3e0f857254f0bd8a64c3e1913e5b",
-      "workflow": "b136fbae0ec44c2f4c083bfe5ffcc6e242b17ec0",
-      "guard": "0ad65fbea6db6d7050604ba9253062d998e2de2c",
-      "readme": "089e2ea317712094235955cefca8a39f6a7aa02b",
-      "rootReview": "26f62f1a8d67fc3f61ee1c359467c6c5a394cd6d",
-      "nativeReview": "2f3b94c66e0f65a5963ea12fa5a5a8b567db12d8",
-      "inventoryReview": "793ab1cc701e6c693d2685dc9682439545cb9a65",
-      "pipelineReview": "4d8fe32fa995159e70012410ff4113cdcd7e1812",
-      "disposition": "Failed source launcher; retained immutable. No observed timing cohort."
+      "source": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+      "sourceDigest": "46bdf936009651b9a3c8ae5697ac88fd00a7c0e3be67eda851d685d89ff50e28",
+      "workflow": "0a2c2f39c44cd4a94ccf9e6ed66922eef18570e6",
+      "study": "15065d5e0cdb8fe612092c19fac4b14ba233965b",
+      "readme": "b82d6285e64062a98db1386f51c463265f1861d7",
+      "guard": "7f3df3b27de3b4012d0481884ac34a53de363402",
+      "tests": "f290fc66fe1b74f70d815925fcaf260d47ede50e",
+      "rootReview": "d56d6ff827007d4d1548fe48e72f3f9af37cb0d6",
+      "nativeReview": "c302a7bbf7fe5a8afcb45d0338e7692ac1ed77e0",
+      "inventoryReview": "a6a50d761da34833aa0aa5412f52a3dccabf85d8",
+      "publicationDecision": "fd1d14311997cda5513a1541492bc3541f01983d",
+      "allProductControlCodeAndNumericPoliciesUnchanged": true,
+      "change": "Exact acquisition branch and removal of push.paths only; complete jobs section byte-identical"
     },
     "reader": {
       "commit": "2443419f919ff0ca6d578d681484cf43cb07a866",
@@ -232,7 +234,22 @@
       "correctedCaller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
       "correctedTests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099",
       "literalReview": "a8cc87e701781cfb2db63fbff7f79518317affcf",
-      "localPurePreflight": "Pipeline is reconstructing exact reviewed assembly in isolated scratch and running existing pure tests only; no real artifacts or imports."
+      "localPurePreflight": {
+        "readerCases": 19,
+        "numericCases": 14,
+        "passed": true,
+        "python": "3.12.14",
+        "testedCaller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
+        "testedTests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099",
+        "receipt": "5cffb6265470b1f64493ccdff31e73023bca9cc9",
+        "bundle": "39d72a583155dc5f0c0d519f4866826255e741c3",
+        "noOriginalImportsOrArtifacts": true
+      },
+      "acquireCaller": "003ad2118b61b488545c595044eba7cfeaa050d5",
+      "acquireTests": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+      "acquireLiteralReview": "0b3037582a23e4b07dc24c069d7bec7d7b8d90c2",
+      "independentAcquireLiteralReview": "12032a1a31fe855ecb3a386fa0fe3433278b0fd7",
+      "finalManifestState": "Disabled/null until all six original acquisition artifacts exist"
     },
     "numericEvaluator": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
     "activationChecker": "9e03c189823092fa7a8217f65ab9283893f85d2e",
@@ -438,10 +455,106 @@
         "owner": "native_host_review",
         "preflightOwner": "pipeline_audit",
         "preflightBranch": "test/native-record-fields-browser-preflight-trigger-20261128-1c413",
-        "noRefYet": true,
-        "noTimingObserved": true,
-        "triggerCause": "Path-filter suppression after prior test-source introduction is an unconfirmed hypothesis; original event diff was not available. Official docs confirms path filters skip when no files change."
+        "noRefYet": false,
+        "noTimingObserved": false,
+        "triggerCause": "Path-filter suppression after prior test-source introduction is an unconfirmed hypothesis; original event diff was not available. Official docs confirms path filters skip when no files change.",
+        "state": "Published after exact successful source-only preflight; first actual acquisition underway",
+        "priorCauseRemainsUnconfirmed": true
       }
+    },
+    "firstFailedProducer": {
+      "head": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "tree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+      "parent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+      "branch": "perf/native-record-fields-browser-20261128-1c413",
+      "published": true,
+      "source": "71108341a50c71f340252153eb18080c9753b55c",
+      "sourceDigest": "0c9aa2674e74a98d711b7a78c09906db046bd1051835049bc8e14fc973cfb02c",
+      "study": "292b25e1d99f3e0f857254f0bd8a64c3e1913e5b",
+      "workflow": "b136fbae0ec44c2f4c083bfe5ffcc6e242b17ec0",
+      "guard": "0ad65fbea6db6d7050604ba9253062d998e2de2c",
+      "readme": "089e2ea317712094235955cefca8a39f6a7aa02b",
+      "rootReview": "26f62f1a8d67fc3f61ee1c359467c6c5a394cd6d",
+      "nativeReview": "2f3b94c66e0f65a5963ea12fa5a5a8b567db12d8",
+      "inventoryReview": "793ab1cc701e6c693d2685dc9682439545cb9a65",
+      "pipelineReview": "4d8fe32fa995159e70012410ff4113cdcd7e1812",
+      "disposition": "Failed source launcher; retained immutable. No observed timing cohort."
+    },
+    "acquisition": {
+      "id": 46138650386,
+      "attempt": 1,
+      "createdAt": "2026-11-28T11:10:53Z",
+      "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 140959486645,
+          "name": "Complete import (vndb, AB)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 140959486747,
+          "name": "Complete import (jitendex, BA)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 140959486755,
+          "name": "Complete import (vndb, BA)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 140959486757,
+          "name": "Complete import (jitendex, AB)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 140959486760,
+          "name": "Complete import (jmdict, AB)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 140959486803,
+          "name": "Complete import (jmdict, BA)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "registration": "de7abdfe0368f1951df3559448b8bfc71ca08e1a",
+      "partialTimingsInspected": false,
+      "allOriginalCellsRetained": true
+    },
+    "finalSourcePreflight": {
+      "head": "236c729ca8c7a3dbbf77134b58b070e27d0e98a0",
+      "tree": "fef9cc4571a229e3bb2a8e8f5de028602418e4e2",
+      "branch": "test/native-record-fields-browser-preflight-trigger-20261128-1c413",
+      "run": 46138436711,
+      "job": 140958839281,
+      "attempt": 1,
+      "conclusion": "success",
+      "target": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "tests": 29,
+      "bothActualGuardsPassed": true,
+      "boundPaths": 21,
+      "protectedFiles": 235,
+      "fullLog": "996a38bfa0606e7b85984a62875cb887367ace21",
+      "fullLogSha256": "e5154b0ca4f575cb11e534ee4d859bfbacbfc777b75e6446d32b713eba5fcdd9",
+      "completion": "80f553aadde61c2fca843645a9352e4103a628fd",
+      "outcomes": "ab8453a542149f496a942b3aa74196c751387cc4",
+      "api": "57a487b85e86629d57aac40655ebe0272ec1cacf",
+      "artifact": {
+        "id": 15260433927,
+        "bytes": 169388,
+        "sha256": "4d216252ca7d1a949ea852faceaad2a200b4d2d649f377519fa4e8fba2dc5a80"
+      },
+      "noImportsOrTimings": true,
+      "archiveBytesIndependentlyRead": false
     }
   },
   "historicalCorrectness": {
@@ -643,10 +756,30 @@
     }
   },
   "next": [
-    "Review new trigger-only producer and separate preflight rebind",
-    "Require unchanged products/gates and completed source preflight; check older915d branch still has no customrun",
-    "Publish one unfiltered original6-cell acquisition",
-    "Read every original74report percell and apply frozen thresholds",
-    "PR only after qualified worthwhile import gain"
-  ]
+    "Retain and finish original six-cell run46138650386 without source/gate changes or reruns",
+    "Seal final74-report reader only after all six original artifacts exist and independently review manifest",
+    "Audit all444 reports and apply original per-host gates, controls, media, memory and activation",
+    "Complete isolated a300 integration prep while old-source timings remain scoped to f28",
+    "Open PR only for a worthwhile whole-import gain with appropriate current-source validation"
+  ],
+  "integration": {
+    "reviewedDevelop": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "frozenMeasuredBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "upstreamPR": 982,
+    "reachableNewCommits": 6,
+    "changedPaths": 103,
+    "overlappingProductPaths": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "dev/bin/audit-release-packages.js",
+      "test/release-package-native-assets.test.js",
+      "eslint.config.js"
+    ],
+    "releaseMergeRequired": "Combine five native assets, trainer-license checks and field missing/corrupt cases",
+    "lintChangesCommute": true,
+    "nonRuntimeReview": "69c82cb74fc545774c82430c2152a87c77e8ffa4",
+    "nativeLifecycleStaticCompatibility": "Six existing store method bodies are byte-identical; DB four native hunks still match uniquely; store10/11 contexts exact and remaining mismatch is JSDoc only",
+    "timingTransferLimit": "PR982 changes ordinary finishBulkImport high-water SQL, offscreen admission, storage/read context machinery and UI completion fencing. Frozen f28 results do not qualify a300.",
+    "next": "Native agent authorized separate isolated a300 candidate/control integration and meaningful validation prep; no new timing, performance ref or PR. Keep frozen acquisition unchanged."
+  }
 }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "reachable-evidence-index",
   "repository": "ManabiIO/manabitan",
-  "scope": "Previously preserved original source/record evidence, now anchored as actual Git tree entries. Original failed studies remain failed; native whole-browser qualification remains undecided.",
+  "scope": "Original source/record evidence anchored as actual Git tree entries. Original failures remain failed. First actual native-fields six-cell browser acquisition is in progress; its qualification is undecided. Current develop integration is a separate activity.",
   "files": {
     "current-correctness-result.json": "07161060078f96743419784e04ae5e33d407ddca",
     "current-correctness-completion.json": "af558285347a7e5e941509a5ee69def401bd0014",
@@ -29,6 +29,19 @@
     "watchdog-disposition.json": "d54f58d7d75fecfa6755745ccb730f4c3ff7b0a5",
     "crc-tail-result.json": "d08462bbf9abe4c286bbc00a8c4f5bd666fc642b",
     "crc-tail-disposition.json": "e47c9940dedda3d0dd08abfb5ab11e579ef36955",
-    "root-corrected-source-publication.json": "114c65e1fdc26ac55dc7d1bfd470a0d45c7ba670"
-  }
+    "root-corrected-source-publication.json": "114c65e1fdc26ac55dc7d1bfd470a0d45c7ba670",
+    "final-source-preflight-completion.json": "80f553aadde61c2fca843645a9352e4103a628fd",
+    "final-source-preflight-outcomes.json": "ab8453a542149f496a942b3aa74196c751387cc4",
+    "final-source-preflight-api.json": "57a487b85e86629d57aac40655ebe0272ec1cacf",
+    "final-source-preflight.log": "996a38bfa0606e7b85984a62875cb887367ace21",
+    "actual-browser-acquisition-registration.json": "de7abdfe0368f1951df3559448b8bfc71ca08e1a",
+    "actual-browser-acquisition-publication.json": "fd1d14311997cda5513a1541492bc3541f01983d",
+    "final-producer-root-review.json": "d56d6ff827007d4d1548fe48e72f3f9af37cb0d6",
+    "final-producer-native-review.json": "c302a7bbf7fe5a8afcb45d0338e7692ac1ed77e0",
+    "final-producer-inventory-review.json": "a6a50d761da34833aa0aa5412f52a3dccabf85d8",
+    "final-reader-literal-review.json": "0b3037582a23e4b07dc24c069d7bec7d7b8d90c2",
+    "final-reader-independent-literal-review.json": "12032a1a31fe855ecb3a386fa0fe3433278b0fd7",
+    "pr982-non-runtime-compatibility.json": "69c82cb74fc545774c82430c2152a87c77e8ffa4"
+  },
+  "observedAt": "2026-11-28 11:23 UTC"
 }
