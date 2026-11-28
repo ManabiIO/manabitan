@@ -1,0 +1,244 @@
+// Copyright (C) 2026 Manabitan authors
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Diagnostic source replay; never a browser or whole-import benchmark.
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {createReadStream, openAsBlob} from 'node:fs';
+import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {parseArgs} from 'node:util';
+import {performance} from 'node:perf_hooks';
+import {BlobReader, ZipReader} from '@zip.js/zip.js';
+
+const {values, positionals} = parseArgs({allowPositionals:true, options:{
+    'baseline-root':{type:'string'}, 'candidate-root':{type:'string'},
+    'cache-dir':{type:'string'}, 'parser-workers':{type:'string',default:'3'},
+    'pairs':{type:'string',default:'1'}, 'out':{type:'string'},
+}});
+const roots={baseline:path.resolve(values['baseline-root']),candidate:path.resolve(values['candidate-root'])};
+const root=roots.baseline;
+const parserWorkers=Number(values['parser-workers']);
+const pairs=Number(values.pairs);
+assert([2,3,5].includes(parserWorkers));
+assert(Number.isInteger(pairs)&&pairs>=1&&pairs<=6);
+assert.equal(process.version,'v22.22.0');
+const output=path.resolve(values.out);
+const dictionaries=positionals.length?positionals:['jmdict','jitendex','vndb'];
+const cache=path.resolve(values['cache-dir']??path.join(root,'builds/e2e-dictionary-cache'));
+const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
+const viewBytes=view=>new Uint8Array(view.buffer,view.byteOffset,view.byteLength);
+const lockBytes=await readFile(path.join(root,'test/perf/dictionaries.lock.json'));
+const fixtures=JSON.parse(lockBytes).dictionaries;
+const sourceFiles=[
+    'ext/js/dictionary/term-bank-wasm-parser.js',
+    'ext/js/dictionary/term-bank-wasm-parser-worker.js',
+    'ext/js/dictionary/term-bank-experiments.js',
+    'ext/js/dictionary/term-content-ownership.js',
+    'ext/js/dictionary/term-record-preinterned-plan.js',
+    'ext/js/dictionary/term-lookup-index-preparation.js',
+    'ext/js/dictionary/term-lookup-index.js',
+    'ext/js/dictionary/term-lookup-route.js',
+    'ext/js/dictionary/dictionary-importer.js',
+    'ext/js/dictionary/dense-zip-directory.js',
+    'ext/js/dictionary/term-bank-source-pipeline.js',
+    'ext/js/dictionary/term-key-hash.js',
+    'ext/js/media/media-util.js',
+    'ext/lib/term-bank-parser.wasm',
+    'ext/js/dictionary/wasm/term-bank-parser.c',
+    'dev/data/dictionary-wasm/manifest.json',
+];
+const sourceIdentity=async sourceRoot=>Object.fromEntries(await Promise.all(sourceFiles.map(async file=>[file,sha256(await readFile(path.join(sourceRoot,file)))])));
+const load=async(sourceRoot,file)=>import(pathToFileURL(path.join(sourceRoot,file)).href);
+const {readDenseZipDirectory}=await load(root,'ext/js/dictionary/dense-zip-directory.js');
+const {RawZipPayloadReader}=await load(root,'ext/js/dictionary/term-bank-source-pipeline.js');
+const {getImageMediaTypeFromFileName}=await load(root,'ext/js/media/media-util.js');
+const {hashTermKeyBytes}=await load(root,'ext/js/dictionary/term-key-hash.js');
+const sources={};
+for(const [arm,sourceRoot]of Object.entries(roots)){
+    assert.deepEqual(await readFile(path.join(sourceRoot,'test/perf/dictionaries.lock.json')),lockBytes);
+    const artifacts=await load(sourceRoot,'dev/dictionary-wasm.js');artifacts.loadDictionaryWasm();
+    const moduleBytes=await readFile(path.join(sourceRoot,'ext/lib/term-bank-parser.wasm'));
+    assert.equal(sha256(moduleBytes),artifacts.getDictionaryWasmManifest().targets.find(x=>x.name==='term-bank-parser.wasm').sha256);
+    const context={callback:null,pending:null};
+    context.self={addEventListener(type,callback){if(type==='message')context.callback=callback;},postMessage(message,transfer=[]){
+        const postReachedAt=performance.now();
+        const transferBytes=transfer.reduce((sum,buffer)=>sum+buffer.byteLength,0);
+        const received=structuredClone(message,{transfer});
+        const deliveredAt=performance.now();
+        const resolve=context.pending;context.pending=null;
+        resolve({message:received,transferBytes,transferBuffers:transfer.length,postReachedAt,deliveryMs:deliveredAt-postReachedAt});
+    }};
+    globalThis.self=context.self;
+    await load(sourceRoot,'ext/js/dictionary/term-bank-wasm-parser-worker.js');
+    const send=async data=>{
+        assert.equal(context.pending,null);globalThis.self=context.self;
+        const promise=new Promise(resolve=>{context.pending=resolve;});
+        context.callback({data});const result=await promise;
+        if(result.message.type==='parse-error'||result.message.type==='init-error')throw Error(JSON.stringify(result.message));
+        return result;
+    };
+    await send({type:'initialize',module:await WebAssembly.compile(moduleBytes)});
+    sources[arm]={send,identity:await sourceIdentity(sourceRoot),previous:null};
+}
+for(const file of sourceFiles.filter(file=>file!=='ext/js/dictionary/term-bank-wasm-parser.js'&&file!=='ext/js/dictionary/term-bank-wasm-parser-worker.js')){
+    assert.equal(sources.baseline.identity[file],sources.candidate.identity[file],`Unexpected source difference: ${file}`);
+}
+assert.notEqual(sources.baseline.identity['ext/js/dictionary/term-bank-wasm-parser.js'],sources.candidate.identity['ext/js/dictionary/term-bank-wasm-parser.js']);
+
+function partition(entries,groupsPerWorker){
+    const total=entries.reduce((sum,entry)=>sum+entry.uncompressedSize,0);
+    const groupCount=Math.min(entries.length,Math.max(parserWorkers*groupsPerWorker,Math.ceil(total/(24*1024*1024))));
+    const groups=[];let start=0;let consumed=0;
+    for(let index=0;index<groupCount-1;++index){
+        const remaining=groupCount-index;const target=(total-consumed)/remaining;
+        let end=start+1;let bytes=entries[start].uncompressedSize;const maxEnd=entries.length-(remaining-1);
+        while(end<maxEnd){const nextBytes=bytes+entries[end].uncompressedSize;if(Math.abs(nextBytes-target)>Math.abs(bytes-target))break;bytes=nextBytes;++end;}
+        groups.push(entries.slice(start,end));start=end;consumed+=bytes;
+    }
+    groups.push(entries.slice(start));return groups;
+}
+async function openTermBanks(archivePath){
+    const archive=await openAsBlob(archivePath);let reader=null;
+    const dense=await readDenseZipDirectory(archive);
+    let entries=dense;
+    if(entries===null){reader=new ZipReader(new BlobReader(archive),{useWebWorkers:false});entries=await reader.getEntries();}
+    const hasArchiveImages=entries.some(entry=>!entry.directory&&getImageMediaTypeFromFileName(entry.filename)!==null);
+    const banks=entries.filter(entry=>/^term_bank_\d+\.json$/.test(entry.filename)).sort((a,b)=>Number(a.filename.slice(10,-5))-Number(b.filename.slice(10,-5)));
+    const payloads=new RawZipPayloadReader(archive);const signal=new AbortController().signal;
+    return {entries:banks,hasArchiveImages,close:async()=>{if(reader)await reader.close();},read:async entry=>({
+        bytes:await payloads.read(entry,signal),compressionMethod:entry.compressionMethod,
+        compressedSize:entry.compressedSize,uncompressedSize:entry.uncompressedSize,
+        signature:entry.signature,filename:entry.filename,
+    })};
+}
+function updateView(digest,label,view){
+    digest.update(label+':');
+    if(!view){digest.update('absent;');return;}
+    digest.update(String(view.byteLength)+':');digest.update(viewBytes(view));
+}
+function digestPlan(digest,plan){
+    const offsets=plan.stringOffsets??new Uint32Array(plan.stringLengths.length);
+    const hashes=plan.stringHashes??new Uint32Array(plan.stringLengths.length);
+    if(!plan.stringOffsets||!plan.stringHashes){
+        let offset=0;for(let key=0;key<plan.stringLengths.length;++key){const end=offset+plan.stringLengths[key];
+            if(!plan.stringOffsets)offsets[key]=offset;if(!plan.stringHashes)hashes[key]=hashTermKeyBytes(plan.stringsBuffer.subarray(offset,end));offset=end;}
+        assert.equal(offset,plan.stringsBuffer.byteLength);
+    }
+    for(const [label,view]of Object.entries({lengths:plan.stringLengths,offsets,hashes,strings:plan.stringsBuffer,
+        expressions:Uint32Array.from(plan.expressionIndexes),readings:Uint32Array.from(plan.readingIndexes)}))updateView(digest,label,view);
+}
+function digestMedia(digest,rows){
+    digest.update('media:'+rows.length+':');
+    for(const entry of rows){digest.update(JSON.stringify({index:entry.index,imagePaths:entry.imagePaths??null}));
+        for(const [key,value]of Object.entries(entry.row).sort(([a],[b])=>a.localeCompare(b))){
+            if(ArrayBuffer.isView(value))updateView(digest,key,value);else digest.update(key+':'+JSON.stringify(value)+';');
+        }
+    }
+}
+function outputDigest(owned,includeContent){
+    const digest=createHash('sha256');digestPlan(digest,owned.termRecordPreinternedPlan);
+    for(const [key,entry]of owned.preparedLookupIndexes){digest.update(key);updateView(digest,'index',entry.bytes);updateView(digest,'route',entry.routeFilter);digestPlan(digest,entry.preinternedPlan);}
+    for(const key of ['readingEqualsExpressionList','scoreList','sequenceList','contentMetaList','contentUniqueIndexList'])updateView(digest,key,owned[key]);
+    digest.update(JSON.stringify({contentMetaByUniqueIndex:owned.contentMetaByUniqueIndex===true,contentBytesBaseOffset:owned.contentBytesBaseOffset,contentBytesLength:owned.contentBytesLength,rowCount:owned.rowCount}));
+    if(includeContent)updateView(digest,'content',owned.contentBytesBuffer);
+    digestMedia(digest,owned.mediaRows);return digest.digest('hex');
+}
+function transferFootprint(chunk){
+    const buffers=new Set();const addView=value=>{if(ArrayBuffer.isView(value)&&value.buffer instanceof ArrayBuffer&&value.buffer.byteLength>0)buffers.add(value.buffer);};
+    for(const key of ['expressionBytesList','readingBytesList','contentBytesList'])for(const bytes of chunk[key])addView(bytes);
+    for(const key of ['readingEqualsExpressionList','scoreList','sequenceList','contentHash1List','contentHash2List','contentBytesBuffer','contentMetaList','contentUniqueIndexList'])addView(chunk[key]);
+    for(const {row}of chunk.mediaRows)for(const key of ['expressionBytes','readingBytes','glossaryJsonBytes','termEntryContentBytes'])addView(row[key]);
+    const addPlan=plan=>{for(const key of ['stringLengths','stringOffsets','stringHashes','stringsBuffer','expressionIndexes','readingIndexes'])addView(plan?.[key]);};
+    addPlan(chunk.termRecordPreinternedPlan);
+    for(const prepared of chunk.preparedLookupIndexes.values()){addView(prepared.bytes);addView(prepared.routeFilter);addPlan(prepared.preinternedPlan);}
+    for(const key of ['uniqueRowIndexes','uniqueSignatures','resolvedFlags','resolvedOffsets','resolvedLengths','pendingEpochs','pendingIndexes','pendingSpanOffsetsScratch','pendingSpanLengthsScratch'])addView(chunk.contentDedupPlan?.[key]);
+    return {bufferCount:buffers.size,bytes:[...buffers].reduce((sum,b)=>sum+b.byteLength,0)};
+}
+async function replayGroup(source,compressed,policy){
+    // Copies model the already-delivered owned compressed inputs and remain
+    // outside the worker interval. Each arm receives the same bounded bytes.
+    const sourceBuffers=compressed.map(entry=>Uint8Array.from(entry.bytes).buffer);
+    const sourceMetadata=compressed.map(({bytes,...metadata})=>metadata);
+    const options={copyContentBytes:false,includeContentMetadata:true,initialContentBytesPerRow:48,minimalDecode:true,
+        reuseExpressionForReadingDecode:true,preallocateChunkRows:true,skipTagRuleDecode:policy.mediaHintFastScan,lazyGlossaryDecode:true,
+        mediaHintFastScan:policy.mediaHintFastScan,projectImagePaths:policy.projectImagePaths,validateGlossaryTypes:true,
+        computeContentHashes:true,emitContentSlab:true,emitTokenBinaryContent:true,emitTermByteLists:false,prepareLookupIndexes:true,
+        prepareLookupRoute:policy.prepareLookupRoute,ownContentBytes:policy.ownContentBytes,
+        experimentalNativeEscapedKeys:policy.ownContentBytes};
+    const start=performance.now();
+    const response=await source.send({type:'parse',id:0,version:3,sourceBuffers,sourceMetadata,chunkSize:8192,options});
+    const elapsedMs=response.postReachedAt-start;
+    const {chunk:owned,profile,borrowsWorkerMemory:borrowedContent}=response.message;
+    assert(owned?.preparedLookupIndexes instanceof Map);
+    const plan=owned.termRecordPreinternedPlan;
+    const first=owned.preparedLookupIndexes.values().next().value;
+    const wholeIndex=owned.preparedLookupIndexes.size===1&&first.preinternedPlan===plan;
+    const potentialOwnedColumnBytes=wholeIndex?plan.stringsBuffer.byteLength+plan.stringLengths.byteLength+4*owned.rowCount:0;
+    const reusedOwnedColumnBytes=wholeIndex&&plan.stringsBuffer.buffer===first.bytes.buffer&&plan.stringLengths.buffer===first.bytes.buffer&&plan.expressionIndexes.buffer===first.bytes.buffer?potentialOwnedColumnBytes:0;
+    // Checksums and shape/ownership checks remain outside the worker interval.
+    if(source.previous)assert.equal(outputDigest(source.previous.owned,false),source.previous.digest,'Owned result changed after native heap reuse');
+    const digest=outputDigest(owned,true);const stableDigest=outputDigest(owned,false);
+    const transferred=transferFootprint(owned);
+    assert.equal(transferred.bytes,response.transferBytes,'Transfer list must contain every expected owned result buffer');
+    assert.equal(transferred.bufferCount,response.transferBuffers);
+    let ownedContentBytes=0;
+    if(owned.contentBytesBuffer?.buffer instanceof SharedArrayBuffer&&!borrowedContent)ownedContentBytes=owned.contentBytesBuffer.buffer.byteLength;
+    for(const key of ['stringsBuffer','stringLengths','expressionIndexes','readingIndexes'])assert(plan[key].buffer instanceof ArrayBuffer,`Key column must own private bytes: ${key}`);
+    source.previous={owned,digest:stableDigest};
+    return {rows:owned.rowCount,digest,stableDigest,wholeIndex,potentialOwnedColumnBytes,reusedOwnedColumnBytes,
+        transferBuffers:transferred.bufferCount,transferBytes:transferred.bytes,ownedOutputBufferBytes:transferred.bytes+ownedContentBytes,
+        contentMetaByUniqueIndex:owned.contentMetaByUniqueIndex===true,contentMetaBytes:owned.contentMetaList?.byteLength,
+        borrowedContent,copyMs:profile.resultCopyMs,elapsedMs,adapterDeliveryMs:response.deliveryMs,
+        inflationMs:profile.sourceInflateMs,sourceCrcMs:profile.sourceCrcMs??0,
+        nativeSegments:profile.nativeSegmentedLookupSegments??0,nativeFallbacks:profile.nativeSegmentedLookupFallbacks??0,
+        parseBankMs:profile.parseBankMs,lookupIndexPrepareMs:profile.lookupIndexPrepareMs??0,maxWasmHeapBytes:profile.maxWasmHeapBytes};
+}
+const report={schemaVersion:1,complete:false,node:process.version,pairs,
+    boundary:'Sequential actual source parser-worker handlers receive compressed source groups through an explicit local message adapter. Worker timing ends at postMessage before structuredClone transfer; adapter delivery time is separate. Every result is cloned with its actual transfer list. Full output equality and prior owned-result persistence are checked outside timing before the next heap reuse. File reads, input copies, hashes, browser scheduling/IPC, compression/storage, image-payload import and peak process memory are excluded. Buffer byte counts are actual unique owned result buffers, not peak browser memory.',
+    grouping:{parserWorkers,targetBytes:24*1024*1024,executionConcurrency:1},lockSha256:sha256(lockBytes),
+    runnerSha256:sha256(await readFile(fileURLToPath(import.meta.url))),
+    sources:Object.fromEntries(Object.entries(sources).map(([arm,source])=>[arm,{root:roots[arm],hashes:source.identity}])),dictionaries:[]};
+await mkdir(path.dirname(output),{recursive:true});await writeFile(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+const save=()=>writeFile(output,JSON.stringify(report,null,2)+'\n');
+try{
+for(const dictionary of dictionaries){
+    const fixture=fixtures[dictionary];assert(fixture);const archivePath=path.join(cache,fixture.cacheFile);
+    const archiveDigest=createHash('sha256');let archiveBytes=0;for await(const bytes of createReadStream(archivePath)){archiveDigest.update(bytes);archiveBytes+=bytes.length;}
+    assert.equal(archiveDigest.digest('hex'),fixture.sha256);assert.equal(archiveBytes,fixture.sizeBytes);
+    const reader=await openTermBanks(archivePath);
+    try{
+        const entries=reader.entries;assert(entries.length>0);for(let i=0;i<entries.length;i++)assert.equal(entries[i].filename,`term_bank_${i+1}.json`);
+        const totalSourceBytes=entries.reduce((sum,e)=>sum+e.uncompressedSize,0);
+        const policy={mediaHintFastScan:reader.hasArchiveImages,projectImagePaths:reader.hasArchiveImages&&totalSourceBytes>=1024*1024*1024,prepareLookupRoute:totalSourceBytes>=128*1024*1024};
+        policy.ownContentBytes=policy.projectImagePaths&&totalSourceBytes>=512*1024*1024;
+        const groups=partition(entries,policy.mediaHintFastScan?3:4);
+        const result={dictionary,archiveSha256:fixture.sha256,banks:entries.length,totalSourceBytes,policy,rows:0,groups:[]};report.dictionaries.push(result);await save();
+        for(const source of Object.values(sources))source.previous=null;
+        for(const [index,group]of groups.entries()){
+            const compressed=[];for(const entry of group)compressed.push(await reader.read(entry));
+            const observations=[];
+            for(let pair=0;pair<pairs;pair++){
+                const order=(index+pair)%2===0?['baseline','candidate']:['candidate','baseline'];const arms={};
+                for(const arm of order)arms[arm]=await replayGroup(sources[arm],compressed,policy);
+                const {baseline,candidate}=arms;
+                for(const key of ['rows','digest','stableDigest','wholeIndex','potentialOwnedColumnBytes','nativeSegments','nativeFallbacks','contentMetaByUniqueIndex','contentMetaBytes','borrowedContent'])assert.equal(candidate[key],baseline[key],`${dictionary} group ${index} ${key}`);
+                assert.equal(baseline.reusedOwnedColumnBytes,0);
+                assert.equal(candidate.reusedOwnedColumnBytes,candidate.wholeIndex?candidate.potentialOwnedColumnBytes:0);
+                const expectedSaved=candidate.reusedOwnedColumnBytes;
+                assert.equal(baseline.transferBytes-candidate.transferBytes,expectedSaved,'Unexpected unique transferable byte delta');
+                assert.equal(baseline.ownedOutputBufferBytes-candidate.ownedOutputBufferBytes,expectedSaved,'Unexpected retained result byte delta');
+                observations.push({pair,order,baseline,candidate});
+            }
+            result.rows+=observations[0].candidate.rows;
+            result.groups.push({index,firstBank:group[0].filename,lastBank:group.at(-1).filename,banks:group.length,sourceBytes:group.reduce((sum,e)=>sum+e.uncompressedSize,0),observations});
+            await save();console.log(`${dictionary} ${index+1}/${groups.length}: ${observations[0].candidate.rows} rows; ${observations[0].candidate.reusedOwnedColumnBytes} owned-column bytes reused`);
+            globalThis.gc?.();
+        }
+        assert.equal(result.rows,fixture.termRows);
+        result.summary={reusedColumnBytes:result.groups.reduce((s,g)=>s+g.observations[0].candidate.reusedOwnedColumnBytes,0),wholeIndexRows:result.groups.reduce((s,g)=>s+(g.observations[0].candidate.wholeIndex?g.observations[0].candidate.rows:0),0),maximumGroupByteReduction:Math.max(...result.groups.map(g=>g.observations[0].candidate.reusedOwnedColumnBytes)),nativeSegments:result.groups.reduce((s,g)=>s+g.observations[0].candidate.nativeSegments,0)};
+    }finally{for(const source of Object.values(sources))source.previous=null;await reader.close();}
+}
+for(const [arm,sourceRoot]of Object.entries(roots))assert.deepEqual(await sourceIdentity(sourceRoot),sources[arm].identity,`${arm} changed during replay`);
+report.complete=true;await save();
+}catch(error){report.failure={name:error.name,message:error.message,stack:error.stack};await save();throw error;}

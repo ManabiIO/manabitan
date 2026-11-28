@@ -1,0 +1,849 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "node": "v22.22.0",
+  "pairs": 1,
+  "boundary": "Sequential actual source parser-worker handlers receive compressed source groups through an explicit local message adapter. Worker timing ends at postMessage before structuredClone transfer; adapter delivery time is separate. Every result is cloned with its actual transfer list. Full output equality and prior owned-result persistence are checked outside timing before the next heap reuse. File reads, input copies, hashes, browser scheduling/IPC, compression/storage, image-payload import and peak process memory are excluded. Buffer byte counts are actual unique owned result buffers, not peak browser memory.",
+  "grouping": {
+    "parserWorkers": 3,
+    "targetBytes": 25165824,
+    "executionConcurrency": 1
+  },
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "runnerSha256": "91cc7888674b5993521f3c169895519234962a9741bb018685a274038b3532ab",
+  "sources": {
+    "baseline": {
+      "root": "/workspace/scratch/83b3b3bfba02/manabitan",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+        "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+        "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+        "ext/js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+        "ext/js/dictionary/term-key-hash.js": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+        "ext/js/media/media-util.js": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4",
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+        "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+      }
+    },
+    "candidate": {
+      "root": "/workspace/scratch/83b3b3bfba02/native-owned-plan",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "f7d738cb05b26c87df2ed59316561b1273d97a7da4c09ba1f392191f43fdc176",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-lookup-index.js": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+        "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+        "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+        "ext/js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+        "ext/js/dictionary/term-key-hash.js": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+        "ext/js/media/media-util.js": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4",
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+        "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+      }
+    }
+  },
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "totalSourceBytes": 171617523,
+      "policy": {
+        "mediaHintFastScan": false,
+        "projectImagePaths": false,
+        "prepareLookupRoute": true,
+        "ownContentBytes": false
+      },
+      "rows": 528299,
+      "groups": [
+        {
+          "index": 0,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_5.json",
+          "banks": 5,
+          "sourceBytes": 14543374,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 50000,
+                "digest": "7f2d8a205b81b188cddd5b6d22b50938a1e12509ffb709049e4e4211466935be",
+                "stableDigest": "8bfd602fd1fc94b22f6124aeb5db6738e7f18b782ae1a1a544be19812b5e8c58",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 774480,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 4486700,
+                "ownedOutputBufferBytes": 12973682,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 18.054857999999967,
+                "elapsedMs": 212.97587799999997,
+                "adapterDeliveryMs": 0.3510479999999916,
+                "inflationMs": 32.40119100000004,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 117,
+                "lookupIndexPrepareMs": 31.579116,
+                "maxWasmHeapBytes": 37027840
+              },
+              "candidate": {
+                "rows": 50000,
+                "digest": "7f2d8a205b81b188cddd5b6d22b50938a1e12509ffb709049e4e4211466935be",
+                "stableDigest": "8bfd602fd1fc94b22f6124aeb5db6738e7f18b782ae1a1a544be19812b5e8c58",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 774480,
+                "reusedOwnedColumnBytes": 774480,
+                "transferBuffers": 10,
+                "transferBytes": 3712220,
+                "ownedOutputBufferBytes": 12199202,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 8.63708100000008,
+                "elapsedMs": 112.61366699999996,
+                "adapterDeliveryMs": 0.11567300000001524,
+                "inflationMs": 22.78847399999995,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 71,
+                "lookupIndexPrepareMs": 2.2024880000000167,
+                "maxWasmHeapBytes": 37027840
+              }
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "firstBank": "term_bank_6.json",
+          "lastBank": "term_bank_9.json",
+          "banks": 4,
+          "sourceBytes": 13240716,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "c7761be0122e8d932dae7d514075c6691029bf9d93df8230a0e0c03f715941b4",
+                "stableDigest": "bffab408195361e432a80dcc37b10753775c4318cc2f0099994cd042758402e3",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 628590,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 3902030,
+                "ownedOutputBufferBytes": 13329924,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 9.575647000000117,
+                "elapsedMs": 76.35147800000004,
+                "adapterDeliveryMs": 0.2364390000000185,
+                "inflationMs": 17.05971999999997,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 43,
+                "lookupIndexPrepareMs": 2.211894999999913,
+                "maxWasmHeapBytes": 37027840
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "c7761be0122e8d932dae7d514075c6691029bf9d93df8230a0e0c03f715941b4",
+                "stableDigest": "bffab408195361e432a80dcc37b10753775c4318cc2f0099994cd042758402e3",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 628590,
+                "reusedOwnedColumnBytes": 628590,
+                "transferBuffers": 10,
+                "transferBytes": 3273440,
+                "ownedOutputBufferBytes": 12701334,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 5.4097569999999,
+                "elapsedMs": 67.37585800000011,
+                "adapterDeliveryMs": 0.17568600000004153,
+                "inflationMs": 13.851509999999962,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 44,
+                "lookupIndexPrepareMs": 1.085687999999891,
+                "maxWasmHeapBytes": 37027840
+              }
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "firstBank": "term_bank_10.json",
+          "lastBank": "term_bank_13.json",
+          "banks": 4,
+          "sourceBytes": 13257737,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "2082d9422305d090407e8ebd03e2420120f4c37dc83dfe3659ebcb361e430564",
+                "stableDigest": "0d6f08e15fe384c4b152edd7bb3a7b18a1247f1fa8a239983b7a46524ee5dab7",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 638234,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 3906798,
+                "ownedOutputBufferBytes": 13179596,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 7.875528000000031,
+                "elapsedMs": 72.5244909999999,
+                "adapterDeliveryMs": 0.2858739999999216,
+                "inflationMs": 14.242029999999886,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 45,
+                "lookupIndexPrepareMs": 1.4314999999999145,
+                "maxWasmHeapBytes": 37027840
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "2082d9422305d090407e8ebd03e2420120f4c37dc83dfe3659ebcb361e430564",
+                "stableDigest": "0d6f08e15fe384c4b152edd7bb3a7b18a1247f1fa8a239983b7a46524ee5dab7",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 638234,
+                "reusedOwnedColumnBytes": 638234,
+                "transferBuffers": 10,
+                "transferBytes": 3268564,
+                "ownedOutputBufferBytes": 12541362,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 43.85483299999987,
+                "elapsedMs": 106.16911200000004,
+                "adapterDeliveryMs": 0.11156000000005406,
+                "inflationMs": 13.370959000000084,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 44,
+                "lookupIndexPrepareMs": 1.686085999999932,
+                "maxWasmHeapBytes": 37027840
+              }
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "firstBank": "term_bank_14.json",
+          "lastBank": "term_bank_17.json",
+          "banks": 4,
+          "sourceBytes": 14088207,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "36532fcae46504c737e3fbccedf15994297c16467b654a248e4f4bbdc7fdd6c5",
+                "stableDigest": "68d3b386ec1340f4d6ece6f633d594b3133213ab156a5ddea5ff357d9c4f4332",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 503878,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 3442742,
+                "ownedOutputBufferBytes": 12061962,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 16.85300499999994,
+                "elapsedMs": 79.39222099999984,
+                "adapterDeliveryMs": 0.18424300000015137,
+                "inflationMs": 14.176302999999962,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 46,
+                "lookupIndexPrepareMs": 1.2101310000000467,
+                "maxWasmHeapBytes": 37027840
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "36532fcae46504c737e3fbccedf15994297c16467b654a248e4f4bbdc7fdd6c5",
+                "stableDigest": "68d3b386ec1340f4d6ece6f633d594b3133213ab156a5ddea5ff357d9c4f4332",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 503878,
+                "reusedOwnedColumnBytes": 503878,
+                "transferBuffers": 10,
+                "transferBytes": 2938864,
+                "ownedOutputBufferBytes": 11558084,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 2.445739000000003,
+                "elapsedMs": 59.00845100000015,
+                "adapterDeliveryMs": 0.17017199999986587,
+                "inflationMs": 13.691685000000007,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 40,
+                "lookupIndexPrepareMs": 1.1354519999999866,
+                "maxWasmHeapBytes": 37027840
+              }
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "firstBank": "term_bank_18.json",
+          "lastBank": "term_bank_22.json",
+          "banks": 5,
+          "sourceBytes": 15138615,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 50000,
+                "digest": "c6b852193358500e25603d4314bbd9c71c34d9264fcd1b3010fba54ed9afdf06",
+                "stableDigest": "f60311919a18c486f19cf7af6b5e4483adac63c1e6aa98529fc0388ef8ab15ad",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 915925,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 5077653,
+                "ownedOutputBufferBytes": 13859744,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 7.221703000000161,
+                "elapsedMs": 80.62921500000016,
+                "adapterDeliveryMs": 0.2725519999999051,
+                "inflationMs": 18.255764,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 51,
+                "lookupIndexPrepareMs": 1.669986000000108,
+                "maxWasmHeapBytes": 37879808
+              },
+              "candidate": {
+                "rows": 50000,
+                "digest": "c6b852193358500e25603d4314bbd9c71c34d9264fcd1b3010fba54ed9afdf06",
+                "stableDigest": "f60311919a18c486f19cf7af6b5e4483adac63c1e6aa98529fc0388ef8ab15ad",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 915925,
+                "reusedOwnedColumnBytes": 915925,
+                "transferBuffers": 10,
+                "transferBytes": 4161728,
+                "ownedOutputBufferBytes": 12943819,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 11.508698999999979,
+                "elapsedMs": 95.28134999999997,
+                "adapterDeliveryMs": 3.0759610000000066,
+                "inflationMs": 15.687693000000081,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 51,
+                "lookupIndexPrepareMs": 2.1250989999998637,
+                "maxWasmHeapBytes": 37879808
+              }
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "firstBank": "term_bank_23.json",
+          "lastBank": "term_bank_27.json",
+          "banks": 5,
+          "sourceBytes": 15955653,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 50000,
+                "digest": "9f5a31379b130f3d5a4d79ea2e9b2e03cda51cecdf4b8aabae4f6415e92af24a",
+                "stableDigest": "8a953eaedd879bd3616b9004bc8991c18b2fa49a540c0ab39a6a2cfc7f592843",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1113288,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 5466812,
+                "ownedOutputBufferBytes": 14476488,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 6.913406000000123,
+                "elapsedMs": 96.60281500000019,
+                "adapterDeliveryMs": 0.13996099999985745,
+                "inflationMs": 22.804834999999912,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 63,
+                "lookupIndexPrepareMs": 1.8278239999999641,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 50000,
+                "digest": "9f5a31379b130f3d5a4d79ea2e9b2e03cda51cecdf4b8aabae4f6415e92af24a",
+                "stableDigest": "8a953eaedd879bd3616b9004bc8991c18b2fa49a540c0ab39a6a2cfc7f592843",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1113288,
+                "reusedOwnedColumnBytes": 1113288,
+                "transferBuffers": 10,
+                "transferBytes": 4353524,
+                "ownedOutputBufferBytes": 13363200,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 3.4058899999999994,
+                "elapsedMs": 83.73697200000015,
+                "adapterDeliveryMs": 0.26536899999973684,
+                "inflationMs": 17.12194700000009,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 58,
+                "lookupIndexPrepareMs": 2.443870000000061,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "firstBank": "term_bank_28.json",
+          "lastBank": "term_bank_31.json",
+          "banks": 4,
+          "sourceBytes": 13702906,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "e557978b26233d163da39c5c677a7a1de0698143f9df2ad2a874b68637320f72",
+                "stableDigest": "9c1ccba17d1e8b73decec800767caf7c21c7f3abcd4fb7a2489a99853cae6309",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 821583,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 4111219,
+                "ownedOutputBufferBytes": 11189137,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 7.625303999999687,
+                "elapsedMs": 96.60458999999992,
+                "adapterDeliveryMs": 0.5294160000003103,
+                "inflationMs": 18.44684099999995,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 64,
+                "lookupIndexPrepareMs": 2.8326929999998356,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "e557978b26233d163da39c5c677a7a1de0698143f9df2ad2a874b68637320f72",
+                "stableDigest": "9c1ccba17d1e8b73decec800767caf7c21c7f3abcd4fb7a2489a99853cae6309",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 821583,
+                "reusedOwnedColumnBytes": 821583,
+                "transferBuffers": 10,
+                "transferBytes": 3289636,
+                "ownedOutputBufferBytes": 10367554,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 2.0460229999998774,
+                "elapsedMs": 50.59695699999975,
+                "adapterDeliveryMs": 0.12426200000027166,
+                "inflationMs": 14.14129099999991,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 32,
+                "lookupIndexPrepareMs": 1.0797520000000986,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "firstBank": "term_bank_32.json",
+          "lastBank": "term_bank_36.json",
+          "banks": 5,
+          "sourceBytes": 14307906,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 50000,
+                "digest": "e3678ca3b7532e365756a85715087d726cd98036d133aec45188d9cbf1c74618",
+                "stableDigest": "dd27f352efff77b78a7255106d225d2f52fe8a1976062247b3e202ec6a10c26c",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1224359,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 5586839,
+                "ownedOutputBufferBytes": 13089834,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 4.6006350000002385,
+                "elapsedMs": 56.290574000000106,
+                "adapterDeliveryMs": 0.09212699999989127,
+                "inflationMs": 13.918064999999842,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 35,
+                "lookupIndexPrepareMs": 1.3247959999998784,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 50000,
+                "digest": "e3678ca3b7532e365756a85715087d726cd98036d133aec45188d9cbf1c74618",
+                "stableDigest": "dd27f352efff77b78a7255106d225d2f52fe8a1976062247b3e202ec6a10c26c",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1224359,
+                "reusedOwnedColumnBytes": 1224359,
+                "transferBuffers": 10,
+                "transferBytes": 4362480,
+                "ownedOutputBufferBytes": 11865475,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 800000,
+                "borrowedContent": false,
+                "copyMs": 3.27786500000002,
+                "elapsedMs": 51.66273200000023,
+                "adapterDeliveryMs": 0.13957500000014988,
+                "inflationMs": 12.025774000000183,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 34,
+                "lookupIndexPrepareMs": 1.2606839999998556,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "firstBank": "term_bank_37.json",
+          "lastBank": "term_bank_40.json",
+          "banks": 4,
+          "sourceBytes": 14119170,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "e23bd4887e9c5c049aa94256ef9de81a8dbf8099bd4f2ac4c66cd944599ae1ea",
+                "stableDigest": "a61ffc4ba64112db2b42f7247d665b568450312a36606b8f3854e79226038ae1",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 842304,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 4243212,
+                "ownedOutputBufferBytes": 12093471,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 6.3655650000000605,
+                "elapsedMs": 60.57059900000013,
+                "adapterDeliveryMs": 0.3590289999997367,
+                "inflationMs": 13.171907000000374,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 35,
+                "lookupIndexPrepareMs": 2.7825920000000224,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "e23bd4887e9c5c049aa94256ef9de81a8dbf8099bd4f2ac4c66cd944599ae1ea",
+                "stableDigest": "a61ffc4ba64112db2b42f7247d665b568450312a36606b8f3854e79226038ae1",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 842304,
+                "reusedOwnedColumnBytes": 842304,
+                "transferBuffers": 10,
+                "transferBytes": 3400908,
+                "ownedOutputBufferBytes": 11251167,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 8.983590999999706,
+                "elapsedMs": 144.49650500000007,
+                "adapterDeliveryMs": 0.48131699999976263,
+                "inflationMs": 32.79680300000018,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 83,
+                "lookupIndexPrepareMs": 1.7965340000000651,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_44.json",
+          "banks": 4,
+          "sourceBytes": 13775196,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "e87d8ce959ce07107e98e44e97dc3bbb696cd243f9f80aec8bcdfd77485c0f1d",
+                "stableDigest": "10a16b55aa1c62692b8846808a02ef0c19e395cee5c0739acd5f514f0bf82ac9",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 839766,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 4204822,
+                "ownedOutputBufferBytes": 11802666,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 7.445425000000341,
+                "elapsedMs": 65.55770100000018,
+                "adapterDeliveryMs": 0.09608899999966525,
+                "inflationMs": 16.53793399999995,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 39,
+                "lookupIndexPrepareMs": 1.1229400000001988,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "e87d8ce959ce07107e98e44e97dc3bbb696cd243f9f80aec8bcdfd77485c0f1d",
+                "stableDigest": "10a16b55aa1c62692b8846808a02ef0c19e395cee5c0739acd5f514f0bf82ac9",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 839766,
+                "reusedOwnedColumnBytes": 839766,
+                "transferBuffers": 10,
+                "transferBytes": 3365056,
+                "ownedOutputBufferBytes": 10962900,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 4.589629999999943,
+                "elapsedMs": 57.62163599999985,
+                "adapterDeliveryMs": 0.18004900000005364,
+                "inflationMs": 18.097702000000027,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 31,
+                "lookupIndexPrepareMs": 1.6614739999999983,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "firstBank": "term_bank_45.json",
+          "lastBank": "term_bank_48.json",
+          "banks": 4,
+          "sourceBytes": 13936647,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "baseline",
+                "candidate"
+              ],
+              "baseline": {
+                "rows": 40000,
+                "digest": "77ec72a45935625433a412aad3c0986b2e37d1e32935c0ca9b49d0b280bdbf74",
+                "stableDigest": "f659e8701f2d9c080cb3f8c2f67637867d77216a82f60cecda5612a298f84001",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 882560,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 4330176,
+                "ownedOutputBufferBytes": 12215423,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 2.402473999999984,
+                "elapsedMs": 52.99001499999986,
+                "adapterDeliveryMs": 0.21549899999990885,
+                "inflationMs": 13.49438500000042,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 34,
+                "lookupIndexPrepareMs": 1.0924599999998463,
+                "maxWasmHeapBytes": 38928384
+              },
+              "candidate": {
+                "rows": 40000,
+                "digest": "77ec72a45935625433a412aad3c0986b2e37d1e32935c0ca9b49d0b280bdbf74",
+                "stableDigest": "f659e8701f2d9c080cb3f8c2f67637867d77216a82f60cecda5612a298f84001",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 882560,
+                "reusedOwnedColumnBytes": 882560,
+                "transferBuffers": 10,
+                "transferBytes": 3447616,
+                "ownedOutputBufferBytes": 11332863,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 640000,
+                "borrowedContent": false,
+                "copyMs": 3.716203999999834,
+                "elapsedMs": 54.03938799999969,
+                "adapterDeliveryMs": 0.11673400000017864,
+                "inflationMs": 13.044902999999977,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 35,
+                "lookupIndexPrepareMs": 1.162115999999969,
+                "maxWasmHeapBytes": 38928384
+              }
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "firstBank": "term_bank_49.json",
+          "lastBank": "term_bank_53.json",
+          "banks": 5,
+          "sourceBytes": 15551396,
+          "observations": [
+            {
+              "pair": 0,
+              "order": [
+                "candidate",
+                "baseline"
+              ],
+              "baseline": {
+                "rows": 48299,
+                "digest": "e7d9c490252d7e2b0dc2171bcf7d7ee66f1c97a0fa998c444ce3bc6f4cb131c0",
+                "stableDigest": "e1efb8e5b5d28849ef74a734cbfb1e308f86bd68466e60a703d90a979490337b",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1249901,
+                "reusedOwnedColumnBytes": 0,
+                "transferBuffers": 13,
+                "transferBytes": 5694780,
+                "ownedOutputBufferBytes": 15325841,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 772784,
+                "borrowedContent": false,
+                "copyMs": 3.304729999999836,
+                "elapsedMs": 74.71841300000006,
+                "adapterDeliveryMs": 0.09560499999997774,
+                "inflationMs": 16.365070000000287,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 52,
+                "lookupIndexPrepareMs": 1.5912090000001626,
+                "maxWasmHeapBytes": 43384832
+              },
+              "candidate": {
+                "rows": 48299,
+                "digest": "e7d9c490252d7e2b0dc2171bcf7d7ee66f1c97a0fa998c444ce3bc6f4cb131c0",
+                "stableDigest": "e1efb8e5b5d28849ef74a734cbfb1e308f86bd68466e60a703d90a979490337b",
+                "wholeIndex": true,
+                "potentialOwnedColumnBytes": 1249901,
+                "reusedOwnedColumnBytes": 1249901,
+                "transferBuffers": 10,
+                "transferBytes": 4444879,
+                "ownedOutputBufferBytes": 14075940,
+                "contentMetaByUniqueIndex": false,
+                "contentMetaBytes": 772784,
+                "borrowedContent": false,
+                "copyMs": 2.8941609999997127,
+                "elapsedMs": 65.1386050000001,
+                "adapterDeliveryMs": 0.21193300000004456,
+                "inflationMs": 15.638382999999976,
+                "sourceCrcMs": 0,
+                "nativeSegments": 0,
+                "nativeFallbacks": 0,
+                "parseBankMs": 43,
+                "lookupIndexPrepareMs": 1.6641070000000582,
+                "maxWasmHeapBytes": 43384832
+              }
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "reusedColumnBytes": 10434868,
+        "wholeIndexRows": 528299,
+        "maximumGroupByteReduction": 1249901,
+        "nativeSegments": 0
+      }
+    }
+  ]
+}

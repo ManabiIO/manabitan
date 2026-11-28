@@ -1,0 +1,41 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/83b3b3bfba02/native-owned-plan/ext/js/dictionary/term-bank-wasm-parser.js
+  4273:1  error  Expected indentation of 4 spaces  @stylistic/indent-binary-ops
+  4279:1  error  Expected indentation of 4 spaces  @stylistic/indent-binary-ops
+  4285:1  error  Expected indentation of 4 spaces  @stylistic/indent-binary-ops
+
+/workspace/scratch/83b3b3bfba02/native-owned-plan/test/term-bank-owned-lookup-columns.test.js
+  101:69   error  Unexpected newline after '('                                                 @stylistic/function-paren-newline
+  103:13   error  Unexpected newline before ')'                                                @stylistic/function-paren-newline
+  113:17   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  113:50   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  113:55   error  There should be no line break here                                           @stylistic/function-call-argument-newline
+  114:17   error  Expected newline between arguments/params                                    @stylistic/function-paren-newline
+  173:36   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  173:40   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  197:103  error  Unexpected newline after '('                                                 @stylistic/function-paren-newline
+  199:17   error  Unexpected newline before ')'                                                @stylistic/function-paren-newline
+  207:246  error  Unexpected newline after '('                                                 @stylistic/function-paren-newline
+  258:5    error  Unexpected newline before ')'                                                @stylistic/function-paren-newline
+
+✖ 15 problems (15 errors, 0 warnings)
+  15 errors and 0 warnings potentially fixable with the `--fix` option.
+

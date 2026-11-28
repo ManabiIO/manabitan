@@ -1,0 +1,5 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict 1/12: 50000 rows; 774480 owned-column bytes reused
+jmdict 2/12: 40000 rows; 628590 owned-column bytes reused
+jmdict 3/12: 40000 rows; 638234 owned-column bytes reused

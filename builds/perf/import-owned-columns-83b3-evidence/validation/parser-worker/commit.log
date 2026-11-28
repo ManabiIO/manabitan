@@ -1,0 +1,3 @@
+[perf/native-owned-plan-20261127 b4f212e] Reuse owned lookup columns during parser worker transfer
+ 3 files changed, 335 insertions(+), 11 deletions(-)
+ create mode 100644 test/term-bank-owned-lookup-columns.test.js

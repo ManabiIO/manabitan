@@ -1,0 +1,132 @@
+{
+  "scope": "Independent root review of the complete v3 component receipt blobs; no browser-speed or peak-memory conclusion",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runnerSha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf",
+  "checked": [
+    "Complete marker, Node version and sequential grouping policy",
+    "Exact baseline/candidate parser identities",
+    "Expected three dictionary row and bank totals",
+    "Contiguous ordered bank coverage and one observation per group",
+    "Complete and stable digest equality plus native path/ownership fields",
+    "Actual private and owned-output byte differences equal expected avoided allocations",
+    "Exactly three fewer unique transferable buffers for every adopted whole index",
+    "Per-dictionary summaries and total group/row arithmetic"
+  ],
+  "cohorts": [
+    {
+      "policy": 2,
+      "rawSha256": "0135a020a266fd97c5b8598c625f3317db9ffc9d341bdb15e4e3f8f1dccd4244",
+      "groups": 200,
+      "rows": 7613164,
+      "avoided": 243730158,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "groups": 8,
+          "rows": 528299,
+          "baselineBytes": 57099474,
+          "candidateBytes": 54031390,
+          "avoided": 3068084,
+          "expressionPortion": 720000
+        },
+        {
+          "dictionary": "jitendex",
+          "groups": 22,
+          "rows": 436555,
+          "baselineBytes": 54932029,
+          "candidateBytes": 43454781,
+          "avoided": 11477248,
+          "expressionPortion": 1746220
+        },
+        {
+          "dictionary": "vndb",
+          "groups": 170,
+          "rows": 6648310,
+          "baselineBytes": 812631592,
+          "candidateBytes": 583446766,
+          "avoided": 229184826,
+          "expressionPortion": 26593240
+        }
+      ]
+    },
+    {
+      "policy": 3,
+      "rawSha256": "b471985781ae3a6ee6e8b3363f71020ba221dbd7e049347cc7bc7408d22a1c11",
+      "groups": 204,
+      "rows": 7613164,
+      "avoided": 251096942,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "groups": 12,
+          "rows": 528299,
+          "baselineBytes": 54453783,
+          "candidateBytes": 44018915,
+          "avoided": 10434868,
+          "expressionPortion": 2113196
+        },
+        {
+          "dictionary": "jitendex",
+          "groups": 22,
+          "rows": 436555,
+          "baselineBytes": 54932029,
+          "candidateBytes": 43454781,
+          "avoided": 11477248,
+          "expressionPortion": 1746220
+        },
+        {
+          "dictionary": "vndb",
+          "groups": 170,
+          "rows": 6648310,
+          "baselineBytes": 812631592,
+          "candidateBytes": 583446766,
+          "avoided": 229184826,
+          "expressionPortion": 26593240
+        }
+      ]
+    },
+    {
+      "policy": 5,
+      "rawSha256": "84e75e282543a74bdf4da9cef5881e98d4a06fa8d5380fb5dfaf2dc2a10832ac",
+      "groups": 212,
+      "rows": 7613164,
+      "avoided": 251113536,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "groups": 20,
+          "rows": 528299,
+          "baselineBytes": 54486361,
+          "candidateBytes": 44034899,
+          "avoided": 10451462,
+          "expressionPortion": 2113196
+        },
+        {
+          "dictionary": "jitendex",
+          "groups": 22,
+          "rows": 436555,
+          "baselineBytes": 54932029,
+          "candidateBytes": 43454781,
+          "avoided": 11477248,
+          "expressionPortion": 1746220
+        },
+        {
+          "dictionary": "vndb",
+          "groups": 170,
+          "rows": 6648310,
+          "baselineBytes": 812631592,
+          "candidateBytes": 583446766,
+          "avoided": 229184826,
+          "expressionPortion": 26593240
+        }
+      ]
+    }
+  ],
+  "totalComparedGroups": 616,
+  "totalComparedRows": 22839492,
+  "limitations": [
+    "Reports are source-worker component replays, not concurrent browser imports.",
+    "Expression contribution is arithmetic, not an executed key-only latency comparison.",
+    "Raw payload equality is established by the reviewed runner's digests, not by retaining complete multi-gigabyte output payloads."
+  ]
+}

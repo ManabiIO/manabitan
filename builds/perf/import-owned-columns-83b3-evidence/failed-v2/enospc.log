@@ -1,0 +1,33 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict 1/12: 50000 rows; 774480 owned-column bytes reused
+jmdict 2/12: 40000 rows; 628590 owned-column bytes reused
+jmdict 3/12: 40000 rows; 638234 owned-column bytes reused
+jmdict 4/12: 40000 rows; 503878 owned-column bytes reused
+jmdict 5/12: 50000 rows; 915925 owned-column bytes reused
+jmdict 6/12: 50000 rows; 1113288 owned-column bytes reused
+jmdict 7/12: 40000 rows; 821583 owned-column bytes reused
+jmdict 8/12: 50000 rows; 1224359 owned-column bytes reused
+jmdict 9/12: 40000 rows; 842304 owned-column bytes reused
+jmdict 10/12: 40000 rows; 839766 owned-column bytes reused
+jmdict 11/12: 40000 rows; 882560 owned-column bytes reused
+jmdict 12/12: 48299 rows; 1249901 owned-column bytes reused
+jitendex 1/22: 16000 rows; 404317 owned-column bytes reused
+jitendex 2/22: 18000 rows; 409068 owned-column bytes reused
+jitendex 3/22: 16000 rows; 341951 owned-column bytes reused
+jitendex 4/22: 16000 rows; 357385 owned-column bytes reused
+jitendex 5/22: 16000 rows; 348175 owned-column bytes reused
+node:internal/fs/promises:741
+      (await PromisePrototypeThen(
+       ^
+
+Error: ENOSPC: no space left on device, write
+    at async write (node:internal/fs/promises:741:8)
+    at async writeFileHandle (node:internal/fs/promises:498:7)
+    at async file:///workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261127-baseline/owned-column-replay-v2.mjs:263:88 {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+
+Node.js v22.22.0

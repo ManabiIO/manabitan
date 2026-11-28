@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+    "--max-old-space-size=384",
+    "--expose-gc",
+    "builds/perf/20261127-baseline/owned-column-replay-v3.mjs",
+    "jmdict",
+    "jitendex",
+    "vndb",
+    "--baseline-root",
+    "/workspace/scratch/83b3b3bfba02/manabitan",
+    "--candidate-root",
+    "/workspace/scratch/83b3b3bfba02/native-owned-plan",
+    "--parser-workers",
+    "3",
+    "--pairs",
+    "1",
+    "--out",
+    "/tmp/manabitan-owned-columns-83b3/parity-v3-w3.json"
+  ],
+  "returncode": 0,
+  "elapsedSeconds": 53.63120486799971,
+  "maxRssKiB": 416488,
+  "userSeconds": 73.495974,
+  "systemSeconds": 3.996822,
+  "majorPageFaults": 125,
+  "minorPageFaults": 158268
+}

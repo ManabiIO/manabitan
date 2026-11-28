@@ -1,0 +1,103 @@
+{
+  "recordedAtUtc": "2026-11-28T03:30:32.149129+00:00",
+  "parentCommit": "b4f212ebcfa979b849d7b990fe28159813f05e9f",
+  "upstreamGuardSource": "https://github.com/ManabiIO/manabitan/pull/820",
+  "changeScope": "Port the existing retained-key-arena guard and its two parameterized tests; parser/worker/native bytes unchanged.",
+  "reachability": "Non-import appends and standalone in-memory stores retain materialized records. Active OPFS imports discard them. Normal production import disallows OPFS-to-memory fallback, so this is not a claim of a current production fallback regression.",
+  "files": {
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "sha256": "345eceec81c279a5db791294d410b54c80a9af3bef47b02a48faa13aeed63fbd",
+      "gitBlobSha1": "690a7a976675355c174608c1ae4f2c0d69c304f0"
+    },
+    "test/term-record-opfs-store.test.js": {
+      "sha256": "713122eb743bf8428a090234196249da4daac4b0cc3359a91e09c38819c30421",
+      "gitBlobSha1": "b508bfacbaa47a61bb95998b75ad193540abb462"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "a7e5d0049502926806faa3511dc93a79653816c8054ac2ef78c304b7327ef917",
+      "gitBlobSha1": "9b9ab282bd63b5723b7b583b8b602fa4ef662a67"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+      "sha256": "1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56",
+      "gitBlobSha1": "01c48e1290eaf5df7f64e0e3a6b8f8c40ca31ace"
+    },
+    "test/term-bank-owned-lookup-columns.test.js": {
+      "sha256": "689224807e857b8472937ff92246bde32fac98876a9752d20ae59a5d2508d0af",
+      "gitBlobSha1": "e662ee091436b03499902504bdcf65da126e7a40"
+    },
+    "ext/lib/term-bank-parser.wasm": {
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "gitBlobSha1": "da90749e2f22d0f6696f96935baabfdf4089659a"
+    }
+  },
+  "checks": [
+    {
+      "name": "focused ownership, native parity and retained-record behavior",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-owned-lookup-columns.test.js test/term-bank-wasm-parser.test.js test/term-record-opfs-store.test.js --testNamePattern='owned whole-chunk|encodes parser-owned lookup|encodes single-source native|dense mixed columns|retains only the key arena|persists imported strings before releasing|round-trips preinterned artifact chunk records through direct authoritative encoding' --maxWorkers=1",
+      "exitCode": 0,
+      "testFilesPassed": 3,
+      "testsPassed": 22,
+      "testsUnselected": 385,
+      "log": "focused-tests.log"
+    },
+    {
+      "name": "scoped strict TypeScript",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --max-old-space-size=768 node_modules/typescript/bin/tsc --noEmit --project .tmp-owned-lookup-cache-jsconfig.json",
+      "exitCode": 0,
+      "log": "scoped-types.log"
+    },
+    {
+      "name": "scoped ESLint with repository rules",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --max-old-space-size=768 node_modules/eslint/bin/eslint.js --parser-options '{\"project\":[\"./.tmp-owned-lookup-cache-jsconfig.json\"]}' ext/js/dictionary/term-record-opfs-store.js test/term-record-opfs-store.test.js",
+      "exitCode": 0,
+      "log": "scoped-lint.log"
+    },
+    {
+      "name": "diff whitespace",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "scopedTypeProject": {
+    "extends": "./test/jsconfig.json",
+    "include": [
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/term-record-opfs-store.test.js",
+      "test/term-bank-owned-lookup-columns.test.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "types/ext/**/*.ts",
+      "types/dev/**/*.ts",
+      "types/test/**/*.ts",
+      "types/other/globals.d.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "ext/lib",
+      "dev/lib",
+      "ext/js/dictionary/mdx/vendor"
+    ]
+  },
+  "logs": {
+    "focused-tests.log": {
+      "sha256": "5002c2542407a73c49888cb887ca2adecda18cd647748a0fe91051fa0f5fb32f",
+      "byteLength": 1126
+    },
+    "scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteLength": 0
+    },
+    "scoped-lint.log": {
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "byteLength": 1042
+    }
+  },
+  "limitations": [
+    "Scoped checks are not a full repository/hosted CI pass.",
+    "No new timing, memory peak or complete-import speed claim is made.",
+    "Full-corpus 2/3/5 worker-policy receipts are separate reports; this guard does not alter their parser/worker sources or active OPFS behavior."
+  ],
+  "commit": "df3fcfe2d17fa061bf0525a4b604770734eec98d",
+  "commitExitCode": 0,
+  "commitLogSha256": "546b644adc5a2e68e36401f7c773c4637cef0d5b0142c46760d811e7e05f620c"
+}

@@ -733,3 +733,44 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-27: extend owned lookup columns in #820 (83b3)
+
+This revision continues [#820](https://github.com/ManabiIO/manabitan/pull/820) on develop `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. Its original key-arena/key-length proposal and 252-import study remain historical evidence: they did not establish a repeatable complete-import speedup. Preserve that source and HOLD decision; do not pool the old and current campaigns.
+
+The additional column is the v7 Uint16 expression-ID array. At the immediate parser-worker transfer boundary, it replaces a new Uint32 copy. Adoption defaults off for the general copy helper. Native producer provenance, unchanged column identities, the exact whole-chunk entry and frame geometry guard this path. Reading IDs retain their copy because persisted equal-reading IDs use a sentinel. The original retained-record key-arena guard is carried forward for standalone in-memory stores and non-import appends; active OPFS imports discard materialized records as before.
+
+### Complete corpus ownership proof
+
+The final revision-3 runner executes the actual parser-worker handler with compressed banks, native inflate/CRC and its actual transfer list. A sequential adapter performs `structuredClone` transfer. Complete content, key, numeric, metadata, dedup, media and persisted-index digests match; earlier owned outputs survive subsequent native parses. Both source identities are rechecked at completion.
+
+All locked corpora pass under existing 2-, 3- and 5-worker **grouping** policies: 616 compared groups and 22,839,492 row comparisons. Execution concurrency is one; this does not simulate concurrent browser scheduling or low-memory source batching. Current 3-worker grouping results:
+
+| Dictionary |      Rows | Groups | Baseline emitted private buffers | Revised emitted private buffers | Cumulative bytes removed | Expression-column portion |
+| ---------- | --------: | -----: | -------------------------------: | ------------------------------: | -----------------------: | ------------------------: |
+| JMdict     |   528,299 |     12 |                       54,453,783 |                      44,018,915 |               10,434,868 |                 2,113,196 |
+| Jitendex   |   436,555 |     22 |                       54,932,029 |                      43,454,781 |               11,477,248 |                 1,746,220 |
+| VNDB       | 6,648,310 |    170 |                      812,631,592 |                     583,446,766 |              229,184,826 |                26,593,240 |
+| Total      | 7,613,164 |    204 |                      922,017,404 |                     670,920,462 |              251,096,942 |                30,452,656 |
+
+The expression portion is four bytes per whole-index row. The remaining 220,644,286 bytes belong to the mechanism already explored by #820. This is arithmetic on the current output, not an executed comparison against the historical source or a separate key-only control; JMdict/Jitendex fixtures changed.
+
+These figures count cumulative allocated/emitted backing buffers, not simultaneous retention, browser peaks, IPC-copy volume or time saved. Maximum individual-group reductions are 1,249,901 bytes (JMdict), 740,518 (Jitendex) and 1,521,540 (VNDB). Under the 2-worker policy, JMdict exercises 15 unchanged native segments across five groups; 180,000 whole-index rows remove 3,068,084 bytes. Its 5-worker policy removes 10,451,462 bytes. Jitendex/VNDB grouping stays fixed because the existing byte limit dominates.
+
+The executable proof is `builds/perf/import-owned-columns-83b3-source/owned-column-replay.mjs`, SHA-256 `cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf`. The artifact index and raw receipts are under `builds/perf/import-owned-columns-83b3-evidence`. Final parser/worker hashes are `a7e5d0049502926806faa3511dc93a79653816c8054ac2ef78c304b7327ef917` and `1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56`; unchanged WASM is `8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee`.
+
+### Validation and retained failures
+
+Final product changes pass 22 focused ownership/native/store tests, scoped strict TypeScript, repository ESLint and whitespace checks. These are scoped results, not full CI. The carried store guard changes neither parser/worker identity nor active OPFS behavior.
+
+The original revision-1 JMdict proof passed before formatting-only parser edits. Revision 2 added broader digests but eagerly evaluated `JSON.stringify` on successful worker responses as an assertion diagnostic. Preserve its ENOSPC-truncated report, subsequent SIGKILL and explicit V8 JSON-stringifier heap failure as harness-affected failed attempts. Do not use their timings or attribute every failure solely to shared-host pressure. Revision 3 uses bounded lazy diagnostics, passed independent review and completed all three cohorts. Earlier resource-interrupted unit/lint runs remain incomplete.
+
+The independent two-line #944 score-validator restoration saved about 0.9 ms per JMdict component replay and was not included. Finalization inspection found one final synchronous index flush and already-concurrent content/record close, with no redundant flush. Omitting signatures would disable native canonical scanning and can alter collision/read-error behavior; it was not implemented. Compression request batching remains a separate hypothesis.
+
+### Registered current-source browser qualification
+
+The scoped `import-owned-columns-83b3.yml` workflow revises #820's branch without forcing history. The unchanged driver compares the frozen current baseline with the exact revision head. It permits exactly the parser, parser-worker and record-store packaged changes; dependency, fixture, JavaScript and Python harness equality remains enforced.
+
+Two independent JMdict hosts use opposite initial orders and 12 alternating candidate pairs each. Jitendex and VNDB each use six pairs. Every host retains four excluded warmups, interleaved identical-baseline control pairs, fresh profiles, post-UI completion, persisted readback/restart checks, separate exhaustive media validation and separately audited process-tree memory observations. Do not pool hosts or phases. VNDB's prospective active SAH allocation is exactly 37 units; the current baseline must pass before candidate observations qualify. Do not widen a failed bound after acquisition.
+
+A separate baseline JMdict trace follows its successful AB qualification. It is attribution evidence, not authoritative timing: its trace stops at the worker completion log while timed observations retain the post-UI endpoint. The workflow retains reports, packages, logs and failures. Browser speed and peak-memory benefits remain unproven until those receipts are inspected; #820 stays draft/HOLD meanwhile.

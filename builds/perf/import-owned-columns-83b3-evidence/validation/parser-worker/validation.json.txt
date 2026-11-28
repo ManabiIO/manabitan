@@ -1,0 +1,110 @@
+{
+  "recordedAtUtc": "2026-11-28T03:15:59.092435+00:00",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "branch": "perf/native-owned-plan-20261127",
+  "files": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "a7e5d0049502926806faa3511dc93a79653816c8054ac2ef78c304b7327ef917",
+      "gitBlobSha1": "9b9ab282bd63b5723b7b583b8b602fa4ef662a67"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+      "sha256": "1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56",
+      "gitBlobSha1": "01c48e1290eaf5df7f64e0e3a6b8f8c40ca31ace"
+    },
+    "test/term-bank-owned-lookup-columns.test.js": {
+      "sha256": "689224807e857b8472937ff92246bde32fac98876a9752d20ae59a5d2508d0af",
+      "gitBlobSha1": "e662ee091436b03499902504bdcf65da126e7a40"
+    },
+    "ext/lib/term-bank-parser.wasm": {
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "gitBlobSha1": "da90749e2f22d0f6696f96935baabfdf4089659a"
+    }
+  },
+  "checks": [
+    {
+      "name": "focused native ownership, actual worker transfer/reuse, existing native parity",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-owned-lookup-columns.test.js test/term-bank-wasm-parser.test.js --testNamePattern='owned whole-chunk|encodes parser-owned lookup|encodes single-source native|dense mixed columns' --maxWorkers=1",
+      "exitCode": 0,
+      "testFilesPassed": 2,
+      "testsPassed": 18,
+      "testsUnselected": 184,
+      "log": "focused-tests-final.log"
+    },
+    {
+      "name": "scoped strict TypeScript with repository test config flags",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --max-old-space-size=768 node_modules/typescript/bin/tsc --noEmit --project .tmp-owned-lookup-jsconfig.json",
+      "exitCode": 0,
+      "log": "scoped-types-final.log"
+    },
+    {
+      "name": "scoped ESLint with repository rules and narrow type project",
+      "command": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --max-old-space-size=768 node_modules/eslint/bin/eslint.js --fix --parser-options '{\"project\":[\"./.tmp-owned-lookup-jsconfig.json\"]}' ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/term-bank-owned-lookup-columns.test.js",
+      "exitCode": 0,
+      "log": "scoped-lint.log",
+      "notes": "Only formatting fixes were applied (guard continuation indentation and test formatting). Native worker and WASM unchanged. Existing environment proxy and vendored CommonJS warnings remain in the log."
+    },
+    {
+      "name": "diff whitespace",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "scopedTypeProjectFile": ".tmp-owned-lookup-jsconfig.json",
+  "scopedTypeProject": {
+    "extends": "./test/jsconfig.json",
+    "include": [
+      "test/term-bank-owned-lookup-columns.test.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "types/ext/**/*.ts",
+      "types/dev/**/*.ts",
+      "types/test/**/*.ts",
+      "types/other/globals.d.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "ext/lib",
+      "dev/lib",
+      "ext/js/dictionary/mdx/vendor"
+    ]
+  },
+  "logs": {
+    "focused-tests-final.log": {
+      "sha256": "9b18c9bbfb6d4eb5ca59afd1ba35579282a2782a814d80b8b436c0d67aac1b72",
+      "byteLength": 951
+    },
+    "scoped-types-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteLength": 0
+    },
+    "scoped-lint.log": {
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67",
+      "byteLength": 1042
+    },
+    "scoped-lint-before-fix.log": {
+      "sha256": "95d5b35348b7e355508e2876f915693ca70f8a95f29847b5fb53117606502b85",
+      "byteLength": 3143
+    },
+    "focused-tests.log": {
+      "sha256": "4071bcfe55ff6a408c54904a5a94e220902dc5c0ea7371840faf00bb7f51b0f0",
+      "byteLength": 951
+    },
+    "scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteLength": 0
+    }
+  },
+  "recovery": {
+    "testBeforeFormattingGitBlobSha1": "04f522f407588cba8fce606d3409c8bcc6714e9a",
+    "localFileMatchedRecoveryBlob": true,
+    "parserBeforeFormattingSha256": "f7d738cb05b26c87df2ed59316561b1273d97a7da4c09ba1f392191f43fdc176"
+  },
+  "limitations": [
+    "Checks intentionally cover the changed files and three existing native parity cases, not the full repository suite.",
+    "Earlier broader local test/lint attempts were interrupted by resource failures (including exit 137); they are not recorded as passes.",
+    "Full-corpus worker parity and any timing evidence are separate reports owned by the profiling agent. This receipt makes no speedup claim."
+  ],
+  "commit": "b4f212ebcfa979b849d7b990fe28159813f05e9f",
+  "commitExitCode": 0,
+  "commitLogSha256": "8d5cba8dce60e45dc160f4a229214e21d14b6048db7b0817d4d09970a3325a26"
+}
