@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-28T11:18:00Z",
+  "updatedAt": "2026-11-28T12:26:00Z",
   "claim": "Exact additional typed-array/native-arena backing avoided at the completed term-ingestion checkpoint; not elapsed time or browser process memory.",
   "latestSource": {
     "publicCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
@@ -8,7 +8,7 @@
     "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
     "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
     "extTree": "6882b13827d4bb648a4a9297f293e55f055b74ed",
-    "qualification": "Independent source review plus full hosted unit/types/dry-build/native-asset/changed-JavaScript gates passed. Distinct latest-parent complete corpus verification pending; original observations retain their exact source."
+    "qualification": "Independent source review and full hosted unit/types/dry-build/native-asset/changed-JavaScript gates passed. Exact latest JMdict complete-corpus replay passed and its original receipts were independently audited. Latest Jitendex/VNDB replay is pending a reviewed real-SQLite harness boundary required by upstream online content resolution; symmetric first-attempt failures remain retained."
   },
   "corpusAcquisition": {
     "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
@@ -61,11 +61,24 @@
     ],
     "upstreamImplicitFloat64RecordIdSavingsExcluded": true,
     "archive": {
-      "path": "experiments/implicit-metadata-columns/current-corpus/current-corpus-raw.tar.gz",
+      "path": "builds/perf/20261128-4d9f-current-metadata/current-corpus-raw.tar.gz",
       "bytes": 1092839,
       "members": 94,
       "sha256": "16cf0777466bf11b15582887e8430e304c22d9ec589e3299b4851ed584c0415b",
-      "status": "Verified in checkpointed local workspace before execution outage; portable helper/evidence commit a2214153fc7bc239935d2b1852b22ad80184dbaf not yet uploaded at this checkpoint."
+      "status": "Verified original 94-member archive is public with the exact 85-file helper/evidence package, publication commit3da567143d51e2857eeec7550aef4e7e4de921e6. The same file entries are included in this PR."
+    },
+    "helperPublication": {
+      "commit": "3da567143d51e2857eeec7550aef4e7e4de921e6",
+      "tree": "a3b79a0a20afdc32a7f836911eff547b89c98ac4",
+      "files": 85,
+      "bytes": 5131554,
+      "manifestBlob": "7c819bf7d7d07f4eba391adc8c39d82a30c06711",
+      "prAppendSourceHead": "494005848d832fc5ddce9aa91234c63efaf6022d",
+      "descendantDocumentationFix": {
+        "path": "builds/perf/20261128-4d9f-signature1/reports/signature-only-README.md",
+        "blob": "34959680509483e6765eb6ee6a2f0c6d705acece",
+        "change": "Correct one relative link for its relocated reports directory; original85-file publication remains immutable."
+      }
     }
   },
   "sourceValidation": {
@@ -78,7 +91,7 @@
     },
     "dryBuild": "passed",
     "nativeAssets": "passed",
-    "types": "One test-helper JSDoc error; fixed by public90a0e7d7f93582b0f20d97c057b553a5194f5774 with executable runtime unchanged. Latest hosted validation pending.",
+    "types": "Original single test-helper JSDoc error corrected without executable change; all four latest-source TypeScript configurations pass in run46138271878.",
     "artifact": {
       "id": 15260350679,
       "bytes": 532193,
@@ -142,11 +155,54 @@
         "memoryScreen": true,
         "pairedMedianPercent": -0.19,
         "equalWorkPercent": -0.617
+      },
+      {
+        "dictionary": "vndb",
+        "order": "AB",
+        "semanticReceipts": 42,
+        "memoryScreen": true,
+        "pairedMedianPercent": -0.954838,
+        "equalWorkPercent": -0.592228,
+        "intervalPercent": [
+          -2.08994,
+          -0.069379
+        ]
+      },
+      {
+        "dictionary": "vndb",
+        "order": "BA",
+        "semanticReceipts": 42,
+        "memoryScreen": false,
+        "pairedMedianPercent": 0.624203,
+        "equalWorkPercent": 0.098088,
+        "intervalPercent": [
+          -1.50689,
+          1.75105
+        ],
+        "coverageFailure": {
+          "observations": [
+            {
+              "arm": "candidate",
+              "label": "B1",
+              "maxCoveredGapMs": 285.927306
+            },
+            {
+              "arm": "baseline",
+              "label": "A2",
+              "maxCoveredGapMs": 277.771257
+            }
+          ],
+          "thresholdMs": 250,
+          "reason": "covered-import-scan-gap-over-250ms",
+          "pairedPssDelta": null,
+          "pairedPrivateDelta": null,
+          "schedulingCauseEstablished": false
+        }
       }
     ],
     "speedClaim": false,
     "allFourIntervalsIncludeZero": true,
-    "vndb": "Both jobs completed. AB passed; BA retained complete timing but failed separate memory/semantic qualification. Independent raw audits pending; no VN memory qualification claimed.",
+    "vndb": "Both cells independently audited. All84 semantic receipts pass. AB passes the fixed memory screen; BA has inadequate temporal coverage on candidate B1 and baseline A2. It is unqualified, not a measured memory regression. VN timing does not replicate across the two orders; no speed claim.",
     "olderFailedMemoryCoverageCellsRetained": [
       {
         "runId": 46133384380,
@@ -162,7 +218,16 @@
         "baselineObservation": "A2",
         "maxCoveredGapMs": 256.299311
       }
-    ]
+    ],
+    "allSixSemanticReceiptsPassed": 252,
+    "rawMemoryScans": 1972,
+    "memoryScreensPassed": 5,
+    "memoryScreensTotal": 6,
+    "auditPublication": {
+      "prAppendCommit": "494005848d832fc5ddce9aa91234c63efaf6022d",
+      "directory": "builds/perf/20261128-4d9f-current-metadata/hosted-browser-audit",
+      "manifestBlob": "786b3653955898b2f8b300ab31649f73d759de80"
+    }
   },
   "limits": [
     "Rare generic S1 materialization can exceed the old integrated layout by less than one 64 KiB native page at some capacities.",
@@ -197,5 +262,83 @@
       "preparedCommit": "a76dcb948840bb0630f4eb8874c3f30ad53a4b89",
       "scope": "Ten-line diff aligning the new table; no runtime change."
     }
+  },
+  "latestCorpusAttempt1": {
+    "runId": 46140311762,
+    "tooling": "92467bf27b8ed0661085d65eaad8f134dc2f04cc",
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "jmdict": {
+      "status": "passed-original-acquisition-and-strict-read-only-audit",
+      "rows": 528299,
+      "groups": 12,
+      "backingBytesAvoided": 4194304,
+      "normalizedFileOracle": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "jitendex": {
+      "status": "both-arms-failed-at-group4",
+      "reason": "TermContentLookupReadError: Database not open"
+    },
+    "vndb": {
+      "status": "both-arms-failed-at-group11",
+      "reason": "TermContentLookupReadError: Database not open"
+    },
+    "qualification": "Upstream a300 added a real content-root database dependency to cold exact-deduplication. The scoped harness did not open SQLite. The original tee pipeline lacked explicit pipefail; green step color is not accepted as proof. All source hashes, complete JMdict receipts and unchanged26-contract TAP were audited; the comparator was rerun read-only under strict shell failure propagation, and a corrupted receipt rejected with no comparison output. No dictionary acquisition was repeated.",
+    "evidenceCommit": "2b9a93782a6f79c3f09ef26867fa57844f437c3a",
+    "evidenceDirectory": "builds/perf/20261128-4d9f-latest-metadata/attempt-1",
+    "latestJitendexVndb": "Pending source-bound helper adapter with real owned in-memory SQLite and unchanged production root/resolver/byte checks."
+  },
+  "hostedEvidencePublication": {
+    "branch": "perf/import-experiment-evidence-20261128-4d9f",
+    "commit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "tree": "96b19cd40b51212a50fc8af2e3a6d12f711a0ca7",
+    "files": 156,
+    "preservationComplete": true,
+    "qualificationGateFailures": [
+      "import-current-implicit-metadata-vndb-BA-currentbase1-4d9f"
+    ],
+    "url": "https://github.com/ManabiIO/manabitan/tree/e54f8f55e6a493a13f2e7ab2cd8c06317d513800/builds/perf/20261128-4d9f-hosted-evidence"
+  },
+  "latestCorpusFollowup": {
+    "runtimeUnchanged": true,
+    "oraclesUnchanged": true,
+    "jmdictNotReacquired": true,
+    "status": "Jitendex/VNDB held behind corrected public-sink integration control",
+    "attempts": [
+      {
+        "runId": 46142163868,
+        "tooling": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+        "status": "four actual A/B acquisitions failed at group0 after14 reader controls passed",
+        "reason": "root-only SQLite setup omitted glossary tables used by the public sink"
+      },
+      {
+        "runId": 46143543189,
+        "tooling": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+        "status": "scoped helper lint failed before15 controls or corpus",
+        "reason": "formatting and unsafe-finally cleanup structure"
+      },
+      {
+        "runId": 46143955956,
+        "tooling": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+        "status": "lint and parent first14 controls pass; public-sink control15 fails; no candidate controls or corpus",
+        "reason": "resident size observed before ordinary persisted-index loading"
+      },
+      {
+        "runId": 46144303709,
+        "tooling": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+        "status": "authoritative first-row checks pass; public-sink control15 fails at second append; no corpus",
+        "reason": "test finalized immutable record shard between chunks"
+      }
+    ],
+    "productionSchemaFix": "Await the real _initializeSchema once after prepared stores; preserve glossary invalidation, terms virtual table and real root/resolver.",
+    "prospectiveControlFix": "Retain one record import session across both chunks, drain content I/O for cold comparison, finalize records once and verify both persisted rows/IDs/fields. Do not bypass append/finalization guards.",
+    "sourceReviewBlob": "6e9bc6ea641117a0a95046ca8e4cc887680259e4"
+  },
+  "sourceCompatibilityReview": {
+    "blob": "87063c8b45537814cce782acf03576add902d6c0",
+    "formatSource": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "overlappingBaseHunks": 0,
+    "sharedChangedMethods": 0,
+    "combinedExecutionQualified": false
   }
 }

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "status": "source-compatibility-reviewed-no-combined-execution",
+  "base": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "metadata": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+  "format": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "metadataRuntimePaths": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-content-canonical-scan.js",
+    "ext/js/dictionary/term-content-metadata-arena.js",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+  ],
+  "formatRuntimePaths": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-bank-experiments.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "types/ext/dictionary-importer.d.ts"
+  ],
+  "overlap": [
+    "ext/js/dictionary/dictionary-database.js"
+  ],
+  "baseHunkRanges": {
+    "metadata": [
+      {
+        "start": 21,
+        "count": 7,
+        "context": ""
+      },
+      {
+        "start": 664,
+        "count": 12,
+        "context": "export class DictionaryDatabase {"
+      },
+      {
+        "start": 9106,
+        "count": 9,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 9143,
+        "count": 24,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10013,
+        "count": 6,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10027,
+        "count": 12,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10058,
+        "count": 29,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10119,
+        "count": 14,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10160,
+        "count": 6,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10272,
+        "count": 8,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10315,
+        "count": 20,
+        "context": "db.selectObjects(`"
+      },
+      {
+        "start": 10451,
+        "count": 12,
+        "context": "this._readTermContentSignature("
+      },
+      {
+        "start": 10581,
+        "count": 7,
+        "context": "this._readTermContentSignature("
+      },
+      {
+        "start": 10729,
+        "count": 6,
+        "context": "this._readTermContentSignature("
+      },
+      {
+        "start": 10737,
+        "count": 11,
+        "context": "this._readTermContentSignature("
+      },
+      {
+        "start": 12678,
+        "count": 7,
+        "context": "null :"
+      },
+      {
+        "start": 12706,
+        "count": 7,
+        "context": "null :"
+      },
+      {
+        "start": 12742,
+        "count": 9,
+        "context": "null :"
+      },
+      {
+        "start": 12883,
+        "count": 9,
+        "context": "null :"
+      }
+    ],
+    "format": [
+      {
+        "start": 95,
+        "count": 6,
+        "context": "import {initializeTermContentPlanResolution} from './term-content-plan-resolutio"
+      },
+      {
+        "start": 1683,
+        "count": 6,
+        "context": "export class DictionaryDatabase {"
+      },
+      {
+        "start": 1756,
+        "count": 6,
+        "context": "export class DictionaryDatabase {"
+      },
+      {
+        "start": 1812,
+        "count": 9,
+        "context": "export class DictionaryDatabase {"
+      },
+      {
+        "start": 2082,
+        "count": 6,
+        "context": "export class DictionaryDatabase {"
+      },
+      {
+        "start": 13125,
+        "count": 7,
+        "context": "null :"
+      },
+      {
+        "start": 13565,
+        "count": 20,
+        "context": "null :"
+      }
+    ]
+  },
+  "intersections": [],
+  "metadataTree": "525583edb6429008801d181ee03b3e9e5c519eae",
+  "formatTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "baseTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "sharedChangedMethods": [],
+  "testPathOverlap": [],
+  "review": [
+    "Both public comparisons have the exact a300 commit as base and merge base. Their only common runtime path is dictionary-database.js; its base hunk ranges are disjoint.",
+    "Metadata changes in-memory canonical metadata: optional first-signature and dictionary-name-ID columns, explicit logical getters, materialization/growth/alias handling and native scanner insertion bookkeeping. It preserves the logical metadata object fields and stored content bytes.",
+    "Format changes the persisted record-field encoder/readers and bounded online content-reference iterator, adds a default-off record-store experiment flag, records actual emitted format4 chunks and raises the transactional publication floor to13.",
+    "The format database changes are constants, finishBulkImport, setImportOptimizationFlags, _openSupportedDictionaryConnection and _getSupportedInstalledSchemaVersion plus the existing monotone publisher comment. Metadata does not modify these methods or schema/epoch constants.",
+    "The format writer reads the existing private ResolvedContentReferences contract: Uint32 row IDs, Float64 offsets and Uint32 lengths, with unchanged origins/provenance and split lifetime. It does not access S1 presence markers, optional S1/name arrays or the optional metadata record-ID backing.",
+    "Metadata logical getters continue to expose the same dictionary name, offset, length, ID and signature values. Format4 stores references to the same content bytes and codec dictionary names. Neither patch changes the other's private representation or native module ABI.",
+    "The format patch does not modify metadata/canonical-scan source or the native manifest/asset. The metadata patch does not modify the record store, experiment flag/type declaration, record format or read-compatibility floor.",
+    "Changed test paths are disjoint. Added format tests do not add assumptions about physical optional metadata columns; added metadata tests do not assert the record-store metrics or schema floor.",
+    "Existing failure ordering remains separated: optional metadata allocation occurs before relevant entry mutation; format publication raises its actual-byte floor in the publication transaction. No new common mutation or asynchronous alias window was identified."
+  ],
+  "conclusion": "No concrete cross-change defect or interface mismatch was found that calls for an additional focused combined test before opening separate PRs.",
+  "limitations": [
+    "This is a narrow source/interface review of the two exact frozen deltas. No combined runtime was built, benchmarked or corpus-qualified.",
+    "Independent metadata and format observations remain bound to their own source identities; source guards/oracles must be updated explicitly for any future combined acquisition.",
+    "The upstream a300 full-schema read-context harness correction is shared verification tooling, not a runtime change in either candidate."
+  ],
+  "comparisonUrls": {
+    "metadata": "https://github.com/ManabiIO/manabitan/compare/a300da36d00df8e353c5679b1528b50a1299b75f...86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "format": "https://github.com/ManabiIO/manabitan/compare/a300da36d00df8e353c5679b1528b50a1299b75f...85a8aa49f76fbabd2dc494aad247f74774ff2573"
+  }
+}
