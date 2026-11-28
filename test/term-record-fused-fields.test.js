@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import assert from 'node:assert/strict';
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {createPreparedTermLookupIndexForRecordFields, getSynchronousWholePreparedTermLookupIndex} from '../ext/js/dictionary/term-record-field-preparation.js';
@@ -26,6 +27,7 @@ import {createPreparedTermLookupIndexForRecordFields, getSynchronousWholePrepare
 /**
  * @param {boolean} branded
  * @param {number} [count=128]
+ * @returns {{store: TermRecordOpfsStore, chunk: ArtifactChunk & {resolvedContentReferences: References}, prepared: Map<string, import('../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>, references: References}}
  */
 function fixture(branded, count = 128) {
     const store = new TermRecordOpfsStore();
@@ -71,6 +73,7 @@ function fixture(branded, count = 128) {
  * The append hook retains the actual encoders. It validates and serializes
  * each complete sidecar envelope without creating OPFS files.
  * @param {Fixture} value
+ * @returns {Promise<{appends: Array<{firstId: number, count: number, base: number, fields: Uint8Array, payload: Uint8Array, envelope: Uint8Array}>, error: {name: string, message: string}|null, fusedRows: number}>}
  */
 async function capture(value) {
     const {store, chunk, prepared} = value;
@@ -82,7 +85,9 @@ async function capture(value) {
             throw new Error('Missing encoded oracle bytes');
         }
         appends.push({
-            firstId, count, base,
+            firstId,
+            count,
+            base,
             fields: new Uint8Array(fields),
             payload: new Uint8Array(payload),
             envelope: store._createLookupIndexChunk(firstId, count, base, payload, fields, format),
@@ -119,8 +124,14 @@ function changeValues(value, kind) {
     switch (kind) {
         case 'sentinel': references.offsets.fill(-1); break;
         case 'empty': references.lengths.fill(0); break;
-        case 'max-delta': references.offsets.fill(0); references.offsets[1] = 0xfffffffe; break;
-        case 'wide-delta': references.offsets[0] = 0; references.offsets[1] = 0xffffffff; break;
+        case 'max-delta':
+            references.offsets.fill(0);
+            references.offsets[1] = 0xfffffffe;
+            break;
+        case 'wide-delta':
+            references.offsets[0] = 0;
+            references.offsets[1] = 0xffffffff;
+            break;
         case 'large-length': references.lengths[0] = 65535; break;
         case 'distinct-scores': chunk.scoreList = Int32Array.from({length: chunk.rowCount}, (_, i) => i); break;
         case 'fractional-score': chunk.scoreList = new Float64Array(chunk.rowCount).fill(0.25); break;
@@ -132,8 +143,15 @@ function changeValues(value, kind) {
         case 'negative-offset': references.offsets[references.offsets.length - 1] = -2; break;
         case 'unsafe-offset': references.offsets[references.offsets.length - 1] = Number.MAX_SAFE_INTEGER + 1; break;
         case 'bad-length': references.lengths[references.lengths.length - 1] = 0xffffffff; break;
-        case 'bad-after-wide': references.offsets[0] = 0; references.offsets[1] = 0xffffffff; references.offsets[2] = Number.NaN; break;
-        case 'bad-after-legacy': references.lengths[0] = 65535; references.offsets[references.offsets.length - 1] = Number.NaN; break;
+        case 'bad-after-wide':
+            references.offsets[0] = 0;
+            references.offsets[1] = 0xffffffff;
+            references.offsets[2] = Number.NaN;
+            break;
+        case 'bad-after-legacy':
+            references.lengths[0] = 65535;
+            references.offsets[references.offsets.length - 1] = Number.NaN;
+            break;
     }
 }
 
@@ -144,7 +162,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const baseline = await capture(fixture(false, count));
         const candidate = await capture(fixture(true, count));
         expect(candidate.error).toBeNull();
-        expect(candidate.appends).toEqual(baseline.appends);
+        assert.deepEqual(candidate.appends, baseline.appends);
         expect(candidate.fusedRows).toBe(count);
         expect(candidate.appends).toHaveLength(1);
     });
@@ -157,7 +175,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const expected = await capture(baseline);
         const actual = await capture(candidate);
         expect(actual.error).toBeNull();
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(128);
     });
 
@@ -169,7 +187,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const expected = await capture(baseline);
         const actual = await capture(candidate);
         expect(actual.error).toEqual(expected.error);
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
     });
 
@@ -182,7 +200,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const actual = await capture(candidate);
         expect(expected.error).not.toBeNull();
         expect(actual.error).toEqual(expected.error);
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
     });
 
@@ -207,7 +225,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const expected = await capture(baseline);
         const actual = await capture(candidate);
         expect(actual.error).toEqual(expected.error);
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
     });
 
@@ -232,7 +250,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const expected = await capture(baseline);
         const actual = await capture(candidate);
         expect(actual.error).toEqual(expected.error);
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
     });
 
@@ -248,7 +266,7 @@ describe('fused whole-run content bounds and compact record fields', () => {
         await mutation;
         const [expected, actual] = await Promise.all([expectedPromise, actualPromise]);
         expect(actual.error).toBeNull();
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(128);
     });
 
@@ -257,49 +275,59 @@ describe('fused whole-run content bounds and compact record fields', () => {
         const candidate = fixture(true);
         const reads = [0, 0];
         for (const [position, value] of [baseline, candidate].entries()) {
-            if (kind === 'throwing-fixed-base' || kind === 'changing-fixed-base') {
-                Object.defineProperty(value.chunk, 'fixedContentOffsetBase', {get() {
-                    ++reads[position];
-                    if (kind === 'throwing-fixed-base') { throw new Error('Fixed base getter'); }
-                    if (reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
-                    return void 0;
-                }});
-            } else if (kind === 'map-get') {
-                const original = value.prepared.get.bind(value.prepared);
-                value.prepared.get = (key) => {
-                    ++reads[position];
-                    if (reads[position] === 2) { value.references.offsets[0] = 27; }
-                    return original(key);
-                };
-            } else if (kind === 'entry-plan') {
-                const entry = value.prepared.get(`0:${value.chunk.rowCount}`);
-                if (typeof entry === 'undefined') { throw new Error('Missing oracle entry'); }
-                const plan = entry.preinternedPlan;
-                Object.defineProperty(entry, 'preinternedPlan', {get() {
-                    ++reads[position];
-                    if (reads[position] === 3) { value.references.offsets[0] = 27; }
-                    return plan;
-                }});
-            } else if (kind === 'offset-proxy') {
-                value.references.offsets = new Proxy(value.references.offsets, {
-                    get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
-                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
-                });
-            } else if (kind === 'score-proxy') {
-                value.chunk.scoreList = new Proxy(value.chunk.scoreList, {
-                    get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
-                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
-                });
-            } else {
-                Object.setPrototypeOf(value.references.offsets.buffer, new Proxy(ArrayBuffer.prototype, {
-                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
-                }));
+            switch (kind) {
+                case 'throwing-fixed-base':
+                case 'changing-fixed-base':
+                    Object.defineProperty(value.chunk, 'fixedContentOffsetBase', {get() {
+                        ++reads[position];
+                        if (kind === 'throwing-fixed-base') { throw new Error('Fixed base getter'); }
+                        if (reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
+                        return void 0;
+                    }});
+                    break;
+                case 'map-get': {
+                    const original = value.prepared.get.bind(value.prepared);
+                    value.prepared.get = (key) => {
+                        ++reads[position];
+                        if (reads[position] === 2) { value.references.offsets[0] = 27; }
+                        return original(key);
+                    };
+                    break;
+                }
+                case 'entry-plan': {
+                    const entry = value.prepared.get(`0:${value.chunk.rowCount}`);
+                    if (typeof entry === 'undefined') { throw new Error('Missing oracle entry'); }
+                    const plan = entry.preinternedPlan;
+                    Object.defineProperty(entry, 'preinternedPlan', {get() {
+                        ++reads[position];
+                        if (reads[position] === 3) { value.references.offsets[0] = 27; }
+                        return plan;
+                    }});
+                    break;
+                }
+                case 'offset-proxy':
+                    value.references.offsets = new Proxy(value.references.offsets, {
+                        get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
+                        getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                    });
+                    break;
+                case 'score-proxy':
+                    value.chunk.scoreList = new Proxy(value.chunk.scoreList, {
+                        get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
+                        getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                    });
+                    break;
+                default:
+                    Object.setPrototypeOf(value.references.offsets.buffer, new Proxy(ArrayBuffer.prototype, {
+                        getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                    }));
+                    break;
             }
         }
         const expected = await capture(baseline);
         const actual = await capture(candidate);
         expect(actual.error).toEqual(expected.error);
-        expect(actual.appends).toEqual(expected.appends);
+        assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
         expect(reads[1]).toBe(reads[0]);
     });
@@ -311,11 +339,20 @@ describe('fused whole-run content bounds and compact record fields', () => {
         if (typeof entry === 'undefined') { throw new Error('Missing oracle entry'); }
         expect(getSynchronousWholePreparedTermLookupIndex(value.prepared, 128)?.prepared).toBe(entry);
         let traps = 0;
-        const wrapped = new Proxy(entry, {getOwnPropertyDescriptor() { ++traps; throw new Error('Unexpected descriptor trap'); }});
+        const wrapped = new Proxy(entry, {getOwnPropertyDescriptor() {
+            ++traps;
+            throw new Error('Unexpected descriptor trap');
+        }});
         expect(getSynchronousWholePreparedTermLookupIndex(new Map([[key, wrapped]]), 128)).toBeNull();
-        const mapProxy = new Proxy(value.prepared, {getPrototypeOf() { ++traps; throw new Error('Unexpected prototype trap'); }});
+        const mapProxy = new Proxy(value.prepared, {getPrototypeOf() {
+            ++traps;
+            throw new Error('Unexpected prototype trap');
+        }});
         expect(getSynchronousWholePreparedTermLookupIndex(mapProxy, 128)).toBeNull();
-        Object.defineProperty(entry, 'bytes', {get() { ++traps; throw new Error('Unexpected bytes getter'); }});
+        Object.defineProperty(entry, 'bytes', {get() {
+            ++traps;
+            throw new Error('Unexpected bytes getter');
+        }});
         expect(getSynchronousWholePreparedTermLookupIndex(value.prepared, 128)).toBeNull();
         expect(traps).toBe(0);
     });
