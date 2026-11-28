@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "source-reviewed-before-execution",
+  "repository": "ManabiIO/manabitan",
+  "commit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+  "tree": "2a25482a7ca5c8eac50e6b3bd137188d6b50634b",
+  "parents": [
+    "6eff7eeba7e94d80373448b890ccdd147ec78bb9"
+  ],
+  "ext": "6882b13827d4bb648a4a9297f293e55f055b74ed",
+  "allTwentyHelperBlobsMatch": true,
+  "manifestSha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
+  "protocolSha256": "56935854760f82e5e0ca60f74f8d5be4b7768dbc5c2fcac340dfe5e041183a9b",
+  "changedManifestKeys": [
+    "purpose",
+    "legacyImportReadContext",
+    "priorLegacyReadContextManifest"
+  ],
+  "reviewerScope": "Read-only source, Git object, manifest, workflow and direct diff review. No benchmark, corpus acquisition or contract execution by this review.",
+  "review": [
+    "Public d4c3991 is a child of 6eff7ee with exactly 13 changed tooling/evidence files; no production path changed.",
+    "All 20 declared helper blobs match the frozen tree. The 15 original helper/oracle files remain unchanged, as do the 42 runtime source pins, eight independent oracle members, locked archives, generated-asset pins, source groups and resource policy.",
+    "The four revised helper blobs are the independently reviewed full-schema adapter 15f7845, public-sink contract d775a36, derived runner a6237eb and comparator ae6f63e. The launcher is unchanged 941b94b.",
+    "The runner awaits attachment after both real stores prepare. Its other changes are the explicit v2 mode and boundary description. No production resolver, cold comparison, codec, invalidation or read method is replaced.",
+    "The derived comparator retains exact source/output/logical metadata gates and successful drain/worker-join/owned-close requirements; its only new code change is the declared v2 context mode.",
+    "The workflow uses exact a300/86cd product sources, Bash with the exit37 pipeline negative control, JV-only acquisitions, normal tooling library build and scoped lint, then 26 unchanged controls and 15 real public-sink/read controls on each arm before acquisition.",
+    "The additional public-sink control exercises actual nonempty raw-v2 compression, ordinary scoped glossary invalidation, an independently cold exact read and duplicate reuse with no content growth. Whole SQLite exports are diagnostic, while root, epoch, committed high-water and user_version are explicit invariants.",
+    "All earlier null-database failures, 14-control successes and subsequent additive-only group 0 missing-glossary-table failures remain separate. This review does not qualify the unexecuted v2 corpus."
+  ],
+  "files": {
+    "manifest": "c0f2161c20701b926a9a7ca1eefef1c8e4d8bdfc",
+    "protocol": "0b4158a51412110f6cea425fa16a5c48c69e0116",
+    "transition": "0261f5f508baa635d01e7cdd42e9e1992a6e3c9c",
+    "workflow": "2a7453f69d3c107beacc0ee9444915377f7044af",
+    "driver": "ba57bd6e99edb88584763f76688e2e9171272471"
+  }
+}

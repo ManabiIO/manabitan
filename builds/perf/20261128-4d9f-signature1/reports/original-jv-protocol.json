@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "purpose": "Complete current-parent/candidate Jitendex and VNDB term-sink byte parity and constant-S1 allocation census",
+  "timingEligible": false,
+  "parentCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateCommit": "232de57c6fd78ef1115d6db97d2ac5bb2c224417",
+  "candidateTree": "b1f6585579990fd1083f7c505b1fc119da2f72e5",
+  "sourceSelection": "Exact clean A/B commits in common.mjs, frozen before the first acquisition; original 9e10 source guards permit only merged parser #972 and the reviewed S1 runtime/native deltas; one explicitly pinned regenerated ZIP asset delta is proven to contain only 24 esbuild source-path line comments, normalized byte-for-byte to the frozen asset; A and B raw ZIP asset hashes must match",
+  "runtime": "Exact Node v22.22.0 executable SHA256 1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "runtimeHeapMiB": 512,
+  "observations": "One complete fresh-process A and one complete fresh-process B per corpus, sequential under the shared CPU slot; failed attempts remain separate",
+  "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS",
+  "oracles": [
+    "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
+    "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
+    "Every encoded record row independently decoded and checked against its input score/reference; every record field and final envelope hash retained",
+    "All persisted file bytes hashed twice: raw receipt plus comparison form normalizing only independently linked random 16-byte record/index generation identifiers",
+    "Every logical metadata column, slot, ordered collision entry, dictionary interner, high-water and free-ID state hashed",
+    "Candidate signature1 and presence independently decoded from marker2 and literal 0x3652424d without calling a product getter",
+    "Per-group and final native arena/S1 allocation measured separately; physical null status observed rather than assumed",
+    "Independent VNDB full-corpus group/media path oracle and ZIP media filename oracle retained: 170 groups, 146725 references, 146570 distinct paths, 155 repeated group representatives",
+    "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required"
+  ],
+  "resourcePolicy": {
+    "minimumTemporaryBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallSeconds": 1200,
+    "firstExecYieldMilliseconds": 30000
+  },
+  "excludedClaims": [
+    "Whole-browser import speed or parser concurrency timing",
+    "Browser peak/settled memory qualification",
+    "Media file persistence, settings UI, SQLite transaction, restart or lookup validation",
+    "New format byte savings from the copied field-size diagnostic"
+  ],
+  "preflightRevision": {
+    "reason": "First A attempt failed before parsing because restored node_modules path changed generated ZIP source comments",
+    "priorProtocol": "preflight-1-source/protocol.json",
+    "provenance": "generated-zip-comment-provenance.json",
+    "diff": "generated-zip-comment-only.diff",
+    "runtimeSourceChanged": false,
+    "firstSuccessfulAcquisitionStarted": false
+  }
+}

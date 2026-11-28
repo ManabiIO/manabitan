@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "runId": 46143543189,
+  "toolingCommit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+  "status": "scoped-helper-lint-failed-before-new-controls-or-corpus",
+  "timingEligible": false,
+  "newPublicSinkControlsExecuted": false,
+  "corpusAcquisitions": 0,
+  "artifacts": [
+    {
+      "corpus": "jitendex",
+      "artifactId": 15262069580,
+      "file": "jitendex.zip",
+      "bytes": 23030,
+      "sha256": "ab1c3cc3133d4d2a836236109288facad43a54636ef055f529190b9ad88ed6d9",
+      "members": {
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6244,
+          "sha256": "46f6a1d51dfcd2fded27ebd19a560d80ea17f193740c27e57d24451a81428b6d"
+        },
+        "helper-lint.log": {
+          "bytes": 2339,
+          "sha256": "13b7bc07fdf6e9d1ca9996689c2e6ce0217631a0e7990d57063b5bd93959dd13"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8585,
+          "sha256": "4b1569ec778fb6cfc1c6278bcf3e9297f3b95bcb6a076a325d3b1620ec1df3ac"
+        },
+        "preflight.log": {
+          "bytes": 216,
+          "sha256": "e4706b031cf3e1a4eba71dc6e89a33d67ab763fa978791a44782edaf04372a20"
+        },
+        "protocol.json": {
+          "bytes": 9221,
+          "sha256": "56935854760f82e5e0ca60f74f8d5be4b7768dbc5c2fcac340dfe5e041183a9b"
+        },
+        "source-profile-transition.json": {
+          "bytes": 12322,
+          "sha256": "fd90e291e2881c82ac6c716cedf9df3728b6b0057822bc0de298430291f13270"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "originalContracts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0
+      },
+      "scopedLint": {
+        "errors": 11,
+        "warnings": 0
+      },
+      "newControlsStarted": false,
+      "corpusStarted": false
+    },
+    {
+      "corpus": "vndb",
+      "artifactId": 15262733443,
+      "file": "vndb.zip",
+      "bytes": 22956,
+      "sha256": "cd2d73e2f5939c86538f675b7261611267fecbb08e51cf7759045df183153704",
+      "members": {
+        "build-libs-A.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-B.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "build-libs-tooling.log": {
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "contracts.log": {
+          "bytes": 6244,
+          "sha256": "33d2441f0f94012360773ddc3e92c8e2e94d53b804ef9fedfb7001a7074abc45"
+        },
+        "helper-lint.log": {
+          "bytes": 2339,
+          "sha256": "13b7bc07fdf6e9d1ca9996689c2e6ce0217631a0e7990d57063b5bd93959dd13"
+        },
+        "npm-ci-A.log": {
+          "bytes": 421,
+          "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+        },
+        "npm-ci-B.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "npm-ci-tooling.log": {
+          "bytes": 421,
+          "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+        },
+        "pipeline-negative-control.json": {
+          "bytes": 55,
+          "sha256": "dd29934e4189520b42fb2d05bb1802c33a80fe9e49be8ab38d4885f6f050f145"
+        },
+        "pipeline-negative-control.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "preflight.json": {
+          "bytes": 8114,
+          "sha256": "556f0e5a4ea89205079b8242ec6626369905ea4a932d6f457fbb0014ec358586"
+        },
+        "preflight.log": {
+          "bytes": 213,
+          "sha256": "e4ae587e5d4845662c3417fafde9cc3fb3a1bc4a9f4f933859f8383ef00bf426"
+        },
+        "protocol.json": {
+          "bytes": 9221,
+          "sha256": "56935854760f82e5e0ca60f74f8d5be4b7768dbc5c2fcac340dfe5e041183a9b"
+        },
+        "source-profile-transition.json": {
+          "bytes": 12322,
+          "sha256": "fd90e291e2881c82ac6c716cedf9df3728b6b0057822bc0de298430291f13270"
+        },
+        "verification-manifest.json": {
+          "bytes": 21852,
+          "sha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512"
+        },
+        "verification-oracles-index.json": {
+          "bytes": 1417,
+          "sha256": "75d9903ed55f05a5195ae2e9fe262cb3d34b61dbfc8787db4f38a1dd8e7c619b"
+        }
+      },
+      "originalContracts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0
+      },
+      "scopedLint": {
+        "errors": 11,
+        "warnings": 0
+      },
+      "newControlsStarted": false,
+      "corpusStarted": false
+    }
+  ]
+}

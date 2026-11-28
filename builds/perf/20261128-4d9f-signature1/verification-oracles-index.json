@@ -1,0 +1,41 @@
+{
+  "archive": "verification-oracles.tar.gz",
+  "bytes": 74109,
+  "sha256": "456120a04cb75c4772aeedba7738060d0a7ed956f18610f292aea5b501022a71",
+  "memberCount": 8,
+  "uncompressedMemberBytes": 800564,
+  "members": {
+    "oracles/jitendex-output.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "oracles/jmdict-output.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "oracles/jmdict-reference.json": {
+      "bytes": 124620,
+      "sha256": "1fec0474fcc8f8fc5a32b4322fb052432dcf265cf076f16d9ce4b2986b0dc923"
+    },
+    "oracles/vndb-corpus.json": {
+      "bytes": 578999,
+      "sha256": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a"
+    },
+    "oracles/vndb-directory.json": {
+      "bytes": 78941,
+      "sha256": "c2f75c06a1f8408e6a8dd6cbc348f06d0bbb4fe5e05ec9cb09bd6a454096564e"
+    },
+    "oracles/vndb-media-files.json": {
+      "bytes": 708,
+      "sha256": "31af569cea779b28393b9bdb1d34f40280194265dc64da73de2119673f531aeb"
+    },
+    "oracles/vndb-media-original-helper.py": {
+      "bytes": 2518,
+      "sha256": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0"
+    },
+    "oracles/vndb-output.json": {
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    }
+  }
+}

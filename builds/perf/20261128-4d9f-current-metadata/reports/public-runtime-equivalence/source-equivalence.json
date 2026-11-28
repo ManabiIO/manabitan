@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Packaging-only public checkout provenance; frozen corpus protocol, manifest and executed helpers are unchanged",
+  "publicCommit": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+  "acquisitionCommit": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "identicalFullTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+  "acquisitionHelperCommit": "fb9d9612f34bdb002d846364ef089f25ed188b29",
+  "runtimeTrees": {
+    "ext": "9f19f03afba5eb6f2eedd32db813a206a8abee3d",
+    "dev/data/dictionary-wasm": "051bcdc890367aa050bbcdc21caead300c4824e8",
+    "dev/lib": "4d4b281ddf0baf15e9bb10cce12e98724bd2a64a"
+  },
+  "frozenManifest": {
+    "bytes": 19619,
+    "sha256": "70354d122d0297554f9ea9cd70e47744c0b0062ecee747006e87b94fe70130e6"
+  },
+  "frozenProtocol": {
+    "bytes": 5349,
+    "sha256": "129cb3d163d7da594c8dc4f5dd2ebca0f36e8e888519015fd01f71125d004263"
+  },
+  "publicationReceipt": {
+    "path": "remote-runtime-source.json",
+    "bytes": 1205,
+    "sha256": "ef61444226831d399df6cd605ff3f69efe3d4eb811c90b53f9fa70d2cae84faa"
+  },
+  "existingSourceGuard": {
+    "path": "test/perf/signature1-corpus-verification/common.mjs",
+    "bytes": 9692,
+    "sha256": "8266a7d8aa2d4bc3c067353c3c3cd7baf04df40f71107b244e54daca4f274c79",
+    "selection": "The CLI actual source ID must equal the checkout HEAD. Git subtree checks use that actual ID; every runtime source/asset hash must equal profile B. profile.runtimeCommit is only a provenance label and is never used as a Git lookup.",
+    "workingTree": "Tracked runtime, native source/manifest, package lock and dictionary lock edits reject. Generated bundle bytes must match the pinned canonical hash, allowing only 24 anchored ZIP source-location comments."
+  },
+  "additionalAliasTestsExecuted": false,
+  "controls": "Existing 26 helper contracts and six source-bound corpus acquisitions remain the executed controls. No public68 checkout acquisition or new alias-specific test is claimed in this packaging receipt.",
+  "laterTestOnlyFollowup": {
+    "source": "172dfa06e1a5e6d28ff97cdeae2bb5df6ac95b6d",
+    "receipt": "../current-source-validation/test-type-followup-172dfa0.json",
+    "runtimeChanged": false,
+    "acquisitionsRelabeled": false
+  }
+}

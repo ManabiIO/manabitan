@@ -1,0 +1,59 @@
+{
+  "runtimeCommit": "55e87bc64c9b043a91f1d075f0324d3176c18c9a",
+  "priorHelperCommit": "2c51277cbefc9b7559cf54a151f338e103f12e6f",
+  "contracts": {
+    "attempt1": {
+      "exit": 0,
+      "passed": 15
+    },
+    "attempt2": {
+      "exit": 0,
+      "passed": 15
+    }
+  },
+  "eslint": {
+    "attempt1": {
+      "exit": 1,
+      "reason": "two helper nested-ternary style errors"
+    },
+    "attempt2": {
+      "exit": 1,
+      "reason": "prefer-switch helper style error"
+    },
+    "attempt3": {
+      "exit": 0
+    }
+  },
+  "prettier": {
+    "attempt1": {
+      "exit": 0
+    }
+  },
+  "runtimeDiffFromFrozen55Bytes": 0,
+  "logs": {
+    "contracts-attempt-1.log": {
+      "bytes": 4497,
+      "sha256": "763dc320b04ad09fb065556e5133cd22f85d02e9482328beff1cb93d16c00de5"
+    },
+    "contracts-attempt-2.log": {
+      "bytes": 4497,
+      "sha256": "650d15650e47b2d0101300656d761d38d01fe9e41e9296f3245c4a604317c3ec"
+    },
+    "eslint-attempt-1.log": {
+      "bytes": 1491,
+      "sha256": "14362aaa958d3ff6499a907441e9ac7e3c7c06d2eb2283caca78bee59c9e8920"
+    },
+    "eslint-attempt-2.log": {
+      "bytes": 1345,
+      "sha256": "10876320f9675b187a989130da2da41d1231e64a466968975f98dddea8891b1b"
+    },
+    "eslint-attempt-3.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "prettier-attempt-1.log": {
+      "bytes": 240,
+      "sha256": "97b81cae9f382872debd1a5c1b562432c3f8b5fb4fe569b0055bc19e0f401889"
+    }
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "archive": "portable-validation-raw.tar.gz",
+  "bytes": 168210,
+  "sha256": "17e66ffb692924a0c2b909638ef5aec2fab1429dfec92536fd6e9c38395e5b9e",
+  "memberCount": 51,
+  "uncompressedMemberBytes": 856867,
+  "members": {
+    "reports/portable-validation/bounded-contracts-1.log": {
+      "bytes": 1264,
+      "sha256": "1b86684cf9f385b9a1e60b2b5f42866afb90ffec2c90e7dd95c72a5048a66192"
+    },
+    "reports/portable-validation/bounded-contracts-final-2.log": {
+      "bytes": 1263,
+      "sha256": "9a6753d9abaf75c49db7945d11a76fe4ff3e4339951e051ed91f7591dc5c9f3c"
+    },
+    "reports/portable-validation/commands-1.json": {
+      "bytes": 4663,
+      "sha256": "53cd19542ec84defc442efa7e0a4642f321841046712cd3deb48f1a8c6f27729"
+    },
+    "reports/portable-validation/commands-final-2.json": {
+      "bytes": 757,
+      "sha256": "25d45d37bf3a3d16645bd481291a8f03dbfdeb4df53a251cb6e72383a86b6360"
+    },
+    "reports/portable-validation/comparison-command.json": {
+      "bytes": 821,
+      "sha256": "39997e2542efdc609f5cb67bc136a47bd3e8ccf0759d7a5154706bca5edf8702"
+    },
+    "reports/portable-validation/jmdict-A-1/complete-file-oracle.json": {
+      "bytes": 300,
+      "sha256": "3367eabf3fbd987dad99c7e9b8de3771bc66859f8c87dc34f3e26cddf5475e50"
+    },
+    "reports/portable-validation/jmdict-A-1/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "reports/portable-validation/jmdict-A-1/jmdict-oracle-receipt.json": {
+      "bytes": 11138,
+      "sha256": "c91302dcff4a3e89c31bf0cce57d813f56215c14fea623a1c674fee15e299fe0"
+    },
+    "reports/portable-validation/jmdict-A-1/preflight.json": {
+      "bytes": 16552,
+      "sha256": "7953d6fb8b5d9b4b20eb8407c2d9c42a6988ec92db454bdbb5292bfe5a108785"
+    },
+    "reports/portable-validation/jmdict-A-1/progress.json": {
+      "bytes": 84577,
+      "sha256": "5ce1ced885a1748a865d025211932e8ad26d6664237f5426c833b84ebf06f2ff"
+    },
+    "reports/portable-validation/jmdict-A-1/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "72f3cc599ab248741bcd0b910911b7f455d92338460f86d893e01051a39cf8b6"
+    },
+    "reports/portable-validation/jmdict-A-1/result.json": {
+      "bytes": 109299,
+      "sha256": "eedb9faa9f5a7ad723c431f045aeb74910d55cedbcf28a7271d146f92533d586"
+    },
+    "reports/portable-validation/jmdict-A-1/setup.json": {
+      "bytes": 15323,
+      "sha256": "4c5ff51d4cf35a0e3842dff37d7cb1e0fdd453bad82b08b3166df838215d1db7"
+    },
+    "reports/portable-validation/jmdict-A-1/signature-allocation.json": {
+      "bytes": 4050,
+      "sha256": "2da7595d5a54ece5fc1d4893f34b0f2cc99822c001f6c32908a6e2cd7e35c2e9"
+    },
+    "reports/portable-validation/jmdict-A-1.launcher.json": {
+      "bytes": 1058,
+      "sha256": "3517ffd7c2973c4602e2296ea1ceecca49f1352701cc86bcf8dcc6a0e8c231ec"
+    },
+    "reports/portable-validation/jmdict-A-1.stderr.log": {
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    "reports/portable-validation/jmdict-A-1.stdout.log": {
+      "bytes": 718,
+      "sha256": "97d5c96e71a0417dbc595ab5f5eda97057d44c6902103b60362b3ee9754edb3b"
+    },
+    "reports/portable-validation/jmdict-B-1/complete-file-oracle.json": {
+      "bytes": 300,
+      "sha256": "3367eabf3fbd987dad99c7e9b8de3771bc66859f8c87dc34f3e26cddf5475e50"
+    },
+    "reports/portable-validation/jmdict-B-1/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "reports/portable-validation/jmdict-B-1/jmdict-oracle-receipt.json": {
+      "bytes": 11138,
+      "sha256": "c91302dcff4a3e89c31bf0cce57d813f56215c14fea623a1c674fee15e299fe0"
+    },
+    "reports/portable-validation/jmdict-B-1/preflight.json": {
+      "bytes": 16558,
+      "sha256": "2cd21aa79946195ddf3806c045c0370138b1f07ca96b7f8bd097705453183e5a"
+    },
+    "reports/portable-validation/jmdict-B-1/progress.json": {
+      "bytes": 84566,
+      "sha256": "a337bf123709db810bc3fba14b940e835878083388112258be4d14582a39324d"
+    },
+    "reports/portable-validation/jmdict-B-1/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "02508b9d126a32ab841f20edc0e3288739e8d6269350bc925dc72f60fbef39a2"
+    },
+    "reports/portable-validation/jmdict-B-1/result.json": {
+      "bytes": 109290,
+      "sha256": "b2fed865fe1539ac9a9215b54552a3350023c830fb76e143646dfb4c8c47de18"
+    },
+    "reports/portable-validation/jmdict-B-1/setup.json": {
+      "bytes": 15329,
+      "sha256": "161515ca6d46405de3728c081256d81fb6b40982cf7a8bae165b934f68fce2c4"
+    },
+    "reports/portable-validation/jmdict-B-1/signature-allocation.json": {
+      "bytes": 4036,
+      "sha256": "dc5a23113af2a8bd87826fb32ba099ff207c903a4d08635e01bf2cba0c8f018d"
+    },
+    "reports/portable-validation/jmdict-B-1.launcher.json": {
+      "bytes": 1062,
+      "sha256": "d60dd615a5362fa8b91af6ab13c9acece49d2b4e72eebbdbb6b27b4fb76deb5a"
+    },
+    "reports/portable-validation/jmdict-B-1.stderr.log": {
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    "reports/portable-validation/jmdict-B-1.stdout.log": {
+      "bytes": 718,
+      "sha256": "97d5c96e71a0417dbc595ab5f5eda97057d44c6902103b60362b3ee9754edb3b"
+    },
+    "reports/portable-validation/jmdict-comparison.json": {
+      "bytes": 12949,
+      "sha256": "5622388d44e92cc8b89bda9d3df7ac37c9cfbec708167ccef1aa40eb7dc7fa30"
+    },
+    "reports/portable-validation/lint-attempt-1.json": {
+      "bytes": 211901,
+      "sha256": "72ef3dbb312277a16cca34a9d6cca5c37f20220cce46c68e6027f5976b5c59b3"
+    },
+    "reports/portable-validation/lint-attempt-1.log": {
+      "bytes": 1044,
+      "sha256": "c79b4aaca48f8687e16116f5f2d04355cb8b2b23082359ed7ab191bc33c4d47c"
+    },
+    "reports/portable-validation/lint-autofix-2-command.json": {
+      "bytes": 426,
+      "sha256": "c04746f35ef941e3ffdc944b3d6330ca3f45f206eff07c707b11f56709d6f2d3"
+    },
+    "reports/portable-validation/lint-autofix-2.json": {
+      "bytes": 97804,
+      "sha256": "a4ec3921378902ce5c9305b909f8106d5fe1e2c39d6e7f5e140cae64386005ce"
+    },
+    "reports/portable-validation/lint-autofix-2.log": {
+      "bytes": 1042,
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67"
+    },
+    "reports/portable-validation/lint-final-3.json": {
+      "bytes": 13706,
+      "sha256": "c5f582fbe2ef21365fec85bb45887f0a0f7987bb918c54c5762320bfdd7affe0"
+    },
+    "reports/portable-validation/lint-final-3.log": {
+      "bytes": 1042,
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67"
+    },
+    "reports/portable-validation/lint-final-4-command.json": {
+      "bytes": 411,
+      "sha256": "812aa3a9c42427936c4bffa8342617189155fbe4cabb7a58d79e25dfa8d6ab1c"
+    },
+    "reports/portable-validation/lint-final-4.json": {
+      "bytes": 2995,
+      "sha256": "4e67bfb0600153fad38b3ff65af32d9b7c45aac7a1faa897c6ab8b8ff36010dd"
+    },
+    "reports/portable-validation/lint-final-4.log": {
+      "bytes": 1042,
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67"
+    },
+    "reports/portable-validation/markdown-check-1.log": {
+      "bytes": 242,
+      "sha256": "b819c8fab376c4a1a4614252035e691a5afc2fc9ba18d1fd82a0cde307ee1ce1"
+    },
+    "reports/portable-validation/summary.json": {
+      "bytes": 2769,
+      "sha256": "9b145c120e86b8b2f81d8bcb94d05eb594d005599e5917908ac9f0c18f835747"
+    },
+    "reports/portable-validation/syntax-archive-catalog.mjs.log": {
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    "reports/portable-validation/syntax-common.mjs.log": {
+      "bytes": 175,
+      "sha256": "84336e09f9c0a345a4a73eca39b2d51e444ce40180e89f516a0d99adc233b163"
+    },
+    "reports/portable-validation/syntax-compare-results.mjs.log": {
+      "bytes": 175,
+      "sha256": "e36aac0ec25f0df90bec7253e7660583368ffc4ba4765c22cf5519dda8bb96be"
+    },
+    "reports/portable-validation/syntax-field-analysis.mjs.log": {
+      "bytes": 175,
+      "sha256": "4bab9aebb28c30e50cf26b894915105f7422518f071df726227981b4d63b39dc"
+    },
+    "reports/portable-validation/syntax-file-oracle.mjs.log": {
+      "bytes": 175,
+      "sha256": "0d5d67f1b9c5fb3ff11dd2ee455a8343b3b569eb21461af1dd0ad224462b3c0d"
+    },
+    "reports/portable-validation/syntax-metadata-oracle.mjs.log": {
+      "bytes": 175,
+      "sha256": "79605b0e3c0a1b88b40a15fc23536fef1da1b1aa62f85c65f49acc7ec652fcbe"
+    },
+    "reports/portable-validation/syntax-node-opfs-bounded.mjs.log": {
+      "bytes": 175,
+      "sha256": "fbd225f885d630dc79d8364944905ccb081b7e0939b813fcc3c0c828b9fdd785"
+    },
+    "reports/portable-validation/syntax-node-opfs-bounded.test.mjs.log": {
+      "bytes": 175,
+      "sha256": "d4c5632216873168556f7ab63a02a72c7188dc700fcfb2b80b7adc0e6ee5ea53"
+    },
+    "reports/portable-validation/syntax-run.mjs.log": {
+      "bytes": 175,
+      "sha256": "4dc64a70a85d70d6b31248205e1c5f621f3813e1b411d743659c3c71b38cc884"
+    }
+  }
+}

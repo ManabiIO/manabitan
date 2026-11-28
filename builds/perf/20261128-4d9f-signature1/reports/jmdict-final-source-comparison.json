@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "timingEligible": false,
+  "scope": "Post-acquisition source-only identity and complete final-oracle equality check for final232de57 JMdict run; original source/slab/frame/registration checks remain in the archived acquisition",
+  "baseline": {
+    "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "run": "canonical-signatures/sink/correctness-A-1"
+  },
+  "candidate": {
+    "commit": "232de57c6fd78ef1115d6db97d2ac5bb2c224417",
+    "run": "canonical-signatures/sink/correctness-B-2"
+  },
+  "rows": 528299,
+  "groups": 12,
+  "frames": 103,
+  "finalOracle": {
+    "bytes": 4712,
+    "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+  },
+  "parentAllocation": {
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 26214400,
+    "physicalSignature1": {
+      "type": "Uint32Array",
+      "length": 524288,
+      "bytes": 2097152,
+      "sha256": "6fed4e642e597cae275a2d1cf84a38569ba214b0ae712a1c37be4e918af5ce5a"
+    },
+    "signaturePresent": {
+      "type": "Uint8Array",
+      "length": 524288,
+      "bytes": 524288,
+      "sha256": "f7be999e90823375a0a906cbf1ca2ac420f60723d5c8bd824f33e38420d44c83"
+    },
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 26214400
+  },
+  "candidateAllocation": {
+    "denseCount": 362032,
+    "capacity": 524288,
+    "hashSlots": 1048576,
+    "nativeArenaBytes": 24117248,
+    "physicalSignature1": null,
+    "signaturePresent": {
+      "type": "Uint8Array",
+      "length": 524288,
+      "bytes": 524288,
+      "sha256": "832f33fe6dea23135aa1eceb921bc2e8b129fd613e4d586385db3227d49811c6"
+    },
+    "externalSignature1Bytes": 0,
+    "ownedArenaAndSignature1Bytes": 24117248
+  },
+  "finalOwnedBytesAvoided": 2097152,
+  "sourceResultSha256": {
+    "A": "f53efb03ec516cbce89658743bb8f74fca715984ea5b9937a3ecbf6f0d32321e",
+    "B": "7df05e3c0322ab3b7ea29536cfacf98cca5ce43116d9901894f229bdf88c830e"
+  }
+}

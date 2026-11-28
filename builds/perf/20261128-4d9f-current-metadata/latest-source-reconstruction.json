@@ -1,0 +1,194 @@
+{
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "localEquivalent": "5b178ff002216d74cc8a09336c375832fc4dd994",
+  "exactTree": "525583edb6429008801d181ee03b3e9e5c519eae",
+  "mergedDatabaseBlob": "503a9cc67acbaa3cb2386aa8a772d6940380c166",
+  "sourceHunks": [
+    {
+      "i": 0,
+      "header": "@@ -21,7 +21,7 @@",
+      "count": 1
+    },
+    {
+      "i": 1,
+      "header": "@@ -591,12 +591,16 @@ export class DictionaryDatabase {",
+      "count": 1
+    },
+    {
+      "i": 2,
+      "header": "@@ -6326,9 +6330,11 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 3,
+      "header": "@@ -6363,24 +6369,72 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 4,
+      "header": "@@ -7222,6 +7276,79 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 5,
+      "header": "@@ -7236,12 +7363,13 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 6,
+      "header": "@@ -7267,29 +7395,38 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 7,
+      "header": "@@ -7328,14 +7465,20 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 8,
+      "header": "@@ -7369,6 +7512,7 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 9,
+      "header": "@@ -7481,8 +7625,6 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 10,
+      "header": "@@ -7524,20 +7666,20 @@ void 0 :",
+      "count": 1
+    },
+    {
+      "i": 11,
+      "header": "@@ -7660,12 +7802,12 @@ this._readTermContentSignature(",
+      "count": 1
+    },
+    {
+      "i": 12,
+      "header": "@@ -7790,7 +7932,7 @@ this._readTermContentSignature(",
+      "count": 1
+    },
+    {
+      "i": 13,
+      "header": "@@ -7938,6 +8080,12 @@ this._readTermContentSignature(",
+      "count": 1
+    },
+    {
+      "i": 14,
+      "header": "@@ -7946,11 +8094,10 @@ this._readTermContentSignature(",
+      "count": 1
+    },
+    {
+      "i": 15,
+      "header": "@@ -9887,7 +10034,7 @@ null :",
+      "count": 1
+    },
+    {
+      "i": 16,
+      "header": "@@ -9915,7 +10062,7 @@ null :",
+      "count": 1
+    },
+    {
+      "i": 17,
+      "header": "@@ -9951,9 +10098,10 @@ null :",
+      "count": 1
+    },
+    {
+      "i": 18,
+      "header": "@@ -10092,9 +10240,10 @@ null :",
+      "count": 1
+    }
+  ],
+  "entries": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c301130cd510e8ea864848baed037be5da2ea77"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c35d93db4ddc39a3a805c8e12921bf36d56f45a7"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "503a9cc67acbaa3cb2386aa8a772d6940380c166"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24bf45625a56d462ff76ac07059fc1199b0cc6ee"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-metadata-arena.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e58fb9d71f16d6ffa25f5c3af9a54f81c4385b1"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "510ab06e23d2b946c7194d66d6338649ac24e1d0"
+    },
+    {
+      "path": "test/dictionary-content-dict-name-prefix.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9642aade2ae7ebebfe8d1171324ba40d299db76"
+    },
+    {
+      "path": "test/dictionary-content-implicit-columns.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52386f4eb47bbdf25f32384b601ba3187091b494"
+    },
+    {
+      "path": "test/dictionary-content-publication-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8cc2d7cbcae152173a3752bbbad01bc19c67d7f7"
+    },
+    {
+      "path": "test/dictionary-database-content-dedup.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31ac5989c30c5874ae71ef09f8f6d763dd561b59"
+    },
+    {
+      "path": "test/term-content-canonical-scan.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c46b4faa5dff1336ba7e4d629bbaea124c9683f6"
+    },
+    {
+      "path": "test/term-content-metadata-arena.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f332babe31ded5feaf0eb5575880492d306293c"
+    },
+    {
+      "path": "test/term-content-metadata-growth.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41823379cc6ae8fff8fa1f72416490c13661dca9"
+    },
+    {
+      "path": "test/term-content-signature1.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5502287ef83ccb2a9f8d261b2e4db1c4f145c7dd"
+    }
+  ],
+  "remoteCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+  "branch": "perf/implicit-import-metadata-latest-20261128-4d9f",
+  "scope": "Exact source-only reconstruction of previously reviewed local tree; no new build, test, corpus or browser qualification.",
+  "noPrOpened": true
+}

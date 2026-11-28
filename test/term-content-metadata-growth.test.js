@@ -44,6 +44,17 @@ function getArena(database) {
     return arena
 }
 
+/**
+ * @param {DictionaryDatabase} database
+ * @param {(typeof databaseColumnNames)[number]} name
+ * @returns {Uint8Array|Uint32Array|Float64Array}
+ */
+function getPhysicalColumn(database, name) {
+    const column = Reflect.get(database, name)
+    if (column === null) { throw new Error(`Expected physical column: ${name}`) }
+    return column
+}
+
 /** @returns {DictionaryDatabase} */
 function createSparseDatabase() {
     const database = new DictionaryDatabase()
@@ -80,14 +91,15 @@ describe('bounded metadata arena copies', () => {
     test('keeps the complete-column and same-capacity slot-copy defaults', () => {
         const previous = new TermContentMetadataArena(17, 64)
         const next = new TermContentMetadataArena(32, 64)
-        for (const [i, name] of arenaColumnNames.entries()) { previous[name].fill(i + 1) }
+        previous.materializeSignature1()
+        for (const [i, name] of arenaColumnNames.entries()) { previous[name]?.fill(i + 1) }
         previous.slots[63] = 17
 
         next.copyFrom(previous)
 
         for (const name of arenaColumnNames) {
-            expect(next[name].subarray(0, 17)).toEqual(previous[name])
-            expect([...next[name].subarray(17)]).toEqual(new Array(15).fill(0))
+            expect(next[name]?.subarray(0, 17)).toEqual(previous[name])
+            expect([...(next[name]?.subarray(17) ?? [])]).toEqual(new Array(15).fill(0))
         }
         expect(next.slots).toEqual(previous.slots)
     })
@@ -95,15 +107,16 @@ describe('bounded metadata arena copies', () => {
     test.each([0, 3, 17])('copies exactly the allocated dense prefix of %s IDs and leaves slots to the caller', (denseCount) => {
         const previous = new TermContentMetadataArena(17, 64)
         const next = new TermContentMetadataArena(32, 64)
-        for (const [i, name] of arenaColumnNames.entries()) { previous[name].fill(i + 1) }
+        previous.materializeSignature1()
+        for (const [i, name] of arenaColumnNames.entries()) { previous[name]?.fill(i + 1) }
         previous.slots.fill(17)
         next.slots[0] = 9
 
         next.copyFrom(previous, denseCount, false)
 
         for (const name of arenaColumnNames) {
-            expect(next[name].subarray(0, denseCount)).toEqual(previous[name].subarray(0, denseCount))
-            expect([...next[name].subarray(denseCount)]).toEqual(new Array(32 - denseCount).fill(0))
+            expect(next[name]?.subarray(0, denseCount)).toEqual(previous[name]?.subarray(0, denseCount))
+            expect([...(next[name]?.subarray(denseCount) ?? [])]).toEqual(new Array(32 - denseCount).fill(0))
         }
         expect([...next.slots]).toEqual([9, ...new Array(63).fill(0)])
     })
@@ -136,7 +149,7 @@ describe('metadata growth with reusable dense IDs', () => {
     test.each(['dense', 'slots', 'same-capacity rehash'])('preserves sparse high IDs, pending entries and collision chains during %s replacement', (mode) => {
         const database = createSparseDatabase()
         const previous = getArena(database)
-        const before = databaseColumnNames.map((name) => Reflect.get(database, name).slice(0, 7))
+        const before = databaseColumnNames.map((name) => [...getPhysicalColumn(database, name).subarray(0, 7)])
         const resize = Reflect.get(database, '_resizeTermContentMetadataArena').bind(database)
 
         resize(mode === 'dense' ? 33 : 7, mode === 'slots' ? 64 : previous.slots.length, mode === 'same-capacity rehash')
@@ -145,7 +158,7 @@ describe('metadata growth with reusable dense IDs', () => {
         expect(next).not.toBe(previous)
         expect(previous.memory.buffer.byteLength).toBeGreaterThan(0)
         for (const [i, name] of databaseColumnNames.entries()) {
-            expect(Reflect.get(database, name).subarray(0, 7)).toEqual(before[i])
+            expect([...getPhysicalColumn(database, name).subarray(0, 7)]).toEqual(before[i])
         }
         expect(next.state[6]).toBe(previous.state[6])
         expect(next.state[6]).not.toBe(0)
@@ -170,8 +183,8 @@ describe('metadata growth with reusable dense IDs', () => {
     test('keeps all old columns and probe chains after a replacement copy fails', () => {
         const database = createSparseDatabase()
         const previous = getArena(database)
-        const columns = databaseColumnNames.map((name) => Reflect.get(database, name))
-        const values = columns.map((column) => column.slice(0, column.length))
+        const columns = databaseColumnNames.map((name) => getPhysicalColumn(database, name))
+        const values = columns.map((column) => [...column])
         const oldSlots = new Uint32Array(previous.slots)
         const failure = new Error('injected metadata copy failure')
         const copy = TermContentMetadataArena.prototype.copyFrom
@@ -193,7 +206,7 @@ describe('metadata growth with reusable dense IDs', () => {
         expect(previous.slots).toEqual(oldSlots)
         for (const [i, name] of databaseColumnNames.entries()) {
             expect(Reflect.get(database, name)).toBe(columns[i])
-            expect(columns[i]).toEqual(values[i])
+            expect([...columns[i]]).toEqual(values[i])
         }
         expect(Reflect.get(database, '_termEntryContentMetaDenseCount')).toBe(7)
         expect(Reflect.get(database, '_termEntryContentMetaFreeIndexes')).toEqual([2])

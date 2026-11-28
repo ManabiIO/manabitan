@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 8,
+  "purpose": "Distinct Jitendex/VNDB full term-sink qualification after completing the actual a300 public-sink SQLite schema boundary",
+  "timingEligible": false,
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidateCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+  "candidateTree": "525583edb6429008801d181ee03b3e9e5c519eae",
+  "sourceSelection": "Fresh exact public a300/86cd checkouts; independent whole-tree preflight and unchanged verifier runtime tree/every-source-and-asset guards. Earlier f28/81e observations are never relabeled as this qualification.",
+  "runtime": "Pinned Node v22.22.0 Linux x64 executable SHA256 required in both arms; ordinary locked npm ci and build:libs in each source checkout.",
+  "runtimeHeapMiB": 512,
+  "observations": "Two independent Ubuntu26.04 jobs, one per locked Jitendex/VNDB corpus. After source/asset guards, scoped new-helper ESLint, 26 unchanged contracts and 15 actual-I/O/public-sink contracts on each runtime arm pass, attempt one fresh A and one fresh B and run the strict derived comparator. No JMdict import is reexecuted. Preserve every failure and never retry unchanged acquisitions.",
+  "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS; real owned in-memory SQLite using unchanged runtime pragmas and awaited complete production _initializeSchema() once, including real glossary tables, health schema, virtual table and one-time epoch-zero legacy seed; version reset migrations are not invoked; full SQLite import publication remains outside scope",
+  "oracles": [
+    "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
+    "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
+    "Every encoded record row independently decoded and checked against its input score/reference; every record field and final envelope hash retained",
+    "All persisted file bytes hashed twice: raw receipt plus comparison form normalizing only independently linked random 16-byte record/index generation identifiers",
+    "Every logical metadata column, slot, ordered collision entry, dictionary interner, high-water and free-ID state hashed",
+    "Candidate S1/presence independently decoded from marker 2 and literal 0x3652424d; virtual dictionary-name column independently reconstructed from its prefix with a zero capacity tail; no product getter or materializer is invoked",
+    "In both current arms, independently expand an empty Float64 record-ID view to positive zero over the full state-column capacity; physical columns retain exact bytes, including signed zero; never call a product getter. Record existing upstream ID backing separately and do not credit it to this candidate.",
+    "Per-group and final native arena, external S1 and dictionary-name backing measured separately; both prefix scalar properties explicitly validated and recorded; physical null status observed without assuming identical behavior across corpora",
+    "Independent VNDB full-corpus group/media path oracle and ZIP media filename oracle retained: 170 groups, 146725 references, 146570 distinct paths, 155 repeated group representatives",
+    "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
+    "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest",
+    "Cold persisted comparisons use unchanged production resolvers and physical OPFS/decompression/byte-equality paths. Require committed root legacy-root-v0, epoch0, highwater0, legacy manifest and no snapshots/online/recovery/lifecycle/record-health activity after every group and final drain. Do not reseed during staged import.",
+    "Settle both production store sessions with workers and SQLite alive; then join every codec/index worker and close only the owned SQLite attachment, followed by sequential ZIP/OPFS release. The derived comparator requires complete successful drain/join/owned-close/resource-release receipts. Cleanup-only failures throw after finally; an original body error retains precedence while cleanup failures are recorded.",
+    "A real nonempty public-sink contract must pass before corpus acquisition: actual raw-v2 encoding and unchanged block compression, ordinary target-only glossary invalidation with unrelated rows retained, cold persisted exact comparison and duplicate reuse without content growth. SQLite exports are recorded diagnostically; root/epoch/high-water and user_version remain explicit invariants."
+  ],
+  "resourcePolicy": {
+    "minimumTemporaryBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallSeconds": 1200,
+    "firstExecYieldMilliseconds": 30000
+  },
+  "excludedClaims": [
+    "Whole-browser import speed or parser concurrency timing",
+    "Browser peak/settled memory qualification",
+    "Media file persistence, settings UI, SQLite transaction, restart or lookup validation",
+    "New format byte savings from the copied field-size diagnostic"
+  ],
+  "portableDerivative": {
+    "source": "All15 original public fb9/a221 helper files remain byte-identical. Five separately named files extend only the missing a300 SQLite public-sink/read context. The v2 adapter uses actual full production schema setup; the v1 additive-only attempt is retained. All original oracles, exact comparisons, source grouping, cache/worker budgets and 42 runtime pins remain unchanged.",
+    "runtimeCodeChangedByHelper": false,
+    "candidateRuntimeCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "helperValidation": "Scoped ESLint after a normal tooling library build, 15 real SQLite/OPFS/public-sink contracts on each exact source arm and the26 unchanged controls are mandatory before acquisition; this prospective freeze asserts no outcome.",
+    "newFiles": [
+      "legacy-import-read-context.mjs",
+      "legacy-import-read-context.contract.mjs",
+      "run-with-legacy-context.mjs",
+      "launch-with-legacy-context.py",
+      "compare-results-with-legacy-context.mjs"
+    ]
+  },
+  "logicalRecordIdRepresentation": "implicit-positive-zero-or-full-float64",
+  "priorProfile": {
+    "path": "builds/perf/20261128-4d9f-latest-metadata/protocol.json",
+    "sha256": "07cb1c53c99bd856bec7b2998f68a7d769fd8b21b0cbe6c183aa354aabf48b1c",
+    "qualificationNotTransferred": true
+  },
+  "upstreamIntegration": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "previousParent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "runtimePaths": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/raw-term-content.js",
+      "ext/js/dictionary/term-content-block-store.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "ext/js/dictionary/term-content-opfs-store.js",
+      "ext/js/dictionary/zstd-term-content.js",
+      "ext/js/pages/settings/dictionary-import-controller.js"
+    ],
+    "scope": "Merged #982 online Zstd is preserved; no candidate metadata method changed from the reviewed f28 integration. All six changed canonical runtime source hashes are explicit; generated library/native inputs and locked archives are unchanged.",
+    "priorPreflightHistory": "Original dcfc/f28 source-bound acquisitions and all failed attempts remain separate and immutable."
+  },
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "retainedAttempt": {
+    "runId": 46140311762,
+    "rawEvidenceCommit": "2b9a93782a6f79c3f09ef26867fa57844f437c3a",
+    "jmdict": "Complete original4MiB proof independently revalidated without reacquisition; do not label it as execution of this new derivative.",
+    "jitendex": "Real symmetric missing-SQLite failure at group4 preserved.",
+    "vndb": "Real symmetric missing-SQLite failure at group11 preserved.",
+    "orchestration": "Future workflow explicitly selects Bash pipefail and requires the exit37-through-tee negative control; original status ambiguity and strict artifact audit retained."
+  },
+  "plannedCorpora": [
+    "jitendex",
+    "vndb"
+  ],
+  "retainedIncompleteSchemaAttempt": {
+    "runId": 46142163868,
+    "toolingCommit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+    "mode": "real-sqlite-epoch-zero-v1",
+    "rawEvidence": "attempt-1",
+    "contracts": "26 unchanged plus14 actual cold-read controls passed on both source arms on both hosts.",
+    "corpus": "All four Jitendex/VNDB arms failed group0 with SQLite3Error: no such table: termGlossaryTokens in ordinary public glossary invalidation. No completed corpus oracle.",
+    "correction": "Await actual production _initializeSchema() once after normal runtime pragmas; add the missed real nonempty public-sink integration control; do not bypass invalidation or manually add tables."
+  },
+  "retainedScopedLintAttempt": {
+    "runId": 46143543189,
+    "toolingCommit": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+    "rawEvidence": "lint-attempt-1",
+    "result": "Both hosts passed source/oracle guards,26 original contracts and normal A/B/tooling builds, then stopped on11 scoped helper lint errors. The new15 controls and all corpus acquisitions were skipped.",
+    "correction": "Formatting corrections and fail-closed cleanup error capture outside finally; original body errors retain precedence, all actual resources still settle and cleanup receipts are enforced. No product, schema, fixture, oracle or resource-policy change."
+  },
+  "retainedPublicSinkContractAttempt": {
+    "runId": 46143955956,
+    "toolingCommit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+    "rawEvidence": "public-sink-contract-attempt-1",
+    "result": "Scoped lint passed. Both hosts passed parent controls1-14 and failed public-sink control15 on a premature resident record-store size assertion (observed0 after drain). Candidate controls and all corpus acquisitions were skipped. Cleanup diagnostics were empty.",
+    "sourceDiagnosis": "Prepared OPFS import appends intentionally avoid resident caching; endImportSession drains without loading persistent indexes. The size getter is therefore not an authoritative post-import row count until the normal persistent dictionary reader runs.",
+    "correction": "Use the unchanged ensureDictionariesLoaded reader after each drain, then require exact persisted row counts and decoded records. Keep the nonempty public sink, real glossary invalidation, cold exact content comparison and every existing negative control."
+  },
+  "retainedPublicSinkLifecycleAttempt": {
+    "runId": 46144303709,
+    "toolingCommit": "8b4213d7fb93317fac750ab70c76cf0adc6e6c96",
+    "rawEvidence": "public-sink-contract-attempt-2",
+    "result": "Scoped lint passed. Parent controls1-14 passed; public control15 passed its first authoritative row decoding, then correctly failed the second append because its first record endImportSession had finalized the shard. Candidate controls and corpus were skipped; cleanup errors were empty.",
+    "sourceDiagnosis": "The authoritative record writer finalizes its shard at endImportSession and a later begin does not reopen that finalized shard.",
+    "correction": "Keep one actual record import session across both public chunks, finalize once, and then load/decode both complete records. Retain the actual cold content read boundary and every exact nonempty/reference/glossary assertion; never clear the finalized-state guard."
+  }
+}

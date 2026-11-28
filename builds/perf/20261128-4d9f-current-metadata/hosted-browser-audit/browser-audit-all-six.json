@@ -1,0 +1,994 @@
+{
+  "schemaVersion": 1,
+  "qualificationBoundary": "Completed frozen f28-versus68b browser cohort; not later a300 qualification.",
+  "workflowRunId": 46135718522,
+  "preservationRunId": 46139005895,
+  "preservedCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidate": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+  "localCandidateTreeEquivalent": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "browserVersion": "153.0.8010.12",
+  "auditHelperSha256": "83f6c2eabcd31232dade45596c5df833fe87879e095267cda250aa44780347ee",
+  "cellCount": 6,
+  "semanticChecks": 252,
+  "scheduledObservations": 216,
+  "rawMemoryScanCount": 1972,
+  "passedMemoryCells": 5,
+  "allMemoryCellsQualified": false,
+  "repeatedElapsedGainEstablished": false,
+  "repeatedProcessPeakMemoryGainEstablished": false,
+  "memoryFailureInterpretation": "Temporal sampling coverage failed in VNDB BA; no paired PSS/private deltas are eligible for that cell. No underlying scheduling cause is inferred.",
+  "retainedOldCohortFailures": [
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifact": {
+        "id": 15258559921,
+        "name": "import-implicit-metadata-jmdict-BA-cohort1-4d9f",
+        "runId": 46133384380,
+        "sha256": "291032b419313eb85784fad46a9d549f60e37ce4f44a846f040542f9cbab692e",
+        "size": 35550908,
+        "workflowHead": "3b53faa5c7c1a0e72abbb80f36cb82e6ab8465df"
+      },
+      "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "candidate": "6a05b649de2bf220b21f5365902c76d78d1cde29",
+      "failures": [
+        {
+          "name": "A2",
+          "arm": "A",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 369.707434
+        }
+      ],
+      "passesProspectiveMemoryScreen": false
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifact": {
+        "id": 15259387382,
+        "name": "import-implicit-metadata-vndb-AB-cohort1-4d9f",
+        "runId": 46133384380,
+        "sha256": "3ba72788ce2104a85ffa1179d0a9c6fe95a3968532dbfb82d6cf8a120c241277",
+        "size": 35851005,
+        "workflowHead": "3b53faa5c7c1a0e72abbb80f36cb82e6ab8465df"
+      },
+      "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "candidate": "6a05b649de2bf220b21f5365902c76d78d1cde29",
+      "failures": [
+        {
+          "name": "A2",
+          "arm": "A",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 256.299311
+        }
+      ],
+      "passesProspectiveMemoryScreen": false
+    }
+  ],
+  "cells": [
+    {
+      "artifact": {
+        "id": 15260125586,
+        "name": "import-current-implicit-metadata-jmdict-AB-currentbase1-4d9f",
+        "size_in_bytes": 35606345,
+        "digest": "sha256:9735326088a378c5e22b128be57541d7d3c11011e31d6ee40f0be325e7e804b2"
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9797807204898834,
+          1.014530283412593,
+          1.0214975138928817,
+          0.9789995624908534,
+          0.9595772032566098,
+          1.0312499999998619,
+          0.957204995089102,
+          1.012062200261658,
+          1.0176926451235215,
+          1.0193158360365344,
+          0.998153671353435,
+          1.0246291228575193
+        ],
+        "medianPairedChangePercent": 1.329624183712541,
+        "equalWorkChangePercent": 0.09743657600485012,
+        "worstPairChangePercent": 3.124999999986189,
+        "descriptiveBootstrap95Percent": [
+          -2.0609858509631596,
+          2.040667496470805
+        ],
+        "fasterPairs": 5
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9920370638482693,
+          0.999709639953441,
+          1.0015928178396947,
+          1.0340760157270774
+        ],
+        "medianPairedChangePercent": 0.06512288965678792,
+        "equalWorkChangePercent": 0.6819500870506534,
+        "worstPairChangePercent": 3.4076015727077413,
+        "descriptiveBootstrap95Percent": [
+          -0.7962936151730715,
+          3.4076015727077413
+        ],
+        "fasterPairs": 2
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 311,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.022704083752568,
+            "maximumPairedChangePercent": 2.676716095453213
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.301002984613131,
+            "maximumPairedChangePercent": 3.161782261710644
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 0,
+      "mediaBytes": 0,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "a43afcba5dd8d03af2b3f302a1fdab7076a868d145fa49d4de364eb7c0f0fecd",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "a43afcba5dd8d03af2b3f302a1fdab7076a868d145fa49d4de364eb7c0f0fecd",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "383561259c7136a16eb6875facef2f8f4bea6fb85fbd1def717e652aecf609cb",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "383561259c7136a16eb6875facef2f8f4bea6fb85fbd1def717e652aecf609cb",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 342920,
+        "archiveSha256": "6012f9027d346b9e51628d70eb8fe4a18e3fb73e78eee92d922d1086d15da2f0",
+        "artifact": {
+          "id": 15260125586,
+          "name": "import-current-implicit-metadata-jmdict-AB-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "9735326088a378c5e22b128be57541d7d3c11011e31d6ee40f0be325e7e804b2",
+          "size": 35606345,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 24018084,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [],
+      "auditExecution": "original local audit, retained unchanged"
+    },
+    {
+      "artifact": {
+        "id": 15260020903,
+        "name": "import-current-implicit-metadata-jmdict-BA-currentbase1-4d9f",
+        "size_in_bytes": 35556677,
+        "digest": "sha256:7d81a018c0cdb375c5decfe2fc30f4a4eda55b4e36c94bc918f91b0a2e6903ca"
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9985231132772117,
+          0.9808089754945378,
+          0.9954483386435828,
+          1.0101284958427992,
+          1.0051569846807134,
+          0.9978527607362052,
+          0.9727339719970524,
+          0.9996956323238738,
+          0.620844811753908,
+          0.9267162712340539,
+          0.9305436948477228,
+          1.003429764390168
+        ],
+        "medianPairedChangePercent": -0.3349450310105917,
+        "equalWorkChangePercent": -6.339080797974583,
+        "worstPairChangePercent": 1.012849584279918,
+        "descriptiveBootstrap95Percent": [
+          -4.836116657761247,
+          0.15626983570209418
+        ],
+        "fasterPairs": 9
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9864158829675989,
+          0.9977389207114863,
+          1.0147145379635079,
+          1.0216364467469325
+        ],
+        "medianPairedChangePercent": 0.6226729337497128,
+        "equalWorkChangePercent": 0.5095159598383692,
+        "worstPairChangePercent": 2.1636446746932547,
+        "descriptiveBootstrap95Percent": [
+          -1.3584117032401144,
+          2.1636446746932547
+        ],
+        "fasterPairs": 2
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 262,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -4.791204792411197,
+            "maximumPairedChangePercent": -3.4311282581918623
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -6.062897334553158,
+            "maximumPairedChangePercent": -4.448666907950294
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 0,
+      "mediaBytes": 0,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "1e789909ebf1027e21617b6f6dca42217979218a53c4bd277386058d67ca37fa",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "1e789909ebf1027e21617b6f6dca42217979218a53c4bd277386058d67ca37fa",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "e25a7ca2410e28974f2bf32503eb1c5516ce997a814d3f756f29bc9d0a2e49f9",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "e25a7ca2410e28974f2bf32503eb1c5516ce997a814d3f756f29bc9d0a2e49f9",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 330084,
+        "archiveSha256": "61e0b2550eb9ddae33bcaf5f4885e74c695c5be055551b2985be5773dcf335d7",
+        "artifact": {
+          "id": 15260020903,
+          "name": "import-current-implicit-metadata-jmdict-BA-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "7d81a018c0cdb375c5decfe2fc30f4a4eda55b4e36c94bc918f91b0a2e6903ca",
+          "size": 35556677,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 22273756,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [],
+      "auditExecution": "original local audit, retained unchanged"
+    },
+    {
+      "artifact": {
+        "id": 15260335462,
+        "name": "import-current-implicit-metadata-jitendex-AB-currentbase1-4d9f",
+        "size_in_bytes": 35600209,
+        "digest": "sha256:e00eac86779efb776e36e60f839c2a8f340c0d504886ede7275da212a79fb507"
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0035313001605137,
+          1.2207230142566328,
+          1.058350488934645,
+          1.0637725701114327,
+          0.9974604786997651,
+          0.8833827241795639,
+          0.9889651790092827,
+          1.0144899660190911,
+          0.9992324421133725,
+          1.002288895762457,
+          1.0444615286052688,
+          0.993971909096389
+        ],
+        "medianPairedChangePercent": 0.2910097961485336,
+        "equalWorkChangePercent": 2.041304438251368,
+        "worstPairChangePercent": 22.072301425663277,
+        "descriptiveBootstrap95Percent": [
+          -0.42838061019230267,
+          5.140600876995682
+        ],
+        "fasterPairs": 5
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.972330808697784,
+          0.931596842044596,
+          0.9935608902225267,
+          1.0006915629322122
+        ],
+        "medianPairedChangePercent": -1.7054150539844715,
+        "equalWorkChangePercent": -2.6391576637674996,
+        "worstPairChangePercent": 0.06915629322121752,
+        "descriptiveBootstrap95Percent": [
+          -6.840315795540397,
+          0.06915629322121752
+        ],
+        "fasterPairs": 3
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 284,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.7151509384739796,
+            "maximumPairedChangePercent": 2.299944149952471
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.8923794223356152,
+            "maximumPairedChangePercent": 2.997043457130122
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "ace4b7bdd8f92d9e456a0f1ab59694db6c7084a15f9e4f26ce915179d5dfcc0b",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "ace4b7bdd8f92d9e456a0f1ab59694db6c7084a15f9e4f26ce915179d5dfcc0b",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "b6be55c26a4686d54d847a08ad41c9a85cfa9a88143cb76d01be6c7039563e25",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "b6be55c26a4686d54d847a08ad41c9a85cfa9a88143cb76d01be6c7039563e25",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 353336,
+        "archiveSha256": "25f254a5263d71a1fc17b67f72f003af784c275146ff5869591832e0fc4b36b9",
+        "artifact": {
+          "id": 15260335462,
+          "name": "import-current-implicit-metadata-jitendex-AB-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "e00eac86779efb776e36e60f839c2a8f340c0d504886ede7275da212a79fb507",
+          "size": 35600209,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 22987527,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [],
+      "auditExecution": "original local audit, retained unchanged"
+    },
+    {
+      "artifact": {
+        "id": 15259662382,
+        "name": "import-current-implicit-metadata-jitendex-BA-currentbase1-4d9f",
+        "size_in_bytes": 35590233,
+        "digest": "sha256:aaedd4ddf1e82e89a90dbf7b3cb234794db6ef848d711d915fb3e647e4b1dc21"
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9740957497841589,
+          0.9857418111753484,
+          1.002506748939458,
+          0.9604449938195528,
+          0.9938331084987249,
+          1.002375296912114,
+          1.0052910052910053,
+          0.944397482859011,
+          1.048560460652569,
+          0.9935027708771369,
+          1.01307317073173,
+          1.0037203090717415
+        ],
+        "medianPairedChangePercent": -0.1895797294580559,
+        "equalWorkChangePercent": -0.6171361052568103,
+        "worstPairChangePercent": 4.8560460652568915,
+        "descriptiveBootstrap95Percent": [
+          -2.008121952024633,
+          0.45056571813733015
+        ],
+        "fasterPairs": 6
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0070353722884615,
+          0.9968646080760205,
+          1.013030888030888,
+          1.0237909516380888
+        ],
+        "medianPairedChangePercent": 1.0033130159674775,
+        "equalWorkChangePercent": 1.010271903324389,
+        "worstPairChangePercent": 2.3790951638088753,
+        "descriptiveBootstrap95Percent": [
+          -0.31353919239794914,
+          2.3790951638088753
+        ],
+        "fasterPairs": 1
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 271,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.9912736248488652,
+            "maximumPairedChangePercent": 1.8293630914336
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.2121831007164352,
+            "maximumPairedChangePercent": 1.9575517236257722
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "e53d4ea208be9106e85101cded15afab8d8a7aadbbd39bb3351c1ea725591bbd",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "e53d4ea208be9106e85101cded15afab8d8a7aadbbd39bb3351c1ea725591bbd",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "617b7c58d02adf275b68e6c2affc84edfbfcb5fde9068178ee997c35a38db1cc",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "617b7c58d02adf275b68e6c2affc84edfbfcb5fde9068178ee997c35a38db1cc",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 334492,
+        "archiveSha256": "0d7366ad909a8b957961c7b277f23938cad4e9a41e0081dfcf02d439c8f7ef54",
+        "artifact": {
+          "id": 15259662382,
+          "name": "import-current-implicit-metadata-jitendex-BA-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "aaedd4ddf1e82e89a90dbf7b3cb234794db6ef848d711d915fb3e647e4b1dc21",
+          "size": 35590233,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 22743834,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [],
+      "auditExecution": "original local audit, retained unchanged"
+    },
+    {
+      "artifact": {
+        "digest": "sha256:9e2827f50e58a49d9cf6d262b9ac13c51c986b0688f5bdeb619c7c62779b4046",
+        "id": 15260312654,
+        "name": "import-current-implicit-metadata-vndb-AB-currentbase1-4d9f",
+        "size_in_bytes": 35763370
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0007343530349762,
+          0.9845130506863983,
+          0.9963901878743237,
+          0.9842752673627329,
+          0.9978780621034424,
+          0.9964690150850435,
+          0.9679453280722496,
+          0.9726606997558944,
+          0.9798743206521642,
+          1.0395502471890294,
+          0.9783269320052433,
+          1.035309036052385
+        ],
+        "medianPairedChangePercent": -0.9548380719639038,
+        "equalWorkChangePercent": -0.5922282478735941,
+        "worstPairChangePercent": 3.955024718902944,
+        "descriptiveBootstrap95Percent": [
+          -2.089937367129624,
+          -0.06937924307907073
+        ],
+        "fasterPairs": 9
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9565966940472569,
+          1.0405284466226319,
+          1.0260458633680996,
+          0.9936774880255554
+        ],
+        "medianPairedChangePercent": 0.9861675696827499,
+        "equalWorkChangePercent": 0.3494969042295626,
+        "worstPairChangePercent": 4.052844662263189,
+        "descriptiveBootstrap95Percent": [
+          -4.340330595274311,
+          4.052844662263189
+        ],
+        "fasterPairs": 2
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 433,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.3891113548332723,
+            "maximumPairedChangePercent": 2.8847452277486196
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.6779493823805836,
+            "maximumPairedChangePercent": 3.0926190979296164
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "1f522d21bac5b1880a344f0bedd6a4cfa776da4b70b66eb0ed15b1542f8108fb",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "1f522d21bac5b1880a344f0bedd6a4cfa776da4b70b66eb0ed15b1542f8108fb",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "a2615e1a069b3b8d096c7eb444344593f05a30e24e4be281d013a1f836d1e1dc",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "a2615e1a069b3b8d096c7eb444344593f05a30e24e4be281d013a1f836d1e1dc",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 369200,
+        "archiveSha256": "355c941ac3f887bb068f833a7de6df250dcab59da4ee2de6bb3040537d562729",
+        "artifact": {
+          "id": 15260312654,
+          "name": "import-current-implicit-metadata-vndb-AB-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "9e2827f50e58a49d9cf6d262b9ac13c51c986b0688f5bdeb619c7c62779b4046",
+          "size": 35763370,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 28158225,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [],
+      "auditExecution": "hosted frozen audit in preservation run46139005895"
+    },
+    {
+      "artifact": {
+        "digest": "sha256:20f711e110286812c9e877e04a2665d2e1ad4bbfd35dcf5c8e5601179b78477d",
+        "id": 15260224001,
+        "name": "import-current-implicit-metadata-vndb-BA-currentbase1-4d9f",
+        "size_in_bytes": 35737679
+      },
+      "status": "audit-passed",
+      "observations": 36,
+      "semanticChecks": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0006324221769387,
+          0.9847917965772801,
+          0.9350590524761717,
+          0.9850704715503761,
+          1.0012885251610697,
+          1.0154038447996414,
+          1.0256210238008647,
+          0.965170305080129,
+          1.0170825063793425,
+          1.0569104262571638,
+          1.0111955429397557,
+          1.0179384015320512
+        ],
+        "medianPairedChangePercent": 0.624203405041257,
+        "equalWorkChangePercent": 0.0980877246693268,
+        "worstPairChangePercent": 5.69104262571638,
+        "descriptiveBootstrap95Percent": [
+          -1.506886593617196,
+          1.7510453955696725
+        ],
+        "fasterPairs": 4
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0180261535522719,
+          0.9400154798761431,
+          1.0008485362749133,
+          0.9913037428691094
+        ],
+        "medianPairedChangePercent": -0.3923860427988646,
+        "equalWorkChangePercent": -1.341247865515327,
+        "worstPairChangePercent": 1.8026153552271884,
+        "descriptiveBootstrap95Percent": [
+          -5.998452012385691,
+          1.8026153552271884
+        ],
+        "fasterPairs": 2
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 411,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "browserVersion": "153.0.8010.12",
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "source": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "99959e8d50a636c5e37aeb9760d5d146ce3628f92659a5b75072b614424e08b8",
+          "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "99959e8d50a636c5e37aeb9760d5d146ce3628f92659a5b75072b614424e08b8",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "8132c10d1ee396381f8c3a61607b5bbaaf720ec2afa08b646567538c54466fe4",
+          "sha": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "8132c10d1ee396381f8c3a61607b5bbaaf720ec2afa08b646567538c54466fe4",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "167af1110023e4febad62921e13244b2c8bcb93c"
+        }
+      },
+      "publicArchive": {
+        "archive": "verified-evidence.tar.xz",
+        "archiveBytes": 363452,
+        "archiveSha256": "23b1aba7621d78cc6ec896419fabadb982c857cb0816e2d0a6e7f442a3dc3616",
+        "artifact": {
+          "id": 15260224001,
+          "name": "import-current-implicit-metadata-vndb-BA-currentbase1-4d9f",
+          "runId": 46135718522,
+          "sha256": "20f711e110286812c9e877e04a2665d2e1ad4bbfd35dcf5c8e5601179b78477d",
+          "size": 35737679,
+          "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+        },
+        "deterministicTarMetadata": true,
+        "everyPreservedMemberVerified": true,
+        "excludedVerifiedProductZipCount": 2,
+        "qualification": "Preservation only; semantic audit status is recorded separately.",
+        "schemaVersion": 1,
+        "verifiedFileBytes": 27172106,
+        "verifiedFileCount": 311
+      },
+      "memoryCoverageFailures": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "benchmarkExitCode": 0,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 285.927306,
+          "preImportBracketGapMs": 66.603166,
+          "postImportBracketGapMs": 78.202622,
+          "fullyContainedImportSampleCount": 36,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "benchmarkExitCode": 0,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 277.771257,
+          "preImportBracketGapMs": 106.09687,
+          "postImportBracketGapMs": 60.742386,
+          "fullyContainedImportSampleCount": 35,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0
+        }
+      ],
+      "auditExecution": "hosted frozen audit in preservation run46139005895"
+    }
+  ],
+  "limitations": [
+    "Sampled PSS/private observations are not exact process peaks.",
+    "No raw observation was excluded or replaced.",
+    "The preserved product ZIP inventories and archive hashes bind packages; verified duplicate product ZIP bytes alone were excluded from archival.",
+    "Later merged source requires its own qualification."
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "runId": 46140311762,
+  "toolingCommit": "92467bf27b8ed0661085d65eaad8f134dc2f04cc",
+  "auditNode": "v24.22.3",
+  "dictionaryImportReexecuted": false,
+  "corpora": {
+    "jmdict": {
+      "artifactSha256": "a56da68461df59c342ae6c95a2723e58d0f697a22fe6662afca37dbffebf7756",
+      "contractCounts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "preflightVerified": true,
+      "arms": {
+        "A": {
+          "success": true,
+          "rows": 528299,
+          "groups": 12,
+          "finalOracleSha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+        },
+        "B": {
+          "success": true,
+          "rows": 528299,
+          "groups": 12,
+          "finalOracleSha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+        }
+      }
+    },
+    "jitendex": {
+      "artifactSha256": "14095036a5fbf3e0a984c193b9ca950b47ce000271ff452ec56959df5d19d633",
+      "contractCounts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "preflightVerified": true,
+      "arms": {
+        "A": {
+          "success": false,
+          "stage": "actual public canonical sink",
+          "currentGroup": 4,
+          "error": "TermContentLookupReadError: Database not open; exact dedupe candidate=\"raw-block-v2:jmdict\\u00005352631:521\" inFlightCount=0 inFlightKeys=[]"
+        },
+        "B": {
+          "success": false,
+          "stage": "actual public canonical sink",
+          "currentGroup": 4,
+          "error": "TermContentLookupReadError: Database not open; exact dedupe candidate=\"raw-block-v2:jmdict\\u00005352631:521\" inFlightCount=0 inFlightKeys=[]"
+        }
+      }
+    },
+    "vndb": {
+      "artifactSha256": "e49c76b552e40e78e405cb63204a7b5797be93e93c2b58dafc6791f1647b238d",
+      "contractCounts": {
+        "tests": 26,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "preflightVerified": true,
+      "arms": {
+        "A": {
+          "success": false,
+          "stage": "actual public canonical sink",
+          "currentGroup": 11,
+          "error": "TermContentLookupReadError: Database not open; exact dedupe candidate=\"raw-block-v2\\u0000648777:456\" inFlightCount=0 inFlightKeys=[]"
+        },
+        "B": {
+          "success": false,
+          "stage": "actual public canonical sink",
+          "currentGroup": 11,
+          "error": "TermContentLookupReadError: Database not open; exact dedupe candidate=\"raw-block-v2\\u0000648777:456\" inFlightCount=0 inFlightKeys=[]"
+        }
+      }
+    }
+  },
+  "strictComparator": {
+    "exitCode": 0,
+    "sameOriginalComparisonApartFromLocalDirectoryNames": true,
+    "finalOwnedBytesAvoided": 4194304
+  },
+  "negativeExitControl": {
+    "explicitShell": "bash --noprofile --norc -eo pipefail",
+    "mutatedCopyOnly": true,
+    "invalidReceiptRejected": true,
+    "pipelineExitCode": 1,
+    "comparisonOutputAbsent": true
+  },
+  "conclusion": "Original latest JMdict A/B proof independently revalidated without reacquisition; latest Jitendex/VNDB remain real symmetric harness-boundary failures.",
+  "auditSha256": "f9e4a1916ba354046222aeb36cbfcf7863160d8c79c46463db96f778c57986dc"
+}

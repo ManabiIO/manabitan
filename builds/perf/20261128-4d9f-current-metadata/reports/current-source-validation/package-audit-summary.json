@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact release ZIP entry audit; no performance acquisition",
+  "changedEntries": [
+    {
+      "path": "js/dictionary/dictionary-database.js",
+      "A": {
+        "bytes": 617431,
+        "sha256": "214cbbb8f99c82564599bbd456dfe577f107044da431173b54e0aefccb5db004"
+      },
+      "B": {
+        "bytes": 624053,
+        "sha256": "7db25f01e44da65970100b9525b95e03bdc05f285be758d4a5db71b980e3178c"
+      }
+    },
+    {
+      "path": "js/dictionary/term-content-canonical-scan.js",
+      "A": {
+        "bytes": 19536,
+        "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+      },
+      "B": {
+        "bytes": 20714,
+        "sha256": "746dc752e0fa555f7924d1340998674bb10fff624554f212da859bff865b5fda"
+      }
+    },
+    {
+      "path": "js/dictionary/term-content-metadata-arena.js",
+      "A": {
+        "bytes": 5580,
+        "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200"
+      },
+      "B": {
+        "bytes": 7311,
+        "sha256": "74c97b58688e86267ce84106c7e23bb03eeb90d135d32af473cc9798de16401c"
+      }
+    },
+    {
+      "path": "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "A": {
+        "bytes": 6853,
+        "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+      },
+      "B": {
+        "bytes": 7772,
+        "sha256": "c2439ff67d54e21625385a8aa7c79aca6d3b4bb2714aee4a5169140facab991e"
+      }
+    },
+    {
+      "path": "lib/term-content-canonical-scan-v1.wasm",
+      "A": {
+        "bytes": 1624,
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      "B": {
+        "bytes": 2082,
+        "sha256": "d629347973c6d7eb98a1125302dd4713e22a5d0a7059b25dd2c2ee37d3e3baf0"
+      }
+    }
+  ],
+  "unchangedEntryCount": 549,
+  "conclusion": "The four intended runtime entries and their shipped canonical C source differ; no added, removed or other changed release entries.",
+  "arms": {
+    "A": {
+      "sourceId": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "sourceTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+      "package": "/home/agent/manabitan-current-base-4d9ffe79ec6f/builds/manabitan-chrome.zip",
+      "packageBytes": 17291235,
+      "packageSha256": "5f333553e89ffcc71d264e82504889f6cc3194625c8e195eb9ca0c41445ad9c6",
+      "entryCount": 554,
+      "uncompressedBytes": 42565423
+    },
+    "B": {
+      "sourceId": "81e203e084c009e79057a36d0e2106ef669ab168",
+      "sourceTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+      "package": "/home/agent/manabitan-metadata-current-4d9ffe79ec6f/builds/manabitan-chrome.zip",
+      "packageBytes": 17293651,
+      "packageSha256": "3d3e965e37372dc4425a88262ecc288f8b6f695687dee04fdf0e7c7ed97641f8",
+      "entryCount": 554,
+      "uncompressedBytes": 42576331
+    }
+  },
+  "completeInventory": "See package-audit.json inside ../../validation-and-source-81e203e.tar.gz"
+}

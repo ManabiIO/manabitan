@@ -1,0 +1,175 @@
+[
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/pinned-artifact-manifest.json",
+    "bytes": 11145,
+    "sha256": "4e8ad7613257e5a4c698d119614ea9d7235c721b621c9a7352d3c8ed5e84b267"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/audit-hosted-imports-4d9f.py",
+    "bytes": 9582,
+    "sha256": "83f6c2eabcd31232dade45596c5df833fe87879e095267cda250aa44780347ee"
+  },
+  {
+    "originalLocalAudit": "/workspace/scratch/4d9ffe79ec6f/experiments/metadata-current/hosted-currentbase1-first4/independent-audit.json",
+    "bytes": 10533,
+    "sha256": "418603cd73227526117e2503c135f1d8dc364cad0f4debe6468e648a7ab022aa"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260312654/independent-audit.json",
+    "bytes": 2645,
+    "sha256": "c9e1254bb5520da3707272d5b93969acb7273cc2d9d8174f2e22ec14f56cd7d0"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260224001/independent-audit.json",
+    "bytes": 2588,
+    "sha256": "d0206b64b15b3364f3d71dc989914af2bfe9abd87f68f302433811a9abd9dbb1"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260125586/archive-receipt.json",
+    "bytes": 756,
+    "sha256": "f836f01d886bebcd39093fb650fa87cef6d2bec3c2b2748e10c4b0a0348b43bd"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260125586/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "b81754a77781adc21a422de3c0ef08fc6d5199a315d4cb6d4b6f930505dc7af5"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260125586/verified-evidence.tar.xz",
+    "bytes": 342920,
+    "sha256": "6012f9027d346b9e51628d70eb8fe4a18e3fb73e78eee92d922d1086d15da2f0"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260020903/archive-receipt.json",
+    "bytes": 756,
+    "sha256": "da9864cb359e5dfe9fba252fbd144959deb3b086e590a8924f1b22fca08abe86"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260020903/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "c7bba68079f32668e460c23db64de66f4f4077de9009f18b5e18bcbeccb3cc0e"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260020903/verified-evidence.tar.xz",
+    "bytes": 330084,
+    "sha256": "61e0b2550eb9ddae33bcaf5f4885e74c695c5be055551b2985be5773dcf335d7"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260335462/archive-receipt.json",
+    "bytes": 758,
+    "sha256": "cfafd5317bd4eb0021a8a3e895a5b0a1b87002548f458d1869f4849680caa3e1"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260335462/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "881a005c17070080d7eda88df35953525afe44d03eba58c46cfc25fe0df7835a"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260335462/verified-evidence.tar.xz",
+    "bytes": 353336,
+    "sha256": "25f254a5263d71a1fc17b67f72f003af784c275146ff5869591832e0fc4b36b9"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259662382/archive-receipt.json",
+    "bytes": 758,
+    "sha256": "ac5219c424f60cdeca351b3e0349cf2578619a48866c1eddce9b390f00415f72"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259662382/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "f7af7288abf219e0980e060c5ebdc4c5230a69297f23f2c26cc516ce4c31692c"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259662382/verified-evidence.tar.xz",
+    "bytes": 334492,
+    "sha256": "0d7366ad909a8b957961c7b277f23938cad4e9a41e0081dfcf02d439c8f7ef54"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260312654/archive-receipt.json",
+    "bytes": 754,
+    "sha256": "fb0bda776cdb0156d515d0b0ff0e29512b249548c6f53dd3d216f8c44a4c571f"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260312654/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "86da618869f71ee70aa1e99a94bda13eccdea818fd44f0ca6ae550929aa3e230"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260312654/verified-evidence.tar.xz",
+    "bytes": 369200,
+    "sha256": "355c941ac3f887bb068f833a7de6df250dcab59da4ee2de6bb3040537d562729"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260224001/archive-receipt.json",
+    "bytes": 754,
+    "sha256": "2f6c6cf1ef00430b87613f7e4c51919e964b6888b0d8c2cbcbc3f4b43fad581f"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260224001/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "d5fc98d0a09c799fa14074b469b38d34c74896626ddfbb1ac860e4c14985b925"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15260224001/verified-evidence.tar.xz",
+    "bytes": 363452,
+    "sha256": "23b1aba7621d78cc6ec896419fabadb982c857cb0816e2d0a6e7f442a3dc3616"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15258559921/archive-receipt.json",
+    "bytes": 743,
+    "sha256": "aa69dd7554fced7703de7bb5e26fa16f1107b6ed7f3a63e205fe72a1569b47aa"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15258559921/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "8b24e51059f76de75bdc3881b6c6248dc2ebd52bae2c44e8f09886796f56c7a4"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15258559921/verified-evidence.tar.xz",
+    "bytes": 343136,
+    "sha256": "b0c07c79d4e82f26ae6bd6de9049567bbc1b5fd48b16dda3198c93c08cb671cb"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259387382/archive-receipt.json",
+    "bytes": 741,
+    "sha256": "7e7fb8c3ebb711884e33a086778968bc14054b80035a4faaf917cd7d87e443d7"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259387382/artifact-members.json",
+    "bytes": 52980,
+    "sha256": "d643826418d845488defefc0e351a68e5785083c1fdca7e74716ba713c9be53d"
+  },
+  {
+    "publicCommit": "e54f8f55e6a493a13f2e7ab2cd8c06317d513800",
+    "path": "builds/perf/20261128-4d9f-hosted-evidence/artifacts/15259387382/verified-evidence.tar.xz",
+    "bytes": 370980,
+    "sha256": "2248b99412fb28e16f4f9c46c22f147b4fe9ea74e4f2e5b288e0927745acc0d3"
+  }
+]

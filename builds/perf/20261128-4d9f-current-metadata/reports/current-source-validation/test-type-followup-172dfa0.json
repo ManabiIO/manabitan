@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "parent": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "source": "172dfa06e1a5e6d28ff97cdeae2bb5df6ac95b6d",
+  "tree": "e5060ae9f1e78fe069abdfc225ced1a79bde4237",
+  "extTree": "9f19f03afba5eb6f2eedd32db813a206a8abee3d",
+  "runtimeUnchanged": true,
+  "changedPaths": [
+    "test/dictionary-content-implicit-columns.test.js"
+  ],
+  "change": "One test helper return-type comment explicitly declares its actual signature fields, matching existing S1 fixture style. No executable source changed.",
+  "patchSha256": "f67a9ce4ef51b4dc365490d085e680cfceb69948bf0ad108bb0c454046b645d1",
+  "hostedTypeLogSha256": "b9c820ebb79bb8f2a0247b4de3ba39a049e3cfff7d5a2c77dfdaf5e8f527fbf6",
+  "hostedError": "test/dictionary-content-implicit-columns.test.js(17,52) TS2353: signature1 is absent from the private setter parameter type used as the previous helper return annotation.",
+  "localChecks": [
+    "git diff --check passed",
+    "Only one JSDoc line differs; ext and dev trees unchanged"
+  ],
+  "notRerun": "No broad local unit, type or lint retry; normal hosted CI must verify final test annotation.",
+  "sourceFileSha256": "5840399fe6fa7658e2fbf8c47667e4641339cf919a5cb3badb191002375bb103"
+}

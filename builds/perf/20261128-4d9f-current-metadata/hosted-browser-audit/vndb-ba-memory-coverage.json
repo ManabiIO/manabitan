@@ -1,0 +1,32 @@
+[
+  {
+    "name": "B1",
+    "arm": "B",
+    "pair": 1,
+    "benchmarkExitCode": 0,
+    "qualificationFailures": [
+      "covered-import-scan-gap-over-250ms"
+    ],
+    "maximumCoveredSampleGapMs": 285.927306,
+    "preImportBracketGapMs": 66.603166,
+    "postImportBracketGapMs": 78.202622,
+    "fullyContainedImportSampleCount": 36,
+    "samplesWithUnavailableSmaps": 0,
+    "samplesWithUnreadableAddressSpaces": 0
+  },
+  {
+    "name": "A2",
+    "arm": "A",
+    "pair": 2,
+    "benchmarkExitCode": 0,
+    "qualificationFailures": [
+      "covered-import-scan-gap-over-250ms"
+    ],
+    "maximumCoveredSampleGapMs": 277.771257,
+    "preImportBracketGapMs": 106.09687,
+    "postImportBracketGapMs": 60.742386,
+    "fullyContainedImportSampleCount": 35,
+    "samplesWithUnavailableSmaps": 0,
+    "samplesWithUnreadableAddressSpaces": 0
+  }
+]

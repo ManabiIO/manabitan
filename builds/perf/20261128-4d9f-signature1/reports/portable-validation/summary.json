@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "scope": "Portable-helper validation only; original acquisitions remain separate",
+  "runtimeSourceUnchanged": "232de57c6fd78ef1115d6db97d2ac5bb2c224417",
+  "syntax": "All9 ESM helper modules and both Python files passed syntax checks; final helper modules were parsed by scoped ESLint and executed by focused/full-corpus checks",
+  "lint": {
+    "receipt": "lint-final-4-command.json",
+    "result": "lint-final-4.json",
+    "exitCode": 0,
+    "retainedPriorFailures": [
+      "lint-attempt-1.json",
+      "lint-autofix-2.json",
+      "lint-final-3.json"
+    ],
+    "fixes": "Repository formatting, named observer wrappers, removed unused import, and two narrowly documented dynamic imports of source-identity-verified checkout modules"
+  },
+  "boundedAdapterContracts": {
+    "receipt": "commands-final-2.json",
+    "log": "bounded-contracts-final-2.log",
+    "exitCode": 0
+  },
+  "markdown": {
+    "receipt": "commands-1.json",
+    "log": "markdown-check-1.log",
+    "exitCode": 0
+  },
+  "corpus": {
+    "name": "jmdict",
+    "parent": "jmdict-A-1",
+    "candidate": "jmdict-B-1",
+    "rows": 528299,
+    "groups": 12,
+    "frames": 103,
+    "oracle": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "comparison": "jmdict-comparison.json",
+    "parentExitCode": 0,
+    "candidateExitCode": 0,
+    "parentSignal": null,
+    "candidateSignal": null,
+    "finalOwnedBytesAvoided": 2097152
+  },
+  "optionalJvmRepetition": "Not run; original complete Jitendex/VNDB acquisitions retained, portable changes do not alter their parser/group/sink logic",
+  "helperSha256": {
+    "README.md": "bb8c88d5885ccd150b11fe5d8ea2b1513ae2b4060e532553ed122bdc914da9e8",
+    "archive-catalog.mjs": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302",
+    "common.mjs": "c8d46840b99fdec66ecb6a6065af53cfdcc409525b9cc75e994b1ddb4361bf4d",
+    "compare-results.mjs": "c5f8e699abb370286ac1010cd6877b3998644a2500db397b04d46328977b1ea8",
+    "field-analysis.mjs": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67",
+    "file-oracle.mjs": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e",
+    "launch.py": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef",
+    "metadata-oracle.mjs": "ac36656f091d57468775ff028188b436e34f135eeea7ba4b8a9a55ec950a29ae",
+    "node-opfs-bounded.mjs": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8",
+    "node-opfs-bounded.test.mjs": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2",
+    "run.mjs": "eb5dacae109e44292dc917168eda43e57829c990bb979c8d4e314ab60429e929",
+    "vndb-media-oracle.py": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+  }
+}

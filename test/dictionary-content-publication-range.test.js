@@ -76,7 +76,9 @@ function snapshot({database, state, staged}) {
         '_termEntryContentMetaRecentSourceOffsetTable',
     ]
     return {
-        tables: Object.fromEntries(names.map((name) => [name, [...Reflect.get(database, name)]])),
+        tables: Object.fromEntries(names.map((name) => [name, name === '_termEntryContentMetaDictNameIdTable' ?
+            Array.from({length: Reflect.get(database, '_termEntryContentMetaStateTable').length}, (_, i) => database._readTermEntryContentMetaDictNameId(i)) :
+            [...Reflect.get(database, name)]])),
         pendingCount: Reflect.get(database, '_termEntryContentMetaHashPairPendingCount'),
         publishedCount: Reflect.get(database, '_termEntryContentMetaHashPairCount'),
         denseCount: Reflect.get(database, '_termEntryContentMetaDenseCount'),
@@ -245,7 +247,7 @@ describe('contiguous content metadata publication', () => {
             }},
         {name: 'reservation indexes overlap dictionary IDs',
             change: ({database, staged}) => {
-                const dictIds = /** @type {Uint32Array} */ (Reflect.get(database, '_termEntryContentMetaDictNameIdTable'))
+                const dictIds = database._materializeTermEntryContentMetaDictNameIds()
                 const values = staged.indexes
                 staged.indexes = new Int32Array(dictIds.buffer, dictIds.byteOffset, 3)
                 staged.indexes.set(values)
@@ -269,7 +271,7 @@ describe('contiguous content metadata publication', () => {
         {name: 'output offset and dictionary ID ranges overlap',
             change: ({database}) => {
                 const offsets = /** @type {Float64Array} */ (Reflect.get(database, '_termEntryContentMetaOffsetTable'))
-                const values = /** @type {Uint32Array} */ (Reflect.get(database, '_termEntryContentMetaDictNameIdTable'))
+                const values = database._materializeTermEntryContentMetaDictNameIds()
                 const dictIds = new Uint32Array(offsets.buffer, offsets.byteOffset, values.length)
                 dictIds.set(values)
                 Reflect.set(database, '_termEntryContentMetaDictNameIdTable', dictIds)

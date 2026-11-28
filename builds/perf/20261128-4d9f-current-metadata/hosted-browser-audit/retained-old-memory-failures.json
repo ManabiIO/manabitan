@@ -1,0 +1,52 @@
+[
+  {
+    "dictionary": "jmdict",
+    "order": "BA",
+    "artifact": {
+      "id": 15258559921,
+      "name": "import-implicit-metadata-jmdict-BA-cohort1-4d9f",
+      "runId": 46133384380,
+      "sha256": "291032b419313eb85784fad46a9d549f60e37ce4f44a846f040542f9cbab692e",
+      "size": 35550908,
+      "workflowHead": "3b53faa5c7c1a0e72abbb80f36cb82e6ab8465df"
+    },
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "6a05b649de2bf220b21f5365902c76d78d1cde29",
+    "failures": [
+      {
+        "name": "A2",
+        "arm": "A",
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 369.707434
+      }
+    ],
+    "passesProspectiveMemoryScreen": false
+  },
+  {
+    "dictionary": "vndb",
+    "order": "AB",
+    "artifact": {
+      "id": 15259387382,
+      "name": "import-implicit-metadata-vndb-AB-cohort1-4d9f",
+      "runId": 46133384380,
+      "sha256": "3ba72788ce2104a85ffa1179d0a9c6fe95a3968532dbfb82d6cf8a120c241277",
+      "size": 35851005,
+      "workflowHead": "3b53faa5c7c1a0e72abbb80f36cb82e6ab8465df"
+    },
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "6a05b649de2bf220b21f5365902c76d78d1cde29",
+    "failures": [
+      {
+        "name": "A2",
+        "arm": "A",
+        "qualificationFailures": [
+          "covered-import-scan-gap-over-250ms"
+        ],
+        "maximumCoveredSampleGapMs": 256.299311
+      }
+    ],
+    "passesProspectiveMemoryScreen": false
+  }
+]

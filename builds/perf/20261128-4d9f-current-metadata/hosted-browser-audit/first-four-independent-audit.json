@@ -1,0 +1,326 @@
+[
+  {
+    "artifact": {
+      "id": 15260335462,
+      "name": "import-current-implicit-metadata-jitendex-AB-currentbase1-4d9f",
+      "size_in_bytes": 35600209,
+      "digest": "sha256:e00eac86779efb776e36e60f839c2a8f340c0d504886ede7275da212a79fb507"
+    },
+    "status": "audit-passed",
+    "observations": 36,
+    "semanticChecks": 42,
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        1.0035313001605137,
+        1.2207230142566328,
+        1.058350488934645,
+        1.0637725701114327,
+        0.9974604786997651,
+        0.8833827241795639,
+        0.9889651790092827,
+        1.0144899660190911,
+        0.9992324421133725,
+        1.002288895762457,
+        1.0444615286052688,
+        0.993971909096389
+      ],
+      "medianPairedChangePercent": 0.2910097961485336,
+      "equalWorkChangePercent": 2.041304438251368,
+      "worstPairChangePercent": 22.072301425663277,
+      "descriptiveBootstrap95Percent": [
+        -0.42838061019230267,
+        5.140600876995682
+      ],
+      "fasterPairs": 5
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        0.972330808697784,
+        0.931596842044596,
+        0.9935608902225267,
+        1.0006915629322122
+      ],
+      "medianPairedChangePercent": -1.7054150539844715,
+      "equalWorkChangePercent": -2.6391576637674996,
+      "worstPairChangePercent": 0.06915629322121752,
+      "descriptiveBootstrap95Percent": [
+        -6.840315795540397,
+        0.06915629322121752
+      ],
+      "fasterPairs": 3
+    },
+    "memory": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 284,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.7151509384739796,
+          "maximumPairedChangePercent": 2.299944149952471
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.8923794223356152,
+          "maximumPairedChangePercent": 2.997043457130122
+        }
+      }
+    },
+    "browserVersion": "153.0.8010.12",
+    "changedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-content-canonical-scan.js",
+      "js/dictionary/term-content-metadata-arena.js",
+      "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes."
+  },
+  {
+    "artifact": {
+      "id": 15260125586,
+      "name": "import-current-implicit-metadata-jmdict-AB-currentbase1-4d9f",
+      "size_in_bytes": 35606345,
+      "digest": "sha256:9735326088a378c5e22b128be57541d7d3c11011e31d6ee40f0be325e7e804b2"
+    },
+    "status": "audit-passed",
+    "observations": 36,
+    "semanticChecks": 42,
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9797807204898834,
+        1.014530283412593,
+        1.0214975138928817,
+        0.9789995624908534,
+        0.9595772032566098,
+        1.0312499999998619,
+        0.957204995089102,
+        1.012062200261658,
+        1.0176926451235215,
+        1.0193158360365344,
+        0.998153671353435,
+        1.0246291228575193
+      ],
+      "medianPairedChangePercent": 1.329624183712541,
+      "equalWorkChangePercent": 0.09743657600485012,
+      "worstPairChangePercent": 3.124999999986189,
+      "descriptiveBootstrap95Percent": [
+        -2.0609858509631596,
+        2.040667496470805
+      ],
+      "fasterPairs": 5
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        0.9920370638482693,
+        0.999709639953441,
+        1.0015928178396947,
+        1.0340760157270774
+      ],
+      "medianPairedChangePercent": 0.06512288965678792,
+      "equalWorkChangePercent": 0.6819500870506534,
+      "worstPairChangePercent": 3.4076015727077413,
+      "descriptiveBootstrap95Percent": [
+        -0.7962936151730715,
+        3.4076015727077413
+      ],
+      "fasterPairs": 2
+    },
+    "memory": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 311,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 1.022704083752568,
+          "maximumPairedChangePercent": 2.676716095453213
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 1.301002984613131,
+          "maximumPairedChangePercent": 3.161782261710644
+        }
+      }
+    },
+    "browserVersion": "153.0.8010.12",
+    "changedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-content-canonical-scan.js",
+      "js/dictionary/term-content-metadata-arena.js",
+      "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes."
+  },
+  {
+    "artifact": {
+      "id": 15260020903,
+      "name": "import-current-implicit-metadata-jmdict-BA-currentbase1-4d9f",
+      "size_in_bytes": 35556677,
+      "digest": "sha256:7d81a018c0cdb375c5decfe2fc30f4a4eda55b4e36c94bc918f91b0a2e6903ca"
+    },
+    "status": "audit-passed",
+    "observations": 36,
+    "semanticChecks": 42,
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9985231132772117,
+        0.9808089754945378,
+        0.9954483386435828,
+        1.0101284958427992,
+        1.0051569846807134,
+        0.9978527607362052,
+        0.9727339719970524,
+        0.9996956323238738,
+        0.620844811753908,
+        0.9267162712340539,
+        0.9305436948477228,
+        1.003429764390168
+      ],
+      "medianPairedChangePercent": -0.3349450310105917,
+      "equalWorkChangePercent": -6.339080797974583,
+      "worstPairChangePercent": 1.012849584279918,
+      "descriptiveBootstrap95Percent": [
+        -4.836116657761247,
+        0.15626983570209418
+      ],
+      "fasterPairs": 9
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        0.9864158829675989,
+        0.9977389207114863,
+        1.0147145379635079,
+        1.0216364467469325
+      ],
+      "medianPairedChangePercent": 0.6226729337497128,
+      "equalWorkChangePercent": 0.5095159598383692,
+      "worstPairChangePercent": 2.1636446746932547,
+      "descriptiveBootstrap95Percent": [
+        -1.3584117032401144,
+        2.1636446746932547
+      ],
+      "fasterPairs": 2
+    },
+    "memory": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 262,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -4.791204792411197,
+          "maximumPairedChangePercent": -3.4311282581918623
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -6.062897334553158,
+          "maximumPairedChangePercent": -4.448666907950294
+        }
+      }
+    },
+    "browserVersion": "153.0.8010.12",
+    "changedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-content-canonical-scan.js",
+      "js/dictionary/term-content-metadata-arena.js",
+      "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes."
+  },
+  {
+    "artifact": {
+      "id": 15259662382,
+      "name": "import-current-implicit-metadata-jitendex-BA-currentbase1-4d9f",
+      "size_in_bytes": 35590233,
+      "digest": "sha256:aaedd4ddf1e82e89a90dbf7b3cb234794db6ef848d711d915fb3e647e4b1dc21"
+    },
+    "status": "audit-passed",
+    "observations": 36,
+    "semanticChecks": 42,
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        0.9740957497841589,
+        0.9857418111753484,
+        1.002506748939458,
+        0.9604449938195528,
+        0.9938331084987249,
+        1.002375296912114,
+        1.0052910052910053,
+        0.944397482859011,
+        1.048560460652569,
+        0.9935027708771369,
+        1.01307317073173,
+        1.0037203090717415
+      ],
+      "medianPairedChangePercent": -0.1895797294580559,
+      "equalWorkChangePercent": -0.6171361052568103,
+      "worstPairChangePercent": 4.8560460652568915,
+      "descriptiveBootstrap95Percent": [
+        -2.008121952024633,
+        0.45056571813733015
+      ],
+      "fasterPairs": 6
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        1.0070353722884615,
+        0.9968646080760205,
+        1.013030888030888,
+        1.0237909516380888
+      ],
+      "medianPairedChangePercent": 1.0033130159674775,
+      "equalWorkChangePercent": 1.010271903324389,
+      "worstPairChangePercent": 2.3790951638088753,
+      "descriptiveBootstrap95Percent": [
+        -0.31353919239794914,
+        2.3790951638088753
+      ],
+      "fasterPairs": 1
+    },
+    "memory": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 271,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -0.9912736248488652,
+          "maximumPairedChangePercent": 1.8293630914336
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -1.2121831007164352,
+          "maximumPairedChangePercent": 1.9575517236257722
+        }
+      }
+    },
+    "browserVersion": "153.0.8010.12",
+    "changedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-content-canonical-scan.js",
+      "js/dictionary/term-content-metadata-arena.js",
+      "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes."
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/test/perf/signature1-corpus-verification/compare-results.mjs",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-A-1",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-B-1",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-comparison.json"
+  ],
+  "exitCode": 0,
+  "observation": "Recorded from the successful tool execution; report was written only after every comparison assertion passed",
+  "reportSha256": "5622388d44e92cc8b89bda9d3df7ac37c9cfbec708167ccef1aa40eb7dc7fa30"
+}
