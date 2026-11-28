@@ -1,8 +1,8 @@
-name: Bounded content overlap qualification
+name: Bounded content overlap qualification - repaired test types
 
 on:
   push:
-    branches: ['perf/bounded-content-overlap-20261128-da6c4']
+    branches: ['perf/owned-overlap-qualification-r2-20261128-da6c4']
     # Evidence-only updates do not replace a completed cohort.
     paths:
       - 'ext/js/dictionary/**'
