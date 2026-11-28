@@ -1,0 +1,2472 @@
+{
+  "analysisBranchExpectedHead": "80ae12e75fc9cf0928ad5645eae7c5c70040d4e4",
+  "analysisBranchExpectedTree": "2dc03b2548560e1a2f30973c6a2e7726ee430f23",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "checkpoint": {
+    "bytes": 49860,
+    "sha256": "b41b6c9038bd5f4a253fa9aaed16f5f791cf8c32b9cd6de3570f5e0803a5bbb7",
+    "updatedUtc": "2026-11-28 07:54:38 UTC"
+  },
+  "closedExperiments": [
+    {
+      "cohorts": [
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -2.1682266183334686,
+              25.632708856607778
+            ],
+            "equalWorkChangePercent": 7.919746568109787,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 0.5013986043347352,
+            "ratios": [
+              1.5032626427406517,
+              1.00209698558327,
+              1.0093915343915036,
+              0.9810257115357546,
+              1.007930986503425,
+              0.9756097560975762
+            ],
+            "worstPairChangePercent": 50.32626427406517
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -0.3853034264547306,
+              0.17735334242678924
+            ],
+            "equalWorkChangePercent": -0.1027608412727421,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.10397504201397068,
+            "ratios": [
+              1.001773533424268,
+              0.9961469657354527
+            ],
+            "worstPairChangePercent": 0.17735334242678924
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 271
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -4.09404767583379,
+              1.4472989694026772
+            ],
+            "equalWorkChangePercent": -1.0209480511852553,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.18846224297602854,
+            "ratios": [
+              1.011296076099881,
+              0.9394307149161578,
+              1.0176499032881727,
+              0.9944339175745953,
+              0.9786883315671665,
+              1.0017968375658841
+            ],
+            "worstPairChangePercent": 1.764990328817273
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.7773620205779772,
+              1.497222893020278
+            ],
+            "equalWorkChangePercent": -0.16633004633410664,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.14006956377885516,
+            "ratios": [
+              0.9822263797942202,
+              1.0149722289302028
+            ],
+            "worstPairChangePercent": 1.497222893020278
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 273
+        }
+      ],
+      "evidenceHead": "5f4f02608bd1f07d77ea98b195a367ee85d16c95",
+      "evidencePath": "builds/perf/parser-inline-20261128-5a86/summary.json.txt",
+      "evidenceTree": "c7e86503eeb34ac75f164b461aa12349f9bd84d2",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/5f4f02608bd1f07d77ea98b195a367ee85d16c95/builds/perf/parser-inline-20261128-5a86/summary.json.txt",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/5f4f02608bd1f07d77ea98b195a367ee85d16c95/dev/perf/import-experiments-20260914.md",
+      "id": "inline",
+      "imports": 52,
+      "measuredHead": "ed09ddbd9c20352e4690ade354e91a9bd70392a4",
+      "measurementKind": "complete-browser-import",
+      "mechanism": "Force one parser helper inline; generated parser grows by 407 bytes. Local fixed-group component is negative, separate from ordinary import cohorts.",
+      "name": "Force-inline next_format3_field",
+      "rawMemoryScans": 544,
+      "runId": 46102590692,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46102590692",
+      "status": "CLOSED_NO_REVIEW_WORTHY_GAIN_NO_PR",
+      "unitPassed": 15135
+    },
+    {
+      "cohorts": [
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -7.423172143820955,
+              1.5619121604732111
+            ],
+            "equalWorkChangePercent": -2.5117963872066995,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.7821698855450254,
+            "ratios": [
+              0.8836313959264651,
+              0.9914849118613506,
+              0.9679051611971159,
+              1.0261254612546298,
+              1.0051127819548347,
+              0.992871690427749
+            ],
+            "worstPairChangePercent": 2.612546125462978
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -0.35534498075557863,
+              1.4669209329616795
+            ],
+            "equalWorkChangePercent": 0.5600176847672556,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.5557879761030504,
+            "ratios": [
+              0.9964465501924442,
+              1.0146692093296168
+            ],
+            "worstPairChangePercent": 1.4669209329616795
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 314
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -1.8772670952116877,
+              4.7480637248119795
+            ],
+            "equalWorkChangePercent": 1.3871249731972624,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 1.4048718646640035,
+            "ratios": [
+              1.054997513674806,
+              0.9764000386884392,
+              1.0245206861755685,
+              1.0399637608214334,
+              1.0035767511177116,
+              0.9860546194073271
+            ],
+            "worstPairChangePercent": 5.499751367480599
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -0.09055236945015865,
+              1.105861063637259
+            ],
+            "equalWorkChangePercent": 0.5078950015103612,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.5076543470935446,
+            "ratios": [
+              1.0110586106363726,
+              0.9990944763054984
+            ],
+            "worstPairChangePercent": 1.105861063637259
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 264
+        }
+      ],
+      "evidenceHead": "7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1",
+      "evidencePath": "builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery/manifest.json",
+      "evidenceTree": "6dc4f4342d9eb02f78a24a1eab7c41fb3e291338",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1/builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery/manifest.json",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1/dev/perf/import-experiments-20260914.md",
+      "id": "field",
+      "imports": 52,
+      "measuredHead": "ab116fa90777cd64b067d4858318923f0f4e3ee7",
+      "measurementKind": "complete-browser-import",
+      "mechanism": "Re-evaluate the remaining #764 length-dispatch path using already-captured synchronous reference columns; no Jitendex/VNDB expansion after negative JMdict.",
+      "name": "Captured record-field lengths",
+      "rawMemoryScans": 578,
+      "runId": 46102823858,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46102823858",
+      "status": "CLOSED_NO_REVIEW_WORTHY_GAIN_NO_PR",
+      "unitPassed": 15137
+    },
+    {
+      "cohorts": [
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -4.909357178039797,
+              4.8694627957381
+            ],
+            "equalWorkChangePercent": -0.27543891078570804,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.5598884772136437,
+            "ratios": [
+              1.0091082109842067,
+              0.9796940194715206,
+              0.9542285939760402,
+              1.0120384147165764,
+              1.0853508411981858,
+              0.9475842624631639
+            ],
+            "worstPairChangePercent": 8.535084119818581
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -6.504164625184494,
+              5.110179802621029
+            ],
+            "equalWorkChangePercent": -0.9832272990178859,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.6969924112817383,
+            "ratios": [
+              1.0511017980262103,
+              0.9349583537481551
+            ],
+            "worstPairChangePercent": 5.110179802621029
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 261
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -1.7084257552225868,
+              11.280835283572399
+            ],
+            "equalWorkChangePercent": 3.5245512769818577,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 1.3236103642608965,
+            "ratios": [
+              1.1987343312644347,
+              0.9906410856340665,
+              0.9751903992614818,
+              1.0268823744070132,
+              1.0208111623506875,
+              1.0056610449345305
+            ],
+            "worstPairChangePercent": 19.873433126443473
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -0.9523809523816373,
+              0.0941065756955961
+            ],
+            "equalWorkChangePercent": -0.4292602610853513,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.4291371883430206,
+            "ratios": [
+              1.000941065756956,
+              0.9904761904761836
+            ],
+            "worstPairChangePercent": 0.0941065756955961
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 270
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -2.574478403453262,
+              0.7733322695780309
+            ],
+            "equalWorkChangePercent": -0.7198212056997666,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.29663639915178397,
+            "ratios": [
+              1.0031880977683367,
+              0.9904281239122866,
+              0.9966727957272049,
+              0.9973944762897595,
+              1.012278547623224,
+              0.958082308018648
+            ],
+            "worstPairChangePercent": 1.227854762322389
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.3776050865449085,
+              0.7811128664204192
+            ],
+            "equalWorkChangePercent": -0.2949203274954071,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.2982461100622391,
+            "ratios": [
+              1.0078111286642042,
+              0.9862239491345509
+            ],
+            "worstPairChangePercent": 0.7811128664204192
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 332
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -7.0619355695315855,
+              4.469429651894341
+            ],
+            "equalWorkChangePercent": -1.384140061792194,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": -0.6774941243977928,
+            "ratios": [
+              0.9778866691795381,
+              0.9975074775673162,
+              1.0707593526829389,
+              0.8808746194298303,
+              0.9889426399447279,
+              1.0186292403549477
+            ],
+            "worstPairChangePercent": 7.075935268293887
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -2.2309389556277592,
+              0.68058076225046
+            ],
+            "equalWorkChangePercent": -0.8159022177426589,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": -0.7751790966886496,
+            "ratios": [
+              1.0068058076225046,
+              0.9776906104437224
+            ],
+            "worstPairChangePercent": 0.68058076225046
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 275
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -1.3193732846373596,
+              2.536339758194317
+            ],
+            "equalWorkChangePercent": 0.5035268719253638,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 0.3202358422179197,
+            "ratios": [
+              1.0057004001242416,
+              0.9798781510256553,
+              1.0305141713401,
+              0.9937343832815975,
+              1.0007043167201168,
+              1.0202126238237863
+            ],
+            "worstPairChangePercent": 3.051417134010004
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.0115740313438093,
+              -0.4153294317538192
+            ],
+            "equalWorkChangePercent": -0.7167990442678351,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": -0.7134517315488198,
+            "ratios": [
+              0.9898842596865619,
+              0.9958467056824618
+            ],
+            "worstPairChangePercent": -0.4153294317538192
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 605
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 6,
+            "descriptiveBootstrap95Percent": [
+              -5.957037706274249,
+              1.3249275483599998
+            ],
+            "equalWorkChangePercent": -1.828535454701219,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.49916152816693593,
+            "ratios": [
+              1.0065336579726372,
+              1.019964892994563,
+              0.9200490828831485,
+              1.0006545197240322,
+              0.9608101629913666,
+              0.989362249712629
+            ],
+            "worstPairChangePercent": 1.9964892994563055
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 2,
+            "descriptiveBootstrap95Percent": [
+              -1.249935526022894,
+              1.6836383530682397
+            ],
+            "equalWorkChangePercent": 0.19769041854489355,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.21685141352267845,
+            "ratios": [
+              1.0168363835306824,
+              0.9875006447397711
+            ],
+            "worstPairChangePercent": 1.6836383530682397
+          },
+          "initialOrder": "BA",
+          "memoryPassed": false,
+          "originalGateStatus": "memory-or-semantics-failed",
+          "rawMemoryScans": 414
+        }
+      ],
+      "evidenceHead": "be6eaed99ff78936152fe827854973272bfc31f1",
+      "evidencePath": "dev/perf/composite-window-5a86/hosted/manifest.json.txt",
+      "evidenceTree": "b51bdeb6e5894351f10c3dc3af7cffa8aae0cc0e",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/be6eaed99ff78936152fe827854973272bfc31f1/dev/perf/composite-window-5a86/hosted/manifest.json.txt",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/be6eaed99ff78936152fe827854973272bfc31f1/dev/perf/import-experiments-20260914.md",
+      "id": "composite",
+      "imports": 156,
+      "measuredHead": "2cdcc90241fa19221b7fc4e5d793eb70896c3258",
+      "measurementKind": "complete-browser-import",
+      "mechanism": "Reuse a sixteen-byte special-character window across generic string parses in one composite; no cache-budget/scheduler change.",
+      "name": "Composite string-window reuse",
+      "rawMemoryScans": 2157,
+      "runId": 46104027586,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104027586",
+      "status": "CLOSED_NO_REVIEW_WORTHY_GAIN_NO_PR",
+      "unitPassed": 15139
+    },
+    {
+      "cohorts": [
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -2.069820649280929,
+              3.047664792564242
+            ],
+            "equalWorkChangePercent": 9.484354245149774,
+            "fasterPairs": 6,
+            "medianPairedChangePercent": 0.896388497693823,
+            "ratios": [
+              2.1690950407699914,
+              0.958242880858149,
+              0.9700843437006024,
+              1.0552246886843775,
+              0.9998724001530752,
+              1.025387154099988,
+              1.0323928944618446,
+              1.0285604013894403,
+              0.988519243313779,
+              0.9953885799538541,
+              1.0180553698008012,
+              0.9277123686542179
+            ],
+            "worstPairChangePercent": 116.90950407699914
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -1.0476689366198277,
+              2.101458974703796
+            ],
+            "equalWorkChangePercent": 0.7721378771070597,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 1.037241981030812,
+            "ratios": [
+              1.021014589747038,
+              0.9895233106338017,
+              1.0155902004453876,
+              1.0051546391752284
+            ],
+            "worstPairChangePercent": 2.101458974703796
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 278
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -4.916260876020528,
+              0.8692863609066404
+            ],
+            "equalWorkChangePercent": -1.8565440257822807,
+            "fasterPairs": 8,
+            "medianPairedChangePercent": -1.926064336540556,
+            "ratios": [
+              0.9487319334605872,
+              0.9926060267857103,
+              1.001681143177336,
+              0.9648584576767376,
+              0.9688726864834786,
+              0.9349560513860637,
+              1.0183776022972253,
+              1.0452966714905765,
+              0.9938597743823827,
+              1.0157045840407968,
+              0.9459385665528534,
+              0.9529428490190023
+            ],
+            "worstPairChangePercent": 4.529667149057648
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -3.905938620967564,
+              8.475548544390632
+            ],
+            "equalWorkChangePercent": 2.3674242424252867,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 2.72127773476436,
+            "ratios": [
+              1.017822333611832,
+              0.9609406137903244,
+              1.0847554854439063,
+              1.0366032210834553
+            ],
+            "worstPairChangePercent": 8.475548544390632
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 257
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -0.01060337333553818,
+              3.362658339623459
+            ],
+            "equalWorkChangePercent": 1.60239146827581,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": 1.6346545675880453,
+            "ratios": [
+              1.0380914981346827,
+              1.0049092435889193,
+              0.979318342890274,
+              0.9948786889443698,
+              1.0346141427187638,
+              1.0170741171905278,
+              1.026718564454452,
+              1.0578964506675501,
+              1.0130677086669428,
+              1.0326390240737053,
+              1.0156189741612334,
+              0.9792594477669061
+            ],
+            "worstPairChangePercent": 5.7896450667550114
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -2.310104306650962,
+              0.1672994015814
+            ],
+            "equalWorkChangePercent": -0.9099370907706184,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.7441181412074949,
+            "ratios": [
+              0.9895606506980802,
+              0.9768989569334904,
+              1.001672994015814,
+              0.9955569864777699
+            ],
+            "worstPairChangePercent": 0.1672994015814
+          },
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 274
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.0187564015755268,
+              0.9033786362225626
+            ],
+            "equalWorkChangePercent": 1.8870604107861233,
+            "fasterPairs": 6,
+            "medianPairedChangePercent": -0.19721933799590197,
+            "ratios": [
+              1.278094033312246,
+              1.0022709530906129,
+              0.9914854035489451,
+              0.9881394684195444,
+              0.9944201158355536,
+              1.0141737891738059,
+              1.0016354974045285,
+              1.0046891651864844,
+              1.0133784075379666,
+              0.993527738264597,
+              0.9794092587333139,
+              0.9630534990920354
+            ],
+            "worstPairChangePercent": 27.80940333122459
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -3.183520599248535,
+              0.19406310644594083
+            ],
+            "equalWorkChangePercent": -1.5169752540089565,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -1.5091029781829746,
+            "ratios": [
+              0.9858724975152469,
+              1.0019406310644594,
+              0.9681647940075147,
+              0.9839454429210936
+            ],
+            "worstPairChangePercent": 0.19406310644594083
+          },
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 403
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.9883432858506689,
+              1.13153458193902
+            ],
+            "equalWorkChangePercent": -0.7872218895262573,
+            "fasterPairs": 7,
+            "medianPairedChangePercent": -0.27037563056222513,
+            "ratios": [
+              1.0021066359030908,
+              1.0336690499106325,
+              0.9973507947615676,
+              1.000856955623147,
+              0.9875264881525699,
+              0.9931463341245502,
+              0.9972416926271878,
+              1.0280966511233691,
+              0.9420448766844541,
+              1.0205240557356896,
+              0.9384189115602858,
+              0.9727066461304167
+            ],
+            "worstPairChangePercent": 3.3669049910632465
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -4.8351860181180655,
+              2.7458109660928542
+            ],
+            "equalWorkChangePercent": -0.5563745103814188,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": 0.05869840619108224,
+            "ratios": [
+              1.0274581096609285,
+              0.9516481398188193,
+              1.0114789468361218,
+              0.9896950212877
+            ],
+            "worstPairChangePercent": 2.7458109660928542
+          },
+          "initialOrder": "AB",
+          "memoryPassed": false,
+          "originalGateStatus": "memory-or-semantics-failed",
+          "rawMemoryScans": 490
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.644559059705586,
+              5.897841338630205
+            ],
+            "equalWorkChangePercent": 2.8831258247749014,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": 1.9318301867053744,
+            "ratios": [
+              1.006400979628192,
+              0.9854702937812804,
+              1.0864719446579554,
+              0.9527102180038496,
+              1.0225928971377156,
+              1.0241056055098527,
+              1.0705236235303346,
+              1.0474332032422695,
+              0.9502094958946532,
+              1.2100726558477415,
+              1.0160437065963916,
+              0.9816385250246079
+            ],
+            "worstPairChangePercent": 21.00726558477415
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -4.073070700231696,
+              1.6803807835344298
+            ],
+            "equalWorkChangePercent": -0.7168492902908108,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": -0.20486211610042382,
+            "ratios": [
+              1.000169772881627,
+              0.9957329847963646,
+              0.959269292997683,
+              1.0168038078353443
+            ],
+            "worstPairChangePercent": 1.6803807835344298
+          },
+          "initialOrder": "BA",
+          "memoryPassed": false,
+          "originalGateStatus": "memory-or-semantics-failed",
+          "rawMemoryScans": 451
+        }
+      ],
+      "evidenceHead": "7960f29074a19c9e1691e2219f738cf968ae33f4",
+      "evidencePath": "dev/perf/suffix-window-5a86/hosted/results.json.txt",
+      "evidenceTree": "8fbe664f7eb46fa19c662fb984beac52ccc38d57",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/7960f29074a19c9e1691e2219f738cf968ae33f4/dev/perf/suffix-window-5a86/hosted/results.json.txt",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/7960f29074a19c9e1691e2219f738cf968ae33f4/dev/perf/import-experiments-20260914.md",
+      "id": "suffix",
+      "imports": 252,
+      "measuredHead": "38031a752b26c9b630e5f2f1d45e780786656c74",
+      "measurementKind": "complete-browser-import",
+      "mechanism": "After the original glossary probe fails, compare complete remaining row suffixes only at older unchecked slots in the existing four-row window; equality is required and original budgets remain.",
+      "name": "Exact format-3 suffix reuse",
+      "rawMemoryScans": 2153,
+      "runId": 46104813593,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104813593",
+      "status": "CLOSED_NO_REVIEW_WORTHY_GAIN_NO_PR",
+      "unitPassed": 15153
+    },
+    {
+      "cohorts": [
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -2.6826791145044826,
+              1.4133465152151414
+            ],
+            "equalWorkChangePercent": -0.5245749134316746,
+            "fasterPairs": 7,
+            "medianPairedChangePercent": -0.6262866663707012,
+            "ratios": [
+              0.9724444444444502,
+              1.037733865881883,
+              1.0132711249351876,
+              1.0149958053691153,
+              0.9610811909358926,
+              0.9899166580924083,
+              1.0058260507699077,
+              0.950376695128053,
+              1.0371274000212152,
+              0.98764807127675,
+              0.9739019732654601,
+              0.9975576085801778
+            ],
+            "worstPairChangePercent": 3.77338658818831
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -0.13530391340428327,
+              4.726472437641593
+            ],
+            "equalWorkChangePercent": 1.37977892178609,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.4701902879666875,
+            "ratios": [
+              0.9986469608659572,
+              1.047264724376416,
+              1.005827869705521,
+              1.0035759360538126
+            ],
+            "worstPairChangePercent": 4.726472437641593
+          },
+          "imports": 42,
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "memoryReview": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 0.6268408344946241,
+                "medianPairedChangePercent": -1.0856442166499947
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 0.5838428459310707,
+                "medianPairedChangePercent": -1.0830170819555174
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 64,
+                "arm": "A",
+                "maxSampledPrivateKiB": 803108,
+                "maxSampledPssKiB": 1038701,
+                "maximumCoveredSampleGapMs": 233.793219,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 64,
+                "arm": "B",
+                "maxSampledPrivateKiB": 780636,
+                "maxSampledPssKiB": 1010138,
+                "maximumCoveredSampleGapMs": 212.172517,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 64,
+                "arm": "B",
+                "maxSampledPrivateKiB": 788524,
+                "maxSampledPssKiB": 1021442,
+                "maximumCoveredSampleGapMs": 205.922179,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 66,
+                "arm": "A",
+                "maxSampledPrivateKiB": 783612,
+                "maxSampledPssKiB": 1015513,
+                "maximumCoveredSampleGapMs": 211.836791,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 803108,
+                  "candidate": 780636,
+                  "changePercent": -2.7981292677946135
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1038701,
+                  "candidate": 1010138,
+                  "changePercent": -2.7498770098421055
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 783612,
+                  "candidate": 788524,
+                  "changePercent": 0.6268408344946241
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1015513,
+                  "candidate": 1021442,
+                  "changePercent": 0.5838428459310707
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true
+          },
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 258,
+          "reviewSha256": "ea7125a15d8bd5009f87d9fcb57d3a5ec2aad24c45bbb9cc938c2a88c50ff1e3"
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.5517832242539442,
+              0.75534390927261
+            ],
+            "equalWorkChangePercent": -0.23424871854668128,
+            "fasterPairs": 8,
+            "medianPairedChangePercent": -0.9220419212766395,
+            "ratios": [
+              0.9708066845471544,
+              0.9911013400335009,
+              1.0240760295670723,
+              0.9805946791862528,
+              0.976545842217478,
+              0.9904578215409663,
+              0.9883696563286684,
+              1.0111547200991409,
+              1.0039521580863113,
+              0.995450315375902,
+              0.9887206266318052,
+              1.051765441099835
+            ],
+            "worstPairChangePercent": 5.176544109983494
+          },
+          "dictionary": "jmdict",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -1.5574029253907717,
+              3.349333333329607
+            ],
+            "equalWorkChangePercent": 0.7023102310201867,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 0.527933868155217,
+            "ratios": [
+              1.0071132816647017,
+              1.0034453956984026,
+              0.9844259707460923,
+              1.033493333333296
+            ],
+            "worstPairChangePercent": 3.349333333329607
+          },
+          "imports": 42,
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "memoryReview": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 4.1260307060904555,
+                "medianPairedChangePercent": 2.681770532932082
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 3.3625556646169175,
+                "medianPairedChangePercent": 2.2417020511525276
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 64,
+                "arm": "B",
+                "maxSampledPrivateKiB": 779400,
+                "maxSampledPssKiB": 1014089,
+                "maximumCoveredSampleGapMs": 187.368206,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 63,
+                "arm": "A",
+                "maxSampledPrivateKiB": 748516,
+                "maxSampledPssKiB": 981099,
+                "maximumCoveredSampleGapMs": 203.180085,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 65,
+                "arm": "A",
+                "maxSampledPrivateKiB": 777044,
+                "maxSampledPssKiB": 1004953,
+                "maximumCoveredSampleGapMs": 199.559146,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 65,
+                "arm": "B",
+                "maxSampledPrivateKiB": 786660,
+                "maxSampledPssKiB": 1016217,
+                "maximumCoveredSampleGapMs": 199.686741,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 748516,
+                  "candidate": 779400,
+                  "changePercent": 4.1260307060904555
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 981099,
+                  "candidate": 1014089,
+                  "changePercent": 3.3625556646169175
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 777044,
+                  "candidate": 786660,
+                  "changePercent": 1.237510359773708
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1004953,
+                  "candidate": 1016217,
+                  "changePercent": 1.1208484376881378
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true
+          },
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 257,
+          "reviewSha256": "33c523a1a923b548d9f73cc8bdd1898f3f92090b5be96e64892b2ba2114b1a9e"
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.8953568982992053,
+              3.2487830284332997
+            ],
+            "equalWorkChangePercent": 0.42773654771088854,
+            "fasterPairs": 6,
+            "medianPairedChangePercent": -0.06540515144044523,
+            "ratios": [
+              1.0967555412784946,
+              0.9716131436735308,
+              0.9856740694401037,
+              1.0018841854038254,
+              1.0196328403875687,
+              1.0453428201810975,
+              1.0108238495793798,
+              1.048886018727771,
+              0.9897823189693249,
+              0.9764187925939123,
+              0.9968077115673656,
+              0.9184487996664271
+            ],
+            "worstPairChangePercent": 9.675554127849463
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -0.8898015058136033,
+              2.6110170595114557
+            ],
+            "equalWorkChangePercent": 0.022044813958799203,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -0.759981055226322,
+            "ratios": [
+              0.993669696020071,
+              0.991101984941864,
+              0.9911306828754025,
+              1.0261101705951146
+            ],
+            "worstPairChangePercent": 2.6110170595114557
+          },
+          "imports": 42,
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "memoryReview": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 2.5532776362307663,
+                "medianPairedChangePercent": 2.370431213169455
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 2.218249072842715,
+                "medianPairedChangePercent": 1.9759946968503805
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 69,
+                "arm": "A",
+                "maxSampledPrivateKiB": 810096,
+                "maxSampledPssKiB": 1039198,
+                "maximumCoveredSampleGapMs": 171.069822,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 68,
+                "arm": "B",
+                "maxSampledPrivateKiB": 830780,
+                "maxSampledPssKiB": 1062250,
+                "maximumCoveredSampleGapMs": 214.381311,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 69,
+                "arm": "B",
+                "maxSampledPrivateKiB": 843628,
+                "maxSampledPssKiB": 1073528,
+                "maximumCoveredSampleGapMs": 194.969549,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 69,
+                "arm": "A",
+                "maxSampledPrivateKiB": 825568,
+                "maxSampledPssKiB": 1055233,
+                "maximumCoveredSampleGapMs": 184.583965,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 810096,
+                  "candidate": 830780,
+                  "changePercent": 2.5532776362307663
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1039198,
+                  "candidate": 1062250,
+                  "changePercent": 2.218249072842715
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 825568,
+                  "candidate": 843628,
+                  "changePercent": 2.1875847901081436
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1055233,
+                  "candidate": 1073528,
+                  "changePercent": 1.733740320858046
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true
+          },
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 275,
+          "reviewSha256": "da022e37137c42a892a6c1ae1e4f146d9440cdc8ecfcd3f331efeec444702704"
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -2.028133860433723,
+              0.19824266229155896
+            ],
+            "equalWorkChangePercent": -1.1176383763850661,
+            "fasterPairs": 8,
+            "medianPairedChangePercent": -1.0979553603861603,
+            "ratios": [
+              0.9945259174156884,
+              0.9836031833150225,
+              0.9800013650945404,
+              1.0191698001916762,
+              1.0020713123242997,
+              1.0468976018271616,
+              0.9944377094772543,
+              0.979435957696785,
+              0.9807021291746121,
+              1.0018935409215315,
+              0.9473396998636061,
+              0.9442686115315798
+            ],
+            "worstPairChangePercent": 4.689760182716163
+          },
+          "dictionary": "jitendex",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -6.893250359022717,
+              3.0069280765685047
+            ],
+            "equalWorkChangePercent": -2.128321720637427,
+            "fasterPairs": 3,
+            "medianPairedChangePercent": -2.1942367647966643,
+            "ratios": [
+              0.9664743807261662,
+              0.9310674964097728,
+              1.030069280765685,
+              0.9896408839779005
+            ],
+            "worstPairChangePercent": 3.0069280765685047
+          },
+          "imports": 42,
+          "initialOrder": "BA",
+          "memoryPassed": true,
+          "memoryReview": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 1.4169452114518144,
+                "medianPairedChangePercent": 1.3296152111592963
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 1.1127200670680626,
+                "medianPairedChangePercent": 1.0839529335976539
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 99,
+                "arm": "B",
+                "maxSampledPrivateKiB": 818228,
+                "maxSampledPssKiB": 1048093,
+                "maximumCoveredSampleGapMs": 113.587925,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 100,
+                "arm": "A",
+                "maxSampledPrivateKiB": 808188,
+                "maxSampledPssKiB": 1036559,
+                "maximumCoveredSampleGapMs": 115.087835,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 97,
+                "arm": "A",
+                "maxSampledPrivateKiB": 825720,
+                "maxSampledPssKiB": 1054601,
+                "maximumCoveredSampleGapMs": 123.91793,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 96,
+                "arm": "B",
+                "maxSampledPrivateKiB": 837420,
+                "maxSampledPssKiB": 1065729,
+                "maximumCoveredSampleGapMs": 112.753525,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 808188,
+                  "candidate": 818228,
+                  "changePercent": 1.2422852108667781
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1036559,
+                  "candidate": 1048093,
+                  "changePercent": 1.1127200670680626
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 825720,
+                  "candidate": 837420,
+                  "changePercent": 1.4169452114518144
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1054601,
+                  "candidate": 1065729,
+                  "changePercent": 1.0551858001272452
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true
+          },
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 392,
+          "reviewSha256": "d1c03fafb6d6fb7aa430c3c5323d624080b3c7e2e49161ef06eaa73d862b636d"
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -2.4200575490879395,
+              0.43223769024485215
+            ],
+            "equalWorkChangePercent": -0.6426866414662502,
+            "fasterPairs": 8,
+            "medianPairedChangePercent": -1.231677572479939,
+            "ratios": [
+              0.9904852723034492,
+              0.9681775178463924,
+              0.9852384147528874,
+              1.0517081975874212,
+              0.9759662926179016,
+              1.0312849912661164,
+              0.9901280337975138,
+              0.966028042384683,
+              1.0053028188668611,
+              1.0033419349380361,
+              0.9756325564003395,
+              0.983067856685255
+            ],
+            "worstPairChangePercent": 5.170819758742118
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -4.204374057314175,
+              1.9910138199732863
+            ],
+            "equalWorkChangePercent": -0.9536133677711112,
+            "fasterPairs": 2,
+            "medianPairedChangePercent": -0.7425982352342597,
+            "ratios": [
+              0.9579562594268582,
+              0.9670890455390341,
+              1.0199101381997329,
+              1.0180589897562806
+            ],
+            "worstPairChangePercent": 1.9910138199732863
+          },
+          "imports": 42,
+          "initialOrder": "AB",
+          "memoryPassed": true,
+          "memoryReview": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 1.5185588485938872,
+                "medianPairedChangePercent": 0.8860635147963536
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 0.7513793349811282,
+                "medianPairedChangePercent": 0.7277057187059288
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 143,
+                "arm": "A",
+                "maxSampledPrivateKiB": 1013856,
+                "maxSampledPssKiB": 1245709,
+                "maximumCoveredSampleGapMs": 127.11532,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 143,
+                "arm": "B",
+                "maxSampledPrivateKiB": 1029252,
+                "maxSampledPssKiB": 1255069,
+                "maximumCoveredSampleGapMs": 146.562582,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 142,
+                "arm": "B",
+                "maxSampledPrivateKiB": 1001080,
+                "maxSampledPssKiB": 1236715,
+                "maximumCoveredSampleGapMs": 143.198211,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              },
+              {
+                "allObservedSampleCount": 150,
+                "arm": "A",
+                "maxSampledPrivateKiB": 998548,
+                "maxSampledPssKiB": 1228069,
+                "maximumCoveredSampleGapMs": 141.712952,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 1013856,
+                  "candidate": 1029252,
+                  "changePercent": 1.5185588485938872
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1245709,
+                  "candidate": 1255069,
+                  "changePercent": 0.7513793349811282
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 998548,
+                  "candidate": 1001080,
+                  "changePercent": 0.25356818099881995
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1228069,
+                  "candidate": 1236715,
+                  "changePercent": 0.7040321024307294
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true
+          },
+          "originalGateStatus": "correctness-memory-passed",
+          "rawMemoryScans": 578,
+          "reviewSha256": "98b973f53b2d2729460609a0ac80ef9321b15e14f618612eb51a83c973adf1c4"
+        },
+        {
+          "candidateVsBaseline": {
+            "count": 12,
+            "descriptiveBootstrap95Percent": [
+              -1.2848526779088099,
+              3.9887190656602733
+            ],
+            "equalWorkChangePercent": 1.0766553488766872,
+            "fasterPairs": 4,
+            "medianPairedChangePercent": 1.4704806092180167,
+            "ratios": [
+              0.981144252572823,
+              1.047161019184454,
+              1.019884620105554,
+              0.9931586938690009,
+              1.0004924548876126,
+              0.9451711340206339,
+              1.0817628599663611,
+              1.0460675859978747,
+              1.0137339191452899,
+              1.0156756930390702,
+              0.9576076746585468,
+              1.033706795315331
+            ],
+            "worstPairChangePercent": 8.176285996636112
+          },
+          "dictionary": "vndb",
+          "identicalCodeControl": {
+            "count": 4,
+            "descriptiveBootstrap95Percent": [
+              -1.919456066945202,
+              7.529431000654019
+            ],
+            "equalWorkChangePercent": 3.231186332722835,
+            "fasterPairs": 1,
+            "medianPairedChangePercent": 3.5263013021607836,
+            "ratios": [
+              0.980805439330548,
+              1.0534042014679827,
+              1.017121824575233,
+              1.0752943100065402
+            ],
+            "worstPairChangePercent": 7.529431000654019
+          },
+          "imports": 42,
+          "initialOrder": "BA",
+          "memoryPassed": false,
+          "memoryReview": {
+            "everyObservationQualified": false,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": null,
+                "medianPairedChangePercent": null
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": null,
+                "medianPairedChangePercent": null
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 105,
+                "arm": "B",
+                "maxSampledPrivateKiB": null,
+                "maxSampledPssKiB": null,
+                "maximumCoveredSampleGapMs": 268.173684,
+                "name": "B1",
+                "pair": 1,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ],
+                "qualifiedForWholeTreePss": false
+              },
+              {
+                "allObservedSampleCount": 106,
+                "arm": "A",
+                "maxSampledPrivateKiB": null,
+                "maxSampledPssKiB": null,
+                "maximumCoveredSampleGapMs": 277.503958,
+                "name": "A1",
+                "pair": 1,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ],
+                "qualifiedForWholeTreePss": false
+              },
+              {
+                "allObservedSampleCount": 108,
+                "arm": "A",
+                "maxSampledPrivateKiB": null,
+                "maxSampledPssKiB": null,
+                "maximumCoveredSampleGapMs": 263.562157,
+                "name": "A2",
+                "pair": 2,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ],
+                "qualifiedForWholeTreePss": false
+              },
+              {
+                "allObservedSampleCount": 104,
+                "arm": "B",
+                "maxSampledPrivateKiB": null,
+                "maxSampledPssKiB": null,
+                "maximumCoveredSampleGapMs": 307.072375,
+                "name": "B2",
+                "pair": 2,
+                "qualificationFailures": [
+                  "covered-import-scan-gap-over-250ms"
+                ],
+                "qualifiedForWholeTreePss": false
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": null,
+                  "candidate": null,
+                  "changePercent": null
+                },
+                "maxSampledPssKiB": {
+                  "baseline": null,
+                  "candidate": null,
+                  "changePercent": null
+                },
+                "pair": 1,
+                "qualified": false
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": null,
+                  "candidate": null,
+                  "changePercent": null
+                },
+                "maxSampledPssKiB": {
+                  "baseline": null,
+                  "candidate": null,
+                  "changePercent": null
+                },
+                "pair": 2,
+                "qualified": false
+              }
+            ],
+            "passesProspectiveMemoryScreen": false
+          },
+          "originalGateStatus": "memory-or-semantics-failed",
+          "rawMemoryScans": 423,
+          "reviewSha256": "14e176958c9eaf588abedc7ffeff025b012a718fd8c4275959b2010df09ef964"
+        }
+      ],
+      "decision": "STOP / NO PR / no further unchanged acquisition: uncertain JMdict effects, no Jitendex replication, opposite VNDB signs and VNDB BA memory-coverage failure.",
+      "evidenceHead": "43150e79573d38d6b2379bf29c7676c44f592930",
+      "evidencePath": "builds/perf/js-hash-rounds-5a86/completed-hosted/evidence-index.json",
+      "evidencePublicationStatus": "EVIDENCE_PUBLISHED_AND_ROOT_READBACK_VERIFIED",
+      "evidenceTree": "79a73fa55c2727754a964c1c5a1a6fc2916b27ab",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/43150e79573d38d6b2379bf29c7676c44f592930/builds/perf/js-hash-rounds-5a86/completed-hosted/evidence-index.json",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/43150e79573d38d6b2379bf29c7676c44f592930/dev/perf/import-experiments-20260914.md",
+      "id": "js-hash",
+      "imports": 252,
+      "independentReview": {
+        "archiveGitBlob": "602338607cfbc976bf34ec6b9e83fc53c53fff75",
+        "archiveMembers": 40,
+        "archiveSha256": "e1f67044104278086b3700aefad35cc3c87cc8aa2e2a3b7958ed702c6a7e2ddd",
+        "gitBlob": "d1c01edc325e83401aeb17944e1c6ef2917eda85",
+        "manifestGitBlob": "127b7b6f877eaa2e74cda22f1e30f4be22622cbf",
+        "manifestSha256": "b05b72db5317756a51f0f6523985293eef519c1d52da6a691f578d0c87ee0c5b",
+        "preparationHistory": "Initial reviewer-only numeric nextFrameAtMs assumption failed for a valid null optional field. Corrected to the unchanged original completedAtMs protocol; original failed helper/receipt and all observations are retained.",
+        "sha256": "595b0e53843c43e3e50c36f16f21e5da0febbea4c7f172a840aad2f9dd6179bf"
+      },
+      "measuredHead": "baca22e773e835f6729d4fc5198f2445afac4535",
+      "measurementKind": "complete-browser-import",
+      "mechanism": "Inline four existing large-range XXH32 rounds with equivalent modulo-32-bit arithmetic; only packaged term-key-hash.js changes.",
+      "name": "Large JavaScript hash-round specialization",
+      "publishedSummary": {
+        "bytes": 41113,
+        "sha256": "1739050674ac52b783f8445a327c9ce2f17f2a8e540c2eb206e42e67bb78badb"
+      },
+      "rawMemoryScans": 2183,
+      "runId": 46107975597,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46107975597",
+      "sourceValidationEvidenceHead": "b85683e2f1a92a1d80af969776645d088443da94",
+      "status": "CLOSED_NO_REVIEW_WORTHY_GAIN_NO_PR",
+      "unitPassed": 15139
+    },
+    {
+      "cohorts": [],
+      "component": {
+        "blocks": 12,
+        "boundary": "Five complete fixed JMdict decodes per fresh Node process, twelve production-byte-balanced groups in serial. Cold first decode is after untimed module compilation and input/oracle preparation; four subsequent sweeps are all retained and averaged with equal weight, without a steady-state claim. Primary clock sums awaited production inflate helper calls, including allocation and compressed-input copies. Existing native sourceInflate counter is secondary and includes immediate CRC. Separate process user/system CPU counters bracket the same calls and may include runtime/compiler threads. Input acquisition, output SHA/CRC/spans verification and receipt writes are outside every measured call. No explicit GC, affinity, flags, worker-count or production-budget change.",
+        "checks": {
+          "candidateEqualWorkWallAgainstBoth": false,
+          "candidateFasterBlocksAgainstBoth": false,
+          "candidateMedianCpuAgainstBoth": false,
+          "candidateMedianWallAgainstBoth": false,
+          "coldWallAgainstBoth": false,
+          "sameCodeMedianCpuDrift": true,
+          "sameCodeMedianWallDrift": true
+        },
+        "children": 36,
+        "coldSweeps": 36,
+        "criteria": {
+          "allCorrectnessAndSourceGates": "required",
+          "candidateEqualWorkWallAgainstBoth": "negative",
+          "candidateMedianCpuAgainstBoth": "negative",
+          "maximumColdMedianRegressionPercent": 5,
+          "maximumSameCodeMedianDriftPercent": 2,
+          "minimumFasterBlocks": 9,
+          "minimumPairedWallImprovementPercent": 2,
+          "onFailure": "hold; no unchanged local rerun",
+          "onPass": "eligible only for hosted full import/source/memory qualification, including full leak-enabled sanitizer; no PR or whole-import gain claim"
+        },
+        "originalLocalDisposition": "FAILED/HOLD; zero measured children; unknown SIGKILL cause. Native census and most raw local validation logs remain unavailable; exact-hash recoveries and deterministic read-only review reconstruction are labelled separately.",
+        "postcoldSweeps": 144,
+        "sourceGate": {
+          "dryBuildTargets": 7,
+          "files": 669,
+          "leakEnabled": true,
+          "nativeSanitizerCases": 231528,
+          "typeProjects": 4,
+          "unitPassed": 15143,
+          "unitSkipped": 47
+        },
+        "statistics": {
+          "callElapsedMs": {
+            "cold": {
+              "BA": {
+                "bestPercent": 1.3925092319006849,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.908038841052067,
+                "medianAbsoluteDifferenceMs": 10.57980299999997,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.582940450401886,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 13.404527563060409
+              },
+              "BC": {
+                "bestPercent": -1.6252372735966025,
+                "equalBlocks": 0,
+                "equalWorkPercent": 5.9498416256623,
+                "medianAbsoluteDifferenceMs": 11.047850999999909,
+                "numeratorFasterBlocks": 1,
+                "pairedMedianPercent": 6.82217703444945,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 10.152664697548497
+              },
+              "CA": {
+                "bestPercent": -6.21996840910406,
+                "equalBlocks": 0,
+                "equalWorkPercent": 0.9043875863214756,
+                "medianAbsoluteDifferenceMs": 1.8085060000001363,
+                "numeratorFasterBlocks": 4,
+                "pairedMedianPercent": 1.1207105674962414,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 7.00225456057999
+              }
+            },
+            "postcoldMean": {
+              "BA": {
+                "bestPercent": 4.797352736595428,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.169026508189002,
+                "medianAbsoluteDifferenceMs": 9.323835375000215,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.490460742604509,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 6.683974358671607
+              },
+              "BC": {
+                "bestPercent": 4.371601412644277,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.407202757789543,
+                "medianAbsoluteDifferenceMs": 9.254473999999917,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.444664832238733,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 7.311630945563219
+              },
+              "CA": {
+                "bestPercent": -2.322687006715529,
+                "equalBlocks": 0,
+                "equalWorkPercent": -0.22383470613610568,
+                "medianAbsoluteDifferenceMs": -0.1584537499999783,
+                "numeratorFasterBlocks": 8,
+                "pairedMedianPercent": -0.11026098873491708,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 2.0244824813659745
+              }
+            }
+          },
+          "cpuTotalMs": {
+            "cold": {
+              "BA": {
+                "bestPercent": 2.615161427334267,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.279150922510635,
+                "medianAbsoluteDifferenceMs": 9.604,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 5.381682993120096,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 10.487775599215698
+              },
+              "BC": {
+                "bestPercent": -4.00885878061491,
+                "equalBlocks": 0,
+                "equalWorkPercent": 4.957683508495947,
+                "medianAbsoluteDifferenceMs": 10.524999999999991,
+                "numeratorFasterBlocks": 1,
+                "pairedMedianPercent": 5.900689763089817,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 9.032154090671662
+              },
+              "CA": {
+                "bestPercent": -4.875088946378437,
+                "equalBlocks": 0,
+                "equalWorkPercent": 1.2590478084510082,
+                "medianAbsoluteDifferenceMs": 0.8705000000000069,
+                "numeratorFasterBlocks": 4,
+                "pairedMedianPercent": 0.4903382358924069,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 9.395219446012115
+              }
+            },
+            "postcoldMean": {
+              "BA": {
+                "bestPercent": 4.798296831565474,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.1589631358072605,
+                "medianAbsoluteDifferenceMs": 9.290124999999989,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.462613079165392,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 6.690738797044404
+              },
+              "BC": {
+                "bestPercent": 4.3756928692033625,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.3979182914331245,
+                "medianAbsoluteDifferenceMs": 9.229500000000002,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.423139149094803,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 7.313500505702208
+              },
+              "CA": {
+                "bestPercent": -2.3370908217710595,
+                "equalBlocks": 0,
+                "equalWorkPercent": -0.22458630719760508,
+                "medianAbsoluteDifferenceMs": -0.1807500000000033,
+                "numeratorFasterBlocks": 7,
+                "pairedMedianPercent": -0.12570650273954764,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 2.0462151893666958
+              }
+            }
+          },
+          "sourceInflateMs": {
+            "cold": {
+              "BA": {
+                "bestPercent": 1.339481089429806,
+                "equalBlocks": 0,
+                "equalWorkPercent": 7.061279115398755,
+                "medianAbsoluteDifferenceMs": 10.47750200000003,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.779717248001393,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 13.579767734375213
+              },
+              "BC": {
+                "bestPercent": -0.46841447284199367,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.398663542004912,
+                "medianAbsoluteDifferenceMs": 11.120478999999975,
+                "numeratorFasterBlocks": 1,
+                "pairedMedianPercent": 7.147811751855038,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 10.289665075379073
+              },
+              "CA": {
+                "bestPercent": -6.297257777214815,
+                "equalBlocks": 0,
+                "equalWorkPercent": 0.6227668199349612,
+                "medianAbsoluteDifferenceMs": 1.4093949999999893,
+                "numeratorFasterBlocks": 4,
+                "pairedMedianPercent": 0.8945056389984218,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 5.760760637868034
+              }
+            },
+            "postcoldMean": {
+              "BA": {
+                "bestPercent": 5.040367951219005,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.361149550866285,
+                "medianAbsoluteDifferenceMs": 9.278124249999976,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.639199729063783,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 6.863037693154417
+              },
+              "BC": {
+                "bestPercent": 4.569941717667603,
+                "equalBlocks": 0,
+                "equalWorkPercent": 6.586715023028278,
+                "medianAbsoluteDifferenceMs": 9.288865124999859,
+                "numeratorFasterBlocks": 0,
+                "pairedMedianPercent": 6.647239662973803,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 7.500999179548606
+              },
+              "CA": {
+                "bestPercent": -2.1850454295510024,
+                "equalBlocks": 0,
+                "equalWorkPercent": -0.2116262539034519,
+                "medianAbsoluteDifferenceMs": -0.12462949999989803,
+                "numeratorFasterBlocks": 8,
+                "pairedMedianPercent": -0.08907838787818312,
+                "undefinedRatioBlocks": [],
+                "worstPercent": 1.975563947309289
+              }
+            }
+          }
+        },
+        "totalSweeps": 180
+      },
+      "decision": "STOP / NO PR. Complete acquisition is ineligible under five of seven unchanged continuation guards; all browser expansion jobs were skipped.",
+      "evidenceHead": "ac0894ec21efcc89c34408534a43a40f4f46d761",
+      "evidencePath": "builds/perf/inflate-short-word-hosted-20261128-5a86/summary.json.txt",
+      "evidencePublicationStatus": "EVIDENCE_PUBLISHED_AND_ROOT_READBACK_VERIFIED",
+      "evidenceTree": "d9d4dbb5c6f4e72213731759ff656c4b785c37a5",
+      "evidenceUrl": "https://github.com/ManabiIO/manabitan/blob/ac0894ec21efcc89c34408534a43a40f4f46d761/builds/perf/inflate-short-word-hosted-20261128-5a86/summary.json.txt",
+      "handoffUrl": "https://github.com/ManabiIO/manabitan/blob/ac0894ec21efcc89c34408534a43a40f4f46d761/dev/perf/import-experiments-20260914.md",
+      "id": "short-word",
+      "imports": 0,
+      "independentReview": {
+        "archiveGitBlob": "c4ef7b14cb2aa7df0b673b51d2183a5fc70f0458",
+        "archiveMembers": 11,
+        "archiveSha256": "24e82ac8fd2579cd7842432881a5aeeb57027dc962228be0a8eef62242881e26",
+        "derivationSha256": "a17e1058d79a5dd341c83ddec54ff2bdb06b3f11cf29957877c9575be459798b",
+        "finalSummaryScopeReview": {
+          "gitBlob": "de932d1aaed83433ecdd628718e7718fb5545d7b",
+          "preparationHistory": "An extra reviewer assumption that all old handoff bytes stayed unchanged was corrected to allow the documented frozen source-check command pin; all other old text and all numerical/source scopes remain exact.",
+          "sha256": "815de29cff71f4ade90c1ba8b8dcd642b5e5a972278e17c3e089a5ab08254c89"
+        },
+        "gitBlob": "88c71ca15fe170bd551fa5e45a5384ac29aaf3ef",
+        "manifestGitBlob": "3c981b50ae4c9be3a9947baa49331e15f2015d7d",
+        "manifestSha256": "2ee2afe4ccf1622c01e321bbb17c808fc9160c74ca62e7c22dc0335922c8214c",
+        "preparationHistory": "Initial reviewer-only assertion incorrectly demanded identical heap sizes across cold/postcold sweeps. Corrected to the frozen five-sweep shape invariant across all children; the original failed helper/receipt remains. The earlier source-validation reviewer fixture-membership assumption failure is retained in the source-gate evidence.",
+        "separateSourceOracleControllerReviewSha256": "2d34dd87d37c8ad58f40758065baac9658e19050e98ec5a9d3449149567f9193",
+        "sha256": "67013f1ce48858638c974422e7954883fb5ff6a1ba80a78c050c88fa30c35498"
+      },
+      "measuredHead": "49bf79f35084e7c42d1088d5d30c522172d8ec3b",
+      "measurementKind": "fixed-decoder-component",
+      "mechanism": "Bounded native word copy for eligible short DEFLATE matches; parser binary grows by eight bytes.",
+      "name": "Short DEFLATE match word copy",
+      "publishedSummary": {
+        "bytes": 16602,
+        "sha256": "0453105843def7e499c1a989cc94b360de58d063cb34829a4aff79922f5b59b4"
+      },
+      "rawMemoryScans": 0,
+      "runId": 46112380632,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46112380632",
+      "status": "CLOSED_COMPONENT_REGRESSION_NO_PR",
+      "unitPassed": 15143
+    }
+  ],
+  "closedTotals": {
+    "browserStudies": 5,
+    "candidateStudies": 6,
+    "coverageFailedHosts": 4,
+    "imports": 764,
+    "independentHosts": 22,
+    "memoryQualifiedHosts": 18,
+    "rawMemoryScans": 7615,
+    "separateComponentChildren": 36,
+    "separateComponentSweeps": 180
+  },
+  "corpusProof": {
+    "arms": [
+      "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "2cdcc90241fa19221b7fc4e5d793eb70896c3258",
+      "38031a752b26c9b630e5f2f1d45e780786656c74"
+    ],
+    "banksPerArm": 937,
+    "evidenceHead": "05a829b3fa88bac31cb4956104356fd393e0facc",
+    "groupsPerArm": 204,
+    "measuredHead": "7657938904308d6b08d5ffda78124ee7695f3e14",
+    "rowsPerArm": 7613164,
+    "runId": 46105432915,
+    "scope": "Complete live byte ranges hashed into group SHA256 across parser/content/index/route/media outputs. Not direct A/B retained-row-array comparison, after-heap-reuse retention proof, browser/storage qualification, or timing.",
+    "sourceBytesPerArm": 4978537800,
+    "url": "https://github.com/ManabiIO/manabitan/tree/05a829b3fa88bac31cb4956104356fd393e0facc/dev/perf/import-corpus-5a86"
+  },
+  "diagnostics": {
+    "baselineClassifiedBytePositions": 92763904,
+    "candidateClassifiedBytePositions": 96377744,
+    "compositeClassificationsAvoidedAgainstPerString16ByteCounterfactual": 2606065,
+    "evidenceHead": "80ae12e75fc9cf0928ad5645eae7c5c70040d4e4",
+    "nativeCacheFields": "WASM locals in exact frozen disassembly, not the hypothesized memory stores",
+    "noPerformanceClaim": true,
+    "suffixAdditionalJitendexReuses": 24,
+    "suffixAdditionalJmdictGlossaryBytes": 25012079,
+    "suffixAdditionalJmdictReuses": 106651,
+    "suffixWorkModel": {
+      "bytes": 36355,
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "reportPath": "builds/perf/import-analysis-20261128-5a86/census/jmdict-suffix-production-groups.json",
+      "runnerPath": "builds/perf/import-analysis-20261128-5a86/census/suffix-production-groups.mjs",
+      "runnerSha256": "b4a17143f5f20325cbb85ec4ec8a3b01c8fb85033739e17c5245ca5e9000f3a0",
+      "sha256": "5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904",
+      "source": {
+        "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "baselineSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+        "candidateCommit": "38031a752b26c9b630e5f2f1d45e780786656c74",
+        "candidateSourceSha256": "5fb1656504b65502f396d23d1222342f9c9b6485f90b949207758cb8058fa3ca"
+      },
+      "sourceScope": "Untimed raw-token work model over the exact twelve production groups, not native instrumentation or elapsed-time attribution."
+    },
+    "url": "https://github.com/ManabiIO/manabitan/blob/80ae12e75fc9cf0928ad5645eae7c5c70040d4e4/dev/perf/import-experiments-20260914.md"
+  },
+  "documentationValidation": {
+    "receipt": {
+      "bytes": 959,
+      "sha256": "1a0733f22785a2f0b82822a8e1d191e05a3deb3f30d25a933a0dbcc71df5d09a"
+    },
+    "result": {
+      "agents": {
+        "bytes": 5082,
+        "sha256": "a27348515fd1308f2360ab3db134d12273bbbb5706b35d0bd56c3d1be822646c",
+        "sourceHead": "80ae12e75fc9cf0928ad5645eae7c5c70040d4e4"
+      },
+      "command": [
+        "npx",
+        "--offline",
+        "prettier",
+        "AGENTS.md",
+        "--check"
+      ],
+      "cwd": "/workspace/scratch/5a86d1e7822a/manabitan",
+      "elapsedSeconds": 0.7648205939985928,
+      "exitCode": 0,
+      "finishedAt": "2026-11-28T08:28:40.707389+00:00",
+      "kind": "Required narrow documentation formatting check; no product or benchmark execution",
+      "offlineReason": "Do not install or fetch an optional tool during evidence-only publication.",
+      "passed": true,
+      "startedAt": "2026-11-28T08:28:39.942574+00:00",
+      "stderr": {
+        "bytes": 150,
+        "sha256": "9aac3da9a7039a99c345545c32f286aa65c358d571bfce7e00d94625d095c829"
+      },
+      "stdout": {
+        "bytes": 66,
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      "timedOut": false
+    },
+    "scope": "Required narrow AGENTS.md formatting check only; no full historical handoff reformat, product validation or acquisition rerun.",
+    "stderr": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n",
+    "stdout": "Checking formatting...\nAll matched files use Prettier code style!\n"
+  },
+  "draftInputs": {
+    "analysis-handoff.md": {
+      "bytes": 114613,
+      "sha256": "9ffeae617f121b053b262dd03614dce85347492fbcb55dc7728dd81778b3a929"
+    },
+    "analysis-manifest.json": {
+      "bytes": 7143,
+      "sha256": "3be79cd89641e37d54374d06af73cb354c91ace079d87f9ab22dd185947ffb2c"
+    },
+    "composite-analyses.json": {
+      "bytes": 9738,
+      "sha256": "3872bf4000d16d41e090ef3cfa394fecebeda85c063eba379c8863f7baceeb2a"
+    },
+    "composite-memory.json": {
+      "bytes": 4001,
+      "sha256": "47eac1a95229f0c9e2262125b22aad3395514023989a65927a9f6ff830e196d2"
+    },
+    "field-handoff.md": {
+      "bytes": 103981,
+      "sha256": "35f81ed75e4076c427af7beb0a99f2c8c10a57f7aea7c4893d62c0be3ceff0ef"
+    },
+    "field-summary.json": {
+      "bytes": 4092,
+      "sha256": "7bfdd02ce21d2d2ecc35c7ae565e8fa4ec039b479f1bfc1ae5e9b086a13aee3a"
+    },
+    "final-publication-heads.json": {
+      "bytes": 690,
+      "sha256": "2a35ddd7f2db41fa88fcb80a89a59bfc6763655ab4683d3dfb5a00eca32ca7f5"
+    },
+    "inline-summary.json": {
+      "bytes": 6549,
+      "sha256": "09df453e52f40f9a5b5ada37744a025fc477a8fd962de3cf5df7358b63b6e11c"
+    },
+    "js-final-evidence-index.json": {
+      "bytes": 41113,
+      "sha256": "1739050674ac52b783f8445a327c9ce2f17f2a8e540c2eb206e42e67bb78badb"
+    },
+    "js-review-jitendex-AB.json": {
+      "bytes": 46083,
+      "sha256": "da022e37137c42a892a6c1ae1e4f146d9440cdc8ecfcd3f331efeec444702704"
+    },
+    "js-review-jitendex-BA.json": {
+      "bytes": 46229,
+      "sha256": "d1c03fafb6d6fb7aa430c3c5323d624080b3c7e2e49161ef06eaa73d862b636d"
+    },
+    "js-review-jmdict-AB.json": {
+      "bytes": 46129,
+      "sha256": "ea7125a15d8bd5009f87d9fcb57d3a5ec2aad24c45bbb9cc938c2a88c50ff1e3"
+    },
+    "js-review-jmdict-BA.json": {
+      "bytes": 46059,
+      "sha256": "33c523a1a923b548d9f73cc8bdd1898f3f92090b5be96e64892b2ba2114b1a9e"
+    },
+    "js-review-vndb-AB.json": {
+      "bytes": 46247,
+      "sha256": "98b973f53b2d2729460609a0ac80ef9321b15e14f618612eb51a83c973adf1c4"
+    },
+    "js-review-vndb-BA.json": {
+      "bytes": 46212,
+      "sha256": "14e176958c9eaf588abedc7ffeff025b012a718fd8c4275959b2010df09ef964"
+    },
+    "js-six-host-review.json": {
+      "bytes": 38774,
+      "sha256": "595b0e53843c43e3e50c36f16f21e5da0febbea4c7f172a840aad2f9dd6179bf"
+    },
+    "root-recovery-checkpoint.json": {
+      "bytes": 49860,
+      "sha256": "b41b6c9038bd5f4a253fa9aaed16f5f791cf8c32b9cd6de3570f5e0803a5bbb7"
+    },
+    "suffix-results.json": {
+      "bytes": 99033,
+      "sha256": "f04c20823e23e0cc857187002355de7589e7baa6f024225b9b17a4f03bbe3097"
+    },
+    "suffix-work-model.json": {
+      "bytes": 36355,
+      "sha256": "5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904"
+    },
+    "word-component-review-manifest.json": {
+      "bytes": 2439,
+      "sha256": "2ee2afe4ccf1622c01e321bbb17c808fc9160c74ca62e7c22dc0335922c8214c"
+    },
+    "word-component-review.json": {
+      "bytes": 55370,
+      "sha256": "67013f1ce48858638c974422e7954883fb5ff6a1ba80a78c050c88fa30c35498"
+    },
+    "word-component-storage-review.json": {
+      "bytes": 48471,
+      "sha256": "2d34dd87d37c8ad58f40758065baac9658e19050e98ec5a9d3449149567f9193"
+    },
+    "word-final-summary.json": {
+      "bytes": 16602,
+      "sha256": "0453105843def7e499c1a989cc94b360de58d063cb34829a4aff79922f5b59b4"
+    }
+  },
+  "holds": [
+    {
+      "id": "startup",
+      "reason": "Earlier first-bank prefetch already initiates shared archive reading; negative prior work and active parser-bundle ownership prevent an unchanged duplicate proposal.",
+      "status": "HOLD_NO_NEW_ACQUISITION"
+    },
+    {
+      "id": "key-fusion",
+      "reason": "New-key validation already shares the copy loop; earlier hash fusion risks duplicate work and requires preserving full-arena duplicate success. No isolated material critical-path saving established.",
+      "status": "HOLD_NO_PROTOTYPE"
+    },
+    {
+      "id": "producer-checksum",
+      "reason": "Mutable aliases and asynchronous handoff do not establish immutable producer-to-storage checksum provenance.",
+      "status": "HOLD_NO_PROTOTYPE"
+    },
+    {
+      "id": "final-hash-copy",
+      "reason": "Same-stack ownership is sound at final encoding for ordinary, non-shared inputs, but a fused JS loop retains hashing/stores and may lose native TypedArray.set efficiency. No copy-only timing or speed claim.",
+      "status": "HOLD_NO_PROTOTYPE"
+    },
+    {
+      "id": "compression-and-metadata",
+      "reason": "Source audit found no distinct proven material redundancy within unchanged framing,formats,compression settings,budgets and scheduler; active overlapping studies are excluded.",
+      "status": "HOLD_NO_PROTOTYPE"
+    }
+  ],
+  "indexPreparationDidNotMutateRefs": true,
+  "kind": "Final six-candidate investigation index; no review-worthy gain and no PR",
+  "measurementScope": {
+    "baselineFlags": {},
+    "bootstrap": {
+      "kind": "descriptive paired-median interval",
+      "replicates": 10000,
+      "seed": 897,
+      "sortedIndices": [
+        249,
+        9749
+      ]
+    },
+    "candidateFlags": {},
+    "groups": {
+      "jitendex": 22,
+      "jmdict": 12,
+      "vndb": 170
+    },
+    "memory": "Separate instrumented observations; sampled whole-process-tree maxima, 250 ms maximum coverage gap; no exact peak claim",
+    "noControlSubtraction": true,
+    "noPooling": true,
+    "noTailRemoval": true,
+    "ordinaryBoundary": "File-input change to post-UI completion, browser monotonic time, fresh profile. This is not a physical-paint measurement.",
+    "parserWorkers": 3,
+    "semantic": "Sampled browser content/lookups/restart and exact row counts; separate exhaustive-media observations",
+    "vndbSahAllocationUnits": [
+      37,
+      37
+    ],
+    "warmupsExcludedAsPrespecified": true
+  },
+  "noNewAcquisition": true,
+  "pendingStudies": [],
+  "preservationLimits": [
+    "Final evidence commits preserve original observed tails/failures and source/fixture/package identities.",
+    "Compact browser packs omit only declared original product ZIP payloads; retained per-entry digests do not recreate their raw ZIP bytes. Optional original-ZIP verification is distinct.",
+    "Environment resets did not cause replacement imports. Exact hash-verified recovery and irrecoverable local raw evidence are labelled separately."
+  ],
+  "proposedPaths": [
+    "dev/perf/import-experiments-20260914.md",
+    "builds/perf/import-analysis-20261128-5a86/experiment-index.json",
+    "builds/perf/import-analysis-20261128-5a86/manifest.json.txt"
+  ],
+  "publicationKind": "Evidence and single handoff only",
+  "publicationPending": [],
+  "pullRequestsCreated": [],
+  "schemaVersion": 1,
+  "status": "FINAL_ALL_EVIDENCE_PUBLISHED",
+  "workflowExclusion": {
+    "result": {
+      "allFileContentsBoundToListedGitBlobs": true,
+      "analysisWorkflow": {
+        "gitBlob": "857e5fd9e42e0937108173b01d749fb5d4779029",
+        "path": ".github/workflows/import-analysis-20261127-5a86.yml",
+        "pushDisposition": "all three proposed paths excluded by exact path allowlist",
+        "sha256": "eec13f22bdb3bb052a70faa05e201f9e7e67c253b386b41e6c085f8b71800ef1"
+      },
+      "automaticLintMayRun": true,
+      "branch": "perf/import-analysis-20261127-5a86",
+      "eligiblePushWorkflows": [
+        ".github/workflows/actionlint.yml"
+      ],
+      "importOrPerformanceAcquisitionTriggered": false,
+      "kind": "Read-only exact source workflow exclusion for proposed three-path evidence update",
+      "proposedPaths": [
+        "dev/perf/import-experiments-20260914.md",
+        "builds/perf/import-analysis-20261128-5a86/experiment-index.json",
+        "builds/perf/import-analysis-20261128-5a86/manifest.json.txt"
+      ],
+      "records": [
+        {
+          "gitBlob": "f1acb45974ecd803f24b25271f982b27c1acb5ac",
+          "path": ".github/workflows/actionlint.yml",
+          "pushDisposition": "unconditional existing workflow lint; no import or performance acquisition",
+          "sha256": "dd53c964d467a908a075de4baa961c10cca36e87a5987139ef22fd1768fee58e"
+        },
+        {
+          "gitBlob": "a5de0844c81e8976bd9d38b5905a9abe719f6b36",
+          "path": ".github/workflows/anki-note-type-compatibility.yml",
+          "pushDisposition": "no push event",
+          "sha256": "8c55793c38e9ee3c80cf0ca4e7243214ddf8b2d03723afd7b165e6e5d0eb3754"
+        },
+        {
+          "gitBlob": "48f5bfb1f81b2e118580a7876459652348e18cc5",
+          "path": ".github/workflows/auto-approve-run.yml",
+          "pushDisposition": "no push event",
+          "sha256": "c37915616cfed21cd7afc40f698a4982468ecf24b848ccf549f18b55f8314059"
+        },
+        {
+          "gitBlob": "e83784e1cfc38766cead5504ebb73ebec599ecb5",
+          "path": ".github/workflows/auto-approve.yml",
+          "pushDisposition": "no push event",
+          "sha256": "60d8812be5381a00ee0f155368f46438d0c44ece4313740295fc0158be61e7d4"
+        },
+        {
+          "gitBlob": "99b50f58d76136f7a9b49377120081d917221ae1",
+          "path": ".github/workflows/benchmarks-manual.yml",
+          "pushDisposition": "no push event",
+          "sha256": "1863b67225810b05047040939e96c1d1bb0a9da2aa82cec374507d310b8c7365"
+        },
+        {
+          "gitBlob": "5595279b79ba53e7c2dfabde8b13f73bb5fa7883",
+          "path": ".github/workflows/broken-links.yml",
+          "pushDisposition": "no push event",
+          "sha256": "f7f6424c0d22b822468616a1cf1021a941e00c8034afbf17f173190153b749e3"
+        },
+        {
+          "gitBlob": "e88ce07b5532c0dcd6618ab00d32b7dc553d4ec8",
+          "path": ".github/workflows/chromium-restart-interruption.yml",
+          "pushDisposition": "no push event",
+          "sha256": "411fdb78eb002aff3868d92783af90f66b4c419f1109612383266d43a15557e3"
+        },
+        {
+          "gitBlob": "7843d80536edee68a482bf4e06d4d64e76afe51c",
+          "path": ".github/workflows/ci.yml",
+          "pushDisposition": "branch is not in exact branch allowlist",
+          "sha256": "25708c0d8428c2d920a594d83f60cee4b58cf9689fa43fae2cccd43d7e23d0e7"
+        },
+        {
+          "gitBlob": "1cd2060817282d919b2387ed7ba8ae63030f002f",
+          "path": ".github/workflows/codeql.yml",
+          "pushDisposition": "branch is not in exact branch allowlist",
+          "sha256": "078631d9b8b0d2ff433cc7e799874b9e0325f4360ed731e2247028f441dfbac4"
+        },
+        {
+          "gitBlob": "4a164676b13cbf6dfa6518665c97046c603bb6c1",
+          "path": ".github/workflows/contribution-license.yml",
+          "pushDisposition": "no push event",
+          "sha256": "d33636dc99e79ca0ddd89dd611b9dfe5de9f7644578e498c1163c289fdc402df"
+        },
+        {
+          "gitBlob": "f9de6f3b0a733548e7e52b99ee94aa769d8df925",
+          "path": ".github/workflows/create-prerelease-on-tag.yml",
+          "pushDisposition": "tag-only push; this update is a branch",
+          "sha256": "3c79749e32e26a9b3fcaa6f11e732a4f4ae26f51273efbf774e42fd1bb194f03"
+        },
+        {
+          "gitBlob": "31f984228d960bf92a69cd123bff604191cc7724",
+          "path": ".github/workflows/delay.yml",
+          "pushDisposition": "no push event",
+          "sha256": "e5f73c43ae5f7d0a496f6daca95ba22ac0f785e0f3bfaa08efd1542ff336df88"
+        },
+        {
+          "gitBlob": "61aacaf474583c815b6731144f81b2b4b6e0750a",
+          "path": ".github/workflows/dependency-review.yml",
+          "pushDisposition": "no push event",
+          "sha256": "3b47e97077b9b9977888f192cf63b724cf0ee83eef3f26adb6d9644ecfb01476"
+        },
+        {
+          "gitBlob": "0dba5bd3586864bc2c8c70121d88312dfcf7db8f",
+          "path": ".github/workflows/firefox-extension-e2e.yml",
+          "pushDisposition": "no push event",
+          "sha256": "96d3a35cf52193f13faba623fa37ec6b0d2015a92e0f6263f779d2dec4913fb1"
+        },
+        {
+          "gitBlob": "02f5b2488d84f2882135eff3d90dca4cae3f6211",
+          "path": ".github/workflows/import-allocation-verification-b4b3.yml",
+          "pushDisposition": "no push event",
+          "sha256": "4c8fa98008110ebd97aaf8d9ac65e1009cb4e829a01141ff67e86a429d2307f1"
+        },
+        {
+          "gitBlob": "857e5fd9e42e0937108173b01d749fb5d4779029",
+          "path": ".github/workflows/import-analysis-20261127-5a86.yml",
+          "pushDisposition": "all three proposed paths excluded by exact path allowlist",
+          "sha256": "eec13f22bdb3bb052a70faa05e201f9e7e67c253b386b41e6c085f8b71800ef1"
+        },
+        {
+          "gitBlob": "8a42b3838dce1aafe9afc33cdcbfddcd9f3b2db4",
+          "path": ".github/workflows/import-candidates-fe114.yml",
+          "pushDisposition": "no push event",
+          "sha256": "6d3b14a710475a3a95ee0c152f0d4d68f1c4adbda8cc3e583aea2cc7d7b9b4f1"
+        },
+        {
+          "gitBlob": "4b135a2a2945a773e6a02bef6a323cecdea0eb49",
+          "path": ".github/workflows/import-index-startup-513d.yml",
+          "pushDisposition": "no push event",
+          "sha256": "6ede554d364b8ef1b5d17e57dfa8ff60ed9edb47a46d8db8764d7747474341c8"
+        },
+        {
+          "gitBlob": "a379dcc2f298b7c1a0ea4eef3aeda456d3ce1cf6",
+          "path": ".github/workflows/import-memory-ca365.yml",
+          "pushDisposition": "no push event",
+          "sha256": "11453ad08468b8bd418f9c1eb2b6c133222173de25e2399744d3c812dd19d4ac"
+        },
+        {
+          "gitBlob": "6196d616af7c205b8bab16051da7cd5c93993186",
+          "path": ".github/workflows/import-qualification-a7f7.yml",
+          "pushDisposition": "branch is not in exact branch allowlist",
+          "sha256": "79965f8832ac0e5ff0d7f1bac56774620260f369be4c698bef15a3308d09fa7b"
+        },
+        {
+          "gitBlob": "170fb79a4aed642aa1d0086ccb102c30043f6b32",
+          "path": ".github/workflows/import-qualification-ca365.yml",
+          "pushDisposition": "no push event",
+          "sha256": "aef76a456e33251e80fa736b9a648a2fda4473c1f15803460fd541d170d4d70c"
+        },
+        {
+          "gitBlob": "3b456df591687c6ef23ba71f2115979d101de43a",
+          "path": ".github/workflows/manabitan-web.yml",
+          "pushDisposition": "branch is not in exact branch allowlist",
+          "sha256": "4e09b56007eacfd0c7ae62f5f4ab1bc5258c69e053c768ed547b82523508c5aa"
+        },
+        {
+          "gitBlob": "32f6b05cd22eb7d2c05d567060eb942546aeeb19",
+          "path": ".github/workflows/mdict-native.yml",
+          "pushDisposition": "no push event",
+          "sha256": "9d02968bfb37a27a8e70852814ffd0d7eebce382bae55b01e84bb18cff18ef75"
+        },
+        {
+          "gitBlob": "0769ee5fbc46c27d3d667ce9ad8ab0629a647626",
+          "path": ".github/workflows/perf-bundle.yml",
+          "pushDisposition": "no push event",
+          "sha256": "6b24aade34abbd2fe59380bc4ccfd4731734aae313c163d1d92d52215c042a1e"
+        },
+        {
+          "gitBlob": "36c9f2d9ec0a6ff2b0b9266e77b4b726ed471d71",
+          "path": ".github/workflows/playwright.yml",
+          "pushDisposition": "no push event",
+          "sha256": "30c7dc634023f735bbcb97b11664fd0bb35e44f78da173f0ddff913179f75f50"
+        },
+        {
+          "gitBlob": "c4ea811af36506e86b480c853effa551dd6318a5",
+          "path": ".github/workflows/publish-chrome-development.yml",
+          "pushDisposition": "no push event",
+          "sha256": "0b2192b566505c1c8040f054f5691bed0e5006ed51daa10ed55aec38d4bf2819"
+        },
+        {
+          "gitBlob": "ebfd882257908fbfb5665d960a271435d978ecc3",
+          "path": ".github/workflows/publish-chrome.yml",
+          "pushDisposition": "no push event",
+          "sha256": "632bb7a200df6d44f91c8f5dce935196081b01c4dcdd5d80992429062f4fd36f"
+        },
+        {
+          "gitBlob": "95d89f536ffb87cc22c321c3ec660016874925d2",
+          "path": ".github/workflows/publish-edge.yml",
+          "pushDisposition": "no push event",
+          "sha256": "9edfd0648d864810c27b742bf31effbec7a84580ac6c726400415f03550e9f41"
+        },
+        {
+          "gitBlob": "ed6f805a286e08160f31e30fc5feabcf495af5f9",
+          "path": ".github/workflows/publish-firefox-development.yml",
+          "pushDisposition": "no push event",
+          "sha256": "d31438fd3306bc028f8645ba55feb4d42c521d90affd6ed7da14ba878c67a0cc"
+        },
+        {
+          "gitBlob": "cebe40998edc2cb6d2a62acb62907a43a4d871b1",
+          "path": ".github/workflows/publish-firefox.yml",
+          "pushDisposition": "no push event",
+          "sha256": "d64343035926798c389c5801eedec9dbf22b7b96411fecb6c473020d910cdf8d"
+        },
+        {
+          "gitBlob": "f59d9dadf917d8a904a4f41e6a6b106f554f96a2",
+          "path": ".github/workflows/release.yml",
+          "pushDisposition": "no push event",
+          "sha256": "924b1323d2fa7f27e5c09852603dabf742c7eb8fa4e1095711f59b2edda0d339"
+        },
+        {
+          "gitBlob": "1a29f6708a90fdc04c3c566f3da7f9fcf618c633",
+          "path": ".github/workflows/scorecard.yml",
+          "pushDisposition": "branch is not in exact branch allowlist",
+          "sha256": "fc0ba2d9a7211771d361095b289a884305a5b86c522eb1c9e3f4f20dc0538e3e"
+        },
+        {
+          "gitBlob": "b7b4fcb36bf8bb5762b8626ffddba698286cf6f3",
+          "path": ".github/workflows/search-contract.yml",
+          "pushDisposition": "no push event",
+          "sha256": "6c1e824539e01f5bdf151d22da599b0bde728f5c8144de5797b17e7e92c2c201"
+        },
+        {
+          "gitBlob": "03b407513bacfcf8932e280695ad563dbf6e2e74",
+          "path": ".github/workflows/touch-google-refresh-token.yml",
+          "pushDisposition": "no push event",
+          "sha256": "23425fed13cb7852ba5d483b7dd83dd042a041abc532f40f75ec234360f15828"
+        }
+      ],
+      "schema": 1,
+      "scope": "No push, PR, dispatch or acquisition performed by this preparation. Recheck the branch lease before publishing; automatic unconditional actionlint is expected and is not an import acquisition.",
+      "sourceHead": "80ae12e75fc9cf0928ad5645eae7c5c70040d4e4",
+      "sourceOrigin": "33 unchanged workflows read from baseline Git and matched exact head blob IDs; one analysis workflow read at exact head and its Git blob ID verified. No history fetch.",
+      "sourceTree": "2dc03b2548560e1a2f30973c6a2e7726ee430f23",
+      "workflowCount": 34,
+      "workflowListUrl": "https://api.github.com/repos/ManabiIO/manabitan/contents/.github/workflows?ref=80ae12e75fc9cf0928ad5645eae7c5c70040d4e4"
+    },
+    "review": {
+      "bytes": 10583,
+      "sha256": "a72f033f52681e7158680b34f341906f012566eaa321ec027952a79512d56dba"
+    }
+  }
+}

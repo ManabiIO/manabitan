@@ -186,6 +186,10 @@
     "final-record-lookup-hash-copy-hold.json": {
       "bytes": 7432,
       "sha256": "74c1dc10512f21b1f6fd7b3cb55e2f5589a9c660d6cc0bb7155a4d0d8b36b065"
+    },
+    "experiment-index.json": {
+      "bytes": 98192,
+      "sha256": "543a0f3f8ade104fed0211624b00eb4c29f8f65cdabb15d435c10c87f1d5926b"
     }
   }
 }

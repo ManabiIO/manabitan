@@ -1,5 +1,72 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: investigation index and final findings (5a86)
+
+**All six candidates are closed without a review-worthy import gain; no performance PR was created.** Five completed their prescribed browser studies. The sixth, a short DEFLATE copy change, regressed in its component screen, so browser expansion was skipped. The [machine-readable index](../../builds/perf/import-analysis-20261128-5a86/experiment-index.json) records exact source/evidence identities, independent results and limitations. This section supplements every earlier observation without rewriting the historical handoff.
+
+### What the complete-import studies measured
+
+The five browser studies compare independently frozen sources with `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, default flags, locked archives, Node 22.22.0 and pinned Chromium. The timer ends at post-UI completion after file-input change; **it is not a physical-paint measurement**. Fresh profiles, independent AB/BA hosts, prespecified warmups, alternating pairs, identical-code controls, exhaustive-media checks and separate memory observations remain unchanged. No hosts are pooled, controls subtracted or tails discarded. The studies retain **764 complete imports and 7,615 raw memory scans**.
+
+### JMdict results by independent host
+
+Negative means faster. Equal-work compares summed candidate/baseline time. Intervals use the unchanged 10,000-resample descriptive paired-median bootstrap, seed 897. Six-pair hosts have two identical-code control pairs; twelve-pair hosts have four. All ten JMdict hosts passed memory qualification.
+
+| Candidate / initial order | Pairs | Paired median | Equal-work | Descriptive 95% interval | Faster | Same-code median |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| [Helper inlining][final-5a86-inline] / AB | 6 | +0.5014% | +7.9197% | [-2.1682%, +25.6327%] | 2/6 | -0.1040% |
+| [Helper inlining][final-5a86-inline] / BA | 6 | -0.1885% | -1.0209% | [-4.0940%, +1.4473%] | 3/6 | -0.1401% |
+| [Captured field lengths][final-5a86-field] / AB | 6 | -0.7822% | -2.5118% | [-7.4232%, +1.5619%] | 4/6 | +0.5558% |
+| [Captured field lengths][final-5a86-field] / BA | 6 | +1.4049% | +1.3871% | [-1.8773%, +4.7481%] | 2/6 | +0.5077% |
+| [Composite string window][final-5a86-composite] / AB | 6 | -0.5599% | -0.2754% | [-4.9094%, +4.8695%] | 3/6 | -0.6970% |
+| [Composite string window][final-5a86-composite] / BA | 6 | +1.3236% | +3.5246% | [-1.7084%, +11.2808%] | 2/6 | -0.4291% |
+| [Exact row suffix][final-5a86-suffix] / AB | 12 | +0.8964% | +9.4844% | [-2.0698%, +3.0477%] | 6/12 | +1.0372% |
+| [Exact row suffix][final-5a86-suffix] / BA | 12 | -1.9261% | -1.8565% | [-4.9163%, +0.8693%] | 8/12 | +2.7213% |
+| [Large JS hash rounds][final-5a86-js-hash] / AB | 12 | -0.6263% | -0.5246% | [-2.6827%, +1.4133%] | 7/12 | +0.4702% |
+| [Large JS hash rounds][final-5a86-js-hash] / BA | 12 | -0.9220% | -0.2342% | [-1.5518%, +0.7553%] | 8/12 | +0.5279% |
+
+Every candidate interval spans zero. Opposite-order signs disagree for the first four candidates. JS hash rounds have small favorable JMdict medians, with uncertainty spanning regressions. Inlining AB retains a +50.3263% worst pair; suffix AB retains +116.9095%. Those tails explain their worse equal-work totals. No candidate establishes a repeatable import improvement.
+
+### Jitendex, VNDB and qualification limits
+
+Inlining and field lengths stopped after JMdict. Composite-window Jitendex medians were −0.2966%/−0.6775%, alongside controls of −0.2982%/−0.7752%; VNDB medians were +0.3202%/−0.4992%. Suffix Jitendex medians were +1.6347%/−0.1972%, with equal-work totals +1.6024%/+1.8871%; VNDB medians were −0.2704%/+1.9318%. JS hash Jitendex medians were −0.0654%/−1.0980%, without replication beyond uncertainty; VNDB signs reversed, −1.2317%/+1.4705%. Every interval spans zero. All host results and controls remain in the linked evidence.
+
+All prescribed imports passed semantic receipts. Four VNDB hosts failed the unchanged 250 ms memory-coverage bound: composite BA, both suffix hosts and JS hash BA. These remain unqualified with null aggregate effects; JS hash BA qualified none of its four observations. Sampled PSS/private-memory acceptance establishes neither exact peaks nor memory reduction. Browser content/lookups/restart checks are sampled with exact counts; exhaustive media checks are separate.
+
+### What the work reductions actually established
+
+Helper inlining grew the parser by 407 bytes; its fixed-group component was 16.57% slower by paired median. Captured field lengths re-evaluated #764; the isolated full-corpus field encoder was 0.971% slower. Neither local boundary included the complete browser pipeline. [Inlining][final-5a86-inline] and [field-length evidence][final-5a86-field] preserve their commands and failures.
+
+The composite model found 2,606,065 fewer sixteen-byte classifications versus resetting that helper per string. Against the actual eight-byte baseline, classified byte positions were 96,377,744 versus 92,763,904. Exact WASM inspection placed cache state in locals, leaving no demonstrated memory-store elimination target. These source-work counts do not measure instructions or elapsed savings.
+
+Suffix reuse increased observed JMdict validated-glossary reuses from 54,641 to 161,292. The [exact-group model][final-5a86-suffix-model] attributes 25,012,079 additional glossary bytes to skipped validation, while retaining extra probes/equality checks. Its report, runner, baseline/candidate C and fixture hashes are bound in the index. Jitendex gained only 24 reuses. [Diagnostic evidence][final-5a86-analysis] identifies serialized canonicalization/index publication, compression and parser waits; perturbed traces and overlapping counters cannot be added into a savings budget.
+
+### Rejected decoder component
+
+The [short-word screen][final-5a86-short-word] completed all 36 fresh children and 180 sweeps. Its prescribed four-postcold-sweep mean regressed +6.4905% B/A and +6.4447% B/C by paired wall median; 0/12 blocks were faster against either. Total CPU regressed +6.4626%/+6.4231%, and cold wall +6.5829%/+6.8222%. Same-code guards passed, but five of seven continuation criteria failed. Every cold/postcold sweep and tail remains. These decoder effects are separate from browser-import results; the browser matrix correctly stayed skipped.
+
+### Correctness evidence and source checks
+
+The [three-arm corpus proof][final-5a86-corpus] covers 7,613,164 rows and 204 production groups per arm. It hashes complete live row/content/index/route/media byte ranges into group digests. It does not establish retained-buffer equality after heap reuse, browser storage behavior or speed.
+
+Unit gates passed 15,135/15,137/15,139/15,153/15,139/15,143 tests for inline/field/composite/suffix/JS/word respectively, each across 669 files with 47 skips. Native artifacts reproduce with pinned Clang/LLD 21.1.8; build checks use seven-target dry runs. Coverage varies: field checked main/test TypeScript, composite invoked none, JS/word checked all four projects. Word also passed 231,528 leak-enabled native sanitizer cases. Exact receipts bound each claim.
+
+### Holds and preservation
+
+[Source-backed HOLDs][final-5a86-analysis] cover overlapping startup work, term-key fusion, producer checksums and final-boundary hash/copy fusion. Mutable aliases obstruct earlier checksum provenance; final synchronous ownership is sound for ordinary, non-shared inputs but offers no measured advantage over native bulk copies. Compression/metadata audits found no distinct proven material redundancy within unchanged contracts. No cache-capacity, worker-count, compression-level, framing or threshold tuning was introduced.
+
+The earlier local word attempt remains a zero-child SIGKILL failure with unknown cause. Lost raw native-census/local-validation evidence stays explicitly unavailable; the separately acquired hosted result does not replace it. Detailed evidence retains reviewer-only preparation failures and corrections. Compact browser packs omit declared product-ZIP payloads; hashes do not recreate ZIP bytes. Optional original-ZIP verification, exact-hash recovery and deterministic review reconstruction remain separately labelled. All six candidates stop here without further unchanged acquisition.
+
+[final-5a86-inline]: https://github.com/ManabiIO/manabitan/blob/5f4f02608bd1f07d77ea98b195a367ee85d16c95/builds/perf/parser-inline-20261128-5a86/summary.json.txt
+[final-5a86-field]: https://github.com/ManabiIO/manabitan/blob/7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1/builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery/manifest.json
+[final-5a86-composite]: https://github.com/ManabiIO/manabitan/blob/be6eaed99ff78936152fe827854973272bfc31f1/dev/perf/composite-window-5a86/hosted/manifest.json.txt
+[final-5a86-suffix]: https://github.com/ManabiIO/manabitan/blob/7960f29074a19c9e1691e2219f738cf968ae33f4/dev/perf/suffix-window-5a86/hosted/results.json.txt
+[final-5a86-js-hash]: https://github.com/ManabiIO/manabitan/blob/43150e79573d38d6b2379bf29c7676c44f592930/builds/perf/js-hash-rounds-5a86/completed-hosted/evidence-index.json
+[final-5a86-short-word]: https://github.com/ManabiIO/manabitan/blob/ac0894ec21efcc89c34408534a43a40f4f46d761/builds/perf/inflate-short-word-hosted-20261128-5a86/summary.json.txt
+[final-5a86-analysis]: https://github.com/ManabiIO/manabitan/blob/80ae12e75fc9cf0928ad5645eae7c5c70040d4e4/dev/perf/import-experiments-20260914.md
+[final-5a86-corpus]: https://github.com/ManabiIO/manabitan/tree/05a829b3fa88bac31cb4956104356fd393e0facc/dev/perf/import-corpus-5a86
+[final-5a86-suffix-model]: https://github.com/ManabiIO/manabitan/blob/80ae12e75fc9cf0928ad5645eae7c5c70040d4e4/builds/perf/import-analysis-20261128-5a86/census/jmdict-suffix-production-groups.json
+
 ## November 28, 2026: current JMdict dependency trace and exact suffix opportunity
 
 This follow-up preserves diagnostics for frozen baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` (tree `d99ea4d04658f7ec1c76acdc5f3684594212a471`) and the unchanged format-3 suffix candidate `38031a752b26c9b630e5f2f1d45e780786656c74` (tree `a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5`). It changes only evidence and this handoff. No runtime, acquisition workflow, parser setting or source threshold changes here, and no performance PR or new timing acquisition follows from these diagnostics.
