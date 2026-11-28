@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 10:22:12 UTC",
+  "observedAt": "2026-11-28T10:35:22Z",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -19,7 +19,7 @@
     "productTree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d",
     "control": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
     "controlTree": "4c916a995f996afe56cecf0714c20d5b7e5ef346",
-    "controlRefPublished": false,
+    "controlRefPublished": true,
     "productPaths": 13,
     "controlPaths": 9,
     "productFilesUnchangedFromPrior": 11,
@@ -59,7 +59,9 @@
       "blob": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
       "bytes": 69068,
       "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
-    }
+    },
+    "controlBranch": "perf/native-record-fields-control-20261128-1c413",
+    "controlPublicationReview": "c9ca8191e8fbe833b0f1808a97c7e3681904d751"
   },
   "currentCorrectness": {
     "branch": "test/native-record-fields-current-20261128-1c413",
@@ -73,7 +75,7 @@
       "validation": 140944881152,
       "corpus": 140944880913
     },
-    "status": "Both originals success; complete artifact audit pending",
+    "status": "Both original jobs and complete independent artifact audit succeeded; no new imports or timing in auditor",
     "tests": {
       "unitFiles": 673,
       "unitPassed": 15301,
@@ -113,10 +115,44 @@
     "driver": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
     "archiveWriter": "82913f3e5a0091affdfa870c630c748dd20b150a",
     "archiveTests": "42f5543f35b0bd06c792487dba7d63759aa078bd",
-    "limitations": "Nonpersistent real memory SQLite plus disk OPFS adapter; full term/field hashes; retired raw sinks; no browser/restart/full-media/performance substitution"
+    "limitations": "Nonpersistent real memory SQLite plus disk OPFS adapter; full term/field hashes; retired raw sinks; no browser/restart/full-media/performance substitution",
+    "recordsAudit": {
+      "head": "866b9a8a4149f4fbc4c7b7f176a80626a9cab82c",
+      "tree": "bebb46c280600a050086bc12bacb991c0634ce0a",
+      "branch": "audit/native-fields-current-correctness-20261128-1c413",
+      "run": 46135194884,
+      "job": 140948804639,
+      "attempt": 1,
+      "conclusion": "success",
+      "tests": 34,
+      "caller": "7890ebe21b4bf7d6b694771d7417e2c27c0b2fd6",
+      "manifest": "1153ad3a761c671ddd3b62dbf85d41dcb207d889",
+      "source": "c240212a65d6177eef8cdaa1bff33e752f590601",
+      "result": {
+        "blob": "07161060078f96743419784e04ae5e33d407ddca",
+        "bytes": 650381,
+        "sha256": "f433eb75a0e0e6e0117045580a1f4f8ec7f67a17c78fb461e8b10e747e1bc128"
+      },
+      "log": {
+        "blob": "1674bdb34b32c375cb10697e4a9064c8bdc4347f",
+        "bytes": 655918,
+        "sha256": "fa27563a3ef720dac024ff353f96d0d32a8934305f957fa8c69f74985dfdddb9"
+      },
+      "artifact": {
+        "id": 15259502329,
+        "bytes": 6022837,
+        "sha256": "3cb4f294e2892e74fbaecf7a31d226ca12ae66547864561afb5723403375f411"
+      },
+      "rootReview": "5c81e5248cef9f84af225fb1698e850654599738",
+      "pipelineReview": "8714d351db987865f35e6883cbe8092d8e1542b9",
+      "inventoryReview": "079e588301f0ca0e9a826c06e6e724412c119778",
+      "rows": 7613164,
+      "calls": 226,
+      "allNative": true
+    }
   },
   "browser": {
-    "status": "Disabled; no native-field whole-browser timing acquired",
+    "status": "Enabled source sealed; awaiting final root publication, no whole-browser native-field observations acquired",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -155,7 +191,7 @@
     },
     "readinessDecision": "293adf44d2172d8da91f707386356dcb093cd4f8",
     "readinessPolicy": "Prospective engineering budget only. Allow at most first actual source-group field calls and rows before readiness; require remaining native calls/rows and zero ready-state declines. Derive exact numbers only from audited current source receipts, include startup/fallback costs, never force readiness or retry/exclude a failure.",
-    "numericPoliciesSealed": false,
+    "numericPoliciesSealed": true,
     "modeReview": "f4c850fcf932f21038932643717db43f866e29a2",
     "oldDisabledProducer": {
       "commit": "97de439695816465c34b1da52193869ba54167aa",
@@ -165,7 +201,22 @@
       "workflow": "755b674910ef74e7335f393ef81a7b329156d9af",
       "guard": "6ce33bd5bbf4b4cc7a7b09d979c878050265ed31"
     },
-    "currentProducer": "Native rebuilding unpublished disabled f28 rebind after transient state reset",
+    "currentProducer": {
+      "head": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "tree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+      "parent": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+      "branch": "perf/native-record-fields-browser-20261128-1c413",
+      "published": false,
+      "source": "71108341a50c71f340252153eb18080c9753b55c",
+      "sourceDigest": "0c9aa2674e74a98d711b7a78c09906db046bd1051835049bc8e14fc973cfb02c",
+      "study": "292b25e1d99f3e0f857254f0bd8a64c3e1913e5b",
+      "workflow": "b136fbae0ec44c2f4c083bfe5ffcc6e242b17ec0",
+      "guard": "0ad65fbea6db6d7050604ba9253062d998e2de2c",
+      "readme": "089e2ea317712094235955cefca8a39f6a7aa02b",
+      "rootReview": "26f62f1a8d67fc3f61ee1c359467c6c5a394cd6d",
+      "nativeReview": "2f3b94c66e0f65a5963ea12fa5a5a8b567db12d8",
+      "inventoryReview": "793ab1cc701e6c693d2685dc9682439545cb9a65"
+    },
     "reader": {
       "commit": "2443419f919ff0ca6d578d681484cf43cb07a866",
       "tree": "2531c5db6ac73bb7e341c96a094826d51587acdd",
@@ -174,11 +225,44 @@
       "cases": 19,
       "rootCoreReview": "567b805fd40629243db747057b2fab8126eb0ecb",
       "assemblyProof": "13d00893f1bfe94f4563fb96b367cda8b7015fb8",
-      "published": false
+      "published": false,
+      "nativeReview": "d1ec2e300f307bdd69494dd2c1e5e1ace6e86ed8"
     },
     "numericEvaluator": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
     "activationChecker": "9e03c189823092fa7a8217f65ab9283893f85d2e",
-    "activationTests": "ac9583fe30aeca15364b7e0d1fc89f188dac7668"
+    "activationTests": "ac9583fe30aeca15364b7e0d1fc89f188dac7668",
+    "policies": [
+      {
+        "dictionary": "jmdict",
+        "expectedCalls": 12,
+        "expectedRows": 528299,
+        "maximumReadinessJavascriptCalls": 1,
+        "minimumNativeCalls": 11,
+        "minimumNativeRows": 478299,
+        "maximumReadyStateDeclines": 0,
+        "sourceGroupFieldPlanSha256": "dfdbea10a54fff61e575c1612fecc1907249e48dcf23e86c77e518e45ae528dc"
+      },
+      {
+        "dictionary": "jitendex",
+        "expectedCalls": 22,
+        "expectedRows": 436555,
+        "maximumReadinessJavascriptCalls": 1,
+        "minimumNativeCalls": 21,
+        "minimumNativeRows": 420555,
+        "maximumReadyStateDeclines": 0,
+        "sourceGroupFieldPlanSha256": "16a738bc65c7a04582fd4062dbcc842c811a6bb586b43d8897ef2d8dc8cf404e"
+      },
+      {
+        "dictionary": "vndb",
+        "expectedCalls": 192,
+        "expectedRows": 6648310,
+        "maximumReadinessJavascriptCalls": 1,
+        "minimumNativeCalls": 191,
+        "minimumNativeRows": 6608310,
+        "maximumReadyStateDeclines": 0,
+        "sourceGroupFieldPlanSha256": "2b5e8da9c69f9bd4ccb3b6879cb6ebdf109b0f87734714c57a8d6b8cb12556af"
+      }
+    ]
   },
   "historicalCorrectness": {
     "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
@@ -233,7 +317,7 @@
       "ebd27ad90c92d4c87998dc1def281af2a1bf577b"
     ],
     "crcScope": "Bound default version3 validated route; deferred iff >1banks, >=4MiB and compressed<=floor(uncompressed/32). Only deferred groups emit scanned+reused counters; immediate groups verify CRC in inflation and report zero. Keep full input and exact A/B checks. No per-request version/options retained; derive route from bound source, never invent recorded fields.",
-    "nextReader": "CRC scope repair under independent review; new current reader must differ only in fixed source/run/job identities",
+    "nextReader": "Completed successfully; historical source remains separate from current",
     "earlierFailures": [
       {
         "run": 46125649822,
@@ -248,7 +332,25 @@
         "reason": "1lint/1type failure and intentional smoke symlink archive failure; full corpus console parity retained but no corpus artifact",
         "failureReceipt": "5696251e503c805ba476299a026feb5aab13aca9"
       }
-    ]
+    ],
+    "finalReader": {
+      "head": "2e03deeba0de1be5bb48110ae789226ee1e8dbc4",
+      "run": 46135022899,
+      "job": 140948269750,
+      "attempt": 1,
+      "conclusion": "success",
+      "tests": 34,
+      "caller": "0fcd55ded6773dfb93f0f86c447b8d08a1cd84f6",
+      "result": "f529f9f7de814a6a84c612df931614b9a2549a62",
+      "resultSha256": "8382aa9ebc31291301b2b18ca14eaefabe110bfd89157a5c885f13ad509060ed",
+      "log": "524925d01c53c3918fc256907a6f12246d366b97",
+      "artifact": {
+        "id": 15259900147,
+        "bytes": 6003446,
+        "sha256": "09a30103a66824a7817418f893430fa6439b9665b9e42b58c69f324601865da8"
+      },
+      "receipt": "0e917959c6996730159b1b069362dc830ff8ce45"
+    }
   },
   "component": {
     "name": "Native compact record fields",
@@ -357,10 +459,9 @@
     "totalRows": 7613164
   },
   "next": [
-    "Finish narrow source-bound CRC reader repair; retain both failed reader attempts",
-    "Read same historical artifacts with fixed reader and read exact new f28 artifacts with identity-only rebound reader; no new imports",
-    "Seal first-group native-readiness policy only from verified current receipts; finalize disabled current producer",
-    "Publish reviewed inert control ref then frozen six-cell browser experiment, once prerequisites fully pass",
-    "Read every original browser artifact independently; apply unchanged gates; PR only for a worthwhile qualified gain"
+    "Publish exact final producer7d003d51 after independent reviews",
+    "Wait original six cells; no rerun or new thresholds",
+    "Bind exact original artifacts into reviewed74-report reader and audit once",
+    "Open clean product PR only if complete original frozen qualification passes"
   ]
 }
