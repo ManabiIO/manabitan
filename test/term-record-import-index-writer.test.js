@@ -3,6 +3,8 @@ import {afterEach, describe, expect, test, vi} from 'vitest';
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {safePerformance} from '../ext/js/core/safe-performance.js';
+import * as lookupIndex from '../ext/js/dictionary/term-lookup-index.js';
+import {createDeferredIndexChunkFixture} from './util/import-index-protocol-fixture.js';
 
 /**
  * @param {{shortWrite?: number, invalidProgress?: number, flushError?: Error, closeError?: Error, truncateError?: Error, writeError?: Error}} [options]
@@ -114,6 +116,46 @@ describe('fresh import index writer', () => {
         expect(file.calls.writes.map((x) => x.at)).toEqual([0, 2, 4, 0]);
         expect([...body]).toEqual([1, 2, 3, 4, 5, 6]);
         expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+    });
+
+    test('hashes deferred parts once in the ordered write and returns independent completed headers', async () => {
+        const file = memoryFile({shortWrite: 17});
+        const writer = await writerFor(file);
+        const {chunk, expected, expectedHeader} = createDeferredIndexChunkFixture(7);
+        const hash = vi.spyOn(lookupIndex, 'hashTermLookupKeyBytes');
+        const earlier = writer.write(Uint8Array.of(6));
+        const writing = writer.writeIndexChunks([Uint8Array.of(5, 4), chunk, new Uint8Array()]);
+        expect(hash).not.toHaveBeenCalled();
+        const headers = await writing;
+        await earlier;
+        expect(hash).toHaveBeenCalledTimes(3);
+        expect(headers).toEqual([null, expectedHeader, null]);
+        expect(headers[1]?.buffer).not.toBe(chunk.header.buffer);
+        expect(Buffer.compare(file.bytes, Buffer.concat([Uint8Array.of(6, 5, 4), expected]))).toBe(0);
+        chunk.header.fill(0);
+        expect(headers[1]).toEqual(expectedHeader);
+        await writer.close();
+        expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+    });
+
+    test('preserves an older write failure before hashing or validating a later deferred envelope', async () => {
+        const failure = new Error('Earlier write witness');
+        const file = memoryFile({writeError: failure});
+        const writer = await writerFor(file);
+        const {chunk} = createDeferredIndexChunkFixture();
+        // If preparation runs before the queue, this malformed frame would
+        // replace the existing write failure and hash before ownership drains.
+        new DataView(chunk.header.buffer).setUint32(16, 0, true);
+        const hash = vi.spyOn(lookupIndex, 'hashTermLookupKeyBytes');
+        const earlier = writer.write(Uint8Array.of(1)).catch((error) => error);
+        const later = writer.writeIndexChunks([chunk]).catch((error) => error);
+        expect(await earlier).toBe(failure);
+        expect(await later).toBe(failure);
+        expect(hash).not.toHaveBeenCalled();
+        await expect(writer.abort()).rejects.toBe(failure);
+        expect(file.calls.flushes).toBe(0);
         expect(file.calls.closes).toBe(1);
     });
 

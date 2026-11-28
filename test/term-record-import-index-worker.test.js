@@ -10,6 +10,8 @@ import {createImportIndexWorkerClient, WorkerImportIndexWriter} from '../ext/js/
 import {SyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {createDeferredIndexChunkFixture} from './util/import-index-protocol-fixture.js';
+import {createImportIndexChunkFixture} from './util/import-index-chunk-fixture.js';
 
 /** @type {NodeWorker[]} */
 const workers = [];
@@ -145,6 +147,73 @@ afterEach(async () => {
 });
 
 describe('production import index worker', () => {
+    test('hashes the private snapshot while original buffers remain live and change behind an older queued write', async () => {
+        const file = fixture({blockWriteAt: 1});
+        const {client, writer} = await openWorker(file);
+        const source = await createImportIndexChunkFixture();
+        const payload = source.encoded.lookupIndexBytes;
+        const fields = source.encoded.recordFields;
+        const payloadLength = payload.byteLength;
+        const fieldsLength = fields.byteLength;
+        const payloadAlias = new Uint8Array(payload.buffer);
+        const fieldsAlias = new DataView(fields.buffer);
+        const deferred = source.adopt();
+        if (deferred instanceof Uint8Array) { throw new Error('Expected deferred private copies'); }
+        const earlier = writer.write(Uint8Array.of(7));
+        await expect.poll(() => Atomics.load(file.counters, 4)).toBe(1);
+        payloadAlias.fill(0xfe);
+        fieldsAlias.setUint32(0, 0xffffffff, true);
+        let acknowledged = false;
+        const writing = writer.writeOwnedIndexChunks([deferred]).then((headers) => {
+            acknowledged = true;
+            return headers;
+        });
+        try {
+            expect([deferred.header.byteLength, deferred.payload.byteLength, deferred.recordFields.byteLength]).toEqual([0, 0, 0]);
+            expect([payload.byteLength, fields.byteLength]).toEqual([payloadLength, fieldsLength]);
+            payloadAlias.fill(0xfd);
+            fieldsAlias.setUint32(4, 123, true);
+            expect(acknowledged).toBe(false);
+        } finally {
+            release(file);
+        }
+        const [, headers] = await Promise.all([earlier, writing]);
+        expect(headers).toEqual([source.expected.slice(0, 40)]);
+        await writer.close();
+        expect(Buffer.compare(readFileSync(file.filePath), Buffer.concat([Uint8Array.of(7), source.expected]))).toBe(0);
+        expect(payload[0]).toBe(0xfd);
+        expect(fieldsAlias.getUint32(4, true)).toBe(123);
+        expect([payload.byteLength, fields.byteLength]).toEqual([payloadLength, fieldsLength]);
+        client.dispose();
+    });
+
+    test('returns completed logical headers with exact deferred/eager byte parity through the production thread', async () => {
+        const file = fixture({shortWrite: 17});
+        const {client, writer} = await openWorker(file);
+        const first = createDeferredIndexChunkFixture(3);
+        const second = createDeferredIndexChunkFixture(9);
+        const eager = Uint8Array.of(8, 6, 4, 2);
+        const expected = Buffer.concat([eager, first.expected, second.expected]);
+        const writing = writer.writeOwnedIndexChunks([eager, first.chunk, second.chunk]);
+        expect(eager.byteLength).toBe(0);
+        for (const {chunk} of [first, second]) {
+            expect([chunk.header.byteLength, chunk.payload.byteLength, chunk.recordFields.byteLength]).toEqual([0, 0, 0]);
+        }
+        const headers = await writing;
+        expect(headers).toEqual([null, first.expectedHeader, second.expectedHeader]);
+        for (const header of headers) {
+            if (header === null) { continue; }
+            expect(header.buffer).toBeInstanceOf(ArrayBuffer);
+            expect(header.buffer.byteLength).toBe(40);
+        }
+        await writer.close();
+        expect(Buffer.compare(readFileSync(file.filePath), expected)).toBe(0);
+        expect(Atomics.load(file.counters, 2)).toBe(1);
+        expect(Atomics.load(file.counters, 3)).toBe(1);
+        expect(Atomics.load(file.counters, 7)).toBeLessThanOrEqual(512 * 1024);
+        client.dispose();
+    });
+
     test('preserves positional byte parity across owned transfer, short writes and periodic/final flush', async () => {
         const file = fixture({shortWrite: 200_003});
         const {client, writer} = await openWorker(file);
@@ -166,20 +235,28 @@ describe('production import index worker', () => {
         client.dispose();
     });
 
-    test('joins an admitted large write on abort and suppresses periodic/final flush', async () => {
+    test('joins an admitted deferred envelope and large write on abort and suppresses periodic/final flush', async () => {
         const file = fixture({blockWriteAt: 1});
         const {client, writer} = await openWorker(file);
         const bytes = patternedBytes(18 * 1024 * 1024);
-        const expected = digest(bytes);
-        const writing = writer.writeOwnedChunks([bytes]);
+        const {chunk, expected: envelope, expectedHeader} = createDeferredIndexChunkFixture();
+        const expected = createHash('sha256').update(envelope).update(bytes)
+            .digest('hex');
+        let acknowledged = false;
+        const writing = writer.writeOwnedIndexChunks([chunk, bytes]).then((headers) => {
+            acknowledged = true;
+            return headers;
+        });
         await expect.poll(() => Atomics.load(file.counters, 4)).toBe(1);
         let aborted = false;
         const aborting = writer.abort().then(() => { aborted = true; });
         await new Promise((resolve) => { setTimeout(resolve, 15); });
+        expect(acknowledged).toBe(false);
         expect(aborted).toBe(false);
         expect(Atomics.load(file.counters, 3)).toBe(0);
         release(file);
-        await Promise.all([writing, aborting]);
+        const [headers] = await Promise.all([writing, aborting]);
+        expect(headers).toEqual([expectedHeader, null]);
         await expect(writer.close()).rejects.toMatchObject({name: 'AbortError'});
         expect(digest(readFileSync(file.filePath))).toBe(expected);
         expect(Atomics.load(file.counters, 2)).toBe(0);

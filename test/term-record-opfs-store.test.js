@@ -16,9 +16,12 @@
  */
 
 import assert from 'node:assert/strict';
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {WorkerImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-worker-client.js';
+import {prepareImportIndexChunkParts} from '../ext/js/dictionary/term-record-import-index-chunk.js';
+import {createImportIndexChunkFixture} from './util/import-index-chunk-fixture.js';
 import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
@@ -6597,6 +6600,199 @@ describe('TermRecordOpfsStore query-scoped exact reads', () => {
         assert.equal(await reopened.prepareExactLookupView(dictionaryName, ['猫']), null);
         await reopened.ensureDictionariesLoaded([dictionaryName]);
         assert.deepEqual(reopened.findTermIds(dictionaryName, '猫', 'expression'), [1]);
+    });
+});
+
+describe('TermRecordOpfsStore deferred lookup header receipts', () => {
+    afterEach(() => { vi.restoreAllMocks(); });
+    /**
+     * Only transport and file access are adapted. The production proxy performs
+     * the transfer, validates receipts, and owns close/abort failure settlement.
+     * Real worker hashing/coalescing/flush parity is covered by its thread tests.
+     * @param {TermRecordOpfsStore} store
+     * @param {(headers: (Uint8Array|null)[]) => Promise<void>|void} [beforeReceipt]
+     * @returns {string[]}
+     */
+    function installWorkerWriter(store, beforeReceipt = () => {}) {
+        /** @type {string[]} */
+        const actions = [];
+        vi.spyOn(store, '_createLookupIndexWritable').mockImplementation(async (state) => {
+            if (state.lookupIndexFileHandle === null) { throw new Error('Missing test index file'); }
+            const writable = await state.lookupIndexFileHandle.createWritable();
+            await writable.truncate(0);
+            /** @type {Promise<unknown>} */
+            let queue = Promise.resolve();
+            const client = {
+                /**
+                 * @param {number} writerId
+                 * @param {string} action
+                 * @param {Record<string, unknown>} [params]
+                 * @param {Transferable[]} [transfer]
+                 * @returns {Promise<unknown>}
+                 */
+                request(writerId, action, params = {}, transfer = []) {
+                    expect(writerId).toBe(1);
+                    actions.push(action);
+                    const received = structuredClone(params, {transfer});
+                    const result = queue.then(async () => {
+                        if (action === 'writeIndexChunks' || action === 'writeChunks') {
+                            const chunks = /** @type {import('../ext/js/dictionary/term-record-import-index-chunk.js').ImportIndexChunk[]} */ (received.chunks);
+                            await writable.write(new Blob(prepareImportIndexChunkParts(chunks)));
+                            if (action === 'writeChunks') { return; }
+                            const headers = chunks.map((chunk) => (chunk instanceof Uint8Array ? null : new Uint8Array(chunk.header)));
+                            await beforeReceipt(headers);
+                            return headers;
+                        }
+                        if (action === 'seek') { await writable.seek(/** @type {number} */ (received.offset)); }
+                        if (action === 'truncate') { await writable.truncate(/** @type {number} */ (received.size)); }
+                        if (action === 'close') { await writable.close(); }
+                        if (action === 'abort') { await writable.abort(); }
+                    });
+                    queue = result.catch(() => {});
+                    return result;
+                },
+            };
+            return new WorkerImportIndexWriter(/** @type {import('../ext/js/dictionary/term-record-import-index-worker-client.js').ImportIndexWorkerClient} */ (/** @type {unknown} */ (client)), 1);
+        });
+        return actions;
+    }
+
+    /**
+     * @param {boolean} worker
+     * @param {(headers: (Uint8Array|null)[]) => Promise<void>|void} [beforeReceipt]
+     * @returns {Promise<{store: TermRecordOpfsStore, files: Map<string, Uint8Array>, checkpoint: Awaited<ReturnType<TermRecordOpfsStore['createImportCheckpoint']>>, state: TermRecordShardState, bytes: number, headers: Uint8Array[], actions: string[], dictionary: string}>}
+     */
+    async function appendFixture(worker, beforeReceipt) {
+        const first = await createImportIndexChunkFixture(128, 0, '同じ語');
+        const second = await createImportIndexChunkFixture(128, 0, '違う語');
+        const {store} = first;
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        store._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        Reflect.set(store, '_importSessionActive', false);
+        const checkpoint = await store.createImportCheckpoint();
+        await store.beginImportSession();
+        const actions = worker ? installWorkerWriter(store, beforeReceipt) : [];
+        for (const {consumer, prepared} of [first, second]) {
+            Reflect.deleteProperty(consumer, 'mediaRows');
+            await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw');
+            expect(prepared.bytes.byteLength).toBeGreaterThan(0);
+        }
+        const state = [...store._shardStateByFileName.values()][0];
+        expect(state.pendingLookupIndexChunks).toHaveLength(2);
+        const bytes = state.pendingLookupIndexBytes;
+        const route = store._exactLookupRoute;
+        if (route === null) { throw new Error('Missing staged lookup route'); }
+        const headers = route.shards.get(state)?.chunks.map(({header}) => header);
+        if (typeof headers === 'undefined') { throw new Error('Missing staged route headers'); }
+        for (const header of headers) { expect(header.slice(24, 36)).toEqual(new Uint8Array(12)); }
+        return {store, files, checkpoint, state, bytes, headers, actions, dictionary: first.consumer.dictionary};
+    }
+
+    /**
+     * A sparse read must use the captured chunk headers. A full/dense read would
+     * mask stale zero-checksum route frames by loading a fresh persisted header.
+     * @param {Awaited<ReturnType<typeof appendFixture>>} fixture
+     */
+    async function expectSparseRoute(fixture) {
+        const {store, dictionary, headers, files, state} = fixture;
+        const bytes = files.get(`${state.fileName}.mbti`);
+        if (typeof bytes === 'undefined') { throw new Error('Missing finalized index bytes'); }
+        const route = store._exactLookupRoute;
+        if (route === null) { throw new Error('Missing finalized route'); }
+        const chunks = route.shards.get(state)?.chunks;
+        if (typeof chunks === 'undefined') { throw new Error('Missing finalized route chunks'); }
+        for (let i = 0; i < chunks.length; ++i) {
+            expect(headers[i]).toEqual(bytes.slice(chunks[i].start, chunks[i].start + 40));
+            expect(headers[i].slice(24, 36)).not.toEqual(new Uint8Array(12));
+        }
+        store.publishExactLookupRoute(dictionary);
+        expect(await store.prepareExactLookupView(dictionary, ['同じ語', '違う語'])).toBeNull();
+        const view = await store.prepareExactLookupView(dictionary, ['同じ語']);
+        expect(view).not.toBeNull();
+        if (view === null) { throw new Error('Sparse route unexpectedly declined'); }
+        expect(store.findTermIdMatchesForDictionaries([dictionary], '同じ語', view)).toEqual([{
+            expression: Array.from({length: 128}, (_, i) => i + 1),
+            reading: [],
+        }]);
+        expect((await store.getByIdsAsync([1], view)).get(1)?.expression).toBe('同じ語');
+        expect(store.hasPersistentTermLookupIndex(dictionary)).toBe(false);
+        expect(store.getById(1)).toBeUndefined();
+    }
+
+    test.each([false, true])('completes exact route headers and counts only acknowledged worker envelopes: %s', async (worker) => {
+        const fixture = await appendFixture(worker);
+        await fixture.store.endImportSession();
+        const metrics = fixture.store.getLastEndImportSessionMetrics();
+        expect(metrics?.lookupIndexWorkerOwnedEnvelopeCount).toBe(worker ? 2 : 0);
+        expect(metrics?.lookupIndexWorkerOwnedEnvelopeBytes).toBe(worker ? fixture.bytes : 0);
+        const stored = fixture.files.get(`${fixture.state.fileName}.mbti`);
+        if (typeof stored === 'undefined') { throw new Error('Missing finalized index file'); }
+        const fileHeader = new DataView(stored.buffer, stored.byteOffset, 40);
+        expect(fileHeader.getUint32(16, true)).toBe(2);
+        expect(fileHeader.getUint32(20, true)).toBe(256);
+        if (worker) { expect(fixture.actions.filter((action) => action === 'writeIndexChunks')).toHaveLength(1); }
+        await expectSparseRoute(fixture);
+        vi.restoreAllMocks();
+    });
+
+    test('retains logical queued bytes and unpublished headers until the worker receipt validates', async () => {
+        let reached = () => {};
+        let release = () => {};
+        const pending = new Promise((resolve) => {
+            reached = () => { resolve(void 0); };
+        });
+        const gate = new Promise((resolve) => {
+            release = () => { resolve(void 0); };
+        });
+        const fixture = await appendFixture(true, async () => {
+            reached();
+            await gate;
+        });
+        const completion = fixture.store.endImportSession();
+        try {
+            await pending;
+            expect(fixture.state.lookupIndexQueuedBytes).toBe(fixture.bytes);
+            expect(fixture.state.lookupIndexChunkCount).toBe(0);
+            expect(fixture.state.lookupIndexRecordCount).toBe(0);
+            expect(fixture.store._lookupIndexWriteMetrics.workerOwnedEnvelopeCount).toBe(0);
+            for (const header of fixture.headers) { expect(header.slice(24, 36)).toEqual(new Uint8Array(12)); }
+            expect(fixture.store._exactLookupRoute?.published).toBe(false);
+        } finally {
+            release();
+            await completion;
+        }
+        expect(fixture.state.lookupIndexQueuedBytes).toBe(0);
+        expect(fixture.store.getLastEndImportSessionMetrics()?.lookupIndexWorkerOwnedEnvelopeCount).toBe(2);
+        await expectSparseRoute(fixture);
+        vi.restoreAllMocks();
+    });
+
+    test('malformed worker headers fail finalization and drain through rollback without local retry', async () => {
+        const fixture = await appendFixture(true, (headers) => {
+            const header = headers[0];
+            if (header === null) { throw new Error('Missing deferred header fixture'); }
+            header[0] ^= 1;
+        });
+        const completionError = await fixture.store.endImportSession().catch((error) => /** @type {unknown} */ (error));
+        const failure = fixture.state.lookupIndexWriteError;
+        expect(failure).toBeInstanceOf(TypeError);
+        expect(failure?.message).toBe('Invalid import index worker header receipt');
+        expect(completionError).toBeInstanceOf(AggregateError);
+        if (!(completionError instanceof AggregateError)) { throw new Error('Missing finalization failure'); }
+        expect(completionError.errors).toEqual([failure, failure]);
+        expect(fixture.state.lookupIndexQueuedBytes).toBe(0);
+        expect(fixture.state.lookupIndexChunkCount).toBe(0);
+        expect(fixture.store._lookupIndexWriteMetrics.workerOwnedEnvelopeCount).toBe(0);
+        for (const header of fixture.headers) { expect(header.slice(24, 36)).toEqual(new Uint8Array(12)); }
+        await expect(fixture.store._awaitLookupIndexWritesForShard(fixture.state)).rejects.toBe(failure);
+        await fixture.store.rollbackImportSession(fixture.checkpoint);
+        expect(fixture.actions.filter((action) => action === 'writeIndexChunks')).toHaveLength(1);
+        expect(fixture.actions.filter((action) => action === 'close')).toHaveLength(1);
+        expect(fixture.files.size).toBe(0);
+        expect(fixture.store._exactLookupRoute).toBeNull();
+        expect(await fixture.store.prepareExactLookupView(fixture.dictionary, ['同じ語'])).toBeNull();
+        vi.restoreAllMocks();
     });
 });
 
