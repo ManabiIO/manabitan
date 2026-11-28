@@ -1,0 +1,72 @@
+name: Native compiler bundle 9bb32
+
+on:
+  push:
+    branches: [diagnostic/import-baseline-20261127-9bb32]
+    paths: [.github/workflows/native-compiler-9bb32.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install pinned native toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Package compiler and its runtime
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, re, shutil, subprocess, tarfile
+          root = pathlib.Path("native-toolchain")
+          (root / "bin").mkdir(parents=True)
+          (root / "lib").mkdir()
+          programs = {"clang-real": pathlib.Path(shutil.which("clang-21")).resolve(),
+                      "wasm-ld-real": pathlib.Path(shutil.which("wasm-ld-21")).resolve()}
+          receipts = {}
+          queue = list(programs.values())
+          seen = set()
+          for name, source in programs.items():
+              shutil.copy2(source, root / "bin" / name)
+              receipts[name] = subprocess.check_output([str(source), "--version"], text=True)
+          assert "21.1.8" in receipts["clang-real"] and "21.1.8" in receipts["wasm-ld-real"], receipts
+          while queue:
+              source = queue.pop()
+              if source in seen:
+                  continue
+              seen.add(source)
+              result = subprocess.run(["ldd", str(source)], text=True, capture_output=True, check=False)
+              for name in re.findall(r"(?:=>\\s+)?(/[^\\s()]+)", result.stdout):
+                  dependency = pathlib.Path(name).resolve()
+                  if dependency.is_file():
+                      destination = root / "lib" / pathlib.Path(name).name
+                      if not destination.exists():
+                          shutil.copy2(dependency, destination)
+                      if dependency not in seen:
+                          queue.append(dependency)
+          resource = pathlib.Path(subprocess.check_output(["clang-21", "-print-resource-dir"], text=True).strip())
+          shutil.copytree(resource, root / "lib" / "clang" / "21")
+          loader = next(path.name for path in (root / "lib").glob("ld-linux*"))
+          prefix = '#!/bin/sh\nset -eu\nroot=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)\n'
+          clang = prefix + 'exec "$root/lib/' + loader + '" --library-path "$root/lib" "$root/bin/clang-real" -resource-dir "$root/lib/clang/21" "$@"\n'
+          linker = prefix + 'exec "$root/lib/' + loader + '" --argv0 wasm-ld --library-path "$root/lib" "$root/bin/wasm-ld-real" "$@"\n'
+          for name, text in [("clang", clang), ("wasm-ld", linker)]:
+              target = root / "bin" / name
+              target.write_text(text)
+              target.chmod(0o755)
+          receipts["files"] = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                               for path in sorted(root.rglob("*")) if path.is_file()}
+          (root / "manifest.json").write_text(json.dumps(receipts, indent=2) + "\n")
+          subprocess.run([str(root / "bin/clang"), "--version"], check=True)
+          subprocess.run([str(root / "bin/wasm-ld"), "--version"], check=True)
+          with tarfile.open("native-toolchain-9bb32.tar.gz", "w:gz") as archive:
+              archive.add(root, arcname="native-toolchain")
+          PY
+      - name: Retain compiler bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-toolchain-9bb32
+          path: native-toolchain-9bb32.tar.gz
+          if-no-files-found: error
+          retention-days: 7
