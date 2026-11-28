@@ -1,0 +1,78 @@
+name: Offline original VNDB artifact review eef4
+
+on:
+  push:
+    branches: [experiment/offline-vndb-artifact-review-20261128-eef4]
+    paths:
+      - .github/workflows/offline-vndb-artifact-review-eef4.yml
+      - dev/perf/offline-vndb-artifact-review-eef4.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: offline-vndb-artifact-review-eef4-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Offline VNDB artifact review (${{ matrix.order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [forward, reverse]
+    env:
+      ORIGINAL_ROOT: /workspace/scratch/eef400aacc1b
+      BRIDGE_SHA256: 7d1e1472b040090f5f6f1ad888246938696b2b09ac842dbe982ef5b1d7731d31
+    steps:
+      - name: Check out this offline-only review wrapper
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: audit-code
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out the immutable original campaign sources
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 8be0d1c54e537efabc25e34e01926bb898eb50df
+          path: frozen-campaign
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out the immutable production baseline
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          path: baseline
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Recreate only the original evidence path on this fresh host
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e "$ORIGINAL_ROOT"
+          test ! -L "$ORIGINAL_ROOT"
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$ORIGINAL_ROOT"
+          printf '%s  %s\n' "$BRIDGE_SHA256" audit-code/dev/perf/offline-vndb-artifact-review-eef4.py | sha256sum -c -
+          python3 -m py_compile audit-code/dev/perf/offline-vndb-artifact-review-eef4.py
+      - name: Audit the original artifact and replay only its unchanged summary
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 audit-code/dev/perf/offline-vndb-artifact-review-eef4.py \
+            --order '${{ matrix.order }}' \
+            --campaign-checkout frozen-campaign \
+            --baseline-checkout baseline
+      - name: Retain the original ZIP, every raw observation and all replay failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: offline-vndb-equality-review-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /workspace/scratch/eef400aacc1b/bench-work/hosted-vndb-equality/${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 30

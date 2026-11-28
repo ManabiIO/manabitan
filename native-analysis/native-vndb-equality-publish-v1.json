@@ -1,0 +1,119 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "tree": "f0eb884d923ad6054112a9b47e1550709f22f1ee",
+  "branch": "experiment/native-vndb-equality-component-20261128-eef4",
+  "files": [
+    {
+      "path": ".github/workflows/native-vndb-equality-component-eef4.yml",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/.github/workflows/native-vndb-equality-component-eef4.yml",
+      "bytes": 6131,
+      "sha256": "15f517ea88f6ad6ba197975fe2828020531952c1fa3681bc1c55c1fd87a16ddc",
+      "gitBlob": "d71b9a523a6bd6ec572ed71fe44bcc4158efe7bd",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/README.md",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/README.md",
+      "bytes": 5955,
+      "sha256": "8e6a09a4f981ca9f6cea3c557d0175a214b37c8a8100b35085f0be47116d9d83",
+      "gitBlob": "779c1102f918a476018fffde114f08b49fb3df17",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/campaign.py",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/campaign.py",
+      "bytes": 4086,
+      "sha256": "a30bae3541c4b56d39fdf8f13ac6bb500a60c5d9842877297e8f4e2563cc3308",
+      "gitBlob": "68980b45b3dbdc0c9d8f6b31a0bb7533afe51ae9",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/preloaded-worker-server.mjs",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/preloaded-worker-server.mjs",
+      "bytes": 20627,
+      "sha256": "c13f63b7069dd81cc78ea6fe0d58663473c5c5009e9dc12588be89908db3134b",
+      "gitBlob": "a69bb3c5e38a276e7c7142e35e2e8f026d91808a",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/prepare.py",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/prepare.py",
+      "bytes": 8492,
+      "sha256": "777f61df208348f2a966ca3e1e2726f9161f9225de2494efedb5614a38e18a30",
+      "gitBlob": "dbee8301035029bfca7600be054944cb6b7aeb2c",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/prerequisites.json",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/prerequisites.json",
+      "bytes": 2545,
+      "sha256": "801b5f819bec44fc8a14e38e31fef41dc14b7e80f0fe1437b1318d5227a29d6d",
+      "gitBlob": "ea1a53671f48ed7652cf9ec7b264269e2392ba43",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/protocol.json",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/protocol.json",
+      "bytes": 4490,
+      "sha256": "b1348d1a7b2561ddba69777e2f474e915b3b8597958d247c1fc865a751bf3ee5",
+      "gitBlob": "d4b8b7f6069874bcbc99b03190c1014208a61d1c",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/run.py",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/run.py",
+      "bytes": 8280,
+      "sha256": "bad88bcb3f0069fea2cc121367a686db2e07e46a53dcf7d833ba8e9ed7f3ec40",
+      "gitBlob": "df7dd4193dd3037ed349aeaf93caaf5f3f0e5fe0",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/summarize.py",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/summarize.py",
+      "bytes": 7272,
+      "sha256": "eebaa0ee4f266940a2713b6f35923934f23a43b4e1e3467d0539ea9cf3735d42",
+      "gitBlob": "a847791a5541a444fbc8a3f05d1c7bb560a91059",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/build-receipt.json",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/build-receipt.json",
+      "bytes": 5423,
+      "sha256": "5112614bb3b39b3e63bb20e73e71b82867004362c9a77801b0b2a8dba87499ed",
+      "gitBlob": "8fb18151beac16579a9a993ab7183720f5dc2d41",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/source.patch",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/source.patch",
+      "bytes": 2202,
+      "sha256": "b9be78c8197a870787aec727329cd590d0812d9f0d057d2d6e5032c610f8636a",
+      "gitBlob": "ef3b481276be856c1ac67ed54bbb96cc72c84372",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.c",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.c",
+      "bytes": 159717,
+      "sha256": "9570174624c1076825ed3ad569730371f9c75fd6d28d0032d4cf42db5013ea32",
+      "gitBlob": "4651c0d4b40281cb47dc6d9b18c03f68d7dc3096",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.wasm",
+      "localPath": "/workspace/scratch/eef400aacc1b/native-analysis/native-vndb-equality-hosted-v1/dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.wasm",
+      "bytes": 68470,
+      "sha256": "a921cc6b71fb5fc59d22ab769416db6fbe9a6a5e5cedfa705ae3cace16ffefe7",
+      "gitBlob": "929dd7bb189088667135373f2e20d06df0cd9ce4",
+      "encoding": "base64"
+    }
+  ],
+  "diagnosticOnly": true,
+  "pullRequestCreated": false,
+  "admissionCampaignSha256": "1d41b31df9fb025a5c001311378b474956aa86a3d3013cd945d5639a4dddeb39",
+  "admissionReceiptSha256": "91ba638e11eff6ece6e1185440076740e962a40299772f92b9a3d99e78a67978",
+  "reviewSha256": "ea7513c47f056a4679896362175b8bd0abebfb708b985eb9a9f0c5a9b850effc",
+  "protocolSha256": "b1348d1a7b2561ddba69777e2f474e915b3b8597958d247c1fc865a751bf3ee5",
+  "prerequisitesSha256": "801b5f819bec44fc8a14e38e31fef41dc14b7e80f0fe1437b1318d5227a29d6d"
+}

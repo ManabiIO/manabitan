@@ -1,0 +1,88 @@
+{
+  "commit": "8be0d1c54e537efabc25e34e01926bb898eb50df",
+  "tree": "f0eb884d923ad6054112a9b47e1550709f22f1ee",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "branch": "experiment/native-vndb-equality-component-20261128-eef4",
+  "files": [
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/campaign.py",
+      "sha": "68980b45b3dbdc0c9d8f6b31a0bb7533afe51ae9",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/preloaded-worker-server.mjs",
+      "sha": "a69bb3c5e38a276e7c7142e35e2e8f026d91808a",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/run.py",
+      "sha": "df7dd4193dd3037ed349aeaf93caaf5f3f0e5fe0",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/summarize.py",
+      "sha": "a847791a5541a444fbc8a3f05d1c7bb560a91059",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/build-receipt.json",
+      "sha": "8fb18151beac16579a9a993ab7183720f5dc2d41",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/source.patch",
+      "sha": "ef3b481276be856c1ac67ed54bbb96cc72c84372",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.c",
+      "sha": "4651c0d4b40281cb47dc6d9b18c03f68d7dc3096",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/variants/equality-bounded-tail/term-bank-parser.wasm",
+      "sha": "929dd7bb189088667135373f2e20d06df0cd9ce4",
+      "reusedVerifiedBlob": true
+    },
+    {
+      "path": ".github/workflows/native-vndb-equality-component-eef4.yml",
+      "sha": "d71b9a523a6bd6ec572ed71fe44bcc4158efe7bd",
+      "reusedVerifiedBlob": false
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/README.md",
+      "sha": "779c1102f918a476018fffde114f08b49fb3df17",
+      "reusedVerifiedBlob": false
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/prepare.py",
+      "sha": "dbee8301035029bfca7600be054944cb6b7aeb2c",
+      "reusedVerifiedBlob": false
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/prerequisites.json",
+      "sha": "ea1a53671f48ed7652cf9ec7b264269e2392ba43",
+      "reusedVerifiedBlob": false
+    },
+    {
+      "path": "dev/perf/native-vndb-equality-component-20261128-eef4/protocol.json",
+      "sha": "d4b8b7f6069874bcbc99b03190c1014208a61d1c",
+      "reusedVerifiedBlob": false
+    }
+  ],
+  "allBlobsAndCompleteTreeVerified": true,
+  "admissionCampaignSha256": "1d41b31df9fb025a5c001311378b474956aa86a3d3013cd945d5639a4dddeb39",
+  "admissionReceiptSha256": "91ba638e11eff6ece6e1185440076740e962a40299772f92b9a3d99e78a67978",
+  "reviewSha256": "ea7513c47f056a4679896362175b8bd0abebfb708b985eb9a9f0c5a9b850effc",
+  "protocolSha256": "b1348d1a7b2561ddba69777e2f474e915b3b8597958d247c1fc865a751bf3ee5",
+  "prerequisitesSha256": "801b5f819bec44fc8a14e38e31fef41dc14b7e80f0fe1437b1318d5227a29d6d",
+  "pullRequestCreated": false,
+  "diagnosticRun": 46114043842,
+  "workflowLintRun": 46114043780,
+  "jobs": {
+    "reverse": 140883726734,
+    "forward": 140883726945
+  },
+  "scope": "Prospective VNDB-only equality component; fixed source and conditioning. No complete-import or memory claim.",
+  "commitResponseInspection": "create_commit returned only SHA; an initial client guard expected a tree field and stopped before branch creation. A separate git-commit GET verified exact tree and single baseline parent; no second commit or acquisition was created."
+}
