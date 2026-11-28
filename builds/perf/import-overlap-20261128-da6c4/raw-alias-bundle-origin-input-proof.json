@@ -1,0 +1,4326 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "node": "v24.22.3",
+  "esbuild": "0.25.1",
+  "acorn": "8.19.0",
+  "reconstructionSha256": "0e650b21056a6db9be9be0f917a4018de930cdcc2984deae5ef1bed55bad4ca5",
+  "scope": "Exact hashed bundles; no product/source write, corpus import, browser execution or timing",
+  "files": [
+    {
+      "path": "ext/lib/handlebars.js",
+      "naturalSha256": "691429be5a0d86e84c13de4083c53da47f02b6aa451da5a85346721ea6518e1d",
+      "hostedSha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2",
+      "naturalAstSha256": "003df1786f63d7045b82fd8cb7d5b9874f240ca8eb0b0a3a62de57127a741c4f",
+      "hostedAstSha256": "738461d9e28d20b0ba3d0b427eeb853309ce3269e6bf5410b1767a211897e774",
+      "astExactlyIdentical": false,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 48,
+      "commonJsSourceLabels": 42,
+      "replacementSpans": [
+        {
+          "start": 1612,
+          "end": 1678,
+          "kind": "comment"
+        },
+        {
+          "start": 1754,
+          "end": 1820,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 4593,
+          "end": 4659,
+          "kind": "comment"
+        },
+        {
+          "start": 4743,
+          "end": 4809,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 6425,
+          "end": 6491,
+          "kind": "comment"
+        },
+        {
+          "start": 6605,
+          "end": 6671,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 7845,
+          "end": 7911,
+          "kind": "comment"
+        },
+        {
+          "start": 7993,
+          "end": 8059,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 11323,
+          "end": 11389,
+          "kind": "comment"
+        },
+        {
+          "start": 11491,
+          "end": 11557,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 12271,
+          "end": 12337,
+          "kind": "comment"
+        },
+        {
+          "start": 12415,
+          "end": 12481,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 13830,
+          "end": 13896,
+          "kind": "comment"
+        },
+        {
+          "start": 13976,
+          "end": 14042,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 14782,
+          "end": 14848,
+          "kind": "comment"
+        },
+        {
+          "start": 14934,
+          "end": 15000,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 15409,
+          "end": 15475,
+          "kind": "comment"
+        },
+        {
+          "start": 15557,
+          "end": 15623,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 16916,
+          "end": 16982,
+          "kind": "comment"
+        },
+        {
+          "start": 17062,
+          "end": 17128,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 18913,
+          "end": 18979,
+          "kind": "comment"
+        },
+        {
+          "start": 19068,
+          "end": 19134,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 19956,
+          "end": 20022,
+          "kind": "comment"
+        },
+        {
+          "start": 20108,
+          "end": 20174,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 20693,
+          "end": 20759,
+          "kind": "comment"
+        },
+        {
+          "start": 20837,
+          "end": 20903,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 22234,
+          "end": 22300,
+          "kind": "comment"
+        },
+        {
+          "start": 22399,
+          "end": 22465,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 25681,
+          "end": 25747,
+          "kind": "comment"
+        },
+        {
+          "start": 25821,
+          "end": 25887,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 29549,
+          "end": 29615,
+          "kind": "comment"
+        },
+        {
+          "start": 29703,
+          "end": 29769,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 30159,
+          "end": 30225,
+          "kind": "comment"
+        },
+        {
+          "start": 30320,
+          "end": 30386,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 30928,
+          "end": 30994,
+          "kind": "comment"
+        },
+        {
+          "start": 31074,
+          "end": 31140,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 44881,
+          "end": 44947,
+          "kind": "comment"
+        },
+        {
+          "start": 45035,
+          "end": 45101,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 45835,
+          "end": 45901,
+          "kind": "comment"
+        },
+        {
+          "start": 45992,
+          "end": 46058,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 48007,
+          "end": 48073,
+          "kind": "comment"
+        },
+        {
+          "start": 48154,
+          "end": 48220,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 49291,
+          "end": 49357,
+          "kind": "comment"
+        },
+        {
+          "start": 49444,
+          "end": 49510,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 94344,
+          "end": 94410,
+          "kind": "comment"
+        },
+        {
+          "start": 94505,
+          "end": 94571,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 95066,
+          "end": 95132,
+          "kind": "comment"
+        },
+        {
+          "start": 95221,
+          "end": 95287,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 99522,
+          "end": 99588,
+          "kind": "comment"
+        },
+        {
+          "start": 99699,
+          "end": 99765,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 105684,
+          "end": 105750,
+          "kind": "comment"
+        },
+        {
+          "start": 105840,
+          "end": 105906,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 111647,
+          "end": 111713,
+          "kind": "comment"
+        },
+        {
+          "start": 111797,
+          "end": 111863,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 113549,
+          "end": 113615,
+          "kind": "comment"
+        },
+        {
+          "start": 113706,
+          "end": 113772,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 132098,
+          "end": 132164,
+          "kind": "comment"
+        },
+        {
+          "start": 132226,
+          "end": 132292,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 133381,
+          "end": 133447,
+          "kind": "comment"
+        },
+        {
+          "start": 133517,
+          "end": 133583,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 135237,
+          "end": 135303,
+          "kind": "comment"
+        },
+        {
+          "start": 135361,
+          "end": 135427,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 144178,
+          "end": 144244,
+          "kind": "comment"
+        },
+        {
+          "start": 144312,
+          "end": 144378,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 146622,
+          "end": 146688,
+          "kind": "comment"
+        },
+        {
+          "start": 146762,
+          "end": 146828,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 148153,
+          "end": 148219,
+          "kind": "comment"
+        },
+        {
+          "start": 148309,
+          "end": 148375,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 159212,
+          "end": 159278,
+          "kind": "comment"
+        },
+        {
+          "start": 159354,
+          "end": 159420,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 160938,
+          "end": 161004,
+          "kind": "comment"
+        },
+        {
+          "start": 161074,
+          "end": 161140,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 162045,
+          "end": 162111,
+          "kind": "comment"
+        },
+        {
+          "start": 162199,
+          "end": 162265,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 186726,
+          "end": 186792,
+          "kind": "comment"
+        },
+        {
+          "start": 186864,
+          "end": 186930,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 196685,
+          "end": 196751,
+          "kind": "comment"
+        },
+        {
+          "start": 196817,
+          "end": 196883,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 197156,
+          "end": 197222,
+          "kind": "comment"
+        },
+        {
+          "start": 197313,
+          "end": 197379,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 202164,
+          "end": 202230,
+          "kind": "comment"
+        },
+        {
+          "start": 202343,
+          "end": 202409,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 238204,
+          "end": 238270,
+          "kind": "comment"
+        },
+        {
+          "start": 238345,
+          "end": 238411,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 240497,
+          "end": 240563,
+          "kind": "comment"
+        },
+        {
+          "start": 240660,
+          "end": 240726,
+          "kind": "comment"
+        },
+        {
+          "start": 241014,
+          "end": 241080,
+          "kind": "comment"
+        },
+        {
+          "start": 241220,
+          "end": 241286,
+          "kind": "comment"
+        },
+        {
+          "start": 242215,
+          "end": 242281,
+          "kind": "comment"
+        },
+        {
+          "start": 262313,
+          "end": 262379,
+          "kind": "comment"
+        }
+      ],
+      "labels": [
+        {
+          "start": 1753,
+          "end": 1860,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/utils.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/utils.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 4742,
+          "end": 4853,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/exception.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/exception.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 6604,
+          "end": 6734,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/block-helper-missing.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/block-helper-missing.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 7992,
+          "end": 8106,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/each.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/each.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 11490,
+          "end": 11614,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/helper-missing.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/helper-missing.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 12414,
+          "end": 12526,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/if.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/if.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 13975,
+          "end": 14088,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/log.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/log.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 14933,
+          "end": 15049,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/lookup.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/lookup.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 15556,
+          "end": 15670,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers/with.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers/with.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 17061,
+          "end": 17170,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/helpers.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/helpers.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 19067,
+          "end": 19186,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/decorators/inline.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/decorators/inline.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 20107,
+          "end": 20219,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/decorators.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/decorators.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 20836,
+          "end": 20944,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/logger.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/logger.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 22398,
+          "end": 22521,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/internal/proto-access.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/internal/proto-access.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 25820,
+          "end": 25926,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/base.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/base.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 29702,
+          "end": 29815,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/safe-string.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/safe-string.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 30319,
+          "end": 30440,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/internal/wrapHelper.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/internal/wrapHelper.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 31073,
+          "end": 31182,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/runtime.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/runtime.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 45034,
+          "end": 45147,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/no-conflict.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/no-conflict.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 45991,
+          "end": 46100,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars.runtime.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars.runtime.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 48153,
+          "end": 48267,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/ast.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/ast.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 49443,
+          "end": 49560,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 94504,
+          "end": 94625,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/node-types.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/node-types.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 95220,
+          "end": 95338,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/visitor.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/visitor.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 99698,
+          "end": 99827,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/whitespace-control.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/whitespace-control.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 105839,
+          "end": 105957,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/helpers.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/helpers.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 111796,
+          "end": 111911,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/base.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/base.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 113705,
+          "end": 113824,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 132225,
+          "end": 132317,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/base64.js",
+          "hosted": "node_modules/source-map/lib/base64.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 133516,
+          "end": 133612,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/base64-vlq.js",
+          "hosted": "node_modules/source-map/lib/base64-vlq.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 135360,
+          "end": 135450,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/util.js",
+          "hosted": "node_modules/source-map/lib/util.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 144311,
+          "end": 144406,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/array-set.js",
+          "hosted": "node_modules/source-map/lib/array-set.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 146761,
+          "end": 146859,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/mapping-list.js",
+          "hosted": "node_modules/source-map/lib/mapping-list.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 148308,
+          "end": 148414,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/source-map-generator.js",
+          "hosted": "node_modules/source-map/lib/source-map-generator.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 159353,
+          "end": 159452,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/binary-search.js",
+          "hosted": "node_modules/source-map/lib/binary-search.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 161073,
+          "end": 161169,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/quick-sort.js",
+          "hosted": "node_modules/source-map/lib/quick-sort.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 162198,
+          "end": 162303,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/source-map-consumer.js",
+          "hosted": "node_modules/source-map/lib/source-map-consumer.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 186863,
+          "end": 186960,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/lib/source-node.js",
+          "hosted": "node_modules/source-map/lib/source-node.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 196816,
+          "end": 196908,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/source-map/source-map.js",
+          "hosted": "node_modules/source-map/source-map.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 197312,
+          "end": 197431,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 202342,
+          "end": 202472,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars/compiler/javascript-compiler.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars/compiler/javascript-compiler.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 238344,
+          "end": 238445,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/handlebars/dist/cjs/handlebars.js",
+          "hosted": "node_modules/handlebars/dist/cjs/handlebars.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        }
+      ],
+      "commonJsHelper": "var __commonJS = (cb, mod) => function __require() {\n  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;\n};",
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "handlebars.js.map",
+          "bytes": 456860,
+          "sha256": "9630cf0ebcc663517eecad8d357e4b0134237c07d61d0f5a0e4e9d38429ea409"
+        },
+        {
+          "name": "handlebars.js",
+          "bytes": 259731,
+          "sha256": "564843c2cb26b564a471bdbf109096e0312c0218eff06b191412057fe65092fc"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/hangul-js.js",
+      "naturalSha256": "b502ecd41a13474800ba6f5927ca5034d2a60760a0af5acfd4c7c3f69c05e7ab",
+      "hostedSha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62",
+      "naturalAstSha256": "d45c2b8f5de1368af5359e39f4287526d521ce953ddb9e68858224734ec1f720",
+      "hostedAstSha256": "b5e300b7f792d24505da81ec8a592ee8af43c0e7923d0865cc7b47ebb5b42700",
+      "astExactlyIdentical": false,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 1,
+      "commonJsSourceLabels": 1,
+      "replacementSpans": [
+        {
+          "start": 1339,
+          "end": 1405,
+          "kind": "comment"
+        },
+        {
+          "start": 1462,
+          "end": 1528,
+          "kind": "commonjs-source-label"
+        }
+      ],
+      "labels": [
+        {
+          "start": 1461,
+          "end": 1548,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/hangul-js/hangul.js",
+          "hosted": "node_modules/hangul-js/hangul.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        }
+      ],
+      "commonJsHelper": "var __commonJS = (cb, mod) => function __require() {\n  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;\n};",
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "hangul-js.js.map",
+          "bytes": 38220,
+          "sha256": "c12e2a1b1c4ca596da3aea871b0bd96956ddc5b46721d89fdf3ace22ff7cf75b"
+        },
+        {
+          "name": "hangul-js.js",
+          "bytes": 19842,
+          "sha256": "36363ca2c00609b4bc0e2ca40e067ac21a216729eb255e2f1a6cf9cd0da06d13"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/kanji-processor.js",
+      "naturalSha256": "58b02d0065f7e87284a970d7ed53bd64373e78528dde60a71d9b1325fe44b4de",
+      "hostedSha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a",
+      "naturalAstSha256": "6ab6922f553a408bbcf4e1f8e2adcd3a421438e1b96bc9cb362e824b1e0891e1",
+      "hostedAstSha256": "6ab6922f553a408bbcf4e1f8e2adcd3a421438e1b96bc9cb362e824b1e0891e1",
+      "astExactlyIdentical": true,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 3,
+      "commonJsSourceLabels": 0,
+      "replacementSpans": [
+        {
+          "start": 19,
+          "end": 85,
+          "kind": "comment"
+        },
+        {
+          "start": 124252,
+          "end": 124318,
+          "kind": "comment"
+        },
+        {
+          "start": 150937,
+          "end": 151003,
+          "kind": "comment"
+        }
+      ],
+      "labels": [],
+      "commonJsHelper": null,
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "kanji-processor.js.map",
+          "bytes": 418651,
+          "sha256": "09e901dbe3613c642f03bfb7259bd3a5d318c965b5dce1196f3f8ce32336c987"
+        },
+        {
+          "name": "kanji-processor.js",
+          "bytes": 151634,
+          "sha256": "cbc709cad3698b5c93afbdc4c721a7298c0a61d8f6b9dffb8c8a9a66f43fa880"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/linkedom.js",
+      "naturalSha256": "622a36f7daef69024459cefe7d5893b592d829b6b6e938e87740aa1df4fbe147",
+      "hostedSha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e",
+      "naturalAstSha256": "a4d4427d7527b31ebef259876d320f6a58b38b6da7db9ec076c32dc253400bbc",
+      "hostedAstSha256": "27f5a8e6b81d4de24140ff82400d57e655eb52eddb710b0ccec2de963cf41b6b",
+      "astExactlyIdentical": false,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 195,
+      "commonJsSourceLabels": 26,
+      "replacementSpans": [
+        {
+          "start": 1839,
+          "end": 1905,
+          "kind": "comment"
+        },
+        {
+          "start": 1979,
+          "end": 2045,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 2347,
+          "end": 2413,
+          "kind": "comment"
+        },
+        {
+          "start": 2470,
+          "end": 2536,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 2754,
+          "end": 2820,
+          "kind": "comment"
+        },
+        {
+          "start": 2885,
+          "end": 2951,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 3152,
+          "end": 3218,
+          "kind": "comment"
+        },
+        {
+          "start": 3277,
+          "end": 3343,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 4288,
+          "end": 4354,
+          "kind": "comment"
+        },
+        {
+          "start": 4423,
+          "end": 4489,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 8951,
+          "end": 9017,
+          "kind": "comment"
+        },
+        {
+          "start": 9088,
+          "end": 9154,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 10485,
+          "end": 10551,
+          "kind": "comment"
+        },
+        {
+          "start": 10614,
+          "end": 10680,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 11836,
+          "end": 11902,
+          "kind": "comment"
+        },
+        {
+          "start": 11973,
+          "end": 12039,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 15422,
+          "end": 15488,
+          "kind": "comment"
+        },
+        {
+          "start": 15563,
+          "end": 15629,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 16664,
+          "end": 16730,
+          "kind": "comment"
+        },
+        {
+          "start": 16807,
+          "end": 16873,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 17497,
+          "end": 17563,
+          "kind": "comment"
+        },
+        {
+          "start": 17632,
+          "end": 17698,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 19044,
+          "end": 19110,
+          "kind": "comment"
+        },
+        {
+          "start": 19185,
+          "end": 19251,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 20208,
+          "end": 20274,
+          "kind": "comment"
+        },
+        {
+          "start": 20349,
+          "end": 20415,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 21197,
+          "end": 21263,
+          "kind": "comment"
+        },
+        {
+          "start": 21330,
+          "end": 21396,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 22157,
+          "end": 22223,
+          "kind": "comment"
+        },
+        {
+          "start": 22298,
+          "end": 22364,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 23177,
+          "end": 23243,
+          "kind": "comment"
+        },
+        {
+          "start": 23320,
+          "end": 23386,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 24287,
+          "end": 24353,
+          "kind": "comment"
+        },
+        {
+          "start": 24414,
+          "end": 24480,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 25327,
+          "end": 25393,
+          "kind": "comment"
+        },
+        {
+          "start": 25474,
+          "end": 25540,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 30493,
+          "end": 30559,
+          "kind": "comment"
+        },
+        {
+          "start": 30626,
+          "end": 30692,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 31875,
+          "end": 31941,
+          "kind": "comment"
+        },
+        {
+          "start": 32016,
+          "end": 32082,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 33023,
+          "end": 33089,
+          "kind": "comment"
+        },
+        {
+          "start": 33144,
+          "end": 33210,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 47792,
+          "end": 47858,
+          "kind": "comment"
+        },
+        {
+          "start": 47941,
+          "end": 48007,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 51795,
+          "end": 51861,
+          "kind": "comment"
+        },
+        {
+          "start": 51916,
+          "end": 51982,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 54096,
+          "end": 54162,
+          "kind": "comment"
+        },
+        {
+          "start": 54215,
+          "end": 54281,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 55710,
+          "end": 55776,
+          "kind": "comment"
+        },
+        {
+          "start": 55852,
+          "end": 55918,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 56311,
+          "end": 56377,
+          "kind": "comment"
+        },
+        {
+          "start": 56443,
+          "end": 56509,
+          "kind": "commonjs-source-label"
+        },
+        {
+          "start": 56701,
+          "end": 56767,
+          "kind": "comment"
+        },
+        {
+          "start": 57546,
+          "end": 57612,
+          "kind": "comment"
+        },
+        {
+          "start": 58131,
+          "end": 58197,
+          "kind": "comment"
+        },
+        {
+          "start": 105540,
+          "end": 105606,
+          "kind": "comment"
+        },
+        {
+          "start": 105890,
+          "end": 105956,
+          "kind": "comment"
+        },
+        {
+          "start": 107265,
+          "end": 107331,
+          "kind": "comment"
+        },
+        {
+          "start": 120311,
+          "end": 120377,
+          "kind": "comment"
+        },
+        {
+          "start": 144233,
+          "end": 144299,
+          "kind": "comment"
+        },
+        {
+          "start": 158267,
+          "end": 158333,
+          "kind": "comment"
+        },
+        {
+          "start": 159514,
+          "end": 159580,
+          "kind": "comment"
+        },
+        {
+          "start": 166316,
+          "end": 166382,
+          "kind": "comment"
+        },
+        {
+          "start": 169989,
+          "end": 170055,
+          "kind": "comment"
+        },
+        {
+          "start": 171589,
+          "end": 171655,
+          "kind": "comment"
+        },
+        {
+          "start": 218950,
+          "end": 219016,
+          "kind": "comment"
+        },
+        {
+          "start": 219252,
+          "end": 219318,
+          "kind": "comment"
+        },
+        {
+          "start": 220612,
+          "end": 220678,
+          "kind": "comment"
+        },
+        {
+          "start": 234451,
+          "end": 234517,
+          "kind": "comment"
+        },
+        {
+          "start": 261498,
+          "end": 261564,
+          "kind": "comment"
+        },
+        {
+          "start": 263470,
+          "end": 263536,
+          "kind": "comment"
+        },
+        {
+          "start": 264121,
+          "end": 264187,
+          "kind": "comment"
+        },
+        {
+          "start": 266065,
+          "end": 266131,
+          "kind": "comment"
+        },
+        {
+          "start": 270054,
+          "end": 270120,
+          "kind": "comment"
+        },
+        {
+          "start": 271181,
+          "end": 271247,
+          "kind": "comment"
+        },
+        {
+          "start": 272387,
+          "end": 272453,
+          "kind": "comment"
+        },
+        {
+          "start": 274630,
+          "end": 274696,
+          "kind": "comment"
+        },
+        {
+          "start": 276817,
+          "end": 276883,
+          "kind": "comment"
+        },
+        {
+          "start": 279000,
+          "end": 279066,
+          "kind": "comment"
+        },
+        {
+          "start": 281493,
+          "end": 281559,
+          "kind": "comment"
+        },
+        {
+          "start": 285666,
+          "end": 285732,
+          "kind": "comment"
+        },
+        {
+          "start": 286558,
+          "end": 286624,
+          "kind": "comment"
+        },
+        {
+          "start": 287578,
+          "end": 287644,
+          "kind": "comment"
+        },
+        {
+          "start": 287801,
+          "end": 287867,
+          "kind": "comment"
+        },
+        {
+          "start": 288750,
+          "end": 288816,
+          "kind": "comment"
+        },
+        {
+          "start": 288905,
+          "end": 288971,
+          "kind": "comment"
+        },
+        {
+          "start": 294110,
+          "end": 294176,
+          "kind": "comment"
+        },
+        {
+          "start": 297144,
+          "end": 297210,
+          "kind": "comment"
+        },
+        {
+          "start": 297476,
+          "end": 297542,
+          "kind": "comment"
+        },
+        {
+          "start": 297639,
+          "end": 297705,
+          "kind": "comment"
+        },
+        {
+          "start": 299144,
+          "end": 299210,
+          "kind": "comment"
+        },
+        {
+          "start": 303950,
+          "end": 304016,
+          "kind": "comment"
+        },
+        {
+          "start": 305863,
+          "end": 305929,
+          "kind": "comment"
+        },
+        {
+          "start": 307868,
+          "end": 307934,
+          "kind": "comment"
+        },
+        {
+          "start": 308075,
+          "end": 308141,
+          "kind": "comment"
+        },
+        {
+          "start": 314013,
+          "end": 314079,
+          "kind": "comment"
+        },
+        {
+          "start": 314318,
+          "end": 314384,
+          "kind": "comment"
+        },
+        {
+          "start": 315579,
+          "end": 315645,
+          "kind": "comment"
+        },
+        {
+          "start": 316478,
+          "end": 316544,
+          "kind": "comment"
+        },
+        {
+          "start": 316944,
+          "end": 317010,
+          "kind": "comment"
+        },
+        {
+          "start": 318251,
+          "end": 318317,
+          "kind": "comment"
+        },
+        {
+          "start": 320252,
+          "end": 320318,
+          "kind": "comment"
+        },
+        {
+          "start": 320725,
+          "end": 320791,
+          "kind": "comment"
+        },
+        {
+          "start": 321162,
+          "end": 321228,
+          "kind": "comment"
+        },
+        {
+          "start": 321315,
+          "end": 321381,
+          "kind": "comment"
+        },
+        {
+          "start": 322376,
+          "end": 322442,
+          "kind": "comment"
+        },
+        {
+          "start": 333535,
+          "end": 333601,
+          "kind": "comment"
+        },
+        {
+          "start": 333690,
+          "end": 333756,
+          "kind": "comment"
+        },
+        {
+          "start": 335447,
+          "end": 335513,
+          "kind": "comment"
+        },
+        {
+          "start": 341189,
+          "end": 341255,
+          "kind": "comment"
+        },
+        {
+          "start": 342740,
+          "end": 342806,
+          "kind": "comment"
+        },
+        {
+          "start": 343419,
+          "end": 343485,
+          "kind": "comment"
+        },
+        {
+          "start": 343582,
+          "end": 343648,
+          "kind": "comment"
+        },
+        {
+          "start": 348173,
+          "end": 348239,
+          "kind": "comment"
+        },
+        {
+          "start": 350784,
+          "end": 350850,
+          "kind": "comment"
+        },
+        {
+          "start": 352161,
+          "end": 352227,
+          "kind": "comment"
+        },
+        {
+          "start": 355128,
+          "end": 355194,
+          "kind": "comment"
+        },
+        {
+          "start": 356483,
+          "end": 356549,
+          "kind": "comment"
+        },
+        {
+          "start": 360958,
+          "end": 361024,
+          "kind": "comment"
+        },
+        {
+          "start": 364304,
+          "end": 364370,
+          "kind": "comment"
+        },
+        {
+          "start": 366777,
+          "end": 366843,
+          "kind": "comment"
+        },
+        {
+          "start": 369449,
+          "end": 369515,
+          "kind": "comment"
+        },
+        {
+          "start": 370458,
+          "end": 370524,
+          "kind": "comment"
+        },
+        {
+          "start": 377005,
+          "end": 377071,
+          "kind": "comment"
+        },
+        {
+          "start": 377924,
+          "end": 377990,
+          "kind": "comment"
+        },
+        {
+          "start": 378208,
+          "end": 378274,
+          "kind": "comment"
+        },
+        {
+          "start": 379190,
+          "end": 379256,
+          "kind": "comment"
+        },
+        {
+          "start": 379950,
+          "end": 380016,
+          "kind": "comment"
+        },
+        {
+          "start": 380166,
+          "end": 380232,
+          "kind": "comment"
+        },
+        {
+          "start": 381178,
+          "end": 381244,
+          "kind": "comment"
+        },
+        {
+          "start": 383088,
+          "end": 383154,
+          "kind": "comment"
+        },
+        {
+          "start": 385927,
+          "end": 385993,
+          "kind": "comment"
+        },
+        {
+          "start": 387484,
+          "end": 387550,
+          "kind": "comment"
+        },
+        {
+          "start": 388388,
+          "end": 388454,
+          "kind": "comment"
+        },
+        {
+          "start": 388785,
+          "end": 388851,
+          "kind": "comment"
+        },
+        {
+          "start": 400930,
+          "end": 400996,
+          "kind": "comment"
+        },
+        {
+          "start": 402205,
+          "end": 402271,
+          "kind": "comment"
+        },
+        {
+          "start": 404152,
+          "end": 404218,
+          "kind": "comment"
+        },
+        {
+          "start": 417480,
+          "end": 417546,
+          "kind": "comment"
+        },
+        {
+          "start": 418121,
+          "end": 418187,
+          "kind": "comment"
+        },
+        {
+          "start": 418370,
+          "end": 418436,
+          "kind": "comment"
+        },
+        {
+          "start": 418816,
+          "end": 418882,
+          "kind": "comment"
+        },
+        {
+          "start": 420428,
+          "end": 420494,
+          "kind": "comment"
+        },
+        {
+          "start": 420680,
+          "end": 420746,
+          "kind": "comment"
+        },
+        {
+          "start": 422107,
+          "end": 422173,
+          "kind": "comment"
+        },
+        {
+          "start": 422362,
+          "end": 422428,
+          "kind": "comment"
+        },
+        {
+          "start": 422611,
+          "end": 422677,
+          "kind": "comment"
+        },
+        {
+          "start": 422860,
+          "end": 422926,
+          "kind": "comment"
+        },
+        {
+          "start": 423857,
+          "end": 423923,
+          "kind": "comment"
+        },
+        {
+          "start": 424333,
+          "end": 424399,
+          "kind": "comment"
+        },
+        {
+          "start": 424595,
+          "end": 424661,
+          "kind": "comment"
+        },
+        {
+          "start": 424847,
+          "end": 424913,
+          "kind": "comment"
+        },
+        {
+          "start": 425090,
+          "end": 425156,
+          "kind": "comment"
+        },
+        {
+          "start": 425351,
+          "end": 425417,
+          "kind": "comment"
+        },
+        {
+          "start": 425607,
+          "end": 425673,
+          "kind": "comment"
+        },
+        {
+          "start": 425859,
+          "end": 425925,
+          "kind": "comment"
+        },
+        {
+          "start": 426121,
+          "end": 426187,
+          "kind": "comment"
+        },
+        {
+          "start": 426364,
+          "end": 426430,
+          "kind": "comment"
+        },
+        {
+          "start": 426613,
+          "end": 426679,
+          "kind": "comment"
+        },
+        {
+          "start": 426875,
+          "end": 426941,
+          "kind": "comment"
+        },
+        {
+          "start": 428086,
+          "end": 428152,
+          "kind": "comment"
+        },
+        {
+          "start": 428338,
+          "end": 428404,
+          "kind": "comment"
+        },
+        {
+          "start": 428590,
+          "end": 428656,
+          "kind": "comment"
+        },
+        {
+          "start": 428842,
+          "end": 428908,
+          "kind": "comment"
+        },
+        {
+          "start": 429201,
+          "end": 429267,
+          "kind": "comment"
+        },
+        {
+          "start": 429459,
+          "end": 429525,
+          "kind": "comment"
+        },
+        {
+          "start": 429711,
+          "end": 429777,
+          "kind": "comment"
+        },
+        {
+          "start": 430626,
+          "end": 430692,
+          "kind": "comment"
+        },
+        {
+          "start": 430881,
+          "end": 430947,
+          "kind": "comment"
+        },
+        {
+          "start": 431688,
+          "end": 431754,
+          "kind": "comment"
+        },
+        {
+          "start": 431937,
+          "end": 432003,
+          "kind": "comment"
+        },
+        {
+          "start": 432189,
+          "end": 432255,
+          "kind": "comment"
+        },
+        {
+          "start": 432441,
+          "end": 432507,
+          "kind": "comment"
+        },
+        {
+          "start": 432699,
+          "end": 432765,
+          "kind": "comment"
+        },
+        {
+          "start": 433023,
+          "end": 433089,
+          "kind": "comment"
+        },
+        {
+          "start": 433278,
+          "end": 433344,
+          "kind": "comment"
+        },
+        {
+          "start": 433534,
+          "end": 433600,
+          "kind": "comment"
+        },
+        {
+          "start": 433783,
+          "end": 433849,
+          "kind": "comment"
+        },
+        {
+          "start": 434032,
+          "end": 434098,
+          "kind": "comment"
+        },
+        {
+          "start": 435137,
+          "end": 435203,
+          "kind": "comment"
+        },
+        {
+          "start": 435380,
+          "end": 435446,
+          "kind": "comment"
+        },
+        {
+          "start": 436149,
+          "end": 436215,
+          "kind": "comment"
+        },
+        {
+          "start": 436395,
+          "end": 436461,
+          "kind": "comment"
+        },
+        {
+          "start": 436657,
+          "end": 436723,
+          "kind": "comment"
+        },
+        {
+          "start": 436907,
+          "end": 436973,
+          "kind": "comment"
+        },
+        {
+          "start": 437940,
+          "end": 438006,
+          "kind": "comment"
+        },
+        {
+          "start": 438189,
+          "end": 438255,
+          "kind": "comment"
+        },
+        {
+          "start": 438435,
+          "end": 438501,
+          "kind": "comment"
+        },
+        {
+          "start": 439702,
+          "end": 439768,
+          "kind": "comment"
+        },
+        {
+          "start": 441120,
+          "end": 441186,
+          "kind": "comment"
+        },
+        {
+          "start": 441369,
+          "end": 441435,
+          "kind": "comment"
+        },
+        {
+          "start": 442710,
+          "end": 442776,
+          "kind": "comment"
+        },
+        {
+          "start": 442956,
+          "end": 443022,
+          "kind": "comment"
+        },
+        {
+          "start": 443206,
+          "end": 443272,
+          "kind": "comment"
+        },
+        {
+          "start": 444301,
+          "end": 444367,
+          "kind": "comment"
+        },
+        {
+          "start": 444559,
+          "end": 444625,
+          "kind": "comment"
+        },
+        {
+          "start": 444808,
+          "end": 444874,
+          "kind": "comment"
+        },
+        {
+          "start": 445058,
+          "end": 445124,
+          "kind": "comment"
+        },
+        {
+          "start": 445327,
+          "end": 445393,
+          "kind": "comment"
+        },
+        {
+          "start": 446514,
+          "end": 446580,
+          "kind": "comment"
+        },
+        {
+          "start": 446766,
+          "end": 446832,
+          "kind": "comment"
+        },
+        {
+          "start": 447024,
+          "end": 447090,
+          "kind": "comment"
+        },
+        {
+          "start": 447270,
+          "end": 447336,
+          "kind": "comment"
+        },
+        {
+          "start": 447528,
+          "end": 447594,
+          "kind": "comment"
+        },
+        {
+          "start": 448454,
+          "end": 448520,
+          "kind": "comment"
+        },
+        {
+          "start": 448706,
+          "end": 448772,
+          "kind": "comment"
+        },
+        {
+          "start": 448964,
+          "end": 449030,
+          "kind": "comment"
+        },
+        {
+          "start": 450480,
+          "end": 450546,
+          "kind": "comment"
+        },
+        {
+          "start": 451372,
+          "end": 451438,
+          "kind": "comment"
+        },
+        {
+          "start": 451648,
+          "end": 451714,
+          "kind": "comment"
+        },
+        {
+          "start": 452122,
+          "end": 452188,
+          "kind": "comment"
+        },
+        {
+          "start": 452654,
+          "end": 452720,
+          "kind": "comment"
+        },
+        {
+          "start": 455645,
+          "end": 455711,
+          "kind": "comment"
+        },
+        {
+          "start": 456756,
+          "end": 456822,
+          "kind": "comment"
+        },
+        {
+          "start": 464292,
+          "end": 464358,
+          "kind": "comment"
+        },
+        {
+          "start": 466829,
+          "end": 466895,
+          "kind": "comment"
+        },
+        {
+          "start": 467094,
+          "end": 467160,
+          "kind": "comment"
+        },
+        {
+          "start": 467354,
+          "end": 467420,
+          "kind": "comment"
+        },
+        {
+          "start": 468376,
+          "end": 468442,
+          "kind": "comment"
+        },
+        {
+          "start": 471311,
+          "end": 471377,
+          "kind": "comment"
+        },
+        {
+          "start": 471740,
+          "end": 471806,
+          "kind": "comment"
+        }
+      ],
+      "labels": [
+        {
+          "start": 1978,
+          "end": 2078,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/linkedom/commonjs/perf_hooks.cjs",
+          "hosted": "node_modules/linkedom/commonjs/perf_hooks.cjs",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 2469,
+          "end": 2554,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/boolbase/index.js",
+          "hosted": "node_modules/boolbase/index.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 2884,
+          "end": 2975,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/StyleSheet.js",
+          "hosted": "node_modules/cssom/lib/StyleSheet.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 3276,
+          "end": 3364,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSRule.js",
+          "hosted": "node_modules/cssom/lib/CSSRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 4422,
+          "end": 4515,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSStyleRule.js",
+          "hosted": "node_modules/cssom/lib/CSSStyleRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 9087,
+          "end": 9181,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSStyleSheet.js",
+          "hosted": "node_modules/cssom/lib/CSSStyleSheet.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 10613,
+          "end": 10703,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/MediaList.js",
+          "hosted": "node_modules/cssom/lib/MediaList.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 11972,
+          "end": 12066,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSImportRule.js",
+          "hosted": "node_modules/cssom/lib/CSSImportRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 15562,
+          "end": 15658,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSGroupingRule.js",
+          "hosted": "node_modules/cssom/lib/CSSGroupingRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 16806,
+          "end": 16903,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSConditionRule.js",
+          "hosted": "node_modules/cssom/lib/CSSConditionRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 17631,
+          "end": 17724,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSMediaRule.js",
+          "hosted": "node_modules/cssom/lib/CSSMediaRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 19184,
+          "end": 19280,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSSupportsRule.js",
+          "hosted": "node_modules/cssom/lib/CSSSupportsRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 20348,
+          "end": 20444,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSFontFaceRule.js",
+          "hosted": "node_modules/cssom/lib/CSSFontFaceRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 21329,
+          "end": 21421,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSHostRule.js",
+          "hosted": "node_modules/cssom/lib/CSSHostRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 22297,
+          "end": 22393,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSKeyframeRule.js",
+          "hosted": "node_modules/cssom/lib/CSSKeyframeRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 23319,
+          "end": 23416,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSKeyframesRule.js",
+          "hosted": "node_modules/cssom/lib/CSSKeyframesRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 24413,
+          "end": 24502,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSValue.js",
+          "hosted": "node_modules/cssom/lib/CSSValue.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 25473,
+          "end": 25572,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSValueExpression.js",
+          "hosted": "node_modules/cssom/lib/CSSValueExpression.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 30625,
+          "end": 30717,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/MatcherList.js",
+          "hosted": "node_modules/cssom/lib/MatcherList.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 32015,
+          "end": 32111,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSDocumentRule.js",
+          "hosted": "node_modules/cssom/lib/CSSDocumentRule.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 33143,
+          "end": 33229,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/parse.js",
+          "hosted": "node_modules/cssom/lib/parse.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 47940,
+          "end": 48040,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/CSSStyleDeclaration.js",
+          "hosted": "node_modules/cssom/lib/CSSStyleDeclaration.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 51915,
+          "end": 52001,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/clone.js",
+          "hosted": "node_modules/cssom/lib/clone.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 54214,
+          "end": 54300,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/cssom/lib/index.js",
+          "hosted": "node_modules/cssom/lib/index.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 55851,
+          "end": 55952,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/linkedom/commonjs/canvas-shim.cjs",
+          "hosted": "node_modules/linkedom/commonjs/canvas-shim.cjs",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        },
+        {
+          "start": 56442,
+          "end": 56538,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/linkedom/commonjs/canvas.cjs",
+          "hosted": "node_modules/linkedom/commonjs/canvas.cjs",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        }
+      ],
+      "commonJsHelper": "var __commonJS = (cb, mod) => function __require2() {\n  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;\n};",
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "linkedom.js.map",
+          "bytes": 660635,
+          "sha256": "d979ab457ef2f6d07058a0ba76bd19b1f759f3c1844222a4ea2d3a68a3dec6df"
+        },
+        {
+          "name": "linkedom.js",
+          "bytes": 465197,
+          "sha256": "127193e4654f8b9d8c81a86e33ba2a28acc3bb4c6c9bb0eb146eb255e62b205c"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/parse5.js",
+      "naturalSha256": "390643db239d5ee1a5f332a34ec7d5ec256eb041188e1d8215cda98a09683c13",
+      "hostedSha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7",
+      "naturalAstSha256": "3b2fbbbcf13015c6717663196e0b324bb98f8422e4027dfc0864ffa7fb62f29a",
+      "hostedAstSha256": "3b2fbbbcf13015c6717663196e0b324bb98f8422e4027dfc0864ffa7fb62f29a",
+      "astExactlyIdentical": true,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 19,
+      "commonJsSourceLabels": 0,
+      "replacementSpans": [
+        {
+          "start": 186,
+          "end": 252,
+          "kind": "comment"
+        },
+        {
+          "start": 3166,
+          "end": 3232,
+          "kind": "comment"
+        },
+        {
+          "start": 7949,
+          "end": 8015,
+          "kind": "comment"
+        },
+        {
+          "start": 12861,
+          "end": 12927,
+          "kind": "comment"
+        },
+        {
+          "start": 13878,
+          "end": 13944,
+          "kind": "comment"
+        },
+        {
+          "start": 61239,
+          "end": 61305,
+          "kind": "comment"
+        },
+        {
+          "start": 61541,
+          "end": 61607,
+          "kind": "comment"
+        },
+        {
+          "start": 62893,
+          "end": 62959,
+          "kind": "comment"
+        },
+        {
+          "start": 76659,
+          "end": 76725,
+          "kind": "comment"
+        },
+        {
+          "start": 93693,
+          "end": 93759,
+          "kind": "comment"
+        },
+        {
+          "start": 176787,
+          "end": 176853,
+          "kind": "comment"
+        },
+        {
+          "start": 186313,
+          "end": 186379,
+          "kind": "comment"
+        },
+        {
+          "start": 190013,
+          "end": 190079,
+          "kind": "comment"
+        },
+        {
+          "start": 194647,
+          "end": 194713,
+          "kind": "comment"
+        },
+        {
+          "start": 199083,
+          "end": 199149,
+          "kind": "comment"
+        },
+        {
+          "start": 205446,
+          "end": 205512,
+          "kind": "comment"
+        },
+        {
+          "start": 294102,
+          "end": 294168,
+          "kind": "comment"
+        },
+        {
+          "start": 295484,
+          "end": 295550,
+          "kind": "comment"
+        },
+        {
+          "start": 299237,
+          "end": 299303,
+          "kind": "comment"
+        }
+      ],
+      "labels": [],
+      "commonJsHelper": null,
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "parse5.js.map",
+          "bytes": 448301,
+          "sha256": "888091899e94b7115cf9704a23111134554438db8f6fbdce27b6207251c2b9d2"
+        },
+        {
+          "name": "parse5.js",
+          "bytes": 299239,
+          "sha256": "30b8f145adad2d844ef86ef772069b150864cfec0378f5524a94151afc3bb975"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/resvg-wasm.js",
+      "naturalSha256": "fcede82a0615c28850e3c6a99e5180b7aa1e064ee4deecd781e1e519ceac4edd",
+      "hostedSha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988",
+      "naturalAstSha256": "15ad18a02a1daadf58657da8997ca3d0c8a954316b16bb0916ed6943fc62ba9e",
+      "hostedAstSha256": "15ad18a02a1daadf58657da8997ca3d0c8a954316b16bb0916ed6943fc62ba9e",
+      "astExactlyIdentical": true,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 1,
+      "commonJsSourceLabels": 0,
+      "replacementSpans": [
+        {
+          "start": 19,
+          "end": 85,
+          "kind": "comment"
+        }
+      ],
+      "labels": [],
+      "commonJsHelper": null,
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "resvg-wasm.js.map",
+          "bytes": 29317,
+          "sha256": "e153bfe1202bd99456c41ed5991567adbf89d0cae36ac4700d2150f708d5a638"
+        },
+        {
+          "name": "resvg-wasm.js",
+          "bytes": 17118,
+          "sha256": "1215548adab348ab9ad0bf099124e29d2be88026c1ec5268520aafadf7d726da"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/ucs2length.js",
+      "naturalSha256": "9e6022a65c17dff69c8ebe0c17f569b38b191a98e80eaeca3f578aa8a9a39e76",
+      "hostedSha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513",
+      "naturalAstSha256": "589f7633f5f158a248f9c53dfbf09e3015a91bd06663da8ecc1bb5a4d1e52174",
+      "hostedAstSha256": "3867dada7308d9b07c5025265537f0006ab98d7115f49ceeb0cf5c3213a6020d",
+      "astExactlyIdentical": false,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 1,
+      "commonJsSourceLabels": 1,
+      "replacementSpans": [
+        {
+          "start": 1339,
+          "end": 1405,
+          "kind": "comment"
+        },
+        {
+          "start": 1477,
+          "end": 1543,
+          "kind": "commonjs-source-label"
+        }
+      ],
+      "labels": [
+        {
+          "start": 1476,
+          "end": 1574,
+          "natural": "../../../../workspace/scratch/da6c4dbd0097/manabitan/node_modules/ajv/dist/runtime/ucs2length.js",
+          "hosted": "node_modules/ajv/dist/runtime/ucs2length.js",
+          "classification": "Sole esbuild __commonJS callback method key; name only used to select that one callback, and may appear in diagnostic function names/stacks"
+        }
+      ],
+      "commonJsHelper": "var __commonJS = (cb, mod) => function __require() {\n  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;\n};",
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "ucs2length.js.map",
+          "bytes": 2100,
+          "sha256": "621f10f96ac05f2aaf34d467bc57883d7c00227af9a51f5594e2b73b0d6bacce"
+        },
+        {
+          "name": "ucs2length.js",
+          "bytes": 2331,
+          "sha256": "d1276527719803fe78ca78d34af695bc479f322d2a0cc0a624987e666dde4435"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/z-worker.js",
+      "naturalSha256": "699fd93541c04cc79b2a53d6cffd3a72811972c3059b665ea1d6fa078ca6f1e2",
+      "hostedSha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c",
+      "naturalAstSha256": "41fa1313f095f8b368810551c5a3097e18b7d4d0dbbd9daaf0a489a573e06de5",
+      "hostedAstSha256": "41fa1313f095f8b368810551c5a3097e18b7d4d0dbbd9daaf0a489a573e06de5",
+      "astExactlyIdentical": true,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 15,
+      "commonJsSourceLabels": 0,
+      "replacementSpans": [
+        {
+          "start": 19,
+          "end": 85,
+          "kind": "comment"
+        },
+        {
+          "start": 573,
+          "end": 639,
+          "kind": "comment"
+        },
+        {
+          "start": 1190,
+          "end": 1256,
+          "kind": "comment"
+        },
+        {
+          "start": 1834,
+          "end": 1900,
+          "kind": "comment"
+        },
+        {
+          "start": 2415,
+          "end": 2481,
+          "kind": "comment"
+        },
+        {
+          "start": 2873,
+          "end": 2939,
+          "kind": "comment"
+        },
+        {
+          "start": 18779,
+          "end": 18845,
+          "kind": "comment"
+        },
+        {
+          "start": 19344,
+          "end": 19410,
+          "kind": "comment"
+        },
+        {
+          "start": 29005,
+          "end": 29071,
+          "kind": "comment"
+        },
+        {
+          "start": 32433,
+          "end": 32499,
+          "kind": "comment"
+        },
+        {
+          "start": 36274,
+          "end": 36340,
+          "kind": "comment"
+        },
+        {
+          "start": 38788,
+          "end": 38854,
+          "kind": "comment"
+        },
+        {
+          "start": 42779,
+          "end": 42845,
+          "kind": "comment"
+        },
+        {
+          "start": 83003,
+          "end": 83069,
+          "kind": "comment"
+        },
+        {
+          "start": 137291,
+          "end": 137357,
+          "kind": "comment"
+        }
+      ],
+      "labels": [],
+      "commonJsHelper": null,
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "z-worker.js.map",
+          "bytes": 322314,
+          "sha256": "160a9206c80fce12b0aed6b1100c7d9108de834ddd8cb1ad94bda65d62ef5f37"
+        },
+        {
+          "name": "z-worker.js",
+          "bytes": 136911,
+          "sha256": "91d1aa4af74d925fc25804d6d5ba6061f5538ab409813a42e2b287b9f02e3e53"
+        }
+      ]
+    },
+    {
+      "path": "ext/lib/zip.js",
+      "naturalSha256": "a917201677eb8eac5c86de5d4e64825d8a2b7acf193d84a8f26fc0072a56e211",
+      "hostedSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+      "naturalAstSha256": "59152172a620e297b03831dd1080fb614d970bb02142e31b8fd8ec40a8194e26",
+      "hostedAstSha256": "59152172a620e297b03831dd1080fb614d970bb02142e31b8fd8ec40a8194e26",
+      "astExactlyIdentical": true,
+      "astIdenticalAfterOnlyRecognizedSourceLabels": true,
+      "comments": 24,
+      "commonJsSourceLabels": 0,
+      "replacementSpans": [
+        {
+          "start": 19,
+          "end": 85,
+          "kind": "comment"
+        },
+        {
+          "start": 1644,
+          "end": 1710,
+          "kind": "comment"
+        },
+        {
+          "start": 2261,
+          "end": 2327,
+          "kind": "comment"
+        },
+        {
+          "start": 4791,
+          "end": 4857,
+          "kind": "comment"
+        },
+        {
+          "start": 50459,
+          "end": 50525,
+          "kind": "comment"
+        },
+        {
+          "start": 50643,
+          "end": 50709,
+          "kind": "comment"
+        },
+        {
+          "start": 52577,
+          "end": 52643,
+          "kind": "comment"
+        },
+        {
+          "start": 53221,
+          "end": 53287,
+          "kind": "comment"
+        },
+        {
+          "start": 53802,
+          "end": 53868,
+          "kind": "comment"
+        },
+        {
+          "start": 54260,
+          "end": 54326,
+          "kind": "comment"
+        },
+        {
+          "start": 70175,
+          "end": 70241,
+          "kind": "comment"
+        },
+        {
+          "start": 70740,
+          "end": 70806,
+          "kind": "comment"
+        },
+        {
+          "start": 80401,
+          "end": 80467,
+          "kind": "comment"
+        },
+        {
+          "start": 83829,
+          "end": 83895,
+          "kind": "comment"
+        },
+        {
+          "start": 87716,
+          "end": 87782,
+          "kind": "comment"
+        },
+        {
+          "start": 90236,
+          "end": 90302,
+          "kind": "comment"
+        },
+        {
+          "start": 98256,
+          "end": 98322,
+          "kind": "comment"
+        },
+        {
+          "start": 101282,
+          "end": 101348,
+          "kind": "comment"
+        },
+        {
+          "start": 119994,
+          "end": 120060,
+          "kind": "comment"
+        },
+        {
+          "start": 121432,
+          "end": 121498,
+          "kind": "comment"
+        },
+        {
+          "start": 121747,
+          "end": 121813,
+          "kind": "comment"
+        },
+        {
+          "start": 124089,
+          "end": 124155,
+          "kind": "comment"
+        },
+        {
+          "start": 151243,
+          "end": 151309,
+          "kind": "comment"
+        },
+        {
+          "start": 191137,
+          "end": 191203,
+          "kind": "comment"
+        }
+      ],
+      "labels": [],
+      "commonJsHelper": null,
+      "stockReadOnlyBuildOutputs": [
+        {
+          "name": "zip.js.map",
+          "bytes": 337579,
+          "sha256": "b174dbb088ed1bb32b1561fc74f31ccb9f91a33a9cbbdf67cf37adc4d8b9b6a4"
+        },
+        {
+          "name": "zip.js",
+          "bytes": 191540,
+          "sha256": "c50d5f808eebb6d8ea0250717d78e78fe5bf5e1451e1bba4caa9d4a4592c8b40"
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "path": "dev/lib/handlebars.js",
+      "bytes": 767,
+      "sha256": "cf2660d2d515fdcfbbdcc866172ca39a864ed88aa00960067c1db99fe1b832ef"
+    },
+    {
+      "path": "dev/lib/hangul-js.js",
+      "bytes": 739,
+      "sha256": "c6b98d04e59bb0a3705f036b3f84a251d3088cf74cf565f7d7a1e2ed568a3e7c"
+    },
+    {
+      "path": "dev/lib/kanji-processor.js",
+      "bytes": 735,
+      "sha256": "19fe68df5dab888b7e6322f3c0207b466fe4b0a91b5cb38f16aefe326aaad639"
+    },
+    {
+      "path": "dev/lib/linkedom.js",
+      "bytes": 728,
+      "sha256": "d5a7e333991be603ac11335d2ec32b00cffd4a15ab6960f918c6f3f3c226c5fb"
+    },
+    {
+      "path": "dev/lib/parse5.js",
+      "bytes": 726,
+      "sha256": "8bd9f806260c13a380f2130f1f78f3b68ab2d981d332084da745d7768fd02f05"
+    },
+    {
+      "path": "dev/lib/resvg-wasm.js",
+      "bytes": 737,
+      "sha256": "0b069bdf64d89bdc6f6ba8c3668d257548f57d6cc16adc83c533530b4ff00ea5"
+    },
+    {
+      "path": "dev/lib/ucs2length.js",
+      "bytes": 837,
+      "sha256": "5cddb243facb2473b2cdfa5cc37c2f7bec285879d00ad84428ca041d07a69812"
+    },
+    {
+      "path": "dev/lib/z-worker.js",
+      "bytes": 762,
+      "sha256": "ebd178d7cae55a32271f2da380d8e3a5cdc4dec93876206d16cd08b6edf54094"
+    },
+    {
+      "path": "dev/lib/zip.js",
+      "bytes": 1363,
+      "sha256": "c85a72f23e94c382bf0be56a5622d899b8e98743479438f89b7d7e9d2f8570f8"
+    },
+    {
+      "path": "node_modules/@resvg/resvg-wasm/index.mjs",
+      "bytes": 17048,
+      "sha256": "10170d02d816f02ec76f9bc095b01d9becf536e7b1e12e5aa616652c84b237a1"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/codec-pool.js",
+      "bytes": 4664,
+      "sha256": "29b66c51fd756f7f6de5181fd574818e8bbe0c311e96c8c7d64f1c96d3f92089"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/codec-worker.js",
+      "bytes": 9057,
+      "sha256": "8a2b2262e6a307fbd6cbacd8c7e3bfe0b88fe899e2e77f32dad2cba29549c358"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/configuration.js",
+      "bytes": 3958,
+      "sha256": "baa316a63df2f8239f9d52cd4863eaedaddd34ad887b7513588da75d19e84932"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/constants.js",
+      "bytes": 4090,
+      "sha256": "14fe1468b87cd0fe20c6f1fec916485f875d8592beba94c9241af4cbd12dd88f"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/io.js",
+      "bytes": 19520,
+      "sha256": "3884028bae2696be0886dd5250ef7815303026897fc0e19a8c83a36857b3ae89"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/aes-crypto-stream.js",
+      "bytes": 10878,
+      "sha256": "8bc4f1490b64d8eb5850c88574ada77933c07b5052354804f19d729b8f4dd2e4"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/codec-stream.js",
+      "bytes": 4311,
+      "sha256": "1c0d9de91141bf89f49dc1e239dd22d75a3e46d38dd153aca1a6d48c231d4d85"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/codecs/crc32.js",
+      "bytes": 1956,
+      "sha256": "dfdde666f72b4a5ffc8cf5b1451e0db578ce4bd90de20df2cff5bfd47758cb23"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/codecs/deflate.js",
+      "bytes": 65547,
+      "sha256": "08c1b24d1845528f6db296570d690ecbe23c6c01c6cb26b561e601e770281c3a"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/codecs/inflate.js",
+      "bytes": 57297,
+      "sha256": "55d00eed332cf2c4f61e2ee23133e3257768d0608572ee3f9641a2921c3a6f67"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/codecs/sjcl.js",
+      "bytes": 19962,
+      "sha256": "462289c5312f01bba8a757a7a0f3d8f349f471183cb4c49fb73d58bba18a5428"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/common-crypto.js",
+      "bytes": 2127,
+      "sha256": "e3c28d03f3c2809d5bf69f31d01449679eb94cb76648e370145986313052436a"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/crc32-stream.js",
+      "bytes": 1987,
+      "sha256": "fad66e40ef3972154f4b11203169b0746dca093a8dffbc46ee228fad94ccf122"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/stream-adapter.js",
+      "bytes": 1914,
+      "sha256": "9e7f3fe1601cc447943cd37b5adb6d74c6e9c404d002e707e8eace7bc048929c"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/zip-crypto-stream.js",
+      "bytes": 4803,
+      "sha256": "19305af1e8296e7fa6763f3391d0b8149a1e09c659e1d1ff32a484448b18243c"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/streams/zip-entry-stream.js",
+      "bytes": 5460,
+      "sha256": "8c7cf9c0476b83f3ad707fe0899796fca6da7ba2b98b532eb9b266613862d394"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/util/cp437-decode.js",
+      "bytes": 2371,
+      "sha256": "d665ded184037ffe5d255be8f379f90416053e3d0d84fac95b28f4aeaab3d336"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/util/decode-text.js",
+      "bytes": 1738,
+      "sha256": "c04a098fa7c16470c48b6abd4eb4ac48af53547de65e7c8f39b78ae62330ad57"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/util/default-mime-type.js",
+      "bytes": 1567,
+      "sha256": "177ae00e1956d3d00cdefc40eb158cb591d3d24ede452c056d30f98d73d9cd73"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/util/encode-text.js",
+      "bytes": 1905,
+      "sha256": "148916caf86339886f76f7585fb1fca5abafb6f684918962a3064fcda0a71f74"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/util/stream-codec-shim.js",
+      "bytes": 3342,
+      "sha256": "438e7796d5a5c6030359f711e746240fe38a3ba900ac34249b33120d26776170"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/z-worker-core.js",
+      "bytes": 5391,
+      "sha256": "a57a555ba9429b6b5cb750244b39bbec3aa90b7ecb7e3ec718c689030ec48596"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/zip-entry.js",
+      "bytes": 4362,
+      "sha256": "e82cad789f5f17ee70a5b6aaf25f9283e9e5894079e0a3c4a19d328de0a44edc"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/zip-reader.js",
+      "bytes": 29378,
+      "sha256": "6f3497c48d00509ec9a8c2808f88ff9489f9051f137cf6bf24ab66c56abdad26"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/core/zip-writer.js",
+      "bytes": 41155,
+      "sha256": "e9e7a1d7e15ca1432e45ee10c680b08e6906061665ce469efb417601ef9570e0"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/z-worker-inline.js",
+      "bytes": 45553,
+      "sha256": "9b3e1a2f621c64a47692f3a656be150c1651e63485beccdefa0d9ab5b769c8f7"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/z-worker.js",
+      "bytes": 1695,
+      "sha256": "90181d48b10de2f2ecae8066c589079ea4def94f9779f96438f6559bb92aea22"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/lib/zip.js",
+      "bytes": 2067,
+      "sha256": "0f9e0c4bc744e4d9bd95f55293d3e2d7196dc49abb87bfc7d9d127b57aceb083"
+    },
+    {
+      "path": "node_modules/ajv/dist/runtime/ucs2length.js",
+      "bytes": 808,
+      "sha256": "1df012dd3d23fced07255a7204798004509687cb1f431ae0ab976db436bbd890"
+    },
+    {
+      "path": "node_modules/boolbase/index.js",
+      "bytes": 125,
+      "sha256": "c62510fca8738c7444cdf5012bdd0ce214a1b6f7eaff7facb3a919e4656d7341"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/attributes.js",
+      "bytes": 7112,
+      "sha256": "3abd5f086c2f38c6b420403484c3c72ce54113f0ee3e97fa0e8ec1f3e80b3a5f"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/compile.js",
+      "bytes": 4283,
+      "sha256": "564aa5f6719df852725b44e2025cdb2f43d6a06042d7baafd8ea354f02f297ae"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/general.js",
+      "bytes": 5655,
+      "sha256": "05c7b390fc91d337e49914df01c80b641c04a1cd6a75f4aa8b2bcc0978f189c7"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/index.js",
+      "bytes": 5069,
+      "sha256": "5c3f9861f525cdd1b3108d586b4a310e43ffb258d85fc6d689e86577e82f24fa"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/pseudo-selectors/aliases.js",
+      "bytes": 1419,
+      "sha256": "8f167ed0ba83ac2001c0946a9787f420831c3fffdfdbdc2af52ee4d535671157"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/pseudo-selectors/filters.js",
+      "bytes": 5189,
+      "sha256": "7e634b639e304346455627a1a98936c4c8f4b824d386886ffeed7a337eab982b"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/pseudo-selectors/index.js",
+      "bytes": 1703,
+      "sha256": "6ee19f30c0d30eebf5cded920d0513da648df1b1857574f58820122055f6776b"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/pseudo-selectors/pseudos.js",
+      "bytes": 2911,
+      "sha256": "ad9ebe0ea8adb0c48f8db622d82ff0490bf4b3d9a201988137a665b20f342150"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/pseudo-selectors/subselects.js",
+      "bytes": 3663,
+      "sha256": "7bd5cfd3a17238a75f22a6cbcd16a9267bb3d0ed1894e168572013ce98e8b12f"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/sort.js",
+      "bytes": 2484,
+      "sha256": "980d3ba6657ca20edb0505257bec1d6f74c3b09c65b93baf09cda5ab11f46298"
+    },
+    {
+      "path": "node_modules/css-what/lib/es/index.js",
+      "bytes": 112,
+      "sha256": "2766bf77766c85c25ec31586823fefb48344e64556faad7e75a3363e517814f6"
+    },
+    {
+      "path": "node_modules/css-what/lib/es/parse.js",
+      "bytes": 16356,
+      "sha256": "71df2ad407b9a4b08a6080c9c295062f92b6f2f4fc4b2cac5bdef9f089983b31"
+    },
+    {
+      "path": "node_modules/css-what/lib/es/stringify.js",
+      "bytes": 4465,
+      "sha256": "5e9a20d2f648db07d1e5d4f451ead9b7d2bbf02be3268226789d2289ca7850cc"
+    },
+    {
+      "path": "node_modules/css-what/lib/es/types.js",
+      "bytes": 1320,
+      "sha256": "4d91c499b1b51ae5e3aa191e9e7ee4142e3616fe2cd7694117a6732838ef8685"
+    },
+    {
+      "path": "node_modules/cssom/lib/clone.js",
+      "bytes": 2094,
+      "sha256": "baa407ce943f238648c2e55b7823dcf454b4b4e9a8fc7bf61c3b284e76964223"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSConditionRule.js",
+      "bytes": 678,
+      "sha256": "7fcad5000c479674b91ff9eab7e45d35919084475e251f638d2f3d45017bb400"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSDocumentRule.js",
+      "bytes": 1126,
+      "sha256": "1f8ceabdb680c2ce7423373a5081b2ed2f5485b1f218ebc5be489e36123d5bcc"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSFontFaceRule.js",
+      "bytes": 1065,
+      "sha256": "50a271d0181860e9ca920f122c27838d4560c83dbbebcc30e88c27c6b1914ce8"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSGroupingRule.js",
+      "bytes": 1893,
+      "sha256": "ddcb41c091d8369e6719dd9686e3a3761e51995f72aef5006aa2c5e0fa3cd9f8"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSHostRule.js",
+      "bytes": 913,
+      "sha256": "bec5d76cd521a4c1288046f7b49f57f11b5d836d0783f1e764fd61964f0010b1"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSImportRule.js",
+      "bytes": 3321,
+      "sha256": "45d22a4cf4ae72042bd14a29ca21b53e3414538119139316f21218d43c8c97f9"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSKeyframeRule.js",
+      "bytes": 1099,
+      "sha256": "d35479d2a3396b57dd1ad4bff0d59bae5ed3d8bb1d20a63d9cf137a21eb5706f"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSKeyframesRule.js",
+      "bytes": 1177,
+      "sha256": "b3ee1f5efd98b6c2369f9afacd288408bd938fbf7cf1e2822168d11aa9fc9ab0"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSMediaRule.js",
+      "bytes": 1445,
+      "sha256": "c6293bb2976004f26d3371f909556aacef6bd00d008971a7165b7627fe6e1429"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSRule.js",
+      "bytes": 1052,
+      "sha256": "979cdf515af137d2daa86e5b4b88ef32766b10d974a76ebf38ca891043e0ab60"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSStyleDeclaration.js",
+      "bytes": 3590,
+      "sha256": "29009c281f53a29bfa26aa3dd400224b4cbf0d3b54f97d4cf3a535059e1d33fa"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSStyleRule.js",
+      "bytes": 3617,
+      "sha256": "87213930c3938aceaad294bbe4cd29f5748445d0b808c3b8e444b1ec6dadb7c5"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSStyleSheet.js",
+      "bytes": 2422,
+      "sha256": "ac7046e7fd38b612de5821162de0d900f1be0de79e4aaa1f937265eda586a674"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSSupportsRule.js",
+      "bytes": 990,
+      "sha256": "6c91715a59fc277941ad3a97631a3a560b24950170d7906e3cf6a3396c64c29f"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSValue.js",
+      "bytes": 887,
+      "sha256": "23e4565e78ecb9cd5edf845106295873495163943ad281ec69c1ca86ace24d84"
+    },
+    {
+      "path": "node_modules/cssom/lib/CSSValueExpression.js",
+      "bytes": 5368,
+      "sha256": "9fa29e57a9cf0d5a8d42f7cb62377043cfcd5308381387ff156e58966ca6d10c"
+    },
+    {
+      "path": "node_modules/cssom/lib/index.js",
+      "bytes": 1362,
+      "sha256": "c5a2c25ab1d592109ebdbc04965b81d1fe4f91abddca44b8828020d901ea4d4d"
+    },
+    {
+      "path": "node_modules/cssom/lib/MatcherList.js",
+      "bytes": 1340,
+      "sha256": "831ec6a6cb198e67107d877a09fada719488b39ce3ff3ccbc08c0705d2bc3727"
+    },
+    {
+      "path": "node_modules/cssom/lib/MediaList.js",
+      "bytes": 1028,
+      "sha256": "d7d003e9df357015fb1e33e492706d6b866729daf02292c99752f8d1317b23f9"
+    },
+    {
+      "path": "node_modules/cssom/lib/parse.js",
+      "bytes": 11889,
+      "sha256": "874fe73687280c55d2494f40418406b34c694aecc183f0dd71d82a5d00a951fa"
+    },
+    {
+      "path": "node_modules/cssom/lib/StyleSheet.js",
+      "bytes": 272,
+      "sha256": "348b4145bb478675fb1eb3a42eb96af3a28b5dcc4894f619fd958d34b00c1be3"
+    },
+    {
+      "path": "node_modules/dom-serializer/lib/esm/foreignNames.js",
+      "bytes": 2047,
+      "sha256": "e91bdcbf83ec8b575d8f2513467b6fb7943116528a7ca5a5f1ed459f8051b263"
+    },
+    {
+      "path": "node_modules/dom-serializer/lib/esm/index.js",
+      "bytes": 5381,
+      "sha256": "f9498fbdcff1e557f052fdb97a1f5db142c1f07bf079e622610ff774a68728ff"
+    },
+    {
+      "path": "node_modules/domelementtype/lib/esm/index.js",
+      "bytes": 1712,
+      "sha256": "ca6911093e5ea989c8330ac66416ae9545631c3e761d1b98d20e7d3f83d8fa7f"
+    },
+    {
+      "path": "node_modules/domhandler/lib/esm/index.js",
+      "bytes": 4678,
+      "sha256": "629cd778554dddcdee5515b82e4f32c7b163a26cfc9f38194cccd3959003a533"
+    },
+    {
+      "path": "node_modules/domhandler/lib/esm/node.js",
+      "bytes": 9213,
+      "sha256": "eca04c3ebb27045c5188dd7a857b2ac2da345f8a679d49a1f9636b5e69d21e79"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/feeds.js",
+      "bytes": 5981,
+      "sha256": "2ecf2b79c06dbaae1773f7bdb07fbb0941bd9c23fcf46c9ecc173d5b65d001c1"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/helpers.js",
+      "bytes": 4981,
+      "sha256": "20d83b6e9376b599b89c63f96ab9fadae6c29e46f0575b2b26ca239283593762"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/index.js",
+      "bytes": 405,
+      "sha256": "8864457af2be76823ef1eadfb4c5e74990fdb2bc7f9f3ecb8b348d6a32427bf9"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/legacy.js",
+      "bytes": 5209,
+      "sha256": "b02fe32740e3da1ae8628f1121e596b9cc5daac3d495a6dcf8bfef6939c4b84b"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/manipulation.js",
+      "bytes": 3376,
+      "sha256": "f5754e91f5f33f5798c0f28bcb2631d01b6ebe36157c743b8c1e529859e8ef08"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/querying.js",
+      "bytes": 5124,
+      "sha256": "641c0844f7aff8ecbda8b150d5469ea3439ab85ec6ab0f6139eafabfd2c6ae45"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/stringify.js",
+      "bytes": 2562,
+      "sha256": "773aa58839e56a9edf9c9af62e7a206782c72b8370e14ba39faa190e5065c6ac"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/traversal.js",
+      "bytes": 3092,
+      "sha256": "210852290d70c715e9164a1ec94cc09a6dc926740e91d08205841f47f4546691"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/decode_codepoint.js",
+      "bytes": 2112,
+      "sha256": "9da79851b2a0213ba13ba8a393a730f9f9779d111baf6d6f6f335a8fb091537e"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/decode.js",
+      "bytes": 19810,
+      "sha256": "cf3b65f4843c7dde17e938492454a95c6c24cff25cb6e9355ba915f37de1ca1f"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/encode.js",
+      "bytes": 2569,
+      "sha256": "c79e3ffa191a5fba999eaafc975d9888a073f38562ee036dd55a856b01510823"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/escape.js",
+      "bytes": 3965,
+      "sha256": "cff4eb409e374c49311df5868a8957e9216955ec5207be1951deee2a54c8abf0"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/generated/decode-data-html.js",
+      "bytes": 47724,
+      "sha256": "d7d493875740395ad71eaee1457a4e0d53feb5d82eaae98a8640e57754fcb2ac"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/generated/decode-data-xml.js",
+      "bytes": 279,
+      "sha256": "c016ab8ce42a686bfe2267c25120ac3440a4db292cc91399ffa91831e995adbe"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/generated/encode-html.js",
+      "bytes": 27039,
+      "sha256": "45150e9a9796346d068dafeee1be8a26eb338456b662da5f3a4dd906816e3112"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/index.js",
+      "bytes": 4057,
+      "sha256": "5b66e3763067098506cc3c12ff2c94d5d815691285bf8e4b902f77d612724b61"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars.js",
+      "bytes": 4900,
+      "sha256": "b4918a0c545733377f9164603b673f0a4f3a30afecffe2e49b97ed2575f4ef45"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars.runtime.js",
+      "bytes": 4606,
+      "sha256": "5aaf4c66ea0cbae5d2ba737c28ddcb2bf179c70b73b9270cb8c9e820fe59d764"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/base.js",
+      "bytes": 9641,
+      "sha256": "77d96cd889c7ed97b9c076ee9aa3721c9819e206a85d59402cbfc5d3954eaa8d"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/ast.js",
+      "bytes": 3425,
+      "sha256": "256e26e4a9daa82c622ca868c5ffe318007316fdae2fd5946eb92a391bdf61e1"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/base.js",
+      "bytes": 3926,
+      "sha256": "166de3f716b73150c4bc7c0fa1956e47961028514dc767ff31d11ee7600da423"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/code-gen.js",
+      "bytes": 21565,
+      "sha256": "90b6a71646ffdbf263c7da5ae64eb63cfd28e82f1d18e3123d61753282e22ff7"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/compiler.js",
+      "bytes": 73950,
+      "sha256": "9478d256d7168af1ef727ad4bc82279a489d49c01b2219cb7f58273cedbd2790"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/helpers.js",
+      "bytes": 19212,
+      "sha256": "a9bce7cc09eb86c5b1860e2953d1c00a44d769a98379e8517f234ed4d64f418c"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/javascript-compiler.js",
+      "bytes": 124572,
+      "sha256": "0523d0f3ff90b98bf81256c03986c069d6fbedef3af530ebdc2672d56e9e943a"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/node-types.js",
+      "bytes": 2235,
+      "sha256": "cb0223bb5ea3badfca672fa8679e93bbf79165f353a20280a6a7319ffbbbabad"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/parser.js",
+      "bytes": 205666,
+      "sha256": "3fdb0091ee5d21df4668d85f3772669d9871e1111cf832535913fe3d3189df37"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/visitor.js",
+      "bytes": 15292,
+      "sha256": "ecc0ef76f461c5f39bf7c02570701891947c7bdef8a68d4b06d0141f432ef6bc"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/compiler/whitespace-control.js",
+      "bytes": 24212,
+      "sha256": "7ac915e01322c7bf7ea5db5d3023f3ee34c7573715e8d3d797587e645fc35d17"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/decorators.js",
+      "bytes": 1000,
+      "sha256": "c7f29d481e3fa1bbdbb6e1cfc1e363afbca8364b04990063cd7f8013485dd43f"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/decorators/inline.js",
+      "bytes": 2696,
+      "sha256": "4ac0a5729144cbee031426c35a9efa57c2de75696ce79d74de83a1baa865602a"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/exception.js",
+      "bytes": 6405,
+      "sha256": "10ac536ec90185063612d872faa212300ae2ad737a482cf8db7242ad015fbbfc"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers.js",
+      "bytes": 4000,
+      "sha256": "97a565afc31fd3258ba6b5b6f1484643471183391f15e4d93aab218f515b89e7"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/block-helper-missing.js",
+      "bytes": 3831,
+      "sha256": "bf1672d914aed118a1edf8f83a82333a97747174c0acb4a572a2fd726e7c8765"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/each.js",
+      "bytes": 11772,
+      "sha256": "9908cd8a42efb29d3dd61dcf52abdb8894a5527a0f6f78c4de2697ebed4644d0"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/helper-missing.js",
+      "bytes": 2013,
+      "sha256": "f8630801450bd707f94dbf6dc7a16a8b1ca5e40b3103cb1279b9d4a427c424f0"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/if.js",
+      "bytes": 4458,
+      "sha256": "ed0b3b310fb99c760a5a70a4c4a5d2f45441ca730263d483629896c87115a399"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/log.js",
+      "bytes": 2507,
+      "sha256": "e3d1a7d4e1b1ee8e02eca89a98f805524a2132e7d58982ee3c45480853f28bda"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/lookup.js",
+      "bytes": 1244,
+      "sha256": "17d2ec1e3df209483d506bebc3b9cd36f2dc7ab08ee5510d7e10d20b7eb7f91e"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/helpers/with.js",
+      "bytes": 3759,
+      "sha256": "c9f36ccc5c1d050e2a83d4d90039a5acdf657b5dee52bfc29666f561d9f8c437"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/internal/proto-access.js",
+      "bytes": 11057,
+      "sha256": "a473030c79a532610822f34850336891ca7e86fa9f6205464816d453e0150b36"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/internal/wrapHelper.js",
+      "bytes": 2192,
+      "sha256": "143d010ee40c74b1e32df4b3952cc8f739a9ebbd7879548244ccad786b7f4e7c"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/logger.js",
+      "bytes": 3883,
+      "sha256": "cec4e7ccd06d9d3590e2faa1f8bd1f644f542707ee3b3e12d9f618d11c965184"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/no-conflict.js",
+      "bytes": 2507,
+      "sha256": "ce932f953ead0a866467ca07663319e652454a18f25a982272eaafb7ab141494"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/runtime.js",
+      "bytes": 49189,
+      "sha256": "116508647dd3da470cf63bab36acbdf04867bc3137bc1d58fc2783df8ea2f4f3"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/safe-string.js",
+      "bytes": 1164,
+      "sha256": "d9e1b6c24b51a7afa526853f687a4a80dbcdf884c8446972ea7eadfd376da5b6"
+    },
+    {
+      "path": "node_modules/handlebars/dist/cjs/handlebars/utils.js",
+      "bytes": 10619,
+      "sha256": "206d78d82f46ccd89c418837a30d47e830f03c6d84b8af9147131d2761949384"
+    },
+    {
+      "path": "node_modules/hangul-js/hangul.js",
+      "bytes": 21269,
+      "sha256": "94362dfdd81723a3cb94e5d27c7c0ef09b6949dc25002ecc06aff5448602bfc8"
+    },
+    {
+      "path": "node_modules/htmlparser2/dist/esm/index.js",
+      "bytes": 2977,
+      "sha256": "324cf9f047f8d38bfd8b314e25cd81f3cf3430a949d2ef7980c1f63c3e2111e7"
+    },
+    {
+      "path": "node_modules/htmlparser2/dist/esm/Parser.js",
+      "bytes": 16720,
+      "sha256": "c841a56757105a0c819cbc2acddfe8cefd0ac9eb2606ee622fa019329ddf7cd4"
+    },
+    {
+      "path": "node_modules/htmlparser2/dist/esm/Tokenizer.js",
+      "bytes": 30303,
+      "sha256": "55e263392cd9f4c9299166bd3fe2ce4ec7c673b9c28c0ba957b52354144273de"
+    },
+    {
+      "path": "node_modules/htmlparser2/node_modules/entities/dist/esm/decode-codepoint.js",
+      "bytes": 2098,
+      "sha256": "5d8ee93923d609724c69c8c356147176af5226585d4f343c87a5eec6590ebca9"
+    },
+    {
+      "path": "node_modules/htmlparser2/node_modules/entities/dist/esm/decode.js",
+      "bytes": 20168,
+      "sha256": "8af227bae5682a686bf9e9a6547af8c388274f41cb857ff39592fe74fc848d25"
+    },
+    {
+      "path": "node_modules/htmlparser2/node_modules/entities/dist/esm/generated/decode-data-html.js",
+      "bytes": 47771,
+      "sha256": "b035b71d6969983297e39df1a06d760f2a8000a0f98444c4fe845fe1155da451"
+    },
+    {
+      "path": "node_modules/htmlparser2/node_modules/entities/dist/esm/generated/decode-data-xml.js",
+      "bytes": 325,
+      "sha256": "e28599f48fddd869435e44e6ae8644e70a610450d97562e33c869c056e3b129f"
+    },
+    {
+      "path": "node_modules/kanji-processor/dist/full_list.json",
+      "bytes": 171838,
+      "sha256": "fc73f33be11c711320a27b1b0d8720ddb6212040d4b6975fe8da7e3e83eeadac"
+    },
+    {
+      "path": "node_modules/kanji-processor/dist/index.js",
+      "bytes": 788,
+      "sha256": "efc189539cc3bf404f9e0da8b06520a89b856d7c5a08aa069129817ad3682f35"
+    },
+    {
+      "path": "node_modules/kanji-processor/dist/itaiji_list.json",
+      "bytes": 25838,
+      "sha256": "966be6a8782480342881b3b65567c250c4f5ad8a0426e6cff38dee1f1e9dfbb5"
+    },
+    {
+      "path": "node_modules/linkedom/commonjs/canvas-shim.cjs",
+      "bytes": 260,
+      "sha256": "ccd842575c15dce905ee083df412349311c6fb7dcc3a7f756edd84b00579f126"
+    },
+    {
+      "path": "node_modules/linkedom/commonjs/canvas.cjs",
+      "bytes": 159,
+      "sha256": "fdf000a844046641c040e89e68d49a9e4f01bfc36fae4ad79e329cacdc23ee68"
+    },
+    {
+      "path": "node_modules/linkedom/commonjs/perf_hooks.cjs",
+      "bytes": 211,
+      "sha256": "5f5de18e3c3da1994f49a7bb8fb1e8a6ab037021065f9e22adbd819d69a4b0a2"
+    },
+    {
+      "path": "node_modules/linkedom/esm/dom/parser.js",
+      "bytes": 1250,
+      "sha256": "f2c34b27d3a00a7f078ba6c0c4a3c57a2090a0e52005de9c6249bcbd7de73e7b"
+    },
+    {
+      "path": "node_modules/linkedom/esm/dom/string-map.js",
+      "bytes": 1027,
+      "sha256": "8ab3f0e66f9df4846a28810adb8268c6600b347631cb71ad035c5528169eb05f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/dom/token-list.js",
+      "bytes": 1994,
+      "sha256": "f2af0de69243077a82a9a6634242600528db284578a1ffce59e53f8b96d4d924"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/anchor-element.js",
+      "bytes": 1266,
+      "sha256": "9a6c3b110b4884f12f0422fb86d966ee22cf8c1cf60d24817d72aee8ec30220f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/area-element.js",
+      "bytes": 238,
+      "sha256": "73b29068f8e8efee0c012811563bb7a23a4d59550463b63280548113d98f1aed"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/audio-element.js",
+      "bytes": 241,
+      "sha256": "6c2a6b6d2c120ee062733e7264711aeef80855bbf676c045fa76675fa4cbf646"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/base-element.js",
+      "bytes": 238,
+      "sha256": "d9d9d73427f8d27b8b1ced9f221c565a8045aabe42f8a70863865a32fa4ee17a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/body-element.js",
+      "bytes": 238,
+      "sha256": "8f575359c97d3419e4834f4d39283b48dd8cc8f17e3c83f749472b0c2d3fb54c"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/br-element.js",
+      "bytes": 232,
+      "sha256": "18f7be59acdc2d535dfe51e0f9300ab478cd23e8b1560a4b811d1b205264bbf5"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/button-element.js",
+      "bytes": 872,
+      "sha256": "bad0427773eaa04723d216f85b9b9964637f5cc22d938d48f635b5f6f70e0be6"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/canvas-element.js",
+      "bytes": 1090,
+      "sha256": "15cd1796a08161b233b128ce76db3bd6b949d3bf5372941817578ccb8288fdc1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/d-list-element.js",
+      "bytes": 238,
+      "sha256": "0ac2e92432caa7a6111d93605627986090241fcefe18420fb30875fdbd3b211d"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/data-element.js",
+      "bytes": 238,
+      "sha256": "27cdc6a9923e95965097443e0c525d345a8c3b6eed8ff98e0ff6e8d6100f754c"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/data-list-element.js",
+      "bytes": 250,
+      "sha256": "2abfe76a2cd6da63bffb18a2aea245af0d107c8c1bf09836ac139cd5552895ec"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/details-element.js",
+      "bytes": 247,
+      "sha256": "ac0007e104fdea79119cecc63a30aa4bbb402d14df594792e66d2c1dfc9038b9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/directory-element.js",
+      "bytes": 247,
+      "sha256": "c40f9d05c83dbfa66b60013d97722424c1d293e03f9500d9f61eba485c2c53f2"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/div-element.js",
+      "bytes": 235,
+      "sha256": "973b24a4db1a9b6c3e77a4abfa5f259d7b2d15c1913f1f713c6f247632538b1e"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/document.js",
+      "bytes": 2833,
+      "sha256": "c8db9fee5a281ab087dc7fd0436eaa8ba7f32305cf1f2620bf64b154a7ad6c14"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/element.js",
+      "bytes": 12670,
+      "sha256": "f9f99d2a920a38eb06a0efda745d5bf9d9e521df99260bf404e2eaa0c4f92d14"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/embed-element.js",
+      "bytes": 241,
+      "sha256": "300a46c2eb461eaaaa4a5c0a15fb7d65b03fdb8e1520e17c8139406115cb2e4f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/field-set-element.js",
+      "bytes": 250,
+      "sha256": "108abbee8a3140d79b12a05ac6a0bda8df38fd1c33faba0ab7a47eadce00322e"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/font-element.js",
+      "bytes": 238,
+      "sha256": "d2a82a23f82f644bfd0c2928c2ec58fc3b4af6d7c4d6109d3ef106721d5ef119"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/form-element.js",
+      "bytes": 238,
+      "sha256": "1d44525113a926ac2f6130c0565aaa682e7650fa45184bffdbe308204a22ebb4"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/frame-element.js",
+      "bytes": 241,
+      "sha256": "d8ed75cbce1aa1707f3139e1d91ce995636438e01aa214d9afee0ec80877e8da"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/frame-set-element.js",
+      "bytes": 250,
+      "sha256": "2a1ac923a8ad2972ae8b3162983d806a6d49b147eb64fdcf5f3dc7607ba806ee"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/head-element.js",
+      "bytes": 238,
+      "sha256": "e97cbe0559c92cba933d2206c551260208999b78415cae2c721583281f5d0ec7"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/heading-element.js",
+      "bytes": 441,
+      "sha256": "f435cb3a38b7fcb44b39eb1e942862c1da33f6ce4e8194a8bcc7dfb916341e72"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/hr-element.js",
+      "bytes": 232,
+      "sha256": "557a8cac43222563fb412fe1cd3ae08a3d467a8bb9fe6964f92722c21f5b1e2a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/html-element.js",
+      "bytes": 238,
+      "sha256": "ed5b49d47506df71617040663772ea04209f66f49ba64b3cc251dabcf1be560a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/i-frame-element.js",
+      "bytes": 1509,
+      "sha256": "c555dfcec3b1774794200747cde1af6de9f52ba286933a237171129b84c4ebda"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/image-element.js",
+      "bytes": 1416,
+      "sha256": "390894cdca7f9ed0bb4fd55e7c5e44df88f82d015b28d8c2fc28b364e5e782f9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/input-element.js",
+      "bytes": 1300,
+      "sha256": "2608f6ac35745c6f8dd666b4f1864f4bd687eed3402ca806b78af81960d3eec8"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/label-element.js",
+      "bytes": 241,
+      "sha256": "397e3dc388126b63c3f9db15807840794750f85c554b7f9cd736b4516898be8f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/legend-element.js",
+      "bytes": 244,
+      "sha256": "8bfd3c542dde6235a1d7847901e41e7b1fec8322f944fc5f94e32624f1375383"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/li-element.js",
+      "bytes": 232,
+      "sha256": "d5936e2845702b90110a0eff52fa31c08b220ff7b9e5c8709ccec0f45beb3ad2"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/link-element.js",
+      "bytes": 1351,
+      "sha256": "2a72cadf469e3c861fc3135e5ce0de8662a1cc46a95e0beff1529bbf7e04374b"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/map-element.js",
+      "bytes": 235,
+      "sha256": "c3b32f3d24b470c88a7987f7b5a9a7f16f9bd418ca4c656bc63da593ad1b0599"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/marquee-element.js",
+      "bytes": 247,
+      "sha256": "6dee7f470255ba3b7c7d57a6b50328448003c634bd08c01e4b10003e98b7b0cf"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/media-element.js",
+      "bytes": 241,
+      "sha256": "e4606ac4918a14902d822c097e3a695140372b2d570b8a2858f13605e921bc6c"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/menu-element.js",
+      "bytes": 238,
+      "sha256": "b6bff84bc35cad4dfaaa232b914c2d839d007238a11301b0f9e23a1243f5a3da"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/meta-element.js",
+      "bytes": 1153,
+      "sha256": "fe35fc095fe4d6112191247264e4483b434702c55c0c9c62b5cf4232f1f83080"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/meter-element.js",
+      "bytes": 241,
+      "sha256": "659f0578bb5d6a2ee98a1d39c43071cbd9823f7f0cbd7a4fe19a7129bc9687a2"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/mod-element.js",
+      "bytes": 235,
+      "sha256": "8029291a0cbf14305b201d787cf18ee0cdf793fc3f2a9d13754f6dd8c53378fe"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/o-list-element.js",
+      "bytes": 238,
+      "sha256": "c9699dd777034eb96b1edd05db3e08a4947f6dd19d6e8fdfa019753d84b60d5d"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/object-element.js",
+      "bytes": 244,
+      "sha256": "0ec07fe2e64b861c1ecb8c1f269283b473e84cc541c3e4e526fa5666fd99ac58"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/opt-group-element.js",
+      "bytes": 250,
+      "sha256": "629ea016173f8b52a32f123a700586932973afdc20d52e20ccfa5918fea94538"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/option-element.js",
+      "bytes": 946,
+      "sha256": "7c2882b99914fa2bdbba4db591f4729a113ba884b5e0c40c1fe42c87bfafeebc"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/output-element.js",
+      "bytes": 244,
+      "sha256": "744b92afb6715321ff0c51e52ad5d458b49d019dcabdcb801dbe6a745d016fdc"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/paragraph-element.js",
+      "bytes": 245,
+      "sha256": "c45ca7f9b3e668aa4482efef58e087d4aa78c4791f320f6b9d38456a37a6a1cc"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/param-element.js",
+      "bytes": 241,
+      "sha256": "d41c020f75b44d22ee8767c76529b01ce1edd6404d3760040a3e4be2b873f7fe"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/picture-element.js",
+      "bytes": 247,
+      "sha256": "034128dff6c966ed11bd8fc99d1c11fcba3893614233deecfe1f6b03196c2204"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/pre-element.js",
+      "bytes": 235,
+      "sha256": "7e8a1593a90485a89f8e7a418936b0ffdcd84728696dc00f1a71df35e1571eb0"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/progress-element.js",
+      "bytes": 250,
+      "sha256": "7bcdc92f1fdea0e158cd1aa05a2aa90cb7219ec3d2b6040c12d62ff7c646a092"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/quote-element.js",
+      "bytes": 241,
+      "sha256": "ccfaa2c5ace9fc3fd36d008279af1b220b8f15f594615a1e1041820a617df5d9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/script-element.js",
+      "bytes": 1779,
+      "sha256": "029f03da6d9ace753000d5920873a11fed54c1cda4b979e920e4cb79286f9892"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/select-element.js",
+      "bytes": 1264,
+      "sha256": "7f060fc5753a9b45f8f8ca7834fb49249973202c7b3555c2abc80c1d8792d236"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/slot-element.js",
+      "bytes": 1718,
+      "sha256": "f604222e11fb7b80ecdc62506f9693a615f66ce764ed5d840d2a259ea0a0ac7a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/source-element.js",
+      "bytes": 1017,
+      "sha256": "5d6cd501a0efe0f263afbfa697e06947f623f3b08337cda606106f74d150b446"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/span-element.js",
+      "bytes": 238,
+      "sha256": "f124f77880791a635dbad06c28e6c2fbcec1e09c61c1c6f2e6f93c689f19ac3f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/style-element.js",
+      "bytes": 1094,
+      "sha256": "89978bac7270d92a24525c8cb94e396d5e996defa9e18817575aa63683b9f5a9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/table-caption-element.js",
+      "bytes": 257,
+      "sha256": "89c4551ae7c1977d7c2b5a67b5384fc21d1c57c78dcde1bbdbb2a2074df98268"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/table-cell-element.js",
+      "bytes": 246,
+      "sha256": "f6c9a93c0def93eb113d89d0739b39cdc915d48416b858d7725b5dfb052701af"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/table-element.js",
+      "bytes": 241,
+      "sha256": "cecf5f2a6c8a5135900262c39ee6fbddf6418ca075755bbfa2ec4ba88142eaff"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/table-row-element.js",
+      "bytes": 244,
+      "sha256": "9a25268347c01476fa270fd637a6d837e44e03b37756cc3378346c7882cd8259"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/template-element.js",
+      "bytes": 784,
+      "sha256": "2d54385f426e33857dab7a265b0241fe30e068accb07b602c0ca6430a39a0e8b"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/text-area-element.js",
+      "bytes": 1120,
+      "sha256": "589e26571eee240daf39f9f1e9f19d427ff68086d082ab9bf483b309bb51cef4"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/text-element.js",
+      "bytes": 376,
+      "sha256": "2a1a2bb95b847cb72fb9f37e465b7b55a2bea1c5fe08c462e0027c1fbde0374d"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/time-element.js",
+      "bytes": 600,
+      "sha256": "d11fc4d551bcd8bb375ef421b51d5f8be742b12a90dacc55dc381604ed0ddb6a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/title-element.js",
+      "bytes": 409,
+      "sha256": "74b5d1c955f8f630b2abccb4bfa6337ba41d320988a45ce1ef7adb12982a40c7"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/track-element.js",
+      "bytes": 241,
+      "sha256": "ca6502d872555ccf70eb9ba2867310ff8ccffe5cad2f187cf185b25ea9c9d7ca"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/u-list-element.js",
+      "bytes": 238,
+      "sha256": "f10c7056cd362cd771fffdd217b009f2dedf76fce468f2c6f852c8a3f888b041"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/unknown-element.js",
+      "bytes": 247,
+      "sha256": "a316920f2b7b6294a66b014c6418e6cd9b65970093852a7e760ab21737bd2bbc"
+    },
+    {
+      "path": "node_modules/linkedom/esm/html/video-element.js",
+      "bytes": 241,
+      "sha256": "c40c3d0aac81e9443f158481b2f678628f95c9bf22280aa9a49097b2c716b4c9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/index.js",
+      "bytes": 948,
+      "sha256": "e5dfc90cc53ab53d301b348ccdc6c3166fb9956a7357fb7e292cb47db101cd1f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/attr.js",
+      "bytes": 1677,
+      "sha256": "c728d30af492890c322698316ba9dbfa114e71e1ae7d9276646eea2fc824a92f"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/cdata-section.js",
+      "bytes": 545,
+      "sha256": "f89d2d957241c08597157e85c72f15efc34997d9c72687babaaaf8cdc8cf7f4c"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/character-data.js",
+      "bytes": 2412,
+      "sha256": "f609469a902712ee1542d706c3d143a901006c31d83ab6596e795188a8d85881"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/comment.js",
+      "bytes": 508,
+      "sha256": "9605acc5d218a75d929fbffe080a42904a71dde2b4377f7eaa8d425a185252c1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/css-style-declaration.js",
+      "bytes": 2871,
+      "sha256": "99dec32b9246d067531cf42215822bc57000278c764ddf8073937158ddea2bbd"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/custom-element-registry.js",
+      "bytes": 5482,
+      "sha256": "dfc1327d78d61e4f0fa32f639a08f8a856ee08e5e632a59e6076875de3f08557"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/custom-event.js",
+      "bytes": 386,
+      "sha256": "23355d195be2e4a9f7d47f718044d354b3df50bb3545c50d69982e1d06d74413"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/document-fragment.js",
+      "bytes": 359,
+      "sha256": "ebef2ce6d2984c6a98fccd16a9a7bf4eeb2107d08e21b45dad344ecaeeaf33b0"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/document-type.js",
+      "bytes": 1050,
+      "sha256": "c8a5f4d00dd5dfe3c56c9e3438d47414a69ac35c88ad66d663d46043d74a1884"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/document.js",
+      "bytes": 9116,
+      "sha256": "c2cfc824aaff81cddcbac91b0856bd179ee51a45295529142de55a721a7fd3af"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/element.js",
+      "bytes": 13661,
+      "sha256": "3e937c8269feeaeda1899355c18033bf9a0885908738e99899f54e3bcce86d43"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/event-target.js",
+      "bytes": 2090,
+      "sha256": "b73e75ec1cde0f65ef158b0bf726d053b9ef64ad04c508a1feb3dfcbc768a1d1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/event.js",
+      "bytes": 1693,
+      "sha256": "f4f3d2ab3b5b7d6181bd4e7ffe983a8ddaf7fef636c72153be6dbcb458f66c2c"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/image.js",
+      "bytes": 457,
+      "sha256": "e6ccefc825349772e47ce30c5f7f8af99b62a00396eb9e4692329c187ef0b6f4"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/input-event.js",
+      "bytes": 583,
+      "sha256": "bf109f5ec1d029af63004de7d9304cd8ab0d6489ddcca162a537a2c8d2747423"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/mutation-observer.js",
+      "bytes": 5011,
+      "sha256": "16289f8619abc3ba75d0ae622b5c1ea256fb4e37d9cb22b1cc9591af14a90fe3"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/named-node-map.js",
+      "bytes": 847,
+      "sha256": "4ce3d74292585499c22837a86f90043812daab2014f96fc8610f4db5022b64cd"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/node-filter.js",
+      "bytes": 412,
+      "sha256": "2d183fdf9717610cb668b8497fa9e231645c3d4178a5c0a40527fb703fe2c840"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/node-list.js",
+      "bytes": 190,
+      "sha256": "ce245a9ab7e22859b7ef8bf375b8a6d3428662ba3dd2171898bce51a88fd1604"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/node.js",
+      "bytes": 6258,
+      "sha256": "9482346bdca5670613e0ee6cd57bf608819d9e83c340b663c4e70c23da8cf9a0"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/range.js",
+      "bytes": 3132,
+      "sha256": "be68b11ebcb21edcef417bd1171ab3d286150eb7417de729084e3368de13aa77"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/shadow-root.js",
+      "bytes": 540,
+      "sha256": "d61ae08eb881dd1cb916b35777b7e2adbe2814ff043de061fb57a207b2e6e67a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/text.js",
+      "bytes": 1086,
+      "sha256": "d9d8b6b17c729b2f49e64e984b7ee14a6bc05862b363f28d1683be9d612dc06a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/interface/tree-walker.js",
+      "bytes": 1307,
+      "sha256": "9e4cf3329a89b108edd78cf9a6b5bea253ca96983c9571db03f56d7f3b5ca975"
+    },
+    {
+      "path": "node_modules/linkedom/esm/mixin/child-node.js",
+      "bytes": 1622,
+      "sha256": "4f54ad6900052facc3eb6016afefd816c528ae4bf277b94c81c7a5c390be646b"
+    },
+    {
+      "path": "node_modules/linkedom/esm/mixin/inner-html.js",
+      "bytes": 1017,
+      "sha256": "ac2e4712355523dad30e2b68f691bb8046b8215e358a09ddeb65cdd31d05edac"
+    },
+    {
+      "path": "node_modules/linkedom/esm/mixin/non-document-type-child-node.js",
+      "bytes": 562,
+      "sha256": "403d95009ac5e0cc864ac8c1af7f6a10a5a97b20f08e660c3f8795bab99362e1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/mixin/non-element-parent-node.js",
+      "bytes": 1094,
+      "sha256": "5dd40991875a87ec50715ec8a171321f47bae3026c8329a9917d4ef2c39dd178"
+    },
+    {
+      "path": "node_modules/linkedom/esm/mixin/parent-node.js",
+      "bytes": 7855,
+      "sha256": "eeec998c5a3dcc8cb42f4c238c86dffd6d154c1dd210b56d8e5376aec32048dc"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/attributes.js",
+      "bytes": 2399,
+      "sha256": "622b8df94d1f42ac093b925bc6d58dd404dcf62f1450ff3bf26f0bb7fa4eebde"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/constants.js",
+      "bytes": 1194,
+      "sha256": "d58c002bf63ef8abb4963e20d9956446e1c4b9cbc08a4fbfe704bbd6bff90ecd"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/facades.js",
+      "bytes": 2602,
+      "sha256": "8a184182240df4a477c92dc894ac5398c9620ca3e301dbc1ea37f853724f145d"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/html-classes.js",
+      "bytes": 6899,
+      "sha256": "7a3f7162fd60dfa597efa890ef8917e148040e44f30e86639cb8fbd3384c95f8"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/jsdon.js",
+      "bytes": 1691,
+      "sha256": "3879f1a1f0a3fc31c611acdddd6723e7297697ed2674ed2193aa282fcfbad6d9"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/matches.js",
+      "bytes": 2670,
+      "sha256": "3aeef69e7fb9e67207371fabafc119a598863e45c6a3a6c1e17d4cc58ffe35a1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/mime.js",
+      "bytes": 837,
+      "sha256": "7ce42df682e665d12ec23177f64687519e747245ab935c0a738f66c35f120c84"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/node.js",
+      "bytes": 1056,
+      "sha256": "4555d99a098fdd552cd9eac5295a790da268044569d22da6791e63dba47306c0"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/object.js",
+      "bytes": 243,
+      "sha256": "28ea116addd5490e40605c092ca2d4102cc1ddc0f58621e7dc848bf42f6c44a3"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/parse-from-string.js",
+      "bytes": 3656,
+      "sha256": "62f60d4b8747978bc822f4caebcaf00c5b60311fd7d822817cefcab93d2021fd"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/parse-json.js",
+      "bytes": 4064,
+      "sha256": "abcb6509bf4736e0193e85c07253a5090bb4a3a9cedd2343eac9f3bef3b9a957"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/register-html-class.js",
+      "bytes": 220,
+      "sha256": "49a8d9de809ddaddedb342b6008a7813dd21a0fe9b6d72ba5c74861638ae130a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/shadow-roots.js",
+      "bytes": 40,
+      "sha256": "3e444a6bfd8a0dc3357045a1be35880b40f21dd2523bdaacdae4f634f22b1bc1"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/symbols.js",
+      "bytes": 1905,
+      "sha256": "9d26091b3da331dd5a0f5b1b62efbe8ff3957a9c9daa467cbb0b98dd09948e10"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/text-escaper.js",
+      "bytes": 500,
+      "sha256": "1b9063c3ec00df99af48eb64fcec8c538e6423e0a7bf56c2ff575fc1164e2369"
+    },
+    {
+      "path": "node_modules/linkedom/esm/shared/utils.js",
+      "bytes": 1052,
+      "sha256": "4cea404c0b2c451a54c72bab3b0b5f2e180fafcb9b30ea1c0230835c33352939"
+    },
+    {
+      "path": "node_modules/linkedom/esm/svg/document.js",
+      "bytes": 297,
+      "sha256": "b22ec834cae7403b410a3b6e9212c6c8d8e84c340244588625a71e8e29f9df9a"
+    },
+    {
+      "path": "node_modules/linkedom/esm/svg/element.js",
+      "bytes": 1312,
+      "sha256": "a5440944893b5a67ae9ddb9f6579713484ffcf07a135978dfcd322dcc12fe6df"
+    },
+    {
+      "path": "node_modules/linkedom/esm/xml/document.js",
+      "bytes": 295,
+      "sha256": "3b24e9566392bd2b396abf7fb12901a19e2ecbd9de74f4393dbd27f53634843f"
+    },
+    {
+      "path": "node_modules/nth-check/lib/esm/compile.js",
+      "bytes": 3320,
+      "sha256": "e9056239a84e9047f4a3f7c9e0107936492496738eeaa7dd211731df4a9f7f3b"
+    },
+    {
+      "path": "node_modules/nth-check/lib/esm/index.js",
+      "bytes": 1655,
+      "sha256": "9d0248074dd9d6de03c9d961a2583a5d620cb30e4fd93bd4193190f08d82964f"
+    },
+    {
+      "path": "node_modules/nth-check/lib/esm/parse.js",
+      "bytes": 2239,
+      "sha256": "c6de425587503aea265f76c43ea578b9aa05c2953bc3b7f984603b88a70afc1c"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/doctype.js",
+      "bytes": 4661,
+      "sha256": "855d8cd764782cdc73003a9847d03ed261c5158f6a6901e563ccd4d3b92c8b16"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/error-codes.js",
+      "bytes": 4746,
+      "sha256": "b38ae5ac4f2a31ce2e1cfeca35cf7b89cc66736cd5be068cc433a3ccaca78be2"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/foreign-content.js",
+      "bytes": 6299,
+      "sha256": "129a84a9d04b6050b6896de45a70e1ee468434e19bdd6486e3aef3405d137cac"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/html.js",
+      "bytes": 17554,
+      "sha256": "e6cf93f387be70ddcd4f2bec67fbeb53161094f6306d834de461ec888a9dab76"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/token.js",
+      "bytes": 834,
+      "sha256": "52dac9efba3a637771818d633a5cf1df30c7913d05ff23235150c88319ea035a"
+    },
+    {
+      "path": "node_modules/parse5/dist/common/unicode.js",
+      "bytes": 2989,
+      "sha256": "69a0a52be895d2bcf88850beead4a098c5305c0b5669d1e8a0fe26f621ea25c6"
+    },
+    {
+      "path": "node_modules/parse5/dist/index.js",
+      "bytes": 1355,
+      "sha256": "b825162aced2e79be8d68d45efb1f89ec34ed4189467195a071a0d7b694a19d4"
+    },
+    {
+      "path": "node_modules/parse5/dist/parser/formatting-element-list.js",
+      "bytes": 4297,
+      "sha256": "b57aa26bc6340bfdb55b405e02f11173c3faf2627b0016a08e6cb3c9dc3c189e"
+    },
+    {
+      "path": "node_modules/parse5/dist/parser/index.js",
+      "bytes": 106733,
+      "sha256": "fc06bc41b3f69dbee4894fe61c7b524000889350f4b8019cacf30d54ddeb7805"
+    },
+    {
+      "path": "node_modules/parse5/dist/parser/open-element-stack.js",
+      "bytes": 10721,
+      "sha256": "f5b299089fca3616279b779b639b46ca833fea22d846f4563de7cff7fdad665e"
+    },
+    {
+      "path": "node_modules/parse5/dist/serializer/index.js",
+      "bytes": 5276,
+      "sha256": "37e2464a7564bada61a351e1f1f4a5d4d40f5f1eb7c0c9e8ad869d8536bca1b6"
+    },
+    {
+      "path": "node_modules/parse5/dist/tokenizer/index.js",
+      "bytes": 98131,
+      "sha256": "987e90ac999435aabb42dc1324e9589bbc0ecfdf4efbe8ee8eb2fdb324d29d06"
+    },
+    {
+      "path": "node_modules/parse5/dist/tokenizer/preprocessor.js",
+      "bytes": 7021,
+      "sha256": "12199175a31eb461dcecefa10ce2536c69ab92cdd2a1f67da3ea20b214599ac1"
+    },
+    {
+      "path": "node_modules/parse5/dist/tree-adapters/default.js",
+      "bytes": 5232,
+      "sha256": "14b6408b0abb1c041e645644f977db34da280239be8a59a2eb3c9e282e89b7c4"
+    },
+    {
+      "path": "node_modules/source-map/lib/array-set.js",
+      "bytes": 3197,
+      "sha256": "163bb3055aaea7140167740036a83161fd912c344b14f992754b80f21477d754"
+    },
+    {
+      "path": "node_modules/source-map/lib/base64-vlq.js",
+      "bytes": 4714,
+      "sha256": "f3407e528f54ec0787bd0a71eeac0c99fffd98445916fcbe116dc69ca3be928b"
+    },
+    {
+      "path": "node_modules/source-map/lib/base64.js",
+      "bytes": 1540,
+      "sha256": "651bf433cf05e9ec8cee0b94639483236a605d48279e83d3d5c5de81c21d6599"
+    },
+    {
+      "path": "node_modules/source-map/lib/binary-search.js",
+      "bytes": 4249,
+      "sha256": "c7f4a47a125af0bd860443dfd71d2f412d1a97dcb53ab7038189d63b91dc32bd"
+    },
+    {
+      "path": "node_modules/source-map/lib/mapping-list.js",
+      "bytes": 2339,
+      "sha256": "35ddb82861f11a70ab84cb47d620fcb28d7f884bb444644e06bde815b836ef9e"
+    },
+    {
+      "path": "node_modules/source-map/lib/quick-sort.js",
+      "bytes": 3616,
+      "sha256": "00ed5475b08b4a239836bc5d667bfaf343f4f2412cd7616d2aaf37bddd8582c2"
+    },
+    {
+      "path": "node_modules/source-map/lib/source-map-consumer.js",
+      "bytes": 40562,
+      "sha256": "b59ae64263c0abc03d9bb5576d805dbe736097a3f0f31010d13b3468b52a3063"
+    },
+    {
+      "path": "node_modules/source-map/lib/source-map-generator.js",
+      "bytes": 14356,
+      "sha256": "98f91170f8bfd754bebc9bc8babf26ea16ba4cf980f7abb30debe6d89f24f17f"
+    },
+    {
+      "path": "node_modules/source-map/lib/source-node.js",
+      "bytes": 13808,
+      "sha256": "b45db8183550ca1e6259976f6ceee89f6764360c56cf206701bd2f7471144e31"
+    },
+    {
+      "path": "node_modules/source-map/lib/util.js",
+      "bytes": 12950,
+      "sha256": "c83bf8e825fc7366ff511da21c58dde4c4a032308a51c0a71865760c3b43a401"
+    },
+    {
+      "path": "node_modules/source-map/source-map.js",
+      "bytes": 405,
+      "sha256": "dc098456c2d9ab90a4c0a17cca9be16665b9813df20906553a98b0088a157be7"
+    },
+    {
+      "path": "node_modules/uhyphen/esm/index.js",
+      "bytes": 149,
+      "sha256": "6fd8b2b30de3ed458e571bebcf04af629a1ae86a14ad0733ef1ed492b1353a51"
+    },
+    {
+      "path": "node_modules/yomitan-handlebars/src/handlebars.ts",
+      "bytes": 1890,
+      "sha256": "534b38852ff7fc4bc41d9ba170b281971e90f9c9845c8573668d68bed7c48bc9"
+    },
+    {
+      "path": "node_modules/yomitan-handlebars/src/symbols.ts",
+      "bytes": 270,
+      "sha256": "a9fa02099f30d4449f32dbc57d3956d0165674a2466ad15d16308a2e2b389869"
+    },
+    {
+      "path": "node_modules/yomitan-handlebars/src/utils.ts",
+      "bytes": 2096,
+      "sha256": "db4eef619412b75aeb168bbf46d15b803d38e7b4a483cfea07a511f7d50c9cfa"
+    },
+    {
+      "path": "node_modules/yomitan-handlebars/src/visitor.ts",
+      "bytes": 27128,
+      "sha256": "753cf3dee342e54723fe51b59a7ba3afeea02d2a550a9f608710b6cca2584a99"
+    }
+  ],
+  "packages": [
+    {
+      "path": "node_modules/@resvg/resvg-wasm/package.json",
+      "name": "@resvg/resvg-wasm",
+      "version": "2.6.2",
+      "bytes": 903,
+      "sha256": "4a9efcb54b2670726ccf9b91086413676c3de0fae607cce3b8a5a0d25abaff48"
+    },
+    {
+      "path": "node_modules/@zip.js/zip.js/package.json",
+      "name": "@zip.js/zip.js",
+      "version": "2.7.54",
+      "bytes": 2879,
+      "sha256": "c1b5de79ccb035b8f27fa73d656e0f15bdc035a714b310e8c4b9776688d33440"
+    },
+    {
+      "path": "node_modules/ajv/package.json",
+      "name": "ajv",
+      "version": "8.20.0",
+      "bytes": 4405,
+      "sha256": "1f9033ee5a6515e7d76938b7072941862d1ed228a6879cc7fe10cdeb75107989"
+    },
+    {
+      "path": "node_modules/boolbase/package.json",
+      "name": "boolbase",
+      "version": "1.0.0",
+      "bytes": 550,
+      "sha256": "ca09c0dccbfc43be6be0ac89e9ffa19b64b30f9c74c64da27f719a7244a25e30"
+    },
+    {
+      "path": "node_modules/css-select/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/css-what/package.json",
+      "name": "css-what",
+      "version": "6.1.0",
+      "bytes": 1733,
+      "sha256": "22b0a7860ea48e6bf4b3a573f4954a6644b3a52b1dc0f0d5d53a78e48d31e8fe"
+    },
+    {
+      "path": "node_modules/cssom/package.json",
+      "name": "cssom",
+      "version": "0.5.0",
+      "bytes": 337,
+      "sha256": "f9babfc8744f2ed28a3661c14d6d8a0a015bdf437c52f996f5cc6111cb400237"
+    },
+    {
+      "path": "node_modules/dom-serializer/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/domelementtype/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/domhandler/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/domutils/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/entities/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/handlebars/package.json",
+      "name": "handlebars",
+      "version": "4.7.10",
+      "bytes": 3622,
+      "sha256": "cf06251288836dd2ba6d8d1a83dbe4c8c944556c34e17a3263c86325115d2a3c"
+    },
+    {
+      "path": "node_modules/hangul-js/package.json",
+      "name": "hangul-js",
+      "version": "0.2.6",
+      "bytes": 660,
+      "sha256": "741d48f9849d0bd0e6e8e1b2a1a3583c3603ab75b5a3def1a29e96e191cf8d91"
+    },
+    {
+      "path": "node_modules/htmlparser2/dist/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 23,
+      "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+    },
+    {
+      "path": "node_modules/htmlparser2/node_modules/entities/dist/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 23,
+      "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+    },
+    {
+      "path": "node_modules/kanji-processor/package.json",
+      "name": "kanji-processor",
+      "version": "1.0.2",
+      "bytes": 362,
+      "sha256": "5127dfc8e958cf28505c1d6a679be238a43872db375ce5e453f2f01f51b8c709"
+    },
+    {
+      "path": "node_modules/linkedom/package.json",
+      "name": "linkedom",
+      "version": "0.18.10",
+      "bytes": 4047,
+      "sha256": "fa87ef958d3235b7628361de85a0cac7d52208a3293522619b780f74881e29df"
+    },
+    {
+      "path": "node_modules/nth-check/lib/esm/package.json",
+      "name": null,
+      "version": null,
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    {
+      "path": "node_modules/parse5/package.json",
+      "name": "parse5",
+      "version": "7.2.1",
+      "bytes": 1386,
+      "sha256": "b44cccf4b2cf4b4d07a2464b3021aa284f9b3d2222f9ef0503dc66b4f8f4f197"
+    },
+    {
+      "path": "node_modules/source-map/package.json",
+      "name": "source-map",
+      "version": "0.6.1",
+      "bytes": 2579,
+      "sha256": "3fdebd9f5c0107bcf7b73e0d17e0147042bcfb74884106e4428afbf17171ef06"
+    },
+    {
+      "path": "node_modules/uhyphen/package.json",
+      "name": "uhyphen",
+      "version": "0.2.0",
+      "bytes": 1607,
+      "sha256": "5909de06aab4c4a969deb4c758541f5ec0584a651160f00fbbf73998d591024a"
+    },
+    {
+      "path": "node_modules/yomitan-handlebars/package.json",
+      "name": "@kbn/handlebars",
+      "version": "1.0.0",
+      "bytes": 92,
+      "sha256": "3fe11bd57547978bdae43e9f3a87e34cf2e3411ab64d3e13146ab1a5fc9e8a50"
+    }
+  ],
+  "failures": [],
+  "compiler": [
+    {
+      "path": "node_modules/esbuild/package.json",
+      "bytes": 1419,
+      "sha256": "c6dc442df570a4325880f3788e64f2e612629c365cb16145f429261386c793eb"
+    },
+    {
+      "path": "node_modules/esbuild/lib/main.js",
+      "bytes": 87971,
+      "sha256": "5e7dcf28613dbf0bc5558743d6253d38fee888b935dfeb4ef0e702de0a71f075"
+    },
+    {
+      "path": "node_modules/@esbuild/linux-x64/bin/esbuild",
+      "bytes": 10244248,
+      "sha256": "cfbfcac245e272a19c709cea06cda74d8cdebf3c033ba9f4dc2b7fc5985fd516"
+    },
+    {
+      "path": "node_modules/acorn/package.json",
+      "bytes": 1067,
+      "sha256": "04d6fecaafb5e3d20a38fc3b64fed84bb3830a7759a8c00400ebcb87331fec00"
+    },
+    {
+      "path": "node_modules/acorn/dist/acorn.js",
+      "bytes": 246643,
+      "sha256": "b95392d79457d0357555c5ed3e56302d074b92dff119bcf3b44179500b10e9df"
+    },
+    {
+      "path": "package.json",
+      "bytes": 9515,
+      "sha256": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    {
+      "path": "dev/build-libs.js",
+      "bytes": 4589,
+      "sha256": "edd3d2794a75150665ccdebb9701cb247abc786ac369132a5f951f15bfe3ae32"
+    }
+  ]
+}

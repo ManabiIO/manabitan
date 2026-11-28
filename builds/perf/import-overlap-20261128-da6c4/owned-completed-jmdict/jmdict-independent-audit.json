@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent exact-artifact recomputation of two current JMdict owned-overlap cohorts. No observations excluded, pooled or reacquired.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+  "run": 46132124178,
+  "decision": "REJECT_FOR_PRODUCT_PR_NO_REPLICATED_JMDICT_GAIN",
+  "cells": [
+    {
+      "order": "AB",
+      "artifactId": 15258970156,
+      "artifactBytes": 35544298,
+      "artifactSha256": "f727aaea732c2a30c95adfe51b464b5f7beebdce9e50997bbcb9dacfaad8c4fd",
+      "prescribedTimingObservations": 36,
+      "allTimingSummariesSourceBound": true,
+      "allCanonicalReceiptsEqual": true,
+      "candidate": {
+        "count": 12,
+        "medianPairedChangeMs": -0.35000000000582077,
+        "medianPairedChangePercent": -0.05247461495141437,
+        "equalWorkChangePercent": 1.1782837824394043,
+        "fasterPairs": 6,
+        "bootstrap95ChangeMs": [
+          -9.000000000021828,
+          8.44999999999709
+        ],
+        "bootstrap95ChangePercent": [
+          -1.3355243156104035,
+          1.2804124446066378
+        ],
+        "baselineMedianMs": 666.5500000000029,
+        "candidateMedianMs": 667.5999999999913,
+        "pairedMs": [
+          101.89999999999418,
+          84.70000000001164,
+          -8.69999999999709,
+          1.7999999999883585,
+          8.599999999976717,
+          -15.199999999982538,
+          -4.199999999982538,
+          -2.5,
+          8.300000000017462,
+          6.0,
+          -9.300000000046566,
+          -76.60000000003492
+        ],
+        "pairedRatios": [
+          1.1526820497452728,
+          1.1283138918345899,
+          0.986976047904196,
+          1.0027059530967954,
+          1.0130382049726754,
+          0.9772250524423394,
+          0.9936899038461802,
+          0.9962445546041762,
+          1.0125700439194572,
+          1.0089874176153384,
+          0.9863134657835959,
+          0.8934927697441133
+        ]
+      },
+      "control": {
+        "count": 4,
+        "medianPairedChangeMs": 10.950000000011642,
+        "medianPairedChangePercent": 1.6537021655703033,
+        "equalWorkChangePercent": 1.4927069520762615,
+        "fasterPairs": 1,
+        "bootstrap95ChangeMs": [
+          -6.099999999976717,
+          23.60000000000582
+        ],
+        "bootstrap95ChangePercent": [
+          -0.9137207908892941,
+          3.648168186737677
+        ],
+        "baselineMedianMs": 662.4499999999825,
+        "candidateMedianMs": 669.7000000000116,
+        "pairedMs": [
+          10.299999999988358,
+          23.60000000000582,
+          11.600000000034925,
+          -6.099999999976717
+        ],
+        "pairedRatios": [
+          1.0154260895611624,
+          1.0364816818673768,
+          1.0176479537502436,
+          0.9908627920911071
+        ]
+      },
+      "timingGates": {
+        "savingMsAtLeast10": false,
+        "savingPercentAtLeast1": false,
+        "fasterPairsAtLeast9": false,
+        "equalWorkLower": false,
+        "upper95MsNegative": false,
+        "upper95PercentNegative": false,
+        "controlMedianBelowHalfBenefit": false,
+        "controlEqualWorkBelowHalfBenefit": false
+      },
+      "passesAllTimingGates": false,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 0.03921728412668024,
+            "medianPairedChangePercent": -0.0075472794793252085
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.08563462037611824,
+            "medianPairedChangePercent": 0.06026564566670167
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 253,
+        "schemaVersion": 1
+      },
+      "sourceIdentityChangedEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/dictionary-import-session.js",
+        "js/dictionary/dictionary-importer.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/term-content-ownership.js",
+        "js/dictionary/zstd-term-content.js"
+      ],
+      "sourceIdentityAddedEntries": [
+        "js/dictionary/artifact-term-chunk-pipeline.js"
+      ],
+      "rawArchiveMembers": 313,
+      "rawArchiveValidatedEveryMember": true
+    },
+    {
+      "order": "BA",
+      "artifactId": 15258509384,
+      "artifactBytes": 35597119,
+      "artifactSha256": "d2e9bad9bbc098b2b2eac4819277c983b2773deb2863bade9e5d4edd2f36a6e3",
+      "prescribedTimingObservations": 36,
+      "allTimingSummariesSourceBound": true,
+      "allCanonicalReceiptsEqual": true,
+      "candidate": {
+        "count": 12,
+        "medianPairedChangeMs": 15.39999999999418,
+        "medianPairedChangePercent": 1.867625031331377,
+        "equalWorkChangePercent": 1.515091577989458,
+        "fasterPairs": 3,
+        "bootstrap95ChangeMs": [
+          -3.1000000000130967,
+          35.849999999998545
+        ],
+        "bootstrap95ChangePercent": [
+          -0.3238999573707324,
+          4.217974765617738
+        ],
+        "baselineMedianMs": 838.1999999999971,
+        "candidateMedianMs": 848.8500000000058,
+        "pairedMs": [
+          39.80000000000291,
+          -10.099999999991269,
+          -46.10000000000582,
+          4.600000000005821,
+          25.0,
+          -32.100000000034925,
+          7.5,
+          31.89999999999418,
+          3.8999999999650754,
+          60.40000000002328,
+          45.100000000034925,
+          23.29999999998836
+        ],
+        "pairedRatios": [
+          1.0464464931730695,
+          0.9888175376439423,
+          0.9463953488372026,
+          1.005558912386714,
+          1.0305064063453324,
+          0.9626874346157919,
+          1.0088683930471798,
+          1.037913002139285,
+          1.004704463208643,
+          1.0723353293413453,
+          1.055330634278047,
+          1.028484107579448
+        ]
+      },
+      "control": {
+        "count": 4,
+        "medianPairedChangeMs": 6.44999999999709,
+        "medianPairedChangePercent": 0.7763125426693218,
+        "equalWorkChangePercent": 1.3571104730238481,
+        "fasterPairs": 0,
+        "bootstrap95ChangeMs": [
+          2.6000000000349246,
+          29.399999999965075
+        ],
+        "bootstrap95ChangePercent": [
+          0.315266157394789,
+          3.5696940262219368
+        ],
+        "baselineMedianMs": 826.0,
+        "candidateMedianMs": 836.5499999999884,
+        "pairedMs": [
+          4.7000000000116415,
+          8.199999999982538,
+          2.6000000000349246,
+          29.399999999965075
+        ],
+        "pairedRatios": [
+          1.005681131391287,
+          1.0098451194620994,
+          1.003152661573948,
+          1.0356969402622194
+        ]
+      },
+      "timingGates": {
+        "savingMsAtLeast10": false,
+        "savingPercentAtLeast1": false,
+        "fasterPairsAtLeast9": false,
+        "equalWorkLower": false,
+        "upper95MsNegative": false,
+        "upper95PercentNegative": false,
+        "controlMedianBelowHalfBenefit": false,
+        "controlEqualWorkBelowHalfBenefit": false
+      },
+      "passesAllTimingGates": false,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.8415559575043057,
+            "medianPairedChangePercent": 2.023778996046155
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.6634811960259963,
+            "medianPairedChangePercent": 1.6514838583507552
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 303,
+        "schemaVersion": 1
+      },
+      "sourceIdentityChangedEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/dictionary-import-session.js",
+        "js/dictionary/dictionary-importer.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/term-content-ownership.js",
+        "js/dictionary/zstd-term-content.js"
+      ],
+      "sourceIdentityAddedEntries": [
+        "js/dictionary/artifact-term-chunk-pipeline.js"
+      ],
+      "rawArchiveMembers": 313,
+      "rawArchiveValidatedEveryMember": true
+    }
+  ]
+}

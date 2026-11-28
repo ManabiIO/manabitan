@@ -1,0 +1,270 @@
+{
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+  "dictionary": "jmdict",
+  "expectedAddedPackageEntries": [
+    "js/dictionary/artifact-term-chunk-pipeline.js"
+  ],
+  "expectedPackageEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-import-session.js",
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-ownership.js",
+    "js/dictionary/zstd-term-content.js"
+  ],
+  "expectedWorkers": 3,
+  "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+  "flags": {},
+  "initialOrder": "BA",
+  "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+  "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+  "memorySchedule": [
+    {
+      "arm": "B",
+      "index": 1,
+      "name": "B1",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "index": 2,
+      "name": "A1",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "index": 3,
+      "name": "A2",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "index": 4,
+      "name": "B2",
+      "pair": 2
+    }
+  ],
+  "pairs": 12,
+  "schedule": [
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3
+    },
+    {
+      "arm": "A",
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3
+    },
+    {
+      "arm": "C",
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1
+    },
+    {
+      "arm": "A",
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4
+    },
+    {
+      "arm": "B",
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4
+    },
+    {
+      "arm": "B",
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5
+    },
+    {
+      "arm": "A",
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5
+    },
+    {
+      "arm": "A",
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6
+    },
+    {
+      "arm": "B",
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6
+    },
+    {
+      "arm": "A",
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2
+    },
+    {
+      "arm": "C",
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2
+    },
+    {
+      "arm": "B",
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7
+    },
+    {
+      "arm": "A",
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7
+    },
+    {
+      "arm": "A",
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8
+    },
+    {
+      "arm": "B",
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8
+    },
+    {
+      "arm": "B",
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9
+    },
+    {
+      "arm": "A",
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9
+    },
+    {
+      "arm": "C",
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3
+    },
+    {
+      "arm": "A",
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3
+    },
+    {
+      "arm": "A",
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10
+    },
+    {
+      "arm": "B",
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10
+    },
+    {
+      "arm": "B",
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11
+    },
+    {
+      "arm": "A",
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11
+    },
+    {
+      "arm": "A",
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12
+    },
+    {
+      "arm": "B",
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12
+    },
+    {
+      "arm": "A",
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4
+    },
+    {
+      "arm": "C",
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4
+    }
+  ],
+  "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+  "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+  "vndbSahAllocationPolicy": null
+}

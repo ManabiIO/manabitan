@@ -1,0 +1,133 @@
+{
+  "node": "v24.22.3",
+  "passed": 31,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "eager: cancellation while ordered sink awaits a result prevents another write",
+      "passed": true
+    },
+    {
+      "name": "eager: buffered success cannot start another write after peer parse failure",
+      "passed": true
+    },
+    {
+      "name": "eager: cancellation after the final sink is still reported",
+      "passed": true
+    },
+    {
+      "name": "eager: ordinary ordered parsing and successor import remain correct",
+      "passed": true
+    },
+    {
+      "name": "eager: sink failure preserves original error",
+      "passed": true
+    },
+    {
+      "name": "deferred: cancellation while ordered sink awaits a result prevents another write",
+      "passed": true
+    },
+    {
+      "name": "deferred: buffered success cannot start another write after peer parse failure",
+      "passed": true
+    },
+    {
+      "name": "deferred: cancellation after the final sink is still reported",
+      "passed": true
+    },
+    {
+      "name": "deferred: ordinary ordered parsing and successor import remain correct",
+      "passed": true
+    },
+    {
+      "name": "deferred: sink failure preserves original error",
+      "passed": true
+    },
+    {
+      "name": "lazy: cancellation while ordered sink awaits a result prevents another write",
+      "passed": true
+    },
+    {
+      "name": "lazy: buffered success cannot start another write after peer parse failure",
+      "passed": true
+    },
+    {
+      "name": "lazy: cancellation after the final sink is still reported",
+      "passed": true
+    },
+    {
+      "name": "lazy: ordinary ordered parsing and successor import remain correct",
+      "passed": true
+    },
+    {
+      "name": "lazy: sink failure preserves original error",
+      "passed": true
+    },
+    {
+      "name": "stored: cancellation while ordered sink awaits a result prevents another write",
+      "passed": true
+    },
+    {
+      "name": "stored: buffered success cannot start another write after peer parse failure",
+      "passed": true
+    },
+    {
+      "name": "stored: cancellation after the final sink is still reported",
+      "passed": true
+    },
+    {
+      "name": "stored: ordinary ordered parsing and successor import remain correct",
+      "passed": true
+    },
+    {
+      "name": "stored: sink failure preserves original error",
+      "passed": true
+    },
+    {
+      "name": "deflate: cancellation while ordered sink awaits a result prevents another write",
+      "passed": true
+    },
+    {
+      "name": "deflate: buffered success cannot start another write after peer parse failure",
+      "passed": true
+    },
+    {
+      "name": "deflate: cancellation after the final sink is still reported",
+      "passed": true
+    },
+    {
+      "name": "deflate: ordinary ordered parsing and successor import remain correct",
+      "passed": true
+    },
+    {
+      "name": "deflate: sink failure preserves original error",
+      "passed": true
+    },
+    {
+      "name": "lazy: finalizing a cancelled sink cannot start another source window",
+      "passed": true
+    },
+    {
+      "name": "lazy: healthy sink advances the bounded source window",
+      "passed": true
+    },
+    {
+      "name": "stored: finalizing a cancelled sink cannot start another source window",
+      "passed": true
+    },
+    {
+      "name": "stored: healthy sink advances the bounded source window",
+      "passed": true
+    },
+    {
+      "name": "deflate: finalizing a cancelled sink cannot start another source window",
+      "passed": true
+    },
+    {
+      "name": "deflate: healthy sink advances the bounded source window",
+      "passed": true
+    }
+  ],
+  "workerCount": 93,
+  "unhandled": []
+}

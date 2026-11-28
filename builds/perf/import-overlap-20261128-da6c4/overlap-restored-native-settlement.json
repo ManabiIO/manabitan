@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "recovered-native-settlement-raw-evidence",
+  "recoveredAt": "2026-11-28",
+  "originalEvidenceBlob": "54a143076148e5073f502e9caeb5df4bae5e04a3",
+  "historicalSource": {
+    "baseCommit": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+    "baseTree": "11db07622fe196dd1a6fd587aec247553e8de193",
+    "developBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "sourceFiles": [
+      {
+        "path": "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+        "blob": "6655bd36acb4b56c2a288f40314eaaaebe6433c9",
+        "chars": 9395
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "blob": "ac53375d350e48088eb207bd6c210e2f293415c4",
+        "chars": 350541
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "blob": "00603c0fe2c6ef10df7bb923bcfa06bce0013f0b",
+        "chars": 214677
+      },
+      {
+        "path": "ext/js/dictionary/term-content-ownership.js",
+        "blob": "84326a4b654bb0485b82a3cce557b2cb5571e09a",
+        "chars": 6389
+      },
+      {
+        "path": "test/artifact-term-chunk-pipeline.test.js",
+        "blob": "b7786a5b83550dee50cec14f345125e54f30c42e",
+        "chars": 20051
+      },
+      {
+        "path": "test/term-bank-pipeline-completion.test.js",
+        "blob": "806241f0e59ee0875c9bdbe79d58eb7da08a6081",
+        "chars": 23565
+      },
+      {
+        "path": "test/dictionary-importer-chunk-completion.test.js",
+        "blob": "9886e3b11b4d2c9fc0a07ffa44daa862dcd51b1b",
+        "chars": 10619
+      },
+      {
+        "path": "test/zstd-term-content-initialization.test.js",
+        "blob": "2271f2744adda13d0e902281aadbae80c2f2dd3d",
+        "chars": null
+      }
+    ],
+    "sourceRecovery": {
+      "method": "Fetched exact original files from baseCommit through GitHub; applied the recorded deterministic source edits in V8 after executor disconnection.",
+      "finalFilesystemHashComparison": "Unavailable after executor outage; not claimed.",
+      "postOutageTestOnlyAmendment": "Added an explicit string[] annotation to the new producer-test events array; no runtime behavior change.",
+      "supersededUnreferencedParserTest": "ac893d7c1877eccd980e1f1d76285d290dd70cf2"
+    },
+    "parserWasm": {
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    "fixtureSha256": {
+      "check": "6b5d37366faf35c01b6768d377fa63db2744e489a261f3bee55ba867f9ce5be4",
+      "cases": "3f1842f36e29318f1c5ceeef518f22264c96f8ace845b2d514de0f1384a92317",
+      "worker": "cc04b9bf7b875c7b49b4047823b6fb638598352620994c78dd88776b0752ad5c"
+    }
+  },
+  "originalCommand": "MANABITAN_SETTLEMENT_REFERENCE=0 node --max-old-space-size=1536 test/fixtures/parser-settlement/check.mjs /workspace/scratch/da6c4dbd0097/profiling/settlement-current-default.json > /workspace/scratch/da6c4dbd0097/profiling/settlement-current-default.log 2>&1 && MANABITAN_SETTLEMENT_REFERENCE=1 node --max-old-space-size=1536 test/fixtures/parser-settlement/check.mjs /workspace/scratch/da6c4dbd0097/profiling/settlement-current-reference.json > /workspace/scratch/da6c4dbd0097/profiling/settlement-current-reference.log 2>&1",
+  "originalObservedToolResult": {
+    "exit_code": 0,
+    "wall_time_seconds": 5.452935008,
+    "chunk_id": "393f86",
+    "output": ""
+  },
+  "recoveredFiles": [
+    {
+      "name": "settlement-current-default.json",
+      "bytes": 3728,
+      "sha256": "fe5d7b04b3432e660e4006a225b195ed1596c5d631bc1cd132c50665512d1fc0",
+      "blob": "7ac0815c312bae1c4ff83a3f8e2c714996dc97f0"
+    },
+    {
+      "name": "settlement-current-reference.json",
+      "bytes": 3728,
+      "sha256": "ef130f6673f0debfa1a4baef859ee58e1c052b04f4abafff14a07f7a64143f66",
+      "blob": "d5d15f9c916619003bae6af0c5f1f3adaf4a40de"
+    },
+    {
+      "name": "settlement-current-default.log",
+      "bytes": 53,
+      "sha256": "1d0006cb5a9d581cee6842a612de18aece3235d122d8a240b18f62281f0b187d",
+      "blob": "de088bd25290d4d9cfbdaae9e002dc21e9122c77"
+    },
+    {
+      "name": "settlement-current-reference.log",
+      "bytes": 53,
+      "sha256": "1d0006cb5a9d581cee6842a612de18aece3235d122d8a240b18f62281f0b187d",
+      "blob": "de088bd25290d4d9cfbdaae9e002dc21e9122c77"
+    }
+  ],
+  "results": [
+    {
+      "file": "settlement-current-default.json",
+      "node": "v24.22.3",
+      "passed": 31,
+      "failed": 0,
+      "workers": 93,
+      "unhandled": [],
+      "all31CasesExplicitlyPassed": true
+    },
+    {
+      "file": "settlement-current-reference.json",
+      "node": "v24.22.3",
+      "passed": 31,
+      "failed": 0,
+      "workers": 62,
+      "unhandled": [],
+      "all31CasesExplicitlyPassed": true
+    }
+  ],
+  "interpretation": "This supplements the original successful command receipt with recovered exact raw JSON/log bytes, which are now durably stored. It does not change the original run's source identity or establish a rerun on subsequent lint/type-only repaired commits. No browser or performance claim.",
+  "originalUnavailableSourceComparisonRetained": true
+}

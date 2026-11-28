@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "kind": "tag-jitendex-independent-audit-handoff",
+  "runId": 46125860840,
+  "artifacts": [
+    {
+      "order": "AB",
+      "artifactId": 15257747763,
+      "bytes": 35623569,
+      "sha256": "a4744b1fe6a40d1e0ada2f2dae75d02a7fbbaecbf407dd4d89ca4a4506322c69",
+      "jobId": 140931493670,
+      "allZipMembersCrcAndSha256Verified": true
+    },
+    {
+      "order": "BA",
+      "artifactId": 15258522137,
+      "bytes": 35643387,
+      "sha256": "249424edba922d5af06a849fcfd97a16642c2316ef2cb317de81ac3f79929056",
+      "jobId": 140931493654,
+      "allZipMembersCrcAndSha256Verified": true
+    }
+  ],
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+  "scope": "Independent full-artifact audit of two completed Jitendex tag-prefetch hosts, plus separate baseline-A diagnostic phase extraction. No observations excluded, pooled or reacquired.",
+  "decision": "NO_REPLICATED_TAG_GAIN; Jitendex BA additionally fails the registered upper95 nonregression bound",
+  "files": [
+    {
+      "name": "tag-jitendex-independent-audit.json",
+      "blob": "7ac77c35418708fce7f719166ec3d679a8c23d37",
+      "sha256": "ade3e5385ce5c9e2d65127e3f6ac8d54ca00274f3bc755373779df303c71c3cc"
+    },
+    {
+      "name": "tag-jitendex-audit.py",
+      "blob": "b5464e98dc85e85bd892799618943cb3903fccfd",
+      "sha256": "741a9d4b5919446ca4cae21b11a960984929c11bca2e8389b18cefed59ea727c"
+    },
+    {
+      "name": "tag-jitendex-independent-audit.log",
+      "blob": "b281ea720fd088cc45a74714eaae76b4fd1ecd5e",
+      "sha256": "347574e363be07237bdefdb042e7750572abba884e7310557f9f9af6e5b9cce8"
+    },
+    {
+      "name": "tag-jitendex-AB-job.log",
+      "blob": "0882a25e33be6fce7f3923601eff050bb1fd596f"
+    },
+    {
+      "name": "jitendex-AB-all-observations-evidence.json",
+      "blob": "2f718c4d3f9836a98337f647c5088c47e4537aec",
+      "encoding": "JSON envelope containing gzip+base64 complete original observations, raw phases, and artifact member hashes; original/compressed SHA256/lengths included."
+    },
+    {
+      "name": "tag-jitendex-BA-job.log",
+      "blob": "3685da0842d749065560ab2083be7dc642ad7d93"
+    },
+    {
+      "name": "jitendex-BA-all-observations-evidence.json",
+      "blob": "d66a2ee0dce1ff5b4e300ec9f1802d7d1d8008c5",
+      "encoding": "JSON envelope containing gzip+base64 complete original observations, raw phases, and artifact member hashes; original/compressed SHA256/lengths included."
+    }
+  ],
+  "cells": [
+    {
+      "order": "AB",
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 1391.1499999999942,
+        "otherMedianMs": 1396.949999999997,
+        "medianPairedChangeMs": -2.3999999999941792,
+        "medianPairedChangePercent": -0.1743872445184147,
+        "equalWorkChangePercent": -2.313635194837882,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Ms": [
+          -35.10000000000582,
+          10.30000000000291
+        ],
+        "descriptiveBootstrap95Percent": [
+          -2.506940612366071,
+          0.7509446673031661
+        ],
+        "pairedMs": [
+          15.39999999999418,
+          -20.20000000001164,
+          -0.39999999999417923,
+          -50,
+          -292,
+          21.500000000029104,
+          5.2000000000116415,
+          -1.8999999999650754,
+          58.600000000034925,
+          -14.5,
+          -114.69999999995343,
+          -2.900000000023283
+        ],
+        "pairedRatios": [
+          1.0112334962433396,
+          0.985532158716508,
+          0.9997079225994931,
+          0.9643290290361707,
+          0.8309206716850029,
+          1.0155111463819562,
+          1.0037853971027237,
+          0.9986709569110485,
+          1.0431866755103814,
+          0.9898848971049878,
+          0.9246930602061879,
+          0.9978412981985832
+        ],
+        "baselineEqualWorkTotalMs": 17111.599999999948,
+        "otherEqualWorkTotalMs": 16715.70000000007
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 1380.3999999999942,
+        "otherMedianMs": 1370.9000000000233,
+        "medianPairedChangeMs": -9.499999999970896,
+        "medianPairedChangePercent": -0.6751981327178469,
+        "equalWorkChangePercent": -1.8044978048558868,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -95.00000000005821,
+          13.300000000017462
+        ],
+        "descriptiveBootstrap95Percent": [
+          -6.505958087937092,
+          0.9783008459005149
+        ],
+        "pairedMs": [
+          6.099999999976717,
+          13.300000000017462,
+          -25.09999999991851,
+          -95.00000000005821
+        ],
+        "pairedRatios": [
+          1.0044708296687017,
+          1.0097830084590051,
+          0.9820252076769413,
+          0.9349404191206291
+        ],
+        "baselineEqualWorkTotalMs": 5580.5,
+        "otherEqualWorkTotalMs": 5479.8000000000175
+      },
+      "registeredNonregression": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": true,
+        "upper95ChangeAtMost3Percent": true
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 315,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.7114110602167227,
+            "maximumPairedChangePercent": 0.08149974952795791
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -3.576652632922345,
+            "maximumPairedChangePercent": -0.7628191184322453
+          }
+        }
+      },
+      "phaseMedians": {
+        "totalImportMs": 1391.1499999999942,
+        "workerImportMs": 1362.449999999997,
+        "archiveAndIndexMs": 12,
+        "termFastPathElapsedMs": 1123.5,
+        "importDataBanksElapsedMs": 1187.5,
+        "bulkFinalizationElapsedMs": 133,
+        "step4MediaResolveMs": 33,
+        "step4MediaWriteMs": 12.5,
+        "step4MediaZipBatchReadMs": 16,
+        "step4MediaZipBatchInflateMs": 24,
+        "step4MediaZipBatchCount": 7,
+        "step4MediaZipBatchEntryCount": 236,
+        "step4MediaZipBatchRangeBytes": 7964965,
+        "step4MediaZipBatchCompressedBytes": 4913668,
+        "step4MediaZipBatchUncompressedBytes": 4992155,
+        "step4TagReadMs": 8.5,
+        "step4BulkAddTagsMetaMs": 0,
+        "step4BulkAddTermsMs": 697,
+        "commitMs": 11.900000000008731,
+        "termContentEndImportSessionMs": 3.4500000000116415,
+        "termContentEndImportSessionCloseWritableMs": 2.4500000000116415,
+        "termRecordEndImportSessionMs": 114.45000000001164,
+        "termRecordEndImportSessionFlushPendingWritesMs": 4.30000000000291,
+        "termRecordEndImportSessionAwaitQueuedWritesMs": 0.5,
+        "termRecordEndImportSessionCloseWritableMs": 110.05000000000291,
+        "termRecordLookupIndexAwaitMs": 0.5999999999767169,
+        "createIndexesMs": 0,
+        "termsVirtualTableSyncMs": 0,
+        "totalMs": 132.84999999999127,
+        "dedupCanonicalScanMs": 66.39999999999418,
+        "contentCompressMs": 488.6500000000815,
+        "contentMetadataMs": 57.699999999967986,
+        "termRecordFieldEncodeMs": 32.79999999987194,
+        "termRecordValidationMs": 28.600000000034925,
+        "dedupRecentSourceCacheMs": 11.35000000000582,
+        "parserSourceInflateMs": 704.3500000001804,
+        "parserResultCopyMs": 50.99999999996362,
+        "parserLookupIndexEncodeMs": 33.09999999994761,
+        "mediaWriteShareOfTotalPercent": 0.9013005946125219
+      }
+    },
+    {
+      "order": "BA",
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 1402.75,
+        "otherMedianMs": 1410.6000000000058,
+        "medianPairedChangeMs": 2.2000000000116415,
+        "medianPairedChangePercent": 0.15906217689463098,
+        "equalWorkChangePercent": 0.45476712280541065,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Ms": [
+          -37.24999999998545,
+          55.19999999999709
+        ],
+        "descriptiveBootstrap95Percent": [
+          -2.685098097800176,
+          3.96898045193379
+        ],
+        "pairedMs": [
+          16.000000000029104,
+          -121.5,
+          64.39999999999418,
+          -46.500000000029104,
+          -11.60000000000582,
+          -26.499999999970896,
+          25.100000000034925,
+          146.69999999995343,
+          46,
+          99.29999999998836,
+          -85.99999999994179,
+          -27.999999999941792
+        ],
+        "pairedRatios": [
+          1.0116694624754061,
+          0.9237144471651917,
+          1.0471622116440822,
+          0.9664913165669606,
+          0.9915117810624866,
+          0.9813090703907666,
+          1.0176822824938605,
+          1.0984762032623698,
+          1.0322173973945934,
+          1.074098947839703,
+          0.9408772171043976,
+          0.9798067214770357
+        ],
+        "baselineEqualWorkTotalMs": 17019.699999999983,
+        "otherEqualWorkTotalMs": 17097.100000000093
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 1412.5999999999913,
+        "otherMedianMs": 1388.7999999999884,
+        "medianPairedChangeMs": 1.3999999999941792,
+        "medianPairedChangePercent": 0.08678672282764754,
+        "equalWorkChangePercent": -1.3224337017543997,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -100.19999999995343,
+          22.5
+        ],
+        "descriptiveBootstrap95Percent": [
+          -6.858785680057212,
+          1.633156710459449
+        ],
+        "pairedMs": [
+          10.300000000017462,
+          -7.500000000029104,
+          22.5,
+          -100.19999999995343
+        ],
+        "pairedRatios": [
+          1.0071512879261386,
+          0.9945844465304143,
+          1.0163315671045945,
+          0.9314121431994279
+        ],
+        "baselineEqualWorkTotalMs": 5663.799999999959,
+        "otherEqualWorkTotalMs": 5588.899999999994
+      },
+      "registeredNonregression": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": true,
+        "upper95ChangeAtMost3Percent": false
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 329,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.7237279465139523,
+            "maximumPairedChangePercent": 0.6935070626546747
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.7361601820299934,
+            "maximumPairedChangePercent": 0.8253483154815999
+          }
+        }
+      },
+      "phaseMedians": {
+        "totalImportMs": 1402.75,
+        "workerImportMs": 1376.3500000000058,
+        "archiveAndIndexMs": 13,
+        "termFastPathElapsedMs": 1131,
+        "importDataBanksElapsedMs": 1189.5,
+        "bulkFinalizationElapsedMs": 139.5,
+        "step4MediaResolveMs": 32,
+        "step4MediaWriteMs": 12.5,
+        "step4MediaZipBatchReadMs": 15,
+        "step4MediaZipBatchInflateMs": 24.5,
+        "step4MediaZipBatchCount": 7,
+        "step4MediaZipBatchEntryCount": 236,
+        "step4MediaZipBatchRangeBytes": 7964965,
+        "step4MediaZipBatchCompressedBytes": 4913668,
+        "step4MediaZipBatchUncompressedBytes": 4992155,
+        "step4TagReadMs": 9,
+        "step4BulkAddTagsMetaMs": 0,
+        "step4BulkAddTermsMs": 696.5,
+        "commitMs": 12.400000000008731,
+        "termContentEndImportSessionMs": 4.200000000040745,
+        "termContentEndImportSessionCloseWritableMs": 2.4500000000116415,
+        "termRecordEndImportSessionMs": 120.35000000000582,
+        "termRecordEndImportSessionFlushPendingWritesMs": 4.850000000020373,
+        "termRecordEndImportSessionAwaitQueuedWritesMs": 0.45000000001164153,
+        "termRecordEndImportSessionCloseWritableMs": 114.29999999998836,
+        "termRecordLookupIndexAwaitMs": 0.5499999999883585,
+        "createIndexesMs": 0,
+        "termsVirtualTableSyncMs": 0,
+        "totalMs": 138.34999999997672,
+        "dedupCanonicalScanMs": 65.30000000003201,
+        "contentCompressMs": 486.8999999999942,
+        "contentMetadataMs": 54.15000000006694,
+        "termRecordFieldEncodeMs": 32.64999999993597,
+        "termRecordValidationMs": 24.89999999999418,
+        "dedupRecentSourceCacheMs": 9.050000000046566,
+        "parserSourceInflateMs": 713.2499999999418,
+        "parserResultCopyMs": 48.45000000002619,
+        "parserLookupIndexEncodeMs": 34.74999999994179,
+        "mediaWriteShareOfTotalPercent": 0.8607957019043821
+      }
+    }
+  ],
+  "interpretation": [
+    "No replicated meaningful tag-prefetch gain. AB passes the registered Jitendex nonregression limits; BA fails upper95≤3%. The registered tag plan has no separate numerical control threshold, and all controls are retained.",
+    "Only each host's twelve primary baseline-A observations inform the phase comparison; no host pooling, no excluded observations, no new import acquisition.",
+    "Media writes have a 12.5 ms median on each current host. The AB A observation with 229 ms mediaWrite/232 ms mediaRead and 1727 ms total remains included. The old one-off ~140 ms media-write profile is not representative for choosing a storage rewrite.",
+    "Final record-close elapsed medians are110.05/114.30 ms. Phase counters may overlap or include off-CPU time; they are not additive CPU costs or removable ceilings.",
+    "Full ZIPs remain at the identified GitHub artifacts and were downloaded/hash-verified locally. This handoff keeps all observations/raw phases in compact durable blobs; instrumented raw memory scans remain bound through the complete artifact hashes and the independently recomputed result."
+  ]
+}

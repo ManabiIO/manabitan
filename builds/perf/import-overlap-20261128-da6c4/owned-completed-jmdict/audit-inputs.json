@@ -1,0 +1,1802 @@
+{
+  "downloads": [
+    {
+      "order": "AB",
+      "artifactId": 15258970156,
+      "bytes": 35544298,
+      "sha256": "f727aaea732c2a30c95adfe51b464b5f7beebdce9e50997bbcb9dacfaad8c4fd"
+    },
+    {
+      "order": "BA",
+      "artifactId": 15258509384,
+      "bytes": 35597119,
+      "sha256": "d2e9bad9bbc098b2b2eac4819277c983b2773deb2863bade9e5d4edd2f36a6e3"
+    }
+  ],
+  "printed": [
+    {
+      "order": "AB",
+      "json": [
+        {
+          "data": {
+            "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "candidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+            "dictionary": "jmdict",
+            "expectedAddedPackageEntries": [
+              "js/dictionary/artifact-term-chunk-pipeline.js"
+            ],
+            "expectedPackageEntries": [
+              "js/dictionary/dictionary-database.js",
+              "js/dictionary/dictionary-import-session.js",
+              "js/dictionary/dictionary-importer.js",
+              "js/dictionary/term-bank-wasm-parser.js",
+              "js/dictionary/term-content-ownership.js",
+              "js/dictionary/zstd-term-content.js"
+            ],
+            "expectedWorkers": 3,
+            "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+            "flags": {},
+            "initialOrder": "AB",
+            "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+            "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+            "memorySchedule": [
+              {
+                "arm": "A",
+                "index": 1,
+                "name": "A1",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "index": 2,
+                "name": "B1",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "index": 3,
+                "name": "B2",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "index": 4,
+                "name": "A2",
+                "pair": 2
+              }
+            ],
+            "pairs": 12,
+            "schedule": [
+              {
+                "arm": "A",
+                "id": "warmup-1-A",
+                "kind": "warmup",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "id": "warmup-1-B",
+                "kind": "warmup",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "id": "warmup-2-B",
+                "kind": "warmup",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "warmup-2-A",
+                "kind": "warmup",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "pair-01-A",
+                "kind": "candidate",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "id": "pair-01-B",
+                "kind": "candidate",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "id": "pair-02-B",
+                "kind": "candidate",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "pair-02-A",
+                "kind": "candidate",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "pair-03-A",
+                "kind": "candidate",
+                "pair": 3
+              },
+              {
+                "arm": "B",
+                "id": "pair-03-B",
+                "kind": "candidate",
+                "pair": 3
+              },
+              {
+                "arm": "A",
+                "id": "control-01-A",
+                "kind": "control",
+                "pair": 1
+              },
+              {
+                "arm": "C",
+                "id": "control-01-C",
+                "kind": "control",
+                "pair": 1
+              },
+              {
+                "arm": "B",
+                "id": "pair-04-B",
+                "kind": "candidate",
+                "pair": 4
+              },
+              {
+                "arm": "A",
+                "id": "pair-04-A",
+                "kind": "candidate",
+                "pair": 4
+              },
+              {
+                "arm": "A",
+                "id": "pair-05-A",
+                "kind": "candidate",
+                "pair": 5
+              },
+              {
+                "arm": "B",
+                "id": "pair-05-B",
+                "kind": "candidate",
+                "pair": 5
+              },
+              {
+                "arm": "B",
+                "id": "pair-06-B",
+                "kind": "candidate",
+                "pair": 6
+              },
+              {
+                "arm": "A",
+                "id": "pair-06-A",
+                "kind": "candidate",
+                "pair": 6
+              },
+              {
+                "arm": "C",
+                "id": "control-02-C",
+                "kind": "control",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "control-02-A",
+                "kind": "control",
+                "pair": 2
+              },
+              {
+                "arm": "A",
+                "id": "pair-07-A",
+                "kind": "candidate",
+                "pair": 7
+              },
+              {
+                "arm": "B",
+                "id": "pair-07-B",
+                "kind": "candidate",
+                "pair": 7
+              },
+              {
+                "arm": "B",
+                "id": "pair-08-B",
+                "kind": "candidate",
+                "pair": 8
+              },
+              {
+                "arm": "A",
+                "id": "pair-08-A",
+                "kind": "candidate",
+                "pair": 8
+              },
+              {
+                "arm": "A",
+                "id": "pair-09-A",
+                "kind": "candidate",
+                "pair": 9
+              },
+              {
+                "arm": "B",
+                "id": "pair-09-B",
+                "kind": "candidate",
+                "pair": 9
+              },
+              {
+                "arm": "A",
+                "id": "control-03-A",
+                "kind": "control",
+                "pair": 3
+              },
+              {
+                "arm": "C",
+                "id": "control-03-C",
+                "kind": "control",
+                "pair": 3
+              },
+              {
+                "arm": "B",
+                "id": "pair-10-B",
+                "kind": "candidate",
+                "pair": 10
+              },
+              {
+                "arm": "A",
+                "id": "pair-10-A",
+                "kind": "candidate",
+                "pair": 10
+              },
+              {
+                "arm": "A",
+                "id": "pair-11-A",
+                "kind": "candidate",
+                "pair": 11
+              },
+              {
+                "arm": "B",
+                "id": "pair-11-B",
+                "kind": "candidate",
+                "pair": 11
+              },
+              {
+                "arm": "B",
+                "id": "pair-12-B",
+                "kind": "candidate",
+                "pair": 12
+              },
+              {
+                "arm": "A",
+                "id": "pair-12-A",
+                "kind": "candidate",
+                "pair": 12
+              },
+              {
+                "arm": "C",
+                "id": "control-04-C",
+                "kind": "control",
+                "pair": 4
+              },
+              {
+                "arm": "A",
+                "id": "control-04-A",
+                "kind": "control",
+                "pair": 4
+              }
+            ],
+            "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+            "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+            "vndbSahAllocationPolicy": null
+          },
+          "path": "registered-plan.json",
+          "sha256": "02115d4256abfeab315df4340e4010628998a46a5540be7b1d214f2fd64e1f56"
+        },
+        {
+          "data": {
+            "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+            "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+            "version": "153.0.8010.12",
+            "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+          },
+          "path": "browser-identity.json",
+          "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+        },
+        {
+          "data": [
+            {
+              "arm": "A",
+              "id": "warmup-1-A",
+              "kind": "warmup",
+              "pair": 1,
+              "totalImportMs": 667.8000000000029
+            },
+            {
+              "arm": "B",
+              "id": "warmup-1-B",
+              "kind": "warmup",
+              "pair": 1,
+              "totalImportMs": 675.8999999999942
+            },
+            {
+              "arm": "B",
+              "id": "warmup-2-B",
+              "kind": "warmup",
+              "pair": 2,
+              "totalImportMs": 671.3000000000029
+            },
+            {
+              "arm": "A",
+              "id": "warmup-2-A",
+              "kind": "warmup",
+              "pair": 2,
+              "totalImportMs": 655.1999999999971
+            },
+            {
+              "arm": "A",
+              "id": "pair-01-A",
+              "kind": "candidate",
+              "pair": 1,
+              "totalImportMs": 667.3999999999942
+            },
+            {
+              "arm": "B",
+              "id": "pair-01-B",
+              "kind": "candidate",
+              "pair": 1,
+              "totalImportMs": 769.2999999999884
+            },
+            {
+              "arm": "B",
+              "id": "pair-02-B",
+              "kind": "candidate",
+              "pair": 2,
+              "totalImportMs": 744.8000000000029
+            },
+            {
+              "arm": "A",
+              "id": "pair-02-A",
+              "kind": "candidate",
+              "pair": 2,
+              "totalImportMs": 660.0999999999913
+            },
+            {
+              "arm": "A",
+              "id": "pair-03-A",
+              "kind": "candidate",
+              "pair": 3,
+              "totalImportMs": 668
+            },
+            {
+              "arm": "B",
+              "id": "pair-03-B",
+              "kind": "candidate",
+              "pair": 3,
+              "totalImportMs": 659.3000000000029
+            },
+            {
+              "arm": "A",
+              "id": "control-01-A",
+              "kind": "control",
+              "pair": 1,
+              "totalImportMs": 667.7000000000116
+            },
+            {
+              "arm": "C",
+              "id": "control-01-C",
+              "kind": "control",
+              "pair": 1,
+              "totalImportMs": 678
+            },
+            {
+              "arm": "B",
+              "id": "pair-04-B",
+              "kind": "candidate",
+              "pair": 4,
+              "totalImportMs": 667
+            },
+            {
+              "arm": "A",
+              "id": "pair-04-A",
+              "kind": "candidate",
+              "pair": 4,
+              "totalImportMs": 665.2000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-05-A",
+              "kind": "candidate",
+              "pair": 5,
+              "totalImportMs": 659.6000000000058
+            },
+            {
+              "arm": "B",
+              "id": "pair-05-B",
+              "kind": "candidate",
+              "pair": 5,
+              "totalImportMs": 668.1999999999825
+            },
+            {
+              "arm": "B",
+              "id": "pair-06-B",
+              "kind": "candidate",
+              "pair": 6,
+              "totalImportMs": 652.2000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-06-A",
+              "kind": "candidate",
+              "pair": 6,
+              "totalImportMs": 667.3999999999942
+            },
+            {
+              "arm": "C",
+              "id": "control-02-C",
+              "kind": "control",
+              "pair": 2,
+              "totalImportMs": 670.5
+            },
+            {
+              "arm": "A",
+              "id": "control-02-A",
+              "kind": "control",
+              "pair": 2,
+              "totalImportMs": 646.8999999999942
+            },
+            {
+              "arm": "A",
+              "id": "pair-07-A",
+              "kind": "candidate",
+              "pair": 7,
+              "totalImportMs": 665.6000000000058
+            },
+            {
+              "arm": "B",
+              "id": "pair-07-B",
+              "kind": "candidate",
+              "pair": 7,
+              "totalImportMs": 661.4000000000233
+            },
+            {
+              "arm": "B",
+              "id": "pair-08-B",
+              "kind": "candidate",
+              "pair": 8,
+              "totalImportMs": 663.2000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-08-A",
+              "kind": "candidate",
+              "pair": 8,
+              "totalImportMs": 665.7000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-09-A",
+              "kind": "candidate",
+              "pair": 9,
+              "totalImportMs": 660.2999999999884
+            },
+            {
+              "arm": "B",
+              "id": "pair-09-B",
+              "kind": "candidate",
+              "pair": 9,
+              "totalImportMs": 668.6000000000058
+            },
+            {
+              "arm": "A",
+              "id": "control-03-A",
+              "kind": "control",
+              "pair": 3,
+              "totalImportMs": 657.2999999999884
+            },
+            {
+              "arm": "C",
+              "id": "control-03-C",
+              "kind": "control",
+              "pair": 3,
+              "totalImportMs": 668.9000000000233
+            },
+            {
+              "arm": "B",
+              "id": "pair-10-B",
+              "kind": "candidate",
+              "pair": 10,
+              "totalImportMs": 673.6000000000058
+            },
+            {
+              "arm": "A",
+              "id": "pair-10-A",
+              "kind": "candidate",
+              "pair": 10,
+              "totalImportMs": 667.6000000000058
+            },
+            {
+              "arm": "A",
+              "id": "pair-11-A",
+              "kind": "candidate",
+              "pair": 11,
+              "totalImportMs": 679.5
+            },
+            {
+              "arm": "B",
+              "id": "pair-11-B",
+              "kind": "candidate",
+              "pair": 11,
+              "totalImportMs": 670.1999999999534
+            },
+            {
+              "arm": "B",
+              "id": "pair-12-B",
+              "kind": "candidate",
+              "pair": 12,
+              "totalImportMs": 642.5999999999767
+            },
+            {
+              "arm": "A",
+              "id": "pair-12-A",
+              "kind": "candidate",
+              "pair": 12,
+              "totalImportMs": 719.2000000000116
+            },
+            {
+              "arm": "C",
+              "id": "control-04-C",
+              "kind": "control",
+              "pair": 4,
+              "totalImportMs": 661.5
+            },
+            {
+              "arm": "A",
+              "id": "control-04-A",
+              "kind": "control",
+              "pair": 4,
+              "totalImportMs": 667.5999999999767
+            }
+          ],
+          "path": "observations.json",
+          "sha256": "2f488133e1189b54f4d97d0359b69ba18784351362e59a18867793f09de14998"
+        },
+        {
+          "data": {
+            "candidateVsBaseline": {
+              "count": 12,
+              "descriptiveBootstrap95Percent": [
+                -1.3355243156104035,
+                1.2804124446066378
+              ],
+              "equalWorkChangePercent": 1.1782837824394043,
+              "fasterPairs": 6,
+              "medianPairedChangePercent": -0.05247461495141437,
+              "ratios": [
+                1.1526820497452728,
+                1.1283138918345899,
+                0.986976047904196,
+                1.0027059530967954,
+                1.0130382049726754,
+                0.9772250524423394,
+                0.9936899038461802,
+                0.9962445546041762,
+                1.0125700439194572,
+                1.0089874176153384,
+                0.9863134657835959,
+                0.8934927697441133
+              ],
+              "worstPairChangePercent": 15.268204974527277
+            },
+            "identicalCodeControl": {
+              "count": 4,
+              "descriptiveBootstrap95Percent": [
+                -0.9137207908892941,
+                3.648168186737677
+              ],
+              "equalWorkChangePercent": 1.4927069520762615,
+              "fasterPairs": 1,
+              "medianPairedChangePercent": 1.6537021655703033,
+              "ratios": [
+                1.0154260895611624,
+                1.0364816818673768,
+                1.0176479537502436,
+                0.9908627920911071
+              ],
+              "worstPairChangePercent": 3.648168186737677
+            },
+            "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+            "memoryPassed": true,
+            "status": "correctness-memory-passed",
+            "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+            "timingScope": "File input change through post-UI completion; fresh profile per observation"
+          },
+          "path": "analysis.json",
+          "sha256": "5253d57fe54686699901231b1b4371734483cc88b435cd0f97290139a5eaf203"
+        },
+        {
+          "data": {
+            "authoritativeTiming": false,
+            "dictionary": "jmdict",
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 0.03921728412668024,
+                "medianPairedChangePercent": -0.0075472794793252085
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 0.08563462037611824,
+                "medianPairedChangePercent": 0.06026564566670167
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 66,
+                "arm": "A",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 1,
+                "confirmedExitedZombieObservationCount": 9,
+                "fullyContainedImportSampleCount": 7,
+                "index": 1,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 773312,
+                "maxSampledPssKiB": 1002961,
+                "maximumCoveredSampleGapMs": 131.215499,
+                "name": "A1",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 9,
+                "pair": 1,
+                "postImportBracketGapMs": 78.052077,
+                "preImportBracketGapMs": 33.061253,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 9,
+                "samplesWithUnavailableSmaps": 9,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 7,
+                "stableFullyReadTreeSampleCount": 9,
+                "windowDurationMs": 866.568076,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860144414,
+                    "event": "start",
+                    "monotonicNs": "308839628954"
+                  },
+                  {
+                    "epochMs": 1795860145281,
+                    "event": "end",
+                    "monotonicNs": "309706197030"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 61,
+                "arm": "B",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 7,
+                "index": 2,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 772892,
+                "maxSampledPssKiB": 1003311,
+                "maximumCoveredSampleGapMs": 148.633371,
+                "name": "B1",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 7,
+                "pair": 1,
+                "postImportBracketGapMs": 1.213832,
+                "preImportBracketGapMs": 21.995681,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 7,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 7,
+                "stableFullyReadTreeSampleCount": 7,
+                "windowDurationMs": 794.919909,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860151306,
+                    "event": "start",
+                    "monotonicNs": "315731812167"
+                  },
+                  {
+                    "epochMs": 1795860152101,
+                    "event": "end",
+                    "monotonicNs": "316526732076"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 63,
+                "arm": "B",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 8,
+                "index": 3,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 785676,
+                "maxSampledPssKiB": 1017983,
+                "maximumCoveredSampleGapMs": 122.43765,
+                "name": "B2",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 8,
+                "pair": 2,
+                "postImportBracketGapMs": 0.761263,
+                "preImportBracketGapMs": 18.627057,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 8,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 8,
+                "stableFullyReadTreeSampleCount": 8,
+                "windowDurationMs": 822.250204,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860158113,
+                    "event": "start",
+                    "monotonicNs": "322538643070"
+                  },
+                  {
+                    "epochMs": 1795860158935,
+                    "event": "end",
+                    "monotonicNs": "323360893274"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 63,
+                "arm": "A",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 8,
+                "index": 4,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 785368,
+                "maxSampledPssKiB": 1017112,
+                "maximumCoveredSampleGapMs": 121.205164,
+                "name": "A2",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 8,
+                "pair": 2,
+                "postImportBracketGapMs": 9.956459,
+                "preImportBracketGapMs": 15.972387,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 8,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 8,
+                "stableFullyReadTreeSampleCount": 8,
+                "windowDurationMs": 816.653639,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860164945,
+                    "event": "start",
+                    "monotonicNs": "329370901980"
+                  },
+                  {
+                    "epochMs": 1795860165762,
+                    "event": "end",
+                    "monotonicNs": "330187555619"
+                  }
+                ]
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 773312,
+                  "candidate": 772892,
+                  "changePercent": -0.05431184308533066
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1002961,
+                  "candidate": 1003311,
+                  "changePercent": 0.0348966709572851
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 785368,
+                  "candidate": 785676,
+                  "changePercent": 0.03921728412668024
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1017112,
+                  "candidate": 1017983,
+                  "changePercent": 0.08563462037611824
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true,
+            "replication": 1,
+            "schemaVersion": 1
+          },
+          "path": "memory/memory-comparison.json",
+          "sha256": "b67c51dfa15b4dd3ccd2bb1955ecd906618c62ac6ca1acbd6039f0c279be4fd8"
+        },
+        {
+          "data": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 0.03921728412668024,
+                "medianPairedChangePercent": -0.0075472794793252085
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 0.08563462037611824,
+                "medianPairedChangePercent": 0.06026564566670167
+              }
+            },
+            "observations": 4,
+            "passesProspectiveMemoryScreen": true,
+            "rawScanCount": 253,
+            "schemaVersion": 1
+          },
+          "path": "memory/memory-audit.json",
+          "sha256": "d10635886ed2ed0d3cf3132e5a27069ae82113198ff9ab9439ac59900b4e5509"
+        },
+        {
+          "data": [],
+          "path": "memory/semantic-failures.json",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        }
+      ]
+    },
+    {
+      "order": "BA",
+      "json": [
+        {
+          "data": {
+            "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "candidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+            "dictionary": "jmdict",
+            "expectedAddedPackageEntries": [
+              "js/dictionary/artifact-term-chunk-pipeline.js"
+            ],
+            "expectedPackageEntries": [
+              "js/dictionary/dictionary-database.js",
+              "js/dictionary/dictionary-import-session.js",
+              "js/dictionary/dictionary-importer.js",
+              "js/dictionary/term-bank-wasm-parser.js",
+              "js/dictionary/term-content-ownership.js",
+              "js/dictionary/zstd-term-content.js"
+            ],
+            "expectedWorkers": 3,
+            "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+            "flags": {},
+            "initialOrder": "BA",
+            "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+            "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+            "memorySchedule": [
+              {
+                "arm": "B",
+                "index": 1,
+                "name": "B1",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "index": 2,
+                "name": "A1",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "index": 3,
+                "name": "A2",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "index": 4,
+                "name": "B2",
+                "pair": 2
+              }
+            ],
+            "pairs": 12,
+            "schedule": [
+              {
+                "arm": "B",
+                "id": "warmup-1-B",
+                "kind": "warmup",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "warmup-1-A",
+                "kind": "warmup",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "warmup-2-A",
+                "kind": "warmup",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "id": "warmup-2-B",
+                "kind": "warmup",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "id": "pair-01-B",
+                "kind": "candidate",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "pair-01-A",
+                "kind": "candidate",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "pair-02-A",
+                "kind": "candidate",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "id": "pair-02-B",
+                "kind": "candidate",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "id": "pair-03-B",
+                "kind": "candidate",
+                "pair": 3
+              },
+              {
+                "arm": "A",
+                "id": "pair-03-A",
+                "kind": "candidate",
+                "pair": 3
+              },
+              {
+                "arm": "C",
+                "id": "control-01-C",
+                "kind": "control",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "control-01-A",
+                "kind": "control",
+                "pair": 1
+              },
+              {
+                "arm": "A",
+                "id": "pair-04-A",
+                "kind": "candidate",
+                "pair": 4
+              },
+              {
+                "arm": "B",
+                "id": "pair-04-B",
+                "kind": "candidate",
+                "pair": 4
+              },
+              {
+                "arm": "B",
+                "id": "pair-05-B",
+                "kind": "candidate",
+                "pair": 5
+              },
+              {
+                "arm": "A",
+                "id": "pair-05-A",
+                "kind": "candidate",
+                "pair": 5
+              },
+              {
+                "arm": "A",
+                "id": "pair-06-A",
+                "kind": "candidate",
+                "pair": 6
+              },
+              {
+                "arm": "B",
+                "id": "pair-06-B",
+                "kind": "candidate",
+                "pair": 6
+              },
+              {
+                "arm": "A",
+                "id": "control-02-A",
+                "kind": "control",
+                "pair": 2
+              },
+              {
+                "arm": "C",
+                "id": "control-02-C",
+                "kind": "control",
+                "pair": 2
+              },
+              {
+                "arm": "B",
+                "id": "pair-07-B",
+                "kind": "candidate",
+                "pair": 7
+              },
+              {
+                "arm": "A",
+                "id": "pair-07-A",
+                "kind": "candidate",
+                "pair": 7
+              },
+              {
+                "arm": "A",
+                "id": "pair-08-A",
+                "kind": "candidate",
+                "pair": 8
+              },
+              {
+                "arm": "B",
+                "id": "pair-08-B",
+                "kind": "candidate",
+                "pair": 8
+              },
+              {
+                "arm": "B",
+                "id": "pair-09-B",
+                "kind": "candidate",
+                "pair": 9
+              },
+              {
+                "arm": "A",
+                "id": "pair-09-A",
+                "kind": "candidate",
+                "pair": 9
+              },
+              {
+                "arm": "C",
+                "id": "control-03-C",
+                "kind": "control",
+                "pair": 3
+              },
+              {
+                "arm": "A",
+                "id": "control-03-A",
+                "kind": "control",
+                "pair": 3
+              },
+              {
+                "arm": "A",
+                "id": "pair-10-A",
+                "kind": "candidate",
+                "pair": 10
+              },
+              {
+                "arm": "B",
+                "id": "pair-10-B",
+                "kind": "candidate",
+                "pair": 10
+              },
+              {
+                "arm": "B",
+                "id": "pair-11-B",
+                "kind": "candidate",
+                "pair": 11
+              },
+              {
+                "arm": "A",
+                "id": "pair-11-A",
+                "kind": "candidate",
+                "pair": 11
+              },
+              {
+                "arm": "A",
+                "id": "pair-12-A",
+                "kind": "candidate",
+                "pair": 12
+              },
+              {
+                "arm": "B",
+                "id": "pair-12-B",
+                "kind": "candidate",
+                "pair": 12
+              },
+              {
+                "arm": "A",
+                "id": "control-04-A",
+                "kind": "control",
+                "pair": 4
+              },
+              {
+                "arm": "C",
+                "id": "control-04-C",
+                "kind": "control",
+                "pair": 4
+              }
+            ],
+            "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+            "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+            "vndbSahAllocationPolicy": null
+          },
+          "path": "registered-plan.json",
+          "sha256": "6400f19c3afd340f9ce849c2e1ff2bde3bca9de767ed578af7589aa113e50b8d"
+        },
+        {
+          "data": {
+            "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+            "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+            "version": "153.0.8010.12",
+            "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+          },
+          "path": "browser-identity.json",
+          "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+        },
+        {
+          "data": [
+            {
+              "arm": "B",
+              "id": "warmup-1-B",
+              "kind": "warmup",
+              "pair": 1,
+              "totalImportMs": 853.6999999999971
+            },
+            {
+              "arm": "A",
+              "id": "warmup-1-A",
+              "kind": "warmup",
+              "pair": 1,
+              "totalImportMs": 816.6999999999971
+            },
+            {
+              "arm": "A",
+              "id": "warmup-2-A",
+              "kind": "warmup",
+              "pair": 2,
+              "totalImportMs": 863.2999999999884
+            },
+            {
+              "arm": "B",
+              "id": "warmup-2-B",
+              "kind": "warmup",
+              "pair": 2,
+              "totalImportMs": 965.2999999999884
+            },
+            {
+              "arm": "B",
+              "id": "pair-01-B",
+              "kind": "candidate",
+              "pair": 1,
+              "totalImportMs": 896.6999999999971
+            },
+            {
+              "arm": "A",
+              "id": "pair-01-A",
+              "kind": "candidate",
+              "pair": 1,
+              "totalImportMs": 856.8999999999942
+            },
+            {
+              "arm": "A",
+              "id": "pair-02-A",
+              "kind": "candidate",
+              "pair": 2,
+              "totalImportMs": 903.1999999999971
+            },
+            {
+              "arm": "B",
+              "id": "pair-02-B",
+              "kind": "candidate",
+              "pair": 2,
+              "totalImportMs": 893.1000000000058
+            },
+            {
+              "arm": "B",
+              "id": "pair-03-B",
+              "kind": "candidate",
+              "pair": 3,
+              "totalImportMs": 813.8999999999942
+            },
+            {
+              "arm": "A",
+              "id": "pair-03-A",
+              "kind": "candidate",
+              "pair": 3,
+              "totalImportMs": 860
+            },
+            {
+              "arm": "C",
+              "id": "control-01-C",
+              "kind": "control",
+              "pair": 1,
+              "totalImportMs": 832
+            },
+            {
+              "arm": "A",
+              "id": "control-01-A",
+              "kind": "control",
+              "pair": 1,
+              "totalImportMs": 827.2999999999884
+            },
+            {
+              "arm": "A",
+              "id": "pair-04-A",
+              "kind": "candidate",
+              "pair": 4,
+              "totalImportMs": 827.5
+            },
+            {
+              "arm": "B",
+              "id": "pair-04-B",
+              "kind": "candidate",
+              "pair": 4,
+              "totalImportMs": 832.1000000000058
+            },
+            {
+              "arm": "B",
+              "id": "pair-05-B",
+              "kind": "candidate",
+              "pair": 5,
+              "totalImportMs": 844.5
+            },
+            {
+              "arm": "A",
+              "id": "pair-05-A",
+              "kind": "candidate",
+              "pair": 5,
+              "totalImportMs": 819.5
+            },
+            {
+              "arm": "A",
+              "id": "pair-06-A",
+              "kind": "candidate",
+              "pair": 6,
+              "totalImportMs": 860.3000000000175
+            },
+            {
+              "arm": "B",
+              "id": "pair-06-B",
+              "kind": "candidate",
+              "pair": 6,
+              "totalImportMs": 828.1999999999825
+            },
+            {
+              "arm": "A",
+              "id": "control-02-A",
+              "kind": "control",
+              "pair": 2,
+              "totalImportMs": 832.8999999999942
+            },
+            {
+              "arm": "C",
+              "id": "control-02-C",
+              "kind": "control",
+              "pair": 2,
+              "totalImportMs": 841.0999999999767
+            },
+            {
+              "arm": "B",
+              "id": "pair-07-B",
+              "kind": "candidate",
+              "pair": 7,
+              "totalImportMs": 853.2000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-07-A",
+              "kind": "candidate",
+              "pair": 7,
+              "totalImportMs": 845.7000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-08-A",
+              "kind": "candidate",
+              "pair": 8,
+              "totalImportMs": 841.3999999999942
+            },
+            {
+              "arm": "B",
+              "id": "pair-08-B",
+              "kind": "candidate",
+              "pair": 8,
+              "totalImportMs": 873.2999999999884
+            },
+            {
+              "arm": "B",
+              "id": "pair-09-B",
+              "kind": "candidate",
+              "pair": 9,
+              "totalImportMs": 832.8999999999651
+            },
+            {
+              "arm": "A",
+              "id": "pair-09-A",
+              "kind": "candidate",
+              "pair": 9,
+              "totalImportMs": 829
+            },
+            {
+              "arm": "C",
+              "id": "control-03-C",
+              "kind": "control",
+              "pair": 3,
+              "totalImportMs": 827.3000000000466
+            },
+            {
+              "arm": "A",
+              "id": "control-03-A",
+              "kind": "control",
+              "pair": 3,
+              "totalImportMs": 824.7000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-10-A",
+              "kind": "candidate",
+              "pair": 10,
+              "totalImportMs": 835
+            },
+            {
+              "arm": "B",
+              "id": "pair-10-B",
+              "kind": "candidate",
+              "pair": 10,
+              "totalImportMs": 895.4000000000233
+            },
+            {
+              "arm": "B",
+              "id": "pair-11-B",
+              "kind": "candidate",
+              "pair": 11,
+              "totalImportMs": 860.2000000000116
+            },
+            {
+              "arm": "A",
+              "id": "pair-11-A",
+              "kind": "candidate",
+              "pair": 11,
+              "totalImportMs": 815.0999999999767
+            },
+            {
+              "arm": "A",
+              "id": "pair-12-A",
+              "kind": "candidate",
+              "pair": 12,
+              "totalImportMs": 818
+            },
+            {
+              "arm": "B",
+              "id": "pair-12-B",
+              "kind": "candidate",
+              "pair": 12,
+              "totalImportMs": 841.2999999999884
+            },
+            {
+              "arm": "A",
+              "id": "control-04-A",
+              "kind": "control",
+              "pair": 4,
+              "totalImportMs": 823.6000000000349
+            },
+            {
+              "arm": "C",
+              "id": "control-04-C",
+              "kind": "control",
+              "pair": 4,
+              "totalImportMs": 853
+            }
+          ],
+          "path": "observations.json",
+          "sha256": "fe48f2215982f9c5c5fa02f5e35694c5533fae1e0a3883a1d50fc9a129cb8fe3"
+        },
+        {
+          "data": {
+            "candidateVsBaseline": {
+              "count": 12,
+              "descriptiveBootstrap95Percent": [
+                -0.3238999573707324,
+                4.217974765617738
+              ],
+              "equalWorkChangePercent": 1.515091577989458,
+              "fasterPairs": 3,
+              "medianPairedChangePercent": 1.867625031331377,
+              "ratios": [
+                1.0464464931730695,
+                0.9888175376439423,
+                0.9463953488372026,
+                1.005558912386714,
+                1.0305064063453324,
+                0.9626874346157919,
+                1.0088683930471798,
+                1.037913002139285,
+                1.004704463208643,
+                1.0723353293413453,
+                1.055330634278047,
+                1.028484107579448
+              ],
+              "worstPairChangePercent": 7.2335329341345345
+            },
+            "identicalCodeControl": {
+              "count": 4,
+              "descriptiveBootstrap95Percent": [
+                0.315266157394789,
+                3.5696940262219368
+              ],
+              "equalWorkChangePercent": 1.3571104730238481,
+              "fasterPairs": 0,
+              "medianPairedChangePercent": 0.7763125426693218,
+              "ratios": [
+                1.005681131391287,
+                1.0098451194620994,
+                1.003152661573948,
+                1.0356969402622194
+              ],
+              "worstPairChangePercent": 3.5696940262219368
+            },
+            "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+            "memoryPassed": true,
+            "status": "correctness-memory-passed",
+            "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+            "timingScope": "File input change through post-UI completion; fresh profile per observation"
+          },
+          "path": "analysis.json",
+          "sha256": "306ee96deb2770bc594fe3b0158a0550dd1a75394668c8392366818f80b287a9"
+        },
+        {
+          "data": {
+            "authoritativeTiming": false,
+            "dictionary": "jmdict",
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 3.8415559575043057,
+                "medianPairedChangePercent": 2.023778996046155
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 2.6634811960259963,
+                "medianPairedChangePercent": 1.6514838583507552
+              }
+            },
+            "observations": [
+              {
+                "allObservedSampleCount": 80,
+                "arm": "B",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 14,
+                "index": 1,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 799148,
+                "maxSampledPssKiB": 1030458,
+                "maximumCoveredSampleGapMs": 143.033668,
+                "name": "B1",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 14,
+                "pair": 1,
+                "postImportBracketGapMs": 7.394099,
+                "preImportBracketGapMs": 21.895401,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 14,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 14,
+                "stableFullyReadTreeSampleCount": 14,
+                "windowDurationMs": 1473.175926,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860229696,
+                    "event": "start",
+                    "monotonicNs": "390826581425"
+                  },
+                  {
+                    "epochMs": 1795860231169,
+                    "event": "end",
+                    "monotonicNs": "392299757351"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 72,
+                "arm": "A",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 8,
+                "index": 2,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 769584,
+                "maxSampledPssKiB": 1003724,
+                "maximumCoveredSampleGapMs": 149.134527,
+                "name": "A1",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 10,
+                "pair": 1,
+                "postImportBracketGapMs": 79.886615,
+                "preImportBracketGapMs": 38.866122,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 10,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 8,
+                "stableFullyReadTreeSampleCount": 10,
+                "windowDurationMs": 1082.007674,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860239118,
+                    "event": "start",
+                    "monotonicNs": "400248634291"
+                  },
+                  {
+                    "epochMs": 1795860240200,
+                    "event": "end",
+                    "monotonicNs": "401330641965"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 72,
+                "arm": "A",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 11,
+                "index": 3,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 786400,
+                "maxSampledPssKiB": 1015815,
+                "maximumCoveredSampleGapMs": 159.255654,
+                "name": "A2",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 11,
+                "pair": 2,
+                "postImportBracketGapMs": 9.489381,
+                "preImportBracketGapMs": 7.223894,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 11,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 11,
+                "stableFullyReadTreeSampleCount": 11,
+                "windowDurationMs": 1231.243148,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860248063,
+                    "event": "start",
+                    "monotonicNs": "409193856021"
+                  },
+                  {
+                    "epochMs": 1795860249294,
+                    "event": "end",
+                    "monotonicNs": "410425099169"
+                  }
+                ]
+              },
+              {
+                "allObservedSampleCount": 79,
+                "arm": "B",
+                "authoritativeTiming": false,
+                "benchmarkExitCode": 0,
+                "confirmedExitedZombieIdentityCount": 0,
+                "confirmedExitedZombieObservationCount": 0,
+                "fullyContainedImportSampleCount": 8,
+                "index": 4,
+                "limitations": [
+                  "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+                  "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+                  "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+                  "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+                  "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+                ],
+                "maxSampledPrivateKiB": 788020,
+                "maxSampledPssKiB": 1022311,
+                "maximumCoveredSampleGapMs": 163.507688,
+                "name": "B2",
+                "observedProcessCountRange": [
+                  9,
+                  9
+                ],
+                "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+                "overlappingImportSampleCount": 9,
+                "pair": 2,
+                "postImportBracketGapMs": 10.234097,
+                "preImportBracketGapMs": 34.902413,
+                "qualificationFailures": [],
+                "qualifiedForWholeTreePss": true,
+                "sampleCount": 9,
+                "samplesWithUnavailableSmaps": 0,
+                "samplesWithUnreadableAddressSpaces": 0,
+                "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+                "schemaVersion": 3,
+                "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+                "stableFullyReadImportSampleCount": 8,
+                "stableFullyReadTreeSampleCount": 9,
+                "windowDurationMs": 1080.162562,
+                "windowMarkers": [
+                  {
+                    "epochMs": 1795860258635,
+                    "event": "start",
+                    "monotonicNs": "419765711371"
+                  },
+                  {
+                    "epochMs": 1795860259715,
+                    "event": "end",
+                    "monotonicNs": "420845873933"
+                  }
+                ]
+              }
+            ],
+            "pairs": [
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 769584,
+                  "candidate": 799148,
+                  "changePercent": 3.8415559575043057
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1003724,
+                  "candidate": 1030458,
+                  "changePercent": 2.6634811960259963
+                },
+                "pair": 1,
+                "qualified": true
+              },
+              {
+                "maxSampledPrivateKiB": {
+                  "baseline": 786400,
+                  "candidate": 788020,
+                  "changePercent": 0.20600203458800426
+                },
+                "maxSampledPssKiB": {
+                  "baseline": 1015815,
+                  "candidate": 1022311,
+                  "changePercent": 0.639486520675514
+                },
+                "pair": 2,
+                "qualified": true
+              }
+            ],
+            "passesProspectiveMemoryScreen": true,
+            "replication": 2,
+            "schemaVersion": 1
+          },
+          "path": "memory/memory-comparison.json",
+          "sha256": "9364a66b761154433ccd378b61686f1ef5c883b8de7aa7654da19fcca4bc1c21"
+        },
+        {
+          "data": {
+            "everyObservationQualified": true,
+            "metrics": {
+              "maxSampledPrivateKiB": {
+                "maximumPairedChangePercent": 3.8415559575043057,
+                "medianPairedChangePercent": 2.023778996046155
+              },
+              "maxSampledPssKiB": {
+                "maximumPairedChangePercent": 2.6634811960259963,
+                "medianPairedChangePercent": 1.6514838583507552
+              }
+            },
+            "observations": 4,
+            "passesProspectiveMemoryScreen": true,
+            "rawScanCount": 303,
+            "schemaVersion": 1
+          },
+          "path": "memory/memory-audit.json",
+          "sha256": "bc78aa9c4eb07e94beacf62124f2770a4a0edf9075abb5a1e8a5e524d1fc44bc"
+        },
+        {
+          "data": [],
+          "path": "memory/semantic-failures.json",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        }
+      ]
+    }
+  ]
+}

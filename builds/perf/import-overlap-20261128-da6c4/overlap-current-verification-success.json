@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "overlap-current-exact-source-full-verification",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46132124178,
+  "jobId": 140939372876,
+  "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46132124178/job/140939372876",
+  "qualificationCommit": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+  "qualificationTree": "2b965955c18fdee1b529fd907ac4d38f8f8aa420",
+  "cleanProductCommit": "54844293b8ea82350531b8da92336b325d5ab7ec",
+  "cleanProductTree": "5bff2fbe75d2f2ee747a0f4e4af90ffc576573c3",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "job": {
+    "id": 140939372876,
+    "name": "Verify import ownership and build",
+    "status": "completed",
+    "conclusion": "success",
+    "run_id": 46132124178,
+    "logs_url": null,
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run ./.github/actions/setup",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Check JavaScript",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Check runtime and test types",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run the complete unit suite",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Verify every build target",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Verify qualification identity and receipt gates",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Post Run ./.github/actions/setup",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15
+      },
+      {
+        "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17
+      }
+    ]
+  },
+  "completeDecodedLog": {
+    "blob": "14f99b9c2f36d873211e7882b03529b80810802b",
+    "characters": 819116
+  },
+  "results": {
+    "javascriptLint": "passed",
+    "runtimeAndTestTypes": "passed",
+    "unitFilesPassed": 674,
+    "unitTestsPassed": 15186,
+    "unitTestsSkipped": 47,
+    "unitTestsTotal": 15233,
+    "allBuildTargetValidation": {
+      "passed": true,
+      "command": "node ./dev/bin/build.js --dryRun --all",
+      "scope": "Dry-run validation of all build targets; not a claim that seven release packages were emitted by this gate."
+    },
+    "pythonReceiptGates": {
+      "passed": 42,
+      "failed": 0
+    }
+  },
+  "scope": "Functional/static verification on the exact qualifier source. Browser performance cells are separate and must satisfy their own frozen gates. No local repetition or performance claim."
+}
