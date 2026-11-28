@@ -1,0 +1,98 @@
+name: Composite local hints component screen c563d487
+
+on:
+  push:
+    branches: [perf/composite-hints-screen-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: ${{ matrix.dictionary }} fixed component cohort
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      BASE_ROOT: ${{ github.workspace }}/../hints-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../hints-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/composite-hints-screen
+    steps:
+      - name: Check out the experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the frozen baseline dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install the pinned compiler and verify baseline artifacts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npm run build:dictionary-wasm -- --check
+          mkdir -p "$OUTPUT_ROOT"
+          node --version
+          uname -a
+          lscpu
+
+      - name: Prepare isolated source and rebuilt candidate worktrees
+        run: |
+          git fetch --no-tags origin "$BASE_SHA"
+          git worktree add --detach "$BASE_ROOT" "$BASE_SHA"
+          git worktree add --detach "$CANDIDATE_ROOT" "$BASE_SHA"
+          cp -a node_modules "$BASE_ROOT/node_modules"
+          cp -a node_modules "$CANDIDATE_ROOT/node_modules"
+          npm --prefix "$BASE_ROOT" run build:libs
+          git -C "$CANDIDATE_ROOT" apply --check "$GITHUB_WORKSPACE/dev/perf/composite-hints-c563d487/candidate.patch"
+          git -C "$CANDIDATE_ROOT" apply "$GITHUB_WORKSPACE/dev/perf/composite-hints-c563d487/candidate.patch"
+          npm --prefix "$CANDIDATE_ROOT" run build:dictionary-wasm -- --write
+          npm --prefix "$CANDIDATE_ROOT" run build:libs
+          npm --prefix "$CANDIDATE_ROOT" run build:dictionary-wasm -- --check
+          git -C "$CANDIDATE_ROOT" diff --binary > "$OUTPUT_ROOT/rebuilt-candidate.diff"
+          python3 dev/perf/composite-hints-c563d487/codegen.py "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT"
+
+      - name: Check adversarial and cross-bank output parity
+        run: |
+          node dev/perf/composite-hints-c563d487/smoke.mjs "$BASE_ROOT" > "$OUTPUT_ROOT/smoke-baseline.json"
+          node dev/perf/composite-hints-c563d487/smoke.mjs "$CANDIDATE_ROOT" > "$OUTPUT_ROOT/smoke-candidate.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['OUTPUT_ROOT'])
+          results = [json.loads((root / f'smoke-{arm}.json').read_text()) for arm in ['baseline', 'candidate']]
+          assert results[0]['results'] == results[1]['results']
+          print('HINTS_SMOKE ' + json.dumps({'validCases': results[0]['validCases'], 'malformedCases': results[0]['malformedCases'], 'equal': True}, separators=(',', ':')))
+          PY
+
+      - name: Run targeted parser and field-validation tests
+        if: matrix.dictionary == 'jmdict'
+        working-directory: ${{ env.CANDIDATE_ROOT }}
+        run: npx vitest run test/term-bank-wasm-parser.test.js test/dictionary-importer-term-bank-field-validation.test.js test/term-bank-experiments.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js --maxWorkers=2
+
+      - name: Fetch and integrity-check only the locked selected dictionary
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY]);"
+
+      - name: Compare every native metadata word and synthetic partial error state
+        run: node --max-old-space-size=512 dev/perf/composite-hints-c563d487/native-oracle.mjs --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" --output "$OUTPUT_ROOT" --dictionary "$DICTIONARY" --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache"
+
+      - name: Run the complete fixed four-pair cohort and four identical-code controls
+        run: python3 dev/perf/composite-hints-c563d487/run.py "$DICTIONARY" "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT"
+
+      - name: Preserve all observations, failures, rebuilt source, and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: composite-hints-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: builds/composite-hints-screen
+          if-no-files-found: warn
+          retention-days: 14
