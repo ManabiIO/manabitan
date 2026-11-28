@@ -1,0 +1,80 @@
+{
+  "format": 1,
+  "status": "Prospective single-candidate component screen; no timing has run for this candidate.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "candidateSourceSha256": "31f1f3f0e56fdbf82da5ba721a756c1412341f663e6fc5ad4f1634caafcd19ba",
+  "baselineWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "candidateWasmSha256": "1d0990753b18591d0befd2be35e6fc5a7ba9ae93e48e883184d13f01fe0526e8",
+  "compiler": "LLVM/LLD 21.1.8; both full production-module hashes mandatory",
+  "mechanism": "Exactly one #pragma clang loop unroll(disable) before the existing eight-lane inner CRC loop; no other source change.",
+  "staticLayoutDelta": "32-byte state initializer materialized; static addresses and initial stack/heap base shift by 32 bytes. Same memory limits, lane count, tables, threshold, fold and tail.",
+  "fixture": {
+    "dictionary": "jmdict",
+    "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "archiveBytes": 15645766,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "banks": 53,
+    "groups": 12,
+    "rows": 528299,
+    "compressedBytes": 15632849,
+    "decodedBytes": 171617523,
+    "workers": 3,
+    "deferredCrcGroups": 0
+  },
+  "correctness": {
+    "separateProcess": true,
+    "testExportVectors": 837,
+    "productionSourceCases": 157,
+    "fullProductionGroups": 12,
+    "fullOutputAndSpanDigests": true,
+    "sourceInputPreserved": true,
+    "corpusWasmCapacitiesMustAgree": true,
+    "standaloneDsFormatRecordsNotTested": 14
+  },
+  "performance": {
+    "nodeVersion": "22.22.0",
+    "engine": "default, no V8 flags or forced GC",
+    "treatmentPairs": 6,
+    "identicalCodePairs": 6,
+    "processes": 24,
+    "workersPerProcess": 3,
+    "groupsPerPass": 12,
+    "passesPerProcess": 2,
+    "measuredGroupObservations": 576,
+    "firstAndSecondPassesSeparate": true,
+    "initialWarmups": 0,
+    "retries": 0,
+    "replacements": 0,
+    "outlierRemoval": false,
+    "armTimeoutMs": 180000,
+    "dispatch": "serial source order; groupIndex mod3; not concurrent next-available production scheduling",
+    "timer": "Exact production inflateCompressedTermBankSourcesWasm(sources, {}, true); input copy, allocation, inflation, source CRC, wrapper validation included; output oracle outside timer",
+    "startup": "Validated module bytes are already loaded. Time compilation plus worker creation/imports/private instantiation; parallel init wall plus summed first-pass work is only a component diagnostic.",
+    "summaries": [
+      "all pair ratios",
+      "median paired ratio",
+      "equal-work ratio",
+      "faster pair count"
+    ],
+    "promotion": "No automatic promotion. A useful default-engine benefit beyond identical-code variability would require separately approved browser/import qualification."
+  },
+  "reusedHelpers": {
+    "ref": "70f3cda48ba768979a117f58a3901334d402f700",
+    "captureGitBlob": "990a576a60e10e63c526dfaba6c1766103c6109e",
+    "fixturesGitBlob": "2d5dee5839f6d499219d6907ffc96754375f7d81",
+    "scope": "Exact bytes copied; no historical timings or baseline/candidate code overlaid."
+  },
+  "sourceFiles": {
+    "dev/perf/crc-no-unroll-20261128-beb5/capture.mjs": "6c0ca107dd4f328323b780fe09c1be98cdb6071951b8c14e48b5b4d7ad37af4d",
+    "dev/perf/crc-no-unroll-20261128-beb5/fixtures.mjs": "fcefd24026dcdca74cdcd04a5dd0377b7d3094c1886522fda4e018cad8db8b75",
+    "dev/perf/crc-no-unroll-20261128-beb5/build.py": "74d6c18cac29e589be6d2624818be5fa8f003c519aaf5512b9810b1a83a8571e",
+    "dev/perf/crc-no-unroll-20261128-beb5/common.mjs": "a814da42d8d7b3466f142cca3b90ac879fd66eaac3283d9d7274d86a2c14fc41",
+    "dev/perf/crc-no-unroll-20261128-beb5/verify.mjs": "260897f507a6d23e9b44ad1bb751e16d9904a79b54657fe1eeec11098e1d4b30",
+    "dev/perf/crc-no-unroll-20261128-beb5/arm-worker.mjs": "ff1fb01fcb04c0b84198e26999daaf32f7734b9ef570352aab6f14d584942fe2",
+    "dev/perf/crc-no-unroll-20261128-beb5/arm.mjs": "975797f0f80364e0eaa002c20e6f8cccab47290b3ade9aff2004c344e445f7ee",
+    "dev/perf/crc-no-unroll-20261128-beb5/campaign.mjs": "8c85b8a9ac7b3b6dc2364b5c1e9d94e06688a73da513c2b6065a0243b9fc7239",
+    "dev/perf/crc-no-unroll-20261128-beb5/README.md": "0af01df97c4ab5b06787262d38a48d0af33503d50937c11cf138567bca3485de",
+    ".github/workflows/crc-no-unroll-screen-beb5.yml": "7fc4b8ff7994e23074065c61e149f1c6b6f530a411241a34b55bc450a5d5f8c2"
+  }
+}
