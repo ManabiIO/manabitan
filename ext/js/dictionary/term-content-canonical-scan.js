@@ -176,6 +176,7 @@ export class NativeCanonicalScanner {
         const n = last - first,
             count = chunk.rowCount;
         const uniqueMetadata = chunk.contentMetaByUniqueIndex === true;
+        const hasSignatures = uniqueSignatures instanceof Uint32Array;
         const inputRowCount = uniqueMetadata ? n : count;
         const inputRowStart = uniqueMetadata ? first : chunk.contentRowStart;
         /**
@@ -189,7 +190,7 @@ export class NativeCanonicalScanner {
             !safe32(last) ||
             count > MAX ||
             n > MAX ||
-            !(uniqueSignatures instanceof Uint32Array) ||
+            (uniqueSignatures !== null && typeof uniqueSignatures !== 'undefined' && !hasSignatures) ||
             !safe32(chunk.contentRowStart) ||
             !safe32(chunk.contentBytesBaseOffset) ||
             !safe32(chunk.contentBytesBuffer.byteLength) ||
@@ -203,7 +204,7 @@ export class NativeCanonicalScanner {
                     !(plan.pendingIndexes instanceof Uint32Array) || plan.pendingIndexes.length < last
                 )
             ) ||
-            uniqueSignatures.length < last * 3 ||
+            (hasSignatures && uniqueSignatures.length < last * 3) ||
             db._termEntryContentMetaFreeIndexes.length > 0 ||
             (db._termContentMetadataArena !== null && db._termContentMetadataArena.slots.byteOffset < PREFIX)
         ) {
@@ -290,8 +291,10 @@ export class NativeCanonicalScanner {
                     new Uint32Array(buffer, IDENT, count).set(uniqueIndexList.subarray(0, count));
                     new Uint32Array(buffer, ROWS, n).set(uniqueRowIndexes.subarray(first, last));
                 }
-                new Uint32Array(buffer, SIGS, n * 3).set(uniqueSignatures.subarray(first * 3, last * 3));
-                stats.copiedInputBytes += inputRowCount * 20 + n * 16;
+                if (hasSignatures) {
+                    new Uint32Array(buffer, SIGS, n * 3).set(uniqueSignatures.subarray(first * 3, last * 3));
+                }
+                stats.copiedInputBytes += inputRowCount * 20 + n * (hasSignatures ? 16 : 4);
                 inputArena = a;
             }
             new Uint8Array(buffer, FLAGS + cursor, n - cursor).set(plan.resolvedFlags.subarray(first + cursor, last));
@@ -300,7 +303,7 @@ export class NativeCanonicalScanner {
             const beforeDense = db._termEntryContentMetaDenseCount,
                 beforePending = db._termEntryContentMetaHashPairPendingCount;
             const header = new Uint32Array(buffer, 1024, 7);
-            new Uint32Array(buffer, 1088, 22).set([
+            new Uint32Array(buffer, 1088, 23).set([
                 a.slots.byteOffset,
                 a.slots.length,
                 a.hash1.byteOffset,
@@ -323,6 +326,7 @@ export class NativeCanonicalScanner {
                 persistedLookupRequired && db._termEntryContentMetaHashPairCount > 0 ? 1 : 0,
                 reserveMetadata ? 1 : 0,
                 this._hooks.trapAfter ?? 0,
+                hasSignatures ? 1 : 0,
             ]);
             const exactBase = exactCandidates.length;
             this._hooks.beforeNative?.({a, beforeDense, beforePending});

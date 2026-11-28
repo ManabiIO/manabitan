@@ -41,7 +41,6 @@ const U8_ARRAY_CLOSE = 0x5d;
 const U8_COMMA = 0x2c;
 
 const CONTENT_META_U32_FIELDS = 4;
-const CONTENT_SIGNATURE_U32_FIELDS = 3;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
 const SPARSE_STRUCTURED_BANK_ROWS_PER_SOURCE = 2500;
@@ -983,7 +982,6 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
 0;
         const contentUniqueIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const contentUniqueCountPtr = wasm.wasm_alloc(4);
-        const contentUniqueSignaturesPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
         const rowCountPtr = wasm.wasm_alloc(4);
         const stringsCapacity = Math.max(1024 * 1024, Math.min(jsonLength, fusedMetaCapacity * 64));
         const stringsPtr = wasm.wasm_alloc(stringsCapacity);
@@ -1021,7 +1019,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
         if (
             outPtr === 0 || contentMetaPtr === 0 || contentHashTablePtr === 0 ||
             (experiments.experimentalGlobalExactContentReuse && (rawContentHashTablePtr === 0 || rawContentHashesPtr === 0)) ||
-            contentUniqueIndexesPtr === 0 || contentUniqueCountPtr === 0 || contentUniqueSignaturesPtr === 0 ||
+            contentUniqueIndexesPtr === 0 || contentUniqueCountPtr === 0 ||
             rowCountPtr === 0 || stringsPtr === 0 || stringLengthsPtr === 0 ||
             stringOffsetsPtr === 0 || stringHashesPtr === 0 || expressionIndexesPtr === 0 ||
             readingIndexesPtr === 0 || stringHashTablePtr === 0 || stringUniqueCountPtr === 0 ||
@@ -1056,7 +1054,9 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
             contentHashTableSize,
             contentUniqueIndexesPtr,
             contentUniqueCountPtr,
-            contentUniqueSignaturesPtr,
+            // Rejection samples are populated by the sink only when a hash
+            // candidate needs exact comparison. They are not content identity.
+            0,
             rowCountPtr,
             stringsPtr,
             stringsCapacity,
@@ -1170,11 +1170,6 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
 void 0,
             contentMetasPtr: contentMetaPtr,
             contentUniqueIndexesPtr,
-            contentUniqueSignatures: new Uint32Array(new Uint32Array(
-                wasm.memory.buffer,
-                contentUniqueSignaturesPtr,
-                contentUniqueCount * CONTENT_SIGNATURE_U32_FIELDS,
-            )),
             heap,
             source: heap.subarray(jsonPtr, jsonPtr + jsonLength),
             metas: new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS),

@@ -6530,6 +6530,9 @@ void 0 :
         for (const meta of candidates) {
             const recentSource = this._findRecentTermContentSource(meta);
             if (typeof recentSource !== 'undefined') {
+                if (typeof meta.signature1 !== 'number') {
+                    this._setTermContentSignatures(meta, recentSource.buffer.subarray(recentSource.offset, recentSource.offset + recentSource.length));
+                }
                 if (this._termContentBytesEqualSpan(contentBytes, recentSource.buffer, recentSource.offset, recentSource.length)) {
                     return meta;
                 }
@@ -6537,6 +6540,9 @@ void 0 :
             }
             const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
             if (typeof inFlightSource !== 'undefined') {
+                if (typeof meta.signature1 !== 'number') {
+                    this._setTermContentSignatures(meta, inFlightSource.buffer.subarray(inFlightSource.offset, inFlightSource.offset + inFlightSource.length));
+                }
                 if (
                     this._termContentBytesEqualSpan(
                         contentBytes,
@@ -6619,6 +6625,9 @@ void 0 :
                     const meta = candidates[nextCandidateIndexes[i]++];
                     const recentSource = this._findRecentTermContentSource(meta);
                     if (typeof recentSource !== 'undefined') {
+                        if (typeof meta.signature1 !== 'number') {
+                            this._setTermContentSignatures(meta, recentSource.buffer.subarray(recentSource.offset, recentSource.offset + recentSource.length));
+                        }
                         if (
                             this._termContentBytesEqualSpan(
                                 contentBytes,
@@ -6636,6 +6645,9 @@ void 0 :
                     }
                     const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
                     if (typeof inFlightSource !== 'undefined') {
+                        if (typeof meta.signature1 !== 'number') {
+                            this._setTermContentSignatures(meta, inFlightSource.buffer.subarray(inFlightSource.offset, inFlightSource.offset + inFlightSource.length));
+                        }
                         if (
                             this._termContentBytesEqualSpan(
                                 contentBytes,

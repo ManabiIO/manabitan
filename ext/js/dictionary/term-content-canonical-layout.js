@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Private ABI v1: the kernel owns only the reserved prefix, never table copies.
-export const CANONICAL_SCAN_ABI_VERSION = 1;
+// Private ABI v2: optional samples; the reserved scratch layout is unchanged.
+export const CANONICAL_SCAN_ABI_VERSION = 2;
 
 export const CANONICAL_SCAN_MAX_ROWS = 100000;
 

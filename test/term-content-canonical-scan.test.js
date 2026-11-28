@@ -55,7 +55,7 @@ function useProductionScanner(db, _bytes, hooks = {}) {
     };
 }
 
-test('production canonical kernel: 63 differential, boundary, rollback and full record/index byte controls', async () => {
+test('production canonical kernel: 64 differential, boundary, rollback and full record/index byte controls', async () => {
     const checks = [],
         totals = {
             calls: 0,
@@ -173,11 +173,11 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         'RecentSourceBatchIdTable',
         'RecentSourceOffsetTable',
     ];
-    function metadata(f) {
-        return Object.fromEntries(fields.map((k) => [k, [...(f.db['_termEntryContentMeta' + k] ?? [])]]));
+    function metadata(f, includeSignatures = true) {
+        return Object.fromEntries(fields.filter((k) => includeSignatures || !k.startsWith('Signature')).map((k) => [k, [...(f.db['_termEntryContentMeta' + k] ?? [])]]));
     }
-    function same(a, b, ar, br) {
-        assert.deepEqual(metadata(b), metadata(a));
+    function same(a, b, ar, br, includeSignatures = true) {
+        assert.deepEqual(metadata(b, includeSignatures), metadata(a, includeSignatures));
         for (const k of [
             '_termEntryContentMetaDenseCount',
             '_termEntryContentMetaHashPairPendingCount',
@@ -479,7 +479,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     }
     // Full publication owner: compare persisted bytes and row-record content references,
     // with repeated rows, pending hash collisions, reimport and borrowed slab release.
-    {
+    for (const deferredSignatures of [false, true]) {
         function owner(native) {
             const f = fixture(40);
             // The mocked reservation follows production shared-JMdict admission.
@@ -504,6 +504,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                     word = f.db._readTermContentSignature(bytes, 0);
                 f.plan.uniqueSignatures.set([word, word, word], i * 3);
             }
+            if (deferredSignatures) { f.plan.uniqueSignatures = null; }
             f.db._bulkImportTransactionOpen = true;
             f.db._deferTermsVirtualTableSync = true;
             f.db._termContentZstdInitialized = true;
@@ -588,7 +589,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         for (const f of [a, b]) {
             await f.db._bulkAddArtifactTermsChunkWithContentDedup(f.chunk);
         }
-        same(a, b);
+        same(a, b, void 0, void 0, !deferredSignatures);
         assert.deepEqual(b.content, a.content);
         assert.deepEqual(b.records, a.records);
         assert.deepEqual(b.encoded, a.encoded);
@@ -613,7 +614,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(b.content.length, before);
         collect(b.controller);
         checks.push(
-            'full content publication and 160 production-encoded row-record byte/reference parity including collision and reimport',
+            `full content publication and 160 production-encoded row-record byte/reference parity including collision and reimport; deferred samples=${deferredSignatures}`,
         );
     }
 
@@ -937,8 +938,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             `later ${fault}: preserve accepted segment flags/projections/dense IDs, restore current native/JS segment`,
         );
     }
-    // Mixed dict names and missing/short signature/plan arrays use original JS
-    // before native mutation. A no-reservation arena may be initialized by adapter.
+    // Mixed dict names and short plan arrays use original JS before mutation.
+    // Missing samples stay native; a no-reservation arena can be initialized.
     for (const shape of ['mixed-names', 'missing-signatures', 'short-epochs', 'short-indexes', 'no-arena']) {
         const a = fixture(10),
             b = fixture(10);
@@ -964,13 +965,18 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             br = await b.db._resolveArtifactTermContentDedup(b.chunk, shape !== 'no-arena');
         // Native no-reservation initialization adds an empty arena only; no metadata mutation.
         if (shape !== 'no-arena') {
-            same(a, b, ar, br);
+            same(a, b, ar, br, shape !== 'missing-signatures');
         } else {
             assert.deepEqual(br.pendingContentSpans, ar.pendingContentSpans);
             assert.equal(br.pendingContentCount, 10);
             assert.ok(c.stats.calls > 0);
         }
-        if (shape !== 'no-arena') {
+        if (shape === 'missing-signatures') {
+            assert.equal(c.stats.calls, 1);
+            assert.equal(c.stats.fallbacks, 0);
+            assert.equal(c.stats.copiedInputBytes, 10 * 25);
+            assert.equal(b.db._termEntryContentMetaSignaturePresentTable.some((value) => value !== 0), false);
+        } else if (shape !== 'no-arena') {
             assert.equal(c.stats.calls, 0);
             assert.equal(c.stats.fallbacks, 1);
         }
@@ -1061,7 +1067,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     }
     assert.ok(layout.usedBytes <= layout.PREFIX);
     assert.equal(layout.usedBytes, 8263840);
-    assert.equal(checks.length, 63);
+    assert.equal(checks.length, 64);
 });
 
 test('production typed pending IDs: storage and record failure, old-entry preservation, free-ID retry (4 controls)', async () => {

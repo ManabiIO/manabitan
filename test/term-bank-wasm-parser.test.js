@@ -151,21 +151,6 @@ function getContentString(row) {
 
 /**
  * @param {Uint8Array} bytes
- * @returns {number[]}
- */
-function getContentSignatures(bytes) {
-    const read = (/** @type {number} */ offset) => (
-        (bytes[offset] ?? 0) |
-        ((bytes[offset + 1] ?? 0) << 8) |
-        ((bytes[offset + 2] ?? 0) << 16) |
-        ((bytes[offset + 3] ?? 0) << 24)
-    ) >>> 0;
-    const lastOffset = Math.max(0, bytes.byteLength - 4);
-    return [read(0), read(Math.floor(lastOffset / 2)), read(lastOffset)];
-}
-
-/**
- * @param {Uint8Array} bytes
  * @returns {number}
  */
 const hashBytes = hashTermKeyBytes;
@@ -3049,13 +3034,7 @@ describe('term-bank WASM parser', () => {
         expect(chunk.rowCount).toBe(3);
         expect(chunk.contentUniqueIndexList).toStrictEqual(new Uint32Array([0, 0, 1]));
         expect(chunk.contentDedupPlan?.uniqueRowIndexes).toStrictEqual(new Uint32Array([0, 2]));
-        const uniqueSignatures = [0, 2].flatMap((rowIndex) => {
-            const metaOffset = rowIndex * 4;
-            const offset = contentBytesBaseOffset + contentMetaList[metaOffset];
-            const length = contentMetaList[metaOffset + 1];
-            return getContentSignatures(contentBytesBuffer.subarray(offset, offset + length));
-        });
-        expect(chunk.contentDedupPlan?.uniqueSignatures).toStrictEqual(Uint32Array.from(uniqueSignatures));
+        expect(chunk.contentDedupPlan?.uniqueSignatures).toBeUndefined();
         expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1, 1, 0]));
         expect(chunk.scoreList).toStrictEqual(new Int32Array([2, 3, 4]));
         expect(chunk.sequenceList).toStrictEqual(new Int32Array([11, 12, 13]));
@@ -3079,7 +3058,6 @@ describe('term-bank WASM parser', () => {
             expect(view?.buffer, name).toBe(wasmBuffer);
         }
         expect(chunk.contentDedupPlan?.uniqueRowIndexes.buffer).toBeInstanceOf(ArrayBuffer);
-        expect(chunk.contentDedupPlan?.uniqueSignatures.buffer).toBeInstanceOf(ArrayBuffer);
         expect(plan.expressionIndexes[0]).toBe(plan.expressionIndexes[1]);
         expect(plan.readingIndexes[0]).toBe(plan.expressionIndexes[0]);
         expect(plan.readingIndexes[2]).not.toBe(plan.expressionIndexes[2]);

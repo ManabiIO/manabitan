@@ -3294,7 +3294,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
         out_ptr == 0u || row_meta_ptr == 0u || hash_table_ptr == 0u ||
-        unique_indexes_ptr == 0u || unique_count_ptr == 0u || unique_signatures_ptr == 0u || row_count_ptr == 0u ||
+        unique_indexes_ptr == 0u || unique_count_ptr == 0u || row_count_ptr == 0u ||
         strings_ptr == 0u || string_lengths_ptr == 0u || string_offsets_ptr == 0u ||
         string_hashes_ptr == 0u || expression_indexes_ptr == 0u || reading_indexes_ptr == 0u ||
         string_hash_table_ptr == 0u || string_unique_count_ptr == 0u || string_bytes_count_ptr == 0u ||
@@ -3665,11 +3665,15 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 row_meta[row_offset + 2u] = hash1;
                 row_meta[row_offset + 3u] = hash2;
                 unique_indexes[row_count] = unique_count;
-                const uint32_t last_offset = length > 4u ? length - 4u : 0u;
-                const uint32_t signature_offset = unique_count * 3u;
-                unique_signatures[signature_offset] = read_content_signature(out + start, length, 0u);
-                unique_signatures[signature_offset + 1u] = read_content_signature(out + start, length, last_offset / 2u);
-                unique_signatures[signature_offset + 2u] = read_content_signature(out + start, length, last_offset);
+                // The importer samples only hash candidates at the sink. Keep
+                // the optional output for callers which need eager samples.
+                if (unique_signatures_ptr != 0u) {
+                    const uint32_t last_offset = length > 4u ? length - 4u : 0u;
+                    const uint32_t signature_offset = unique_count * 3u;
+                    unique_signatures[signature_offset] = read_content_signature(out + start, length, 0u);
+                    unique_signatures[signature_offset + 1u] = read_content_signature(out + start, length, last_offset / 2u);
+                    unique_signatures[signature_offset + 2u] = read_content_signature(out + start, length, last_offset);
+                }
                 hash_table[slot] = row_count + 1u;
                 ++unique_count;
             }

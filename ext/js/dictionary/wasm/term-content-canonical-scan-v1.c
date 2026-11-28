@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-// Private ABI v1; mirror term-content-canonical-layout.js. All scratch columns
+// Private ABI v2; mirror term-content-canonical-layout.js. All scratch columns
 // fit below the authoritative arena, which begins at the fixed 8 MiB prefix.
 #define MAX_ROWS 100000u
 #define EXACT_BATCH_SIZE 4096u
@@ -44,7 +44,7 @@ _Static_assert(FLAGS % 4u == 0 && OUT % 4u == 0 && INDEXES % 4u == 0,
                "canonical columns must remain aligned");
 
 __attribute__((export_name("canonical_abi_version")))
-uint32_t canonical_abi_version(void) { return 1u; }
+uint32_t canonical_abi_version(void) { return 2u; }
 __attribute__((export_name("canonical_layout_end")))
 uint32_t canonical_layout_end(void) { return LAYOUT_END; }
 __attribute__((export_name("canonical_max_rows")))
@@ -56,7 +56,7 @@ uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 // resolved count, dense count, reserved. The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.
 // Config at 1088: pointers x10, capacity, dense, rowCount, first, last, cursor,
-// contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter. The
+// contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter, samples. The
 // old projection slots are reserved. trapAfter is for internal fault tests.
 __attribute__((export_name("scan_canonical")))
 int32_t scan_canonical(void) {
@@ -67,7 +67,7 @@ int32_t scan_canonical(void) {
     h[1] = c[15];
     h[5] = c[11];
     if (c[12] > MAX_ROWS || c[14] < c[13] || c[14] - c[13] > MAX_ROWS ||
-        c[15] > c[14] - c[13] || c[1] == 0 || (c[1] & (c[1] - 1)) || bytes < PREFIX) {
+        c[15] > c[14] - c[13] || c[1] == 0 || (c[1] & (c[1] - 1)) || bytes < PREFIX || c[22] > 1) {
         return -1;
     }
     uint32_t widths[8] = {4, 4, 1, 4, 1, 4, 4, 4};
@@ -137,10 +137,12 @@ int32_t scan_canonical(void) {
             hash1[index] = m[2];
             hash2[index] = m[3];
             length[index] = m[1];
-            s1[index] = sigs[i * 3];
-            s2[index] = sigs[i * 3 + 1];
-            s3[index] = sigs[i * 3 + 2];
-            present[index] = 1;
+            if (c[22]) {
+                s1[index] = sigs[i * 3];
+                s2[index] = sigs[i * 3 + 1];
+                s3[index] = sigs[i * 3 + 2];
+            }
+            present[index] = (uint8_t)c[22];
             state[index] = 2;
             slots[slot] = index + 1;
             staged = index;
