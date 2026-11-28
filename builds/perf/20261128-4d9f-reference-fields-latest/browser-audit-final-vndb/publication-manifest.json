@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Independent read-only audit and complete nonpackage preservation of both final85 VNDB browser cells",
+  "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "runId": 46141945184,
+  "entries": [
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13a8747f58fea0286ea24589548c7fade24af8ef",
+      "bytes": 6163,
+      "sha256": "db34f0d6a0d3e644e2fdcdd61ea65792cc551d1496ed516e247f5e1c6d011db7"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/archive-members.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88828aa1be82abd432e1cfbb5dc8942b8d44180c",
+      "bytes": 19294,
+      "sha256": "94924e3f1b48a1c7d23daeed261a195c58c952d19f0b0db191213d28b3e393c0"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/audit-format85-vndb.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86536a504e2096d626c82900244dbe5c5eff3209",
+      "bytes": 15617,
+      "sha256": "1e32e18b9d6342a0e2bc6f40b65883aaddf2457a8b3b7ac2c7cbb36b65beb6be"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/browser-audit-index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da15be3a95a478d6ab087fb5bd6f882d5ef07f4c",
+      "bytes": 9609,
+      "sha256": "8021af9df6a03b4333eaec5a51289bb96481030106d397245408e3ebe0151cbe"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/package-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec5777ec57c3d634b8703473dbe8a513ac2a75d5",
+      "bytes": 845,
+      "sha256": "d61c5655036f54f1c52107c0beb5033a61907928995bc3272b203fc5467024ee"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/pinned-source-receipts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e61e9455c976f3f57956caa269cd8be2fb0a102",
+      "bytes": 10796,
+      "sha256": "96e231ce1c6204fa9824fae7ad78c452b9859641e0fdde8f74d0bb274c3d95c0"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/previous-16c-package-inventory.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac59aab404d36cc559443178d122014757f3abf4",
+      "bytes": 64072,
+      "sha256": "9ad9ffa36d19bd4dc4b78fc66626828b7f773f60b681ebb4afbebe3ded40856c"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/source-contract-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4250ffc8cf73778d844316579951d484092de8c",
+      "bytes": 3043,
+      "sha256": "352fbfb96f5cb1dc599eda96aab688705b2d1cee94b3aac3159dd843b3c30598"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/source-git-proofs.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0273f437052a812f1d917176736c804621560fa",
+      "bytes": 12450,
+      "sha256": "70757c7d29f43b839ddd74509bcdda1821020a3941a1db3fac2c53932afe7768"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-final-vndb/raw-and-audit-evidence.tar.xz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2f0aed39ceebd6ac4d314ef61ffbc15c053dd1c",
+      "bytes": 151776,
+      "sha256": "5d62fd1d2c74486dbdc2e99a1bf5fd76e1eec196b65055582a15b3c53e4fa305"
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "sourceCommit": {
+    "sha": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "node_id": "C_kwDORX5CfNoAKDg1YThhYTQ5Zjc2ZmJhYmQyZGM0OTRhYWQyNDdmNzQ3NzRmZjI1NzM",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "author": {
+      "name": "Alex Ehlke",
+      "email": "alex.ehlke@gmail.com",
+      "date": "2026-11-28T11:27:03Z"
+    },
+    "committer": {
+      "name": "Alex Ehlke",
+      "email": "alex.ehlke@gmail.com",
+      "date": "2026-11-28T11:27:03Z"
+    },
+    "tree": {
+      "sha": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/ae7323d19d6da0cc500ff231a0dcd469ce4f31af"
+    },
+    "message": "style: satisfy bounded reference iterator lint",
+    "parents": [
+      {
+        "sha": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97"
+      }
+    ],
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "sourceDiff": [
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha": "d056b473923f762ab2c4dca91393effa2abc0f40",
+      "patch": "@@ -3709,9 +3709,14 @@ EMPTY_BYTES;\n             // Format4 needs two uint16 row keys plus at most one uint32 offset\n             // and uint16 length per selected row. Sparse tables never require\n             // reading a whole table or the span between distant reference IDs.\n-            const rowBytes = referenceFormat ? 10 : (compact ?\n-COMPACT_RECORD_FIELDS_BYTES_PER_ROW :\n-                (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ? FLOAT64_SCORE_RECORD_FIELDS_BYTES : LOOKUP_INDEX_RECORD_FIELDS_BYTES));\n+            let rowBytes = LOOKUP_INDEX_RECORD_FIELDS_BYTES;\n+            if (referenceFormat) {\n+                rowBytes = 10;\n+            } else if (compact) {\n+                rowBytes = COMPACT_RECORD_FIELDS_BYTES_PER_ROW;\n+            } else if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE) {\n+                rowBytes = FLOAT64_SCORE_RECORD_FIELDS_BYTES;\n+            }\n             const descriptorCharge = 64 + info.contentDictName.length * 2;\n             const blockRange = typeof maxBlockReferences !== 'undefined' &&\n             typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';\n@@ -3724,12 +3729,16 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :\n             let scoreCount = 0;\n             if (referenceLayout !== null) {\n                 scoreCount = referenceLayout.scoreCount;\n-                const rowKeys = await read(file,\n+                const rowKeys = await read(\n+                    file,\n                     fieldsStart + referenceLayout.referenceKeysStart + position.row * 2,\n-                    fieldsStart + referenceLayout.referenceKeysStart + (position.row + rows) * 2);\n-                keys = await read(file,\n+                    fieldsStart + referenceLayout.referenceKeysStart + (position.row + rows) * 2,\n+                );\n+                keys = await read(\n+                    file,\n                     fieldsStart + referenceLayout.scoreKeysStart + position.row * 2,\n-                    fieldsStart + referenceLayout.scoreKeysStart + (position.row + rows) * 2);\n+                    fieldsStart + referenceLayout.scoreKeysStart + (position.row + rows) * 2,\n+                );\n                 const rowKeyView = new DataView(rowKeys.buffer, rowKeys.byteOffset, rowKeys.byteLength);\n                 const scoreKeyView = new DataView(keys.buffer, keys.byteOffset, keys.byteLength);\n                 const order = new Uint32Array(rows);\n@@ -3758,12 +3767,16 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :\n                         lastKey = key;\n                         ++end;\n                     }\n-                    const offsetBytes = await read(file,\n+                    const offsetBytes = await read(\n+                        file,\n                         fieldsStart + referenceLayout.offsetsStart + firstKey * 4,\n-                        fieldsStart + referenceLayout.offsetsStart + (lastKey + 1) * 4);\n-                    const lengthBytes = await read(file,\n+                        fieldsStart + referenceLayout.offsetsStart + (lastKey + 1) * 4,\n+                    );\n+                    const lengthBytes = await read(\n+                        file,\n                         fieldsStart + referenceLayout.lengthsStart + firstKey * 2,\n-                        fieldsStart + referenceLayout.lengthsStart + (lastKey + 1) * 2);\n+                        fieldsStart + referenceLayout.lengthsStart + (lastKey + 1) * 2,\n+                    );\n                     const offsetView = new DataView(offsetBytes.buffer, offsetBytes.byteOffset, offsetBytes.byteLength);\n                     const lengthView = new DataView(lengthBytes.buffer, lengthBytes.byteOffset, lengthBytes.byteLength);\n                     for (let index = start; index < end; ++index) {"
+    }
+  ],
+  "unchangedSourceGitBlobs": [
+    {
+      "path": "test/perf/dictionaries.lock.json",
+      "before": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "after": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "same": true
+    },
+    {
+      "path": "package-lock.json",
+      "before": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "after": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "same": true
+    },
+    {
+      "path": "dev/perf/benchmark-support.js",
+      "before": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+      "after": "7f489dff6dd472d3c5ed8aac9f38c370cf20e142",
+      "same": true
+    },
+    {
+      "path": "dev/perf/dictionary-fixtures.js",
+      "before": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+      "after": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+      "same": true
+    },
+    {
+      "path": "dev/perf/import-benchmark.js",
+      "before": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+      "after": "fdc6e2bba27a8ecf3c0e88c1329b4b5b86c2c90b",
+      "same": true
+    },
+    {
+      "path": "test/chromium/import-flags-ab-benchmark.js",
+      "before": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+      "after": "6492f3756c42954bc7a98f4cf935d1b2b330e8c0",
+      "same": true
+    },
+    {
+      "path": "test/e2e/import-timing.js",
+      "before": "6788524700bf8075d04a6899eb15fb8003a4c187",
+      "after": "6788524700bf8075d04a6899eb15fb8003a4c187",
+      "same": true
+    },
+    {
+      "path": "ext/js/pages/settings/dictionary-import-controller.js",
+      "before": "39888b2a25a22fd91d2aa1239dea64fc4c636ded",
+      "after": "39888b2a25a22fd91d2aa1239dea64fc4c636ded",
+      "same": true
+    },
+    {
+      "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+      "before": "142825fbd36090d693de416801eac50312194ef2",
+      "after": "142825fbd36090d693de416801eac50312194ef2",
+      "same": true
+    }
+  ],
+  "toolingReview": {
+    "schemaVersion": 1,
+    "status": "source-reviewed-not-new-execution",
+    "toolingCommit": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+    "candidate": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "candidateTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+    "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "files": [
+      {
+        "role": "runner",
+        "blob": "be833eb770ecddb1c0b376c3f2f33f8776ac845a",
+        "sha256": "112d99c8276d10d6d4063e38938727dc83d8f3c8311490af1bdbf3caaba65896",
+        "path": "dev/perf/reference-format-browser-4d9f/run-reference-format-browser-v2.py"
+      },
+      {
+        "role": "allocation-contract",
+        "blob": "87ecd25b4a2f0c0333b35279b0d3078ce4d0fd1b",
+        "sha256": "b22fdc0af81d5ecbf682af0065fc8cf5bdbf4e4c5f37b82879ef6adcdcf9ecd7",
+        "path": "dev/perf/reference-format-browser-4d9f/sah_allocation_contract.py"
+      },
+      {
+        "role": "allocation-tests",
+        "blob": "cf7707873e6699467765f8ad2bac3e032bb13c47",
+        "sha256": "4c9e77f10ad4c64ffbc25ae4aba9deeb254c8641a89d50de1ac148c9d3838009",
+        "path": "dev/perf/reference-format-browser-4d9f/test_sah_allocation_contract.py"
+      },
+      {
+        "role": "source-contract",
+        "blob": "f45e88253390f19fcd5384304ae2177cb9fb8d51",
+        "sha256": "008ea4233ac819f5de3fde9286233c21339ad3ce690a024980467cd0777ded2e",
+        "path": "builds/perf/20261128-4d9f-reference-browser/storage-contract-a300-vndb.json"
+      },
+      {
+        "role": "workflow",
+        "blob": "8ac64d715bbba2eea5a6ab0bc3e7fcac25351e0f",
+        "sha256": "e633deceddba1e695a781aa411ad32a5ebc5d801ac3dcd701a0e63b7f2fad7a5",
+        "path": ".github/workflows/reference-fields-vndb77-browser-4d9f.yml"
+      }
+    ],
+    "review": [
+      "The old16c/schema1/37-unit cohort and its failed raw reports remain unchanged.",
+      "The runner adds only the exact parent-allocation helper, schema2/candidate-tree binding, helper retention and the unchanged validator parameter.",
+      "The new helper requires the stated parent/default flags/non-timing observation, aligned77-unit count, exactly seven empty SAH files and equal minimum/maximum77; the original validator still rejects every other actual allocation.",
+      "The frozen contract retains the exact prospective VNDB term-file sizes and observer hashes; only final85 source/tree and independent a300 allocation provenance are new.",
+      "The workflow is VNDB-only, both opposite orders, explicit Bash/pipefail, fresh profiles, exact release package per host and complete artifact retention.",
+      "The parent calibration was independently archive/package/source/raw-hash checked and its full semantic receipt recomputed separately. It is not a candidate comparison.",
+      "No actual85 cohort result is asserted in this review. No source16c result is relabeled as85."
+    ],
+    "executionByReviewer": "Source reads and read-only artifact audits only; no browser import or benchmark launched.",
+    "toolingTree": "f6381689025ca791493acd1077ddac5eb8277dcf",
+    "toolingParents": [
+      "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc"
+    ]
+  },
+  "artifactApiMetadata": {
+    "total_count": 2,
+    "artifacts": [
+      {
+        "id": 15262577737,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI2MjU3NzczNw==",
+        "name": "reference-browser-vndb-off-on-a30077-4d9f",
+        "size_in_bytes": 17262541,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262577737",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262577737/zip",
+        "expired": false,
+        "digest": "sha256:62baf2baab181afc9fcd412b2cf63b8383c518c7425de616c2b941b7ab8130ed",
+        "created_at": "2026-11-28T12:07:53Z",
+        "updated_at": "2026-11-28T12:07:53Z",
+        "expires_at": "2026-12-28T12:07:52Z",
+        "workflow_run": {
+          "id": 46141945184,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "experiment/reference-fields-vndb77-browser-20261128-4d9f",
+          "head_sha": "6650e56034b7c4e92451a7032fbf93ffd76d999f"
+        }
+      },
+      {
+        "id": 15262007286,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI2MjAwNzI4Ng==",
+        "name": "reference-browser-vndb-on-off-a30077-4d9f",
+        "size_in_bytes": 17262203,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262007286",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15262007286/zip",
+        "expired": false,
+        "digest": "sha256:f161c5c373beab7e067d3877e82940f4149b8767b6e4ff115bb8421fb528ae6a",
+        "created_at": "2026-11-28T12:04:56Z",
+        "updated_at": "2026-11-28T12:04:56Z",
+        "expires_at": "2026-12-28T12:04:54Z",
+        "workflow_run": {
+          "id": 46141945184,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "experiment/reference-fields-vndb77-browser-20261128-4d9f",
+          "head_sha": "6650e56034b7c4e92451a7032fbf93ffd76d999f"
+        }
+      }
+    ]
+  }
+}

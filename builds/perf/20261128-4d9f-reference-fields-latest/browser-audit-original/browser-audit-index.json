@@ -1,0 +1,560 @@
+{
+  "allReleaseEntriesIdenticalAcrossSixHosts": true,
+  "cells": [
+    {
+      "actualTermFileBytesSaved": null,
+      "artifactBytes": 17207626,
+      "artifactId": 15261830153,
+      "artifactName": "reference-browser-vndb-on-off-latest-4d9f",
+      "artifactSha256": "786feeaf788bac8139902174aa19eea3c9bb4d03dfbf9ca7e234c5cb43f5a7a4",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "vndb",
+      "observations": [
+        {
+          "activationDiagnostic": {
+            "chunks": 192,
+            "fieldBytes": 28780532,
+            "floor": 13,
+            "format4Rows": 6328310,
+            "formatCounts": {
+              "1": 0,
+              "2": 30,
+              "3": 0,
+              "4": 162
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 320000,
+              "3": 0,
+              "4": 6328310
+            },
+            "indexBytes": 377488588,
+            "minimumFloor": 13,
+            "requestedFlag": true,
+            "totalRows": 6648310
+          },
+          "activationDiagnosticIsQualification": false,
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualSahUnits": 77,
+          "attempted": true,
+          "failure": "VNDB active SAH allocation is outside 37\u201337 units of 4096 bytes",
+          "mode": "on",
+          "rawStatus": "success",
+          "reportSha256": "b22d9134d6dc0f3d5299a7988084b567a7b73fea33383b4a97a7c611b1baf98c",
+          "retrospectivelyQualified": false,
+          "strictSemanticStatus": "failed-original-registered-bound",
+          "summarySha256": "aca2d253fa2bf86e12cc3d1f47a9504d8e4b8894da4cfe768b8651a86a1cdac8"
+        },
+        {
+          "attempted": false,
+          "mode": "off",
+          "reason": "Original stop-at-first-failure policy"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "b889d87e8bd4581edcac9a9fb8f571fd355e59c8423dceef880b6d98e8bf29e7",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "on",
+        "off"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "failed-original-registered-bound",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    },
+    {
+      "actualTermFileBytesSaved": null,
+      "artifactBytes": 17206077,
+      "artifactId": 15261720648,
+      "artifactName": "reference-browser-vndb-off-on-latest-4d9f",
+      "artifactSha256": "d1d98d52b08ffe70ac51c7986681704dd7860030dbddef64369dc761c195a794",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "vndb",
+      "observations": [
+        {
+          "activationDiagnostic": {
+            "chunks": 192,
+            "fieldBytes": 53191776,
+            "floor": 11,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 192,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 6648310,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 401899832,
+            "minimumFloor": 11,
+            "requestedFlag": false,
+            "totalRows": 6648310
+          },
+          "activationDiagnosticIsQualification": false,
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualSahUnits": 77,
+          "attempted": true,
+          "failure": "VNDB active SAH allocation is outside 37\u201337 units of 4096 bytes",
+          "mode": "off",
+          "rawStatus": "success",
+          "reportSha256": "768a5ef656a9f37ed29a3061e1593f2250a78b5aab5b3addd2d9e5665a7fa4b1",
+          "retrospectivelyQualified": false,
+          "strictSemanticStatus": "failed-original-registered-bound",
+          "summarySha256": "748f113fb0223d8226c5878681cefacdf29a626f9248eea2029d671255026506"
+        },
+        {
+          "attempted": false,
+          "mode": "on",
+          "reason": "Original stop-at-first-failure policy"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "9bea22e8aa1c476f99677b1d106a4600503e4eb44c6efdcf171489426d850d04",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "off",
+        "on"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "failed-original-registered-bound",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    },
+    {
+      "actualTermFileBytesSaved": 0,
+      "artifactBytes": 17251025,
+      "artifactId": 15261425778,
+      "artifactName": "reference-browser-jitendex-off-on-latest-4d9f",
+      "artifactSha256": "cfd6565e708d6d09896ceb58c6afeea6881da9d9ca45b65e02ad14f4723bfda2",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "jitendex",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 22,
+            "fieldBytes": 3497796,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 22,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 436555,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23590852,
+            "minimumFloor": 10,
+            "requestedFlag": false,
+            "totalRows": 436555
+          },
+          "actualTermFileBytes": 61977692,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "reportSha256": "f8058ed89066f62a99eef770064827ef0c13f436475d475cd05c00a4455dc002",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "107659ea7315d3350a7596849ab21086ab9dd522dd73d31e86f983e3139f122e"
+        },
+        {
+          "activation": {
+            "chunks": 22,
+            "fieldBytes": 3497796,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 22,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 436555,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23590852,
+            "minimumFloor": 10,
+            "requestedFlag": true,
+            "totalRows": 436555
+          },
+          "actualTermFileBytes": 61977692,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "reportSha256": "f567d7b00c625d6fa21efb264d290e01e04a795456abc6cc64b65bbcef555d6b",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "17a06a1a93c5ac91f64d3499db0a90837a4e5534bf1679c9beaae1708b2283cd"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "b06f6423f0ab5ca7765b3584530320065becb6f2a51b6f7b54fbc32a4460c0c0",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "off",
+        "on"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    },
+    {
+      "actualTermFileBytesSaved": 41004,
+      "artifactBytes": 17249234,
+      "artifactId": 15261096419,
+      "artifactName": "reference-browser-jmdict-off-on-latest-4d9f",
+      "artifactSha256": "66fe0ef4e2508219812da0e709cab28bf3be95800439b7ad3400aee5ea93ae46",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "jmdict",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 12,
+            "fieldBytes": 4239960,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 12,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 528299,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23748952,
+            "minimumFloor": 10,
+            "requestedFlag": false,
+            "totalRows": 528299
+          },
+          "actualTermFileBytes": 43315677,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "reportSha256": "b0dccf7e3fa1eb051fe89ec2d30410e68b8132d476cc8fa05504df3b235aabab",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "a305c536048ef5da34e47ef957e16d7d21154506e032734b2cc437b7cd919c50"
+        },
+        {
+          "activation": {
+            "chunks": 12,
+            "fieldBytes": 4198956,
+            "floor": 13,
+            "format4Rows": 210000,
+            "formatCounts": {
+              "1": 0,
+              "2": 7,
+              "3": 0,
+              "4": 5
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 318299,
+              "3": 0,
+              "4": 210000
+            },
+            "indexBytes": 23707948,
+            "minimumFloor": 13,
+            "requestedFlag": true,
+            "totalRows": 528299
+          },
+          "actualTermFileBytes": 43274673,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "reportSha256": "b1ddca5942201e234199d350348ebfb65c1caa2c968d678eb92b87b69f10e41e",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "8615edf54c17b3eadd111398ffb8b381233d547f3fe7bed3ae4fa4222cb4ea79"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "66982f5f6d38f3baf3cb2278433f4da4809f1097734b23d86dd8fbabbb5407e6",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "off",
+        "on"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    },
+    {
+      "actualTermFileBytesSaved": 41004,
+      "artifactBytes": 17248927,
+      "artifactId": 15260672677,
+      "artifactName": "reference-browser-jmdict-on-off-latest-4d9f",
+      "artifactSha256": "d83cb6295311463ea3d125f4fe61bc00a03b534e80e5d18266b6383b49524d73",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "jmdict",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 12,
+            "fieldBytes": 4198956,
+            "floor": 13,
+            "format4Rows": 210000,
+            "formatCounts": {
+              "1": 0,
+              "2": 7,
+              "3": 0,
+              "4": 5
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 318299,
+              "3": 0,
+              "4": 210000
+            },
+            "indexBytes": 23707948,
+            "minimumFloor": 13,
+            "requestedFlag": true,
+            "totalRows": 528299
+          },
+          "actualTermFileBytes": 43274673,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "reportSha256": "56a85003a061dcd4449f45a9e92cc4abd3909a41d0c0edbc3c2a83ed7694953d",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "13a290c2956774142a76b5ca5facf69779953d2ace856dcfe02b5b10bfd0e98e"
+        },
+        {
+          "activation": {
+            "chunks": 12,
+            "fieldBytes": 4239960,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 12,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 528299,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23748952,
+            "minimumFloor": 10,
+            "requestedFlag": false,
+            "totalRows": 528299
+          },
+          "actualTermFileBytes": 43315677,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "reportSha256": "a53e7e7de7dc75aafef30a63db7cc733aea1c196dc53322903fec6a27c7068d6",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "8dfe973262508c004634b60f09a5cfd95de014c3ea81158981947220eba7c32a"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "74beb977d1d68ac36fde8095e8ac5ee69b0228d089af48d5aea02b0c44cc78b4",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "on",
+        "off"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    },
+    {
+      "actualTermFileBytesSaved": 0,
+      "artifactBytes": 17250671,
+      "artifactId": 15260589347,
+      "artifactName": "reference-browser-jitendex-on-off-latest-4d9f",
+      "artifactSha256": "9c99eb7780ff98c8db7340edfe7ab2fde2000f16e115fa9229af2f0971e66a53",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "jitendex",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 22,
+            "fieldBytes": 3497796,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 22,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 436555,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23590852,
+            "minimumFloor": 10,
+            "requestedFlag": true,
+            "totalRows": 436555
+          },
+          "actualTermFileBytes": 61977692,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "reportSha256": "e7df66f71b738ee8e1ef5a5e00a2448e2fd458d5c8dc29533743d7837d6d7d86",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "47299f6d768c2b560cfd839eb9616239509701dd5540f1af19857822bd3b537b"
+        },
+        {
+          "activation": {
+            "chunks": 22,
+            "fieldBytes": 3497796,
+            "floor": 10,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 22,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 436555,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 23590852,
+            "minimumFloor": 10,
+            "requestedFlag": false,
+            "totalRows": 436555
+          },
+          "actualTermFileBytes": 61977692,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "reportSha256": "edee42804b9fe09c7ea8660c2b1e275be6ea6abae697b908456591bbcc75f3e0",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "8493bd04c2284b9695d24c87568e468f6d32cdb7a3be79dd7fa5487d7c75972d"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "dc4c91a897593bdb9dff68cda1b548813c2bd28501298ea24be95b43643553b2",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "on",
+        "off"
+      ],
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17"
+    }
+  ],
+  "limitations": [
+    "The four qualified cells cover eight orderly-restart imports; interruption/corruption/older-reader gates are separate.",
+    "The two original VNDB cells each stopped after the first successful browser import when the fixed37-unit gate rejected77 units. The second scheduled import did not run.",
+    "Activation checks on those two raw VNDB reports are diagnostic only and do not turn either failed cell into a qualified cohort.",
+    "Source16c results are not relabeled as85a8 or any later source. No speed or process-memory improvement is asserted."
+  ],
+  "originalFailuresRetrospectivelyQualified": false,
+  "originalVndbFailureObservedUnits": 77,
+  "originalVndbRegisteredUnits": [
+    37,
+    37
+  ],
+  "processMemoryMeasured": false,
+  "qualifiedCells": 4,
+  "qualifiedImports": 8,
+  "releaseEntryCount": 582,
+  "retainedFailedCells": 2,
+  "runId": 46139342690,
+  "schemaVersion": 1,
+  "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+  "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+  "timingEligible": false,
+  "tooling": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+  "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17",
+  "unattemptedSecondImports": 2
+}

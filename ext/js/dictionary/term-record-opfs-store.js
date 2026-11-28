@@ -98,10 +98,14 @@ const LOOKUP_INDEX_RECORD_FIELDS_BYTES = 12;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY = 1;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT = 2;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE = 3;
+const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES = 4;
 const FLOAT64_SCORE_RECORD_FIELDS_BYTES = 16;
 const COMPACT_RECORD_FIELDS_MAGIC = 0x3246524d;
 const COMPACT_RECORD_FIELDS_HEADER_BYTES = 16;
 const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
+const REFERENCE_RECORD_FIELDS_MAGIC = 0x3446524d;
+const REFERENCE_RECORD_FIELDS_HEADER_BYTES = 20;
+const REFERENCE_RECORD_FIELDS_BYTES_PER_ROW = 4;
 const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
@@ -117,6 +121,8 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
+/** @type {{get?: (this: Uint32Array) => number}|undefined} */
+const TYPED_ARRAY_BYTE_OFFSET_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint32Array.prototype), 'byteOffset');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
@@ -154,31 +160,37 @@ function getRecordFieldsByteLength(content, offset, count, format) {
     if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE) {
         return count * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
     }
+    const references = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES;
+    const headerBytes = references ? REFERENCE_RECORD_FIELDS_HEADER_BYTES : COMPACT_RECORD_FIELDS_HEADER_BYTES;
     if (
-        format !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ||
+        (!references && format !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) ||
         offset < 0 ||
-        (offset + COMPACT_RECORD_FIELDS_HEADER_BYTES) > content.byteLength
+        (offset + headerBytes) > content.byteLength
     ) {
         throw new Error('Invalid compact term-record fields header');
     }
     const view = new DataView(
         content.buffer,
         content.byteOffset + offset,
-        COMPACT_RECORD_FIELDS_HEADER_BYTES,
+        headerBytes,
     );
     const scoreCount = view.getUint32(8, true);
     if (
-        view.getUint32(0, true) !== COMPACT_RECORD_FIELDS_MAGIC ||
+        view.getUint32(0, true) !== (references ? REFERENCE_RECORD_FIELDS_MAGIC : COMPACT_RECORD_FIELDS_MAGIC) ||
         view.getUint32(4, true) !== count ||
         scoreCount === 0 ||
         scoreCount >= U16_NULL ||
-        view.getUint32(12, true) !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
+        view.getUint32(12, true) !== format
     ) {
         throw new Error('Invalid compact term-record fields dimensions');
     }
-    const byteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
-    (scoreCount * 4) +
-    (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+    const referenceCount = references ? view.getUint32(16, true) : 0;
+    if (references && (referenceCount === 0 || referenceCount >= U16_NULL)) {
+        throw new Error('Compact term-record reference count is invalid');
+    }
+    const byteLength = headerBytes + (scoreCount * 4) + (references ?
+        (referenceCount * 4) + (Math.ceil(referenceCount / 2) * 4) + (count * REFERENCE_RECORD_FIELDS_BYTES_PER_ROW) :
+        count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
     if (!Number.isSafeInteger(byteLength)) {
         throw new Error('Compact term-record fields length is unsafe');
     }
@@ -188,30 +200,95 @@ function getRecordFieldsByteLength(content, offset, count, format) {
 /**
  * @param {Uint8Array} bytes
  * @param {number} count
- * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}}
+ * @param {number} [format=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT]
+ * @returns {{offsets: Uint32Array, lengths: Uint16Array, referenceKeys: Uint16Array|null, scoreKeys: Uint16Array, scores: Int32Array}}
  * @throws {Error}
  */
-function parseCompactRecordFields(bytes, count) {
-    const byteLength = getRecordFieldsByteLength(bytes, 0, count, LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
+function parseCompactRecordFields(bytes, count, format = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
+    const byteLength = getRecordFieldsByteLength(bytes, 0, count, format);
     if (byteLength !== bytes.byteLength) {
         throw new Error('Compact term-record fields length is invalid');
     }
-    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
+    const references = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES;
+    const headerBytes = references ? REFERENCE_RECORD_FIELDS_HEADER_BYTES : COMPACT_RECORD_FIELDS_HEADER_BYTES;
+    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, headerBytes / 4);
     const scoreCount = header[2];
-    let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+    const referenceCount = references ? header[4] : count;
+    let cursor = headerBytes;
     const scores = new Int32Array(bytes.buffer, bytes.byteOffset + cursor, scoreCount);
     cursor += scoreCount * 4;
-    const offsets = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, count);
-    cursor += count * 4;
-    const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
-    cursor += count * 2;
+    const offsets = new Uint32Array(bytes.buffer, bytes.byteOffset + cursor, referenceCount);
+    cursor += referenceCount * 4;
+    const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, referenceCount);
+    if (references && referenceCount % 2 !== 0 && (bytes[cursor + referenceCount * 2] !== 0 || bytes[cursor + referenceCount * 2 + 1] !== 0)) {
+        throw new Error('Compact term-record reference padding is invalid');
+    }
+    cursor += references ? Math.ceil(referenceCount / 2) * 4 : referenceCount * 2;
+    const referenceKeys = references ? new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count) : null;
+    if (referenceKeys !== null) {
+        cursor += count * 2;
+        for (const referenceKey of referenceKeys) {
+            if (referenceKey >= referenceCount) {
+                throw new Error('Compact term-record reference key is invalid');
+            }
+        }
+    }
     const scoreKeys = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
     for (let i = 0; i < scoreKeys.length; ++i) {
         if (scoreKeys[i] >= scoreCount) {
             throw new Error('Compact term-record score key is invalid');
         }
     }
-    return {offsets, lengths, scoreKeys, scores};
+    return {offsets, lengths, referenceKeys, scoreKeys, scores};
+}
+
+/**
+ * @typedef {object} ReferenceRecordFieldsLayout
+ * @property {number} scoreCount
+ * @property {number} referenceCount
+ * @property {number} offsetsStart
+ * @property {number} lengthsStart
+ * @property {number} referenceKeysStart
+ * @property {number} scoreKeysStart
+ */
+
+/**
+ * Validate every reference and row key while streaming the authoritative
+ * checksum. Four-byte-aligned pages keep all uint32/uint16 cells intact;
+ * an odd row count may still put the score-key column at offset 2 mod 4.
+ * Every uint16 length is representable, including the existing null sentinel.
+ * No unused table entry can bypass the safe-offset or padding checks.
+ * @param {Uint8Array} bytes
+ * @param {number} start
+ * @param {number} count
+ * @param {number} contentOffsetBase
+ * @param {ReferenceRecordFieldsLayout} layout
+ * @throws {RangeError} If any authoritative reference field is invalid.
+ */
+function validateReferenceRecordFieldRange(bytes, start, count, contentOffsetBase, layout) {
+    const end = start + bytes.byteLength;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const offsetsEnd = layout.offsetsStart + layout.referenceCount * 4;
+    for (let cursor = Math.max(start, layout.offsetsStart); cursor < Math.min(end, offsetsEnd); cursor += 4) {
+        const delta = view.getUint32(cursor - start, true);
+        validateContentOffset(delta === U32_NULL ? -1 : contentOffsetBase + delta);
+    }
+    const padding = layout.lengthsStart + layout.referenceCount * 2;
+    if (layout.referenceCount % 2 !== 0 && padding >= start && padding < end && view.getUint16(padding - start, true) !== 0) {
+        throw new RangeError('Content-reference table padding is invalid');
+    }
+    const referenceKeysEnd = layout.referenceKeysStart + count * 2;
+    for (let cursor = Math.max(start, layout.referenceKeysStart); cursor < Math.min(end, referenceKeysEnd); cursor += 2) {
+        if (view.getUint16(cursor - start, true) >= layout.referenceCount) {
+            throw new RangeError('Content-reference table key is invalid');
+        }
+    }
+    const scoreKeysEnd = layout.scoreKeysStart + count * 2;
+    for (let cursor = Math.max(start, layout.scoreKeysStart); cursor < Math.min(end, scoreKeysEnd); cursor += 2) {
+        if (view.getUint16(cursor - start, true) >= layout.scoreCount) {
+            throw new RangeError('Content-reference table score key is invalid');
+        }
+    }
 }
 
 /**
@@ -232,12 +309,12 @@ function isLosslessInt32Score(score) {
  * @param {number} count
  * @param {number} format
  * @param {number} contentOffsetBase
- * @returns {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}|null}
+ * @returns {{offsets: Uint32Array, lengths: Uint16Array, referenceKeys: Uint16Array|null, scoreKeys: Uint16Array, scores: Int32Array}|null}
  * @throws {Error}
  */
 function validateRecordFields(bytes, count, format, contentOffsetBase) {
-    const compactFields = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ?
-        parseCompactRecordFields(bytes, count) :
+    const compactFields = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT || format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES ?
+        parseCompactRecordFields(bytes, count, format) :
         null;
     if (contentOffsetBase <= Number.MAX_SAFE_INTEGER - MAX_CONTENT_OFFSET_DELTA) {
         return compactFields;
@@ -248,7 +325,8 @@ function validateRecordFields(bytes, count, format, contentOffsetBase) {
     const fixedRowBytes = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ?
         FLOAT64_SCORE_RECORD_FIELDS_BYTES :
         LOOKUP_INDEX_RECORD_FIELDS_BYTES;
-    for (let row = 0; row < count; ++row) {
+    const offsetCount = compactFields === null ? count : compactFields.offsets.length;
+    for (let row = 0; row < offsetCount; ++row) {
         const contentOffsetDelta = compactFields === null ?
             /** @type {DataView} */ (fixedView).getUint32(row * fixedRowBytes, true) :
             compactFields.offsets[row];
@@ -438,6 +516,65 @@ function getSynchronousRecordFieldReferences(chunk, count) {
     return references
 }
 /* eslint-enable @stylistic/semi */
+
+/**
+ * Preserve the complete private reference table and its existing row IDs.
+ * Unused entries must be representable relative to this exact split's base;
+ * otherwise the existing row columns remain the authoritative representation.
+ * No value witness survives this synchronous encoding operation.
+ * @param {ResolvedContentReferences} references
+ * @param {number} count
+ * @param {number} contentOffsetBase
+ * @param {number[]} scores
+ * @param {Uint16Array} scoreKeys
+ * @param {number} compactByteLength
+ * @returns {Uint8Array|null}
+ */
+function encodeReferenceRecordFields(references, count, contentOffsetBase, scores, scoreKeys, compactByteLength) {
+    const {uniqueIndexList, offsets, lengths} = references;
+    const referenceCount = offsets.length;
+    if (
+        referenceCount === 0 || referenceCount >= U16_NULL ||
+        !Number.isSafeInteger(contentOffsetBase) || contentOffsetBase < 0 ||
+        typeof TYPED_ARRAY_BYTE_OFFSET_DESCRIPTOR?.get !== 'function'
+    ) { return null; }
+    const byteLength = REFERENCE_RECORD_FIELDS_HEADER_BYTES + scores.length * 4 +
+    referenceCount * 4 + Math.ceil(referenceCount / 2) * 4 + count * REFERENCE_RECORD_FIELDS_BYTES_PER_ROW;
+    if (!Number.isSafeInteger(byteLength) || byteLength >= compactByteLength) { return null; }
+    for (let i = 0; i < referenceCount; ++i) {
+        const offset = offsets[i];
+        if (
+            lengths[i] >= U16_NULL ||
+            (offset !== -1 && (!Number.isSafeInteger(offset) || offset < contentOffsetBase || offset - contentOffsetBase > MAX_CONTENT_OFFSET_DELTA))
+        ) { return null; }
+    }
+    const output = new Uint8Array(byteLength);
+    const header = new Uint32Array(output.buffer, 0, REFERENCE_RECORD_FIELDS_HEADER_BYTES / 4);
+    header[0] = REFERENCE_RECORD_FIELDS_MAGIC;
+    header[1] = count;
+    header[2] = scores.length;
+    header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES;
+    header[4] = referenceCount;
+    let cursor = REFERENCE_RECORD_FIELDS_HEADER_BYTES;
+    new Int32Array(output.buffer, cursor, scores.length).set(scores);
+    cursor += scores.length * 4;
+    const outputOffsets = new Uint32Array(output.buffer, cursor, referenceCount);
+    for (let i = 0; i < referenceCount; ++i) {
+        outputOffsets[i] = offsets[i] === -1 ? U32_NULL : offsets[i] - contentOffsetBase;
+    }
+    cursor += referenceCount * 4;
+    new Uint16Array(output.buffer, cursor, referenceCount).set(lengths);
+    cursor += Math.ceil(referenceCount / 2) * 4;
+    // The earlier synchronous length pass checked every row key against this
+    // same private table. Builtin conversion writes only this split's row view.
+    // An explicit view avoids a caller-owned constructor/@@species callback.
+    const rowByteOffset = TYPED_ARRAY_BYTE_OFFSET_DESCRIPTOR.get.call(uniqueIndexList);
+    const rowIds = new Uint32Array(uniqueIndexList.buffer, rowByteOffset, count);
+    new Uint16Array(output.buffer, cursor, count).set(rowIds);
+    cursor += count * 2;
+    new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
+    return output;
+}
 
 /**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
@@ -943,6 +1080,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {number} [referenceTableFieldChunkCount]
  */
 
 /**
@@ -955,7 +1093,7 @@ class DenseIdRecordStore {
  * @property {number} contentOffsetBase
  * @property {Uint8Array} recordFields
  * @property {number} recordFieldsFormat
- * @property {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: Int32Array}|null} compactRecordFields
+ * @property {{offsets: Uint32Array, lengths: Uint16Array, referenceKeys: Uint16Array|null, scoreKeys: Uint16Array, scores: Int32Array}|null} compactRecordFields
  * @property {import('./term-lookup-index.js').PersistedTermLookupIndex} lookupIndex
  */
 
@@ -1023,6 +1161,10 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {boolean} */
+        this._experimentalReferenceTableFields = false;
+        /** @type {number} */
+        this._referenceTableFieldChunkCount = 0;
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1308,6 +1450,9 @@ export class TermRecordOpfsStore {
      */
     async _prepare() {
         await this._closeAllWritables();
+        this._experimentalReferenceTableFields = false;
+        this._referenceTableFieldChunkCount = 0;
+        this._lastEndImportSessionMetrics = null;
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
         this._recordIdStaleDictionaryNames.clear();
@@ -1359,6 +1504,8 @@ export class TermRecordOpfsStore {
                 return;
             }
             this._importSessionActive = true;
+            this._referenceTableFieldChunkCount = 0;
+            this._lastEndImportSessionMetrics = null;
             this._exactLookupRoute = null;
             this._exactLookupRouteAbandoned = false;
             this._deferIndexBuild = true;
@@ -1530,6 +1677,9 @@ export class TermRecordOpfsStore {
      */
     async _abandonImportWritesForRollback() {
         this._importSessionActive = false;
+        this._experimentalReferenceTableFields = false;
+        this._referenceTableFieldChunkCount = 0;
+        this._lastEndImportSessionMetrics = null;
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
         this._indexDirty = false;
@@ -1611,6 +1761,7 @@ export class TermRecordOpfsStore {
         try {
             await this._endImportSession();
         } finally {
+            this._experimentalReferenceTableFields = false;
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
         }
@@ -1643,6 +1794,7 @@ export class TermRecordOpfsStore {
         closeWritableMs = safePerformance.now() - tCloseWritableStart;
         this._deferIndexBuild = false;
         this._lastEndImportSessionMetrics = {
+            referenceTableFieldChunkCount: this._referenceTableFieldChunkCount,
             flushPendingWritesMs,
             awaitQueuedWritesMs,
             closeWritableMs,
@@ -1670,6 +1822,11 @@ export class TermRecordOpfsStore {
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
+    }
+
+    /** @param {import('dictionary-importer').ImportExperiments} [options] */
+    setImportExperiments(options = {}) {
+        this._experimentalReferenceTableFields = options.experimentalReferenceTableFields === true;
     }
 
     /**
@@ -3474,7 +3631,7 @@ export class TermRecordOpfsStore {
                 fail('invalid', 'Content-reference container counters are invalid');
             }
             const minimumBytes = LOOKUP_INDEX_FILE_HEADER_BYTES + chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES +
-            expectedCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW;
+            expectedCount * REFERENCE_RECORD_FIELDS_BYTES_PER_ROW;
             const maximumBytes = Math.max(
                 MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
                 expectedCount * MAX_LOOKUP_INDEX_BYTES_PER_RECORD + MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
@@ -3502,8 +3659,9 @@ export class TermRecordOpfsStore {
                 fail('stale', 'Content-reference chunk changed since checkpoint');
             }
             position.chunkIdentity = identity;
-            const compactHeader = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ?
-                await read(file, fieldsStart, fieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES) :
+            const referenceFormat = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES;
+            const compactHeader = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT || referenceFormat ?
+                await read(file, fieldsStart, fieldsStart + (referenceFormat ? REFERENCE_RECORD_FIELDS_HEADER_BYTES : COMPACT_RECORD_FIELDS_HEADER_BYTES)) :
 EMPTY_BYTES;
             let fieldsLength;
             try {
@@ -3513,13 +3671,29 @@ EMPTY_BYTES;
             }
             const fieldsEnd = fieldsStart + fieldsLength;
             if (!Number.isSafeInteger(fieldsEnd) || fieldsEnd > file.size || position.verifyOffset > fieldsLength ||
-            (position.row > 0 && position.verifyOffset !== fieldsLength)) {
+            (position.row > 0 && position.verifyOffset !== fieldsLength) ||
+            (referenceFormat && position.verifyOffset % 4 !== 0)) {
                 fail('invalid', 'Content-reference field dimensions are invalid');
             }
+            /** @type {ReferenceRecordFieldsLayout|null} */
+            let referenceLayout = null;
+            if (referenceFormat) {
+                const view = new DataView(compactHeader.buffer, compactHeader.byteOffset, compactHeader.byteLength);
+                const scoreCount = view.getUint32(8, true);
+                const referenceCount = view.getUint32(16, true);
+                const offsetsStart = REFERENCE_RECORD_FIELDS_HEADER_BYTES + scoreCount * 4;
+                const lengthsStart = offsetsStart + referenceCount * 4;
+                const referenceKeysStart = lengthsStart + Math.ceil(referenceCount / 2) * 4;
+                referenceLayout = {scoreCount, referenceCount, offsetsStart, lengthsStart, referenceKeysStart, scoreKeysStart: referenceKeysStart + count * 2};
+            }
             if (position.verifyOffset < fieldsLength) {
-                const length = Math.min(fieldsLength - position.verifyOffset, byteBudget - bytesRead);
+                const available = Math.min(fieldsLength - position.verifyOffset, byteBudget - bytesRead);
+                const length = referenceFormat ? Math.floor(available / 4) * 4 : available;
                 if (length <= 0) { fail('resource', 'Content-reference checksum has no admitted read budget'); }
                 const bytes = await read(file, fieldsStart + position.verifyOffset, fieldsStart + position.verifyOffset + length);
+                if (referenceLayout !== null) {
+                    validateReferenceRecordFieldRange(bytes, position.verifyOffset, count, offsetBase, referenceLayout);
+                }
                 position.hash = updateTermKeyHashState(position.hash, bytes);
                 position.verifyOffset += length;
                 if (position.verifyOffset === fieldsLength && finishTermKeyHashState(position.hash, fieldsLength) !== expectedHash) {
@@ -3531,9 +3705,18 @@ EMPTY_BYTES;
                 fail('invalid', 'Content-reference checkpoint checksum is inconsistent');
             }
             const compact = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
-            const rowBytes = compact ?
-COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
-                (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ? FLOAT64_SCORE_RECORD_FIELDS_BYTES : LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+            const columnar = compact || referenceFormat;
+            // Format4 needs two uint16 row keys plus at most one uint32 offset
+            // and uint16 length per selected row. Sparse tables never require
+            // reading a whole table or the span between distant reference IDs.
+            let rowBytes = LOOKUP_INDEX_RECORD_FIELDS_BYTES;
+            if (referenceFormat) {
+                rowBytes = 10;
+            } else if (compact) {
+                rowBytes = COMPACT_RECORD_FIELDS_BYTES_PER_ROW;
+            } else if (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE) {
+                rowBytes = FLOAT64_SCORE_RECORD_FIELDS_BYTES;
+            }
             const descriptorCharge = 64 + info.contentDictName.length * 2;
             const blockRange = typeof maxBlockReferences !== 'undefined' &&
             typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';
@@ -3544,7 +3727,68 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
             let lengths = EMPTY_BYTES;
             let keys = EMPTY_BYTES;
             let scoreCount = 0;
-            if (compact) {
+            if (referenceLayout !== null) {
+                scoreCount = referenceLayout.scoreCount;
+                const rowKeys = await read(
+                    file,
+                    fieldsStart + referenceLayout.referenceKeysStart + position.row * 2,
+                    fieldsStart + referenceLayout.referenceKeysStart + (position.row + rows) * 2,
+                );
+                keys = await read(
+                    file,
+                    fieldsStart + referenceLayout.scoreKeysStart + position.row * 2,
+                    fieldsStart + referenceLayout.scoreKeysStart + (position.row + rows) * 2,
+                );
+                const rowKeyView = new DataView(rowKeys.buffer, rowKeys.byteOffset, rowKeys.byteLength);
+                const scoreKeyView = new DataView(keys.buffer, keys.byteOffset, keys.byteLength);
+                const order = new Uint32Array(rows);
+                for (let row = 0; row < rows; ++row) {
+                    const key = rowKeyView.getUint16(row * 2, true);
+                    if (key >= referenceLayout.referenceCount || scoreKeyView.getUint16(row * 2, true) >= scoreCount) {
+                        fail('invalid', 'Content-reference table row key is invalid');
+                    }
+                    // Both dimensions are <2^16 under the existing admission.
+                    // Uint32Array.sort is unsigned numeric; low bits retain the
+                    // original row ordinal for the scatter after bounded reads.
+                    order[row] = key * 65536 + row;
+                }
+                order.sort();
+                offsets = new Uint8Array(rows * 4);
+                lengths = new Uint8Array(rows * 2);
+                const offsetOutput = new DataView(offsets.buffer);
+                const lengthOutput = new DataView(lengths.buffer);
+                for (let start = 0; start < rows;) {
+                    const firstKey = order[start] >>> 16;
+                    let lastKey = firstKey;
+                    let end = start + 1;
+                    while (end < rows) {
+                        const key = order[end] >>> 16;
+                        if (key > lastKey + 1) { break; }
+                        lastKey = key;
+                        ++end;
+                    }
+                    const offsetBytes = await read(
+                        file,
+                        fieldsStart + referenceLayout.offsetsStart + firstKey * 4,
+                        fieldsStart + referenceLayout.offsetsStart + (lastKey + 1) * 4,
+                    );
+                    const lengthBytes = await read(
+                        file,
+                        fieldsStart + referenceLayout.lengthsStart + firstKey * 2,
+                        fieldsStart + referenceLayout.lengthsStart + (lastKey + 1) * 2,
+                    );
+                    const offsetView = new DataView(offsetBytes.buffer, offsetBytes.byteOffset, offsetBytes.byteLength);
+                    const lengthView = new DataView(lengthBytes.buffer, lengthBytes.byteOffset, lengthBytes.byteLength);
+                    for (let index = start; index < end; ++index) {
+                        const packed = order[index];
+                        const row = packed & 0xffff;
+                        const key = (packed >>> 16) - firstKey;
+                        offsetOutput.setUint32(row * 4, offsetView.getUint32(key * 4, true), true);
+                        lengthOutput.setUint16(row * 2, lengthView.getUint16(key * 2, true), true);
+                    }
+                    start = end;
+                }
+            } else if (compact) {
                 scoreCount = new DataView(compactHeader.buffer, compactHeader.byteOffset, compactHeader.byteLength).getUint32(8, true);
                 const offsetsStart = fieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES + scoreCount * 4;
                 const lengthsStart = offsetsStart + count * 4;
@@ -3561,13 +3805,13 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
             /** @type {ContentReference[]} */
             const references = [];
             for (let row = 0; row < rows; ++row) {
-                const delta = values.getUint32(row * (compact ? 4 : rowBytes), true);
-                const length = compact ? lengthValues.getUint16(row * 2, true) : values.getUint32(row * rowBytes + 4, true);
+                const delta = values.getUint32(row * (columnar ? 4 : rowBytes), true);
+                const length = columnar ? lengthValues.getUint16(row * 2, true) : values.getUint32(row * rowBytes + 4, true);
                 const entryContentOffset = delta === U32_NULL ? -1 : offsetBase + delta;
-                const entryContentLength = length === (compact ? U16_NULL : U32_NULL) ? -1 : length;
+                const entryContentLength = length === (columnar ? U16_NULL : U32_NULL) ? -1 : length;
                 validateContentOffset(entryContentOffset);
                 validateContentLength(entryContentLength);
-                if (compact && keyValues.getUint16(row * 2, true) >= scoreCount) {
+                if (columnar && keyValues.getUint16(row * 2, true) >= scoreCount) {
                     fail('invalid', 'Content-reference compact score key is invalid');
                 }
                 references.push({recordId: firstId + position.row + row,
@@ -3698,6 +3942,9 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                 null;
             for (const id of chunkIds) {
                 const ordinal = id - chunk.firstId;
+                const contentOrdinal = compactFields === null || compactFields.referenceKeys === null ?
+                    ordinal :
+compactFields.referenceKeys[ordinal];
                 const fieldsOffset = ordinal * (
                     chunk.recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ?
                         FLOAT64_SCORE_RECORD_FIELDS_BYTES :
@@ -3708,10 +3955,10 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                 const readingBytes = getPersistedTermKeyBytes(chunk.lookupIndex, ordinal, 'reading');
                 const contentOffsetDelta = compactFields === null ?
                     /** @type {DataView} */ (fieldsView).getUint32(fieldsOffset, true) :
-                    compactFields.offsets[ordinal];
+                    compactFields.offsets[contentOrdinal];
                 const rawContentLength = compactFields === null ?
                     /** @type {DataView} */ (fieldsView).getUint32(fieldsOffset + 4, true) :
-                    compactFields.lengths[ordinal];
+                    compactFields.lengths[contentOrdinal];
                 const entryContentOffset = contentOffsetDelta === U32_NULL ?
                     -1 :
                     chunk.contentOffsetBase + contentOffsetDelta;
@@ -4043,7 +4290,7 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
         }
         const minimumIndexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES +
         (chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES) +
-        (expectedRecordCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+        (expectedRecordCount * REFERENCE_RECORD_FIELDS_BYTES_PER_ROW);
         const maximumIndexBytes = Math.max(
             MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
             Math.min(
@@ -4086,8 +4333,10 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
 
             let recordFieldsLength;
             try {
-                if (recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
-                    const compactHeaderEnd = recordFieldsOffset + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                if (recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT || recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES) {
+                    const compactHeaderEnd = recordFieldsOffset + (recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES ?
+                        REFERENCE_RECORD_FIELDS_HEADER_BYTES :
+COMPACT_RECORD_FIELDS_HEADER_BYTES);
                     if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > file.size) { return null; }
                     const compactHeader = await this._readFileRange(file, recordFieldsOffset, compactHeaderEnd);
                     recordFieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, recordFieldsFormat);
@@ -4561,7 +4810,7 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                 }
                 const minimumIndexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES +
                 (chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES) +
-                (expectedRecordCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+                (expectedRecordCount * REFERENCE_RECORD_FIELDS_BYTES_PER_ROW);
                 const maximumIndexBytes = Math.max(
                     MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
                     Math.min(
@@ -4629,7 +4878,8 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                         (
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
-                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE &&
+                            formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES
                         ) ||
                         !Number.isSafeInteger(recordFieldsStart) ||
                         recordFieldsStart > indexFile.size
@@ -4637,8 +4887,10 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
                     let recordFieldsHeader = EMPTY_BYTES;
-                    if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
-                        const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                    if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT || formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES) {
+                        const compactHeaderEnd = recordFieldsStart + (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES ?
+                            REFERENCE_RECORD_FIELDS_HEADER_BYTES :
+COMPACT_RECORD_FIELDS_HEADER_BYTES);
                         if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
                             throw new PersistentLookupIndexError('invalid', `Compact term-record fields header is truncated for ${state.fileName}`);
                         }
@@ -5230,7 +5482,8 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                     (
                         formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY &&
                         formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
-                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE &&
+                        formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES
                     )
                 ) {
                     throw new TermRecordIntegrityError(`Authoritative chunk metadata is invalid: ${state.fileName}`);
@@ -6382,6 +6635,10 @@ view.chunks :
             }
             return legacy;
         }
+        if (this._experimentalReferenceTableFields && this._importSessionActive && directReferences !== null) {
+            const referenceFields = encodeReferenceRecordFields(directReferences, count, contentOffsetBase, scores, scoreKeys, compactByteLength);
+            if (referenceFields !== null) { return referenceFields; }
+        }
         const output = new Uint8Array(compactByteLength);
         const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
         header[0] = COMPACT_RECORD_FIELDS_MAGIC;
@@ -6470,7 +6727,7 @@ view.chunks :
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
             (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
                 LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
-                LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
+                new DataView(recordFields.buffer, recordFields.byteOffset, recordFields.byteLength).getUint32(12, true));
         const recordFieldEncodeMs = safePerformance.now() - tRecordEncodeStart;
         const tLookupIndexEncodeStart = safePerformance.now();
         let lookupIndexBytes = preparedLookupIndexBytes;
@@ -6570,6 +6827,7 @@ view.chunks :
                 this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);
             }
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
+            if (recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_REFERENCES) { ++this._referenceTableFieldChunkCount; }
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
             state.pendingLookupIndexRecordCount += count;
             if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {

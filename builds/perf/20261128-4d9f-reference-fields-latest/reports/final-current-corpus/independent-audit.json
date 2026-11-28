@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "runId": 46145076480,
+  "toolingCommit": "26c5cb9ff1a19afd583f94a6c86f336dab783719",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "auditScript": {
+    "bytes": 17459,
+    "sha256": "02f38527e3476315253973f99cf56aa52725a216a6d0a1da9b5c626aee5d17b8"
+  },
+  "artifacts": [
+    {
+      "corpus": "contracts",
+      "artifactId": 15263461668,
+      "bytes": 32769,
+      "sha256": "8656ab2d6d39776a6af40aeb75b4cdede5162d8e975fc6b1d31b5635bc345da2",
+      "verifiedMembers": 96
+    },
+    {
+      "corpus": "vndb",
+      "artifactId": 15263227579,
+      "bytes": 798834,
+      "sha256": "0ee3ed9d257cf2501517c79ac6080611d7b9d27465fc6e5e9e76e4b402ebab11",
+      "verifiedMembers": 57
+    },
+    {
+      "corpus": "jitendex",
+      "artifactId": 15263163001,
+      "bytes": 177490,
+      "sha256": "e44b05ea5687eca3fe9e61bd59444caaeef77ba0fd29ebc81b2edc2b9400b6d2",
+      "verifiedMembers": 51
+    },
+    {
+      "corpus": "jmdict",
+      "artifactId": 15263054810,
+      "bytes": 127578,
+      "sha256": "169fe28dd94972f1aa127b00a33c213d7e8edf282e26726edcd8939ccddab232",
+      "verifiedMembers": 53
+    }
+  ],
+  "verificationManifest": {
+    "bytes": 19466,
+    "sha256": "abf7576dbcc4f342c99554d2e8aebdfc6fb212d42b302b7f32facc7a11e5e19f"
+  },
+  "protocol": {
+    "bytes": 6184,
+    "sha256": "79bc1d899dd3230253e7ae7da342da9cf4c47ade0264eaace1ad202e943ba8fe"
+  },
+  "originalOracleArchive": {
+    "bytes": 95475,
+    "sha256": "7959bf4736e64ca55e2ee7176774f2c62d2802a7df968f226818f969bb642e78"
+  },
+  "verifiedOriginalOracleMembers": 8,
+  "corpora": [
+    {
+      "corpus": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "chunks": 12,
+      "format4Chunks": 5,
+      "format4Rows": 210000,
+      "savedBytes": 41004,
+      "off": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/jmdict/jmdict-A-1",
+        "fieldsBytes": 4239960,
+        "indexBytes": 23748952,
+        "contentBytes": 19566680,
+        "allTermFileBytes": 43315677
+      },
+      "on": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/jmdict/jmdict-B-1",
+        "fieldsBytes": 4198956,
+        "indexBytes": 23707948,
+        "contentBytes": 19566680,
+        "allTermFileBytes": 43274673
+      },
+      "fallbackCounts": {
+        "no-strict-size-saving": 7
+      },
+      "completeOriginalOracle": {
+        "bytes": 4712,
+        "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+      },
+      "initialAndFinalSqlite": {
+        "bytes": 311296,
+        "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+        "userVersion": 0
+      },
+      "everyGroupRootVerified": true,
+      "allResourcesReleased": true,
+      "allParserAndSourceColumnsUnchanged": true,
+      "allActualFieldRowsAndFinalFileReceiptsReconciled": true
+    },
+    {
+      "corpus": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "chunks": 22,
+      "format4Chunks": 0,
+      "format4Rows": 0,
+      "savedBytes": 0,
+      "off": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/jitendex/jitendex-A-1",
+        "fieldsBytes": 3497796,
+        "indexBytes": 23590852,
+        "contentBytes": 38386795,
+        "allTermFileBytes": 61977692
+      },
+      "on": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/jitendex/jitendex-B-1",
+        "fieldsBytes": 3497796,
+        "indexBytes": 23590852,
+        "contentBytes": 38386795,
+        "allTermFileBytes": 61977692
+      },
+      "fallbackCounts": {
+        "no-strict-size-saving": 22
+      },
+      "completeOriginalOracle": {
+        "bytes": 4724,
+        "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+      },
+      "initialAndFinalSqlite": {
+        "bytes": 311296,
+        "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+        "userVersion": 0
+      },
+      "everyGroupRootVerified": true,
+      "allResourcesReleased": true,
+      "allParserAndSourceColumnsUnchanged": true,
+      "allActualFieldRowsAndFinalFileReceiptsReconciled": true
+    },
+    {
+      "corpus": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "chunks": 192,
+      "format4Chunks": 162,
+      "format4Rows": 6328310,
+      "savedBytes": 24411244,
+      "off": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/vndb/vndb-A-1",
+        "fieldsBytes": 53191776,
+        "indexBytes": 401899832,
+        "contentBytes": 7533449,
+        "allTermFileBytes": 409433345
+      },
+      "on": {
+        "directory": "/home/runner/work/manabitan/manabitan/reports/vndb/vndb-B-1",
+        "fieldsBytes": 28780532,
+        "indexBytes": 377488588,
+        "contentBytes": 7533449,
+        "allTermFileBytes": 385022101
+      },
+      "fallbackCounts": {
+        "no-strict-size-saving": 10,
+        "unused-offset-before-split-base": 20
+      },
+      "completeOriginalOracle": {
+        "bytes": 5342,
+        "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+      },
+      "initialAndFinalSqlite": {
+        "bytes": 311296,
+        "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+        "userVersion": 0
+      },
+      "everyGroupRootVerified": true,
+      "allResourcesReleased": true,
+      "allParserAndSourceColumnsUnchanged": true,
+      "allActualFieldRowsAndFinalFileReceiptsReconciled": true
+    }
+  ],
+  "scope": "Independent read-only reconciliation of retained, SHA-verified hosted receipts and original output oracles; no new import acquisition.",
+  "limitations": [
+    "Actual OPFS bytes were reread and hashed by the hosted runner before its temporary root was disposed; this audit rechecks retained receipts.",
+    "Sequential production-group term sink with real unpublished epoch0 SQLite state; media projection is checked but media persistence, committed floor13, restart and browser lookup are separate browser gates.",
+    "No latency or peak-memory qualification is claimed."
+  ]
+}

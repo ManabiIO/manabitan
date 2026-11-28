@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "tree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "extTree": "0028cecbfd79ffaa69c62a22ecff5dbc7f0e3f6b",
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "flag": "experimentalReferenceTableFields",
+  "defaultEnabled": false,
+  "persistedSchemaFloor": 13,
+  "claim": "Exact saved persisted term-file bytes when the opt-in format is actually selected; no elapsed-time or process-memory claim.",
+  "originalCompleteCorpus": {
+    "source": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+    "sourceBoundary": "Original format runtime on f28; floor12 predates online-Zstd schema12 and is not claimed compatible with a300.",
+    "rowsAndFiles": "All corpus rows, fields, frames and normalized final files checked; independent format4-to-format2 expansion reproduced original complete oracles.",
+    "results": [
+      {
+        "dictionary": "jmdict",
+        "rows": 528299,
+        "termFileBytesOff": 43315677,
+        "termFileBytesOn": 43274673,
+        "bytesSaved": 41004,
+        "format4Chunks": 5,
+        "totalChunks": 12,
+        "format4Rows": 210000
+      },
+      {
+        "dictionary": "jitendex",
+        "rows": 436555,
+        "termFileBytesOff": 61977692,
+        "termFileBytesOn": 61977692,
+        "bytesSaved": 0,
+        "format4Chunks": 0,
+        "totalChunks": 22,
+        "format4Rows": 0
+      },
+      {
+        "dictionary": "vndb",
+        "rows": 6648310,
+        "termFileBytesOff": 409433345,
+        "termFileBytesOn": 385022101,
+        "bytesSaved": 24411244,
+        "format4Chunks": 162,
+        "totalChunks": 192,
+        "format4Rows": 6328310,
+        "fieldsBytesOff": 53191776,
+        "fieldsBytesOn": 28780532,
+        "contentFileBytes": 7533449,
+        "fallbackChunks": {
+          "strictSize": 10,
+          "unusedOffsetBeforeSplitBase": 20
+        }
+      }
+    ]
+  },
+  "currentValidation": {
+    "full": {
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "runId": 46139050291,
+      "unitTests": {
+        "passed": 15952,
+        "skipped": 47,
+        "filesPassed": 699,
+        "failed": 0
+      },
+      "types": "all four configurations pass",
+      "dryBuild": "pass",
+      "nativeAssets": "pass",
+      "observerContracts": {
+        "node": 5,
+        "python": 5
+      },
+      "changedJavaScriptLint": "eleven style diagnostics in new iterator; no semantic failure"
+    },
+    "lintFollowup": {
+      "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+      "runId": 46139999383,
+      "changedFiles": 1,
+      "change": "Pure row-width conditional and read-call formatting; independent source comparison confirms no decoder/budget/format change.",
+      "focusedIteratorTests": {
+        "passed": 44,
+        "failed": 0
+      },
+      "scopedLint": "pass"
+    },
+    "portableContracts": {
+      "failedSetupRun": 46140621526,
+      "failure": "ESLint configuration required tooling's normal generated Handlebars and Linkedom bundles; no source lint diagnostic or old-reader attempt.",
+      "correctedRun": 46141317509,
+      "nodeContracts": 20,
+      "pythonContracts": 5,
+      "syntaxChecks": 18,
+      "scopedLint": "pass",
+      "previousReader": {
+        "source": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "status": "rejects-floor13-before-eight-mutation-hooks",
+        "sqliteBytesUnchanged": 16384,
+        "format4OpfsFilesUnchanged": 2
+      },
+      "artifactId": 15261827644,
+      "artifactBytes": 27316,
+      "artifactSha256": "d283d1f46dcb9b939433110f6657fe88b4cde3c3e6719860227def4791585b0d",
+      "independentReceiptBlob": "b940659eca76d4eff402ce2c28e38ce817585b30"
+    },
+    "durableProofCommit": "7b649361e2056342abe3eec46c21bcfa08913a7e",
+    "durableProofDirectory": "builds/perf/20261128-4d9f-reference-fields-latest/source-gates",
+    "prCi": {
+      "runId": 46144408353,
+      "head": "dcaf1e3090cc59621f3fd96638b1bc527f6b538f",
+      "unitJob": 140977167035,
+      "unitTestsPassed": 15952,
+      "unitTestsSkipped": 47,
+      "testFilesPassed": 699,
+      "allActiveJobsPassed": true,
+      "chromiumE2E": "passed",
+      "firefoxE2E": "passed",
+      "allFourTypeScriptConfigurations": "passed",
+      "javascriptMarkdownJsonHtmlCss": "passed",
+      "dryBuild": "passed"
+    }
+  },
+  "compatibility": {
+    "floor12ReservedForOnlineZstd": true,
+    "floor13AllowsLegacyEpochZero": true,
+    "positiveEpochStillRequiresValidOnlineRoot": true,
+    "oldFloors10And11RequireEpochZero": true,
+    "promotionOnlyForActualPersistedFormat4": true,
+    "defaultOffAndAllFallbackLeaveFloorUnchanged": true,
+    "priorReaderRejectsBeforeMutation": true
+  },
+  "browser": {
+    "scope": "Exact release ZIP within each off/on pair, fresh profile per import, orderly restart, all media,72 lookup observations and bounded actual field-header/schema-floor observation; storage/correctness only.",
+    "originalSerializerFailure": {
+      "runId": 46136881596,
+      "source": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+      "reason": "Actual E2E JSON projection omitted supplemental referenceFormatActivation receipt; all first-import raw outcomes and failures retained."
+    },
+    "latest16c": {
+      "runId": 46139342690,
+      "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "jmdict": "both flag orders pass",
+      "jitendex": "both flag orders pass",
+      "vndb": "both cells failed inherited old37-unit SAH expectation before activation validation; raw reports retained, not reclassified",
+      "independentAudit": {
+        "status": "complete",
+        "fourCellsPassed": true,
+        "importsPassed": 8,
+        "allMedia": true,
+        "lookupsPerImport": 72,
+        "releaseEntriesPerPackage": 582,
+        "releaseEntriesIdenticalAcrossHosts": true,
+        "originalVndb37FailuresReproduced": true,
+        "vndbSecondModesAbsent": true,
+        "manifestBlob": "ff33879c3f8448bb7fb719150ecbabdd6ccece43",
+        "archiveSha256": "8cf6a9fff5377895b483f852332efe929f8e35f6534e3c0d3ed57bba874eaef8",
+        "archiveBytes": 207596,
+        "archiveMembers": 252,
+        "publicationCommit": "7b649361e2056342abe3eec46c21bcfa08913a7e"
+      }
+    },
+    "independentParentCalibration": {
+      "runId": 46140891339,
+      "source": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "activeSahUnits": 77,
+      "activeSahBytes": 315392,
+      "defaultFlags": true,
+      "artifactId": 15261649240,
+      "artifactSha256": "a03b703d9e0e3ffe47edd953d8ba066911f70ea91d33d33557579eb2011cac5f",
+      "rawReportSha256": "3ea007adcaa5190860333540a6eb1fec87d24bd110b0315fe4235fb60e1bb07b"
+    },
+    "freshVndb": {
+      "runId": 46141945184,
+      "tooling": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+      "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+      "status": "both order cells and all four imports passed; independent raw audit complete",
+      "allocationContract": "prospective exact77, ranges forbidden; all term-file expectations/observer unchanged",
+      "artifacts": [
+        {
+          "id": 15262577737,
+          "name": "reference-browser-vndb-off-on-a30077-4d9f",
+          "bytes": 17262541,
+          "sha256": "62baf2baab181afc9fcd412b2cf63b8383c518c7425de616c2b941b7ab8130ed"
+        },
+        {
+          "id": 15262007286,
+          "name": "reference-browser-vndb-on-off-a30077-4d9f",
+          "bytes": 17262203,
+          "sha256": "f161c5c373beab7e067d3877e82940f4149b8767b6e4ff115bb8421fb528ae6a"
+        }
+      ],
+      "independentAudit": {
+        "manifestBlob": "9dc3167f26fc1d893b4fbcaa198ea877699704fa",
+        "archiveBytes": 151776,
+        "archiveMembers": 96,
+        "archiveUncompressedBytes": 3629034,
+        "archiveSha256": "5d62fd1d2c74486dbdc2e99a1bf5fd76e1eec196b65055582a15b3c53e4fa305",
+        "publicationCommit": "aa07bd2dd4729d04cb308a19f82b2f3e1c953c6a",
+        "actualTermFileBytesSaved": 24411244,
+        "format4Chunks": 162,
+        "format4Rows": 6328310,
+        "allMedia": true,
+        "lookupsPerImport": 72,
+        "releaseEntriesIdenticalAcrossBothHosts": 582,
+        "changedEntryVs16c": "js/dictionary/term-record-opfs-store.js",
+        "changedEntryMatches85SourceBlob": "d056b473923f762ab2c4dca91393effa2abc0f40"
+      }
+    }
+  },
+  "latestCorpus": {
+    "status": "complete-all-six-observations-and-independent-audit-passed",
+    "runtime": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "qualification": "Current source proof of term-file and logical output equivalence at unpublished ingestion boundary. Browser proves actual committed floor13/restart/media separately; no timing or process-memory claim.",
+    "sharedBoundaryHistory": [
+      {
+        "runId": 46142163868,
+        "source": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+        "scope": "metadata harness only",
+        "status": "reader-only14 controls passed; actual Jitendex/VNDB A/B group0 failed missing glossary schema; retained"
+      },
+      {
+        "runId": 46143543189,
+        "source": "d4c3991ed4a5b2e6eda69bddcdc78e1638eb6bc6",
+        "scope": "shared full-schema helper gate",
+        "status": "scoped lint stopped before15 controls and any corpus; retained"
+      },
+      {
+        "runId": 46143955956,
+        "source": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+        "scope": "shared full-schema helper gate",
+        "status": "scoped lint and parent first14 controls passed; public-sink control15 measured unloaded resident size and stopped before candidate controls/corpus; persisted loading correction pending"
+      }
+    ],
+    "runId": 46145076480,
+    "tooling": "26c5cb9ff1a19afd583f94a6c86f336dab783719",
+    "toolingTree": "f58aa97ab47e2605980b33ecdee58825b19064af",
+    "portableManifestBlob": "aeb4d01e6eae8de3655514a009c3abada9424042",
+    "nodeContractsPassed": 35,
+    "pythonContractsPassed": 5,
+    "scopedLint": "passed",
+    "previousReader": "passed-with-unchanged-SQLite-and-both-format4-files",
+    "sourceArms": "same final85 runtime; A flagoff and B flagtrue",
+    "observations": 6,
+    "groupsPerArm": 204,
+    "chunksPerArm": 226,
+    "originalOracleFilesVerified": 8,
+    "completeOutputOracles": "All parser/source rows, fields, frames, and independently expanded final-file hashes match the original unchanged oracles.",
+    "sqlite": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0,
+      "exportUnchangedAcrossAllSixFreshUnseededObservations": true,
+      "rootUnchangedEveryGroup": true
+    },
+    "cleanup": "All storage drains, worker joins, owned DB closes and resource releases fulfilled.",
+    "results": [
+      {
+        "dictionary": "jmdict",
+        "rows": 528299,
+        "termFileBytesOff": 43315677,
+        "termFileBytesOn": 43274673,
+        "bytesSaved": 41004,
+        "format4Chunks": 5,
+        "totalChunks": 12,
+        "format4Rows": 210000
+      },
+      {
+        "dictionary": "jitendex",
+        "rows": 436555,
+        "termFileBytesOff": 61977692,
+        "termFileBytesOn": 61977692,
+        "bytesSaved": 0,
+        "format4Chunks": 0,
+        "totalChunks": 22,
+        "format4Rows": 0
+      },
+      {
+        "dictionary": "vndb",
+        "rows": 6648310,
+        "termFileBytesOff": 409433345,
+        "termFileBytesOn": 385022101,
+        "bytesSaved": 24411244,
+        "format4Chunks": 162,
+        "totalChunks": 192,
+        "format4Rows": 6328310,
+        "fieldsBytesOff": 53191776,
+        "fieldsBytesOn": 28780532,
+        "contentFileBytes": 7533449,
+        "fallbackChunks": {
+          "strictSize": 10,
+          "unusedOffsetBeforeSplitBase": 20
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 15263461668,
+        "name": "reference-fields85a8-contracts-46145076480-1",
+        "bytes": 32769,
+        "sha256": "8656ab2d6d39776a6af40aeb75b4cdede5162d8e975fc6b1d31b5635bc345da2"
+      },
+      {
+        "id": 15263227579,
+        "name": "reference-fields85a8-vndb-46145076480-1",
+        "bytes": 798834,
+        "sha256": "0ee3ed9d257cf2501517c79ac6080611d7b9d27465fc6e5e9e76e4b402ebab11"
+      },
+      {
+        "id": 15263163001,
+        "name": "reference-fields85a8-jitendex-46145076480-1",
+        "bytes": 177490,
+        "sha256": "e44b05ea5687eca3fe9e61bd59444caaeef77ba0fd29ebc81b2edc2b9400b6d2"
+      },
+      {
+        "id": 15263054810,
+        "name": "reference-fields85a8-jmdict-46145076480-1",
+        "bytes": 127578,
+        "sha256": "169fe28dd94972f1aa127b00a33c213d7e8edf282e26726edcd8939ccddab232"
+      }
+    ],
+    "independentContractAudit": {
+      "manifestBlob": "712f86064fe937f107778107c7f5a9b24d3a7079",
+      "reportBlob": "883d10325b40e1f39c1c05ab362c2d576b5f9c2a",
+      "status": "passed",
+      "nodeContracts": 35,
+      "pythonContracts": 5,
+      "syntaxChecks": 22,
+      "lintExit": 0,
+      "skipped": 0
+    },
+    "finalEvidenceManifest": "2cf6de8b8450ffd3f01acdbfe515d89948f03933",
+    "workflowProvenance": {
+      "portableWorkflowBlob": "5f63c448949ced2f9a7c275ea5f1b3065da02b40",
+      "executedWorkflowBlob": "4939c30661206c6202fd654019b9f0b7f43ce4d1",
+      "difference": "The executed26c5 workflow replaces manual dispatch with a unique initial-push trigger, explicit Bash, and first-attempt guards. All runtime, helper code, original oracles and acquisition commands are unchanged."
+    }
+  },
+  "limitations": [
+    "Experimental flag remains off; enabling actual format4 raises the schema floor and prevents opening with older builds.",
+    "Stored term bytes exclude media and SQLite; 24,411,244B is5.962% of VNDB term files and45.893% of the reference/score field sections, not the entire installed dictionary.",
+    "Browser checks use orderly restart; corruption, interruption and old-reader compatibility have separate targeted tests.",
+    "No latency or process-memory benefit established."
+  ],
+  "updatedAt": "2026-11-28T12:42:00Z",
+  "sourceCompatibilityReview": {
+    "blob": "87063c8b45537814cce782acf03576add902d6c0",
+    "metadataSource": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "formatSource": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "sharedRuntimeFile": "ext/js/dictionary/dictionary-database.js",
+    "overlappingBaseHunks": 0,
+    "sharedChangedMethods": 0,
+    "concreteInteractionBlockerFound": false,
+    "combinedExecutionQualified": false
+  }
+}

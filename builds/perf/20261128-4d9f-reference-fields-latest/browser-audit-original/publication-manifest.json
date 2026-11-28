@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Independent unchanged-validator audit of original16c browser cohort and distinct default-flag a300 allocation; no new measurements or retrospective VNDB qualification",
+  "destination": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original",
+  "files": [
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ae394956c2fe85e352e1137df1baf7405cd4c3e4",
+      "bytes": 5593,
+      "sha256": "abe8191298dfa92fd5d307f23cbbf8a1c4a2b0f8973d7d2fa4b2b167ceff7a89"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/archive-members.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "923458ac2811210c882c34f6a7d19e7e5c7c6a78",
+      "bytes": 51889,
+      "sha256": "26325b2d579950f8f1243b32486c850e4489130b9a7339b226874a60e5cd6984"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/audit-format16c.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93870200b2841e54c23b005d8f3ce23ef294ddcb",
+      "bytes": 15412,
+      "sha256": "033345b2b37403cdcf5e0a4f1301557471e67270e5ceaf0e3ff0654cd5da2023"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/audit-parent-calibration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "946b2b3cd303c6892fb39bc3899059a2131fe1be",
+      "bytes": 4560,
+      "sha256": "4d49e0dcc96742ae8d6f61ed318446a14e33debeebbfc188d26d40b5000abb91"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/browser-audit-index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f8342cfdb82b046d5f0e4a4f2dd7be2c215fa6d",
+      "bytes": 18938,
+      "sha256": "3278cff0b7184b7fbf496d6f854578f362486e721a046dbc1e9e29f55737ca8e"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/format77-source-contract.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f45e88253390f19fcd5384304ae2177cb9fb8d51",
+      "bytes": 5182,
+      "sha256": "008ea4233ac819f5de3fde9286233c21339ad3ce690a024980467cd0777ded2e"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/format77-source-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4250ffc8cf73778d844316579951d484092de8c",
+      "bytes": 3043,
+      "sha256": "352fbfb96f5cb1dc599eda96aab688705b2d1cee94b3aac3159dd843b3c30598"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/parent-calibration-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a85f2c2ebffc22fb3778247e0212317c77391d2",
+      "bytes": 1341,
+      "sha256": "274b7ed54fb80a62ad9d419ab94eaf96298ce5d7e0d2ba8cb3f85f77302e4830"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/pinned-source-receipts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "587c1091e56f05cbc41d3cd8f657d1ab0dbc3f9e",
+      "bytes": 6339,
+      "sha256": "e81f4157c876fbf6341d27eb0e9ac74441880ed2e91dbd5e1aa4ec4456b0400b"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/source-git-proofs.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b75009181deff0d8fe11d252fbe984f6922647f0",
+      "bytes": 393,
+      "sha256": "08763fca02e936acdb380332e28c20364b811b7676728ea27de9bcfb94ea8574"
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/browser-audit-original/raw-and-audit-evidence.tar.xz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a0813876ff05fb9d6cdbef056bbd4fe295f71ee",
+      "bytes": 207596,
+      "sha256": "8cf6a9fff5377895b483f852332efe929f8e35f6534e3c0d3ed57bba874eaef8"
+    }
+  ]
+}

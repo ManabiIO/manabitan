@@ -1,0 +1,23 @@
+{
+  "addedEntries": 0,
+  "afterEntries": 582,
+  "afterSource": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "beforeEntries": 582,
+  "beforeSource": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+  "changedEntries": 1,
+  "delta": [
+    {
+      "after": "434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45",
+      "afterGitBlob": "d056b473923f762ab2c4dca91393effa2abc0f40",
+      "before": "3cfb7f4ca9094b05e806bc6715c41ae8c7b596f51cda1b223ddc643ae63e1d44",
+      "path": "js/dictionary/term-record-opfs-store.js",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js"
+    }
+  ],
+  "earlierObservationsRelabeled": false,
+  "previousInventorySha256": "9ad9ffa36d19bd4dc4b78fc66626828b7f773f60b681ebb4afbebe3ded40856c",
+  "removedEntries": 0,
+  "schemaVersion": 1,
+  "sourceDiffIsLintOnly": true,
+  "unchangedEntries": 581
+}

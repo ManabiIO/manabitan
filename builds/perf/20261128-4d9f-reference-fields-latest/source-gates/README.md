@@ -1,0 +1,12 @@
+# Latest reference-field source validation
+
+These are the verbatim original GitHub Actions artifact ZIPs. The accompanying member inventory verifies each original ZIP size and SHA-256 and every file inside it. Failed outcomes remain failed; this publication does not repeat an acquisition.
+
+- [15260817279.zip](15260817279.zip), [run 46139050291](https://github.com/ManabiIO/manabitan/actions/runs/46139050291): source `16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97` passes 15,952 unit tests (47 skipped; 699 files), all four TypeScript configurations, dry build, native-asset regeneration, five Node observer contracts and five Python observer contracts. Changed-JavaScript lint fails with eleven style diagnostics in the new iterator.
+- [15261487300.zip](15261487300.zip), [run 46139999383](https://github.com/ManabiIO/manabitan/actions/runs/46139999383): final source `85a8aa49f76fbabd2dc494aad247f74774ff2573` corrects only equivalent conditional/read-call formatting in that one file. The source preimage/postimage is checked; scoped lint and all 44 iterator tests pass. No decoder, byte-budget, data format or oracle changes.
+- [15261214149.zip](15261214149.zip), [run 46140621526](https://github.com/ManabiIO/manabitan/actions/runs/46140621526): the first portable setup passes 20 Node contracts, five Python contracts and 18 syntax checks, then ESLint configuration cannot load the tooling checkout's normal generated libraries. It does not attempt the previous-reader check. This is retained as a setup failure.
+- [15261827644.zip](15261827644.zip), [run 46141317509](https://github.com/ManabiIO/manabitan/actions/runs/46141317509): preparing the tooling checkout's ordinary bundles resolves that concrete setup failure. All 20 Node contracts, five Python contracts, 18 syntax checks and scoped lint pass. The actual a300 previous reader rejects schema 13 before all eight recovery/prepare/schema/purge hooks. The 16,384-byte SQLite export and both real format 4 files remain byte-identical.
+
+The previous-reader fixture uses the actual candidate writer and actual old `DictionaryDatabase._openConnection` with real SQLite. OPFS preparation and recovery are observation hooks that are never reached. It is not an older-browser restart measurement.
+
+See [verified-source-gate-artifacts.json](verified-source-gate-artifacts.json) for complete hashes and member inventories. The new full-schema corpus boundary and its later observations are recorded separately.

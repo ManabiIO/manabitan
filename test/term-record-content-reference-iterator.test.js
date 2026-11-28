@@ -1,5 +1,6 @@
 /* Copyright (C) 2026 Manabitan authors. GPL-3.0-or-later. */
 import {describe, expect, test, vi} from 'vitest';
+import {hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {ContentReferenceIterationError, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME, RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME, RAW_TERM_CONTENT_TOKEN_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
@@ -8,7 +9,7 @@ const GENERATION = 'dictionary-storage-generation:7';
 const DICTIONARY = 'Iterator Dictionary';
 const U32_NULL = 0xffffffff;
 /** @typedef {{name: string, start: number, end: number}} ReadRange */
-/** @typedef {{codec?: string, count?: number, format?: number, corruptDerived?: boolean}} ShardSpec */
+/** @typedef {{codec?: string, count?: number, format?: number, referenceCount?: number, corruptDerived?: boolean}} ShardSpec */
 
 /**
  * Browser-shaped immutable ranged file: whole-file reads fail the test. The
@@ -65,7 +66,8 @@ async function fixture(specs = [{}]) {
     const layout = [];
     let nextId = 1;
     for (let index = 0; index < specs.length; ++index) {
-        const {codec = 'raw', count = 80, format = 1, corruptDerived = false} = specs[index];
+        const {codec = 'raw', count = 80, format = 1, referenceCount = 171, corruptDerived = false} = specs[index];
+        const referenceKeys = Uint16Array.from({length: count}, (_, row) => [0, referenceCount - 1, Math.min(1, referenceCount - 1), Math.min(2, referenceCount - 1), Math.floor(referenceCount / 2)][row % 5]);
         const base = 2 ** 40 + index * 100000;
         const fileName = store._getShardSegmentFileName(DICTIONARY, codec, index);
         const generation = Uint8Array.from({length: 16}, (_, i) => i + index);
@@ -76,14 +78,33 @@ async function fixture(specs = [{}]) {
             reading: 'reading-' + i,
             expressionReverse: null,
             readingReverse: null,
-            entryContentOffset: i === 1 ? -1 : base + i * 11,
-            entryContentLength: i === 2 ? -1 : i + 3,
+            entryContentOffset: format === 4 ? (referenceKeys[i] === 1 ? -1 : base + referenceKeys[i] * 11) : (i === 1 ? -1 : base + i * 11),
+            entryContentLength: format === 4 ? (referenceKeys[i] === 2 ? -1 : referenceKeys[i] % 1000 + 3) : (i === 2 ? -1 : i + 3),
             entryContentDictName: codec,
             score: 0,
             sequence: null}));
         const encoded = await store._encodeRecords(records);
         let fields;
-        if (format === 2) {
+        if (format === 4) {
+            // Encode a valid on-disk reference table independently of the
+            // writer's size-based admission. Large unused tables exercise the
+            // reader's page bound without a large expression/payload fixture.
+            const offsetsStart = 24; // Twenty-byte header and one int32 score.
+            const lengthsStart = offsetsStart + referenceCount * 4;
+            const keysStart = lengthsStart + Math.ceil(referenceCount / 2) * 4;
+            fields = new Uint8Array(keysStart + count * 4);
+            const view = new DataView(fields.buffer);
+            view.setUint32(0, 0x3446524d, true);
+            view.setUint32(4, count, true);
+            view.setUint32(8, 1, true);
+            view.setUint32(12, 4, true);
+            view.setUint32(16, referenceCount, true);
+            for (let key = 0; key < referenceCount; ++key) {
+                view.setUint32(offsetsStart + key * 4, key === 1 ? U32_NULL : key * 11, true);
+                view.setUint16(lengthsStart + key * 2, key === 2 ? 65535 : key % 1000 + 3, true);
+            }
+            for (let row = 0; row < count; ++row) { view.setUint16(keysStart + row * 2, referenceKeys[row], true); }
+        } else if (format === 2) {
             fields = store._encodeArtifactRecordFields(
                 {rowCount: count, scoreList: new Int32Array(count)},
                 Float64Array.from(records, (row) => row.entryContentOffset),
@@ -166,9 +187,11 @@ async function fixture(specs = [{}]) {
 /**
  * @param {TermRecordOpfsStore} store
  * @param {boolean} [restart]
+ * @param {number} [maxReferences]
+ * @param {number} [byteBudget]
  * @returns {Promise<{rows: import('../ext/js/dictionary/term-record-opfs-store.js').ContentReference[], emptyPages: number}>}
  */
-async function collect(store, restart = false) {
+async function collect(store, restart = false, maxReferences = 16384, byteBudget = 1024) {
     /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').ContentReferenceCursor|null} */
     let cursor = null;
     /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').ContentReference[]} */
@@ -180,11 +203,11 @@ async function collect(store, restart = false) {
             DICTIONARY,
             GENERATION,
             cursor,
-            {byteBudget: 1024, isGenerationCurrent: () => true},
+            {byteBudget, maxReferences, isGenerationCurrent: () => true},
         );
         expect(cursor).toEqual(old);
         const charge = result.references.reduce((sum, row) => sum + 64 + row.entryContentDictName.length * 2, 0);
-        expect(result.bytesRead + charge).toBeLessThanOrEqual(1024);
+        expect(result.bytesRead + charge).toBeLessThanOrEqual(byteBudget);
         if (result.references.length === 0) { ++emptyPages; }
         rows.push(...result.references);
         if (result.done) { return {rows, emptyPages}; }
@@ -205,7 +228,7 @@ function expectNoForegroundState(store) {
 }
 
 describe('private bounded authoritative content-reference metadata iterator', () => {
-    test.each([1, 2, 3])('format %i: bounds, exact references, nulls and >2^32 offsets survive JSON resume', async (format) => {
+    test.each([1, 2, 3, 4])('format %i: bounds, exact references, nulls and >2^32 offsets survive JSON resume', async (format) => {
         const f = await fixture([{format, count: 300}]);
         vi.spyOn(f.store, '_tryLoadPersistentDictionaryIndex').mockImplementation(async () => { throw new Error('Foreground index load forbidden'); });
         vi.spyOn(f.store, '_rebuildLookupIndexForShard').mockImplementation(async () => { throw new Error('Whole-file repair forbidden'); });
@@ -262,8 +285,8 @@ describe('private bounded authoritative content-reference metadata iterator', ()
         expectNoForegroundState(f.store);
     });
 
-    test('a fresh store resumes a portable cursor and outputs have no borrowed state', async () => {
-        const f = await fixture([{count: 1000, format: 2}]);
+    test.each([2, 4])('format %i: a fresh store resumes a portable cursor and outputs have no borrowed state', async (format) => {
+        const f = await fixture([{count: 1000, format}]);
         const first = await f.store.iterateContentReferences(
             DICTIONARY,
             GENERATION,
@@ -288,8 +311,8 @@ describe('private bounded authoritative content-reference metadata iterator', ()
         expectNoForegroundState(restored);
     });
 
-    test('an interrupted verification step replays the same cursor and checksum exactly', async () => {
-        const f = await fixture([{format: 3, count: 500}]);
+    test.each([3, 4])('format %i: an interrupted verification step replays the same cursor and checksum exactly', async (format) => {
+        const f = await fixture([{format, count: 500}]);
         const first = await f.store.iterateContentReferences(
             DICTIONARY,
             GENERATION,
@@ -557,8 +580,8 @@ test('legacy screening skips only a validated matched shard without reading its 
 });
 
 
-test('a finished block range exposes portable interior rows without crossing the shard boundary', async () => {
-    const f = await fixture([{codec: 'raw-block-v2', count: 160, format: 2}, {codec: 'raw-block-v2', count: 136, format: 2}]);
+test.each([2, 4])('format %i: a finished block range exposes portable interior rows without crossing the shard boundary', async (format) => {
+    const f = await fixture([{codec: 'raw-block-v2', count: 160, format}, {codec: 'raw-block-v2', count: 136, format}]);
     let current = true;
     const options = {maxReferences: 64, maxBlockReferences: 256, isGenerationCurrent: () => current};
     const start = await f.store.iterateContentReferences(DICTIONARY, GENERATION, null, options);
@@ -588,4 +611,97 @@ test('an unwrapped legacy reference page still obeys the smaller bound', async (
     const page = await f.store.iterateContentReferences(DICTIONARY, GENERATION, verify.cursor, options);
     expect(page.references).toHaveLength(64);
     expect(page.cursorAfterBlockReference).toBeUndefined();
+});
+
+
+describe('reference-table maintenance pages', () => {
+    test.each([[171, 301, 1024], [65534, 5, 262144]])('table %i with %i odd rows remains bounded at %i bytes and maxReferences1', async (referenceCount, count, byteBudget) => {
+        const f = await fixture([{format: 4, referenceCount, count, corruptDerived: true}]);
+        expect(referenceCount * 6).toBeGreaterThan(byteBudget);
+        const {rows, emptyPages} = await collect(f.store, true, 1, byteBudget);
+        expect(rows).toEqual(f.expected);
+        expect(emptyPages).toBeGreaterThan(1);
+        for (const read of f.reads) { expect(read.end - read.start).toBeLessThanOrEqual(byteBudget); }
+        const layout = f.layout[0];
+        expect(f.reads.filter((read) => read.name.endsWith('.mbti')).every((read) => read.end <= layout.payloadStart || read.start >= layout.payloadEnd)).toBe(true);
+        expectNoForegroundState(f.store);
+    });
+
+    test.each(['count-zero', 'count-sentinel', 'count-overflow', 'reference-key', 'reference-key-sentinel', 'score-count-sentinel', 'score-key', 'score-key-sentinel', 'padding', 'unused-offset', 'checksum', 'truncated'])('rejects %s before returning any format4 references', async (damage) => {
+        const f = await fixture([{format: 4, count: 301, referenceCount: 171}]);
+        const layout = f.layout[0];
+        const name = layout.fileName + '.mbti';
+        const bytes = f.files.get(name);
+        if (typeof bytes === 'undefined') { throw new Error('Missing reference container'); }
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        const fieldsStart = layout.fieldsStart;
+        const offsetsStart = fieldsStart + 24;
+        const lengthsStart = offsetsStart + 171 * 4;
+        const keysStart = lengthsStart + 86 * 4;
+        const scoreKeysStart = keysStart + 301 * 2;
+        if (damage === 'count-zero') { view.setUint32(fieldsStart + 16, 0, true); }
+        if (damage === 'count-sentinel') { view.setUint32(fieldsStart + 16, 65535, true); }
+        if (damage === 'count-overflow') { view.setUint32(fieldsStart + 16, 65536, true); }
+        if (damage === 'reference-key') { view.setUint16(keysStart, 171, true); }
+        if (damage === 'reference-key-sentinel') { view.setUint16(keysStart, 65535, true); }
+        if (damage === 'score-count-sentinel') { view.setUint32(fieldsStart + 8, 65535, true); }
+        if (damage === 'score-key') { view.setUint16(scoreKeysStart, 1, true); }
+        if (damage === 'score-key-sentinel') { view.setUint16(scoreKeysStart, 65535, true); }
+        if (damage === 'padding') { view.setUint16(lengthsStart + 171 * 2, 1, true); }
+        if (damage === 'unused-offset') {
+            // Only key7 is unsafe, and no row references it. Every selected
+            // row remains independently representable at the new chunk base.
+            view.setBigUint64(48, BigInt(Number.MAX_SAFE_INTEGER - 3), true);
+            for (let key = 0; key < 171; ++key) { view.setUint32(offsetsStart + key * 4, key === 1 ? U32_NULL : 0, true); }
+            view.setUint32(offsetsStart + 7 * 4, 4, true);
+        }
+        if (damage === 'checksum') { bytes[fieldsStart + 20] ^= 1; }
+        if (damage === 'truncated') { f.files.set(name, bytes.slice(0, -1)); }
+        if (damage !== 'checksum' && damage !== 'truncated') {
+            view.setUint32(72, hashTermLookupKeyBytes(bytes.subarray(fieldsStart)), true);
+        }
+        /** @type {import('../ext/js/dictionary/term-record-opfs-store.js').ContentReferenceCursor|null} */
+        let cursor = null;
+        let failure;
+        for (let step = 0; step < 100; ++step) {
+            try {
+                const page = await f.store.iterateContentReferences(DICTIONARY, GENERATION, cursor, {byteBudget: 1024, isGenerationCurrent: () => true});
+                expect(page.references).toHaveLength(0);
+                cursor = page.cursor;
+            } catch (error) {
+                failure = error;
+                break;
+            }
+        }
+        expect(failure).toBeInstanceOf(ContentReferenceIterationError);
+        expect(failure).toMatchObject({kind: 'invalid'});
+        expectNoForegroundState(f.store);
+    });
+
+    test('a sparse gather checks ownership after its table-range await', async () => {
+        const f = await fixture([{format: 4, count: 301, referenceCount: 171}]);
+        let current = true;
+        const options = {byteBudget: 262144, isGenerationCurrent: () => current};
+        const verified = await f.store.iterateContentReferences(DICTIONARY, GENERATION, null, options);
+        expect(verified.references).toEqual([]);
+        const entered = Promise.withResolvers();
+        const resume = Promise.withResolvers();
+        const original = f.store._readFileRange.bind(f.store);
+        const firstTableOffset = f.layout[0].fieldsStart + 24;
+        let paused = false;
+        vi.spyOn(f.store, '_readFileRange').mockImplementation(async (file, start, end) => {
+            if (!paused && start === firstTableOffset) {
+                paused = true;
+                entered.resolve(void 0);
+                await resume.promise;
+            }
+            return await original(file, start, end);
+        });
+        const pending = f.store.iterateContentReferences(DICTIONARY, GENERATION, verified.cursor, options);
+        await entered.promise;
+        current = false;
+        resume.resolve(void 0);
+        await expect(pending).rejects.toMatchObject({kind: 'stale'});
+        expectNoForegroundState(f.store);
+    });
 });

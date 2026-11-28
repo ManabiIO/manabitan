@@ -24,7 +24,7 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-test.each([13, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
+test.each([14, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec(`PRAGMA user_version = ${version}`);
@@ -54,7 +54,7 @@ test.each([13, -1])('startup refuses schema %s before old SQL or OPFS initializa
     expect(connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'table'")).toEqual(['newer_storage']);
 });
 
-test('keeps ordinary dictionaries at schema 10 and accepts a published packed-media schema', async () => {
+test.each([11, 12, 13])('keeps ordinary dictionaries at schema 10 and accepts published reader floor %i', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec('PRAGMA user_version = 10');
@@ -66,21 +66,21 @@ test('keeps ordinary dictionaries at schema 10 and accepts a published packed-me
     expect(connection.selectValue('PRAGMA user_version')).toBe(10);
 
     connection.exec('BEGIN');
-    connection.exec('PRAGMA user_version = 11');
+    connection.exec(`PRAGMA user_version = ${version}`);
     connection.exec('ROLLBACK');
     expect(connection.selectValue('PRAGMA user_version')).toBe(10);
 
     connection.exec('BEGIN');
-    connection.exec('PRAGMA user_version = 11');
+    connection.exec(`PRAGMA user_version = ${version}`);
     connection.exec('COMMIT');
-    expect(database._getSupportedInstalledSchemaVersion()).toBe(11);
+    expect(database._getSupportedInstalledSchemaVersion()).toBe(version);
     await database._runSchemaMigrations();
-    expect(connection.selectValue('PRAGMA user_version')).toBe(11);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(version);
     expect(connection.selectValues('SELECT value FROM preserved')).toEqual(['text']);
 });
 
 
-test.each([[10, 1], [11, 1], [12, 0]])('rejects schema %s with incompatible root epoch %s before recovery', async (version, epoch) => {
+test.each([[10, 1], [11, 1], [12, 0], [13, -1], [13, 0.5], [13, 2 ** 53]])('rejects schema %s with incompatible root epoch %s before recovery', async (version, epoch) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec(`PRAGMA user_version = ${version}`);
@@ -118,4 +118,40 @@ test('packed-media publication cannot lower a committed online-content format ga
     connection.exec('COMMIT');
     await database._runSchemaMigrations();
     expect(connection.selectValue('PRAGMA user_version')).toBe(12);
+});
+
+
+test.each([[10, 0], [11, 0], [12, 1], [13, 0], [13, 2]])('supports floor %s and root epoch %s without changing SQLite', async (version, epoch) => {
+    const connection = new sqlite3.oo1.DB(':memory:');
+    connections.push(connection);
+    connection.exec('CREATE TABLE termContentStorageState(singleton INTEGER PRIMARY KEY, activeEpoch INTEGER, logicalHighWater INTEGER)');
+    connection.exec({sql: 'INSERT INTO termContentStorageState VALUES (1, ?, 32)', bind: [epoch]});
+    connection.exec('PRAGMA user_version = ' + version);
+    const before = sqlite3.capi.sqlite3_js_db_export(connection);
+    vi.mocked(openOpfsDatabase).mockResolvedValue(connection);
+    const database = new DictionaryDatabase();
+    await expect(database._openSupportedDictionaryConnection()).resolves.toEqual({storageEpoch: epoch, logicalHighWater: 32});
+    expect(sqlite3.capi.sqlite3_js_db_export(connection)).toEqual(before);
+});
+
+test('online and packed-media promotions preserve a committed format13 floor', async () => {
+    const connection = new sqlite3.oo1.DB(':memory:');
+    connections.push(connection);
+    connection.exec('PRAGMA user_version = 11');
+    const database = new DictionaryDatabase();
+    Reflect.set(database, '_db', connection);
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(13);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(13);
+    connection.exec('ROLLBACK');
+    expect(connection.selectValue('PRAGMA user_version')).toBe(11);
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(13);
+    connection.exec('COMMIT');
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(12);
+    database._raiseDictionaryStorageVersion(11);
+    connection.exec('COMMIT');
+    await database._runSchemaMigrations();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(13);
 });

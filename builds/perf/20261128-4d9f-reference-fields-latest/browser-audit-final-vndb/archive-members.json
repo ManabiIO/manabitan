@@ -1,0 +1,497 @@
+{
+  "allMembersReopenedAndVerified": true,
+  "archive": "raw-and-audit-evidence.tar.xz",
+  "archiveBytes": 151776,
+  "archiveSha256": "5d62fd1d2c74486dbdc2e99a1bf5fd76e1eec196b65055582a15b3c53e4fa305",
+  "excludedDerivedFiles": [
+    "__pycache__/*.pyc"
+  ],
+  "excludedOriginalFiles": [
+    "package.zip (each artifact; full independent ZIP/member inventory retained)"
+  ],
+  "memberCount": 96,
+  "members": [
+    {
+      "bytes": 6163,
+      "path": "README.md",
+      "sha256": "db34f0d6a0d3e644e2fdcdd61ea65792cc551d1496ed516e247f5e1c6d011db7"
+    },
+    {
+      "bytes": 15617,
+      "path": "audit-format85-vndb.py",
+      "sha256": "1e32e18b9d6342a0e2bc6f40b65883aaddf2457a8b3b7ac2c7cbb36b65beb6be"
+    },
+    {
+      "bytes": 9609,
+      "path": "browser-audit-index.json",
+      "sha256": "8021af9df6a03b4333eaec5a51289bb96481030106d397245408e3ebe0151cbe"
+    },
+    {
+      "bytes": 845,
+      "path": "package-comparison.json",
+      "sha256": "d61c5655036f54f1c52107c0beb5033a61907928995bc3272b203fc5467024ee"
+    },
+    {
+      "bytes": 10796,
+      "path": "pinned-source-receipts.json",
+      "sha256": "96e231ce1c6204fa9824fae7ad78c452b9859641e0fdde8f74d0bb274c3d95c0"
+    },
+    {
+      "bytes": 64072,
+      "path": "previous-16c-package-inventory.json",
+      "sha256": "9ad9ffa36d19bd4dc4b78fc66626828b7f773f60b681ebb4afbebe3ded40856c"
+    },
+    {
+      "bytes": 9609,
+      "path": "raw/audit-index.json",
+      "sha256": "8021af9df6a03b4333eaec5a51289bb96481030106d397245408e3ebe0151cbe"
+    },
+    {
+      "bytes": 634,
+      "path": "raw/audit-input-identities.json",
+      "sha256": "73f2e2883d4b6d458ac769d0ad679eac6fe3c38a068cee1b4aea98070696c92e"
+    },
+    {
+      "bytes": 8363,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/activation-overlay.py",
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27"
+    },
+    {
+      "bytes": 185,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/browser-identity.json",
+      "sha256": "b8a96f3759f77eaac11ce9698faa3a3f75e71c14d5b08429b83a19f2496cc104"
+    },
+    {
+      "bytes": 116,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/build-exit.json",
+      "sha256": "9ad05c2cc1d71365c154452d8251f884b0f117244936d63e9ff6ea5159362a5f"
+    },
+    {
+      "bytes": 128,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/build.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 105,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/fixtures-exit.json",
+      "sha256": "ae26c2e1fc7afd914c2171a778c923be181b930df846fdebdc718f32aa97bb40"
+    },
+    {
+      "bytes": 171,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/fixtures.log",
+      "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+    },
+    {
+      "bytes": 342866,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/harness-instrumented.js",
+      "sha256": "85011096c37dc98fabf5c07e4be1e87405e6e4f8e7270daa28fa8448c05885f7"
+    },
+    {
+      "bytes": 325917,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/harness-original.js",
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "bytes": 396,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/import-off-exit.json",
+      "sha256": "f22bc6413197e806fefd06bc863e2810f69f27f2442b0e1d4e5a51c9d8414153"
+    },
+    {
+      "bytes": 1744,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/import-off.log",
+      "sha256": "b169330647a2bd75cdb093a1ec186ca0a59757088b6b20f32989a8ef228ff028"
+    },
+    {
+      "bytes": 394,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/import-on-exit.json",
+      "sha256": "2ea3c62e390b2b486d0fa3bab1f2f1371c083ea31651141e84218ad8f6ae8026"
+    },
+    {
+      "bytes": 1741,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/import-on.log",
+      "sha256": "19a980840a104eb093e9e2bf748ce304c5320865248aa0b3b6aa2d9d37022636"
+    },
+    {
+      "bytes": 3440,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/independent-audit.json",
+      "sha256": "d451d04ca4152ea2685369a668dc6a8bd911d0f714f5d7101114cab894435e84"
+    },
+    {
+      "bytes": 5886,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/independent-member-inventory.json",
+      "sha256": "fe8d21002aaf753dfb7d13257c61f27f9c645027d83736e6c45c1d4146f02a00"
+    },
+    {
+      "bytes": 64196,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/independent-package-inventory.json",
+      "sha256": "85cc4e233c4cdd2d66bdf2e4ee039dcbbba2fd3af74282418bee277fbf73dc59"
+    },
+    {
+      "bytes": 81,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/libs-exit.json",
+      "sha256": "e931a6dbe90f77ffd869768605dc672f49e5afb4bb34051ddb74e0ef7d80e964"
+    },
+    {
+      "bytes": 60,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/libs.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 90,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/license-exit.json",
+      "sha256": "c039ecb5431fa59ab9962a253a9551390152508d8cbc618f7288031b094cfdaa"
+    },
+    {
+      "bytes": 215,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/license.log",
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "bytes": 1135,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/observations.json",
+      "sha256": "98ce2ee182b7e0fb722f8920975b723dd86ec704db06f1a677c8ac65ce33e20a"
+    },
+    {
+      "bytes": 330,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/activation-receipt.json",
+      "sha256": "ffc94232f4f9d4b82f93c83787918280d14fa3ee2abfb007b3d286bbca785d26"
+    },
+    {
+      "bytes": 25807,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/canonical-receipt.json",
+      "sha256": "254a94a08eac47adca6e119103e2bf9f0c52c071f4fbf83e4119c72909493560"
+    },
+    {
+      "bytes": 25754,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/normalized-receipt.json",
+      "sha256": "ad5e252f1ec11e04375ced11d49661c597f167ddd19aef09c34b26a79d87a15b"
+    },
+    {
+      "bytes": 85268,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/run-1.html",
+      "sha256": "f45f437471e0c2b4ed403badaaded6367a0102b846d0ba95b2ce40593aa77422"
+    },
+    {
+      "bytes": 231118,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/run-1.json",
+      "sha256": "950daf6ebee65d55c159ea4ea0e609d7c0aba63b4c0c662a11d3b80f565d3157"
+    },
+    {
+      "bytes": 60405,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/off/summary.json",
+      "sha256": "17ee227e394779740741966adb42f3011f6fbace3401a24ff051b0359a92d4e6"
+    },
+    {
+      "bytes": 341,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/activation-receipt.json",
+      "sha256": "6c145e687218729d305fb5c937ededc3f1e502318115e343e00023c27eda987e"
+    },
+    {
+      "bytes": 25806,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/canonical-receipt.json",
+      "sha256": "fa8dda189249f03128778788fcd737abf8eea3fd30f8db37f66b47922c2950a6"
+    },
+    {
+      "bytes": 25754,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/normalized-receipt.json",
+      "sha256": "ad5e252f1ec11e04375ced11d49661c597f167ddd19aef09c34b26a79d87a15b"
+    },
+    {
+      "bytes": 85189,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/run-1.html",
+      "sha256": "499d2b8245e704cc14a228626a30ac1d5b6c6d43d1ddd8a7c8858ee6d26e7b3f"
+    },
+    {
+      "bytes": 230800,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/run-1.json",
+      "sha256": "9480b4bfcd1c39711781f57aab81c4e002a95f1a719db8d31ddcfbf0625ea2f1"
+    },
+    {
+      "bytes": 60346,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/on/summary.json",
+      "sha256": "662121a881cc1298d7b868bb046839f949e3663bfeb00bc79ec90b451095398b"
+    },
+    {
+      "bytes": 21897,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "bytes": 7123,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/registered-plan.json",
+      "sha256": "75b30d8052b5de5a69f7bc75b068a2742ca90498783aa8f80b1a0623954c7aef"
+    },
+    {
+      "bytes": 1733,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/result.json",
+      "sha256": "584b9621b95fa83d425d16c9186a9b55be182182c4a8ac5fd2900310475c9f02"
+    },
+    {
+      "bytes": 12594,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/run-reference-format-browser-v2.py",
+      "sha256": "112d99c8276d10d6d4063e38938727dc83d8f3c8311490af1bdbf3caaba65896"
+    },
+    {
+      "bytes": 1515,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/sah_allocation_contract.py",
+      "sha256": "b22fdc0af81d5ecbf682af0065fc8cf5bdbf4e4c5f37b82879ef6adcdcf9ecd7"
+    },
+    {
+      "bytes": 66261,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/source-identity.json",
+      "sha256": "c706e32dd25f1583e52c81008e23a3170c81affb84eb83193628641f21f533a1"
+    },
+    {
+      "bytes": 16066,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/storage-activation.mjs",
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+    },
+    {
+      "bytes": 5182,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/storage-contract.json",
+      "sha256": "008ea4233ac819f5de3fde9286233c21339ad3ce690a024980467cd0777ded2e"
+    },
+    {
+      "bytes": 1765,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/storage_contract.py",
+      "sha256": "e7f398707fa0b5200c07d4e1ec08fdcdcd5a2cd6c1671ff4f14eadfa348dd991"
+    },
+    {
+      "bytes": 249,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/worktree-exit.json",
+      "sha256": "9fbbaac4c6bd826f6fba68f39e6688cbd0b1215f6e3bc55b44d031700352810e"
+    },
+    {
+      "bytes": 117,
+      "path": "raw/reference-browser-vndb-off-on-a30077-4d9f/worktree.log",
+      "sha256": "7e5e0e768a2be384c25c1e658913703b037a2b9f749f3bb82a6ee76c1af66c1a"
+    },
+    {
+      "bytes": 8363,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/activation-overlay.py",
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27"
+    },
+    {
+      "bytes": 185,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/browser-identity.json",
+      "sha256": "b8a96f3759f77eaac11ce9698faa3a3f75e71c14d5b08429b83a19f2496cc104"
+    },
+    {
+      "bytes": 116,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/build-exit.json",
+      "sha256": "9ad05c2cc1d71365c154452d8251f884b0f117244936d63e9ff6ea5159362a5f"
+    },
+    {
+      "bytes": 128,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/build.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 105,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/fixtures-exit.json",
+      "sha256": "ae26c2e1fc7afd914c2171a778c923be181b930df846fdebdc718f32aa97bb40"
+    },
+    {
+      "bytes": 171,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/fixtures.log",
+      "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+    },
+    {
+      "bytes": 342866,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/harness-instrumented.js",
+      "sha256": "85011096c37dc98fabf5c07e4be1e87405e6e4f8e7270daa28fa8448c05885f7"
+    },
+    {
+      "bytes": 325917,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/harness-original.js",
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "bytes": 396,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/import-off-exit.json",
+      "sha256": "c88ff77a83351288c22eb043f990d8877e431629473f47bdcdbbc0d7b101f86c"
+    },
+    {
+      "bytes": 1742,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/import-off.log",
+      "sha256": "b8340ade72a8a2665f86d0b5b7d5fda9d40857965feea5bae8b4c0b0549c1f8b"
+    },
+    {
+      "bytes": 394,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/import-on-exit.json",
+      "sha256": "2d5fbc799f09b07b137f11fb38592225ffcfdcf0ab89beb46df824b4ced2e6b1"
+    },
+    {
+      "bytes": 1741,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/import-on.log",
+      "sha256": "6fcc9ebdd55796f8c73b744cb7533b98656978ff6cf0d7b10734d833fe232044"
+    },
+    {
+      "bytes": 3440,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/independent-audit.json",
+      "sha256": "a151d5ed4c7508217d2b98de022497094296ef06b8ba9a5711f576a92a2da343"
+    },
+    {
+      "bytes": 5886,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/independent-member-inventory.json",
+      "sha256": "282dc2b39e26111a749b9355afd2ef7a387c806cc1d948bcf37810e9cc4f1e1f"
+    },
+    {
+      "bytes": 64196,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/independent-package-inventory.json",
+      "sha256": "5312379381bd217268a85287f6a0b734159a1a2b0d29cf0964516b274753010b"
+    },
+    {
+      "bytes": 81,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/libs-exit.json",
+      "sha256": "e931a6dbe90f77ffd869768605dc672f49e5afb4bb34051ddb74e0ef7d80e964"
+    },
+    {
+      "bytes": 60,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/libs.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 90,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/license-exit.json",
+      "sha256": "c039ecb5431fa59ab9962a253a9551390152508d8cbc618f7288031b094cfdaa"
+    },
+    {
+      "bytes": 215,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/license.log",
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "bytes": 1135,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/observations.json",
+      "sha256": "dc8fbb9b48782e3e5ae790bd975a01032ddaea53dc28aed83b62c61e222f31f5"
+    },
+    {
+      "bytes": 330,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/activation-receipt.json",
+      "sha256": "ffc94232f4f9d4b82f93c83787918280d14fa3ee2abfb007b3d286bbca785d26"
+    },
+    {
+      "bytes": 25807,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/canonical-receipt.json",
+      "sha256": "254a94a08eac47adca6e119103e2bf9f0c52c071f4fbf83e4119c72909493560"
+    },
+    {
+      "bytes": 25754,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/normalized-receipt.json",
+      "sha256": "ad5e252f1ec11e04375ced11d49661c597f167ddd19aef09c34b26a79d87a15b"
+    },
+    {
+      "bytes": 85105,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/run-1.html",
+      "sha256": "af68eadb99b3ce44e9bf68652bf1b7906344a7d1afa3838c790867ff293d4a7c"
+    },
+    {
+      "bytes": 230558,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/run-1.json",
+      "sha256": "142b1a6d8b3536170a412eaf64ba0608d9ab0bc6eff5a3eaba2d7e7e929424da"
+    },
+    {
+      "bytes": 60106,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/off/summary.json",
+      "sha256": "77e5ade754408b7eec44bd4e782fe80094c5f95e890359b98cfbc8cc3f24446d"
+    },
+    {
+      "bytes": 341,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/activation-receipt.json",
+      "sha256": "6c145e687218729d305fb5c937ededc3f1e502318115e343e00023c27eda987e"
+    },
+    {
+      "bytes": 25806,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/canonical-receipt.json",
+      "sha256": "fa8dda189249f03128778788fcd737abf8eea3fd30f8db37f66b47922c2950a6"
+    },
+    {
+      "bytes": 25754,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/normalized-receipt.json",
+      "sha256": "ad5e252f1ec11e04375ced11d49661c597f167ddd19aef09c34b26a79d87a15b"
+    },
+    {
+      "bytes": 85166,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/run-1.html",
+      "sha256": "e369c8a3237515f75c8e36ae8499d5720486cde66cc8507f30e1c5b311081050"
+    },
+    {
+      "bytes": 230761,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/run-1.json",
+      "sha256": "5ed72f11081878d6ac74dd6d6cfbffdbb15993a33c796b680be94c210b243caa"
+    },
+    {
+      "bytes": 60330,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/on/summary.json",
+      "sha256": "bca93c246c5c6118d69d6815dcc6f78f01e22383c873f9d8bf697b4a45480944"
+    },
+    {
+      "bytes": 21897,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "bytes": 7123,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/registered-plan.json",
+      "sha256": "5fd82d4b116b24aacb91bb7d6e6adcc087bb3431168f0124c757ef64c56ef803"
+    },
+    {
+      "bytes": 1733,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/result.json",
+      "sha256": "40dce3e727667953144fff4e65c8dfbfab2d691c0f7a12e69481ed33e172bc9f"
+    },
+    {
+      "bytes": 12594,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/run-reference-format-browser-v2.py",
+      "sha256": "112d99c8276d10d6d4063e38938727dc83d8f3c8311490af1bdbf3caaba65896"
+    },
+    {
+      "bytes": 1515,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/sah_allocation_contract.py",
+      "sha256": "b22fdc0af81d5ecbf682af0065fc8cf5bdbf4e4c5f37b82879ef6adcdcf9ecd7"
+    },
+    {
+      "bytes": 66261,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/source-identity.json",
+      "sha256": "f42bf8f7cdc6fccb7e1d3a81aee485a4cac52ff39a65b6233f10339cde7542b2"
+    },
+    {
+      "bytes": 16066,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/storage-activation.mjs",
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+    },
+    {
+      "bytes": 5182,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/storage-contract.json",
+      "sha256": "008ea4233ac819f5de3fde9286233c21339ad3ce690a024980467cd0777ded2e"
+    },
+    {
+      "bytes": 1765,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/storage_contract.py",
+      "sha256": "e7f398707fa0b5200c07d4e1ec08fdcdcd5a2cd6c1671ff4f14eadfa348dd991"
+    },
+    {
+      "bytes": 249,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/worktree-exit.json",
+      "sha256": "7992d1c352ee2b53f0b5428fe1f1efa6dc61401557628f10dbdfb013c4fff219"
+    },
+    {
+      "bytes": 117,
+      "path": "raw/reference-browser-vndb-on-off-a30077-4d9f/worktree.log",
+      "sha256": "7e5e0e768a2be384c25c1e658913703b037a2b9f749f3bb82a6ee76c1af66c1a"
+    },
+    {
+      "bytes": 3043,
+      "path": "source-contract-review.json",
+      "sha256": "352fbfb96f5cb1dc599eda96aab688705b2d1cee94b3aac3159dd843b3c30598"
+    },
+    {
+      "bytes": 12450,
+      "path": "source-git-proofs.json",
+      "sha256": "70757c7d29f43b839ddd74509bcdda1821020a3941a1db3fac2c53932afe7768"
+    }
+  ],
+  "schemaVersion": 1,
+  "uncompressedBytes": 3629034
+}

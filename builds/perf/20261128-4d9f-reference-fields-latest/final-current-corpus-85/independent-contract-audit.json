@@ -1,0 +1,668 @@
+{
+  "acquisitionNodeVersion": "v22.22.0",
+  "artifact": {
+    "bytes": 32769,
+    "id": 15263461668,
+    "sha256": "8656ab2d6d39776a6af40aeb75b4cdede5162d8e975fc6b1d31b5635bc345da2"
+  },
+  "auditor": {
+    "bytes": 11624,
+    "sha256": "f46a069671d97f45a021ff8e01da906211f9d2fa6050da6aaff93afe32aedd71"
+  },
+  "candidate": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "cleanupEvidence": "Actual public-sink control reports errors: []. The pinned previous-reader fixture closes SQLite, restores spies/globals and awaits bounded OPFS disposal in finally; the child exited0 with no signal/error, then the launcher removed its temporary test and rechecked both source receipts.",
+  "contractNames": [
+    "independent format4 expansion reproduces all explicit row values and old field bytes",
+    "independent format4 oracle rejects invalid keys, padding, dimensions and truncated spans",
+    "final-file reread expands a complete stored container and detects unobserved byte changes",
+    "unattached actual cold block reader reproduces the missing database boundary",
+    "real legacy root permits cold exact reuse without altering SQLite or replacing readers",
+    "matching hashes and three signatures still reject unequal persisted bytes",
+    "ordered hash collisions retain exact comparison through the later stored candidate",
+    "actual missing state rejects the boundary and propagates through exact dedupe",
+    "actual missing root rejects the boundary and propagates through exact dedupe",
+    "actual mismatched root high-water rejects the boundary and propagates through exact dedupe",
+    "an online epoch cannot silently enter the legacy-only harness boundary",
+    "a malformed real root manifest rejects exact reads as corruption",
+    "the production _closingPromise guard rejects reads before content can escape",
+    "the production _purgingPromise guard rejects reads before content can escape",
+    "actual stored compressed payload corruption remains a checksum failure",
+    "a real frame read cannot publish bytes after cache generation invalidation",
+    "foreign connection replacement is rejected without closing either connection",
+    "the actual nonempty public sink keeps real schema invalidation and cold exact reuse active",
+    "empty current ID storage expands to positive zero across live, free and unused capacity",
+    "a physical full-capacity ID view preserves signed zero and exact source bytes",
+    "an empty view over an owned backing retains its source allocation in the receipt",
+    "zero capacity remains a zero-length positive-zero column",
+    "invalid ID representation null length null is rejected",
+    "invalid ID representation Uint32Array length 4 is rejected",
+    "invalid ID representation Float64Array length 3 is rejected",
+    "invalid ID representation Float64Array length 5 is rejected",
+    "existing: ordered writes, committed visibility, snapshots, abort",
+    "bounded: ordered writes, committed visibility, snapshots, abort",
+    "bounded: validates confined paths and closes abandoned writers",
+    "bounded: lazy slices and a large staged write retain exact data",
+    "counts every mixed-format chunk and links actual descriptors to the index generation",
+    "default-off, enabled no-gain fallback and packed-media reader floors remain distinct",
+    "malformed authoritative framing, dimensions, formats and row intervals fail closed",
+    "SQLite floor requires a valid unique association, valid main header and no live recovery overlay",
+    "file size/header races, unpaired files, clipped ranges and inventory traversal fail closed"
+  ],
+  "gates": {
+    "actualPreviousReaderReturncode": 0,
+    "nodeContracts": {
+      "fail": 0,
+      "pass": 35,
+      "skip": 0
+    },
+    "pythonContracts": {
+      "fail": 0,
+      "pass": 5
+    },
+    "scopedEslintReturncode": 0,
+    "syntaxCommands": 22
+  },
+  "limits": [
+    "This audit reads the completed contracts artifact; it reruns no contract, importer, worker or browser.",
+    "The actual a300 database reader rejection is not an older-browser restart test. OPFS preparation/recovery hooks are spies and are required to remain unreached.",
+    "The whole SQLite preservation claim applies to the early-rejection test and the empty-glossary control; the separately seeded real glossary invalidation correctly changes SQLite bytes.",
+    "No timing or process-memory conclusion is drawn from diagnostic durations."
+  ],
+  "memberInventory": [
+    {
+      "bytes": 156,
+      "path": "contracts/complete.json",
+      "sha256": "d911bcf6a90d14bab08eb22e4a105a1321712a68585f4b106899aa39c5036e91"
+    },
+    {
+      "bytes": 591,
+      "path": "contracts/invocation.json",
+      "sha256": "6e97922eb333ccf81c2fc2e678d739de960ab95e0d976015f645f0554cfd3785"
+    },
+    {
+      "bytes": 954,
+      "path": "contracts/node-contracts.exit.json",
+      "sha256": "639c30a245122bc98f299e6b147954cb8b2cee09200938688a84ce5d3b9865f2"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/node-contracts.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 14988,
+      "path": "contracts/node-contracts.stdout.log",
+      "sha256": "13afdea85b3797d82b0de9382da1c23a8330e741e63920c5a4cbc9c49e949a73"
+    },
+    {
+      "bytes": 379,
+      "path": "contracts/python-contracts.exit.json",
+      "sha256": "352b852439340cefdf1398605c2328d42cfd771cb5d1f77b180797b39270ca23"
+    },
+    {
+      "bytes": 103,
+      "path": "contracts/python-contracts.stderr.log",
+      "sha256": "812020290987e68027b66f0b10a6cd36f917bfc0dc21dae04c9d9796dd2b845e"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/python-contracts.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3094,
+      "path": "contracts/scoped-eslint.exit.json",
+      "sha256": "bf063ecac9b2e665ae0583d2782199ac3e4c93f855817302a852636797bc17eb"
+    },
+    {
+      "bytes": 694,
+      "path": "contracts/scoped-eslint.stderr.log",
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/scoped-eslint.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 423,
+      "path": "contracts/syntax-00.exit.json",
+      "sha256": "dc0a3f2a46a79363dc9aa86a7eec23316b8cee168de2d1f316636dfa326c8175"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-00.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-00.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 414,
+      "path": "contracts/syntax-01.exit.json",
+      "sha256": "07af4da646e87f09be76add828f89c41fafc57b67fa5c864e1aa6d1bd387e1be"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-01.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-01.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 416,
+      "path": "contracts/syntax-02.exit.json",
+      "sha256": "9eaf6332d2576d9530346041dad574987addb0873f430674fdfe26a1428d4b77"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-02.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-02.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 406,
+      "path": "contracts/syntax-03.exit.json",
+      "sha256": "b88ee4098bff1ff032e9dd03a21dd317134bd303ca32b6215f5dd51c34e752c8"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-03.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-03.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 414,
+      "path": "contracts/syntax-04.exit.json",
+      "sha256": "82b85f2b42193f4b70a35d3b7478c0dd5a1949e1a055df67ca8b10fb168cdf6f"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-04.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-04.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 432,
+      "path": "contracts/syntax-05.exit.json",
+      "sha256": "7d33c4d99ff50a4edbb89ccddeb91d5b967b2384fcacb527067b500b0d0288b9"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-05.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-05.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 419,
+      "path": "contracts/syntax-06.exit.json",
+      "sha256": "f908b6a3fc2c18ed204bc0ea0a2c2bc5a430c1ab20b16ef1dd65d2fe03919871"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-06.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-06.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 412,
+      "path": "contracts/syntax-07.exit.json",
+      "sha256": "dbb81cb44dbdb0bbd7a00185fd329bd4bb2fb91f92e3e812f8766627cb7b39bd"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-07.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-07.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 422,
+      "path": "contracts/syntax-08.exit.json",
+      "sha256": "6b73ced072b53efa08d821ccf8c54dd3fb7e124ab7d16a6f4e7d9008504626c7"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-08.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-08.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 435,
+      "path": "contracts/syntax-09.exit.json",
+      "sha256": "8fd0ba6b2452b38726df5b07f8b8d7b6652411609e195e235a783307aaa645ce"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-09.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-09.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 427,
+      "path": "contracts/syntax-10.exit.json",
+      "sha256": "2c441f9e646d99fa188b7010b9bec59fb753692a1bf8d9c685b3fe3fb842db8c"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-10.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-10.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 427,
+      "path": "contracts/syntax-11.exit.json",
+      "sha256": "714df378a3e3523e2c3486e1b44847ba2e1ddce3613bc640b8cf35c3e52773f7"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-11.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-11.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 419,
+      "path": "contracts/syntax-12.exit.json",
+      "sha256": "d50435aefb9108c523a12a3cd36898359fcccfb3a9892de542be818793b0a7d7"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-12.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-12.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 414,
+      "path": "contracts/syntax-13.exit.json",
+      "sha256": "f79144ffb065571a8a67998acf50484211b609ec3ad858ec722a9f290b56dffd"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-13.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-13.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 426,
+      "path": "contracts/syntax-14.exit.json",
+      "sha256": "83e969dfe74ebff7b70511dea1d842be05fde206d13b117058a8255d3065304b"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-14.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-14.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 418,
+      "path": "contracts/syntax-15.exit.json",
+      "sha256": "40d70dc1df200a34125146bfac3fce5f61823446b4f2344ac7c822d607354e0e"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-15.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-15.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 422,
+      "path": "contracts/syntax-16.exit.json",
+      "sha256": "4e0ecb94308cf0bcee81a5d7c04f4c87e4b90b2bbce845ad0115fe8462a41bc4"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-16.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-16.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 420,
+      "path": "contracts/syntax-17.exit.json",
+      "sha256": "7239d0e0f1f4cd66f63faa9150e5bd0d698921d73a209fd32733e9d853266331"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-17.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-17.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 429,
+      "path": "contracts/syntax-18.exit.json",
+      "sha256": "1e4e19fc3f734d55a35a415c60a1384f67c5bae9b57e929418b30c6c19014df1"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-18.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-18.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 404,
+      "path": "contracts/syntax-19.exit.json",
+      "sha256": "91e8495b28764b91f1bce01f460e0e8ee4f8f4e084ed4415a7639eed205e0ade"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-19.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-19.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 428,
+      "path": "contracts/syntax-20.exit.json",
+      "sha256": "b2faba6f48a1d46178a0a1f3120a0c08fd6b79ba130c6cfd5978c84420bbadac"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-20.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-20.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 418,
+      "path": "contracts/syntax-21.exit.json",
+      "sha256": "09b46adcd78bcbc2dbd722b5121bed3fa5cde405fc812ec5cc02b03b056c6cfb"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-21.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "contracts/syntax-21.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 402,
+      "path": "previous-reader/acquisition/exit.json",
+      "sha256": "64bac0404082ad175abe948180fa048eef477754e7b42d0fe1897e46699f4bfc"
+    },
+    {
+      "bytes": 23894,
+      "path": "previous-reader/acquisition/preflight.json",
+      "sha256": "d46689d6a352ee3214238b1da37c3218faf42223da6c51924f8b7ef2fc1d39e8"
+    },
+    {
+      "bytes": 1806,
+      "path": "previous-reader/acquisition/result.json",
+      "sha256": "9a3070b8f94265c28dae765b4368347f53bf2007bc2958f7bcd667e14781806e"
+    },
+    {
+      "bytes": 0,
+      "path": "previous-reader/acquisition/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 673,
+      "path": "previous-reader/acquisition/stdout.log",
+      "sha256": "aaaefc5a00dc3361512548f70b6396e5daa74281cb44428d2c810c67b4741bdc"
+    },
+    {
+      "bytes": 269,
+      "path": "previous-reader/acquisition/verified.json",
+      "sha256": "723aad22a36c94f830ca72ccbfc5c36c11a58c5f633217be0e49e112725e4e3a"
+    },
+    {
+      "bytes": 157,
+      "path": "previous-reader/complete.json",
+      "sha256": "48d728c2d52d1e4fc0a2e602a918bc77aeb1b50247533adfc1f6ead398e203ef"
+    },
+    {
+      "bytes": 611,
+      "path": "previous-reader/invocation.json",
+      "sha256": "3627b3fc58f18a09fed3c5c90940cdc5ed4c5eae384ebcae6166db5b9310e4c6"
+    },
+    {
+      "bytes": 1012,
+      "path": "previous-reader/old-reader.exit.json",
+      "sha256": "193ecd840dd418eef3de144f345bc73a37f48779bbb5dce2442fe35135e8365d"
+    },
+    {
+      "bytes": 0,
+      "path": "previous-reader/old-reader.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 102,
+      "path": "previous-reader/old-reader.stdout.log",
+      "sha256": "81002003e88c5c13ade6ea069423c721ec6b5f445786eba05879ba7ef0024b67"
+    },
+    {
+      "bytes": 243,
+      "path": "setup/npm-ci.stderr.log",
+      "sha256": "6406691bf6dbfdf4e67da845320bb600eafa4332ccc391ff20453cbc80eef4b8"
+    },
+    {
+      "bytes": 198,
+      "path": "setup/npm-ci.stdout.log",
+      "sha256": "130baa13a2c69ab094b973b28e8d799a06d2fcedd073d2fba45098f51ff2bf11"
+    },
+    {
+      "bytes": 0,
+      "path": "setup/reader-libs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 60,
+      "path": "setup/reader-libs.stdout.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 0,
+      "path": "setup/runtime-libs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 60,
+      "path": "setup/runtime-libs.stdout.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 0,
+      "path": "setup/tooling-libs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 60,
+      "path": "setup/tooling-libs.stdout.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    }
+  ],
+  "newAcquisition": false,
+  "nodeBinarySha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "pinsIdentity": {
+    "bytes": 21605,
+    "sha256": "bd75293a60a8d455855395d3eb98fd34e908142869653f280d1f9d3bf33236a4"
+  },
+  "previousReader": {
+    "actualFormat4Chunks": 1,
+    "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+    "floor": 13,
+    "opfsAfter": [
+      {
+        "bytes": 26,
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr",
+        "sha256": "50bf154931231b1feec50fe2798dccadd07e4cb5771d4c5a2c389036afa0f11d"
+      },
+      {
+        "bytes": 3640,
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr.mbti",
+        "sha256": "e55799c72dce972296f5e7e0b4cbda5c5c567227f3b6bf6cffcf760cf19f32c9"
+      }
+    ],
+    "opfsBefore": [
+      {
+        "bytes": 26,
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr",
+        "sha256": "50bf154931231b1feec50fe2798dccadd07e4cb5771d4c5a2c389036afa0f11d"
+      },
+      {
+        "bytes": 3640,
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr.mbti",
+        "sha256": "e55799c72dce972296f5e7e0b4cbda5c5c567227f3b6bf6cffcf760cf19f32c9"
+      }
+    ],
+    "readerCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "readerMaximumFloor": 12,
+    "resultIdentity": {
+      "bytes": 1806,
+      "sha256": "9a3070b8f94265c28dae765b4368347f53bf2007bc2958f7bcd667e14781806e"
+    },
+    "sqlite": {
+      "afterSha256": "63c5f2d2116c03abfbf950b67889bd0af819f0cafb5da731d443b568350bd224",
+      "beforeSha256": "63c5f2d2116c03abfbf950b67889bd0af819f0cafb5da731d443b568350bd224",
+      "bytes": 16384
+    },
+    "unchangedCandidateAndReaderAfterTest": true,
+    "unreachedHooks": {
+      "contentActivateRootCalls": 0,
+      "contentPrepareCalls": 0,
+      "healthRestoreCalls": 0,
+      "persistentPurgeCalls": 0,
+      "recordPrepareCalls": 0,
+      "recoveryCalls": 0,
+      "runtimePragmaCalls": 0,
+      "schemaCalls": 0
+    }
+  },
+  "publicSinkControl": {
+    "actualRows": 2,
+    "actualScopedGlossaryInvalidation": true,
+    "cleanupErrors": [],
+    "coldPersistedExactComparison": true,
+    "emptyGlossaryPreservesWholeSqlite": true,
+    "publicDuplicateExactReuse": true,
+    "root": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "manifest": {
+        "legacy": true,
+        "regions": [],
+        "version": 1
+      },
+      "rootId": "legacy-root-v0"
+    },
+    "seededGlossaryDeletionChangesSqlite": true,
+    "singleRecordSession": true,
+    "sourceCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573"
+  },
+  "publicSourcePins": {
+    ".github/workflows/reference-field-corpus-qualification-4d9f.yml": {
+      "bytes": 5320,
+      "sha256": "7396c7b68ce5f9f88edb7a6241297b55a0f97a5646e1dc716531d8ba4184dbd6"
+    },
+    "builds/perf/20261128-4d9f-reference-fields-latest/protocol.json": {
+      "bytes": 6184,
+      "sha256": "79bc1d899dd3230253e7ae7da342da9cf4c47ade0264eaace1ad202e943ba8fe"
+    },
+    "builds/perf/20261128-4d9f-reference-fields-latest/verification-manifest.json": {
+      "bytes": 19466,
+      "sha256": "abf7576dbcc4f342c99554d2e8aebdfc6fb212d42b302b7f32facc7a11e5e19f"
+    },
+    "test/perf/record-reference-table-verification/hosted-qualification.py": {
+      "bytes": 7572,
+      "sha256": "31ba35d78033e7c432a0eab8b355f9ebaa3957a78d86ce052e45be5f270eb31a"
+    },
+    "test/perf/record-reference-table-verification/node-opfs-bounded.mjs": {
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    "test/perf/record-reference-table-verification/previous-reader.fixture.mjs": {
+      "bytes": 7977,
+      "sha256": "c35310b5fac5237447601628987b16463377e3e282e99ee6d102e0e58a52794f"
+    },
+    "test/perf/record-reference-table-verification/run-old-reader-check.mjs": {
+      "bytes": 5237,
+      "sha256": "337d12fdb4ea64e871141bae0e8dc44c31f20f334ecbc55a14593dfc0d0533f8"
+    }
+  },
+  "readOnlyAudit": true,
+  "runId": 46145076480,
+  "schemaVersion": 1,
+  "sourceHashesPerArm": 42,
+  "status": "passed",
+  "toolingCommit": "26c5cb9ff1a19afd583f94a6c86f336dab783719",
+  "toolingTree": "f58aa97ab47e2605980b33ecdee58825b19064af"
+}

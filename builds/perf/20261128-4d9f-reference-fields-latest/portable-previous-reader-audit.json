@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "runId": 46141317509,
+  "jobId": 140967676568,
+  "toolingCommit": "a7a7de1a1e1a1151d1d7517710fbb30a16c6c2f4",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "previousReaderCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "artifact": {
+    "id": 15261827644,
+    "bytes": 27316,
+    "sha256": "d283d1f46dcb9b939433110f6657fe88b4cde3c3e6719860227def4791585b0d"
+  },
+  "syntaxFiles": 18,
+  "nodeContracts": {
+    "passed": 20,
+    "failed": 0
+  },
+  "pythonContracts": {
+    "passed": 5,
+    "failed": 0
+  },
+  "scopedLint": "passed",
+  "actualPreviousReader": {
+    "userVersion": 13,
+    "actualFormat4Chunks": 1,
+    "sqliteBytes": 16384,
+    "beforeAfterSqliteSha256": "63c5f2d2116c03abfbf950b67889bd0af819f0cafb5da731d443b568350bd224",
+    "opfsFiles": [
+      {
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr",
+        "bytes": 26,
+        "sha256": "611d6d29fd738c28b7fffac891dcf197390a52c72ee0a2e6ba51e4726571e0c6"
+      },
+      {
+        "name": "manabitan-term-records/dict-Published%20format4.mbtr.mbti",
+        "bytes": 3640,
+        "sha256": "41e122820346167e5bd96c5cfad63bf2348e0c4f7045826f3eb725fe9dde2706"
+      }
+    ],
+    "unreachedCalls": {
+      "recoveryCalls": 0,
+      "contentPrepareCalls": 0,
+      "contentActivateRootCalls": 0,
+      "persistentPurgeCalls": 0,
+      "recordPrepareCalls": 0,
+      "schemaCalls": 0,
+      "runtimePragmaCalls": 0,
+      "healthRestoreCalls": 0
+    },
+    "result": {
+      "bytes": 1806,
+      "sha256": "4a380766dfcc86fd03f9a2143f3c33a5d01fefa8cff43f3586edadd77435aee7"
+    },
+    "beforeAfterSourceIdentityVerified": true
+  },
+  "limitations": [
+    "No corpus acquisition was part of this run.",
+    "Actual previous-reader _openConnection with real SQLite and candidate-written OPFS, not an older-browser restart.",
+    "The forthcoming legacy-read-context adapter is not included in these tested helper contracts."
+  ],
+  "precedingFailedSetup": {
+    "runId": 46140621526,
+    "artifactId": 15261214149,
+    "sha256": "dc0f4fc5c1699e35c605fcf5e82dd8bff814d090da2e66de5219965f1662ff8f",
+    "cause": "Tooling checkout lacked normal generated libraries required by ESLint config startup; all20Node+5Python contracts had passed.",
+    "correction": "Normal build:libs in tooling checkout; no runtime/helper code change."
+  }
+}

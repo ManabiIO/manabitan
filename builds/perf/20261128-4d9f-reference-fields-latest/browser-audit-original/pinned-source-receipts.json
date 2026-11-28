@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "runId": 46139342690,
+  "toolingCommit": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+  "toolingTree": "dc1236c251543334a8bb1ac59db363d2b7db9a17",
+  "sourceCommit": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+  "sourceTree": "c9bd2df5331c144d4988be32f29a64045a407786",
+  "fixture": {
+    "schemaVersion": 1,
+    "dictionaries": {
+      "jmdict": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "jmnedict": {
+        "label": "JMnedict",
+        "cacheFile": "JMnedict.zip",
+        "release": "2026-09-06",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip",
+        "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+        "sizeBytes": 11432315,
+        "expectedTitle": "JMnedict [2026-09-06]",
+        "revision": "JMnedict.2026-09-06",
+        "termRows": 667942
+      },
+      "jitendex": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "vndb": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      }
+    }
+  },
+  "pinnedSources": [
+    {
+      "key": "fixture",
+      "path": "test/perf/dictionaries.lock.json",
+      "ref": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "bytes": 3047
+    },
+    {
+      "key": "validator",
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "ref": "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "bytes": 21897
+    },
+    {
+      "key": "package-lock.json",
+      "path": "package-lock.json",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "bytes": 333801
+    },
+    {
+      "key": "dev/perf/benchmark-support.js",
+      "path": "dev/perf/benchmark-support.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "bytes": 16788
+    },
+    {
+      "key": "dev/perf/dictionary-fixtures.js",
+      "path": "dev/perf/dictionary-fixtures.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "bytes": 6765
+    },
+    {
+      "key": "dev/perf/import-benchmark.js",
+      "path": "dev/perf/import-benchmark.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "bytes": 11064
+    },
+    {
+      "key": "test/chromium/import-flags-ab-benchmark.js",
+      "path": "test/chromium/import-flags-ab-benchmark.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "bytes": 25889
+    },
+    {
+      "key": "test/e2e/import-timing.js",
+      "path": "test/e2e/import-timing.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "bytes": 3293
+    },
+    {
+      "key": "ext/js/pages/settings/dictionary-import-controller.js",
+      "path": "ext/js/pages/settings/dictionary-import-controller.js",
+      "ref": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+      "sha256": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "bytes": 188111
+    }
+  ],
+  "helperSha256": {
+    "run-reference-format-browser.py": "fc209f778a4c5433175fd844be7808e4b022c4bce9fef343c1bc534a0da43cdb",
+    "storage_contract.py": "e7f398707fa0b5200c07d4e1ec08fdcdcd5a2cd6c1671ff4f14eadfa348dd991",
+    "storage-contract.json": "4cddd47868dd2b1e53440dffc846ca87e490e6884c66a9061a1c68fdfee728e9",
+    "activation-overlay.py": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27",
+    "storage-activation.mjs": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+  },
+  "harness": {
+    "originalBlob": "142825fbd36090d693de416801eac50312194ef2",
+    "originalSha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "instrumentedSha256": "85011096c37dc98fabf5c07e4be1e87405e6e4f8e7270daa28fa8448c05885f7"
+  }
+}

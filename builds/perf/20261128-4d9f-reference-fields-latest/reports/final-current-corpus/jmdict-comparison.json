@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "corpus": "jmdict",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "disabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/jmdict/jmdict-A-1",
+    "fieldsBytes": 4239960,
+    "indexBytes": 23748952,
+    "contentBytes": 19566680,
+    "allTermFileBytes": 43315677
+  },
+  "enabled": {
+    "directory": "/home/runner/work/manabitan/manabitan/reports/jmdict/jmdict-B-1",
+    "fieldsBytes": 4198956,
+    "indexBytes": 23707948,
+    "contentBytes": 19566680,
+    "allTermFileBytes": 43274673
+  },
+  "actualSavedBytes": 41004,
+  "fieldReductionPercent": 0.96708459513769,
+  "indexReductionPercent": 0.17265603972756355,
+  "termFileReductionPercent": 0.0946631862639478,
+  "rows": 528299,
+  "groups": 12,
+  "chunks": 12,
+  "format4Chunks": 5,
+  "format4Rows": 210000,
+  "fallbackCounts": {
+    "no-strict-size-saving": 7
+  },
+  "exactParserOutputsAndLookupPayloads": true,
+  "everyActualFieldRowMatchesSource": true,
+  "everyActualFinalChunkReread": true,
+  "everyExpandedFileAndMetadataMatchesOriginalOracle": true,
+  "finalOutputOracle": {
+    "bytes": 4712,
+    "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+  },
+  "actualPersistedFiles": [
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 19566680,
+      "sha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963",
+      "normalizedGenerationRange": null
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "bytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "normalizedGenerationRange": [
+        8,
+        24
+      ]
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "bytes": 23707948,
+      "sha256": "8c6a5035b1c7a87b24141598ff0c8a57862b949c2b9919f3906b024b0c6b1cd9",
+      "normalizedGenerationRange": [
+        24,
+        40
+      ]
+    }
+  ],
+  "defaultOffPreservesEveryOriginalFileByte": true,
+  "legacyReadContext": {
+    "mode": "real-sqlite-epoch-zero-schema-v2",
+    "assetIdentity": {
+      "ext/lib/sqlite/index.mjs": {
+        "bytes": 373254,
+        "sha256": "044a5844df842a96908eb9aa5542896ae6df174c23866f2c8573ded2ea5df9a2"
+      },
+      "ext/lib/sqlite/sqlite3.wasm": {
+        "bytes": 859730,
+        "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
+      }
+    },
+    "initial": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "groupStates": [
+      {
+        "group": 0,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 1,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 2,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 3,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 4,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 5,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 6,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 7,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 8,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 9,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 10,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      },
+      {
+        "group": 11,
+        "state": {
+          "epoch": 0,
+          "logicalHighWater": 0,
+          "rootId": "legacy-root-v0",
+          "manifest": {
+            "version": 1,
+            "legacy": true,
+            "regions": []
+          }
+        }
+      }
+    ],
+    "sqliteInitial": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    },
+    "final": {
+      "epoch": 0,
+      "logicalHighWater": 0,
+      "rootId": "legacy-root-v0",
+      "manifest": {
+        "version": 1,
+        "legacy": true,
+        "regions": []
+      }
+    },
+    "sqliteFinal": {
+      "bytes": 311296,
+      "sha256": "9ea0a6d4f3584f9b56a05ac4da48f0d077536f98435c409b2d6107a2adaa84c0",
+      "userVersion": 0
+    }
+  },
+  "unchangedOwnedSqliteBoundary": true,
+  "limitations": [
+    "Sequential production-group term sink, not whole-browser import timing.",
+    "Separate media persistence/UI/persistent SQLite publication/restart/lookup are outside this corpus boundary.",
+    "Actual persisted size does not establish browser memory or elapsed-time improvement."
+  ]
+}
