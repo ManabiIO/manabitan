@@ -5,6 +5,7 @@ import {LOOKUP_CAP, validateBrowserGlossaries, validateNativeGlossaries, verifie
 import {promisify} from 'node:util'
 import {fileURLToPath} from 'node:url'
 import {execFile} from 'node:child_process'
+import {appendFileSync} from 'node:fs'
 import {mkdir, mkdtemp, readFile, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
@@ -32,6 +33,11 @@ const specs = {
 }
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 const hostSnapshot = () => ({loadavg: os.loadavg(), freeMemBytes: os.freemem(), totalMemBytes: os.totalmem(), platform: process.platform, arch: process.arch})
+function recordImportMemoryMarker(event) {
+    const markerPath = process.env.MANABITAN_IMPORT_MEMORY_MARKERS
+    if (!markerPath) return
+    appendFileSync(markerPath, `${JSON.stringify({event, monotonicNs: process.hrtime.bigint().toString()})}\n`)
+}
 function send(page, action, params) {
     return page.evaluate(({action, params}) => new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({action, params}, (response) => {
@@ -69,7 +75,8 @@ function nativeGlossaryCoverage(results, glossaryOracle) {
 }
 
 async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
-    const output = await mkdtemp(path.join(scratch, `cap-default-${dataset}-${pair}-hoshi-`))
+    const output = process.env.BENCH_RESOURCE_HOSHI_OUTPUT ?? await mkdtemp(path.join(scratch, `cap-default-${dataset}-${pair}-hoshi-`))
+    if (process.env.BENCH_RESOURCE_HOSHI_OUTPUT) await mkdir(output, {recursive: false})
     const before = hostSnapshot()
     try {
         const args = [spec.archive, output, spec.query, spec.title, String(spec.terms), `cap-${dataset}-${pair}`]
@@ -194,6 +201,9 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
         await page.goto(`chrome-extension://${extensionId}/settings.html?popup-preview=false`)
         await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000})
         await page.waitForFunction(() => document.documentElement?.dataset?.loaded === 'true', undefined, {timeout: 30000})
+        if (process.env.MANABITAN_IMPORT_MEMORY_MARKERS) {
+            await page.exposeFunction('__manabitanRecordImportMemoryMarker', recordImportMemoryMarker)
+        }
         const optionsContext = {current: true}
         const modifications = await send(page, 'modifySettings', {
             targets: [{scope: 'profile', optionsContext, action: 'set', path: 'general.maxResults', value: LOOKUP_CAP}],
@@ -207,7 +217,12 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             const input = document.querySelector('#dictionary-import-file-input')
             if (!(input instanceof HTMLInputElement)) throw new Error('Dictionary import input not found')
             let startedAt = null
-            input.addEventListener('change', () => { startedAt = performance.now() }, {capture: true, once: true})
+            input.addEventListener('change', () => {
+                startedAt = performance.now()
+                if (typeof globalThis.__manabitanRecordImportMemoryMarker === 'function') {
+                    void globalThis.__manabitanRecordImportMemoryMarker('start')
+                }
+            }, {capture: true, once: true})
             globalThis.__manabitanImportCompletionSignalEnabled = true
             globalThis.__capSensitivityProbe = new Promise((resolve, reject) => {
                 globalThis.addEventListener('manabitan:dictionary-import-complete', ({detail}) => {
@@ -238,9 +253,14 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
                         const allHydrated = matchingDefinitions.every((items) => items.length > 0)
                         const exactHeadword = entries.some((entry) => (entry.headwords ?? []).some((headword) =>
                             headword.term === query || headword.reading === query))
-                        resolve({startedAt, importCompletedAt, lookupDispatchedAt, responseReceivedAt,
+                        const finish = () => resolve({startedAt, importCompletedAt, lookupDispatchedAt, responseReceivedAt,
                             entries, groups, allHydrated, exactHeadword,
                             hydratedDefinitionCount: matchingDefinitions.reduce((sum, items) => sum + items.length, 0)})
+                        if (typeof globalThis.__manabitanRecordImportMemoryMarker === 'function') {
+                            void globalThis.__manabitanRecordImportMemoryMarker('end').then(finish, reject)
+                        } else {
+                            finish()
+                        }
                     })
                 }, {once: true})
             })
@@ -293,6 +313,10 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             hostBefore: hostBefore, hostAfter: hostSnapshot(),
             chromiumVersion: context.browser()?.version() ?? null, extensionId,
             timingBoundary: 'settings file-input change through first correct ordinary hydrated termsFind response; callback timestamp taken before validation/hash/count reads',
+        }
+        if (process.env.MANABITAN_IMPORT_MEMORY_MARKERS) {
+            record.storageEstimateAtFirstLookup = await page.evaluate(async () => navigator.storage.estimate())
+            record.storageAtFirstLookup = await inspectPersistedContent(page)
         }
         if (!record.exactHeadword || !record.allResultsHydrated || sourceCoverage.missing.length > 0) {
             errors.push('Manabitan lookup failed exact-pair or hydrated-glossary validation')

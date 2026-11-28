@@ -1,0 +1,9 @@
+# Hosted resource diagnostics
+
+This is a separate, non-timing resource cohort. It builds Manabitan from the same frozen product commit used by hosted timing run `46138409695` (`f28c2801`) and compares its first normal hydrated lookup with the pinned Hoshidicts driver for the same archive and query. It does not modify product sources, run the normal timing workflow, or make a latency claim. It runs one Hoshidicts-first pair per dataset; this is a resource sample, not a repeated comparison.
+
+The observer reuses `chromium_memory.py` from `manabitan-registration-probe-20261128/dev/perf/import-memory-ca365`. Original SHA-256: `8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7`. The task-owned copy retains its Linux `/proc` identity, process-tree, and `smaps_rollup` checks. Chromium coverage requires readable browser and renderer processes; Hoshidicts coverage roots at the actual benchmark executable and includes descendants. It reports summed tree RSS, PSS, and private memory. The original evidence files remain untouched.
+
+Each application writes start/end monotonic markers around import-through-first-lookup. The observer samples every 25 ms and requires at least five complete stable scans, pre/post brackets, and no covered gap over 250 ms. These sampled maxima are non-atomic and are not exact peak measurements. Sampling overhead makes all measured timings non-authoritative and they are excluded from the performance report.
+
+For Manabitan, active storage is the recursive OPFS file inventory and dictionary media check from the same browser run, captured at first lookup and after restart. For Hoshidicts, active storage is the imported dictionary output directory, measured as logical and allocated file bytes. These measures do not include the whole browser profile, source archive, or host-wide cache.

@@ -4,7 +4,9 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <set>
@@ -58,6 +60,15 @@ std::string json_escape(std::string_view value) {
 double elapsed_ms(Clock::time_point start, Clock::time_point end) {
   return std::chrono::duration<double, std::milli>(end - start).count();
 }
+void record_import_memory_marker(const char* event) {
+  const char* marker_path = std::getenv("MANABITAN_IMPORT_MEMORY_MARKERS");
+  if (marker_path == nullptr || marker_path[0] == '\0') return;
+  const auto monotonic_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+      Clock::now().time_since_epoch()).count();
+  std::ofstream stream(marker_path, std::ios::app);
+  if (!stream) throw std::runtime_error("could not write import memory marker");
+  stream << "{\"event\":\"" << event << "\",\"monotonicNs\":\"" << monotonic_ns << "\"}\n";
+}
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -77,6 +88,7 @@ int main(int argc, char** argv) {
     if (query_text.empty() || expected_title.empty() || run_id.empty() || !std::filesystem::is_directory(output))
       throw std::runtime_error("invalid archive, output directory, query, title, or run identifier");
     if (std::filesystem::exists(output / expected_title)) throw std::runtime_error("output already contains target dictionary");
+    record_import_memory_marker("start");
     const auto total_start = Clock::now();
     const auto imported = dictionary_importer::import(archive.string(), output.string());
     const auto import_end = Clock::now();
@@ -91,6 +103,7 @@ int main(int argc, char** argv) {
     Lookup lookup(query, deconjugator);
     const auto results = lookup.lookup(query_text);
     const auto lookup_end = Clock::now();
+    record_import_memory_marker("end");
     bool exact_headword = false, matching_dictionary = false, nonempty_glossary = false;
     std::set<std::pair<std::string, std::string>> unique_pairs;
     std::string digest_input;
