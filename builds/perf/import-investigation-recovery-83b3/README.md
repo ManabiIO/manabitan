@@ -1,3 +1,11 @@
+# Recovery completed; investigation resumed
+
+The executor returned at 05:12 UTC. The independently verified [complete 153-file evidence bundle](../import-owned-columns-83b3-followup/README.md) is now published, including the full native-symbol proof, both held experiments, exact checksum inputs, source attribution and all recorded failures. Its 11,294,013-byte archive has SHA-256 `78af8326b7fdf03799c22f914bfee2d861e9ae4ad2a4566a63fd57f793e31a46`.
+
+This supersedes the **remote-availability limitations** in the historical interruption snapshot below. Its dated recovery receipt and the #830 preparation handoff remain unchanged records of that moment. Local investigation has resumed; the interruption produced no timed #830 observations. The product source still equals PR #820 head `f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963`.
+
+---
+
 # Import investigation evidence and executor interruption
 
 This evidence-only branch preserves the completed compressed-input JMdict diagnostic and the separately reviewed hosted-artifact reader for [PR #820](https://github.com/ManabiIO/manabitan/pull/820). Product source is unchanged from candidate `f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963`. This branch does not restart or replace that candidate's pending CI or browser acquisition.

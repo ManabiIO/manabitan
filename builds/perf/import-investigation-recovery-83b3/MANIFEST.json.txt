@@ -1,12 +1,13 @@
 {
-  "schemaVersion": 1,
-  "kind": "partial-remote-evidence-recovery",
+  "schemaVersion": 2,
+  "kind": "recovered-complete-import-evidence",
   "repository": "ManabiIO/manabitan",
-  "parentCommit": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
   "runtimeUnchanged": true,
+  "previousSnapshotCommit": "70a8ad262561ad9ffe05e3a3185726927464fddd",
   "selfExcluded": true,
-  "payloadFiles": 42,
-  "payloadBytes": 658873,
+  "payloadFiles": 46,
+  "payloadBytes": 12002724,
   "entries": [
     {
       "path": "builds/perf/20261128-compressed-worker-profile-83b3/attribution.json.txt",
@@ -332,9 +333,9 @@
       "path": "builds/perf/import-investigation-recovery-83b3/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "fdb1a75adc46b5a703148e191f4ee22c4f35e237",
-      "size": 4833,
-      "sha256": "89a52f16b733e61c065b8e46ba26354da887eb1f7a3ce2d48e6897d5d71f97cb"
+      "sha": "998ec3d9b4a678579d0647b6e5cf9f906511cedb",
+      "size": 5671,
+      "sha256": "be1e5860e5220a2657ca6b8c423a843fa4331b0d1ddbe624e905721643f7b2f4"
     },
     {
       "path": "builds/perf/import-investigation-recovery-83b3/recovery-status.json.txt",
@@ -343,6 +344,38 @@
       "sha": "278931b009587ec416af117e08024b0afaf5c668",
       "size": 3160,
       "sha256": "d48ab0937bbf22e96a70b79daa5f615eeefb7ebcf6368945ab74baf605f6184c"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-followup/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f2bd8982cc7ae98cfbf27984181d4f0559375e9",
+      "size": 5882,
+      "sha256": "c57cdbacddb2b7ace436683a58c359e9d7268c1546bde2b59e682900c084ca44"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-followup/verify-archive.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7713123228f198c66c813858f697ac9ac13e7ea1",
+      "size": 2262,
+      "sha256": "304570d04ce9d553be6e2b0ac58b9cee77627685c62e4a70d8d3819e265d1cca"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-followup/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "790f762d94bc4e8681db6d2014b46fd1538926d1",
+      "size": 40856,
+      "sha256": "20f30eed25516a982bd19f0a2be56d743d11608cb1b9770fa68e4f7072c9cd7e"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-followup/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60f818efafabc59c44c5f8fcf0308d3aa4c7e0cb",
+      "size": 11294013,
+      "sha256": "78af8326b7fdf03799c22f914bfee2d861e9ae4ad2a4566a63fd57f793e31a46"
     }
   ]
 }
