@@ -47,7 +47,7 @@ let compressionPool = null;
 /** @type {Promise<TermContentCompressionPool|null>|null} */
 let compressionPoolPromise = null;
 
-const COMPRESSION_WORKER_COUNT = 4;
+const COMPRESSION_WORKER_COUNT = 2;
 const COMPRESSION_WORKER_READY_TIMEOUT_MS = 30_000;
 const COMPRESSION_JOB_TIMEOUT_MS = 60_000;
 const JMDICT_COMPRESSION_LEVEL = -1;
