@@ -1,0 +1,125 @@
+{
+  "status": "PASS_READ_ONLY_HOLD_SCOPE",
+  "inputSha256": "d9176e53ebac3e82c163069c1297b95e003595925d09e883a36f2dcca2c1e480",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "sourceFilesExactAgainstGit": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "gitBlob": "4f3f7e73c78bca23672f46588cb897633fc7a4ac"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "gitBlob": "82808931b73e099a604c598460cdeaed43d67bd5"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "gitBlob": "ccfba94ced59e465859ccec855f4e6947f23f413"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "gitBlob": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index.js",
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "gitBlob": "e0d30279b67300cb47d519a1b8d809eb4ba784f6"
+    },
+    {
+      "path": "ext/js/dictionary/term-key-hash.js",
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+      "gitBlob": "7662c1fcd9d167aa68953c7272e3f21e25eb95cd"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "gitBlob": "0f8d50ac47427f609ef6eaed121c1d2a2d3c5d8f"
+    },
+    {
+      "path": "test/term-record-opfs-store.test.js",
+      "sha256": "b9fbc72cfb10a5af0b5cc77b19818e3bfaf7fb9cd4b6b7bbad205142b16163ea",
+      "gitBlob": "4b142d505229a05a3e53e54a02c4667539138321"
+    },
+    {
+      "path": "test/term-bank-wasm-parser.test.js",
+      "sha256": "a30df1a71078f1cf86dfbc7eb76bf93b30ee47e96ce363b50cc13a043ce6cc8d",
+      "gitBlob": "f3909aa8d39507076d64c8f6b87e59578c68a04e"
+    }
+  ],
+  "exactExcerpts": 31,
+  "remoteHeadsRechecked": [
+    {
+      "number": 820,
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "updatedAt": "2026-11-28T06:26:21Z"
+    },
+    {
+      "number": 877,
+      "head": "1a04064bcc33565537c47f8047dacd03b3e89b24",
+      "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "updatedAt": "2026-11-24T20:29:39Z"
+    },
+    {
+      "number": 977,
+      "head": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "updatedAt": "2026-11-28T06:01:55Z"
+    }
+  ],
+  "runtimePatchesReviewed": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "patchSha256": "f4bda37ab81830fee9bc1e4e9ecd5838ca003ea2c075910bd89653ee03ac59e4"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "patchSha256": "4a3057fc480a07be90d8f7960e00fbfd8b8b71c572207c63b764fb3f32c147c5"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "patchSha256": "5aac0ccd0bae9ce74dda871b914efabe8b4b839291d6aca69ddc363260ed5e1b"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "patchSha256": "b9bd275699bded30e7567b2cc34c263449a446dd07968d7d67c1e0292639a32d"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index-ownership.js",
+      "patchSha256": "d00b2ca72c9ee0f44dbffb5fe3278a7d56a533b9ed287cde83cc6bff4f11c9f2"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-import-index-chunk.js",
+      "patchSha256": "8e38774e46e179b90be794749431a220bf3ea3c8a059c675cd098b0f3344b6f2"
+    }
+  ],
+  "readbackSha256": "1f7fab539cf2f134673feaf52c23efc3659627d5437287e7123f15e8c7d2c556",
+  "findings": [
+    "The current native encoder does not produce the final persisted base/derived envelope checksums. Adding native final-byte hashing would relocate the scans, with a possible implementation/scheduling effect, rather than reuse an already-computed checksum.",
+    "Segmented key/string/length/expression views alias the prepared payload. Ordinary ownership protects against native heap reuse but does not prevent receiver mutation across the actual database awaits. The final store currently hashes and copies its supplied bytes synchronously.",
+    "A cached checksum bound only to object, descriptor or shape cannot preserve the current mutable-byte contract. No new immutable ownership protocol is established by this audit.",
+    "PR820 uses a private producer association and geometry to reuse owned columns at the immediate worker transfer boundary; its association does not survive transfer or freeze receiver bytes. PR877 snapshots eligible exclusive arrays by atomic structured-clone transfer before deferred hashing and keeps aliased fallbacks; the current 1 GiB source threshold excludes ordinary JMdict. PR977 extends contentBytesBuffer ownership and sink completion scheduling, without a lookup checksum/immutable payload witness.",
+    "The 19.49 MB figure is explicitly a prior-diagnostic upper bound on moved scanning, including excluded container-header bytes, and is not saved traffic or a latency estimate."
+  ],
+  "limitations": [
+    "The prior diagnostic byte totals were not independently regenerated in this read-only source review.",
+    "PR820 descriptive body/updated timestamp changed after the historical report, while its exact runtime head remains f65f4ef. Its historical body hash is preserved as originally recorded, not asserted to match the later description.",
+    "The history search is bounded, not a proof that no unpublished implementation exists.",
+    "No product code, flags, concurrency, source files, acceptance thresholds, tests or qualification data were changed. No decode, import, benchmark or native compilation was executed."
+  ],
+  "decision": "HOLD; source scope supports the report, with no performance or immutable-ownership result."
+}

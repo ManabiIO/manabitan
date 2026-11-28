@@ -170,6 +170,18 @@
     "mask-census/verify-mask-census.py": {
       "bytes": 11789,
       "sha256": "f6365e590eaa078f110bfa27c02c7642c6da7ec0bc91cf9e144c4f924f180f99"
+    },
+    "producer-checksum-feasibility.json": {
+      "bytes": 69015,
+      "sha256": "d9176e53ebac3e82c163069c1297b95e003595925d09e883a36f2dcca2c1e480"
+    },
+    "producer-checksum-storage-independent-review.json": {
+      "bytes": 6604,
+      "sha256": "e0ee2b3988bd53611bb199e013fdfb26883c8f34ef949f789cdbda18364a5fd4"
+    },
+    "producer-checksum-storage-pr-readback.json": {
+      "bytes": 105174,
+      "sha256": "1f7fab539cf2f134673feaf52c23efc3659627d5437287e7123f15e8c7d2c556"
     }
   }
 }

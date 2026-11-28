@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only feasibility/ownership review, not a runtime experiment, native counter, benchmark, or implementation.",
+  "reviewedAtUtc": "2026-11-28T06:18:52.751577+00:00",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "decision": "HOLD",
+  "sourceBindings": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210111,
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "gitBlob": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+      "excerpts": [
+        {
+          "firstLine": 1596,
+          "lastLine": 1650,
+          "text": "function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {\n    const memory = wasm.memory.buffer;\n    if (\n        !(sequenceList instanceof Int32Array) ||\n        !(plan.expressionIndexes instanceof Uint32Array) ||\n        plan.stringLengths.buffer !== memory ||\n        plan.stringOffsets.buffer !== memory ||\n        plan.stringHashes?.buffer !== memory ||\n        plan.stringsBuffer.buffer !== memory ||\n        plan.expressionIndexes.buffer !== memory ||\n        plan.readingIndexes.buffer !== memory ||\n        rowCount <= 0 || rowCount >= 0xffff ||\n        plan.stringLengths.length <= 0 || plan.stringLengths.length >= 0xffff\n    ) {\n        return null;\n    }\n    let readingEqualsPtr = readingEqualsExpressionList.byteOffset;\n    if (readingEqualsExpressionList.buffer !== memory) {\n        new Uint8Array(memory, scratch.readingEqualsPtr, rowCount).set(\n            readingEqualsExpressionList.subarray(0, rowCount),\n        );\n        readingEqualsPtr = scratch.readingEqualsPtr;\n    }\n    let sequenceValuesPtr = sequenceList.byteOffset;\n    if (sequenceList.buffer !== memory) {\n        new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));\n        sequenceValuesPtr = scratch.sequenceValuesPtr;\n    }\n    const length = wasm.encode_term_lookup_index(\n        plan.stringsBuffer.byteOffset,\n        plan.stringsBuffer.byteLength,\n        plan.stringLengths.byteOffset,\n        plan.stringOffsets.byteOffset,\n        /** @type {Uint32Array} */ (plan.stringHashes).byteOffset,\n        plan.stringLengths.length,\n        plan.expressionIndexes.byteOffset,\n        plan.readingIndexes.byteOffset,\n        readingEqualsPtr,\n        sequenceValuesPtr,\n        rowCount,\n        scratch.outputPtr,\n        scratch.outputCapacity,\n        scratch.sequenceKeysPtr,\n        scratch.sequenceKeyByRowPtr,\n        scratch.sequenceSlotsPtr,\n        scratch.sequenceSlotsCount,\n    );\n    return length > 0 ? new Uint8Array(new Uint8Array(wasm.memory.buffer, scratch.outputPtr, length)) : null;\n}\n\n/**\n * @param {Awaited<ReturnType<typeof getWasm>>} wasm\n * @param {number} rows\n * @param {number} keys\n * @param {number} sourceKeys\n"
+        },
+        {
+          "firstLine": 1671,
+          "lastLine": 1752,
+          "text": "/**\n * Uses one reusable native segment workspace. Returned key arenas alias the\n * owned v7 index, not the parser heap; later parses cannot mutate them.\n * @param {Awaited<ReturnType<typeof getWasm>>} wasm\n * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}} plan\n * @param {Uint8Array} equals\n * @param {Int32Array|Float64Array} sequences\n * @param {number} count\n * @param {ReturnType<typeof createNativeLookupIndexScratch>} indexScratch\n * @param {ReturnType<typeof createNativeLookupCompactionScratch>} scratch\n * @returns {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null}\n */\nfunction encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {\n    const compact = wasm.compact_term_lookup_keys;\n    const memory = wasm.memory.buffer;\n    if (!(sequences instanceof Int32Array) || !(plan.expressionIndexes instanceof Uint32Array) ||\n    typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||\n    plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||\n    plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||\n    plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }\n    /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>} */\n    const indexes = new Map();\n    for (let start = 0; start < count; start += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {\n        const rows = Math.min(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS, count - start);\n        const keys = compact(\n            plan.stringsBuffer.byteOffset,\n            plan.stringsBuffer.byteLength,\n            plan.stringLengths.byteOffset,\n            plan.stringOffsets.byteOffset,\n            plan.stringHashes.byteOffset,\n            plan.stringLengths.length,\n            plan.expressionIndexes.byteOffset + start * 4,\n            plan.readingIndexes.byteOffset + start * 4,\n            equals.byteOffset + start,\n            rows,\n            scratch.remap,\n            scratch.lengths,\n            scratch.offsets,\n            scratch.hashes,\n            scratch.expressions,\n            scratch.readings,\n            scratch.strings,\n            scratch.stringCapacity,\n            scratch.keyCapacity,\n            scratch.info,\n        );\n        if (keys <= 0) { return null; }\n        const length = new Uint32Array(memory, scratch.info, 1)[0];\n        const runPlan = {stringLengths: new Uint16Array(memory, scratch.lengths, keys),\n            stringOffsets: new Uint32Array(memory, scratch.offsets, keys),\n            stringHashes: new Uint32Array(memory, scratch.hashes, keys),\n            stringsBuffer: new Uint8Array(memory, scratch.strings, length),\n            expressionIndexes: new Uint32Array(memory, scratch.expressions, rows),\n            readingIndexes: new Uint32Array(memory, scratch.readings, rows)};\n        const bytes = encodeNativeTermLookupIndex(\n            wasm,\n            runPlan,\n            equals.subarray(start, start + rows),\n            sequences.subarray(start, start + rows),\n            rows,\n            indexScratch,\n        );\n        if (bytes === null) { return null; }\n        /* eslint-disable @stylistic/semi */\n        // The owned v7 base already contains the compact lengths immediately\n        // after its padded key arena, followed by the expression IDs. Reuse\n        // both owned columns; optional offsets can be reconstructed for splits.\n        const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)\n        const ownedPlan = {stringLengths,\n            stringHashes: new Uint32Array(runPlan.stringHashes),\n            // v7: 16-byte container header, then the 32-byte base header.\n            stringsBuffer: bytes.subarray(48, 48 + length),\n            expressionIndexes: new Uint16Array(bytes.buffer, stringLengths.byteOffset + stringLengths.byteLength, rows),\n            // The persisted reading column uses a sentinel for equal readings;\n            // the plan still requires their actual interned string IDs.\n            readingIndexes: new Uint32Array(runPlan.readingIndexes)}\n        indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan})\n        /* eslint-enable @stylistic/semi */\n    }\n    return indexes;\n}\n\n"
+        },
+        {
+          "firstLine": 2545,
+          "lastLine": 2645,
+          "text": "                // Only a complete native group owns the entire encoded slab.\n                contentBytesLength: emitContentSlab && parsed.wasm !== null && start === 0 && end === rowCount ?\n                    parsed.encodedContentBytes :\n                    void 0,\n                contentMetaList,\n                contentUniqueIndexList: contentDedupPlan === null ? null : contentUniqueIndexes.subarray(start, end),\n                contentDedupPlan,\n                useResolvedContentReferences: contentDedupPlan !== null,\n                termRecordPreinternedPlan,\n                mediaRows,\n            };\n            if (\n                options.compactContentMetadata === true && emitContentSlab &&\n                start === 0 && end === rowCount && contentDedupPlan !== null &&\n                contentDedupPlan.uniqueCount * 2 < rowCount\n            ) {\n                // Exact native content IDs include all encoded content fields.\n                // Transfer one descriptor for each unique value; the existing\n                // per-row ID column retains every term's original reference.\n                const uniqueMetas = new Uint32Array(contentDedupPlan.uniqueCount * CONTENT_META_U32_FIELDS);\n                const uniqueRows = contentDedupPlan.uniqueRowIndexes;\n                for (let uniqueIndex = 0; uniqueIndex < uniqueRows.length; ++uniqueIndex) {\n                    const sourceOffset = uniqueRows[uniqueIndex] * CONTENT_META_U32_FIELDS;\n                    const targetOffset = uniqueIndex * CONTENT_META_U32_FIELDS;\n                    uniqueMetas[targetOffset] = contentMetaList[sourceOffset];\n                    uniqueMetas[targetOffset + 1] = contentMetaList[sourceOffset + 1];\n                    uniqueMetas[targetOffset + 2] = contentMetaList[sourceOffset + 2];\n                    uniqueMetas[targetOffset + 3] = contentMetaList[sourceOffset + 3];\n                }\n                chunk.contentMetaList = uniqueMetas;\n                chunk.contentMetaByUniqueIndex = true;\n                ++compactContentMetadataGroups;\n                compactContentMetadataBytesAvoided += contentMetaList.byteLength - uniqueMetas.byteLength;\n            }\n            if (\n                nativeLookupIndexScratch !== null &&\n                parsed.wasm !== null &&\n                nativeStringPlan !== null &&\n                (fusedStringPlan === null || (start === 0 && end === rowCount))\n            ) {\n                const tLookupIndexStart = safePerformance.now();\n                const segments = nativeCompactionScratch === null ?\n    null :\n    encodeNativeTermLookupSegments(\n        parsed.wasm,\n        nativeStringPlan,\n        readingEqualsExpressionList,\n        sequenceList,\n        count,\n        nativeLookupIndexScratch,\n        nativeCompactionScratch,\n    );\n                const bytes = nativeCompactionScratch === null ?\n    encodeNativeTermLookupIndex(\n        parsed.wasm,\n        nativeStringPlan,\n        readingEqualsExpressionList,\n        sequenceList,\n        count,\n        nativeLookupIndexScratch,\n    ) :\n    null;\n                const elapsedMs = Math.max(0, safePerformance.now() - tLookupIndexStart);\n                if (segments !== null) {\n                    chunk.preparedLookupIndexes = segments;\n                    chunk.preparedLookupIndexEncodeMs = elapsedMs;\n                    nativeSegmentedLookupSegments += segments.size;\n                } else if (bytes !== null) {\n                    chunk.preparedLookupIndexes = new Map([\n                        [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],\n                    ]);\n                    chunk.preparedLookupIndexEncodeMs = elapsedMs;\n                } else if (nativeCompactionScratch !== null) {\n                    ++nativeSegmentedLookupFallbacks;\n                }\n                if (nativeLookupScratchReusedBytes > 0 && (segments !== null || bytes !== null)) {\n                    ++nativeLookupScratchReuseGroups;\n                }\n                // Count failed native work too; worker fallback adds its own time.\n                nativeLookupIndexEncodeMs += elapsedMs;\n            }\n            ++chunkIndex;\n            const progress = {processedRows: end, totalRows: rowCount, chunkIndex, chunkCount};\n            const invokeColumnChunk = async () => {\n                if (dispatchStopped) { return; }\n                const tDispatchStart = Date.now();\n                const result = onChunk(chunk, progress);\n                await result;\n                chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);\n            };\n            const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);\n            void promise.catch(() => {});\n            dispatchTail = promise;\n            pendingDispatches.push(promise);\n            if (pendingDispatches.length >= maxPendingChunks) {\n                await /** @type {Promise<void>} */ (pendingDispatches.shift());\n            }\n        }\n        await Promise.all(pendingDispatches);\n    } catch (error) {\n        // String-plan or column projection failure must retain ownership until\n"
+        },
+        {
+          "firstLine": 3720,
+          "lastLine": 3760,
+          "text": "            if (data.type !== 'result' && data.type !== 'parse-error') { return; }\n            cleanup();\n            if (data.type === 'result') {\n                if (!Number.isSafeInteger(data.rowCount) || /** @type {number} */ (data.rowCount) < 0) {\n                    worker.terminate();\n                    const error = new Error('Term-bank parser worker returned an invalid row count');\n                    reject(error);\n                    return;\n                }\n                if (!Number.isSafeInteger(data.resultSentEpochMs) || /** @type {number} */ (data.resultSentEpochMs) < 0) {\n                    worker.terminate();\n                    reject(new Error('Term-bank parser worker returned an invalid result timestamp'));\n                    return;\n                }\n                const profile = /** @type {NonNullable<typeof lastTermBankWasmParseProfile>|null} */ (data.profile ?? null);\n                if (profile !== null) {\n                    profile.sourcePreparationMs = sourcePreparationMs;\n                    profile.sourceTransferredBytes = sourceTransferredBytes;\n                    profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));\n                }\n                const chunk = /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null);\n                const ownsContentBytes = (\n                    data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&\n                    registerOwnedTermContent(chunk?.contentBytesBuffer)\n                );\n                resolve({\n                    chunk,\n                    profile,\n                    error: null,\n                    finishedAt: safePerformance.now(),\n                    rowCount: /** @type {number} */ (data.rowCount),\n                    borrowsWorkerMemory: (\n                        data.borrowsWorkerMemory === true ||\n                        (\n                            typeof SharedArrayBuffer === 'function' &&\n                            chunk?.contentBytesBuffer?.buffer instanceof SharedArrayBuffer && !ownsContentBytes\n                        )\n                    ),\n                });\n            } else {\n                worker.terminate();\n"
+        },
+        {
+          "firstLine": 4180,
+          "lastLine": 4252,
+          "text": "                plan.stringHashes instanceof Uint32Array ?\n                    new Uint32Array(plan.stringHashes) :\n                    void 0\n            ),\n        stringsBuffer: ownedStrings,\n        expressionIndexes: new Uint32Array(plan.expressionIndexes),\n        readingIndexes: new Uint32Array(plan.readingIndexes),\n    };\n    /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */\n    let preparedLookupIndexes;\n    if (chunk.preparedLookupIndexes instanceof Map) {\n        preparedLookupIndexes = new Map();\n        for (const [key, prepared] of chunk.preparedLookupIndexes) {\n            preparedLookupIndexes.set(key, {\n                bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?\n                    new Uint8Array(prepared.bytes) :\n                    prepared.bytes,\n                preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,\n                ...(prepareLookupRoute ? {routeFilter: buildTermLookupFilter(prepared.preinternedPlan.stringHashes)} : {}),\n            });\n        }\n    }\n    return {\n        ...chunk,\n        expressionBytesList: chunk.expressionBytesList.map((bytes) => new Uint8Array(bytes)),\n        readingBytesList: chunk.readingBytesList.map((bytes) => new Uint8Array(bytes)),\n        readingEqualsExpressionList: new Uint8Array(chunk.readingEqualsExpressionList),\n        scoreList: chunk.scoreList instanceof Float64Array ?\n            new Float64Array(chunk.scoreList) :\n            new Int32Array(chunk.scoreList),\n        sequenceList: chunk.sequenceList instanceof Float64Array ?\n            new Float64Array(chunk.sequenceList) :\n            new Int32Array(chunk.sequenceList),\n        contentBytesList: chunk.contentBytesList.map((bytes) => new Uint8Array(bytes)),\n        contentHash1List: new Uint32Array(chunk.contentHash1List),\n        contentHash2List: new Uint32Array(chunk.contentHash2List),\n        contentBytesBuffer,\n        contentBytesBaseOffset: 0,\n        contentMetaList,\n        contentUniqueIndexList: chunk.contentUniqueIndexList === null ?\n            null :\n            new Uint32Array(chunk.contentUniqueIndexList),\n        mediaRows,\n        termRecordPreinternedPlan: stablePlan,\n        ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),\n    };\n}\n\n/**\n * @param {Array<NonNullable<typeof lastTermBankWasmParseProfile>>} profiles\n * @param {number} rowCount\n * @param {number} chunkDispatchMs\n * @returns {NonNullable<typeof lastTermBankWasmParseProfile>}\n */\nfunction aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {\n    /**\n     * @param {keyof NonNullable<typeof lastTermBankWasmParseProfile>} key\n     * @returns {number}\n     */\n    const sum = (key) => {\n        let result = 0;\n        for (const profile of profiles) {\n            const value = profile[key];\n            if (typeof value === 'number') { result += value; }\n        }\n        return result;\n    };\n    return {\n        experiments: profiles[0]?.experiments ?? snapshotTermBankExperiments(),\n        fusedParseAttempts: sum('fusedParseAttempts'),\n        fusedParseFallbacks: sum('fusedParseFallbacks'),\n        discardedFusedParseMs: sum('discardedFusedParseMs'),\n        discardedFusedRows: sum('discardedFusedRows'),\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "bytes": 16935,
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "gitBlob": "82808931b73e099a604c598460cdeaed43d67bd5",
+      "excerpts": [
+        {
+          "firstLine": 209,
+          "lastLine": 241,
+          "text": "        if (stableResultChunk !== null && options.prepareLookupIndexes === true && !(stableResultChunk.preparedLookupIndexes instanceof Map)) {\n            const prepared = prepareTermLookupIndexesFromPreinternedPlan(stableResultChunk, null, experiments);\n            if (prepared !== null) {\n                stableResultChunk.preparedLookupIndexes = prepared.indexes;\n                stableResultChunk.preparedLookupIndexEncodeMs = prepared.totalMs;\n                if (profile !== null) {\n                    profile.lookupIndexPrepareMs = (profile.lookupIndexPrepareMs ?? 0) + prepared.totalMs;\n                    profile.lookupIndexCompactMs = prepared.compactMs;\n                    profile.lookupIndexEncodeMs = (profile.lookupIndexEncodeMs ?? 0) + prepared.indexEncodeMs;\n                    profile.directLookupArenaSegments = prepared.directArenaSegments;\n                    profile.directLookupArenaCopiedBytesAvoided = prepared.directArenaCopiedBytesAvoided;\n                    profile.lookupCompactionSourceValidationPasses = prepared.compactionSourceValidationPasses;\n                }\n            }\n        }\n        if (options.prepareLookupRoute === true && stableResultChunk?.preparedLookupIndexes instanceof Map) {\n            for (const index of stableResultChunk.preparedLookupIndexes.values()) {\n                index.routeFilter ??= buildTermLookupFilter(index.preinternedPlan.stringHashes);\n            }\n        }\n        const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);\n        self.postMessage({\n            type: 'result',\n            id,\n            rowCount: resultRowCount,\n            resultSentEpochMs: Date.now(),\n            borrowsWorkerMemory,\n            ownsContentBytes,\n            chunk: stableResultChunk,\n            profile,\n        }, transfer);\n    } catch (error) {\n        self.postMessage({type: 'parse-error', id, error: serializeError(error)});\n"
+        },
+        {
+          "firstLine": 275,
+          "lastLine": 301,
+          "text": "    const plan = chunk.termRecordPreinternedPlan;\n    addView(plan.stringLengths);\n    addView(plan.stringOffsets);\n    addView(plan.stringHashes);\n    addView(plan.stringsBuffer);\n    addView(plan.expressionIndexes);\n    addView(plan.readingIndexes);\n    const preparedLookupIndexes = /** @type {unknown} */ (chunk.preparedLookupIndexes);\n    if (preparedLookupIndexes instanceof Map) {\n        for (const prepared of preparedLookupIndexes.values()) {\n            if (typeof prepared !== 'object' || prepared === null) { continue; }\n            addView(Reflect.get(prepared, 'bytes'));\n            addView(Reflect.get(prepared, 'routeFilter'));\n            const preparedPlan = /** @type {unknown} */ (Reflect.get(prepared, 'preinternedPlan'));\n            if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }\n            addView(Reflect.get(preparedPlan, 'stringLengths'));\n            addView(Reflect.get(preparedPlan, 'stringOffsets'));\n            addView(Reflect.get(preparedPlan, 'stringHashes'));\n            addView(Reflect.get(preparedPlan, 'stringsBuffer'));\n            addView(Reflect.get(preparedPlan, 'expressionIndexes'));\n            addView(Reflect.get(preparedPlan, 'readingIndexes'));\n        }\n    }\n    const rawDedupPlan = /** @type {unknown} */ (chunk.contentDedupPlan);\n    const dedupPlan = /** @type {{uniqueRowIndexes?: unknown, uniqueSignatures?: unknown, resolvedFlags?: unknown, resolvedOffsets?: unknown, resolvedLengths?: unknown, pendingEpochs?: unknown, pendingIndexes?: unknown, pendingSpanOffsetsScratch?: unknown, pendingSpanLengthsScratch?: unknown}|null} */ (\n        typeof rawDedupPlan === 'object' ? rawDedupPlan : null\n    );\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 158441,
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "gitBlob": "ccfba94ced59e465859ccec855f4e6947f23f413",
+      "excerpts": [
+        {
+          "firstLine": 2854,
+          "lastLine": 2882,
+          "text": "\n/**\n * Encodes the persisted v7 lookup container directly from parser-owned columns.\n * The output is byte-identical to the validated JavaScript encoder. Scratch\n * buffers are caller-owned so repeated parser chunks do not retain C state.\n */\n__attribute__((visibility(\"default\")))\nint32_t encode_term_lookup_index(\n    uint32_t strings_ptr,\n    uint32_t strings_length,\n    uint32_t string_lengths_ptr,\n    uint32_t string_offsets_ptr,\n    uint32_t string_hashes_ptr,\n    uint32_t key_count,\n    uint32_t expression_indexes_ptr,\n    uint32_t reading_indexes_ptr,\n    uint32_t reading_equals_ptr,\n    uint32_t sequences_ptr,\n    uint32_t row_count,\n    uint32_t output_ptr,\n    uint32_t output_capacity,\n    uint32_t sequence_keys_scratch_ptr,\n    uint32_t sequence_key_by_row_scratch_ptr,\n    uint32_t sequence_slots_scratch_ptr,\n    uint32_t sequence_slots_count\n) {\n    if (\n        strings_ptr == 0u || string_lengths_ptr == 0u || string_offsets_ptr == 0u ||\n        string_hashes_ptr == 0u || expression_indexes_ptr == 0u ||\n"
+        },
+        {
+          "firstLine": 2973,
+          "lastLine": 3010,
+          "text": "    const uint32_t sequence_hash_slot_count = term_lookup_hash_slot_count(sequence_key_count);\n    const uint64_t aligned_string_length_64 = ((uint64_t)strings_length + 3u) & ~UINT64_C(3);\n    const uint32_t base_u16_bytes = align4(\n        (key_count + (row_count * 3u)) * (uint32_t)sizeof(uint16_t)\n    );\n    const uint32_t derived_u16_count =\n        key_slot_count + key_count +\n        (key_count + 1u) + row_count +\n        (key_count + 1u) + reading_posting_count +\n        sequence_hash_slot_count + sequence_key_count +\n        (sequence_key_count + 1u) + sequence_posting_count;\n    const uint32_t derived_u16_bytes = align4(derived_u16_count * (uint32_t)sizeof(uint16_t));\n    const uint64_t base_length_64 =\n        TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length_64 + base_u16_bytes +\n        sequence_key_count * (uint32_t)sizeof(int32_t);\n    const uint64_t derived_length_64 = TERM_LOOKUP_DERIVED_HEADER_BYTES + derived_u16_bytes;\n    const uint64_t output_length_64 =\n        TERM_LOOKUP_CONTAINER_HEADER_BYTES + base_length_64 + derived_length_64;\n    if (output_length_64 > output_capacity || output_length_64 > 0x7fffffffu) { return -4; }\n    const uint32_t aligned_string_length = (uint32_t)aligned_string_length_64;\n    const uint32_t base_length = (uint32_t)base_length_64;\n    const uint32_t derived_length = (uint32_t)derived_length_64;\n    const uint32_t output_length = (uint32_t)output_length_64;\n\n    uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;\n    // Every live output column below is overwritten or initialized for its\n    // accumulator role. Clear only padding/reserved bytes; zeroing the full\n    // container would write keys, postings and hash chains twice.\n    uint32_t* container_header = (uint32_t*)output;\n    container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;\n    container_header[1] = TERM_LOOKUP_FORMAT_VERSION;\n    container_header[2] = base_length;\n    container_header[3] = derived_length;\n    uint8_t* base = output + TERM_LOOKUP_CONTAINER_HEADER_BYTES;\n    uint32_t* base_header = (uint32_t*)base;\n    base_header[0] = row_count;\n    base_header[1] = key_count;\n    base_header[2] = strings_length;\n"
+        },
+        {
+          "firstLine": 3102,
+          "lastLine": 3142,
+          "text": "            (uint16_t)reading_indexes[row] : TERM_LOOKUP_U16_NULL;\n        const uint16_t sequence_key = sequence_key_by_row[row];\n        persisted_sequence_row_keys[row] = sequence_key;\n        ++expression_offsets[(uint32_t)persisted_expression_keys[row] + 1u];\n        if (persisted_reading_keys[row] != TERM_LOOKUP_U16_NULL) {\n            ++reading_offsets[(uint32_t)persisted_reading_keys[row] + 1u];\n        }\n        if (sequence_key != TERM_LOOKUP_U16_NULL) { ++sequence_offsets[(uint32_t)sequence_key + 1u]; }\n    }\n    for (uint32_t key = 1u; key <= key_count; ++key) {\n        expression_offsets[key] = (uint16_t)(expression_offsets[key] + expression_offsets[key - 1u]);\n        reading_offsets[key] = (uint16_t)(reading_offsets[key] + reading_offsets[key - 1u]);\n    }\n    for (uint32_t key = 1u; key <= sequence_key_count; ++key) {\n        sequence_offsets[key] = (uint16_t)(sequence_offsets[key] + sequence_offsets[key - 1u]);\n    }\n    for (uint32_t row = row_count; row > 0u;) {\n        --row;\n        const uint32_t expression_key = persisted_expression_keys[row];\n        expression_rows[--expression_offsets[expression_key + 1u]] = (uint16_t)row;\n        if (persisted_reading_keys[row] != TERM_LOOKUP_U16_NULL) {\n            const uint32_t reading_key = persisted_reading_keys[row];\n            reading_rows[--reading_offsets[reading_key + 1u]] = (uint16_t)row;\n        }\n        const uint16_t sequence_key = sequence_key_by_row[row];\n        if (sequence_key != TERM_LOOKUP_U16_NULL) {\n            sequence_rows[sequence_offsets[sequence_key]++] = (uint16_t)row;\n        }\n    }\n    for (uint32_t key = 1u; key < key_count; ++key) {\n        expression_offsets[key] = expression_offsets[key + 1u];\n        reading_offsets[key] = reading_offsets[key + 1u];\n    }\n    expression_offsets[key_count] = (uint16_t)row_count;\n    reading_offsets[key_count] = (uint16_t)reading_posting_count;\n    for (uint32_t key = sequence_key_count; key > 0u; --key) {\n        sequence_offsets[key] = sequence_offsets[key - 1u];\n    }\n    sequence_offsets[0] = 0u;\n    return (int32_t)output_length;\n}\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "bytes": 11139,
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "gitBlob": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+      "excerpts": [
+        {
+          "firstLine": 33,
+          "lastLine": 47,
+          "text": "const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;\n\n/**\n * @typedef {{bytes: Uint8Array, routeFilter?: Uint32Array|null, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex\n */\n\n/**\n * Builds offset-independent lookup sidecars from a parser-owned string plan.\n * The same helper runs in parser workers and remains available to the storage\n * owner as a fallback.\n * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk\n * @param {Uint32Array|null} [remapScratch=null]\n * @param {import('dictionary-importer').ImportExperiments} [experiments={}]\n * @returns {{indexes: Map<string, PreparedTermLookupIndex>, compactMs: number, indexEncodeMs: number, totalMs: number, directArenaSegments: number, directArenaCopiedBytesAvoided: number, compactionSourceValidationPasses: number}|null}\n */\n"
+        },
+        {
+          "firstLine": 207,
+          "lastLine": 250,
+          "text": " */\nfunction isCompletePreparedTermLookupIndex(value, rowCount, requireNonemptyStrings = false) {\n    if (typeof value !== 'object' || value === null) { return false; }\n    const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));\n    const planValue = /** @type {unknown} */ (Reflect.get(value, 'preinternedPlan'));\n    const plan = /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} */ (\n        typeof planValue === 'object' && planValue !== null ? planValue : null\n    );\n    return (\n        bytes instanceof Uint8Array &&\n        bytes.byteLength > 0 &&\n        hasCompletePreparedTermRecordPreinternedPlan(plan, rowCount, requireNonemptyStrings)\n    );\n}\n\n/**\n * Rejects partial or detached worker results before the storage sink trusts\n * them. Index payload integrity is validated when the sidecar is loaded.\n * @param {unknown} value\n * @param {number} rowCount\n * @returns {value is Map<string, PreparedTermLookupIndex>}\n */\nexport function hasCompletePreparedTermLookupIndexes(value, rowCount) {\n    if (!(value instanceof Map) || !Number.isSafeInteger(rowCount) || rowCount <= 0) { return false; }\n    const wholeChunk = /** @type {unknown} */ (value.get(`0:${rowCount}`));\n    if (\n        value.size === 1 &&\n        rowCount <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS &&\n        isCompletePreparedTermLookupIndex(wholeChunk, rowCount, true) &&\n        wholeChunk.preinternedPlan.stringLengths.length <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS\n    ) {\n        return true;\n    }\n    let coveredRows = 0;\n    for (let runStart = 0; runStart < rowCount; runStart += MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS) {\n        const runCount = Math.min(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS, rowCount - runStart);\n        const prepared = /** @type {unknown} */ (value.get(`${runStart}:${runCount}`));\n        if (!isCompletePreparedTermLookupIndex(prepared, runCount)) {\n            return false;\n        }\n        coveredRows += runCount;\n    }\n    return coveredRows === rowCount && value.size === Math.ceil(rowCount / MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS);\n}\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 613153,
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+      "excerpts": [
+        {
+          "firstLine": 8388,
+          "lastLine": 8401,
+          "text": "            throw new Error('Artifact chunk content hash arrays are smaller than row count');\n        }\n        const importMetrics = createTermImportMetrics();\n        /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */\n        let stagedContentMetadata = null;\n        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */\n        let dedupPlanRollbackState = null;\n\n        if (useLocalTransaction) {\n            await this._beginImmediateTransaction(this._requireDb());\n        }\n        try {\n            const tContentAppendStart = safePerformance.now();\n            const dedup = await this._resolveArtifactTermContentDedup(chunk, true);\n"
+        },
+        {
+          "firstLine": 8503,
+          "lastLine": 8530,
+          "text": "                        importMetrics.contentMetadataMs += contentMetadataStageMs;\n                    }\n                    const workerPreparedLookupIndexes = chunk.preparedLookupIndexes;\n                    if (\n                        hasCompletePreparedTermLookupIndexes(workerPreparedLookupIndexes, count)\n                    ) {\n                        preparedLookupIndexes = workerPreparedLookupIndexes;\n                        importMetrics.termLookupIndexEncodeMs += Math.max(0, chunk.preparedLookupIndexEncodeMs ?? 0);\n                    } else {\n                        const preparedLookupResult = typeof this._termRecordStore.prepareArtifactChunkLookupIndexes === 'function' ?\n                            this._termRecordStore.prepareArtifactChunkLookupIndexes(chunk) :\n                            null;\n                        if (preparedLookupResult !== null) {\n                            preparedLookupIndexes = preparedLookupResult.indexes;\n                            importMetrics.termLookupIndexEncodeMs += preparedLookupResult.encodeMs;\n                        }\n                    }\n                    /** @type {{pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], blockProfile?: {packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null} & Partial<Record<symbol, boolean>>} */\n                    const persistenceResult = earlyContentPersistence === null ?\n                        await pendingContentPersistence :\n                        await earlyContentPersistence.storage;\n                    const {\n                        pendingOffsets,\n                        pendingLengths,\n                        pendingResolvedDictNames,\n                    } = persistenceResult;\n                    if (earlyContentPersistence === null) {\n                        this._addTermContentBlockProfile(importMetrics, persistenceResult.blockProfile ?? null);\n"
+        },
+        {
+          "firstLine": 10100,
+          "lastLine": 10123,
+          "text": "     */\n    _createResolvedArtifactTermRecordChunk(\n        chunk,\n        preparedLookupIndexes,\n        contentDedupPlan,\n        useResolvedContentReferences,\n    ) {\n        if (\n            useResolvedContentReferences &&\n            contentDedupPlan !== null &&\n            chunk.contentUniqueIndexList instanceof Uint32Array\n        ) {\n            return createArtifactTermRecordChunkWithResolvedContent(\n                chunk,\n                chunk.contentUniqueIndexList,\n                contentDedupPlan.resolvedOffsets,\n                contentDedupPlan.resolvedLengths,\n                preparedLookupIndexes,\n            );\n        }\n        return preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};\n    }\n\n    /**\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+      "excerpts": [
+        {
+          "firstLine": 586,
+          "lastLine": 596,
+          "text": "}\n\n/**\n * @param {Uint8Array} bytes\n * @returns {number}\n */\nfunction hashLookupIndexBytes(bytes) {\n    return hashTermLookupKeyBytes(bytes);\n}\n\n/**\n"
+        },
+        {
+          "firstLine": 2192,
+          "lastLine": 2208,
+          "text": "                if (i === 0 || contentDictName !== previousContentDictName) {\n                    this._assertShardAcceptsAppend(chunk.dictionary, contentDictName);\n                    previousContentDictName = contentDictName;\n                }\n            }\n        }\n        await this._ensureNextIdReadyForAppend(count);\n        const tBuildStart = safePerformance.now();\n        const firstId = this._nextId;\n        const firstContentDictName = uniformContentDictName ?? (contentDictNames[0] ?? 'raw');\n        const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;\n        const stableStringLengths = preinternedPlan?.stringLengths;\n        const stableStringsBuffer = preinternedPlan?.stringsBuffer;\n        const stableExpressionIndexes = preinternedPlan?.expressionIndexes;\n        const stableReadingIndexes = preinternedPlan?.readingIndexes;\n        const skipRecordMaterialization = (\n            this._importSessionActive &&\n"
+        },
+        {
+          "firstLine": 2280,
+          "lastLine": 2297,
+          "text": "        if (uniformContentDictName !== null) {\n            const state = await this._getOrCreateShardState(chunk.dictionary, uniformContentDictName);\n            if (state === null) {\n                return {buildRecordsMs, encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};\n            }\n            const metrics = await this._encodeAndAppendArtifactChunkForState(\n                state,\n                chunk,\n                firstId,\n                contentOffsets,\n                contentLengths,\n                chunk.termRecordPreinternedPlan ?? null,\n                uniformContentDictName,\n                chunk.preparedLookupIndexes ?? null,\n            );\n            encodeMs += metrics.encodeMs;\n            appendWriteMs += metrics.appendWriteMs;\n            validationMs += metrics.validationMs;\n"
+        },
+        {
+          "firstLine": 2456,
+          "lastLine": 2477,
+          "text": "    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {\n        let encodeMs = 0;\n        let appendWriteMs = 0;\n        let validationMs = 0;\n        let recordFieldEncodeMs = 0;\n        let lookupIndexEncodeMs = 0;\n        const count = chunk.rowCount;\n        const hasWholeChunkPreparedIndex = (\n            preparedLookupIndexes?.has(`0:${count}`) === true &&\n            hasCompletePreparedTermLookupIndexes(preparedLookupIndexes, count)\n        );\n        const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;\n        for (let runStart = 0; runStart < count;) {\n            // Recompute after every awaited append; no validity is cached\n            // across runs. The row loop itself is synchronous.\n            const tValidationStart = safePerformance.now();\n            const useFixedContentSpan = hasFixedContentSpan(chunk, count);\n            const references = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);\n            let runEnd = runStart;\n            const runLimitEnd = Math.min(count, runStart + runRowLimit);\n            let minContentOffset = Number.POSITIVE_INFINITY;\n            let maxContentOffset = Number.NEGATIVE_INFINITY;\n"
+        },
+        {
+          "firstLine": 2542,
+          "lastLine": 2578,
+          "text": "            const preparedLookupIndex = preparedLookupIndexes?.get(`${runStart}:${runCount}`) ?? null;\n            const runPlan = preparedLookupIndex?.preinternedPlan ?? compactTermRecordPreinternedPlan(\n                preinternedPlan,\n                runStart,\n                runCount,\n                this._getPreinternedCompactionRemap(preinternedPlan?.stringLengths.length ?? 0),\n                chunk.readingEqualsExpressionList,\n            );\n            const tEncodeStart = safePerformance.now();\n            const encodedChunk = await this._encodeArtifactChunkRecords(\n                runChunk,\n                runOffsets,\n                runLengths,\n                runPlan,\n                preparedLookupIndex?.bytes ?? null,\n                runContentOffsetBase,\n            );\n            encodeMs += safePerformance.now() - tEncodeStart;\n            validationMs += runValidationMs + encodedChunk.validationMs;\n            recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;\n            lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;\n            const tAppendStart = safePerformance.now();\n            await this._appendEncodedChunk(\n                state,\n                firstId + runStart,\n                runCount,\n                contentDictName,\n                encodedChunk.contentOffsetBase,\n                encodedChunk.lookupIndexBytes,\n                encodedChunk.recordFields,\n                encodedChunk.recordFieldsFormat,\n                (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES ?\n                    preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :\n                    null,\n            );\n            appendWriteMs += safePerformance.now() - tAppendStart;\n            runStart = runEnd;\n"
+        },
+        {
+          "firstLine": 6024,
+          "lastLine": 6056,
+          "text": "                    /** @type {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (preinternedPlan),\n                    chunk.readingEqualsExpressionList,\n                    chunk.sequenceList,\n                    chunk.rowCount,\n                ) :\n                encodePersistedTermLookupIndex(Array.from({length: chunk.rowCount}, (_, i) => {\n                    const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;\n                    const sequence = chunk.sequenceList[i];\n                    return {\n                        expressionBytes: chunk.expressionBytesList[i],\n                        readingBytes: readingEqualsExpression ? null : chunk.readingBytesList[i],\n                        sequence: typeof sequence === 'number' && sequence >= 0 ? sequence : null,\n                    };\n                }));\n        }\n        return {\n            contentOffsetBase,\n            lookupIndexBytes,\n            recordFields,\n            recordFieldsFormat,\n            validationMs,\n            recordFieldEncodeMs,\n            lookupIndexEncodeMs: preparedLookupIndexBytes === null ? safePerformance.now() - tLookupIndexEncodeStart : 0,\n        };\n    }\n\n    /**\n     * @param {TermRecordShardState} state\n     * @param {number} firstId\n     * @param {number} count\n     * @param {string|null} [contentDictNameOverride=null]\n     * @param {number} contentOffsetBase\n     * @param {Uint8Array|null} [lookupIndexBytes=null]\n"
+        },
+        {
+          "firstLine": 6078,
+          "lastLine": 6086,
+          "text": "        const contentDictName = contentDictNameOverride ?? firstRecord?.entryContentDictName ?? 'raw';\n        if (state.sharedContentDictName === null) {\n            state.sharedContentDictName = contentDictName;\n        } else if (state.sharedContentDictName !== contentDictName) {\n            throw new Error(`Mixed entryContentDictName values are not supported within shard ${state.fileName}`);\n        }\n\n        /** @type {Uint8Array|null} */\n        const binaryHeader = state.fileLength === 0 ?\n"
+        },
+        {
+          "firstLine": 6110,
+          "lastLine": 6125,
+          "text": "            if (\n                this._importSessionActive && !this._exactLookupRouteAbandoned &&\n                (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES\n            ) {\n                this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);\n            }\n            state.pendingLookupIndexChunks.push(lookupIndexChunk);\n            state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;\n            state.pendingLookupIndexRecordCount += count;\n            if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {\n                await this._flushPendingLookupIndexChunks(state, !this._importSessionActive);\n            } else if (\n                this._importSessionActive &&\n                state.lookupIndexChunkCount === 0 &&\n                state.lookupIndexWritePromise === null &&\n                state.pendingLookupIndexBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES\n"
+        },
+        {
+          "firstLine": 6244,
+          "lastLine": 6282,
+          "text": "    _createLookupIndexChunk(\n        firstId,\n        count,\n        contentOffsetBase,\n        payload,\n        recordFields,\n        recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,\n    ) {\n        if (!(recordFields instanceof Uint8Array)) {\n            throw new Error('Invalid authoritative term-record fields');\n        }\n        if (\n            getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength\n        ) {\n            throw new Error('Invalid authoritative term-record fields');\n        }\n        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);\n        const {base, derived} = splitPersistedTermLookupIndex(payload);\n        const output = new Uint8Array(\n            LOOKUP_INDEX_CHUNK_HEADER_BYTES +\n            payload.byteLength +\n            recordFields.byteLength,\n        );\n        const view = new DataView(output.buffer, output.byteOffset, output.byteLength);\n        view.setUint32(0, firstId, true);\n        view.setUint32(4, count, true);\n        writeSafeU64Le(view, 8, contentOffsetBase);\n        view.setUint32(16, payload.byteLength, true);\n        view.setUint32(20, base.byteLength, true);\n        view.setUint32(24, hashLookupIndexBytes(base), true);\n        view.setUint32(28, hashLookupIndexBytes(derived), true);\n        view.setUint32(32, hashLookupIndexBytes(recordFields), true);\n        view.setUint32(36, recordFieldsFormat, true);\n        output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);\n        output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);\n        return output;\n    }\n\n    /**\n"
+        },
+        {
+          "firstLine": 4216,
+          "lastLine": 4238,
+          "text": "                    if (!isCurrent()) { return null; }\n                    const payload = chunkBody.subarray(0, payloadLength);\n                    let sections;\n                    try {\n                        sections = splitPersistedTermLookupIndex(payload);\n                    } catch (error) {\n                        throw new PersistentLookupIndexError('invalid', `Lookup index framing is invalid for ${state.fileName}`, error);\n                    }\n                    if (\n                        sections.base.byteLength !== baseLength ||\n                        hashLookupIndexBytes(sections.base) !== baseHash\n                    ) {\n                        throw new PersistentLookupIndexError('invalid', `Lookup index authoritative base checksum failed for ${state.fileName}`);\n                    }\n                    if (hashLookupIndexBytes(sections.derived) !== derivedHash) {\n                        throw new PersistentLookupIndexError('invalid', `Lookup index derived checksum failed for ${state.fileName}`);\n                    }\n                    const recordFields = chunkBody.subarray(payloadLength);\n                    if (hashLookupIndexBytes(recordFields) !== recordFieldsHash) {\n                        throw new PersistentLookupIndexError('invalid', `Lookup index record fields checksum failed for ${state.fileName}`);\n                    }\n                    let compactRecordFields;\n                    try {\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index.js",
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "gitBlob": "e0d30279b67300cb47d519a1b8d809eb4ba784f6",
+      "excerpts": [
+        {
+          "firstLine": 520,
+          "lastLine": 552,
+          "text": "    }\n    return {keys: keys.subarray(0, keyCount), keyByRow, postingCount};\n}\n\n/**\n * Returns the independently persistable authoritative and derived sections.\n * @param {Uint8Array} bytes\n * @returns {PersistedTermLookupIndexSections}\n * @throws {Error} If the container framing is malformed.\n */\nexport function splitPersistedTermLookupIndex(bytes) {\n    if (bytes.byteLength < CONTAINER_HEADER_BYTES || (bytes.byteOffset & 3) !== 0) {\n        throw new Error('Invalid persisted term lookup index container');\n    }\n    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, CONTAINER_HEADER_U32_COUNT);\n    const baseLength = header[2];\n    const derivedLength = header[3];\n    if (\n        header[0] !== CONTAINER_MAGIC ||\n        !isSupportedIndexFormat(header[1]) ||\n        baseLength < BASE_HEADER_BYTES ||\n        derivedLength < DERIVED_HEADER_BYTES ||\n        CONTAINER_HEADER_BYTES + baseLength + derivedLength !== bytes.byteLength\n    ) {\n        throw new Error('Invalid persisted term lookup index container');\n    }\n    return {\n        base: bytes.subarray(CONTAINER_HEADER_BYTES, CONTAINER_HEADER_BYTES + baseLength),\n        derived: bytes.subarray(CONTAINER_HEADER_BYTES + baseLength),\n    };\n}\n\n/**\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-key-hash.js",
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+      "gitBlob": "7662c1fcd9d167aa68953c7272e3f21e25eb95cd",
+      "excerpts": [
+        {
+          "firstLine": 18,
+          "lastLine": 26,
+          "text": "\nconst HASH_SEED = 0x811c9dc5;\nconst PRIME1 = 0x9e3779b1;\nconst PRIME2 = 0x85ebca77;\nconst PRIME3 = 0xc2b2ae3d;\nconst PRIME4 = 0x27d4eb2f;\nconst PRIME5 = 0x165667b1;\n\n/**\n"
+        },
+        {
+          "firstLine": 48,
+          "lastLine": 70,
+          "text": "export function hashTermKeyBytes(bytes) {\n    return hashTermKeyByteRange(bytes, 0, bytes.byteLength);\n}\n\n/**\n * Stable XXH32 used by both persisted lookup indexes and runtime queries.\n * Keep this implementation synchronized with term-bank-parser.c.\n * @param {Uint8Array} bytes\n * @param {number} start\n * @param {number} end\n * @returns {number}\n */\nexport function hashTermKeyByteRange(bytes, start, end) {\n    const length = end - start;\n    if (\n        length >= 1024 && start >= 0 && end <= bytes.byteLength &&\n        Number.isInteger(start) && Number.isInteger(end)\n    ) {\n        return hashLargeTermKeyByteRange(bytes, start, end);\n    }\n    let offset = start;\n    let hash;\n    if (length >= 16) {\n"
+        }
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "gitBlob": "0f8d50ac47427f609ef6eaed121c1d2a2d3c5d8f",
+      "excerpts": [
+        {
+          "firstLine": 79,
+          "lastLine": 111,
+          "text": "    if (\n        source instanceof Uint8Array &&\n        source.byteOffset === 0 && source.byteLength > 0 && source.byteLength === source.buffer.byteLength\n    ) {\n        ownedContentBuffers.add(source.buffer)\n        return true\n    }\n    return false\n}\n\n/**\n * Consumes a private one-time witness for a complete immutable backing buffer.\n * A cache may retain a subrange view only while charging the full allocation.\n * @param {Uint8Array} source\n * @returns {boolean}\n */\nexport function takeOwnedTermContent(source) {\n    if (\n        source.byteOffset !== 0 ||\n        source.byteLength === 0 || source.byteLength !== source.buffer.byteLength\n    ) { return false }\n    return ownedContentBuffers.delete(source.buffer)\n}\n"
+        }
+      ]
+    },
+    {
+      "path": "test/term-record-opfs-store.test.js",
+      "bytes": 342754,
+      "sha256": "b9fbc72cfb10a5af0b5cc77b19818e3bfaf7fb9cd4b6b7bbad205142b16163ea",
+      "gitBlob": "4b142d505229a05a3e53e54a02c4667539138321",
+      "excerpts": [
+        {
+          "firstLine": 3966,
+          "lastLine": 4019,
+          "text": "        await readerStore._loadShardFiles(true);\n        const records = [...Reflect.get(readerStore, '_recordsById').values()];\n        expect(records.map(({entryContentOffset}) => entryContentOffset)).toStrictEqual([16, 16, 0x100000010]);\n        expect(records.map(({entryContentLength}) => entryContentLength)).toStrictEqual([7, 7, 9]);\n    });\n\n    /* eslint-disable @stylistic/semi */\n    test('splits high resolved offsets even with a prepared whole-chunk lookup index', async () => {\n        const dictionary = 'Reserved shared content offsets'\n        const expressions = ['old', 'reserved', 'repeated', 'far-reserved']\n        const bytes = expressions.map((value) => new TextEncoder().encode(value))\n        const builder = createTermRecordPreinternedPlanBuilder(expressions.length)\n        const indexes = bytes.map((value) => builder.internStringBytes(value))\n        const plan = builder.buildPlan(indexes, indexes)\n        const uniqueOffsets = new Float64Array([16, 0x100000010, Number.MAX_SAFE_INTEGER - 64])\n        const uniqueIndexes = new Uint32Array([0, 1, 0, 2])\n        const expectedOffsets = [...uniqueIndexes].map((index) => uniqueOffsets[index])\n        const files = new Map()\n        const directory = createFakeDirectoryHandle(files)\n        const writer = new TermRecordOpfsStore()\n        Reflect.set(writer, '_recordsDirectoryHandle', directory)\n        const chunk = {\n            dictionary,\n            dictionaryTotalRows: 1_000_000,\n            rowCount: expressions.length,\n            expressionBytesList: bytes,\n            readingBytesList: bytes,\n            readingEqualsExpressionList: new Uint8Array(expressions.length).fill(1),\n            scoreList: new Int32Array([1, 2, 3, 4]),\n            sequenceList: new Int32Array(expressions.length).fill(-1),\n            termRecordPreinternedPlan: plan,\n            resolvedContentReferences: {\n                uniqueIndexList: uniqueIndexes,\n                offsets: uniqueOffsets,\n                lengths: new Uint32Array(uniqueOffsets.length).fill(8),\n            },\n        }\n        const prepared = writer.prepareArtifactChunkLookupIndexes(chunk)\n        expect(prepared?.indexes.size).toBe(1)\n        const encode = vi.spyOn(writer, '_encodeArtifactChunkRecords')\n        await writer.beginImportSession()\n        await writer.appendBatchFromArtifactChunkResolvedContent(\n            {...chunk, preparedLookupIndexes: prepared?.indexes},\n            new Float64Array(0),\n            new Uint32Array(0),\n            'raw-block-v2:jmdict',\n        )\n        await writer.endImportSession()\n        expect(encode.mock.calls.map(([run]) => run.rowCount)).toStrictEqual([1, 1, 1, 1])\n\n        const reader = new TermRecordOpfsStore()\n        Reflect.set(reader, '_recordsDirectoryHandle', directory)\n        await reader._loadShardFiles(false)\n        await reader.ensureDictionariesLoaded([dictionary])\n"
+        }
+      ]
+    },
+    {
+      "path": "test/term-bank-wasm-parser.test.js",
+      "bytes": 197535,
+      "sha256": "a30df1a71078f1cf86dfbc7eb76bf93b30ee47e96ce363b50cc13a043ce6cc8d",
+      "gitBlob": "f3909aa8d39507076d64c8f6b87e59578c68a04e",
+      "excerpts": [
+        {
+          "firstLine": 3200,
+          "lastLine": 3245,
+          "text": "    maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {\n        const sources = [\n            textEncoder.encode(JSON.stringify([\n                ['first', '', '', '', 1, ['one'], 10, ''],\n                ['first', 'reading', '', '', 2, ['two'], 10, ''],\n            ])),\n            textEncoder.encode(JSON.stringify([\n                ['second', 'reading', '', '', 3, ['three'], 11, ''],\n                ['third', '', '', '', 4, ['four'], -1, ''],\n            ])),\n        ];\n        let result = null;\n        await parseTermBankWithWasmColumnChunks(\n            sources,\n            3,\n            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },\n            8,\n            {\n                emitContentSlab: true,\n                emitTokenBinaryContent: true,\n                emitTermByteLists: false,\n                prepareLookupIndexes: true,\n                singleChunk: true,\n            },\n        );\n        const chunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));\n        const nativeBytes = chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.bytes;\n        const javascriptBytes = encodePersistedTermLookupIndexFromPreinternedPlan(\n            chunk.termRecordPreinternedPlan,\n            chunk.readingEqualsExpressionList,\n            chunk.sequenceList,\n            chunk.rowCount,\n        );\n\n        expect(nativeBytes).toStrictEqual(javascriptBytes);\n        expect(chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.preinternedPlan).toBe(\n            chunk.termRecordPreinternedPlan,\n        );\n        expect(chunk.termRecordPreinternedPlan.stringOffsets).toBeUndefined();\n        expect(chunk.termRecordPreinternedPlan.stringHashes).toBeUndefined();\n        expect(consumeLastTermBankWasmParseProfile()?.lookupIndexEncodeMs).toBeGreaterThanOrEqual(0);\n    });\n\n    maybeTest('encodes single-source native plans and leaves escaped plans to the fallback', async () => {\n        /**\n         * @param {string} expression\n"
+        }
+      ]
+    }
+  ],
+  "remotePullRequests": {
+    "820": {
+      "number": 820,
+      "url": "https://github.com/ManabiIO/manabitan/pull/820",
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "title": "perf: reuse owned native lookup key and expression buffers",
+      "updated_at": "2026-11-28T06:00:22Z",
+      "state": "open",
+      "draft": true,
+      "bodySha256": "43c24ef44083255e4c3fc5cb45b6463a9f24ca5d4946d125c55e1a262d56c36f"
+    },
+    "877": {
+      "number": 877,
+      "url": "https://github.com/ManabiIO/manabitan/pull/877",
+      "head": "1a04064bcc33565537c47f8047dacd03b3e89b24",
+      "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "title": "Move owned lookup envelopes to the import I/O worker",
+      "updated_at": "2026-11-24T20:29:39Z",
+      "state": "open",
+      "draft": true,
+      "bodySha256": "dc892a90170b103372d597da34f5a882a8d28c90038a6f0d0cad0afc33fe0b69"
+    },
+    "977": {
+      "number": 977,
+      "url": "https://github.com/ManabiIO/manabitan/pull/977",
+      "head": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "title": "perf(import): overlap bounded owned JMdict content preparation",
+      "updated_at": "2026-11-28T06:01:55Z",
+      "state": "open",
+      "draft": true,
+      "bodySha256": "ab4f7f242eacb837983b8cfce4f0237aa8cf8c586a5a1b52510788abdb16f20f"
+    }
+  },
+  "questions": {
+    "alreadyComputedFinalChecksum": false,
+    "wouldEliminateEquivalentScan": false,
+    "couldMoveScanFromCoordinatorToParserWorker": true,
+    "lookupSpecificImmutableByteContractFound": false,
+    "prototypeOrMeasurementRun": false
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "claim": "The native encoder constructs final v7 bytes in reusable parser memory, then JavaScript copies them to an owned Uint8Array. It does not currently compute the final base/derived envelope checksum. Reusing the existing XXH32 implementation would add final-byte scans in that worker while removing corresponding coordinator scans. It is work placement and possible implementation-speed change, not an already-proven eliminated pass.",
+      "sources": [
+        "ext/js/dictionary/wasm/term-bank-parser.c:2854-3142",
+        "ext/js/dictionary/term-bank-wasm-parser.js:1596-1650"
+      ]
+    },
+    {
+      "id": "F2",
+      "claim": "Derived counts/postings are backfilled and rewritten during construction. Folding the exact final-order XXH32 stream into those writes is not the narrow post-encoder proposal and would need a separate algorithm proof. Existing key/content hashes cover different bytes and cannot substitute for the persisted base/derived checksums.",
+      "sources": [
+        "ext/js/dictionary/wasm/term-bank-parser.c:3102-3142",
+        "ext/js/dictionary/term-key-hash.js:18-70"
+      ]
+    },
+    {
+      "id": "F3",
+      "claim": "The segmented native plan intentionally aliases string bytes, key lengths and expression IDs into the owned v7 payload. Whole-group native indexes have a separately copied stable plan at baseline, but their prepared bytes remain exposed and mutable. Owned means independent of subsequent parser heap reuse; it does not mean immutable to every receiver/callback.",
+      "sources": [
+        "ext/js/dictionary/term-bank-wasm-parser.js:1671-1752",
+        "ext/js/dictionary/term-bank-wasm-parser.js:4180-4252"
+      ]
+    },
+    {
+      "id": "F4",
+      "claim": "The existing worker transfer detaches the sender buffer but preserves all receiver-side aliases. The parser invokes/awaits its onChunk callback, and the receiver/database retain the prepared map across asynchronous deduplication/content persistence and record append steps. There is no existing lookup checksum witness or lookup-specific immutable-byte ownership contract.",
+      "sources": [
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js:209-301",
+        "ext/js/dictionary/term-bank-wasm-parser.js:2545-2645",
+        "ext/js/dictionary/term-bank-wasm-parser.js:3720-3760",
+        "ext/js/dictionary/dictionary-database.js:8388-8530"
+      ]
+    },
+    {
+      "id": "F5",
+      "claim": "The current final envelope operation validates fields/framing, hashes the bytes currently supplied, and copies those same bytes synchronously into an independent owned envelope. The earlier _encodeArtifactChunkRecords and _validateShardAppendFormat awaits separate this operation from native production. Replacing current-byte hashing by a producer value would allow an unchanged object identity/descriptor with altered bytes to carry a stale checksum. A WeakMap, map entry or descriptor/length check alone cannot prove byte immutability.",
+      "sources": [
+        "ext/js/dictionary/term-record-opfs-store.js:2542-2578",
+        "ext/js/dictionary/term-record-opfs-store.js:6024-6056",
+        "ext/js/dictionary/term-record-opfs-store.js:6078-6086",
+        "ext/js/dictionary/term-record-opfs-store.js:6244-6282"
+      ]
+    },
+    {
+      "id": "F6",
+      "claim": "The later loader recomputes base/derived/record-field checksums. A stale producer value can therefore cause a persisted import to fail readback, or invoke derived repair, instead of describing the current snapshot as baseline does. Preserving validation requires proven exclusive immutable ownership through the final snapshot or revalidation of the actual bytes; the latter restores the checksum scan.",
+      "sources": [
+        "ext/js/dictionary/term-record-opfs-store.js:4216-4238"
+      ]
+    },
+    {
+      "id": "F7",
+      "claim": "Whole/segmented preparation, missing/incomplete maps and content-offset-driven splits have fallback behavior. A checksum protocol would need exact byte-range and format identity, transfer/detachment failure handling, and ordinary fallback for all these cases. No safe narrow fast path satisfying the requested unchanged mutable-byte contract was established.",
+      "sources": [
+        "ext/js/dictionary/term-lookup-index-preparation.js:207-250",
+        "ext/js/dictionary/term-record-opfs-store.js:2456-2477",
+        "test/term-record-opfs-store.test.js:3966-4019"
+      ]
+    },
+    {
+      "id": "F8",
+      "claim": "Even a safe producer checksum would leave record-field encoding/hash, score-key and framing validation, final envelope allocation/copies, and persistence unchanged. Those fields depend on sink-selected content offsets and are not present in the parser-side lookup container.",
+      "sources": [
+        "ext/js/dictionary/term-record-opfs-store.js:6244-6282",
+        "ext/js/dictionary/term-record-opfs-store.js:2542-2578"
+      ]
+    },
+    {
+      "id": "F9",
+      "claim": "PR #820 current f65f4ef uses producer/descriptor geometry for buffer reuse and explicitly keeps in-place edits visible to existing validation; it is not an immutable checksum witness. PR #877 atomically transfers eligible owned envelope parts before asynchronous I/O-worker hashing; it does not reuse an earlier checksum, keeps alias fallbacks, and its existing source-size eligibility excludes the ordinary JMdict path. PR #977 changes content preparation/metadata/completion ownership and scheduling, not lookup payload immutability or final lookup checksums.",
+      "sources": [
+        "PR820",
+        "PR877",
+        "PR977",
+        "ext/js/dictionary/term-content-ownership.js:79-111"
+      ]
+    }
+  ],
+  "priorMeasuredByteScope": {
+    "attribution": "Previously retained parent-supplied JMdict diagnostics; not regenerated or measured by this review.",
+    "lookupPayloadBytesIncludingContainerHeaders": 19491860,
+    "lookupAndRecordFieldBytes": 23748240,
+    "interpretation": "About 19.49 MB is an upper bound on moved base/derived bytes; container headers themselves are excluded from the two hashes. The current source does not support calling this eliminated work or converting byte volume to milliseconds."
+  },
+  "overlapLimits": {
+    "noExactProducerChecksumHandoffFoundInInspectedHistory": true,
+    "notExhaustiveAbsenceProof": true,
+    "earlierParallelAgentInventory": [
+      "0119/f3fd2373 native hashing with copies",
+      "511a8/93db298 native hashing with copies",
+      "beb5/93456fd native component hashing with copies"
+    ],
+    "currentChecks": [
+      "PR820 at f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "PR877 at 1a04064bcc33565537c47f8047dacd03b3e89b24",
+      "PR977 at 4702e9e9d73dda0d0f6ea83dce399a249ebb13a6"
+    ],
+    "independentStorageReview": "Storage agent independently found no lookup-specific immutable ownership contract and agreed the alias/await barrier remains. No tests or timing were run for that review."
+  },
+  "requirementsBeforeAnyFuturePrototype": [
+    "Establish an exact internal producer-to-final-snapshot byte-ownership contract rather than trusting mutable descriptors or an enumerable checksum field.",
+    "Preserve existing caller mutation/alias/fallback behavior, including whole and segmented plans and content-offset splits.",
+    "Show where native final-byte hashing runs and whether it extends the critical worker straggler; byte volume alone is not a latency estimate.",
+    "Check compatibility with concurrent #820 and #977 before changing ownership or lifetime semantics."
+  ],
+  "noChanges": {
+    "production": true,
+    "flagsOrThresholds": true,
+    "workersOrBuffersOrCaches": true,
+    "tests": true,
+    "qualification": true
+  }
+}
