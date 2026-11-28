@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-28T11:10:00Z",
+  "updatedAt": "2026-11-28T11:18:00Z",
   "claim": "Exact additional typed-array/native-arena backing avoided at the completed term-ingestion checkpoint; not elapsed time or browser process memory.",
   "latestSource": {
     "publicCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
@@ -8,7 +8,7 @@
     "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
     "tree": "525583edb6429008801d181ee03b3e9e5c519eae",
     "extTree": "6882b13827d4bb648a4a9297f293e55f055b74ed",
-    "qualification": "Source review complete; own hosted validation and distinct corpus verification pending. Prior observations remain bound to their original sources."
+    "qualification": "Independent source review plus full hosted unit/types/dry-build/native-asset/changed-JavaScript gates passed. Distinct latest-parent complete corpus verification pending; original observations retain their exact source."
   },
   "corpusAcquisition": {
     "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
@@ -146,7 +146,7 @@
     ],
     "speedClaim": false,
     "allFourIntervalsIncludeZero": true,
-    "vndb": "AB job passed, independent audit pending; BA still pending at this checkpoint.",
+    "vndb": "Both jobs completed. AB passed; BA retained complete timing but failed separate memory/semantic qualification. Independent raw audits pending; no VN memory qualification claimed.",
     "olderFailedMemoryCoverageCellsRetained": [
       {
         "runId": 46133384380,
@@ -168,5 +168,34 @@
     "Rare generic S1 materialization can exceed the old integrated layout by less than one 64 KiB native page at some capacities.",
     "4/4/1 MiB is backing at a specific import checkpoint, not whole-process or steady-state memory.",
     "No repeatable elapsed-time improvement was established; native checksum candidate remains unpromoted."
-  ]
+  ],
+  "latestSourceValidation": {
+    "runId": 46138271878,
+    "source": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+    "gates": {
+      "units": 0,
+      "types": 0,
+      "dryBuild": 0,
+      "nativeAssets": 0,
+      "changedJavaScript": 0
+    },
+    "artifact": {
+      "id": 15260439255,
+      "bytes": 558863,
+      "sha256": "737a88c85db4c6369de44a9ad7e828770891539c980c485f74479e785a243bf2"
+    },
+    "prCi": {
+      "runId": 46138371985,
+      "source": "bc558871d2427ce8d4d2e68a4eb9f5088a65fb36",
+      "unitJob": 140958637920,
+      "passed": 15942,
+      "skipped": 47,
+      "filesPassed": 701
+    },
+    "markdownFormatter": {
+      "runId": 46138930701,
+      "preparedCommit": "a76dcb948840bb0630f4eb8874c3f30ad53a4b89",
+      "scope": "Ten-line diff aligning the new table; no runtime change."
+    }
+  }
 }
