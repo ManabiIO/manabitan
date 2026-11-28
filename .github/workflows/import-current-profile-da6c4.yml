@@ -59,6 +59,13 @@ jobs:
       - name: Verify the selected complete corpus
         run: node dev/perf/prepare-dictionaries.js "$PROFILE_DICTIONARY"
 
+      - name: Prepare the exact release package before the runtime snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROFILE_OUTPUT"
+          node dev/bin/build.js --target chrome 2>&1 | tee "$PROFILE_OUTPUT/build.log"
+
       - name: Record and guard all tracked sources and runtime files
         shell: bash
         run: |
@@ -104,7 +111,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$PROFILE_OUTPUT"
           node dev/perf/import-benchmark.js "$PROFILE_DICTIONARY" \
-            --runs 1 --build-target chrome --media-check all \
+            --runs 1 --build-target chrome --media-check all --no-build \
             --output "$PROFILE_OUTPUT" 2>&1 | tee "$PROFILE_OUTPUT/run.log"
 
       - name: Guard source and runtime identity after the import
