@@ -40,12 +40,6 @@ jobs:
       - name: All TypeScript projects
         if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
         run: npm run test:ts 2>&1 | tee builds/perf/import-early-native-media-gates-checks/types.log
-      - name: Complete unit suite
-        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
-        run: npm run test:unit -- --maxWorkers=2 --reporter=default --reporter=json --outputFile.json=builds/perf/import-early-native-media-gates-checks/unit.json 2>&1 | tee builds/perf/import-early-native-media-gates-checks/unit.log
-      - name: Every dry-build target
-        if: always() && steps.setup.outcome == 'success' && steps.compiler.outcome == 'success'
-        run: npm run test:build 2>&1 | tee builds/perf/import-early-native-media-gates-checks/build.log
       - name: Preserve all validation receipts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

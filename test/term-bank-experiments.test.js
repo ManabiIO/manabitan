@@ -604,6 +604,7 @@ describe('native media columns before compatibility rows', () => {
      * @param {boolean} early
      * @param {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnParserOptions} [overrides]
      * @param {number} [version]
+     * @returns {Promise<{result: Chunk, rawRows: number[], nativeRows: number[], nativeCalls: number}>}
      */
     async function project(source, early, overrides = {}, version = 3) {
         const preloadedSource = await inflateCompressedTermBankSourcesWasm([compressed(source, 8), compressed('[]', 0)])
@@ -649,9 +650,12 @@ describe('native media columns before compatibility rows', () => {
             ['\ufeff先行', '\ufeffせんこう', '', '', 1, [{type: 'image', path: 'first.png'}], 1, ''],
             ['alias', '', '', '', 2, [{type: 'image', path: 'first.png'}], 2, ''],
             ['unsupported', '', '', '', 3, [{type: 'image', path: 'unsupported.bin'}], 3, ''],
-            ['multi\ud800', 'reading\udfff', '', '', 4, [{type: 'structured-content', content: [
-                {tag: 'img', path: 'middle.webp'}, {tag: 'img', path: 'second.png'},
-            ]}], 4, ''],
+            ['multi\ud800', 'reading\udfff', '', '', 4, [{
+                type: 'structured-content',
+                content: [
+                    {tag: 'img', path: 'middle.webp'}, {tag: 'img', path: 'second.png'},
+                ]
+            }], 4, ''],
             ['native\ud800', 'reading\udfff', '', '', 5, [{type: 'image', path: 'last.png'}], 5, ''],
         ])
         const baseline = await project(source, false)

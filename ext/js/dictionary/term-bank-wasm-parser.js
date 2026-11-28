@@ -2329,8 +2329,8 @@ null :
     // Only the worker requests this representation. Final fused columns have
     // already validated the numbers which compatibility rows would decode.
     const projectNativeMedia = options.projectNativeMedia === true && options.projectImagePaths === true &&
-        version === 3 && projectMediaHintsOnly && typeof options.preloadedSource !== 'undefined' &&
-        typeof parsed.wasm?.project_single_glossary_image_path === 'function'
+    version === 3 && projectMediaHintsOnly && typeof options.preloadedSource !== 'undefined' &&
+    typeof parsed.wasm?.project_single_glossary_image_path === 'function'
     /* eslint-enable @stylistic/semi */
     const needsRowProjection = !projectMediaHintsOnly || (mediaHintFastScan && mediaHintPresent);
     const mediaHintRowsSkipped = projectMediaHintsOnly && mediaHintFastScan && !mediaHintPresent ? rowCount : 0;
@@ -2517,10 +2517,11 @@ null :
                             null
                         if (path !== null && nativeMedia !== null) {
                             const expression = getUnescapedJsonStringTokenBytes(source, metas[o], metas[o + 1]) ??
-                                decodeJsonStringToken(source, metas[o], metas[o + 1])
-                            const reading = readingEqualsExpressionList[i] === 1 ? expression :
+                            decodeJsonStringToken(source, metas[o], metas[o + 1])
+                            const reading = readingEqualsExpressionList[i] === 1 ?
+                                expression :
                                 (getUnescapedJsonStringTokenBytes(source, metas[o + 2], metas[o + 3]) ??
-                                    decodeJsonStringToken(source, metas[o + 2], metas[o + 3]))
+                                decodeJsonStringToken(source, metas[o + 2], metas[o + 3]))
                             nativeMedia.rowIndexes.push(i)
                             nativeMedia.paths.push(path)
                             nativeMedia.pathEnds.push(nativeMedia.paths.length)
@@ -4204,7 +4205,7 @@ function mergeProjectedMedia(nativeMedia, fallbackMedia) {
     let fallbackIndex = 0
     while (nativeIndex < nativeMedia.rowIndexes.length || fallbackIndex < fallbackMedia.rowIndexes.length) {
         const takeNative = fallbackIndex >= fallbackMedia.rowIndexes.length ||
-            (nativeIndex < nativeMedia.rowIndexes.length && nativeMedia.rowIndexes[nativeIndex] < fallbackMedia.rowIndexes[fallbackIndex])
+        (nativeIndex < nativeMedia.rowIndexes.length && nativeMedia.rowIndexes[nativeIndex] < fallbackMedia.rowIndexes[fallbackIndex])
         const media = takeNative ? nativeMedia : fallbackMedia
         const index = takeNative ? nativeIndex++ : fallbackIndex++
         const {bytes, spans, decodedKeys} = media.diagnosticKeys
@@ -4213,7 +4214,8 @@ function mergeProjectedMedia(nativeMedia, fallbackMedia) {
         const expression = decodedKeys?.get(keyIndex) ?? bytes.subarray(spans[spanIndex], spans[spanIndex] + spans[spanIndex + 1])
         const reading = decodedKeys?.get(keyIndex + 1) ?? (
             typeof expression !== 'string' && spans[spanIndex] === spans[spanIndex + 2] && spans[spanIndex + 1] === spans[spanIndex + 3] ?
-                expression : bytes.subarray(spans[spanIndex + 2], spans[spanIndex + 2] + spans[spanIndex + 3])
+                expression :
+                bytes.subarray(spans[spanIndex + 2], spans[spanIndex + 2] + spans[spanIndex + 3])
         )
         builder.rowIndexes.push(media.rowIndexes[index])
         for (let i = index === 0 ? 0 : media.pathEnds[index - 1]; i < media.pathEnds[index]; ++i) {
