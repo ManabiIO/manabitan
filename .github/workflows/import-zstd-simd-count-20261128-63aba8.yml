@@ -1,0 +1,78 @@
+name: Import zstd-simd-count study 20261128 63aba8
+
+on:
+  push:
+    branches:
+      - study/zstd-simd-count-20261128-63aba8
+    paths:
+      - ext/lib/zstd.wasm
+      - .github/workflows/import-zstd-simd-count-20261128-63aba8.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-zstd-simd-count-63aba8-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: ["jmdict", "jitendex", "vndb"]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify existing qualification receipt checks
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install matching Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore checksum-pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare complete imports, persisted results, and separate memory cohorts
+        shell: bash
+        run: |
+          set -euo pipefail
+          storage_policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # The independently acquired current baseline has one 37-unit active
+            # SAH file. Preserve exact cross-arm file/size equality as well.
+            storage_policy+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 6 \
+            --expected-package-entry lib/zstd.wasm \
+            "${storage_policy[@]}" \
+            --evidence builds/perf/import-zstd-simd-count-63aba8
+      - name: Retain every observation, exact packages, and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: import-zstd-simd-count-63aba8-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}
+          path: builds/perf/import-zstd-simd-count-63aba8
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7

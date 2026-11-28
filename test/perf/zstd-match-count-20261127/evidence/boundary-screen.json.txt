@@ -1,0 +1,29 @@
+{
+  "scope": "Warm codec component comparison, not complete-import or browser memory qualification. Actual canonical rows, within-group duplicate offsets omitted, record-aligned 4 MiB blocks. Global deduplication and browser scheduling are not modeled. Input copies, parsing, verification and decompression are outside compression timing.",
+  "node": "v24.22.3",
+  "execArgv": [],
+  "runnerSha256": "621e582f98a801a3dd4f215f3e3c2cc03d64d69401326f2c0bbce50123083f13",
+  "pairs": 8,
+  "source": {
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dictionarySha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+    "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "arms": {
+    "baseline": {
+      "js": "/workspace/scratch/63aba8f8e231/zstd-analysis/builds/control/zstd-simd-module.js",
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "wasmBytes": 433631
+    },
+    "candidate": {
+      "js": "/workspace/scratch/63aba8f8e231/zstd-analysis/builds/simd/zstd-simd-module.js",
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "60319137e8014265d975e493c1fbc1d24a9aa8a773a401f5cb072e4a3a74fb7a",
+      "wasmBytes": 428172
+    }
+  },
+  "fuzzCases": 3072,
+  "fuzzCapacityCases": 1652,
+  "results": []
+}

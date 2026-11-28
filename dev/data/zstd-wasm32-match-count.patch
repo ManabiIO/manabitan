@@ -1,0 +1,45 @@
+--- a/lib/compress/zstd_compress_internal.h
++++ b/lib/compress/zstd_compress_internal.h
+@@ -851,8 +851,34 @@
+ /*-*************************************
+ *  Match length counter
+ ***************************************/
++#if defined(__wasm32__) && defined(__wasm_simd128__)
++#  include <wasm_simd128.h>
++#endif
+ MEM_STATIC size_t ZSTD_count(const BYTE* pIn, const BYTE* pMatch, const BYTE* const pInLimit)
+ {
++#if defined(__wasm32__) && defined(__wasm_simd128__)
++    /* wasm32 has native SIMD loads despite its 32-bit size_t. Every wide
++     * load stays within the caller-provided match length limit. */
++    const BYTE* const pStart = pIn;
++    if ((size_t)(pInLimit - pIn) >= 16) {
++        const BYTE* const end = pInLimit - 15;
++        do {
++            U32 const mask = wasm_i8x16_bitmask(wasm_i8x16_ne(wasm_v128_load(pIn), wasm_v128_load(pMatch)));
++            if (mask) return (size_t)(pIn - pStart) + ZSTD_countTrailingZeros32(mask);
++            pIn += 16; pMatch += 16;
++        } while (pIn < end);
++    }
++    if ((size_t)(pInLimit - pIn) >= 8) {
++        U64 const diff = MEM_read64(pMatch) ^ MEM_read64(pIn);
++        if (diff) return (size_t)(pIn - pStart) + (ZSTD_countTrailingZeros64(diff) >> 3);
++        pIn += 8; pMatch += 8;
++    }
++    if ((size_t)(pInLimit - pIn) >= 4 && MEM_read32(pMatch) == MEM_read32(pIn)) { pIn += 4; pMatch += 4; }
++    if ((size_t)(pInLimit - pIn) >= 2 && MEM_read16(pMatch) == MEM_read16(pIn)) { pIn += 2; pMatch += 2; }
++    if (pIn < pInLimit && *pMatch == *pIn) ++pIn;
++    return (size_t)(pIn - pStart);
++#else
++
+     const BYTE* const pStart = pIn;
+     const BYTE* const pInLoopLimit = pInLimit - (sizeof(size_t)-1);
+ 
+@@ -870,6 +896,7 @@
+     if ((pIn<(pInLimit-1)) && (MEM_read16(pMatch) == MEM_read16(pIn))) { pIn+=2; pMatch+=2; }
+     if ((pIn<pInLimit) && (*pMatch == *pIn)) pIn++;
+     return (size_t)(pIn - pStart);
++#endif
+ }
+ 
+ /** ZSTD_count_2segments() :
