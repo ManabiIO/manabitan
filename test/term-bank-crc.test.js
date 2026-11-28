@@ -25,7 +25,7 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest'
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 import {findCompiler} from './util/wasm-compiler.js'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_update_gap_test: (initial: number, input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
 /** @type {Exports} */
 let wasm
 /** @type {string | undefined} */
@@ -51,6 +51,7 @@ beforeAll(async () => {
         '-Wl,--export=wasm_alloc',
         '-Wl,--export=inflate_and_join_term_banks',
         '-Wl,--export=term_bank_crc32_test',
+        '-Wl,--export=term_bank_crc32_update_gap_test',
         '-Wl,--export=term_bank_crc32_combine_test',
         '-DTERM_BANK_CRC_TEST',
         '-Wl,--strip-all',
@@ -118,6 +119,74 @@ function candidateCrc(bytes, alignment = 0) {
 }
 
 describe('term bank CRC32', () => {
+    test('updates every short gap length and alignment from arbitrary CRC states', () => {
+        for (let length = 0; length <= 257; ++length) {
+            const bytes = randomBytes(length, 0x6e2a93c7 ^ length)
+            for (let alignment = 0; alignment < 16; ++alignment) {
+                wasm.wasm_reset_heap()
+                const pointer = writeBytes(bytes, alignment)
+                for (const initial of [0, 0xffffffff, 0x80000000, 0x12345678]) {
+                    expect(wasm.term_bank_crc32_update_gap_test(initial, pointer, length) >>> 0)
+                        .toBe(crc32(bytes, initial))
+                }
+            }
+        }
+    })
+
+    test('never reads past a gap ending at the physical end of WASM memory', () => {
+        for (let length = 0; length <= 257; ++length) {
+            const bytes = randomBytes(length, 0x82bd9f41 ^ length)
+            const pointer = wasm.memory.buffer.byteLength - length
+            const guarded = new Uint8Array(wasm.memory.buffer, pointer - 16, length + 16)
+            guarded.fill(0xa7, 0, 16)
+            guarded.set(bytes, 16)
+            for (const initial of [0, 0xffffffff, 0x13579bdf]) {
+                expect(wasm.term_bank_crc32_update_gap_test(initial, pointer, length) >>> 0)
+                    .toBe(crc32(bytes, initial))
+            }
+            expect([...guarded.subarray(0, 16)]).toEqual(new Array(16).fill(0xa7))
+            expect(guarded.subarray(16)).toEqual(bytes)
+        }
+    })
+
+    test('preserves incremental state across row-field gaps and glossary spans', () => {
+        const fields = [
+            '\r\n[',
+            JSON.stringify(['日本語', 'にほんご', 'noun', '', 1]).slice(0, -1) + ',',
+            JSON.stringify([{type: 'structured-content', content: '日本語 𠮷'}]),
+            ',1,""],',
+            JSON.stringify(['escaped"key', '', '', '', 0]).slice(0, -1) + ',',
+            JSON.stringify(['line\n', 'next']),
+            ',2,""],\r\n',
+            JSON.stringify(['last', '', '', '', -1]).slice(0, -1) + ',',
+            '[]',
+            ',3,""]]\r\n',
+        ]
+        expect(JSON.parse(fields.join(''))).toHaveLength(3)
+        const segments = fields.map((text) => new TextEncoder().encode(text))
+        let expected = 0
+        let actual = 0
+        for (const segment of segments) {
+            wasm.wasm_reset_heap()
+            actual = wasm.term_bank_crc32_update_gap_test(actual, writeBytes(segment, 3), segment.length) >>> 0
+            expected = crc32(segment, expected)
+            expect(actual).toBe(expected)
+        }
+    })
+
+    test('matches split and whole CRCs over long gaps with every tail size', () => {
+        for (let tail = 0; tail < 16; ++tail) {
+            const bytes = randomBytes(65536 + tail, 0xa3e91c72 ^ tail)
+            wasm.wasm_reset_heap()
+            const pointer = writeBytes(bytes, tail)
+            for (const split of [0, 1, 4, 7, 8, 12, 15, 16, 17, 127, bytes.length - tail, bytes.length]) {
+                const first = wasm.term_bank_crc32_update_gap_test(0, pointer, split) >>> 0
+                const combined = wasm.term_bank_crc32_update_gap_test(first, pointer + split, bytes.length - split) >>> 0
+                expect(combined).toBe(crc32(bytes))
+            }
+        }
+    })
+
     test('combines exact source spans with the independent zlib CRC', () => {
         const first = randomBytes(8192, 0x51a73b92)
         for (const length of [0, 1, 2, 3, 4, 7, 8, 15, 16, 17, 31, 32, 63, 64, 255, 256, 257, 511, 512, 1023, 1024, 65535, 65536, 1048577]) {
