@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "prospectively registered for qualification before startup screen outcomes; publication pending independent review",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "1c32ca03a4e0a8e5361ffdb5c90693b657ffad24",
+  "candidateTree": "24688d89b0ce95c385fc960b4ca86badf3eb5300",
+  "driver": "dev/perf/import-qualification-20261127-88711ca9.py",
+  "driverSha256": "4d4880def7622032af22d14ab3028ac8cacb9d5c349ddafdcb94d77108fa8dd3",
+  "screenHelperSha256": "b7887b7c044f32ed33dad0a25662b60f00229e1260740953e9a506898d62078d",
+  "receiptValidatorSha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+  "memoryObserverSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+  "memoryProtocolSha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+  "memoryAuditorSha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "dictionaries": ["jmdict", "jitendex", "vndb"],
+  "initialOrders": ["AB", "BA"],
+  "pairsPerHost": 12,
+  "controlPairsPerHost": 4,
+  "excludedWarmupObservationsPerHost": 4,
+  "allMediaObservationsPerHost": 2,
+  "separateMemoryObservationsPerHost": 4,
+  "expectedParserWorkers": 3,
+  "flags": {},
+  "vndbSahAllocationUnits": [37, 37],
+  "expectedSourceChanges": [
+    "ext/js/dictionary/dictionary-importer.js",
+    "ext/js/dictionary/term-bank-source-pipeline.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "test/term-bank-owned-source-startup.test.js",
+    "test/term-bank-wasm-startup.test.js"
+  ],
+  "expectedPackageChanges": [
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-source-pipeline.js",
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "expectedPackageAdditions": [],
+  "sourceRuntimeSha256": {
+    "ext/js/dictionary/dictionary-importer.js": "c8403ba5ded4f2ac06fd529652682f19f10c3cb02d2eb9be8f99906c8f21724a",
+    "ext/js/dictionary/term-bank-source-pipeline.js": "0b4006d5eed91ffee4fe61aaff85c3ebf0f7dcc630b43001bcadccc371e25153",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "e91e4b463d576dcdc085fdb3074880efa466934690d7511ef4b713c903229468"
+  },
+  "workflowDraft": ".github/workflows/source-startup-qualification-88711.yml",
+  "futureBranch": "perf/source-startup-qualification-20261128-88711",
+  "artifactScope": "Only the exact leaf evidence cell; every original cell member retained, sibling source checkouts excluded",
+  "policy": "Identical reviewed qualification driver, semantic gates, source/package checks, media and memory observer; no changed worker, group, batch, compression, cache, timing or retry policy",
+  "registeredAtUtc": "2026-11-28T06:14:25.323685+00:00",
+  "acquisitionDecision": {
+    "reason": "Queue the complete qualification prospectively to avoid another serial GitHub runner queue after the screen. The fixed source and observed startup dependency gap justify investigation; no startup browser timing result has been observed.",
+    "screenStatusAtDecision": "Frozen source validation and both downstream screen acquisitions have produced no timing observations; latest API check showed static validation queued.",
+    "selectionRule": "Run and retain the entire fixed qualification irrespective of later exploratory screen direction. Keep original screen and all qualification failures/outliers. No retry or replacement.",
+    "promotionRule": "Existing complete-import, lookup, full row-count/restart checks, source-derived sampled lexical/content lookup receipts, exact logical storage receipts, exhaustive media, source/package identity, memory, and practical materiality rules still apply. The unchanged driver does not assert exhaustive persisted lexical-byte equality. Acquisition is not a product PR or a claim of gain."
+  },
+  "staticPrerequisite": {
+    "source": "1c32ca03a4e0a8e5361ffdb5c90693b657ffad24",
+    "tree": "24688d89b0ce95c385fc960b4ca86badf3eb5300",
+    "requiredGates": [
+      "test-project TypeScript",
+      "dictionary-importer.js ESLint",
+      "term-bank-source-pipeline.js ESLint"
+    ],
+    "afterGate": "Source tree, clean status, and all five source/test hashes must remain unchanged",
+    "isolation": "Separate job; 4096MiB Node heap setting is confined to static validation and absent from fresh qualification hosts"
+  }
+}
