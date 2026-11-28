@@ -26,7 +26,8 @@ import {
 } from './term-bank-wasm-parser.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
-import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
+// eslint-disable-next-line @stylistic/semi
+import {prepareTermLookupIndexesFromPreinternedPlan, prepareTermRecordScores} from './term-lookup-index-preparation.js'
 import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes} from './term-content-ownership.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
@@ -226,6 +227,15 @@ async function parse(data) {
                 index.routeFilter ??= buildTermLookupFilter(index.preinternedPlan.stringHashes);
             }
         }
+        /* eslint-disable @stylistic/semi */
+        if (stableResultChunk?.preparedLookupIndexes instanceof Map) {
+            for (const [range, index] of stableResultChunk.preparedLookupIndexes) {
+                const [first, count] = range.split(':').map(Number)
+                const scores = prepareTermRecordScores(stableResultChunk.scoreList, first, count)
+                if (scores !== null) { index.preparedScores = scores }
+            }
+        }
+        /* eslint-enable @stylistic/semi */
         const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
@@ -285,6 +295,13 @@ function collectChunkTransferables(chunk) {
             if (typeof prepared !== 'object' || prepared === null) { continue; }
             addView(Reflect.get(prepared, 'bytes'));
             addView(Reflect.get(prepared, 'routeFilter'));
+            /* eslint-disable @stylistic/semi */
+            const preparedScores = /** @type {unknown} */ (Reflect.get(prepared, 'preparedScores'))
+            if (typeof preparedScores === 'object' && preparedScores !== null) {
+                addView(Reflect.get(preparedScores, 'scores'))
+                addView(Reflect.get(preparedScores, 'keys'))
+            }
+            /* eslint-enable @stylistic/semi */
             const preparedPlan = /** @type {unknown} */ (Reflect.get(prepared, 'preinternedPlan'));
             if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }
             addView(Reflect.get(preparedPlan, 'stringLengths'));

@@ -33,7 +33,7 @@ export const MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS = 30000;
 const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
 
 /**
- * @typedef {{bytes: Uint8Array, routeFilter?: Uint32Array|null, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
+ * @typedef {{bytes: Uint8Array, routeFilter?: Uint32Array|null, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedScores?: PreparedTermRecordScores}} PreparedTermLookupIndex
  */
 
 /**
@@ -248,3 +248,110 @@ export function hasCompletePreparedTermLookupIndexes(value, rowCount) {
     }
     return coveredRows === rowCount && value.size === Math.ceil(rowCount / MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS);
 }
+
+/* eslint-disable @stylistic/semi */
+/** @typedef {{scores: Int32Array, keys: Uint16Array}} PreparedTermRecordScores */
+
+const U16_NULL = 0xffff
+const INLINE_SCORE_RADIUS = 256
+const typedArrayName = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)?.get
+const arrayBufferByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get
+
+/**
+ * The builtin getters check the actual storage and element kind, including
+ * prototype-spoofed views. No shared memory or property accessors participate
+ * in the synchronous score validation and output copy.
+ * @param {unknown} value
+ * @param {object} prototype
+ * @param {string} name
+ * @returns {boolean}
+ */
+function isPrivateColumn(value, prototype, name) {
+    if (
+        !ArrayBuffer.isView(value) || Object.getPrototypeOf(value) !== prototype ||
+        Object.hasOwn(value, 'buffer') || Object.hasOwn(value, 'length') ||
+        Object.hasOwn(value, 'byteLength') || Object.hasOwn(value, 'byteOffset') ||
+        typeof typedArrayName !== 'function' || typeof arrayBufferByteLength !== 'function'
+    ) { return false }
+    try {
+        if (typedArrayName.call(value) !== name) { return false }
+        arrayBufferByteLength.call(value.buffer)
+        return true
+    } catch { return false }
+}
+
+/**
+ * Prepare the same first-occurrence score table as the record encoder for one
+ * exact prepared-lookup range. The storage owner validates these optional
+ * columns against its current scores before using them.
+ * @param {Int32Array|Float64Array} source
+ * @param {number} first
+ * @param {number} count
+ * @returns {PreparedTermRecordScores|null}
+ */
+export function prepareTermRecordScores(source, first, count) {
+    if (
+        !isPrivateColumn(source, Int32Array.prototype, 'Int32Array') ||
+        !Number.isSafeInteger(first) || first < 0 ||
+        !Number.isSafeInteger(count) || count <= 0 || first > source.length - count
+    ) { return null }
+    const keys = new Uint16Array(count)
+    /** @type {number[]} */
+    const scores = []
+    /** @type {Map<number, number>} */
+    const indexes = new Map()
+    const inlineIndexes = new Uint16Array(INLINE_SCORE_RADIUS * 2)
+    for (let i = 0; i < count; ++i) {
+        const score = source[first + i]
+        const inline = score + INLINE_SCORE_RADIUS
+        const useInline = inline >= 0 && inline < inlineIndexes.length
+        let key = useInline ? inlineIndexes[inline] - 1 : (indexes.get(score) ?? -1)
+        if (key < 0) {
+            key = scores.length
+            if (key >= U16_NULL - 1) { return null }
+            if (useInline) {
+                inlineIndexes[inline] = key + 1
+            } else {
+                indexes.set(score, key)
+            }
+            scores.push(score)
+        }
+        keys[i] = key
+    }
+    return {scores: Int32Array.from(scores), keys}
+}
+
+/**
+ * Capture private typed columns and reject duplicate dictionary values. This
+ * does not certify row values: the encoder must check each key, its first-use
+ * order, and its equality to the live score in the same synchronous operation.
+ * @param {unknown} prepared
+ * @param {number} count
+ * @returns {PreparedTermRecordScores|null}
+ */
+export function getPreparedTermRecordScoreColumns(prepared, count) {
+    if (typeof prepared !== 'object' || prepared === null) { return null }
+    /** @type {unknown} */
+    let scores
+    /** @type {unknown} */
+    let keys
+    try {
+        scores = Object.getOwnPropertyDescriptor(prepared, 'scores')?.value
+        keys = Object.getOwnPropertyDescriptor(prepared, 'keys')?.value
+    } catch { return null }
+    if (
+        !isPrivateColumn(scores, Int32Array.prototype, 'Int32Array') ||
+        !isPrivateColumn(keys, Uint16Array.prototype, 'Uint16Array') ||
+        !(scores instanceof Int32Array) || !(keys instanceof Uint16Array) ||
+        scores.length === 0 || scores.length >= U16_NULL || keys.length !== count
+    ) { return null }
+    /** @type {Set<number>} */
+    const seen = new Set()
+    for (let i = 0; i < scores.length; ++i) {
+        const score = scores[i]
+        if (seen.has(score)) { return null }
+        seen.add(score)
+    }
+    return {scores, keys}
+}
+/* eslint-enable @stylistic/semi */

@@ -46,6 +46,7 @@ import {
     warmPersistedTermPrefixIndex,
 } from './term-lookup-index.js';
 import {
+    getPreparedTermRecordScoreColumns,
     hasCompletePreparedTermLookupIndexes,
     MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS,
     prepareTermLookupIndexesFromPreinternedPlan,
@@ -2555,6 +2556,7 @@ export class TermRecordOpfsStore {
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
                 runContentOffsetBase,
+                preparedLookupIndex?.preparedScores ?? null,
             );
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += runValidationMs + encodedChunk.validationMs;
@@ -5835,10 +5837,13 @@ view.chunks :
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermRecordScores|null} [preparedScorePlan=null]
      * @returns {Uint8Array}
      */
-    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase, preparedScorePlan = null) {
         const count = chunk.rowCount;
+        // eslint-disable-next-line @stylistic/semi
+        const preparedColumns = getPreparedTermRecordScoreColumns(preparedScorePlan, count)
         const useFixedContentSpan = hasFixedContentSpan(chunk, count);
         const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
         if (useFloat64Scores) {
@@ -5856,17 +5861,21 @@ view.chunks :
         }
         /* eslint-disable @stylistic/semi */
         const directReferences = getSynchronousRecordFieldReferences(chunk, count)
+        // The origin guard prevents callbacks and concurrent mutation between
+        // validating live scores and copying their prepared output columns.
+        const preparedScores = directReferences === null ? null : preparedColumns
         const offsets = directReferences === null ? new Uint32Array(count) : null
         const lengths = directReferences === null ? new Uint16Array(count) : null
+        const scoreKeys = preparedScores?.keys ?? new Uint16Array(count)
+        let nextPreparedScore = 0
         /* eslint-enable @stylistic/semi */
-        const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
         /** @type {Map<number, number>} */
         const scoreIndexes = new Map();
         // Common integer scores use a bounded table. Store the key plus one
         // so zero can mark an unseen score without initializing the table.
-        const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+        const inlineScoreIndexes = preparedScores === null && chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
         let compact = true;
@@ -5885,6 +5894,16 @@ view.chunks :
             }
             /* eslint-enable @stylistic/semi */
             const score = chunk.scoreList[i] ?? 0;
+            /* eslint-disable @stylistic/semi */
+            if (preparedScores !== null) {
+                const key = scoreKeys[i]
+                if (key >= preparedScores.scores.length || key > nextPreparedScore || preparedScores.scores[key] !== score) {
+                    return this._encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase)
+                }
+                if (key === nextPreparedScore) { ++nextPreparedScore }
+                continue
+            }
+            /* eslint-enable @stylistic/semi */
             const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
             const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
             let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
@@ -5903,14 +5922,20 @@ view.chunks :
             }
             scoreKeys[i] = scoreIndex;
         }
+        /* eslint-disable @stylistic/semi */
+        if (compact && preparedScores !== null && nextPreparedScore !== preparedScores.scores.length) {
+            return this._encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase)
+        }
+        const scoreValues = preparedScores?.scores ?? scores
+        /* eslint-enable @stylistic/semi */
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
-        (scores.length * 4) +
+        (scoreValues.length * 4) +
         (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
         if (
             !compact ||
-            scores.length === 0 ||
+            scoreValues.length === 0 ||
             // The reader reserves this score count even though the last key fits u16.
-            scores.length >= U16_NULL ||
+            scoreValues.length >= U16_NULL ||
             compactByteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES
         ) {
             const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
@@ -5930,11 +5955,11 @@ view.chunks :
         const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
         header[0] = COMPACT_RECORD_FIELDS_MAGIC;
         header[1] = count;
-        header[2] = scores.length;
+        header[2] = scoreValues.length;
         header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
         let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
-        new Int32Array(output.buffer, cursor, scores.length).set(scores);
-        cursor += scores.length * 4;
+        new Int32Array(output.buffer, cursor, scoreValues.length).set(scoreValues);
+        cursor += scoreValues.length * 4;
         /* eslint-disable @stylistic/semi */
         const outputOffsets = new Uint32Array(output.buffer, cursor, count)
         cursor += count * 4
@@ -5967,9 +5992,10 @@ view.chunks :
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
      * @param {number|null} [validatedContentOffsetBase=null]
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermRecordScores|null} [preparedScores=null]
      * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
+    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null, preparedScores = null) {
         if (chunk.rowCount === 0) {
             return {
                 contentOffsetBase: 0,
@@ -6006,6 +6032,7 @@ view.chunks :
             contentOffsets,
             contentLengths,
             contentOffsetBase,
+            preparedScores,
         );
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
