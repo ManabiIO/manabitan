@@ -1,0 +1,722 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "scope": "Bounded actual production worker transport, then real record/lookup encoder and sidecar creation; persistence intercepted, deterministic content references, no timing or complete-import activation-rate claim",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "checksumWasmSha256": "04401e56da4ed009ca67def777e7c51e87251529b92eceb6951980907efbf75e",
+  "cases": [
+    {
+      "dictionary": "jmdict",
+      "groupIndex": 0,
+      "rows": 50000,
+      "sourceFiles": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json"
+      ],
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "manifestSha256": "369632d947f84f6c6f323581a2d738a720c9c4c9bc417c13efcb7c36e5485013",
+      "options": {
+        "emitTermByteLists": false,
+        "computeContentHashes": true,
+        "emitContentSlab": true,
+        "emitTokenBinaryContent": true,
+        "mediaHintFastScan": false,
+        "projectImagePaths": false,
+        "validateGlossaryTypes": true,
+        "prepareLookupIndexes": true,
+        "prepareLookupRoute": true,
+        "ownContentBytes": false,
+        "experimentalNativeEscapedKeys": false
+      },
+      "borrowsWorkerMemory": false,
+      "ownsContentBytes": true,
+      "content": {
+        "bytes": 8486982,
+        "offset": 0,
+        "ordinaryUint8": true,
+        "privateBuffer": false,
+        "sharedBuffer": true,
+        "resizable": false,
+        "ownMetadata": false
+      },
+      "scoreType": "Int32Array",
+      "prepared": [
+        {
+          "key": "0:50000",
+          "bytes": {
+            "bytes": 1427380,
+            "offset": 0,
+            "ordinaryUint8": true,
+            "privateBuffer": true,
+            "sharedBuffer": false,
+            "resizable": false,
+            "ownMetadata": false
+          }
+        }
+      ],
+      "nativeSegments": 0,
+      "modes": [
+        {
+          "scope": "Worker-prepared whole policy group",
+          "writes": [
+            {
+              "rows": 50000,
+              "contentDictName": "raw",
+              "format": 2,
+              "base": {
+                "bytes": 939156,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 488208,
+                "offset": 939172,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 401376,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": true,
+              "nativeCalls": 1,
+              "sidecarSha256": "47c643a6a3a28744305b7c8d1b89162bf9d5d72095d1888285a03d642994b575"
+            }
+          ]
+        },
+        {
+          "scope": "Forced two-run content-dictionary branch; not actual compression run shape",
+          "writes": [
+            {
+              "rows": 25000,
+              "contentDictName": "raw-block-v2",
+              "format": 2,
+              "base": {
+                "bytes": 462220,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 228908,
+                "offset": 462236,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 201000,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "cf487fe8207dcc812942f36a48121f228824e57bb965f9c8b5f235186f286cea"
+            },
+            {
+              "rows": 25000,
+              "contentDictName": "raw-v6",
+              "format": 2,
+              "base": {
+                "bytes": 477072,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 271700,
+                "offset": 477088,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 201108,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "30fad67d90351feff5c10624e0a7b55aba271616ab5a3ee5333e2674e36a7ada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dictionary": "jitendex",
+      "groupIndex": 0,
+      "rows": 16000,
+      "sourceFiles": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "manifestSha256": "52683e92ed0b75aec12cfc432ff522ce8777d4d0551e46c314fa8292a6245c07",
+      "options": {
+        "emitTermByteLists": false,
+        "computeContentHashes": true,
+        "emitContentSlab": true,
+        "emitTokenBinaryContent": true,
+        "mediaHintFastScan": true,
+        "projectImagePaths": true,
+        "validateGlossaryTypes": true,
+        "prepareLookupIndexes": true,
+        "prepareLookupRoute": true,
+        "ownContentBytes": true,
+        "experimentalNativeEscapedKeys": true
+      },
+      "borrowsWorkerMemory": true,
+      "ownsContentBytes": false,
+      "content": {
+        "bytes": 16958793,
+        "offset": 31149888,
+        "ordinaryUint8": true,
+        "privateBuffer": false,
+        "sharedBuffer": true,
+        "resizable": false,
+        "ownMetadata": false
+      },
+      "scoreType": "Int32Array",
+      "prepared": [
+        {
+          "key": "0:16000",
+          "bytes": {
+            "bytes": 695956,
+            "offset": 0,
+            "ordinaryUint8": true,
+            "privateBuffer": true,
+            "sharedBuffer": false,
+            "resizable": false,
+            "ownMetadata": false
+          }
+        }
+      ],
+      "nativeSegments": 0,
+      "modes": [
+        {
+          "scope": "Worker-prepared whole policy group",
+          "writes": [
+            {
+              "rows": 16000,
+              "contentDictName": "raw",
+              "format": 2,
+              "base": {
+                "bytes": 472004,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 223936,
+                "offset": 472020,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 128168,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": true,
+              "nativeCalls": 1,
+              "sidecarSha256": "ab265cfd98e5fd838501afe3fdb1365a4437891a694a5e80db8f4f5d1c3c3864"
+            }
+          ]
+        },
+        {
+          "scope": "Forced two-run content-dictionary branch; not actual compression run shape",
+          "writes": [
+            {
+              "rows": 8000,
+              "contentDictName": "raw-block-v2",
+              "format": 2,
+              "base": {
+                "bytes": 227760,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 109668,
+                "offset": 227776,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 64168,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "94dbc8fc933a4151e3c158ee3ee9a1f7c8995fbbffcadef3b0612de1be82b079"
+            },
+            {
+              "rows": 8000,
+              "contentDictName": "raw-v6",
+              "format": 2,
+              "base": {
+                "bytes": 244312,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 108180,
+                "offset": 244328,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 64148,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "50b3dd92b557b55f3af11048e69b1c22fc81f9fdd2c52325a746a80a9544a5e5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "groupIndex": 0,
+      "rows": 40000,
+      "sourceFiles": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json"
+      ],
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "manifestSha256": "15bb0c3083ad243ff7889fd3158ca38401654f2cb2afb44aeb57f75261037d59",
+      "options": {
+        "emitTermByteLists": false,
+        "computeContentHashes": true,
+        "emitContentSlab": true,
+        "emitTokenBinaryContent": true,
+        "mediaHintFastScan": true,
+        "projectImagePaths": true,
+        "validateGlossaryTypes": true,
+        "prepareLookupIndexes": true,
+        "prepareLookupRoute": true,
+        "ownContentBytes": true,
+        "experimentalNativeEscapedKeys": true
+      },
+      "borrowsWorkerMemory": false,
+      "ownsContentBytes": true,
+      "content": {
+        "bytes": 503818,
+        "offset": 0,
+        "ordinaryUint8": true,
+        "privateBuffer": true,
+        "sharedBuffer": false,
+        "resizable": false,
+        "ownMetadata": false
+      },
+      "scoreType": "Int32Array",
+      "prepared": [
+        {
+          "key": "0:40000",
+          "bytes": {
+            "bytes": 2054468,
+            "offset": 0,
+            "ordinaryUint8": true,
+            "privateBuffer": true,
+            "sharedBuffer": false,
+            "resizable": false,
+            "ownMetadata": false
+          }
+        }
+      ],
+      "nativeSegments": 0,
+      "modes": [
+        {
+          "scope": "Worker-prepared whole policy group",
+          "writes": [
+            {
+              "rows": 40000,
+              "contentDictName": "raw",
+              "format": 2,
+              "base": {
+                "bytes": 1436728,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 617724,
+                "offset": 1436744,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 320028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": true,
+              "nativeCalls": 1,
+              "sidecarSha256": "1786794741d66831b978018aa2503a646d6653aab2e5769c9ccc25d5c961f736"
+            }
+          ]
+        },
+        {
+          "scope": "Forced two-run content-dictionary branch; not actual compression run shape",
+          "writes": [
+            {
+              "rows": 20000,
+              "contentDictName": "raw-block-v2",
+              "format": 2,
+              "base": {
+                "bytes": 703716,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 306172,
+                "offset": 703732,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 160028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "31a690eb2e365321752f9310654222d58bd3915e3888bc181c35ccfdc57c0194"
+            },
+            {
+              "rows": 20000,
+              "contentDictName": "raw-v6",
+              "format": 2,
+              "base": {
+                "bytes": 768976,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 324340,
+                "offset": 768992,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 160028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "a30a94edde9d910d92a08fb83efcd19e7e8023a1b6f7d8a0923c78140943d9cb"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "groupIndex": 23,
+      "rows": 40000,
+      "sourceFiles": [
+        "term_bank_93.json",
+        "term_bank_94.json",
+        "term_bank_95.json",
+        "term_bank_96.json"
+      ],
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "manifestSha256": "15bb0c3083ad243ff7889fd3158ca38401654f2cb2afb44aeb57f75261037d59",
+      "options": {
+        "emitTermByteLists": false,
+        "computeContentHashes": true,
+        "emitContentSlab": true,
+        "emitTokenBinaryContent": true,
+        "mediaHintFastScan": true,
+        "projectImagePaths": true,
+        "validateGlossaryTypes": true,
+        "prepareLookupIndexes": true,
+        "prepareLookupRoute": true,
+        "ownContentBytes": true,
+        "experimentalNativeEscapedKeys": true
+      },
+      "borrowsWorkerMemory": false,
+      "ownsContentBytes": true,
+      "content": {
+        "bytes": 539210,
+        "offset": 0,
+        "ordinaryUint8": true,
+        "privateBuffer": true,
+        "sharedBuffer": false,
+        "resizable": false,
+        "ownMetadata": false
+      },
+      "scoreType": "Int32Array",
+      "prepared": [
+        {
+          "key": "0:40000",
+          "bytes": {
+            "bytes": 2180564,
+            "offset": 0,
+            "ordinaryUint8": true,
+            "privateBuffer": true,
+            "sharedBuffer": false,
+            "resizable": false,
+            "ownMetadata": false
+          }
+        }
+      ],
+      "nativeSegments": 0,
+      "modes": [
+        {
+          "scope": "Worker-prepared whole policy group",
+          "writes": [
+            {
+              "rows": 40000,
+              "contentDictName": "raw",
+              "format": 2,
+              "base": {
+                "bytes": 1543108,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 637440,
+                "offset": 1543124,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 320028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": true,
+              "nativeCalls": 1,
+              "sidecarSha256": "638d89b0b1ec0a062cb2d8716814030480bb303f8e80bd0b26795b6e2a4bfe9a"
+            }
+          ]
+        },
+        {
+          "scope": "Forced two-run content-dictionary branch; not actual compression run shape",
+          "writes": [
+            {
+              "rows": 20000,
+              "contentDictName": "raw-block-v2",
+              "format": 2,
+              "base": {
+                "bytes": 807156,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 323188,
+                "offset": 807172,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 160028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "237c7534f1d336a24fadbb4fc08fada964f9fa27e35263f3f1eb99845e2b60f2"
+            },
+            {
+              "rows": 20000,
+              "contentDictName": "raw-v6",
+              "format": 2,
+              "base": {
+                "bytes": 771896,
+                "offset": 16,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "derived": {
+                "bytes": 326964,
+                "offset": 771912,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "records": {
+                "bytes": 160028,
+                "offset": 0,
+                "ordinaryUint8": true,
+                "privateBuffer": true,
+                "sharedBuffer": false,
+                "resizable": false,
+                "ownMetadata": false
+              },
+              "baseDerivedSameBuffer": true,
+              "payloadIsContentBuffer": false,
+              "usedWorkerPreparedPayload": false,
+              "nativeCalls": 1,
+              "sidecarSha256": "7e47acb52a8ccb0c27a980281ed5f60209cfebc1475f73af1db74319ce4d1b56"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nativeCalls": 12,
+  "harnessSha256": "e57c7537e66480e36f4d20a6983c082ea3ce3b7358fd7affe0f50f2e01aa3427"
+}

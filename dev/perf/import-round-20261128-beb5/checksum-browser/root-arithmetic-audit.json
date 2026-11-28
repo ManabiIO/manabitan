@@ -1,0 +1,233 @@
+{
+  "scope": "Separate root arithmetic and raw-arm identity audit; component only, no full-import claim",
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "artifactSha256": "5bd637c676abeede73a0c8dc5b7cfee5d8b2ab3ea41d70fea261bddb65d1f95b",
+      "observations": 32,
+      "comparisons": {
+        "triple": {
+          "hashMs": {
+            "medianPairedChangePercent": -71.83722700433788,
+            "equalWorkChangePercent": -72.04011625138713,
+            "medianPairedDeltaMs": -19.067500000077416,
+            "fasterPairs": 8,
+            "allPairedChangesPercent": [
+              -69.00021877057934,
+              -77.33824471488988,
+              -68.60485419939823,
+              -73.25263568949548,
+              -73.25141776934394,
+              -70.57063475076455,
+              -69.69379194610971,
+              -73.10381925791121
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": -12.128261328209899,
+            "equalWorkChangePercent": -14.23925195654584,
+            "medianPairedDeltaMs": -4.157499999986612,
+            "fasterPairs": 7,
+            "allPairedChangesPercent": [
+              -27.923815520245533,
+              -22.927446245800798,
+              5.475643660097007,
+              -29.44536108681114,
+              -11.35075349089022,
+              -11.877810512970532,
+              -12.378712143449267,
+              -4.65432770850841
+            ]
+          }
+        },
+        "control": {
+          "hashMs": {
+            "medianPairedChangePercent": -1.754371603679472,
+            "equalWorkChangePercent": -1.5344376634921608,
+            "medianPairedDeltaMs": -0.4875000000029104,
+            "fasterPairs": 5,
+            "allPairedChangesPercent": [
+              18.42472118963898,
+              -4.92424242417181,
+              -2.9553264605325147,
+              1.2058042097902621,
+              -7.968197880075878,
+              -0.5534167468264295,
+              -15.81081081036153,
+              3.2780410740794075
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": -0.3387157130515406,
+            "equalWorkChangePercent": -4.671409382628888,
+            "medianPairedDeltaMs": -0.14750000002823072,
+            "fasterPairs": 4,
+            "allPairedChangesPercent": [
+              2.6061915047177475,
+              -6.645569620209891,
+              8.38551258435496,
+              4.8790957216403585,
+              -11.313131313229608,
+              -33.076487252105466,
+              9.724554921537521,
+              -3.2836229308208287
+            ]
+          }
+        }
+      },
+      "outputDigest": "feff34659e481e9caab9e3c7a199ae93a6cc53ec8754ab98c348514d503e5b8b"
+    },
+    {
+      "dictionary": "jitendex",
+      "artifactSha256": "eb2b117780d5338503c6a4a551c1ce24d0db0797ed277d66ad7a46589b676535",
+      "observations": 32,
+      "comparisons": {
+        "triple": {
+          "hashMs": {
+            "medianPairedChangePercent": -66.93842992411956,
+            "equalWorkChangePercent": -65.17961414495697,
+            "medianPairedDeltaMs": -8.839999999989232,
+            "fasterPairs": 8,
+            "allPairedChangesPercent": [
+              -62.7160493830074,
+              -66.9718976947437,
+              -64.1366223908472,
+              -76.01451666134274,
+              -29.991431019713144,
+              -70.91817134076504,
+              -75.1700680271218,
+              -66.90496215349543
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": 4.235784543664877,
+            "equalWorkChangePercent": -0.07731192389758279,
+            "medianPairedDeltaMs": 0.9825000000273576,
+            "fasterPairs": 3,
+            "allPairedChangesPercent": [
+              26.515387006356693,
+              -32.60122230688503,
+              5.552023734027078,
+              -24.0348964015061,
+              26.564156945888694,
+              16.703056768447166,
+              2.919545353302677,
+              -1.9493670888743542
+            ]
+          }
+        },
+        "control": {
+          "hashMs": {
+            "medianPairedChangePercent": 5.238908615505778,
+            "equalWorkChangePercent": -0.2140598395128701,
+            "medianPairedDeltaMs": 0.6525000000328873,
+            "fasterPairs": 3,
+            "allPairedChangesPercent": [
+              24.154804270420293,
+              10.656474820010487,
+              25.02923976562681,
+              -1.8886198547897304,
+              -8.535762483392384,
+              0.9441384742958858,
+              9.53367875671567,
+              -48.296199213997916
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": -0.011103093750003179,
+            "equalWorkChangePercent": -4.409528636630733,
+            "medianPairedDeltaMs": -0.04000000000814907,
+            "fasterPairs": 4,
+            "allPairedChangesPercent": [
+              9.257265877207232,
+              18.602693602648102,
+              4.546547991086336,
+              11.537335285513905,
+              -22.504854369056638,
+              -16.82496607839531,
+              -4.568754178586342,
+              -20.75593952506449
+            ]
+          }
+        }
+      },
+      "outputDigest": "4f2fee455a1d39081f0a7336db8a26dad4308c50253fc2c7745df59db187634d"
+    },
+    {
+      "dictionary": "vndb",
+      "artifactSha256": "4451bbfb4a6316cca81086a1e3b6cccbfffdd69c8be075e10d83426da6b7f039",
+      "observations": 32,
+      "comparisons": {
+        "triple": {
+          "hashMs": {
+            "medianPairedChangePercent": -47.80711350784364,
+            "equalWorkChangePercent": -47.43267449285189,
+            "medianPairedDeltaMs": -79.24499999982072,
+            "fasterPairs": 8,
+            "allPairedChangesPercent": [
+              -49.23934466618329,
+              -49.44926318325011,
+              -47.446576197143145,
+              -48.596271010128675,
+              -45.027816412024265,
+              -47.18420662011567,
+              -44.12774070560743,
+              -48.167650818544125
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": -40.24887645030587,
+            "equalWorkChangePercent": -40.63418059886106,
+            "medianPairedDeltaMs": -69.00249999997322,
+            "fasterPairs": 8,
+            "allPairedChangesPercent": [
+              -38.62427643759515,
+              -44.99670364326372,
+              -36.82024737427682,
+              -43.12505502901908,
+              -39.007597341277,
+              -41.49015555933475,
+              -38.016905862481124,
+              -42.64821558608101
+            ]
+          }
+        },
+        "control": {
+          "hashMs": {
+            "medianPairedChangePercent": 2.509254299010777,
+            "equalWorkChangePercent": 0.7640150410483493,
+            "medianPairedDeltaMs": 4.002500000060536,
+            "fasterPairs": 3,
+            "allPairedChangesPercent": [
+              2.6029891985594356,
+              2.4155193994621182,
+              -6.018585114626706,
+              5.0650837652515435,
+              -2.8552214967862755,
+              6.11276686317741,
+              3.065075322790456,
+              -3.2818142425068753
+            ]
+          },
+          "totalMs": {
+            "medianPairedChangePercent": 1.5678185097988906,
+            "equalWorkChangePercent": 0.6049111312005362,
+            "medianPairedDeltaMs": 2.610000000044238,
+            "fasterPairs": 3,
+            "allPairedChangesPercent": [
+              1.3734034559102382,
+              1.762233563687543,
+              -5.022780615752809,
+              5.308656300814452,
+              -3.7321654082364097,
+              6.2163355406972265,
+              4.871886332437869,
+              -4.776473182405594
+            ]
+          }
+        }
+      },
+      "outputDigest": "9e74d7bfd41f2e164dd6eed514c86fcb78d2c6dd0f02e0a9a709be98a3d4c7be"
+    }
+  ]
+}

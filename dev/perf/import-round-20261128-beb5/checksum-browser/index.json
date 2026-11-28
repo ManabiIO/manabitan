@@ -1,0 +1,28 @@
+{
+  "runId": 46105941620,
+  "source": "7de62b7f5888e8d40f0f0c48778a33a5c0407b84",
+  "tree": "fa6c438551e995af4bc295d3bff6b68fb3b02caf",
+  "artifacts": [
+    {
+      "dictionary": "jmdict",
+      "artifactId": 15248124349,
+      "sha256": "5bd637c676abeede73a0c8dc5b7cfee5d8b2ab3ea41d70fea261bddb65d1f95b",
+      "bytes": 85151,
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    },
+    {
+      "dictionary": "jitendex",
+      "artifactId": 15248612113,
+      "sha256": "eb2b117780d5338503c6a4a551c1ce24d0db0797ed277d66ad7a46589b676535",
+      "bytes": 98503,
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    },
+    {
+      "dictionary": "vndb",
+      "artifactId": 15249395675,
+      "sha256": "4451bbfb4a6316cca81086a1e3b6cccbfffdd69c8be075e10d83426da6b7f039",
+      "bytes": 319982,
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    }
+  ]
+}
