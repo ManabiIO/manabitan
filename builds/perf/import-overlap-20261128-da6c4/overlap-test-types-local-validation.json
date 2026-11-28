@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+  "correctedTestBlobs": {
+    "test/dictionary-database-chunk-pipeline.test.js": "c3800ccc9d91f03143447e430203f3165d726a3c",
+    "test/dictionary-database-content-dedup.test.js": "ecb4aa20575794d7a791fbc6779b5949513441ab"
+  },
+  "runtimeUnchanged": true,
+  "runtimeIdentityCheck": "git diff HEAD -- ext dev types eslint.config.js is empty; exactly the two identified test files differ.",
+  "publishedCleanHeadReportedByRoot": "c819bb92d4c26a99300987c00ea79f54fc1734f7",
+  "node": "v24.22.3",
+  "workingDirectory": "/home/agent/manabitan-da6c4dbd0097/ci-repair-recovered",
+  "recordedAtUtc": "2026-11-28T07:36:34.737453+00:00",
+  "gates": [
+    {
+      "name": "test-ts-test",
+      "command": [
+        "npm",
+        "run",
+        "test:ts:test"
+      ],
+      "exitCode": 0,
+      "coverage": "Full test TypeScript project",
+      "logBytes": 389,
+      "logSha256": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 test:ts:test\n> npx tsc --noEmit --project test/jsconfig.typecheck.json\n\nnpm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+    },
+    {
+      "name": "targeted-unit",
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "test/artifact-term-chunk-pipeline.test.js",
+        "test/dictionary-database-chunk-pipeline.test.js",
+        "test/dictionary-database-content-dedup.test.js",
+        "test/dictionary-import-ownership.test.js",
+        "test/dictionary-importer-chunk-completion.test.js",
+        "test/term-bank-pipeline-completion.test.js",
+        "test/zstd-term-content-overlap.test.js"
+      ],
+      "exitCode": 0,
+      "coverage": "7 files /225 tests passed",
+      "logBytes": 782,
+      "logSha256": "7b743ffe1e745f1804ad2e1b7a3944b7e681cb428e90324af7ee546005c4390f",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 test:unit\n> vitest run --maxWorkers=1 --no-file-parallelism test/artifact-term-chunk-pipeline.test.js test/dictionary-database-chunk-pipeline.test.js test/dictionary-database-content-dedup.test.js test/dictionary-import-ownership.test.js test/dictionary-importer-chunk-completion.test.js test/term-bank-pipeline-completion.test.js test/zstd-term-content-overlap.test.js\n\n\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/ci-repair-recovered\n\n\n Test Files  7 passed (7)\n      Tests  225 passed (225)\n   Start at  02:33:47\n   Duration  5.42s (transform 1.49s, setup 83ms, import 2.33s, tests 1.83s, environment 1ms)\n\n"
+    },
+    {
+      "name": "cleanup-unit",
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "test/dictionary-database-import-cleanup.test.js"
+      ],
+      "exitCode": 0,
+      "coverage": "1 file /66 tests passed",
+      "logBytes": 518,
+      "logSha256": "dbffcd1d07f588b754e3eaaa7e4659007f0b5b8f4a7e71838c114d73f24e59ab",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 test:unit\n> vitest run --maxWorkers=1 --no-file-parallelism test/dictionary-database-import-cleanup.test.js\n\n\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/ci-repair-recovered\n\n\n Test Files  1 passed (1)\n      Tests  66 passed (66)\n   Start at  02:34:22\n   Duration  2.04s (transform 1.39s, setup 29ms, import 1.59s, tests 288ms, environment 0ms)\n\n"
+    },
+    {
+      "name": "scoped-lint",
+      "command": [
+        "npx",
+        "eslint",
+        "test/dictionary-database-chunk-pipeline.test.js",
+        "test/dictionary-database-content-dedup.test.js"
+      ],
+      "exitCode": 0,
+      "coverage": "Both changed files passed repository ESLint",
+      "logBytes": 844,
+      "logSha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\u25b2 [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 \u2502 ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        \u2575                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 \u2502     \"type\": \"module\",\n         \u2575             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n"
+    },
+    {
+      "name": "build-libs",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "exitCode": 0,
+      "coverage": "Setup only",
+      "logBytes": 210,
+      "logSha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 build:libs\n> node ./dev/bin/build-libs.js\n\n"
+    },
+    {
+      "name": "license-report-html",
+      "command": [
+        "npm",
+        "run",
+        "license-report:html"
+      ],
+      "exitCode": 0,
+      "coverage": "Setup only",
+      "logBytes": 365,
+      "logSha256": "3e354a438d19cbabb0ae240ef7647b12cca1bdaea69cd0f8ed8307bfe7aa7500",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n> yomitan@0.0.0 license-report:html\n> license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html\n\n"
+    }
+  ],
+  "whitespaceCheckExitCode": 0,
+  "fullLocalValidation": {
+    "complete": false,
+    "scopeChange": "Full local runner interrupted per parent after fresh hosted gates were published. No complete local lint/types/unit/build claim.",
+    "receipt": {
+      "schemaVersion": 1,
+      "sourceBefore": {
+        "head": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "fixes": {
+          "test/dictionary-database-chunk-pipeline.test.js": "c3800ccc9d91f03143447e430203f3165d726a3c",
+          "test/dictionary-database-content-dedup.test.js": "ecb4aa20575794d7a791fbc6779b5949513441ab"
+        },
+        "trackedChanges": [
+          "test/dictionary-database-chunk-pipeline.test.js",
+          "test/dictionary-database-content-dedup.test.js"
+        ]
+      },
+      "node": "v24.22.3",
+      "plan": [
+        {
+          "name": "javascript",
+          "command": [
+            "npm",
+            "run",
+            "test:js"
+          ]
+        },
+        {
+          "name": "all-types",
+          "command": [
+            "npm",
+            "run",
+            "test:ts"
+          ]
+        },
+        {
+          "name": "web-types",
+          "command": [
+            "npx",
+            "tsc",
+            "--noEmit",
+            "--project",
+            "web/tsconfig.json"
+          ]
+        },
+        {
+          "name": "unit-shard-01-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=1/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-02-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=2/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-03-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=3/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-04-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=4/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-05-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=5/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-06-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=6/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-07-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=7/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-08-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=8/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-09-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=9/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-10-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=10/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-11-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=11/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "unit-shard-12-of-12",
+          "command": [
+            "npm",
+            "run",
+            "test:unit",
+            "--",
+            "--shard=12/12",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "options-unit",
+          "command": [
+            "npm",
+            "run",
+            "test:unit:options",
+            "--",
+            "--maxWorkers=1",
+            "--no-file-parallelism"
+          ]
+        },
+        {
+          "name": "build-all",
+          "command": [
+            "npm",
+            "run",
+            "test:build"
+          ]
+        },
+        {
+          "name": "whitespace",
+          "command": [
+            "git",
+            "diff",
+            "--check"
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "name": "javascript",
+          "command": [
+            "npm",
+            "run",
+            "test:js"
+          ],
+          "startedAtUtc": "2026-11-28T07:34:55.563618+00:00",
+          "log": "/workspace/scratch/da6c4dbd0097/profiling/ci-repair/javascript.log"
+        }
+      ],
+      "complete": false,
+      "startedAtUtc": "2026-11-28T07:34:55.563311+00:00",
+      "interruptedByParentScope": "Parent limited local validation to targeted types/units/scoped lint because fresh hosted full gates now cover the complete suite; no local full gate completion claimed.",
+      "cancelledProcessIds": [],
+      "termination": {
+        "execSessionId": 73223,
+        "exitCode": 130,
+        "reason": "Parent requested scoped local gates and fresh hosted full validation; interrupted through session control-C before broader runner completed."
+      }
+    }
+  },
+  "freshHostedQualification": {
+    "head": "c4330b235eaa31a62c48837578f230038dc48226",
+    "runId": 46121740432
+  },
+  "freshPRCI": {
+    "head": "c819bb92d4c26a99300987c00ea79f54fc1734f7",
+    "normalRunId": 46121741374,
+    "webAcceptanceRunId": 46121741356
+  },
+  "originalFailureEvidenceBlob": "9c985874e80ced9c14d270d305f5225d296de745"
+}
+

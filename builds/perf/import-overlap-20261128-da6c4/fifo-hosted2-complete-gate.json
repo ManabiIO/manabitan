@@ -1,0 +1,311 @@
+{
+  "analysisNode": "v24.22.3",
+  "analysisSourceSha256": "536ebc2eff61994f47af84de925e56700c7891346d7aa50e16349c20be2262eb",
+  "sourceHashes": {
+    "component.mjs": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407",
+    "plan.json": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f",
+    "dispatcher-tests.mjs": "9421c5e1501f8f6c4f6bac93d0b93420a95f1191af5d805921d8d9c89425038f",
+    "run.py": "d98524bcfb1cbaa7b76287ea9f78de248306d904c925276f6566a2dc0d5ea01c"
+  },
+  "evaluatorSha": "ad7b8d250d212d7f889209d1bf3ca678510ffabe5286a1883fb79f15bd73a053",
+  "artifactVerification": {
+    "complete": true,
+    "artifactId": 15253330245,
+    "runId": 46113052837,
+    "sizeBytes": 489446028,
+    "sha256": "e287e5295b6186112f35f3c217235ea668ddd9488aef9de2ad2cab61c1fea511",
+    "metadataExtracted": 30,
+    "memberCount": 72,
+    "note": "Full archive streamed through SHA256 without retaining a second489MB copy; compact members extracted with ZIP CRC verification."
+  },
+  "observationSha": "0061022acd1ece43ab57c26bfe341a2c484a1ee5d0e322f560e5c39414536d23",
+  "setupSha": "1f3050c43dee5e122053cf465d7c3983698145e7fe888ed5b5facd85cbba1808",
+  "fullSourceAndSemanticGateEvaluated": true,
+  "compressionWorkersFinalState": {
+    "workerCount": 4,
+    "allTerminated": true,
+    "failure": null
+  },
+  "warmups": 3,
+  "observations": 36,
+  "ownershipChecks": 3,
+  "decodeChecks": 42,
+  "failures": [],
+  "result": {
+    "schemaVersion": 1,
+    "planSha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f",
+    "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+    "componentSourceSha256": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407",
+    "advance": false,
+    "outcome": "inconclusive-or-reject",
+    "scope": "Scheduling component only; no whole-import or browser-memory claim.",
+    "rows": [
+      {
+        "round": 0,
+        "order": [
+          "A-rotation",
+          "B-first-free-fifo",
+          "C-rotation-control"
+        ],
+        "A": 90.875762,
+        "B": 90.446585,
+        "C": 94.084544
+      },
+      {
+        "round": 1,
+        "order": [
+          "B-first-free-fifo",
+          "C-rotation-control",
+          "A-rotation"
+        ],
+        "A": 84.939667,
+        "B": 93.097402,
+        "C": 86.601471
+      },
+      {
+        "round": 2,
+        "order": [
+          "C-rotation-control",
+          "A-rotation",
+          "B-first-free-fifo"
+        ],
+        "A": 93.781009,
+        "B": 110.408447,
+        "C": 88.633934
+      },
+      {
+        "round": 3,
+        "order": [
+          "A-rotation",
+          "C-rotation-control",
+          "B-first-free-fifo"
+        ],
+        "A": 87.072064,
+        "B": 79.642455,
+        "C": 85.7417
+      },
+      {
+        "round": 4,
+        "order": [
+          "C-rotation-control",
+          "B-first-free-fifo",
+          "A-rotation"
+        ],
+        "A": 63.956737,
+        "B": 67.074622,
+        "C": 87.133523
+      },
+      {
+        "round": 5,
+        "order": [
+          "B-first-free-fifo",
+          "A-rotation",
+          "C-rotation-control"
+        ],
+        "A": 61.692029,
+        "B": 68.197124,
+        "C": 63.659059
+      },
+      {
+        "round": 6,
+        "order": [
+          "A-rotation",
+          "B-first-free-fifo",
+          "C-rotation-control"
+        ],
+        "A": 63.598628,
+        "B": 66.681687,
+        "C": 64.497612
+      },
+      {
+        "round": 7,
+        "order": [
+          "B-first-free-fifo",
+          "C-rotation-control",
+          "A-rotation"
+        ],
+        "A": 62.857454,
+        "B": 68.194443,
+        "C": 65.447754
+      },
+      {
+        "round": 8,
+        "order": [
+          "C-rotation-control",
+          "A-rotation",
+          "B-first-free-fifo"
+        ],
+        "A": 62.674652,
+        "B": 71.817638,
+        "C": 64.848802
+      },
+      {
+        "round": 9,
+        "order": [
+          "A-rotation",
+          "C-rotation-control",
+          "B-first-free-fifo"
+        ],
+        "A": 63.420647,
+        "B": 77.16949,
+        "C": 63.278408
+      },
+      {
+        "round": 10,
+        "order": [
+          "C-rotation-control",
+          "B-first-free-fifo",
+          "A-rotation"
+        ],
+        "A": 64.384325,
+        "B": 67.231522,
+        "C": 65.80693
+      },
+      {
+        "round": 11,
+        "order": [
+          "B-first-free-fifo",
+          "A-rotation",
+          "C-rotation-control"
+        ],
+        "A": 71.913383,
+        "B": 72.089996,
+        "C": 65.531692
+      }
+    ],
+    "comparisons": {
+      "B/A": {
+        "differencesMs": [
+          -0.4291769999999957,
+          8.157735000000002,
+          16.627437999999998,
+          -7.429608999999999,
+          3.1178850000000082,
+          6.505095000000004,
+          3.0830589999999987,
+          5.33698900000001,
+          9.142986,
+          13.748842999999994,
+          2.847196999999994,
+          0.17661300000000324
+        ],
+        "differencesPercent": [
+          -0.4722678418916493,
+          9.60415232143541,
+          17.730069421624584,
+          -8.532712627554117,
+          4.874990730061812,
+          10.544465963341887,
+          4.847681619798472,
+          8.49062228960149,
+          14.588012391357186,
+          21.6788122644034,
+          4.422189717761271,
+          0.2455912830578555
+        ],
+        "pairedMedianSavingMs": -4.227437000000009,
+        "pairedMedianSavingPercent": -6.682806509831651,
+        "fasterPairs": 2,
+        "candidateTotalMs": 932.0514110000001,
+        "controlTotalMs": 871.166357,
+        "equalWorkChangePercent": 6.988912451769558,
+        "pairedMedianDifferenceMs95": [
+          1.5119049999999987,
+          8.650360500000001
+        ],
+        "pairedMedianDifferencePercent95": [
+          2.3338905004095634,
+          12.566239177349537
+        ],
+        "checks": {
+          "medianSavingMs": false,
+          "medianSavingPercent": false,
+          "fasterPairs": false,
+          "equalWork": false,
+          "millisecondInterval": false,
+          "percentageInterval": false
+        },
+        "pass": false
+      },
+      "B/C": {
+        "differencesMs": [
+          -3.637958999999995,
+          6.495930999999999,
+          21.774513,
+          -6.099244999999996,
+          -20.05890099999999,
+          4.538065000000003,
+          2.184074999999993,
+          2.7466890000000035,
+          6.968835999999996,
+          13.891081999999997,
+          1.424592000000004,
+          6.558303999999993
+        ],
+        "differencesPercent": [
+          -3.866691430209823,
+          7.50094764556597,
+          24.566790637996494,
+          -7.113510695495884,
+          -23.02087682142726,
+          7.12870260931755,
+          3.386288162110551,
+          4.196765866098318,
+          10.746283331494698,
+          21.952325349272385,
+          2.1648054391840033,
+          10.007835598079762
+        ],
+        "pairedMedianSavingMs": -3.6423770000000033,
+        "pairedMedianSavingPercent": -5.662734237707934,
+        "fasterPairs": 3,
+        "candidateTotalMs": 932.0514110000001,
+        "controlTotalMs": 895.2654289999999,
+        "equalWorkChangePercent": 4.1089470014596285,
+        "pairedMedianDifferenceMs95": [
+          -1.1066834999999955,
+          6.763569999999994
+        ],
+        "pairedMedianDifferencePercent95": [
+          -0.85094299551291,
+          10.37705946478723
+        ],
+        "checks": {
+          "medianSavingMs": false,
+          "medianSavingPercent": false,
+          "fasterPairs": false,
+          "equalWork": false,
+          "millisecondInterval": false,
+          "percentageInterval": false
+        },
+        "pass": false
+      }
+    },
+    "control": {
+      "differencesPercent": [
+        3.530954711554446,
+        1.956452219196958,
+        -5.488397976183002,
+        -1.5278884396262904,
+        36.238224598606394,
+        3.1884670222144917,
+        1.4135273484201738,
+        4.120911419670303,
+        3.4689462655492775,
+        -0.2242786958638332,
+        2.2095517814312515,
+        -8.874135430396857
+      ],
+      "pairedMedianPercent": 2.0830020003141048,
+      "maximumAbsolutePercentExclusive": 2.831367118853967,
+      "pass": true
+    },
+    "bootstrap": {
+      "samples": 20000,
+      "seedHex": "0x000da6c4",
+      "finalState": 1110904116,
+      "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+      "interval": "95% percentile, type7"
+    }
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "runId": 46113052837,
+  "jobId": 140880647245,
+  "reviewer": "import_history",
+  "independentEvaluatorSource": "from pathlib import Path\nimport hashlib,json,statistics,math\nROOT=Path('/workspace/scratch/da6c4dbd0097/analysis/critical-path-fifo-hosted2')\nOUT=Path('/workspace/scratch/da6c4dbd0097/profiling/ci-repair')\ndef read(name):\n raw=(ROOT/name).read_bytes()\n return json.loads(raw),hashlib.sha256(raw).hexdigest()\ndata,raw_hash=read('artifact-metadata/observations.json')\nplan,plan_hash=read('artifact-metadata/plan.json')\nreported,report_hash=read('full-fixed-gate-result.json')\nassert raw_hash=='0061022acd1ece43ab57c26bfe341a2c484a1ee5d0e322f560e5c39414536d23'\nassert plan_hash=='164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f'\nassert data['planSha256']==plan_hash and data['complete'] and data['node']=='v22.22.0'\nassert data['plan']==plan and plan['runtimeCommit']=='5048ba3e8a65fc41b9ae898c47b54d5731cd759e'\nassert data['failures']==[] and data['inFlight'] is None\nassert data['compressionWorkersFinalState']=={'workerCount':4,'allTerminated':True,'failure':None}\nassert len(data['observations'])==36 and len(data['warmups'])==3 and len(data['sourceOwnershipChecks'])==3 and len(data['exhaustiveDecodeVerification'])==42\nassert [x['mode'] for x in data['warmups']]==plan['warmupOrder']\nrows=[{'round':i,'order':v} for i,v in enumerate(plan['orders'])]\nexpected=plan['expected']\nfor ordinal,o in enumerate(data['observations']):\n i=ordinal//3\n assert o['round']==i and o['mode']==plan['orders'][i][ordinal%3] and o['order']==plan['orders'][i]\n elapsed=(int(o['endedNs'])-int(o['startedNs']))/1e6\n assert abs(elapsed-o['elapsedMs'])<1e-12 and elapsed>0\n rows[i][o['mode'][0]]=elapsed\nfor o in data['warmups']+data['observations']:\n assert o['pending']==0 and o['queued']==0 and o['heldReplies']==0 and o['maxPendingGroups']<=2\n assert o['outputSha256']==expected['outputSha256'] and o['outputBytes']==expected['outputBytes']\n assert o['hashedBlocks']==expected['blocks'] and o['expectedDecodedBytes']==expected['uniqueInputBytes']\n assert len(o['jobs'])==expected['blocks'] and len(o['blocks'])==expected['blocks']\n assert all(0<=x['physicalWorker']<4 for x in o['jobs'])\n if o['mode']=='B-first-free-fifo': assert max(o['maxPostedByPhysicalWorker'])<=1\nfor o in data['sourceOwnershipChecks']:\n assert o['callerColumnsPoisonedBeforeSourceConsumed'] and o['sourcePoisonedAfterSourceConsumedBeforeCompletionDelivery']\n assert o['pending']==0 and o['queued']==0 and o['heldReplies']==0\nfor o in data['exhaustiveDecodeVerification']:\n assert o['blocks'] in (10,103) and o['decodedBytes'] in (9506472,100300626)\n# Each metric uses the same twelve round draws, exactly as prospectively registered.\ncomparisons={}\nfor control in ('A','C'):\n ms=[r['B']-r[control] for r in rows]\n pct=[(r['B']/r[control]-1)*100 for r in rows]\n bt=sum(r['B'] for r in rows);ct=sum(r[control] for r in rows)\n comparisons['B/'+control]={'differencesMs':ms,'differencesPercent':pct,'medianDifferenceMs':statistics.median(ms),'medianDifferencePercent':statistics.median(pct),'fasterPairs':sum(x<0 for x in ms),'candidateTotalMs':bt,'controlTotalMs':ct,'equalWorkChangePercent':(bt/ct-1)*100}\nmetrics=[comparisons['B/A']['differencesMs'],comparisons['B/A']['differencesPercent'],comparisons['B/C']['differencesMs'],comparisons['B/C']['differencesPercent']]\nstate=0x000da6c4\nresampled=[[],[],[],[]]\nfor repeat in range(20000):\n draw=[]\n for _ in range(12):\n  state=(state^((state<<13)&0xffffffff))&0xffffffff\n  state=(state^(state>>17))&0xffffffff\n  state=(state^((state<<5)&0xffffffff))&0xffffffff\n  draw.append(math.floor(state/4294967296*12))\n for k,v in enumerate(metrics):resampled[k].append(statistics.median(v[i] for i in draw))\ndef quantile(v,p):\n pos=(len(v)-1)*p;lo=math.floor(pos);hi=math.ceil(pos)\n return v[lo]+(v[hi]-v[lo])*(pos-lo)\nintervals=[]\nfor v in resampled:\n v.sort();intervals.append([quantile(v,.025),quantile(v,.975)])\ndef near(a,b):return abs(a-b)<1e-9\nfor i,key in enumerate(('B/A','B/C')):\n c=comparisons[key];ref=reported['result']['comparisons'][key]\n c['medianDifferenceMs95']=intervals[2*i];c['medianDifferencePercent95']=intervals[2*i+1]\n c['mechanicalPass']=(c['medianDifferenceMs']<=-5 and c['medianDifferencePercent']<=-5 and c['fasterPairs']>=9 and c['candidateTotalMs']<c['controlTotalMs'] and c['medianDifferenceMs95'][1]<0 and c['medianDifferencePercent95'][1]<0)\n assert near(c['medianDifferenceMs'],-ref['pairedMedianSavingMs']) and near(c['medianDifferencePercent'],-ref['pairedMedianSavingPercent'])\n assert c['fasterPairs']==ref['fasterPairs'] and near(c['equalWorkChangePercent'],ref['equalWorkChangePercent'])\n for v,w in zip(c['medianDifferenceMs95'],ref['pairedMedianDifferenceMs95']):assert near(v,w)\n for v,w in zip(c['medianDifferencePercent95'],ref['pairedMedianDifferencePercent95']):assert near(v,w)\nca=[(r['C']/r['A']-1)*100 for r in rows]\ncontrol_median=statistics.median(ca)\ndrift_limit=min(abs(comparisons['B/A']['medianDifferencePercent']),abs(comparisons['B/C']['medianDifferencePercent']))/2\nassert near(control_median,reported['result']['control']['pairedMedianPercent'])\nassert state==1110904116==reported['result']['bootstrap']['finalState']\nadvance=all(c['mechanicalPass'] for c in comparisons.values()) and abs(control_median)<drift_limit\nassert advance is False and reported['result']['advance'] is False\nresult={'schemaVersion':1,'reviewer':'import_history','scope':'Independent raw-clock arithmetic, schedule and receipt consistency; no timing rerun, no independent binary decode. critical_path owns full artifact/source/semantic audit.','sourceBindings':{'observationsSha256':raw_hash,'planSha256':plan_hash,'reportedResultSha256':report_hash,'runtimeCommit':plan['runtimeCommit'],'componentSha256':data['scriptSha256'],'node':data['node']},'completeObservations':36,'warmups':3,'ownershipChecks':3,'decodeReceipts':42,'terminalWorkers':data['compressionWorkersFinalState'],'comparisons':comparisons,'control':{'differencesPercent':ca,'medianPercent':control_median,'driftLimitExclusive':drift_limit,'pass':abs(control_median)<drift_limit},'bootstrap':{'samples':20000,'seedHex':'0x000da6c4','finalState':state,'method':'shared paired round draws, type7 percentile'},'allReportedArithmeticMatches':True,'advance':advance,'decision':'Stop first-free FIFO route. Both paired medians and equal-work totals are slower;2/12 and3/12 pairs faster. No production implementation or favorable-only rerun.','rows':rows}\n(OUT/'fifo-independent-audit.json').write_text(json.dumps(result,indent=2)+'\\n')\nprint(json.dumps(result,indent=2))\n",
+  "result": {
+    "schemaVersion": 1,
+    "reviewer": "import_history",
+    "scope": "Independent raw-clock arithmetic, schedule and receipt consistency; no timing rerun, no independent binary decode. critical_path owns full artifact/source/semantic audit.",
+    "sourceBindings": {
+      "observationsSha256": "0061022acd1ece43ab57c26bfe341a2c484a1ee5d0e322f560e5c39414536d23",
+      "planSha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f",
+      "reportedResultSha256": "f979e114d2450ff3bf85d3ff2624719e177d91c3348dfbf414bd44a3a6442d99",
+      "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+      "componentSha256": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407",
+      "node": "v22.22.0"
+    },
+    "completeObservations": 36,
+    "warmups": 3,
+    "ownershipChecks": 3,
+    "decodeReceipts": 42,
+    "terminalWorkers": {
+      "workerCount": 4,
+      "allTerminated": true,
+      "failure": null
+    },
+    "comparisons": {
+      "B/A": {
+        "differencesMs": [
+          -0.4291769999999957,
+          8.157735000000002,
+          16.627437999999998,
+          -7.429608999999999,
+          3.1178850000000082,
+          6.505095000000004,
+          3.0830589999999987,
+          5.33698900000001,
+          9.142986,
+          13.748842999999994,
+          2.847196999999994,
+          0.17661300000000324
+        ],
+        "differencesPercent": [
+          -0.4722678418916493,
+          9.60415232143541,
+          17.730069421624584,
+          -8.532712627554117,
+          4.874990730061812,
+          10.544465963341887,
+          4.847681619798472,
+          8.49062228960149,
+          14.588012391357186,
+          21.6788122644034,
+          4.422189717761271,
+          0.2455912830578555
+        ],
+        "medianDifferenceMs": 4.227437000000009,
+        "medianDifferencePercent": 6.682806509831651,
+        "fasterPairs": 2,
+        "candidateTotalMs": 932.051411,
+        "controlTotalMs": 871.166357,
+        "equalWorkChangePercent": 6.988912451769536,
+        "medianDifferenceMs95": [
+          1.5119049999999987,
+          8.650360500000001
+        ],
+        "medianDifferencePercent95": [
+          2.3338905004095634,
+          12.566239177349537
+        ],
+        "mechanicalPass": false
+      },
+      "B/C": {
+        "differencesMs": [
+          -3.637958999999995,
+          6.495930999999999,
+          21.774513,
+          -6.099244999999996,
+          -20.05890099999999,
+          4.538065000000003,
+          2.184074999999993,
+          2.7466890000000035,
+          6.968835999999996,
+          13.891081999999997,
+          1.424592000000004,
+          6.558303999999993
+        ],
+        "differencesPercent": [
+          -3.866691430209823,
+          7.50094764556597,
+          24.566790637996494,
+          -7.113510695495884,
+          -23.02087682142726,
+          7.12870260931755,
+          3.386288162110551,
+          4.196765866098318,
+          10.746283331494698,
+          21.952325349272385,
+          2.1648054391840033,
+          10.007835598079762
+        ],
+        "medianDifferenceMs": 3.6423770000000033,
+        "medianDifferencePercent": 5.662734237707934,
+        "fasterPairs": 3,
+        "candidateTotalMs": 932.051411,
+        "controlTotalMs": 895.265429,
+        "equalWorkChangePercent": 4.108947001459606,
+        "medianDifferenceMs95": [
+          -1.1066834999999955,
+          6.763569999999994
+        ],
+        "medianDifferencePercent95": [
+          -0.85094299551291,
+          10.37705946478723
+        ],
+        "mechanicalPass": false
+      }
+    },
+    "control": {
+      "differencesPercent": [
+        3.530954711554446,
+        1.956452219196958,
+        -5.488397976183002,
+        -1.5278884396262904,
+        36.238224598606394,
+        3.1884670222144917,
+        1.4135273484201738,
+        4.120911419670303,
+        3.4689462655492775,
+        -0.2242786958638332,
+        2.2095517814312515,
+        -8.874135430396857
+      ],
+      "medianPercent": 2.0830020003141048,
+      "driftLimitExclusive": 2.831367118853967,
+      "pass": true
+    },
+    "bootstrap": {
+      "samples": 20000,
+      "seedHex": "0x000da6c4",
+      "finalState": 1110904116,
+      "method": "shared paired round draws, type7 percentile"
+    },
+    "allReportedArithmeticMatches": true,
+    "advance": false,
+    "decision": "Stop first-free FIFO route. Both paired medians and equal-work totals are slower;2/12 and3/12 pairs faster. No production implementation or favorable-only rerun.",
+    "rows": [
+      {
+        "round": 0,
+        "order": [
+          "A-rotation",
+          "B-first-free-fifo",
+          "C-rotation-control"
+        ],
+        "A": 90.875762,
+        "B": 90.446585,
+        "C": 94.084544
+      },
+      {
+        "round": 1,
+        "order": [
+          "B-first-free-fifo",
+          "C-rotation-control",
+          "A-rotation"
+        ],
+        "B": 93.097402,
+        "C": 86.601471,
+        "A": 84.939667
+      },
+      {
+        "round": 2,
+        "order": [
+          "C-rotation-control",
+          "A-rotation",
+          "B-first-free-fifo"
+        ],
+        "C": 88.633934,
+        "A": 93.781009,
+        "B": 110.408447
+      },
+      {
+        "round": 3,
+        "order": [
+          "A-rotation",
+          "C-rotation-control",
+          "B-first-free-fifo"
+        ],
+        "A": 87.072064,
+        "C": 85.7417,
+        "B": 79.642455
+      },
+      {
+        "round": 4,
+        "order": [
+          "C-rotation-control",
+          "B-first-free-fifo",
+          "A-rotation"
+        ],
+        "C": 87.133523,
+        "B": 67.074622,
+        "A": 63.956737
+      },
+      {
+        "round": 5,
+        "order": [
+          "B-first-free-fifo",
+          "A-rotation",
+          "C-rotation-control"
+        ],
+        "B": 68.197124,
+        "A": 61.692029,
+        "C": 63.659059
+      },
+      {
+        "round": 6,
+        "order": [
+          "A-rotation",
+          "B-first-free-fifo",
+          "C-rotation-control"
+        ],
+        "A": 63.598628,
+        "B": 66.681687,
+        "C": 64.497612
+      },
+      {
+        "round": 7,
+        "order": [
+          "B-first-free-fifo",
+          "C-rotation-control",
+          "A-rotation"
+        ],
+        "B": 68.194443,
+        "C": 65.447754,
+        "A": 62.857454
+      },
+      {
+        "round": 8,
+        "order": [
+          "C-rotation-control",
+          "A-rotation",
+          "B-first-free-fifo"
+        ],
+        "C": 64.848802,
+        "A": 62.674652,
+        "B": 71.817638
+      },
+      {
+        "round": 9,
+        "order": [
+          "A-rotation",
+          "C-rotation-control",
+          "B-first-free-fifo"
+        ],
+        "A": 63.420647,
+        "C": 63.278408,
+        "B": 77.16949
+      },
+      {
+        "round": 10,
+        "order": [
+          "C-rotation-control",
+          "B-first-free-fifo",
+          "A-rotation"
+        ],
+        "C": 65.80693,
+        "B": 67.231522,
+        "A": 64.384325
+      },
+      {
+        "round": 11,
+        "order": [
+          "B-first-free-fifo",
+          "A-rotation",
+          "C-rotation-control"
+        ],
+        "B": 72.089996,
+        "A": 71.913383,
+        "C": 65.531692
+      }
+    ]
+  }
+}
+

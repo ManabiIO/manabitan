@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "runId": 46113754947,
+  "jobId": 140882831654,
+  "fullDecodedLogBlob": "669d08580e2933f92537cb5f53adc0242c730c95",
+  "compactReceiptsBlob": "11e629a0ff01cbf26101779c961f1aa39a3238c3",
+  "independentEvaluatorSource": "function auditAliasCohort(data) {\n const {observations, setups, analyses}=data, failures=[];\n const check=(ok,label)=>{if(!ok)failures.push(label);};\n const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);\n const median=values=>{const v=[...values].sort((a,b)=>a-b),n=v.length;return n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2;};\n const sum=v=>v.reduce((a,b)=>a+b,0);\n const q=(v,p)=>{const i=(v.length-1)*p,l=Math.floor(i),h=Math.ceil(i);return v[l]+(v[h]-v[l])*(i-l);};\n const near=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1e-9;\n const orders=[\"ABC\",\"BCA\",\"CAB\",\"ACB\",\"CBA\",\"BAC\",\"ABC\",\"BCA\",\"CAB\",\"ACB\",\"CBA\",\"BAC\"];\n const groupIds=[0,1,2,87,91,92,105,123,126,139], promoted=[1,87,91,92,105,123,126,139];\n check(observations.length===36,\"exactly 36 observations\"); check(setups.length===1,\"one setup\"); check(analyses.length===1,\"one analysis\");\n const setup=setups[0], a=analyses[0];\n check(setup.complete===true&&setup.failure===null,\"setup completed\");\n check(setup.node===\"v22.22.0\",\"pinned Node22\");\n check(setup.researchBinding.commit===\"d0a79f888b36684f26ca76ef880c019ad06c88f1\",\"exact research commit\");\n check(setup.researchBinding.githubSha===setup.researchBinding.commit,\"Actions SHA binding\");\n check(setup.protocolSha256===\"bed962679c7b0b86d96d9ebcd1c47d62a8f667ed05afe8828b7c1d0399f6f962\",\"frozen protocol hash\");\n check(setup.researchBinding.protocolBlob===\"83930b97ad2fc05697dbf83455229fe148962010\",\"frozen protocol blob\");\n check(eq(setup.researchBinding,a.researchBinding),\"setup/analysis research binding\");\n check(eq(setup.preAcquisitionBinding.sourceHashes,a.sourceHashes),\"source hashes before/final\");\n check(eq(setup.preAcquisitionBinding.harnessHashes,a.harnessHashes),\"harness hashes before/final\");\n check(setup.capture.manifestSha256===a.captureManifestSha256,\"capture manifest\");\n check(setup.capture.seedSha256===\"f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e\",\"canonical seed\");\n check(eq(setup.capture.groups,groupIds)&&setup.capture.rows===400000,\"captured groups/rows\");\n const blocks=Array.from({length:12},(_,block)=>({block,order:orders[block]}));\n const physical={A:new Set(),B:new Set(),C:new Set()};\n const byOrdinal=[...observations].sort((x,y)=>x.ordinal-y.ordinal);\n for(let i=0;i<byOrdinal.length;i++){\n  const o=byOrdinal[i], b=Math.floor(i/3),arm=orders[b][i%3];\n  check(o.ordinal===i&&o.block===b&&o.arm===arm,\"schedule \"+i);\n  check(o.complete===true,\"complete \"+i);\n  check(Number.isFinite(o.elapsedMs)&&o.elapsedMs>0&&near(Number(o.elapsedNs)/1e6,o.elapsedMs),\"elapsed clock \"+i);\n  check(o.inputWitnessBefore===a.inputWitnessSha256&&o.inputWitnessAfter===a.inputWitnessSha256,\"input immutability \"+i);\n  for(const k of [\"failures\",\"cleanupFailures\",\"workerFailures\"])check(Array.isArray(o[k])&&o[k].length===0,k+\" \"+i);\n  const qu=o.postFinalizationQuiescence;\n  check(qu.parentOpenResources===0&&qu.lockEntries.length===0&&qu.stagingEntries.length===0,\"quiescence \"+i);\n  check(o.workerTransports.length===5&&o.workerTransports.filter(w=>w.kind===\"compression\").length===4&&o.workerTransports.filter(w=>w.kind===\"index\").length===1,\"worker set \"+i);\n  check(o.workerTransports.every(w=>w.readySeen===true&&w.failures.length===0),\"worker readiness/drain \"+i);\n  check(o.workerTransports.filter(w=>w.kind===\"compression\").every(w=>w.messages===0),\"tiny alias owner-thread compression \"+i);\n  check(eq(o.groupElapsedNs.map(g=>g.group),groupIds),\"group schedule \"+i);\n  check(sum(o.groupElapsedNs.map(g=>Number(g.elapsedNs)))<=Number(o.elapsedNs),\"group clock coverage \"+i);\n  check(eq(o.groupElapsedNs.filter(g=>g.promoted).map(g=>g.group),arm===\"B\"?promoted:[]),\"promotion route \"+i);\n  check(sum(o.groupElapsedNs.map(g=>g.rawRows))===(arm===\"B\"?175:0),\"promoted row count \"+i);\n  const v=o.verification;\n  check(v.verifiedRows===400000&&v.lookupProbes===84&&v.referencedCanonicalDefinitions===9302,\"verification counts \"+i);\n  check(v.logicalSha256===a.logicalSha256,\"logical equality \"+i);\n  check(eq(v.promotedGroups,arm===\"B\"?promoted:[]),\"verification promoted groups \"+i);\n  const sizes={descriptorBytes:64,indexBytes:arm===\"B\"?24232348:24663588,lookupPayloadBytes:arm===\"B\"?21031588:21461412,affectedPayloadBytes:arm===\"B\"?16876960:17306784,addedContentBytes:arm===\"B\"?2260:0};\n  for(const [k,value]of Object.entries(sizes))check(v[k]===value,\"size \"+k+\" \"+i);\n  physical[arm].add(v.normalizedPhysicalSha256);\n  check(o.contentFinalization.persistedLengthAfterClose===7533449+sizes.addedContentBytes&&o.contentFinalization.logicalLengthAfterClose===7533449+sizes.addedContentBytes,\"final content length \"+i);\n  check(Number.isFinite(o.recordFinalization.totalMs)&&Number.isFinite(o.contentFinalization.totalMs),\"both finalization receipts \"+i);\n  blocks[b][arm]=o.elapsedMs;\n }\n check(Object.values(physical).every(s=>s.size===1),\"arm-specific stable physical hashes\");\n check([...physical.A][0]===[...physical.C][0],\"identical-code physical equality\");\n for(const arm of [\"A\",\"B\",\"C\"])check([...physical[arm]][0]===a.physicalHashes[arm],\"declared physical hash \"+arm);\n const comparisons={};\n for(const control of [\"A\",\"C\"]){\n  const key=\"B/\"+control,dms=blocks.map(r=>r.B-r[control]),dp=blocks.map(r=>(r.B/r[control]-1)*100);\n  comparisons[key]={differencesMs:dms,differencesPercent:dp,medianDifferenceMs:median(dms),medianDifferencePercent:median(dp),fasterPairs:dms.filter(x=>x<0).length,candidateTotalMs:sum(blocks.map(r=>r.B)),controlTotalMs:sum(blocks.map(r=>r[control]))};\n  comparisons[key].equalWorkChangePercent=(comparisons[key].candidateTotalMs/comparisons[key].controlTotalMs-1)*100;\n }\n let state=0x000da6c4;\n const metrics=[comparisons[\"B/A\"].differencesMs,comparisons[\"B/A\"].differencesPercent,comparisons[\"B/C\"].differencesMs,comparisons[\"B/C\"].differencesPercent];\n const distributions=metrics.map(()=>[]);\n for(let repeat=0;repeat<20000;repeat++){\n  const sample=[];\n  for(let j=0;j<12;j++){state^=state<<13;state^=state>>>17;state^=state<<5;state>>>=0;sample.push(Math.floor((state/4294967296)*12));}\n  for(let j=0;j<4;j++)distributions[j].push(median(sample.map(i=>metrics[j][i])));\n }\n const intervals=distributions.map(v=>{v.sort((x,y)=>x-y);return [q(v,.025),q(v,.975)];});\n for(let i=0;i<2;i++){\n  const key=i===0?\"B/A\":\"B/C\", c=comparisons[key], original=a.comparisons[key];\n  c.medianDifferenceMs95=intervals[i*2];c.medianDifferencePercent95=intervals[i*2+1];\n  c.mechanicalGate=c.medianDifferenceMs<=-10&&c.medianDifferencePercent<=-10&&c.fasterPairs>=9&&c.candidateTotalMs<c.controlTotalMs&&c.medianDifferenceMs95[1]<0&&c.medianDifferencePercent95[1]<0;\n  check(near(c.medianDifferenceMs,-original.pairedMedianSavingMs),\"reported median ms \"+key);\n  check(near(c.medianDifferencePercent,-original.pairedMedianSavingPercent),\"reported median percent \"+key);\n  check(c.fasterPairs===original.fasterPairs,\"reported faster count \"+key);\n  check(near(c.equalWorkChangePercent,original.equalWorkChangePercent),\"reported equal work \"+key);\n  for(let j=0;j<2;j++){check(near(c.medianDifferenceMs95[j],original.pairedMedianDifferenceMs95[j]),\"reported ms interval \"+key+j);check(near(c.medianDifferencePercent95[j],original.pairedMedianDifferencePercent95[j]),\"reported pct interval \"+key+j);}\n }\n const ca=blocks.map(r=>(r.C/r.A-1)*100),controlMedian=median(ca),driftLimit=Math.min(-comparisons[\"B/A\"].medianDifferencePercent,-comparisons[\"B/C\"].medianDifferencePercent)/2;\n check(near(controlMedian,a.control.pairedMedianPercent),\"reported control median\"); check(state===a.bootstrap.finalState,\"shared bootstrap stream final state\");\n const advance=failures.length===0&&comparisons[\"B/A\"].mechanicalGate&&comparisons[\"B/C\"].mechanicalGate&&Math.abs(controlMedian)<driftLimit;\n return {schemaVersion:1,independentEvaluator:\"Reimplemented from frozen protocol; did not call production cohort evaluator\",completeObservations:observations.length,blocks,failures,comparisons,control:{pairedMedianPercent:controlMedian,maximumAbsolutePercentExclusive:driftLimit,pass:Math.abs(controlMedian)<driftLimit},bootstrap:{samples:20000,seedHex:\"0x000da6c4\",finalState:state,percentile:\"type7\",sharedWholeBlockDraws:true},advance,protocolBlob:setup.researchBinding.protocolBlob,researchBinding:setup.researchBinding,sourceHashChecks:\"Compared exact setup pre-acquisition and final analysis hash maps; did not independently hash unavailable remote binary files\",semanticCheckScope:\"Checked every printed verification, ownership/quiescence, route and source-identity receipt; no independent reread of lost binary capture/OPFS graphs\",artifactLimitation:\"Actions upload failed on a vertical-bar OPFS filename after all36 observations and analysis; full decoded log and compact receipts retained by baseline_profile, but binary graphs and OPFS outputs are not claimed retained\",claimScope:\"Immutable completed-content-tail Node record-sink component. Advance only to private ownership design and separate browser qualification; not a whole-import gain.\"};\n}",
+  "result": {
+    "schemaVersion": 1,
+    "independentEvaluator": "Reimplemented from frozen protocol; did not call production cohort evaluator",
+    "completeObservations": 36,
+    "blocks": [
+      {
+        "block": 0,
+        "order": "ABC",
+        "A": 367.419072,
+        "B": 178.565206,
+        "C": 350.060791
+      },
+      {
+        "block": 1,
+        "order": "BCA",
+        "B": 171.019929,
+        "C": 341.924468,
+        "A": 363.583594
+      },
+      {
+        "block": 2,
+        "order": "CAB",
+        "C": 358.284278,
+        "A": 362.051662,
+        "B": 182.595868
+      },
+      {
+        "block": 3,
+        "order": "ACB",
+        "A": 352.460448,
+        "C": 366.21329,
+        "B": 165.214184
+      },
+      {
+        "block": 4,
+        "order": "CBA",
+        "C": 355.207115,
+        "B": 177.955302,
+        "A": 361.876129
+      },
+      {
+        "block": 5,
+        "order": "BAC",
+        "B": 165.185235,
+        "A": 354.818529,
+        "C": 371.236752
+      },
+      {
+        "block": 6,
+        "order": "ABC",
+        "A": 374.56494,
+        "B": 173.953151,
+        "C": 342.79259
+      },
+      {
+        "block": 7,
+        "order": "BCA",
+        "B": 169.030718,
+        "C": 372.050068,
+        "A": 358.963396
+      },
+      {
+        "block": 8,
+        "order": "CAB",
+        "C": 357.79842,
+        "A": 360.570373,
+        "B": 171.884062
+      },
+      {
+        "block": 9,
+        "order": "ACB",
+        "A": 365.360634,
+        "C": 359.879954,
+        "B": 182.38601
+      },
+      {
+        "block": 10,
+        "order": "CBA",
+        "C": 369.065168,
+        "B": 176.224178,
+        "A": 360.742446
+      },
+      {
+        "block": 11,
+        "order": "BAC",
+        "B": 166.94412,
+        "A": 372.421849,
+        "C": 366.551564
+      }
+    ],
+    "failures": [],
+    "comparisons": {
+      "B/A": {
+        "differencesMs": [
+          -188.85386600000004,
+          -192.56366500000001,
+          -179.45579400000003,
+          -187.246264,
+          -183.920827,
+          -189.633294,
+          -200.611789,
+          -189.93267799999998,
+          -188.68631100000002,
+          -182.974624,
+          -184.51826799999998,
+          -205.477729
+        ],
+        "differencesPercent": [
+          -51.400126011967075,
+          -52.96269363573099,
+          -49.566350008911165,
+          -53.1254684213532,
+          -50.824249587349826,
+          -53.44514970355452,
+          -53.558613627853155,
+          -52.91143334291388,
+          -52.32995418622484,
+          -50.08055246586856,
+          -51.14958609556026,
+          -55.17338189253231
+        ],
+        "medianDifferenceMs": -188.77008850000004,
+        "medianDifferencePercent": -52.62069376456936,
+        "fasterPairs": 12,
+        "candidateTotalMs": 2080.957963,
+        "controlTotalMs": 4354.833072000001,
+        "equalWorkChangePercent": -52.214977506719926,
+        "medianDifferenceMs95": [
+          -191.2481715,
+          -184.21954749999998
+        ],
+        "medianDifferencePercent95": [
+          -53.28530906245386,
+          -50.98691784145504
+        ],
+        "mechanicalGate": true
+      },
+      "B/C": {
+        "differencesMs": [
+          -171.495585,
+          -170.904539,
+          -175.68840999999998,
+          -200.99910599999998,
+          -177.251813,
+          -206.05151700000002,
+          -168.83943900000003,
+          -203.01935,
+          -185.91435800000002,
+          -177.493944,
+          -192.84099000000003,
+          -199.607444
+        ],
+        "differencesPercent": [
+          -48.99022952844781,
+          -49.98312639035824,
+          -49.03603668593016,
+          -54.88580329785411,
+          -49.90097481577755,
+          -55.504072775639415,
+          -49.25410989776646,
+          -54.567749736307,
+          -51.96064253162438,
+          -49.32031974195484,
+          -52.251202963699896,
+          -54.45548828704493
+        ],
+        "medianDifferenceMs": -181.70415100000002,
+        "medianDifferencePercent": -50.971884460991305,
+        "fasterPairs": 12,
+        "candidateTotalMs": 2080.957963,
+        "controlTotalMs": 4311.064458,
+        "equalWorkChangePercent": -51.72983416802348,
+        "medianDifferenceMs95": [
+          -200.30327499999999,
+          -173.5919975
+        ],
+        "medianDifferencePercent95": [
+          -54.51161901167596,
+          -49.28721481986065
+        ],
+        "mechanicalGate": true
+      }
+    },
+    "control": {
+      "pairedMedianPercent": -1.2703196719817345,
+      "maximumAbsolutePercentExclusive": 25.485942230495652,
+      "pass": true
+    },
+    "bootstrap": {
+      "samples": 20000,
+      "seedHex": "0x000da6c4",
+      "finalState": 1110904116,
+      "percentile": "type7",
+      "sharedWholeBlockDraws": true
+    },
+    "advance": true,
+    "protocolBlob": "83930b97ad2fc05697dbf83455229fe148962010",
+    "researchBinding": {
+      "commit": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+      "tree": "7853cbb3eac7967b90386f9f9f9b1ced06e7f764",
+      "githubSha": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+      "workflowPath": ".github/workflows/perf-raw-alias-component.yml",
+      "workflowSha256": "3719b3d09996993a0c638061ec1e51e9ded1840c40c653a411b9b3f51bf4f6eb",
+      "protocolBlob": "83930b97ad2fc05697dbf83455229fe148962010",
+      "protocolSha256": "bed962679c7b0b86d96d9ebcd1c47d62a8f667ed05afe8828b7c1d0399f6f962"
+    },
+    "sourceHashChecks": "Compared exact setup pre-acquisition and final analysis hash maps; did not independently hash unavailable remote binary files",
+    "semanticCheckScope": "Checked every printed verification, ownership/quiescence, route and source-identity receipt; no independent reread of lost binary capture/OPFS graphs",
+    "artifactLimitation": "Actions upload failed on a vertical-bar OPFS filename after all36 observations and analysis; full decoded log and compact receipts retained by baseline_profile, but binary graphs and OPFS outputs are not claimed retained",
+    "claimScope": "Immutable completed-content-tail Node record-sink component. Advance only to private ownership design and separate browser qualification; not a whole-import gain."
+  }
+}

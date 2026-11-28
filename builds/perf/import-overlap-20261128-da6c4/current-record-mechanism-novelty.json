@@ -1,0 +1,128 @@
+{
+  "schema": "manabitan-import-history-screen-v1",
+  "observedUtc": "2026-11-28T07:53:00Z",
+  "repository": "ManabiIO/manabitan",
+  "frozenBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "purpose": "Avoid duplicating owner-thread record-field encoding, validation, and metadata work while reviewing the distinct native private raw-alias path.",
+  "scope": "Read-only GitHub PR/branch/source inspection. No measurements, source edits, ref mutations, or claims of performance qualification.",
+  "branches": [
+    {
+      "branch": "lab/import-fused-record-fields-20261128-d2d13264",
+      "head": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "files": [
+        "ext/js/dictionary/term-record-field-preparation.js",
+        "ext/js/dictionary/term-bank-wasm-parser.js",
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "mechanism": "Receiver-created prepared lookup entries carry a WeakMap identity witness. For whole factory/private ordinary input, one synchronous helper combines content validation/min-max/split feasibility, score interning and final compact record fields. Only newly encoded output crosses the existing await; generic and split fallback keep per-run revalidation.",
+      "notEstablished": "No result/latency inference made in this screen; not parser-worker prepared unresolved payloads."
+    },
+    {
+      "branch": "perf/native-record-fields-20261127-beb5",
+      "head": "0d9b11df78f05217b96e3c14ad06de6aeebc29b8",
+      "files": [
+        "ext/js/dictionary/term-record-fields-wasm.js",
+        "ext/js/dictionary/wasm/term-record-fields-v1.c",
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "mechanism": "Owner-thread WASM compact encoder after content references exist; copies row IDs, scores, unique offsets and lengths, then copies owned output. The wrapper retains fallback eligibility.",
+      "notEstablished": "No fresh measurement or browser result audited."
+    },
+    {
+      "branch": "perf/native-record-fields-20261128-a7c4",
+      "head": "d449ca57caed5f593156a8eb50ea1016c36c0f98",
+      "files": [
+        "ext/js/dictionary/term-record-field-encoder.js",
+        "ext/js/dictionary/wasm/term-record-fields-v1.c",
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "mechanism": "Owner-thread native compact record-field helper with copied source columns and independently owned result, after resolved-reference admission.",
+      "notEstablished": "No fresh measurement or browser result audited."
+    },
+    {
+      "branch": "perf/native-record-fields-screen-20261128-1c413",
+      "head": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+      "files": [
+        "dev/perf/native-record-fields-20261128-1c413/README.md"
+      ],
+      "mechanism": "Frozen isolated complete-call component screen of stock JS versus native helper on all twelve actual current JMdict field calls. B timing includes wrapper import, WASM read/compile, staging, initialization, growth and output copies; no product integration.",
+      "notEstablished": "Only protocol/source read; no acquired result audited."
+    },
+    {
+      "branch": "perf/js-record-run-helper-20261128-0f1f",
+      "head": "cb5136c51bed519a958874fad636310a9f83f447",
+      "files": [
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "mechanism": "Outlines the private resolved-reference validation/min-max/run-split loop into a synchronous JS helper; keeps per-run origin checks, consecutive alias skipping and after-await revalidation."
+    },
+    {
+      "branch": "perf/record-run-validator-component-20261128-0f1f",
+      "head": "491b6024fef8ee763e5436b0c5275b287a3be52b",
+      "files": [
+        "dev/perf/record-run-validator-component-20261128-0f1f"
+      ],
+      "mechanism": "Frozen native-versus-extracted-JS record-run validator browser component study, including cold initialization and bounded staging.",
+      "notEstablished": "No measurement result audited."
+    },
+    {
+      "branch": "perf/js-record-field-helper-20261128-0f1f",
+      "head": "6da3dc87d4d0695ef7c1fafd9a934460a0186659",
+      "files": [
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "mechanism": "Outlines final resolved offset/length column scatter into a synchronous JS helper; no new cross-await ownership protocol."
+    },
+    {
+      "branch": "perf/record-field-lengths-20261127-5a86",
+      "head": "7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1",
+      "mechanism": "Latest commit preserves completed negative JMdict record-field qualification and component evidence; commit explicitly says no runtime PR is warranted.",
+      "notEstablished": "Commit conclusion observed; this screen did not independently re-audit that study's numerical receipts."
+    }
+  ],
+  "relatedPrs": [
+    {
+      "number": 849,
+      "head": "5b19312bcf71ca69ebaddcb3922740191798d923",
+      "state": "closed",
+      "merged": true,
+      "mechanism": "Already merged direct final offset/length columns for stable factory private references; six bytes of temporary columns per admitted row avoided."
+    },
+    {
+      "number": 952,
+      "head": "52de629e5a2b8098c436b912c7078bc2f4b8581f",
+      "state": "closed",
+      "merged": false,
+      "mechanism": "Targeted native lookup initialization and structured child-content token entry; not full record fields."
+    },
+    {
+      "number": 964,
+      "head": "65fe8a7b7a8686406b637023ebb8afab6f7eb7a5",
+      "state": "closed",
+      "merged": false,
+      "mechanism": "Metadata arena growth copies/zero fills; not post-storage native publication."
+    },
+    {
+      "number": 980,
+      "head": "a9085d1ce49aa0e74662f7b3818ab546068a1376",
+      "state": "open",
+      "merged": false,
+      "mechanism": "Lazy positive-zero metadata-ID column allocation. PR explicitly claims allocation capacity only, not import speed."
+    }
+  ],
+  "conclusion": "The owner-thread field encoder, fused validation/field path, and native run validator are occupied by recent exact-source branches. This bounded search did not establish an exact duplicate of full unresolved parser-worker field payloads patched after storage. Absence from this search is not exhaustive novelty proof. Existing native publication preflight PR914 was identified independently by critical_path and is not audited here.",
+  "sourceUrls": [
+    "https://github.com/ManabiIO/manabitan/commit/91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+    "https://github.com/ManabiIO/manabitan/commit/0d9b11df78f05217b96e3c14ad06de6aeebc29b8",
+    "https://github.com/ManabiIO/manabitan/commit/d449ca57caed5f593156a8eb50ea1016c36c0f98",
+    "https://github.com/ManabiIO/manabitan/commit/b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "https://github.com/ManabiIO/manabitan/commit/cb5136c51bed519a958874fad636310a9f83f447",
+    "https://github.com/ManabiIO/manabitan/commit/491b6024fef8ee763e5436b0c5275b287a3be52b",
+    "https://github.com/ManabiIO/manabitan/commit/6da3dc87d4d0695ef7c1fafd9a934460a0186659",
+    "https://github.com/ManabiIO/manabitan/commit/7c76d04bf2b3cf1b8f1fbe1dfaa8623610afb9b1",
+    "https://github.com/ManabiIO/manabitan/pull/849",
+    "https://github.com/ManabiIO/manabitan/pull/952",
+    "https://github.com/ManabiIO/manabitan/pull/964",
+    "https://github.com/ManabiIO/manabitan/pull/980"
+  ]
+}

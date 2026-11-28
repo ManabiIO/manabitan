@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent arithmetic and compact-receipt consistency review; no new timing",
+  "sourceCommit": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+  "runId": 46113754947,
+  "jobId": 140882831654,
+  "sourceReceiptBlob": "11e629a0ff01cbf26101779c961f1aa39a3238c3",
+  "rawLogBlob": "669d08580e2933f92537cb5f53adc0242c730c95",
+  "protocolBlob": "83930b97ad2fc05697dbf83455229fe148962010",
+  "protocolSha256": "bed962679c7b0b86d96d9ebcd1c47d62a8f667ed05afe8828b7c1d0399f6f962",
+  "rows": [
+    {
+      "block": 0,
+      "A": 367.419072,
+      "B": 178.565206,
+      "C": 350.060791
+    },
+    {
+      "block": 1,
+      "B": 171.019929,
+      "C": 341.924468,
+      "A": 363.583594
+    },
+    {
+      "block": 2,
+      "C": 358.284278,
+      "A": 362.051662,
+      "B": 182.595868
+    },
+    {
+      "block": 3,
+      "A": 352.460448,
+      "C": 366.21329,
+      "B": 165.214184
+    },
+    {
+      "block": 4,
+      "C": 355.207115,
+      "B": 177.955302,
+      "A": 361.876129
+    },
+    {
+      "block": 5,
+      "B": 165.185235,
+      "A": 354.818529,
+      "C": 371.236752
+    },
+    {
+      "block": 6,
+      "A": 374.56494,
+      "B": 173.953151,
+      "C": 342.79259
+    },
+    {
+      "block": 7,
+      "B": 169.030718,
+      "C": 372.050068,
+      "A": 358.963396
+    },
+    {
+      "block": 8,
+      "C": 357.79842,
+      "A": 360.570373,
+      "B": 171.884062
+    },
+    {
+      "block": 9,
+      "A": 365.360634,
+      "C": 359.879954,
+      "B": 182.38601
+    },
+    {
+      "block": 10,
+      "C": 369.065168,
+      "B": 176.224178,
+      "A": 360.742446
+    },
+    {
+      "block": 11,
+      "B": 166.94412,
+      "A": 372.421849,
+      "C": 366.551564
+    }
+  ],
+  "armMediansMs": {
+    "A": 361.96389550000004,
+    "B": 172.9186065,
+    "C": 359.082116
+  },
+  "comparisons": {
+    "B/A": {
+      "pairedMedianSavingMs": 188.77008850000004,
+      "pairedMedianSavingPercent": 52.62069376456936,
+      "fasterPairs": 12,
+      "equalWorkChangePercent": -52.214977506719926,
+      "pairedMedianDifferenceMs95": [
+        -191.2481715,
+        -184.21954749999998
+      ],
+      "pairedMedianDifferencePercent95": [
+        -53.28530906245386,
+        -50.98691784145504
+      ],
+      "pass": true
+    },
+    "B/C": {
+      "pairedMedianSavingMs": 181.70415100000002,
+      "pairedMedianSavingPercent": 50.971884460991305,
+      "fasterPairs": 12,
+      "equalWorkChangePercent": -51.72983416802348,
+      "pairedMedianDifferenceMs95": [
+        -200.30327499999999,
+        -173.5919975
+      ],
+      "pairedMedianDifferencePercent95": [
+        -54.51161901167596,
+        -49.28721481986065
+      ],
+      "pass": true
+    }
+  },
+  "control": {
+    "pairedMedianPercent": -1.2703196719817345,
+    "maximumAbsolutePercentExclusive": 25.485942230495652,
+    "pass": true
+  },
+  "bootstrap": {
+    "samples": 20000,
+    "seedHex": "0x000da6c4",
+    "finalState": 1110904116,
+    "quantile": "type7",
+    "sharedIndexStream": true
+  },
+  "completeReceiptChecks": true,
+  "advance": true,
+  "limits": [
+    "Artifact upload failed on vertical-bar filenames; no physical OPFS/capture output archive is claimed retained.",
+    "This review recomputes all36 timings and verifies reported source/semantic/worker/quiescence witness consistency; it does not independently reread400000 stored records.",
+    "The measured route uses immutable captured metadata and a completed content seed. Actual production ownership, import-overlay reads, preparation, cancellation, and browser memory require separate validation.",
+    "Only advancement to implementation and exact-source qualification is established; no whole-import gain is claimed."
+  ]
+}

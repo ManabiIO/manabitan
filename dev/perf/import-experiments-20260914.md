@@ -1327,3 +1327,164 @@ new implementation and exact-source browser qualification; it does not
 authorize a full-import gain claim or promotion of the held draft. Inspect
 develop and PR heads before any later source integration. No unchanged reruns
 or relaxed acceptance thresholds were requested.
+
+
+### Resumed investigation: completed component decisions and repaired qualification
+
+The resumed investigation began at 07:27 UTC on 2026-11-28 after the request to
+try harder. This section supersedes the earlier queued-state snapshots only
+where an exact completed run or new source is identified; the earlier evidence
+and failed acquisitions remain retained.
+
+#### VNDB record-only raw aliases: component advance, product qualification pending
+
+Run [46113754947](https://github.com/ManabiIO/manabitan/actions/runs/46113754947)
+executed source `d0a79f888b36684f26ca76ef880c019ad06c88f1` successfully through
+setup, eighteen adapter cases, full 170-group route regeneration, bounded
+ten-group capture, all 36 fresh-child observations, semantic/closure checks,
+and the frozen analysis. Its job failed afterward when actions/upload-artifact
+rejected real OPFS filenames containing `|`. No physical OPFS/capture artifact
+was retained. The complete decoded job log and all 41 compact JSON records are
+retained below. Artifact-upload failure must not be represented as either a
+timing failure or a retained binary capture.
+
+The actual component included canonical reads, alias compression and append,
+private reference construction, record writing, and both stores' finalization.
+Across twelve balanced ABC rounds, B/A paired-median saving was 188.7700885 ms
+(52.6206937646%), and B/C saving was 181.704151 ms (50.9718844610%). Both comparisons
+were faster in 12/12 pairs. Equal-work changes were -52.2149775067% and
+-51.7298341680%, respectively. The paired-median delta 95% bootstrap intervals
+were [-191.2481715, -184.2195475] ms versus A and [-200.303275, -173.5919975] ms
+versus C. C/A paired-median drift was -1.27031967198%. The predeclared 10 ms/10%,
+9-of-12, equal-work, bootstrap, and control gates all passed.
+
+All 36 observations matched the complete 400,000-row semantic witness,
+84 reopened lookup probes, and 9,302 referenced canonical definitions, with
+clean locks/staging/resources and unchanged input hashes. The root and an
+independent reviewer separately recomputed every pair, all four bootstrap
+distributions, and final PRNG state 1110904116. This is an immutable captured
+component using a completed content seed, not a current complete-import or
+browser-memory result. The measured half-time reduction concerns this component
+only. The gate authorizes a production implementation and a separate source-bound
+qualification; it does not establish a corresponding import speedup.
+
+Retained evidence:
+
+- [Decoded full hosted log](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-hosted-job-140882831654.log)
+- [All compact setup, route, capture, observation, and analysis receipts](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-hosted-complete-receipts.json)
+- [Independent full arithmetic and evidence audit](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-hosted-independent-audit.json)
+- [Root's separate complete recomputation](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-hosted-root-audit.json)
+
+The product implementation is being developed independently on baseline
+`9e10d3b3`, rather than stacking it on unqualified overlap runtime. It requires
+private receiver-to-importer provenance, explicit rebinding at the importer's
+payload copy, a distinct DB-publication lease, and lease retention through the
+entire record append and rollback. Review found and corrected cancellation
+before rollback-state adoption and external close/purge racing an awaited alias
+append. These are new product validation obligations; component provenance
+does not cover them. Ordinary mutable/factory-only callers retain the original
+split/revalidation behavior. The original binary capture was lost with the
+ephemeral home directory; a subsequent product capture must have a new explicit
+source/fixture identity.
+
+#### JMdict FIFO: complete negative result, no product implementation
+
+Run [46113052837](https://github.com/ManabiIO/manabitan/actions/runs/46113052837),
+exact source `81d35bc83af349b611f9ad51cc223de788a2d0d6`, completed successfully.
+All 36 timed observations, three warmups, three source-poisoning ownership
+witnesses, and 42 exhaustive decode proofs passed. All four workers joined
+cleanly with no terminal failure. The frozen performance advance gate failed:
+FIFO was slower than both controls.
+
+B/A paired-median change was +4.227437 ms / +6.6828065%, with only 2/12 faster
+pairs; equal-work change was +6.9889125%. B/C was +3.642377 ms / +5.6627342%,
+with 3/12 faster; equal-work change was +4.1089470%. The respective 95% time
+intervals were [1.511905, 8.650361] ms and [-1.106683, 6.763570] ms.
+Control drift passed its gate. The candidate's required gain did not.
+
+The full 489,446,028-byte artifact was streamed to verify its SHA-256 against
+GitHub's artifact metadata. Thirty compact members were recovered without
+retaining another full archive copy. The exact 4,623,329-byte observations JSON
+is preserved as gzip, along with the unmodified gate and acquisition metadata.
+An independent reviewer recomputed the complete fixed cohort. There is no FIFO
+production change, no unchanged rerun, and no promotion of the conditional
+source-only FIFO design.
+
+Retained evidence:
+
+- [Full observations JSON, gzip](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-observations.json.gz)
+- [Decoded hosted log](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-job-140880647245.log)
+- [Exact full gate](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-complete-gate.json)
+- [Setup receipt](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-setup.json)
+- [Full artifact stream verification](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-artifact-stream-verification.json)
+- [Recovered archive member index](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-member-index.json)
+- [Exact reproduction evaluator](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-reproduce-analysis.mjs)
+- [Independent arithmetic audit/evaluator](../../builds/perf/import-overlap-20261128-da6c4/fifo-hosted2-independent-audit.json)
+
+#### Overlap source validation: fix the concrete errors, preserve the runtime
+
+The original `5048ba3e` qualification run
+[46108795917](https://github.com/ManabiIO/manabitan/actions/runs/46108795917)
+passed project JavaScript lint and main-runtime TypeScript, then failed the
+test TypeScript gate with three errors. Browser acquisition never started.
+The static-web check on the old clean PR source failed for the same errors.
+
+Two test-only fixes explicitly narrow the non-null block session and derive the
+dedup helper's actual return type instead of asserting an obsolete Promise<void>.
+No runtime code or test assertions changed. Clean draft #977 now points to
+`c819bb92d4c26a99300987c00ea79f54fc1734f7`, tree
+`3090e6e169da5e623e330e709c343c49837494a4`, with seven runtime files, seven
+test files, and the ESLint header registration.
+
+New independent qualification source
+`c4330b235eaa31a62c48837578f230038dc48226`, tree
+`698af3f9b37112f14f94edf30a0a319fedb60af6`, adds those same fixes and its
+dedicated branch trigger to frozen `5048ba3e`. It excludes later research
+scripts from project-wide source validation. The clean PR and qualification
+source have identical `ext/` subtree
+`498442aef1fa20e49c414b930c23e38a29749ce4`, `test/` subtree
+`00917417cd71807aa0ca60e7479f31d42a7c8add`, and ESLint blob
+`ecacd4bd0572e1df051d2f0167d11d09d3026cf8`.
+
+Local Node 24.22.3 validation passed the full test TypeScript project, 225
+affected tests across seven files, 66 cleanup tests, scoped ESLint, and
+whitespace checks. The larger local validation runner was stopped while doing
+lint; it is not a full local gate pass. The original error log, exact fixes,
+and local validation receipt are retained:
+
+- [Original failure and repair identities](../../builds/perf/import-overlap-20261128-da6c4/overlap-test-types-failure-and-repair.json)
+- [Current local validation receipt](../../builds/perf/import-overlap-20261128-da6c4/overlap-test-types-local-validation.json)
+
+The new fixed qualification is
+[run 46121740432](https://github.com/ManabiIO/manabitan/actions/runs/46121740432);
+normal PR CI is
+[run 46121741374](https://github.com/ManabiIO/manabitan/actions/runs/46121741374).
+As last observed at 07:48 UTC, those checks were queued. Their status is pending,
+not a source-validation pass or acquired performance result. All original
+whole-import, semantic, timing-control, and browser-memory gates remain intact.
+
+#### Fresh critical-path analysis and novelty checks
+
+A single source-unchanged actual DB diagnostic on `9e10d3b3` processed all
+528,299 JMdict rows, twelve groups, and 103 actual content blocks, including
+parity and terminal checks. The
+[exact diagnostic source/report/log bundle](../../builds/perf/import-overlap-20261128-da6c4/jmdict-current-db-diagnostic.zip)
+retains the instrumented execution. Native canonical calls consumed 75.8 ms;
+in-flight registration, contiguous publication, and recent-cache phases also
+remain visible. These are nested diagnostic clocks from one instrumented Node
+run, not additive critical-path costs or comparative performance evidence.
+
+The [current mechanism novelty screen](../../builds/perf/import-overlap-20261128-da6c4/current-record-mechanism-novelty.json)
+binds eight concurrent un-PR'd branch heads and four related PRs. Existing work
+already covers native record encoding, fused whole-run validation/field output,
+cache publication scans, range-backed recent caches, and canonical rejection
+tags. Those exact ideas are not being reimplemented under another name.
+A distinct bounded early read of one small tag-bank text is under source review;
+its possible late-stage overlap remains unmeasured. Existing cached-native late
+tag decoding is a separate related alternative, so the original diagnostic's
+13 ms late tag-read duration is only an opportunity ceiling, not an expected gain.
+
+No new complete-import gain is established in this checkpoint. The VNDB
+component result advances one implementation, the JMdict FIFO result rejects
+one mechanism, and the repaired overlap draft remains held for current-source
+qualification.

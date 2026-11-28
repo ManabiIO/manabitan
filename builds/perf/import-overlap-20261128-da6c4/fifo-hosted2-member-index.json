@@ -1,0 +1,608 @@
+[
+  {
+    "name": "adapted-replan-production-blocks.mjs",
+    "size": 4310,
+    "compressedSize": 4310,
+    "method": 0,
+    "crc32": "80f16b67",
+    "extracted": true,
+    "sha256": "996edf656d7c6a3347ccb8e1d706ed47643393c1e3876db1e6ec2d0c696083b3"
+  },
+  {
+    "name": "baseline-commit.log",
+    "size": 41,
+    "compressedSize": 41,
+    "method": 0,
+    "crc32": "7254fa8b",
+    "extracted": true,
+    "sha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+  },
+  {
+    "name": "baseline-libraries.log",
+    "size": 60,
+    "compressedSize": 60,
+    "method": 0,
+    "crc32": "132de036",
+    "extracted": true,
+    "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+  },
+  {
+    "name": "baseline-source-clean-before-timing.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "baseline-source-clean.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "baseline-tree.log",
+    "size": 41,
+    "compressedSize": 41,
+    "method": 0,
+    "crc32": "a2b04dda",
+    "extracted": true,
+    "sha256": "e7eeeeb8dc66c5568919c561aa5546fd54e30233922c4842c40e77998c42da4a"
+  },
+  {
+    "name": "capture.log",
+    "size": 2981,
+    "compressedSize": 2981,
+    "method": 0,
+    "crc32": "1259b9f6",
+    "extracted": true,
+    "sha256": "860665502a26728e02c74fcf0e0eb352eb2dab9d5611343ffd191b6ee3d496c7"
+  },
+  {
+    "name": "checkout-baseline.log",
+    "size": 158,
+    "compressedSize": 158,
+    "method": 0,
+    "crc32": "4639eae4",
+    "extracted": true,
+    "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+  },
+  {
+    "name": "checkout-runtime.log",
+    "size": 116,
+    "compressedSize": 116,
+    "method": 0,
+    "crc32": "69968d1b",
+    "extracted": true,
+    "sha256": "3b686aa2303bd9d3c0e7ee7dd1024f0f5d119b6eb844a00d126dd114baa5646c"
+  },
+  {
+    "name": "component-config.json",
+    "size": 12278,
+    "compressedSize": 12278,
+    "method": 0,
+    "crc32": "676eb90c",
+    "extracted": true,
+    "sha256": "3b28f2497e9886b621adcbba540233644e9711285654ad5311efb7afbe42f86a"
+  },
+  {
+    "name": "component-syntax.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "component.log",
+    "size": 22937,
+    "compressedSize": 22937,
+    "method": 0,
+    "crc32": "1b151b56",
+    "extracted": true,
+    "sha256": "0cb045debd611a8e655aceeb1139eaa709b79f22eb68faf2a9bc385e8ac0a3a6"
+  },
+  {
+    "name": "component.mjs",
+    "size": 32803,
+    "compressedSize": 32803,
+    "method": 0,
+    "crc32": "5583c896",
+    "extracted": true,
+    "sha256": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407"
+  },
+  {
+    "name": "compressed-outputs/ownership-A-rotation.bin",
+    "size": 1260767,
+    "compressedSize": 1260767,
+    "method": 0,
+    "crc32": "3e1cc5fd",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/ownership-B-first-free-fifo.bin",
+    "size": 1260767,
+    "compressedSize": 1260767,
+    "method": 0,
+    "crc32": "3e1cc5fd",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/ownership-C-rotation-control.bin",
+    "size": 1260767,
+    "compressedSize": 1260767,
+    "method": 0,
+    "crc32": "3e1cc5fd",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-0-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-0-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-0-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-1-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-1-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-1-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-10-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-10-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-10-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-11-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-11-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-11-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-2-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-2-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-2-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-3-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-3-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-3-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-4-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-4-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-4-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-5-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-5-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-5-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-6-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-6-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-6-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-7-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-7-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-7-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-8-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-8-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-8-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-9-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-9-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/round-9-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/warmup-A-rotation-A-rotation.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/warmup-B-first-free-fifo-B-first-free-fifo.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "compressed-outputs/warmup-C-rotation-control-C-rotation-control.bin",
+    "size": 12326040,
+    "compressedSize": 12326040,
+    "method": 0,
+    "crc32": "f7e49fad",
+    "extracted": false
+  },
+  {
+    "name": "dispatcher-tests.log",
+    "size": 1212,
+    "compressedSize": 1212,
+    "method": 0,
+    "crc32": "58e7782f",
+    "extracted": true,
+    "sha256": "27b7a12aedefba6eac9cc534aadcae93b60c3a8e0d43199b87a99bb3ac7139ad"
+  },
+  {
+    "name": "dispatcher-tests.mjs",
+    "size": 11106,
+    "compressedSize": 11106,
+    "method": 0,
+    "crc32": "5935db23",
+    "extracted": true,
+    "sha256": "9421c5e1501f8f6c4f6bac93d0b93420a95f1191af5d805921d8d9c89425038f"
+  },
+  {
+    "name": "local-attempts.json",
+    "size": 4554,
+    "compressedSize": 4554,
+    "method": 0,
+    "crc32": "446330e1",
+    "extracted": true,
+    "sha256": "91ba7343a621e7024ade0cb433c287edbea2f67a9809b6d1a5f7bd55aaf2d337"
+  },
+  {
+    "name": "node-version.log",
+    "size": 9,
+    "compressedSize": 9,
+    "method": 0,
+    "crc32": "2c814507",
+    "extracted": true,
+    "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+  },
+  {
+    "name": "observations.json",
+    "size": 4623329,
+    "compressedSize": 4623329,
+    "method": 0,
+    "crc32": "0f33df0c",
+    "extracted": true,
+    "sha256": "0061022acd1ece43ab57c26bfe341a2c484a1ee5d0e322f560e5c39414536d23"
+  },
+  {
+    "name": "plan.json",
+    "size": 9721,
+    "compressedSize": 9721,
+    "method": 0,
+    "crc32": "f8f99bf2",
+    "extracted": true,
+    "sha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f"
+  },
+  {
+    "name": "reference-manifest-db-1m.json",
+    "size": 82573,
+    "compressedSize": 82573,
+    "method": 0,
+    "crc32": "8b426e1f",
+    "extracted": true,
+    "sha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e"
+  },
+  {
+    "name": "regenerated-manifest-db-1m.json",
+    "size": 84539,
+    "compressedSize": 84539,
+    "method": 0,
+    "crc32": "a17944a5",
+    "extracted": true,
+    "sha256": "2ba2e762b17186427131c0bbf2caf5a450d2aa4e3019d47676a009c5a568ade4"
+  },
+  {
+    "name": "replan.log",
+    "size": 214,
+    "compressedSize": 214,
+    "method": 0,
+    "crc32": "1eb7a3b1",
+    "extracted": true,
+    "sha256": "8ee0f15ee59f35ce99f46b62fef89835143fc5cc6967ab0b97eaf030e79ffcd2"
+  },
+  {
+    "name": "run.py",
+    "size": 15968,
+    "compressedSize": 15968,
+    "method": 0,
+    "crc32": "bb721cfd",
+    "extracted": true,
+    "sha256": "d98524bcfb1cbaa7b76287ea9f78de248306d904c925276f6566a2dc0d5ea01c"
+  },
+  {
+    "name": "runtime-commit.log",
+    "size": 41,
+    "compressedSize": 41,
+    "method": 0,
+    "crc32": "7f35ccb7",
+    "extracted": true,
+    "sha256": "4fa0f1fc19897562513f1e4303e9420a0e19b194de5fc4b567f5bcc7d040e347"
+  },
+  {
+    "name": "runtime-libraries.log",
+    "size": 60,
+    "compressedSize": 60,
+    "method": 0,
+    "crc32": "132de036",
+    "extracted": true,
+    "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+  },
+  {
+    "name": "runtime-source-clean-after-timing.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "runtime-source-clean-before-timing.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "runtime-source-clean.log",
+    "size": 0,
+    "compressedSize": 0,
+    "method": 0,
+    "crc32": "00000000",
+    "extracted": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "runtime-tree.log",
+    "size": 41,
+    "compressedSize": 41,
+    "method": 0,
+    "crc32": "7b4996fc",
+    "extracted": true,
+    "sha256": "222a76a2249e9c505b1c1bbdb417e8577bab45c594bed41573bb8c76b2b73463"
+  },
+  {
+    "name": "setup.json",
+    "size": 27215,
+    "compressedSize": 27215,
+    "method": 0,
+    "crc32": "64d0b1a1",
+    "extracted": true,
+    "sha256": "1f3050c43dee5e122053cf465d7c3983698145e7fe888ed5b5facd85cbba1808"
+  }
+]

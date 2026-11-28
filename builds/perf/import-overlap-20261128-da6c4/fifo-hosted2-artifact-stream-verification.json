@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "artifactId": 15253330245,
+  "runId": 46113052837,
+  "sizeBytes": 489446028,
+  "sha256": "e287e5295b6186112f35f3c217235ea668ddd9488aef9de2ad2cab61c1fea511",
+  "metadataExtracted": 30,
+  "memberCount": 72,
+  "note": "Full archive streamed through SHA256 without retaining a second489MB copy; compact members extracted with ZIP CRC verification."
+}

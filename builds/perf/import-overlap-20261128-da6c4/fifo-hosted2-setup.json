@@ -1,0 +1,843 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "studyId": "jmdict-first-free-fifo-20261128-da6c4-hosted2",
+  "planSha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f",
+  "captureCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+  "workflowSha": "81d35bc83af349b611f9ad51cc223de788a2d0d6",
+  "runId": "46113052837",
+  "runAttempt": "1",
+  "node": "v22.22.0",
+  "phases": [
+    {
+      "label": "node-version",
+      "command": [
+        "node",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849373.7229695,
+      "endedUnixSeconds": 1795849373.7259588,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "node-version.log",
+      "logSha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "label": "component-syntax",
+      "command": [
+        "node",
+        "--check",
+        "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-fifo-20261128-da6c4/component.mjs"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849373.7262273,
+      "endedUnixSeconds": 1795849373.7412646,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "component-syntax.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "checkout-baseline",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+        "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849373.7986238,
+      "endedUnixSeconds": 1795849374.3953826,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "checkout-baseline.log",
+      "logSha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    {
+      "label": "checkout-runtime",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+        "5048ba3e8a65fc41b9ae898c47b54d5731cd759e"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849374.3958318,
+      "endedUnixSeconds": 1795849374.9972394,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "checkout-runtime.log",
+      "logSha256": "3b686aa2303bd9d3c0e7ee7dd1024f0f5d119b6eb844a00d126dd114baa5646c"
+    },
+    {
+      "label": "baseline-commit",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+      "startedUnixSeconds": 1795849374.9976852,
+      "endedUnixSeconds": 1795849374.9990487,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "baseline-commit.log",
+      "logSha256": "9cc016672ca1769ee1f6cfcdeb10f0f48d210574dd422c91a62c3f98c653c9fb"
+    },
+    {
+      "label": "baseline-tree",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+      "startedUnixSeconds": 1795849374.9993165,
+      "endedUnixSeconds": 1795849375.000864,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "baseline-tree.log",
+      "logSha256": "e7eeeeb8dc66c5568919c561aa5546fd54e30233922c4842c40e77998c42da4a"
+    },
+    {
+      "label": "baseline-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+      "startedUnixSeconds": 1795849375.001353,
+      "endedUnixSeconds": 1795849375.3826468,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "baseline-libraries.log",
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "label": "baseline-source-clean",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "ext/js",
+        "types"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+      "startedUnixSeconds": 1795849375.3831623,
+      "endedUnixSeconds": 1795849375.4107242,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "baseline-source-clean.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "runtime-commit",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849375.4111218,
+      "endedUnixSeconds": 1795849375.412673,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-commit.log",
+      "logSha256": "4fa0f1fc19897562513f1e4303e9420a0e19b194de5fc4b567f5bcc7d040e347"
+    },
+    {
+      "label": "runtime-tree",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849375.4130054,
+      "endedUnixSeconds": 1795849375.414484,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-tree.log",
+      "logSha256": "222a76a2249e9c505b1c1bbdb417e8577bab45c594bed41573bb8c76b2b73463"
+    },
+    {
+      "label": "runtime-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849375.4150715,
+      "endedUnixSeconds": 1795849375.7944853,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-libraries.log",
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "label": "runtime-source-clean",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "ext/js",
+        "types"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849375.7950132,
+      "endedUnixSeconds": 1795849375.821899,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-source-clean.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dispatcher-tests",
+      "command": [
+        "node",
+        "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-fifo-20261128-da6c4/dispatcher-tests.mjs",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+        "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-fifo-20261128-da6c4/component.mjs"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849375.822283,
+      "endedUnixSeconds": 1795849375.8520625,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "dispatcher-tests.log",
+      "logSha256": "27b7a12aedefba6eac9cc534aadcae93b60c3a8e0d43199b87a99bb3ac7139ad"
+    },
+    {
+      "label": "capture",
+      "command": [
+        "node",
+        "--expose-gc",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/profiling/capture-compression-groups.mjs",
+        "--root",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+        "--cache",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/fixtures",
+        "--out",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/profiling/compression-groups",
+        "--workers",
+        "3",
+        "jmdict"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849376.166583,
+      "endedUnixSeconds": 1795849377.4328494,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "capture.log",
+      "logSha256": "860665502a26728e02c74fcf0e0eb352eb2dab9d5611343ffd191b6ee3d496c7"
+    },
+    {
+      "label": "replan",
+      "command": [
+        "node",
+        "/home/runner/work/_temp/jmdict-fifo-46113052837-1/profiling/replan-production-blocks.mjs"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849377.43353,
+      "endedUnixSeconds": 1795849377.6857915,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "replan.log",
+      "logSha256": "8ee0f15ee59f35ce99f46b62fef89835143fc5cc6967ab0b97eaf030e79ffcd2"
+    },
+    {
+      "label": "baseline-source-clean-before-timing",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "ext/js",
+        "types"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/baseline",
+      "startedUnixSeconds": 1795849377.6877697,
+      "endedUnixSeconds": 1795849377.7157764,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "baseline-source-clean-before-timing.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "runtime-source-clean-before-timing",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "ext/js",
+        "types"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849377.7162168,
+      "endedUnixSeconds": 1795849377.742833,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-source-clean-before-timing.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "component",
+      "command": [
+        "node",
+        "--expose-gc",
+        "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-fifo-20261128-da6c4/component.mjs",
+        "/home/runner/work/manabitan/manabitan/builds/perf/jmdict-fifo-46113052837-1/component-config.json"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "startedUnixSeconds": 1795849377.7458255,
+      "endedUnixSeconds": 1795849391.485523,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "component.log",
+      "logSha256": "0cb045debd611a8e655aceeb1139eaa709b79f22eb68faf2a9bc385e8ac0a3a6"
+    },
+    {
+      "label": "runtime-source-clean-after-timing",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "ext/js",
+        "types"
+      ],
+      "cwd": "/home/runner/work/_temp/jmdict-fifo-46113052837-1/startup-experiment",
+      "startedUnixSeconds": 1795849391.5298588,
+      "endedUnixSeconds": 1795849391.5780234,
+      "returnCode": 0,
+      "shellEquivalentExitCode": 0,
+      "log": "runtime-source-clean-after-timing.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "failure": null,
+  "evidenceMembers": [
+    {
+      "bytes": 13209,
+      "path": "profiling/capture-compression-groups.mjs",
+      "sha256": "0856f474db7efbf3a790479d01cabde696c908688e36766a4f0b899a356d22e8"
+    },
+    {
+      "bytes": 82573,
+      "path": "profiling/compression-groups/jmdict/manifest-db-1m.json",
+      "sha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e"
+    },
+    {
+      "bytes": 1815727,
+      "path": "profiling/compression-scheduling-db-1m-replication.json",
+      "sha256": "434f569b5a8db01fa96c549a6581f0e4bcda9e5cecf6f0e14f012de5f3562ba0"
+    },
+    {
+      "bytes": 10242,
+      "path": "profiling/compression-scheduling-replay.mjs",
+      "sha256": "7cded3af96ba6c88a5247c062c9a57b3fe93646862166dea5a4dcbc496d9f370"
+    },
+    {
+      "bytes": 1143,
+      "path": "profiling/compression-worker-node-bridge.mjs",
+      "sha256": "7b2dcf0346a78bb5070d3b43fa513f3f9ebd150c1c9f0416df45a5b99f1a0315"
+    },
+    {
+      "bytes": 4292,
+      "path": "profiling/replan-production-blocks.mjs",
+      "sha256": "728f64e207cc42cd7891640f109a3def1ba569c2ca08d0dd6165f952fde65da7"
+    }
+  ],
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "verified": true
+  },
+  "replannerAdaptation": {
+    "originalSha256": "728f64e207cc42cd7891640f109a3def1ba569c2ca08d0dd6165f952fde65da7",
+    "adaptedSha256": "996edf656d7c6a3347ccb8e1d706ed47643393c1e3876db1e6ec2d0c696083b3",
+    "replacementCount": 1,
+    "scope": "Only the literal workspace root changes; exact production planner and1MiB configuration remain unchanged."
+  },
+  "preTimingInputProof": {
+    "complete": true,
+    "groups": 12,
+    "rows": 528299,
+    "blocks": 103,
+    "inputBytes": 100300626,
+    "manifestSha256": "2ba2e762b17186427131c0bbf2caf5a450d2aa4e3019d47676a009c5a568ade4",
+    "referenceManifestSha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e",
+    "runtimeSourceHashes": {
+      "ext/js/dictionary/zstd-term-content.js": "4454ba014404a67a4e8c833538792131f18e5c27dd619678f98749a9191384d8",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "ext/js/dictionary/term-content-block-envelope.js": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+      "ext/js/dictionary/term-entry-content-hash.js": "99429f2a812ccac6538c914555775895c5a1115325dd9b0eb42886d23fbca23d",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    },
+    "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "derivedUnusedReplaySha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d"
+  },
+  "componentSummary": {
+    "scope": "Node scheduling component only. No parser, storage, browser, memory-qualification or whole-import speed claim.",
+    "observations": 36,
+    "warmups": 3,
+    "ownershipChecks": 3,
+    "exhaustiveDecodeOutputs": 42,
+    "exhaustiveDecodedBlocks": 4047,
+    "exhaustiveDecodedBytes": 3940243830,
+    "medianMs": {
+      "A-rotation": 64.170531,
+      "C-rotation-control": 65.669311,
+      "B-first-free-fifo": 71.953817
+    },
+    "comparisons": {
+      "B-first-free-fifo/A-rotation": {
+        "pairs": [
+          {
+            "round": 0,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 90.446585,
+            "controlMs": 90.875762,
+            "changePercent": -0.4722678418916493
+          },
+          {
+            "round": 1,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 93.097402,
+            "controlMs": 84.939667,
+            "changePercent": 9.60415232143541
+          },
+          {
+            "round": 2,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 110.408447,
+            "controlMs": 93.781009,
+            "changePercent": 17.730069421624584
+          },
+          {
+            "round": 3,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 79.642455,
+            "controlMs": 87.072064,
+            "changePercent": -8.532712627554117
+          },
+          {
+            "round": 4,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 67.074622,
+            "controlMs": 63.956737,
+            "changePercent": 4.874990730061812
+          },
+          {
+            "round": 5,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 68.197124,
+            "controlMs": 61.692029,
+            "changePercent": 10.544465963341887
+          },
+          {
+            "round": 6,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 66.681687,
+            "controlMs": 63.598628,
+            "changePercent": 4.847681619798472
+          },
+          {
+            "round": 7,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 68.194443,
+            "controlMs": 62.857454,
+            "changePercent": 8.49062228960149
+          },
+          {
+            "round": 8,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 71.817638,
+            "controlMs": 62.674652,
+            "changePercent": 14.588012391357186
+          },
+          {
+            "round": 9,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 77.16949,
+            "controlMs": 63.420647,
+            "changePercent": 21.6788122644034
+          },
+          {
+            "round": 10,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 67.231522,
+            "controlMs": 64.384325,
+            "changePercent": 4.422189717761271
+          },
+          {
+            "round": 11,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 72.089996,
+            "controlMs": 71.913383,
+            "changePercent": 0.2455912830578555
+          }
+        ],
+        "pairedMedianPercent": 6.682806509831651,
+        "equalWorkPercent": 6.988912451769558,
+        "fasterPairs": 2
+      },
+      "B-first-free-fifo/C-rotation-control": {
+        "pairs": [
+          {
+            "round": 0,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 90.446585,
+            "controlMs": 94.084544,
+            "changePercent": -3.866691430209823
+          },
+          {
+            "round": 1,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 93.097402,
+            "controlMs": 86.601471,
+            "changePercent": 7.50094764556597
+          },
+          {
+            "round": 2,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 110.408447,
+            "controlMs": 88.633934,
+            "changePercent": 24.566790637996494
+          },
+          {
+            "round": 3,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 79.642455,
+            "controlMs": 85.7417,
+            "changePercent": -7.113510695495884
+          },
+          {
+            "round": 4,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 67.074622,
+            "controlMs": 87.133523,
+            "changePercent": -23.02087682142726
+          },
+          {
+            "round": 5,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 68.197124,
+            "controlMs": 63.659059,
+            "changePercent": 7.12870260931755
+          },
+          {
+            "round": 6,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 66.681687,
+            "controlMs": 64.497612,
+            "changePercent": 3.386288162110551
+          },
+          {
+            "round": 7,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 68.194443,
+            "controlMs": 65.447754,
+            "changePercent": 4.196765866098318
+          },
+          {
+            "round": 8,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 71.817638,
+            "controlMs": 64.848802,
+            "changePercent": 10.746283331494698
+          },
+          {
+            "round": 9,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 77.16949,
+            "controlMs": 63.278408,
+            "changePercent": 21.952325349272385
+          },
+          {
+            "round": 10,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 67.231522,
+            "controlMs": 65.80693,
+            "changePercent": 2.1648054391840033
+          },
+          {
+            "round": 11,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 72.089996,
+            "controlMs": 65.531692,
+            "changePercent": 10.007835598079762
+          }
+        ],
+        "pairedMedianPercent": 5.662734237707934,
+        "equalWorkPercent": 4.1089470014596285,
+        "fasterPairs": 3
+      },
+      "C-rotation-control/A-rotation": {
+        "pairs": [
+          {
+            "round": 0,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 94.084544,
+            "controlMs": 90.875762,
+            "changePercent": 3.530954711554446
+          },
+          {
+            "round": 1,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 86.601471,
+            "controlMs": 84.939667,
+            "changePercent": 1.956452219196958
+          },
+          {
+            "round": 2,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 88.633934,
+            "controlMs": 93.781009,
+            "changePercent": -5.488397976183002
+          },
+          {
+            "round": 3,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 85.7417,
+            "controlMs": 87.072064,
+            "changePercent": -1.5278884396262904
+          },
+          {
+            "round": 4,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 87.133523,
+            "controlMs": 63.956737,
+            "changePercent": 36.238224598606394
+          },
+          {
+            "round": 5,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 63.659059,
+            "controlMs": 61.692029,
+            "changePercent": 3.1884670222144917
+          },
+          {
+            "round": 6,
+            "order": [
+              "A-rotation",
+              "B-first-free-fifo",
+              "C-rotation-control"
+            ],
+            "candidateMs": 64.497612,
+            "controlMs": 63.598628,
+            "changePercent": 1.4135273484201738
+          },
+          {
+            "round": 7,
+            "order": [
+              "B-first-free-fifo",
+              "C-rotation-control",
+              "A-rotation"
+            ],
+            "candidateMs": 65.447754,
+            "controlMs": 62.857454,
+            "changePercent": 4.120911419670303
+          },
+          {
+            "round": 8,
+            "order": [
+              "C-rotation-control",
+              "A-rotation",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 64.848802,
+            "controlMs": 62.674652,
+            "changePercent": 3.4689462655492775
+          },
+          {
+            "round": 9,
+            "order": [
+              "A-rotation",
+              "C-rotation-control",
+              "B-first-free-fifo"
+            ],
+            "candidateMs": 63.278408,
+            "controlMs": 63.420647,
+            "changePercent": -0.2242786958638332
+          },
+          {
+            "round": 10,
+            "order": [
+              "C-rotation-control",
+              "B-first-free-fifo",
+              "A-rotation"
+            ],
+            "candidateMs": 65.80693,
+            "controlMs": 64.384325,
+            "changePercent": 2.2095517814312515
+          },
+          {
+            "round": 11,
+            "order": [
+              "B-first-free-fifo",
+              "A-rotation",
+              "C-rotation-control"
+            ],
+            "candidateMs": 65.531692,
+            "controlMs": 71.913383,
+            "changePercent": -8.874135430396857
+          }
+        ],
+        "pairedMedianPercent": 2.0830020003141048,
+        "equalWorkPercent": 2.766299663245597,
+        "fasterPairs": 4
+      }
+    },
+    "limitations": [
+      "A Node transport scheduling component, not a production implementation or browser import benchmark.",
+      "Worker service intervals are event-loop wall times and can include host scheduling delays.",
+      "FIFO dispatch returns through the main event loop; its transport cost is included.",
+      "Per-group production envelope metrics still describe logical pool assignments, so physical-worker receipts are separate.",
+      "Two failed local process attempts are retained separately and are never pooled into this hosted cohort."
+    ]
+  }
+}
