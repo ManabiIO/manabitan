@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "purpose": "Audit and retain ORIGINAL fixed observations only; no parser/import/timing replay.",
+  "workflow": ".github/workflows/frozen-import-artifact-audit-beb5.yml",
+  "workflowSha256": "62ae5ba895f123d22d54ff10ff818a9c5da39de6aa8491926f353b608203e963",
+  "auditFileSha256": {
+    "acquire-and-audit.py": "4f990783228a32509de5fd1a9f2225c2367a8076175c213ea6a5923888dd3301",
+    "audit-recent-first.py": "be9161739f695316b5e26a2815642718e20439b0df9ad8f8a760a2893c2d34f6",
+    "verify-prefix-known-answer.py": "62dbe1176f7c577f156419a82b0a8dc7a42f4eafd2f2d02c70e74f012d49532f",
+    "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
+    "README.md": "ae9781859723505f086648f0fee97116faf09aab6f949a7e66d8368f087d5a76"
+  },
+  "studies": {
+    "canonical": {
+      "kind": "canonical",
+      "runId": 46112170828,
+      "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "sourceTree": "002e46ab6976eeb6b366b04ce67ef57c467bb47d",
+      "auditorPath": "dev/perf/canonical-sidecar-acquisition-20261128-beb5/audit-canonical-sidecar-browser.py",
+      "auditorSha256": "8422368e7e720d5ba0165b47054612cf20ca01c766377a97d8321bab0f33a656",
+      "runtimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a"
+    },
+    "prefix": {
+      "kind": "prefix",
+      "runId": 46114428610,
+      "sourceCommit": "633761548509a77b43b414b83a80033e17ed7399",
+      "sourceTree": "db21a53519b602b29234cb535cc59cead5118494",
+      "runtimeCommit": "1a935bddf29c4d87606d2facd4b168af7e1a40f1",
+      "scope": "New reconstructed auditor; must pass the separate original-prefix known-answer check before a recent-first result is accepted. No recent-first artifact is registered before it exists.",
+      "knownAnswer": null
+    }
+  },
+  "entries": {
+    "canonical-jmdict": {
+      "study": "canonical",
+      "dictionary": "jmdict",
+      "artifactId": 15252673899,
+      "artifactName": "canonical-sidecar-browser-beb5-jmdict-AB",
+      "artifactBytes": 35634582,
+      "artifactSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+      "jobId": 140877908946,
+      "jobName": "Canonical checksum imports (jmdict, 12 pairs)"
+    },
+    "canonical-jitendex": {
+      "study": "canonical",
+      "dictionary": "jitendex",
+      "artifactId": 15252164797,
+      "artifactName": "canonical-sidecar-browser-beb5-jitendex-AB",
+      "artifactBytes": 35784231,
+      "artifactSha256": "3283503cb9b05e7b67ca5df7f07bf50e6c2f066e78b1067195c75cee7275f19e",
+      "jobId": 140877908866,
+      "jobName": "Canonical checksum imports (jitendex, 12 pairs)"
+    }
+  },
+  "permissions": {
+    "actions": "read",
+    "contents": "write",
+    "writeBoundary": "POST /repos/ManabiIO/manabitan/git/blobs only; no branch, ref, commit, PR, workflow or original artifact mutation."
+  },
+  "retention": "Full original downloaded ZIPs remain in this audit's Actions artifact. Durable Git blobs retain prefix ZIPs verbatim. Canonical durable archives omit only exact package-A.zip/package-B.zip bytes, retaining complete original-member census, original outer digest, original observation bytes, audit reports, and an explicit omission manifest.",
+  "execution": "Ubuntu24.04 standard-library Python analysis only. Fixed-source auditors and artifact checksums bind inputs. Matrix fail-fast is false; failed memory or qualification gates do not stop other artifact audits. New code has not been locally executed while the executor is unavailable.",
+  "knownAnswerDerivedTolerances": {
+    "milliseconds": 1e-9,
+    "percentagePoints": 1e-10,
+    "rawReceiptValues": "exact"
+  }
+}
