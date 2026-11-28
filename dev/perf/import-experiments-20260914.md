@@ -733,3 +733,54 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+## 2026-11-28: composite string-window screen (5a86)
+
+**Disposition: no replicated complete-import gain; no performance PR or repeat acquisition for this unchanged candidate.** This study keeps a 16-byte SIMD classification window within one native composite JSON parse, allowing later string tokens to reuse its quote, backslash and control-byte mask. It changes neither grammar, dictionary settings, parser admission, worker counts, storage format nor cache budgets.
+
+The frozen acquisition source is `2cdcc90241fa19221b7fc4e5d793eb70896c3258`, tree `df0f1f9fc77d931381a9f687f4e9bb0c4a225d1d`, against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. The candidate parser WASM is `6b327b4b5c85a973b1e2344276bb5476b6d036b197d87ab03b2a930ed50059eb`, 67,892 bytes, 233 bytes larger than baseline. Only the packaged native C source and parser WASM differ. This preservation follow-up changes no runtime, test, workflow or acquisition observer.
+
+### Complete browser results
+
+[Original run 46104027586](https://github.com/ManabiIO/manabitan/actions/runs/46104027586) contains six independent dictionary/order cells. Each uses the unchanged `a7f7` qualifier: four warmups, six alternating A/B pairs, two interleaved identical-source A/C pairs, two separate exhaustive-media imports, and four separate memory observations. All **156 prescribed imports and 2,157 raw process-tree scans** independently reconcile. The results below use the file-input event through the post-UI import-complete signal, with a fresh profile for every observation, default flags, Node 22.22.0 and lockfile Chromium 153.0.8010.12. The observed parser policies remain three workers and 12, 22 and 170 groups for JMdict, Jitendex and VNDB respectively; VNDB retains its explicitly registered 37..37 allocation-unit range.
+
+Changes below are candidate/baseline percentages; negative values are faster. Each interval is the original descriptive paired-median bootstrap with 10,000 complete-pair resamples and seed 897. Hosts remain separate, and control changes are not subtracted.
+
+| Dictionary / initial order | Paired median | Equal-work total | Descriptive interval | Faster pairs | A/C control median | Memory gate |
+| -------------------------- | ------------: | ---------------: | -------------------: | -----------: | -----------------: | ----------- |
+| JMdict AB | -0.5599% | -0.2754% | -4.9094% to +4.8695% | 3/6 | -0.6970% | Pass |
+| JMdict BA | +1.3236% | +3.5246% | -1.7084% to +11.2808% | 2/6 | -0.4291% | Pass |
+| Jitendex AB | -0.2966% | -0.7198% | -2.5745% to +0.7733% | 4/6 | -0.2982% | Pass |
+| Jitendex BA | -0.6775% | -1.3841% | -7.0619% to +4.4694% | 4/6 | -0.7752% | Pass |
+| VNDB AB | +0.3202% | +0.5035% | -1.3194% to +2.5363% | 2/6 | -0.7135% | Pass |
+| VNDB BA | -0.4992% | -1.8285% | -5.9570% to +1.3249% | 3/6 | +0.2169% | Failed coverage |
+
+Every timing interval crosses zero. JMdict's BA cohort includes a +19.8734% slower pair; that tail remains in the full six-pair statistics. The small negative Jitendex medians occur alongside similarly negative identical-source controls. These observations do not establish a useful improvement for review.
+
+**VNDB BA remains a failed candidate qualification despite a passing evidence audit.** Its B1, A2 and B2 memory observations have covered gaps of 264.812796, 260.551545 and 258.357411 ms, exceeding the unchanged 250 ms bound. Only A1 qualifies. There are no qualified memory pairs, and aggregate memory effects remain null. All 26 semantic receipts still pass. No observation was replaced, no interval was widened, and no memory threshold changed. The other five cells pass the original coverage and sampled PSS/private-memory bounds; a passed bound is not a memory-reduction claim.
+
+The browser receipts sample lexical results and separately verify every media payload. [The independent three-dictionary corpus proof](https://github.com/ManabiIO/manabitan/commit/05a829b3fa88bac31cb4956104356fd393e0facc) preserves complete group-level row/content/index digest parity for baseline, this candidate and the separate suffix candidate; it is not a timing study. [The untimed scanner/bytecode diagnostic](https://github.com/ManabiIO/manabitan/commit/328498db937ae6274b24b35f140545c23035cf91) confirms that the intended reuse occurs, but its source-operation counts do not establish speed, instruction counts or memory traffic. The cache fields compile to WASM locals, so the proposed store-elision follow-up was held.
+
+### Source gates and durable verification
+
+The exact hosted source gate passed 32 observer tests, the complete unit suite (**15,139 passed, 47 skipped, 669 files**), scoped ESLint for the changed test, JSON formatting, all seven dry-run build targets, and checked-in native artifact reproduction with Clang/LLD 21.1.8. **There was no TypeScript invocation in this hosted gate.** An earlier conversational summary conflated another study's test-project type check; it is not claimed here, and no optional run was added to the negative experiment.
+
+The [compact evidence](composite-window-5a86/hosted/hosted-evidence.json.txt) and [manifest](composite-window-5a86/hosted/manifest.json.txt) preserve all 1,206 non-package members of the six original browser artifacts byte-for-byte, the full original validation ZIP and logs, original artifact metadata and every member's length/hash/CRC, independent audits, original package entry inventories, and exact packaged native C/WASM bytes. Raw Git commit/tree/blob proofs bind the selected source paths to the two frozen revisions without a repository checkout or network access. The original local component evidence remains in the frozen source and retained proof objects.
+
+The only omitted members of the six browser artifacts are their twelve original product package ZIP payloads. They were fully verified before omission, and their archive hashes and complete entry inventories are retained. **The compact pack cannot reconstruct or independently rehash those omitted original ZIP bytes.** Supply the original artifact ZIPs to repeat that part of verification. The compact pack still independently rechecks every retained byte, all canonical receipts against raw reports, exact source/runtime/fixture/default-flag identities, registered schedules, post-UI timers, all raw memory scans, separate controls and complete-pair statistics. Its passing result means the retained evidence verifies, including the failed VNDB BA memory qualification.
+
+The [portable auditor](verify-composite-window-hosted-5a86.py) needs only Python's standard library. It extracts about 135 MB, so select an existing temporary directory with sufficient free space:
+
+```sh
+TMPDIR=/path/to/scratch python3 dev/perf/verify-composite-window-hosted-5a86.py
+```
+
+For the additional full-originals check, place the six original browser artifacts in a directory named `jmdict-AB.zip`, `jmdict-BA.zip`, `jitendex-AB.zip`, `jitendex-BA.zip`, `vndb-AB.zip` and `vndb-BA.zip`, together with `validation.zip`, then run:
+
+```sh
+TMPDIR=/path/to/scratch python3 dev/perf/verify-composite-window-hosted-5a86.py \
+  --original-artifacts /path/to/original-artifacts
+```
+
+Both modes pass after fresh extraction. Preparation history retains the initial regular-file-mode and fixture-subset assumptions, their corrections, and the earlier portable checker that incorrectly required every memory gate to pass. The final checker restores the original conditional status/exit rule and verifies failed qualifications without promoting them. Fourteen semantic rejection checks and the independent review's additional source/memory mutations reject; optimized Python is also rejected. These are preservation checks, with no new import or timing acquisition.
+
