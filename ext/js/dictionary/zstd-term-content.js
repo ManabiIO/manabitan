@@ -92,14 +92,17 @@ function validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, b
     }
 }
 
+/* eslint-disable @stylistic/semi */
 export class TermContentCompressionPool {
     /** @param {Worker[]} workers */
     constructor(workers) {
         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
         /** @type {Worker[]} */
         this._workers = workers;
-        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>}>} */
+        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, deadline: number}>} */
         this._pending = new Map();
+        /** @type {{timeoutId: ReturnType<typeof setTimeout>|null}|null} */
+        this._watchdog = null
         /** @type {number} */
         this._nextId = 1;
         /** @type {boolean} */
@@ -378,21 +381,65 @@ export class TermContentCompressionPool {
             null;
         /** @type {Promise<{bytes: Uint8Array, envelopeMs: number}>} */
         const completion = new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`));
-            }, COMPRESSION_JOB_TIMEOUT_MS);
-            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
+            const deadline = safePerformance.now() + COMPRESSION_JOB_TIMEOUT_MS
+            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, deadline})
             try {
+                if (this._watchdog === null) { this._armWatchdog(deadline) }
                 this._workers[workerIndex].postMessage({id, ...message}, transfer);
             } catch (error) {
-                clearTimeout(timeoutId);
                 this._pending.delete(id);
+                if (this._pending.size === 0) { this._cancelWatchdog() }
                 rejectSourceConsumed?.(error);
                 reject(error);
             }
         });
         if (sourceConsumed !== null) { void sourceConsumed.catch(() => {}); }
         return {sourceConsumed, completion};
+    }
+
+    /**
+     * @param {number} deadline
+     * @throws {unknown} If the timer cannot be created.
+     */
+    _armWatchdog(deadline) {
+        /** @type {{timeoutId: ReturnType<typeof setTimeout>|null}} */
+        const watchdog = {timeoutId: null}
+        this._watchdog = watchdog
+        try {
+            watchdog.timeoutId = setTimeout(() => { this._onWatchdog(watchdog) }, Math.max(0, deadline - safePerformance.now()))
+        } catch (error) {
+            if (this._watchdog === watchdog) { this._watchdog = null }
+            throw error
+        }
+    }
+
+    /** @param {{timeoutId: ReturnType<typeof setTimeout>|null}} watchdog */
+    _onWatchdog(watchdog) {
+        if (this._watchdog !== watchdog || this._failed) { return }
+        this._watchdog = null
+        let earliestDeadline = Infinity
+        for (const {deadline} of this._pending.values()) {
+            earliestDeadline = Math.min(earliestDeadline, deadline)
+        }
+        if (earliestDeadline === Infinity) { return }
+        if (earliestDeadline <= safePerformance.now()) {
+            this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`))
+            return
+        }
+        // Keep an earlier wakeup after its original job finishes. Inspect the
+        // surviving dispatch deadlines only when it fires, without renewing them.
+        try {
+            this._armWatchdog(earliestDeadline)
+        } catch (error) {
+            this._fail(error instanceof Error ? error : new Error(String(error)))
+        }
+    }
+
+    /** */
+    _cancelWatchdog() {
+        const watchdog = this._watchdog
+        this._watchdog = null
+        if (watchdog !== null && watchdog.timeoutId !== null) { clearTimeout(watchdog.timeoutId) }
     }
 
     /** */
@@ -415,7 +462,7 @@ export class TermContentCompressionPool {
             return;
         }
         this._pending.delete(id);
-        clearTimeout(pending.timeoutId);
+        if (this._pending.size === 0) { this._cancelWatchdog() }
         if (typeof data.error === 'string') {
             const error = new Error(data.error);
             if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error); }
@@ -442,16 +489,17 @@ export class TermContentCompressionPool {
     _fail(error) {
         if (this._failed) { return; }
         this._failed = true;
+        this._cancelWatchdog()
         for (const worker of this._workers) { worker.terminate(); }
         this._workers = [];
-        for (const {reject, rejectSourceConsumed, sourceConsumedSettled, timeoutId} of this._pending.values()) {
-            clearTimeout(timeoutId);
+        for (const {reject, rejectSourceConsumed, sourceConsumedSettled} of this._pending.values()) {
             if (!sourceConsumedSettled) { rejectSourceConsumed?.(error); }
             reject(error);
         }
         this._pending.clear();
     }
 }
+/* eslint-enable @stylistic/semi */
 
 /* eslint-disable @stylistic/semi */
 /**

@@ -1,0 +1,137 @@
+name: Compression watchdog import screen 20261128
+
+on:
+  push:
+    branches: [perf/compression-watchdog-20261128]
+    paths:
+      - 'ext/js/dictionary/zstd-term-content.js'
+      - 'test/zstd-term-content-watchdog.test.js'
+      - 'dev/perf/compression-watchdog-20261128/**'
+      - '.github/workflows/import-compression-watchdog-1c413.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compression-watchdog-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: ${{ github.sha }}
+
+jobs:
+  correctness:
+    name: Unit tests, main and test types, lint, and dry build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify the frozen source and unchanged qualification boundary
+        run: |
+          python dev/perf/compression-watchdog-20261128/verify-source.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --output builds/perf/compression-watchdog-validation/source-proof.json
+      - name: Changed-source lint
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/compression-watchdog-validation
+          npx eslint ext/js/dictionary/zstd-term-content.js test/zstd-term-content-watchdog.test.js 2>&1 | tee builds/perf/compression-watchdog-validation/lint.log
+      - name: Complete unit suite
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/compression-watchdog-validation
+          npm run test:unit 2>&1 | tee builds/perf/compression-watchdog-validation/unit.log
+      - name: Main source type validation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/compression-watchdog-validation
+          npm run test:ts:main 2>&1 | tee builds/perf/compression-watchdog-validation/types-main.log
+      - name: Test type validation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/compression-watchdog-validation
+          npm run test:ts:test 2>&1 | tee builds/perf/compression-watchdog-validation/types-test.log
+      - name: All-target dry build
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/compression-watchdog-validation
+          npm run test:build 2>&1 | tee builds/perf/compression-watchdog-validation/dry-build.log
+      - name: Preserve all correctness results and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compression-watchdog-validation-${{ github.sha }}
+          path: builds/perf/compression-watchdog-validation
+          if-no-files-found: error
+          retention-days: 14
+
+  compare:
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            initial_order: AB
+          - dictionary: jitendex
+            initial_order: BA
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_INITIAL_ORDER: ${{ matrix.initial_order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify the frozen source and unchanged qualification boundary
+        run: |
+          python dev/perf/compression-watchdog-20261128/verify-source.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --output builds/perf/compression-watchdog-source-proof.json
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the frozen screen and separate media and memory verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_INITIAL_ORDER" \
+            --pairs 12 \
+            --expected-package-entry js/dictionary/zstd-term-content.js \
+            --evidence builds/perf/compression-watchdog-comparison
+      - name: Preserve every observation, package, and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compression-watchdog-${{ matrix.dictionary }}-${{ matrix.initial_order }}-${{ github.sha }}
+          path: |
+            builds/perf/compression-watchdog-comparison
+            builds/perf/compression-watchdog-source-proof.json
+          if-no-files-found: error
+          retention-days: 14
