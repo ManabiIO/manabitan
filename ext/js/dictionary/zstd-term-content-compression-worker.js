@@ -28,8 +28,26 @@ void initialization.then(
 );
 
 self.addEventListener('message', (event) => {
+    const rawData = /** @type {unknown} */ (event.data);
+    const data = /** @type {{type?: unknown, port?: unknown}|null} */ (rawData);
+    if (data?.type === 'connect-import-index' && data.port instanceof MessagePort) {
+        void connectImportIndex(data.port);
+        return;
+    }
     void compressContent(event);
 });
+
+/** @param {MessagePort} port */
+async function connectImportIndex(port) {
+    try {
+        const {attachImportIndexWorkerServer} = await import('./term-record-import-index-worker-server.js');
+        attachImportIndexWorkerServer(port, () => { port.close(); });
+        port.start();
+    } catch (_) {
+        port.postMessage({type: 'initialization-error'});
+        port.close();
+    }
+}
 
 /** @param {MessageEvent} event */
 async function compressContent(event) {

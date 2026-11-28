@@ -104,6 +104,8 @@ export class TermContentCompressionPool {
         this._nextId = 1;
         /** @type {boolean} */
         this._failed = false;
+        /** @type {Set<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient>} */
+        this._indexClients = new Set();
         for (const worker of workers) {
             worker.addEventListener('message', (event) => { this._onMessage(event); });
             worker.addEventListener('error', (event) => {
@@ -117,6 +119,41 @@ export class TermContentCompressionPool {
 
     /** @returns {boolean} */
     get failed() { return this._failed; }
+
+    /**
+     * Lends one already-running worker a private import session. No file handle
+     * is sent until this endpoint is ready; startup failure can retain local I/O.
+     * @returns {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>}
+     */
+    async createImportIndexClient() {
+        if (this._failed || typeof MessageChannel !== 'function') { return null; }
+        let module;
+        try {
+            module = await import('./term-record-import-index-worker-client.js');
+        } catch (_) { return null; }
+        if (this._failed) { return null; }
+        let channel;
+        try {
+            channel = new MessageChannel();
+        } catch (_) { return null; }
+        const client = new module.ImportIndexWorkerClient(channel.port1, {
+            fail: (error) => { this._fail(error); },
+            release: () => { this._indexClients.delete(client); },
+        });
+        this._indexClients.add(client);
+        try {
+            this._workers[0].postMessage({type: 'connect-import-index', port: channel.port2}, [channel.port2]);
+            await client.ready;
+            if (this._failed) { return null; }
+            return client;
+        } catch (error) {
+            // Even an idle lease must observe pool death. A later replacement
+            // pool cannot reacquire a sidecar already mutated by this session.
+            this._fail(error instanceof Error ? error : new Error(String(error)));
+            channel.port2.close();
+            return null;
+        }
+    }
 
     /**
      * @param {Uint8Array[]} contents
@@ -442,15 +479,36 @@ export class TermContentCompressionPool {
     _fail(error) {
         if (this._failed) { return; }
         this._failed = true;
-        for (const worker of this._workers) { worker.terminate(); }
+        const workers = this._workers;
         this._workers = [];
+        const failures = [error];
+        for (const worker of workers) {
+            try { worker.terminate(); } catch (error_) {
+                failures.push(error_ instanceof Error ? error_ : new Error(String(error_)));
+            }
+        }
+        const ownerFailure = failures.length === 1 ?
+            error :
+            new AggregateError(failures, 'Failed to retire compression workers');
+        for (const client of this._indexClients) { client.failFromOwner(ownerFailure); }
+        this._indexClients.clear();
         for (const {reject, rejectSourceConsumed, sourceConsumedSettled, timeoutId} of this._pending.values()) {
             clearTimeout(timeoutId);
-            if (!sourceConsumedSettled) { rejectSourceConsumed?.(error); }
-            reject(error);
+            if (!sourceConsumedSettled) { rejectSourceConsumed?.(ownerFailure); }
+            reject(ownerFailure);
         }
         this._pending.clear();
     }
+}
+
+/**
+ * Borrow only a healthy pool which already completed ordinary compression
+ * startup. This lookup path must never start or wait for another worker pool.
+ * @returns {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>}
+ */
+export async function createImportIndexClientFromReadyCompressionPool() {
+    const pool = compressionPool;
+    return pool === null || pool.failed ? null : await pool.createImportIndexClient();
 }
 
 /* eslint-disable @stylistic/semi */

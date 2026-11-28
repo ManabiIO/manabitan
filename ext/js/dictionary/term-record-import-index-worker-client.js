@@ -21,6 +21,10 @@ const READY_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 60_000;
 
 /**
+ * @typedef {{fail: (error: Error) => void, release: () => void}} ImportIndexWorkerOwner
+ */
+
+/**
  * @typedef {{id: number, name?: string, message?: string, stack?: string, errors?: SerializedIndexError[]}} SerializedIndexError
  */
 
@@ -103,17 +107,26 @@ export async function createImportIndexWorkerClient() {
         await client.ready;
         return client;
     } catch (_) {
-        client?.dispose();
+        await client?.dispose();
         return null;
     }
 }
 
-/** One import session owns this worker and every fresh sidecar opened in it. */
+/** One import session owns this endpoint and every fresh sidecar opened in it. */
 export class ImportIndexWorkerClient {
-    /** @param {Worker} worker */
-    constructor(worker) {
-        /** @type {Worker} */
+    /**
+     * @param {Worker|MessagePort} worker
+     * @param {ImportIndexWorkerOwner|null} [owner]
+     */
+    constructor(worker, owner = null) {
+        /** @type {Worker|MessagePort} */
         this._worker = worker;
+        /** @type {ImportIndexWorkerOwner|null} */
+        this._owner = owner;
+        /** @type {Promise<void>|null} */
+        this._disposePromise = null;
+        /** @type {boolean} */
+        this._disposing = false;
         /** @type {number} */
         this._nextRequestId = 1;
         /** @type {number} */
@@ -138,13 +151,14 @@ export class ImportIndexWorkerClient {
         this._readyTimeout = setTimeout(() => {
             this._fail(new Error('Import index worker startup timed out'));
         }, READY_TIMEOUT_MS);
-        worker.addEventListener('message', (event) => { this._onMessage(event); });
+        worker.addEventListener('message', (event) => { this._onMessage(/** @type {MessageEvent<unknown>} */ (event)); });
         worker.addEventListener('error', (event) => {
-            this._fail(new Error(event.message || 'Import index worker failed'));
+            this._fail(new Error(('message' in event && typeof event.message === 'string' && event.message) || 'Import index worker failed'));
         });
         worker.addEventListener('messageerror', () => {
             this._fail(new Error('Import index worker returned an invalid message'));
         });
+        if ('start' in worker) { worker.start(); }
     }
 
     /**
@@ -175,6 +189,9 @@ export class ImportIndexWorkerClient {
      */
     request(writerId, action, params = {}, transfer = []) {
         if (this._failure !== null) { return Promise.reject(this._failure); }
+        if (this._disposing && action !== 'dispose') {
+            return Promise.reject(new Error('Import index client is closing'));
+        }
         const id = this._nextRequestId++;
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -193,9 +210,42 @@ export class ImportIndexWorkerClient {
      * Called only after store finalization/rollback has joined all writers.
      * Transport failure still reaches checkpoint restoration; termination is
      * never used as proof that a mutated file was successfully published.
+     * @returns {Promise<void>}
      */
     dispose() {
-        this._fail(new Error('Import index worker closed'));
+        if (this._disposePromise !== null) { return this._disposePromise; }
+        this._disposing = true;
+        if (this._owner === null) {
+            this._fail(new Error('Import index worker closed'));
+            this._disposePromise = Promise.resolve();
+        } else {
+            this._disposePromise = (async () => {
+                if (this._failure !== null) { throw this._failure; }
+                try {
+                    if (this._pending.size > 0) {
+                        throw new Error('Cannot dispose an active import index client');
+                    }
+                    const status = await this.request(0, 'dispose');
+                    if (status !== 'disposed') {
+                        throw new Error('Import index session returned invalid disposal status');
+                    }
+                    this._failure = new Error('Import index worker closed');
+                    this._releaseOwner();
+                } catch (error) {
+                    this._fail(toError(error));
+                    throw this._failure ?? toError(error);
+                }
+            })();
+            // Callers which previously disposed a dedicated worker synchronously
+            // still cannot leave an unhandled rejection during failure cleanup.
+            void this._disposePromise.catch(() => {});
+        }
+        return this._disposePromise;
+    }
+
+    /** @param {Error} error */
+    failFromOwner(error) {
+        this._fail(error, false);
     }
 
     /** @param {MessageEvent<unknown>} event */
@@ -211,6 +261,10 @@ export class ImportIndexWorkerClient {
             this._resolveReady();
             return;
         }
+        if (data.type === 'initialization-error') {
+            this._fail(new Error('Import index session initialization failed'));
+            return;
+        }
         const pending = typeof data.id === 'number' ? this._pending.get(data.id) : void 0;
         if (typeof pending === 'undefined') {
             this._fail(new Error('Import index worker returned an unknown response'));
@@ -220,7 +274,12 @@ export class ImportIndexWorkerClient {
         clearTimeout(pending.timeout);
         if (typeof data.error !== 'undefined') {
             try {
-                pending.reject(deserializeImportIndexWorkerError(data.error, this._errors));
+                const error = deserializeImportIndexWorkerError(data.error, this._errors);
+                pending.reject(error);
+                // Failed acquisition/close may leave a handle outside the
+                // server's writer map. A dedicated worker is later terminated;
+                // a borrowed endpoint must retire its owner now as well.
+                if (this._owner !== null) { this._fail(error); }
             } catch (error) {
                 const failure = toError(error);
                 pending.reject(failure);
@@ -231,18 +290,55 @@ export class ImportIndexWorkerClient {
         }
     }
 
-    /** @param {Error} error */
-    _fail(error) {
+    /**
+     * @param {Error} error
+     * @param {boolean} [notifyOwner]
+     */
+    _fail(error, notifyOwner = true) {
         if (this._failure !== null) { return; }
         this._failure = error;
         clearTimeout(this._readyTimeout);
         this._rejectReady(error);
-        this._worker.terminate();
+        const failures = [error];
+        if (this._owner === null) {
+            try {
+                if ('terminate' in this._worker) { this._worker.terminate(); }
+            } catch (error_) {
+                failures.push(toError(error_));
+            }
+        } else {
+            // Closing a MessagePort alone does not release a live synchronous
+            // file handle. Ambiguous transport failure invalidates its owner.
+            try {
+                if (notifyOwner) { this._owner.fail(error); }
+            } catch (error_) {
+                failures.push(toError(error_));
+            }
+            try {
+                this._releaseOwner();
+            } catch (error_) {
+                failures.push(toError(error_));
+            }
+        }
+        if (failures.length > 1) {
+            this._failure = new AggregateError(failures, 'Failed to retire import index transport');
+        }
         for (const {reject, timeout} of this._pending.values()) {
             clearTimeout(timeout);
-            reject(error);
+            reject(this._failure);
         }
         this._pending.clear();
+    }
+
+    /** Releases only this session after acknowledged close, or owner death. */
+    _releaseOwner() {
+        const owner = this._owner;
+        this._owner = null;
+        try {
+            if ('close' in this._worker) { this._worker.close(); }
+        } finally {
+            owner?.release();
+        }
     }
 }
 

@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {createImportIndexClientFromReadyCompressionPool} from './zstd-term-content.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -1476,7 +1477,15 @@ export class TermRecordOpfsStore {
                 // Checkpoint restoration validates the committed sidecar bytes below.
             }
         }
-        await this._retireImportIndexWorker();
+        try {
+            await this._retireImportIndexWorker();
+        } catch (error) {
+            // A failed borrowed transport has already invalidated its owner and
+            // released its handles. Restore and verify checkpoint files below.
+            reportDiagnostics('term-record-store-rollback-worker-retirement-error', {
+                error: toError(error).message,
+            });
+        }
         this._invalidateAllPersistentLookupState();
     }
 
@@ -6449,6 +6458,21 @@ view.chunks :
                     }
                 }
             }
+            if (
+                this._rawTermBankSourceBytes !== null &&
+                this._rawTermBankSourceBytes < MIN_INDEX_WORKER_SOURCE_BYTES &&
+                (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
+            ) {
+                this._importIndexWorkerPromise ??= createImportIndexClientFromReadyCompressionPool();
+                const worker = await this._importIndexWorkerPromise;
+                if (worker !== null) {
+                    const writer = await worker.open(fileHandle);
+                    if (writer !== null) {
+                        ++this._lookupIndexWriteMetrics.workerFileCount;
+                        return writer;
+                    }
+                }
+            }
             const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
             if (writer !== null) { return writer; }
         }
@@ -6470,7 +6494,7 @@ view.chunks :
     async _retireImportIndexWorker() {
         const promise = this._importIndexWorkerPromise;
         this._importIndexWorkerPromise = null;
-        if (promise !== null) { (await promise)?.dispose(); }
+        if (promise !== null) { await (await promise)?.dispose(); }
     }
 
     /**
@@ -6538,7 +6562,12 @@ view.chunks :
                 );
             }
         }
-        await this._retireImportIndexWorker();
+        try {
+            await this._retireImportIndexWorker();
+        } catch (error) {
+            const failure = toError(error);
+            if (!errors.includes(failure)) { errors.push(failure); }
+        }
         if (errors.length === 1) {
             throw errors[0];
         }
