@@ -1,0 +1,654 @@
+{
+  "format": 1,
+  "study": "Indexed Uint16 compact-score validator restoration",
+  "scope": "Actual numeric-input component gain; enclosing sink inconclusive; browser qualification pending",
+  "sourceBindings": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidateRemote": "915268441352c3c7aa50fc0fbd44f73f5a826d79",
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    }
+  },
+  "memberPathBase": "Original workspace-relative path; contents are byte-for-byte unchanged",
+  "archiveMetadata": "gzip timestamp, tar ownership and file timestamps normalized; payload paths and contents preserved",
+  "manifestPlacement": "External to archive so every archive member, without a self-hash exception, has a digest",
+  "spec": {
+    "path": "evidence/durable-bundles/score-restoration/bundle-spec.json",
+    "sha256": "d67b3c675916a4ed944094274c7146c716ab20273647b7f20a455215c51cbef4"
+  },
+  "archive": {
+    "file": "score-restoration-evidence-20261128-1b47.tar.gz",
+    "bytes": 1988652,
+    "sha256": "56e214cf9107725113593c25eb290e36c390b02bf51e169e2632a3726a518841"
+  },
+  "totalPayloadBytes": 7915180,
+  "members": [
+    {
+      "path": "evidence/durable-bundles/package-evidence.py",
+      "bytes": 5523,
+      "sha256": "af5b07fda5e53e0b62805c88aa56b863c4f8351be139a12ae6ccc7b16bf5e99c"
+    },
+    {
+      "path": "evidence/durable-bundles/score-restoration/README.md",
+      "bytes": 6372,
+      "sha256": "fa0fefa2a1ba3fc0539a22edd783a895f08a6c5bd73e75129fb06db812b0bd94"
+    },
+    {
+      "path": "evidence/durable-bundles/score-restoration/bundle-spec.json",
+      "bytes": 3386,
+      "sha256": "d67b3c675916a4ed944094274c7146c716ab20273647b7f20a455215c51cbef4"
+    },
+    {
+      "path": "evidence/durable-bundles/score-restoration/receipts/hosted-jobs.json",
+      "bytes": 6219,
+      "sha256": "823760b0392ef73c5d1a07b6d01e08861e82e8874ea3e1077c7007df995bbefe"
+    },
+    {
+      "path": "evidence/durable-bundles/score-restoration/receipts/hosted-run.json",
+      "bytes": 12163,
+      "sha256": "8b6e9e48fbaec3dcea801cd39c3d63efc6e39ee5f46d89a1b6cedb5cc8745d8b"
+    },
+    {
+      "path": "evidence/jmdict-score-validation-screen-1b47.yml",
+      "bytes": 8992,
+      "sha256": "57b242fcb2fc9f6e4056747506f6eb225b6af7bcdf9a79f0e3d24aa3a07cf676"
+    },
+    {
+      "path": "evidence/jmdict-typed-iterator-audit.md",
+      "bytes": 5784,
+      "sha256": "2fecc0b75f49dcfd9266d73a54ac8562aaa9f7dbae26cffbfb80fbdb5d31bfcb"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs.log",
+      "bytes": 13069,
+      "sha256": "c09e39778af43711d7415c21b5e4991bd24ab3071ca22218578c9013f9d1172c"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/inclusive-metric-analysis.json",
+      "bytes": 16680,
+      "sha256": "ea07625e61c644221230d280bc979d314bc245cde67c570d407935bce48e2c0f"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-01-A.json",
+      "bytes": 57014,
+      "sha256": "9e98ac6a8c57b67dd8dab45b1614bc95f4a717fa51bae8160e9a682def1a4ca1"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-01-A.log",
+      "bytes": 455,
+      "sha256": "61a742bd45944357940348b0bc6f33fce3f642ad323cca717e507285ec6b17bf"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-01-B.json",
+      "bytes": 57037,
+      "sha256": "be57fda8a852d7e7508b72719628cf9c5ec18caf28d0ad53b5f2779afe379a5c"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-01-B.log",
+      "bytes": 471,
+      "sha256": "939b6070878dee036897da4c6363cd9374a046bcd25db606fe3df9c58a34c764"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-02-A.json",
+      "bytes": 56994,
+      "sha256": "dff13a693a5cdedc4de128df4e3ec873d321552dba43f6d9e69f6d5961655fda"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-02-A.log",
+      "bytes": 454,
+      "sha256": "6c8233a1e9532aa23bb7581a158d16dc523e9bc781352b7d13fa5ea0158d059c"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-02-B.json",
+      "bytes": 57130,
+      "sha256": "aea1861d7484dcc185ec55bc234cf4782505f858b08958da44f219135f3a1ec0"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-02-B.log",
+      "bytes": 464,
+      "sha256": "6cb443367b5a9b2c7b6b592113781bb3ebf87e4dddef484e5b9f3bf9168bff5f"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-03-A.json",
+      "bytes": 57115,
+      "sha256": "1de1b0a25d8ec0c1461f9907d2aaf99b820035433f7da9a7381cb9a1c85f0a08"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-03-A.log",
+      "bytes": 464,
+      "sha256": "8b383d64a53e0b62a666121fa039d14ad890876d11c57ef32634d2902a84d3d2"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-03-B.json",
+      "bytes": 57108,
+      "sha256": "2a4829b3146ecbca7af480d78837606f3377b30df0fc3ca7d668ecd8d7c82317"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-03-B.log",
+      "bytes": 463,
+      "sha256": "68d5a083fcdf00999c37aca25d6bfa1705839728c5c83a62d8cc96bc1b860b35"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-04-A.json",
+      "bytes": 57071,
+      "sha256": "a9cc4af2c37f1ac4dea020a531f22bf3fc1a35f83b9b6d2e69f241fab9b0d7c5"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-04-A.log",
+      "bytes": 464,
+      "sha256": "5c5661225b37a57ee6dcd27ca667d60a0abd86d3fc41b43d832874f68127d5b1"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-04-B.json",
+      "bytes": 57235,
+      "sha256": "6cc369c208250141cec9a7da4dd48b00f12e1ee21df773934ccf6a2c33a243a3"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-04-B.log",
+      "bytes": 457,
+      "sha256": "6a97d63b4295a429f6277cb4db23a8009acd4b0c59ba2f4c83dc0ef8b60531e5"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-05-A.json",
+      "bytes": 57031,
+      "sha256": "afb2d030cce3385c4d905ecb093f43100f4e11a9271bd51b390556a188753b6a"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-05-A.log",
+      "bytes": 457,
+      "sha256": "058efe06cc6980da8acba1e4aff07e4dff59b1ceb3e54a3cb93cb05e1dcd45f6"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-05-B.json",
+      "bytes": 57191,
+      "sha256": "377fc7d5ed6f87bc557e11298930f19f9ca683ed8295cc684c03b07d30d384b1"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-05-B.log",
+      "bytes": 463,
+      "sha256": "f43f8a1cf8e7004414fe4732701f24cb6ffaee2e5c37446870c77e0f2d03cfbf"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-06-A.json",
+      "bytes": 57049,
+      "sha256": "5d5db19e0dedf6caf83cf777fda7be7d272415819ed3022c0d5e82b2865af98c"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-06-A.log",
+      "bytes": 457,
+      "sha256": "e2de73abdb4a5bba68afbfb15975759f7aaab489e33367adfb56fa17e467e1ec"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-06-B.json",
+      "bytes": 57057,
+      "sha256": "56ae4f018e30b223b3125db295a10a0861c8ab03666d609c4ec2227f19749826"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-06-B.log",
+      "bytes": 456,
+      "sha256": "512b9e7d40ea727f4dd09820dc6ef8ee14cfc0b9ebf25f44c478354db7be7cad"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-07-A.json",
+      "bytes": 56967,
+      "sha256": "324212394d2b72289f467a98af85cdbc744ac3ecb9fab5107ae333a25dedff4f"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-07-A.log",
+      "bytes": 450,
+      "sha256": "f6b84eed23baa565012a8efc47ad95cb82b27050998431d8fbcb327dda2a0c5a"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-07-B.json",
+      "bytes": 57189,
+      "sha256": "e5c9a7f6891db980174433d85fc8dcf0c0b32a4cc38fee245a82ef67b501f913"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-07-B.log",
+      "bytes": 456,
+      "sha256": "43a591cafc942db69531aeda4dfa8325a32966608e4b7460fee80871de744c9b"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-08-A.json",
+      "bytes": 57031,
+      "sha256": "948acf5b5d54d24496b34ec56c38c060b061f239e7f776119706b17e411e98ce"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-08-A.log",
+      "bytes": 464,
+      "sha256": "cece434ed3436bcac3d28e417a75a6a6f1f4ea91efde41b77874370a69494ec8"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-08-B.json",
+      "bytes": 57131,
+      "sha256": "58818c7fcac50c56ab2376a53e2560fdf7b239e7d278c464178f7bb436a1ac6a"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/pair-08-B.log",
+      "bytes": 456,
+      "sha256": "16694fc282015cf650dc22f8f45b62f6e994c8dd448791dda741a43f3969f9b5"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/summary.json",
+      "bytes": 10467,
+      "sha256": "9fe9086c622ae8634194b347a44e99b7afd2a7469c42964e6b67b1eea8ab206d"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/warmup-A.json",
+      "bytes": 57072,
+      "sha256": "497ccbb7d2f9ddb149cc3302a1ca1d7fce8a7973275612fce57a935adea97b4f"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/warmup-A.log",
+      "bytes": 463,
+      "sha256": "15ff37ff7cd796ce27f5de9750f32b8c8ad16def9fdaee2ff94bdd9aafa9a9d3"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/warmup-B.json",
+      "bytes": 57117,
+      "sha256": "dde6bfefd5ba75eba24321bccf523630efc67cab09f888be13c7fb13c74af71c"
+    },
+    {
+      "path": "evidence/node-jmdict-score-validation-pairs/warmup-B.log",
+      "bytes": 464,
+      "sha256": "05db9c469e357c97314a0a22bf61b4bf8cdc1d4a405b5ff3c2b0268bd070e238"
+    },
+    {
+      "path": "evidence/node-score-capture-replay.mjs",
+      "bytes": 19876,
+      "sha256": "d593c5c41236d7dd181d906e7fa9d55ae2c733749ebf41d6b8c3a1e37769ec4d"
+    },
+    {
+      "path": "evidence/node-score-verify-replay.mjs",
+      "bytes": 18344,
+      "sha256": "1579d11305af6806182d2049503917abb11bac628f3912cfcac52c3e24959f0b"
+    },
+    {
+      "path": "evidence/node-sink-file-fetch.mjs",
+      "bytes": 895,
+      "sha256": "3069ab43c4f7a8ef1588cec9a2f918ae910c52d31a2f8a9ab68086b22b5279d1"
+    },
+    {
+      "path": "evidence/node-sink-jmdict-baseline-verify2.json",
+      "bytes": 57100,
+      "sha256": "e4a45cf917aae081300499a2b37bb80fa5264d84ed6af988fcc06fc9a06404e4"
+    },
+    {
+      "path": "evidence/node-sink-jmdict-baseline-verify2.log",
+      "bytes": 417,
+      "sha256": "9644d282ddae12126a9d058e657fa2b42ecd7e06979fa1f65951ff53a8b4086f"
+    },
+    {
+      "path": "evidence/node-sink-jmdict-score-validation-initial-setup-failure.log",
+      "bytes": 1224,
+      "sha256": "737841e2d7de1893ce1e70326a53e4e3ebe28321012a9becc04167b517d3e2b8"
+    },
+    {
+      "path": "evidence/node-sink-jmdict-score-validation-verify.json",
+      "bytes": 60496,
+      "sha256": "5d2e76381063fd46cffbafe22a503d0d47d7a1a77ebe078e136253e2cdbad1b1"
+    },
+    {
+      "path": "evidence/node-sink-jmdict-score-validation-verify.log",
+      "bytes": 421,
+      "sha256": "5cd1665ef426fb8d2e2f5d6d1bb35a0a52a8e9701698abf37fa7dd7658392e93"
+    },
+    {
+      "path": "evidence/node-sink-opfs.mjs",
+      "bytes": 5577,
+      "sha256": "919aa7da6d0e49011db0b9b4473510c656eae0815bffee9c64595134f4b834ab"
+    },
+    {
+      "path": "evidence/node-sink-replay.mjs",
+      "bytes": 17474,
+      "sha256": "435f14288448a55c9f60f65fc71a78a810f4b5f263e89aa3daed6e14cad1c85e"
+    },
+    {
+      "path": "evidence/node-sink-worker.mjs",
+      "bytes": 701,
+      "sha256": "27dabc1ac52dd36149b815d6d5e76483ff1598450a187622c6c83ada92c569aa"
+    },
+    {
+      "path": "evidence/recent-integration-hunk-audit.md",
+      "bytes": 6935,
+      "sha256": "ea29803d741ed949e24f41df3822c7819051d8643b3c45e3fbbbadefa9148a4b"
+    },
+    {
+      "path": "evidence/run-jmdict-score-validation-pairs.py",
+      "bytes": 4726,
+      "sha256": "e4a4fda0ff411e1349452c1aa32ddc6df739d5b4c5a7034e13ce9c6d1a71509a"
+    },
+    {
+      "path": "evidence/score-checkpoint-claim-audit.md",
+      "bytes": 7690,
+      "sha256": "0c18bef7b1a8e533579c91b13b859fd6ae619fa79354dfbac74b5e6d71569462"
+    },
+    {
+      "path": "evidence/score-restoration-pr-review.md",
+      "bytes": 3519,
+      "sha256": "fe50dcc8ef37c806739d4eec57e4d5db21cc4967f3d951d2490aef67d4e20cce"
+    },
+    {
+      "path": "evidence/score-validation-baseline-capture.log",
+      "bytes": 410,
+      "sha256": "761ea4f72142d0f7861018e5ddb6fe76d24ed68a0d463b5fa32b1c86bdf34081"
+    },
+    {
+      "path": "evidence/score-validation/baseline-capture.json",
+      "bytes": 60387,
+      "sha256": "43924ccaf3e247036d7c98ce100ec57e82eef8ccc1c1a044cf642ed3d2e1de1a"
+    },
+    {
+      "path": "evidence/score-validation/direct-validator-probe.json",
+      "bytes": 13809,
+      "sha256": "f37ba0b24345e15e56fe5473d2f1a3b790b28e30d275011cfcb931fb11156a77"
+    },
+    {
+      "path": "evidence/score-validation/direct-validator-probe.json.modules/A.mjs",
+      "bytes": 365979,
+      "sha256": "9ba659b82a391395227469e8a298ac284e51be1b3b1ab901ec40b6c4b7ec8557"
+    },
+    {
+      "path": "evidence/score-validation/direct-validator-probe.json.modules/B.mjs",
+      "bytes": 365992,
+      "sha256": "3063eb9c0c6d5eb1c38116b5b3a036470dbc44ff2347b0fdcfd239cc14dc99f1"
+    },
+    {
+      "path": "evidence/score-validation/direct-validator-probe.json.modules/C.mjs",
+      "bytes": 365979,
+      "sha256": "9ba659b82a391395227469e8a298ac284e51be1b3b1ab901ec40b6c4b7ec8557"
+    },
+    {
+      "path": "evidence/score-validation/direct-validator-probe.log",
+      "bytes": 299,
+      "sha256": "71281f430ec2c7599d63b183f294042292aea2bb5c26437ab48b1b4d3551f626"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-000.bin",
+      "bytes": 401376,
+      "sha256": "6d65bcc025e23a9f81a53e98652fdefb578b486a44d3c8c0797c19c3f45d1a3e"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-001.bin",
+      "bytes": 321564,
+      "sha256": "d2cdcc2645131d62f42592374f543d601993ecb6dbb9225c46bfea68fc29ac0b"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-002.bin",
+      "bytes": 321736,
+      "sha256": "b17f1fa45004ec9beb5853667a16dfbeff4894088d1847b3d55f1b4fb55b7c32"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-003.bin",
+      "bytes": 321916,
+      "sha256": "dcbfcaa9c4aa1873c2527c13a48e0323b5fcb6274c52d6380d47716f01752961"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-004.bin",
+      "bytes": 400988,
+      "sha256": "7e213207925cd52ad15bac661b29e8c08221e58cbc63ded0e9b1f8e33099c5a5"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-005.bin",
+      "bytes": 401096,
+      "sha256": "9bfbefbd4e23132cfd015585b8ab8a8d21049cc219c5cc835150d90ffba4085b"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-006.bin",
+      "bytes": 321008,
+      "sha256": "fb885f10fe1c3e02966964cfda80516f6cac1374345f406134a14eb62f38c5c7"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-007.bin",
+      "bytes": 400684,
+      "sha256": "0093a079a8629962ba1f5038d0b3527f97666b862f70ca6024865d7fe0ec5d4f"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-008.bin",
+      "bytes": 320808,
+      "sha256": "ab844be7e07f6d308f1cc108d75797674909b5ee1ac43d38b5b7666493bc8b8e"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-009.bin",
+      "bytes": 320812,
+      "sha256": "ffffdb0dafb611a1a953d09f3c37b8912cf53fe3f754b2737be95c56881cb0a2"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-010.bin",
+      "bytes": 320784,
+      "sha256": "1ddc358e5fd8af6caaeaaee2256ccdbffcb9b1c2b9e5baf05e233babeca12c34"
+    },
+    {
+      "path": "evidence/score-validation/fields/compact-011.bin",
+      "bytes": 387188,
+      "sha256": "d2f2b04835164b65d84b6bb3badd49d664f6849bd5b18aae88fc57df6a40a1c8"
+    },
+    {
+      "path": "evidence/score-validation/fields/manifest.json",
+      "bytes": 8921,
+      "sha256": "535317630dc858525ad7197130853e26c038629f9d3cbec0d36147983b2bd236"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build-libs-private-directory.json",
+      "bytes": 155,
+      "sha256": "a46d637e55d9985e83386526b6af3cd91c61213e121b36598624ae3d14aebd5f"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build-libs-private-directory.log",
+      "bytes": 210,
+      "sha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build-libs.json",
+      "bytes": 137,
+      "sha256": "e1dc63b0c3bec5b6b286fe6d8babd6fd7db81a83abc56790863d18eeec7f52a6"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build-libs.log",
+      "bytes": 1240,
+      "sha256": "eee9e7977740ec7ea05e55d52c7496c090269275b6ee4ade6f944fd179859c9e"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build.json",
+      "bytes": 132,
+      "sha256": "50ccc571c18f1b1c6a3035505848fab969eb20ebe13a87cb88b08263febb2cd9"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/build.log",
+      "bytes": 430,
+      "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/compiler-environment.json",
+      "bytes": 643,
+      "sha256": "dbd3a590dfd9881143548ba222f9325aaa41aa0a26d8bf79c3f2025edd716d7c"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/compiler-preflight-detail.json",
+      "bytes": 1112,
+      "sha256": "5deb497128cc26ec44a9f56b02dd9fe548cc0a6f4a549af4da4407d3f1b69d69"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/compiler-preflight-portable-launch.log",
+      "bytes": 78,
+      "sha256": "c0359d0636c9932ba8b06b70cfb50ecafcd1449f75bbb0f93d4e2c1c1be35ac0"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/compiler-preflight.log",
+      "bytes": 783,
+      "sha256": "50fc0e9ae311316426087b578f38a69b51daa2e666b79c87953a8e5adc70affa"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/conditional-skips.json",
+      "bytes": 288,
+      "sha256": "90e6c4903eb31b5ec352f3b221620fd595109101493ace2dcb2c402b4f74c7f8"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/generated-library-hashes.json",
+      "bytes": 3276,
+      "sha256": "8471d54255fb66c972f2db68a5bde2eacc99bbe0c845f9c23631ae41d3fc67b6"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/generated-license.diff",
+      "bytes": 3322,
+      "sha256": "e1497f3ce154219ac69111e15b47e8fa99ee69d87a5183b0d5fceca093cb10c8"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/license-report.json",
+      "bytes": 149,
+      "sha256": "a3eb1079a0b2aa9b5b4815d45a7f0e844b0d87b882ddeae1307a5b5cbb180cd6"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/license-report.log",
+      "bytes": 365,
+      "sha256": "3e354a438d19cbabb0ae240ef7647b12cca1bdaea69cd0f8ed8307bfe7aa7500"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/lint.json",
+      "bytes": 167,
+      "sha256": "261baa8349825c8e64f91cc53de8014420d389e444ca14b0c5d2f7d8be8dc4b5"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/lint.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/materialization-correction.json",
+      "bytes": 329,
+      "sha256": "c51f9dc66fdb648733e98b4215293d94ef5d1368ff343a4f2b827f0dc80e0718"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/materialization.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/missing-fixture-materialization.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/plan.json",
+      "bytes": 843,
+      "sha256": "126a10356250c7b073a7eeaf87c072446fb4799a385d6cd92c730232d1ca7d26"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/product.diff",
+      "bytes": 768,
+      "sha256": "5c5db739adf0eee89803b5e1e01b8aa573543ac7fc9c7ec6c292c662f61fef59"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/summary.json",
+      "bytes": 5112,
+      "sha256": "b340b02236916700943aabd19f650c153ae611248be3c4637fb60e49a27ccd22"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/types-main.json",
+      "bytes": 138,
+      "sha256": "e0bb81c88422e9fe481ba28f4afcdad642ab46e1456b6a1787447ad90c379de5"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/types-main.log",
+      "bytes": 374,
+      "sha256": "304728a9f411c80317241b80cab57c423743cf128f3f58ae31c8bbd8ec4d1b4e"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/types-test.json",
+      "bytes": 138,
+      "sha256": "b830c0fab7d5bed1a7cad21e78fa61510c9ea5973c4a016b77fce3adef64d811"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/types-test.log",
+      "bytes": 389,
+      "sha256": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/unit-complete-prerequisites.json",
+      "bytes": 326,
+      "sha256": "b14074f2c9cf4b0dd2dff239156612f072a0db74e234fa9ad6e72e2d73440e15"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/unit-complete-prerequisites.log",
+      "bytes": 14020,
+      "sha256": "a9466dfb5b1f03f8e85df1587a653815778a455a95abf264bcbb63dcc21f3fb5"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/unit.json",
+      "bytes": 162,
+      "sha256": "ea93f64332b73aca7e370ba8ae40892b22b10467e3d4765fdf0290a79e38886f"
+    },
+    {
+      "path": "evidence/score-validation/full-validation/unit.log",
+      "bytes": 29268,
+      "sha256": "a9a319cd799d86aa004875af7c76c773ab60902b01f684a553736e732fdd2fc1"
+    },
+    {
+      "path": "evidence/score-validator-real-input-probe.mjs",
+      "bytes": 6687,
+      "sha256": "9d0ee6a5532a6378fb820fdbdda904ce206e7447b1e9dd84954421a04e5448b5"
+    },
+    {
+      "path": "manabitan/ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+    },
+    {
+      "path": "manabitan/package-lock.json",
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    {
+      "path": "manabitan/package.json",
+      "bytes": 9515,
+      "sha256": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+    },
+    {
+      "path": "manabitan/test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "path": "manabitan/test/term-record-compact-score-validation.test.js",
+      "bytes": 5036,
+      "sha256": "181ea1ac0343944f29025e9f0681bfcc601563bf4537511f4c683ebb2071b588"
+    },
+    {
+      "path": "manabitan/test/term-record-direct-field-columns.test.js",
+      "bytes": 9662,
+      "sha256": "ae4c6ffd82aba2caf15e3db6d1a641d25dc132deb584ec1b0e197786d8e2bcb1"
+    },
+    {
+      "path": "score-validation-experiment/ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 365322,
+      "sha256": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769"
+    }
+  ],
+  "omissions": [
+    {
+      "description": "JMdict dictionary ZIP",
+      "bytes": 15645766,
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "reason": "Large reconstructible fixture; actual compact numeric fields are included",
+      "reconstruction": "Pinned fixture URL and capture scripts in bundle"
+    },
+    {
+      "description": "node_modules, toolchain distribution, browser packages and physical OPFS output files",
+      "reason": "Reconstructible from frozen repository and lock; full file receipts are retained; no browser result claimed"
+    }
+  ],
+  "verification": {
+    "verifiedMembers": 120,
+    "allMemberBytesAndHashesMatch": true
+  }
+}
