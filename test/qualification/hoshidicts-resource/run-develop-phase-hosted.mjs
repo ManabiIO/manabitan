@@ -17,8 +17,8 @@ const harnessCommit = 'a300da36d00df8e353c5679b1528b50a1299b75f'
 const product = path.join(process.env.RUNNER_TEMP, 'manabitan-develop-a300da36')
 const extensionDir = path.join(process.env.RUNNER_TEMP, 'cross-engine/manabitan-develop-extension')
 const runner = path.join(harness, 'test/qualification/hoshidicts-jmdict/run-glossary.mjs')
-// Start with one stock control to validate in-worker instrumentation before spending a full cohort.
-const workerCountScreenMode = 'smoke'
+// The stock smoke run on a300da36 verified the offscreen worker-count bridge.
+const workerCountScreenMode = 'cohort'
 // JMdict was already imported once in run 46143842404. Its complete snapshot
 // is retained despite a harness title-identity assertion bug, so do not repeat it.
 const datasets = {
