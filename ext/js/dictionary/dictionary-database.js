@@ -7165,10 +7165,21 @@ void 0 :
      * @returns {number}
      */
     _getTermEntryContentMetaHashPairSlot(hash1, hash2, mask) {
-        let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
-        value ^= value >>> 16;
-        return value & mask;
+        // eslint-disable-next-line @stylistic/semi
+        return this._getTermEntryContentMetaHashPairHash(hash1, hash2) & mask
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * @param {number} hash1
+     * @param {number} hash2
+     * @returns {number}
+     */
+    _getTermEntryContentMetaHashPairHash(hash1, hash2) {
+        const value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0
+        return (value ^ (value >>> 16)) >>> 0
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {string} value
@@ -7269,7 +7280,8 @@ void 0 :
         // The high-water mark includes empty IDs retained for reuse after
         // rollback. Never truncate to the published/pending entry count.
         const denseCount = this._termEntryContentMetaDenseCount
-        const rehash = forceRehash || oldSlotTable.length !== slotCapacity
+        const oldIndexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
+        const rehash = forceRehash || oldSlotTable.length !== slotCapacity || oldIndexMask !== arena.slotIndexMask
         if (this._termContentMetadataArena !== null) {
             arena.copyFrom(this._termContentMetadataArena, denseCount, !rehash)
         }
@@ -7295,13 +7307,19 @@ void 0 :
             const useDense = denseCount <= oldSlotTable.length;
             const scanLength = useDense ? denseCount : oldSlotTable.length;
             for (let i = 0; i < scanLength; ++i) {
-                const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
+                /* eslint-disable @stylistic/semi */
+                const encodedIndex = useDense ? i + 1 : oldSlotTable[i] & oldIndexMask
+                /* eslint-enable @stylistic/semi */
                 if (encodedIndex === 0) { continue; }
                 const index = encodedIndex - 1;
                 if (arena.state[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
-                let slot = this._getTermEntryContentMetaHashPairSlot(arena.hash1[index], arena.hash2[index], mask);
+                /* eslint-disable @stylistic/semi */
+                const hash = this._getTermEntryContentMetaHashPairHash(arena.hash1[index], arena.hash2[index])
+                let slot = hash & mask
+                /* eslint-enable @stylistic/semi */
                 while (arena.slots[slot] !== 0) { slot = (slot + 1) & mask; }
-                arena.slots[slot] = encodedIndex;
+                // eslint-disable-next-line @stylistic/semi
+                arena.slots[slot] = encodedIndex | (hash & ~arena.slotIndexMask)
             }
         }
         this._termContentMetadataArena = arena;
@@ -7436,6 +7454,8 @@ void 0 :
         const signature3Table = this._termEntryContentMetaSignature3Table;
         const freeIndexes = this._termEntryContentMetaFreeIndexes;
         const mask = this._termEntryContentMetaHashPairMask;
+        // eslint-disable-next-line @stylistic/semi
+        const indexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
         let stagedCount = 0;
         try {
             for (let i = 0; i < count; ++i) {
@@ -7458,10 +7478,15 @@ void 0 :
                 ) {
                     throw new RangeError(`Invalid staged term content source span: ${contentByteOffset}+${contentLength}`);
                 }
-                let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+                /* eslint-disable @stylistic/semi */
+                const hash = this._getTermEntryContentMetaHashPairHash(hash1, hash2)
+                const tag = hash & ~indexMask
+                let slot = hash & mask
+                /* eslint-enable @stylistic/semi */
                 while (slotTable[slot] !== 0) {
-                    const existingIndex = slotTable[slot] - 1;
-                    if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
+                    // eslint-disable-next-line @stylistic/semi
+                    const existingIndex = (slotTable[slot] & indexMask) - 1
+                    if ((slotTable[slot] & ~indexMask) === tag && hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
                         slot = -1;
                         break;
                     }
@@ -7488,7 +7513,8 @@ void 0 :
                 );
                 signature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
                 stateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
-                slotTable[slot] = index + 1;
+                // eslint-disable-next-line @stylistic/semi
+                slotTable[slot] = (index + 1) | tag
                 indexes[i] = index;
                 ++stagedCount;
             }
@@ -7597,11 +7623,17 @@ this._readTermContentSignature(
         const hash2Table = this._termEntryContentMetaHash2Table;
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
-        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        /* eslint-disable @stylistic/semi */
+        const indexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
+        const hash = this._getTermEntryContentMetaHashPairHash(hash1, hash2)
+        const tag = hash & ~indexMask
+        let slot = hash & mask
+        /* eslint-enable @stylistic/semi */
         let probeCount = 0;
         while (slotTable[slot] !== 0) {
-            const existingIndex = slotTable[slot] - 1;
-            if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
+            // eslint-disable-next-line @stylistic/semi
+            const existingIndex = (slotTable[slot] & indexMask) - 1
+            if ((slotTable[slot] & ~indexMask) === tag && hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
                 return -1;
             }
             if (++probeCount >= slotTable.length) {
@@ -7618,7 +7650,8 @@ this._readTermContentSignature(
         this._termEntryContentMetaSignature2Table[index] = signature2;
         this._termEntryContentMetaSignature3Table[index] = signature3;
         this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
-        slotTable[slot] = index + 1;
+        // eslint-disable-next-line @stylistic/semi
+        slotTable[slot] = (index + 1) | tag
         ++this._termEntryContentMetaHashPairPendingCount;
         return index;
     }
@@ -7760,12 +7793,19 @@ this._readTermContentSignature(
         const stateTable = this._termEntryContentMetaStateTable;
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
-        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        /* eslint-disable @stylistic/semi */
+        const indexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
+        const hash = this._getTermEntryContentMetaHashPairHash(hash1, hash2)
+        const tag = hash & ~indexMask
+        let slot = hash & mask
+        /* eslint-enable @stylistic/semi */
         while (true) {
             const encodedIndex = slotTable[slot];
             if (encodedIndex === 0) { return -1; }
-            const index = encodedIndex - 1;
+            // eslint-disable-next-line @stylistic/semi
+            const index = (encodedIndex & indexMask) - 1
             if (
+                (encodedIndex & ~indexMask) === tag &&
                 stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
@@ -7790,7 +7830,12 @@ this._readTermContentSignature(
         const stateTable = this._termEntryContentMetaStateTable;
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
-        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        /* eslint-disable @stylistic/semi */
+        const indexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
+        const hash = this._getTermEntryContentMetaHashPairHash(hash1, hash2)
+        const tag = hash & ~indexMask
+        let slot = hash & mask
+        /* eslint-enable @stylistic/semi */
         while (true) {
             const encodedIndex = slotTable[slot];
             if (encodedIndex === 0) {
@@ -7806,12 +7851,15 @@ this._readTermContentSignature(
                 hash1Table[index] = hash1;
                 hash2Table[index] = hash2;
                 stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
-                slotTable[slot] = index + 1;
+                // eslint-disable-next-line @stylistic/semi
+                slotTable[slot] = (index + 1) | tag
                 ++this._termEntryContentMetaHashPairCount;
                 return;
             }
-            const index = encodedIndex - 1;
+            // eslint-disable-next-line @stylistic/semi
+            const index = (encodedIndex & indexMask) - 1
             if (
+                (encodedIndex & ~indexMask) === tag &&
                 stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
@@ -7843,11 +7891,18 @@ this._readTermContentSignature(
         const stateTable = this._termEntryContentMetaStateTable;
         const slotTable = this._termEntryContentMetaHashPairTable;
         const mask = this._termEntryContentMetaHashPairMask;
-        let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
+        /* eslint-disable @stylistic/semi */
+        const indexMask = this._termContentMetadataArena?.slotIndexMask ?? 0xffffffff
+        const hash = this._getTermEntryContentMetaHashPairHash(hash1, hash2)
+        const tag = hash & ~indexMask
+        let slot = hash & mask
+        /* eslint-enable @stylistic/semi */
         let probeCount = 0;
         while (slotTable[slot] !== 0) {
-            const existingIndex = slotTable[slot] - 1;
+            // eslint-disable-next-line @stylistic/semi
+            const existingIndex = (slotTable[slot] & indexMask) - 1
             if (
+                (slotTable[slot] & ~indexMask) === tag &&
                 stateTable[existingIndex] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2
             ) {
@@ -7891,7 +7946,8 @@ this._readTermContentSignature(
         hash1Table[index] = hash1;
         hash2Table[index] = hash2;
         stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
-        slotTable[slot] = index + 1;
+        // eslint-disable-next-line @stylistic/semi
+        slotTable[slot] = (index + 1) | tag
         this._termEntryContentMetaIdTable[index] = 0;
         this._termEntryContentMetaOffsetTable[index] = offset;
         this._termEntryContentMetaLengthTable[index] = length;

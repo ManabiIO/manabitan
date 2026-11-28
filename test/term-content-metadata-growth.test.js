@@ -48,7 +48,7 @@ function getArena(database) {
 function createSparseDatabase() {
     const database = new DictionaryDatabase()
     // Every entry shares one probe chain; growth and rollback must retain it.
-    vi.spyOn(database, '_getTermEntryContentMetaHashPairSlot').mockReturnValue(5)
+    vi.spyOn(database, '_getTermEntryContentMetaHashPairHash').mockReturnValue(5)
     const set = Reflect.get(database, '_setTermEntryContentMetaByHashPair').bind(database)
     for (let i = 0; i < 5; ++i) {
         const metadata = {
@@ -77,9 +77,9 @@ function createSparseDatabase() {
 }
 
 describe('bounded metadata arena copies', () => {
-    test('keeps the complete-column and same-capacity slot-copy defaults', () => {
+    test('keeps the complete-column and same-mask slot-copy defaults', () => {
         const previous = new TermContentMetadataArena(17, 64)
-        const next = new TermContentMetadataArena(32, 64)
+        const next = new TermContentMetadataArena(31, 64)
         for (const [i, name] of arenaColumnNames.entries()) { previous[name].fill(i + 1) }
         previous.slots[63] = 17
 
@@ -87,7 +87,7 @@ describe('bounded metadata arena copies', () => {
 
         for (const name of arenaColumnNames) {
             expect(next[name].subarray(0, 17)).toEqual(previous[name])
-            expect([...next[name].subarray(17)]).toEqual(new Array(15).fill(0))
+            expect([...next[name].subarray(17)]).toEqual(new Array(14).fill(0))
         }
         expect(next.slots).toEqual(previous.slots)
     })
@@ -157,7 +157,7 @@ describe('metadata growth with reusable dense IDs', () => {
         expect(get(12, 22)).toBeUndefined()
         expect(get(50, 70)).toBeUndefined()
         expect(get(60, 80)).toBeUndefined()
-        expect([...next.slots].filter((index) => index !== 0).sort((a, b) => a - b)).toEqual([1, 2, 4, 5, 6, 7])
+        expect([...next.slots].map((word) => word & next.slotIndexMask).filter((index) => index !== 0).sort((a, b) => a - b)).toEqual([1, 2, 4, 5, 6, 7])
 
         Reflect.get(database, '_setTermEntryContentMetaByHashPair').call(database, 90, 100, {
             id: 99, offset: 999, length: 4, dictName: 'reused',
