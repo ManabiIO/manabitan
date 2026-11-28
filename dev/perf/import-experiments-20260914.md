@@ -1,5 +1,84 @@
 # Codex instructions: import optimization experiments
 
+## November 27, 2026: complete format-3 suffix reuse study
+
+This is an unqualified source candidate against frozen `develop`
+`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, tree
+`d99ea4d04658f7ec1c76acdc5f3684594212a471`. No import speedup is claimed.
+The independent concurrent adjacent-row suffix study includes fields 2–7 and
+requires an existing content streak. This candidate instead considers fields
+5–7 (glossary, sequence, term tags) after independently validating fields 0–4,
+and looks only inside the existing four-row recent-content window.
+
+### Source-backed opportunity and proof
+
+An exact raw-byte census of every pinned JMdict row found 153,366 matching
+complete suffixes within that window. Relative to a model of the existing
+validated-glossary admission, 106,648 additional rows contain 25,010,605 glossary
+bytes that could avoid parsing. Most additional matches are at distance two.
+The analogous Jitendex census found only 24 additional rows / 7,623 glossary
+bytes. The census crosses original source-bank boundaries and does not reset at
+production parser-group boundaries, so these are opportunity counts, not exact
+runtime execution counters or elapsed-time savings. The original census and
+failed reader attempt are retained in the machine-readable evidence.
+
+The existing glossary-only lookup runs first, with its unchanged admission and
+probe budget. Only after it fails does the suffix helper examine candidates
+outside that lookup's checked distances, still within the existing window.
+Bounded middle, glossary-tail and suffix-tail samples only reject candidates;
+complete equality through the previous row's closing bracket authorizes reuse.
+Current expression, reading, definition tags, rules and score stay independently
+validated. The helper rebases the glossary, numeric sequence and term-tag spans,
+preserves the null sequence sentinel and all three glossary hints, and proves
+the current row boundary. New suffix witnesses do not reset the old glossary
+probe budget. Canonical content reuse still compares every remaining content
+field; a glossary or suffix witness alone is not a content-identity proof.
+
+No allocation, additional retained cache, worker/batch change, compression
+change, format change or threshold adjustment is introduced. The strict
+format-3 path uses the existing validated-glossary-reuse setting; unsupported
+and generic parsing paths remain available. Pinned Clang/LLD 21.1.8 generates
+`term-bank-parser.wasm` SHA-256
+`a9e15a67b2f72adf2288f4c981c0fb78362273953d94440706c41cf44515292f`,
+68,677 bytes versus 67,659 baseline bytes. Native C SHA-256 is
+`5fb1656504b65502f396d23d1222342f9c9b6485f90b949207758cb8058fa3ca`.
+
+### Local evidence and prospective qualification
+
+Focused tests cover distances one through four, distance-five exclusion,
+different current prefix fields, nearer equal content with a different sequence,
+null/zero/negative-zero/maximum integer sequences, normalization/media hints,
+sample collisions, malformed suffixes and truncated banks. The final 62-test
+format-3 suite additionally proves short-glossary reuse across two nonempty
+banks with CR/LF/tab whitespace after term tags and rebased numeric sequence.
+The pinned regeneration/check, scoped ESLint, changed-test TypeScript and all-target dry build passed.
+Earlier broader parser checks passed; the full test TypeScript process was
+killed without a diagnostic and is not recorded as passing. Full unit and test
+type validation are required again in the hosted source gate.
+
+The fixed six-pair local JMdict component cohort stopped after its first
+baseline observation: the first candidate child exited with null status and no
+recorded signal. The unchanged runner reports this as a failure. No completed
+pair or timing estimate exists. A separately labelled candidate-only diagnostic then completed successfully:
+all 528,299 rows, every content/index digest, 19,491,860 index bytes and the
+61,603,840-byte native high-water heap matched the baseline. This does not
+identify the first termination cause and is excluded from the failed timing
+cohort; its timing is not used as a comparison. All observations,
+source identities, commands and failures remain in
+`dev/perf/suffix-window-5a86/local-component-evidence.json.txt`.
+
+The one-shot branch workflow registers twelve adjacent alternating pairs on
+each independent AB/BA host for all three pinned dictionaries, using the
+unchanged `import-qualification-20261125-a7f7.py`. Default flags, warmups,
+identical-code controls, complete release-package checks, post-restart lookups,
+separate exhaustive media validation and whole-process memory observations are
+preserved. VNDB's current 37-unit SAH allocation is declared before acquisition.
+Only the native C and parser WASM package entries may differ. Failed cohorts
+remain failed; no selected reruns or partial favorable estimates are accepted.
+A separate bounded complete-corpus replay is being prepared for all three
+fixtures because sampled browser content probes are not a full output oracle.
+Do not open a performance PR until the collected gain is worth reviewing.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.
