@@ -1,0 +1,16 @@
+{
+  "scope": "Read-only adaptation of the team canonical component lifecycle into an independent record validation study; source team directory was not modified.",
+  "sourceDirectory": "/workspace/scratch/0f1f4f8ea254/recent-primary/dev/perf/canonical-component-20261128-0f1f",
+  "sourceFileHashes": {
+    "common.mjs": "645de3b1174eda2b8aab74b15534b8dc98e45c5aafa8337078a39ef0f5027de8",
+    "observe.mjs": "c4fef47cbc16e9f475a5aba2d5241a4c6498d9f0812fa5a7e446f7c491babfb6",
+    "run.mjs": "63f1a891d8a809f29557683aa7e07fdeaebd0a9dae36f076386e37d4a7b2b879",
+    "worker.mjs": "ff22d374a216fe4c1335c0a66fe475e179891da7ac808f135adf190bc67cb5c0",
+    "protocol.json": "497e9583892588cfd0754ccdba74a133cf22fc252a2b2d74b260eae043bb6650"
+  },
+  "changes": [
+    "Single JS/native comparison, staging-inclusive timings, measured synchronous native initialization",
+    "Source-bound typed columns rather than full canonical memory arenas",
+    "Protocol remains draft and run is blocked until explicit freeze"
+  ]
+}

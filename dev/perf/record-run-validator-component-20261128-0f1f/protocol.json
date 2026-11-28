@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "status": "frozen",
+  "scope": "Extracted JavaScript record-run loop versus native validator, staging-inclusive component only. No full import or production async-method JIT equivalence claim.",
+  "baselineHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineStoreSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+  "baselineLoopSha256": "f6737163f7c737b3c1d8bb5dd899872b4d502cc3bd7f6d6f5488d9d9b2ff9a04",
+  "javascript": {
+    "id": "baseline-js",
+    "file": "baseline-loop.mjs",
+    "sha256": "10cfe61efbae4e9483c741da43ca3fcfe2009ff698b0e8027d9c66baab21345b"
+  },
+  "kernel": {
+    "id": "native",
+    "file": "record-run-validator.wasm",
+    "sha256": "48abbcb5c6b44b9d19808df31ac351bd72ff99428327cfe73a6a425b32b6588c"
+  },
+  "adapter": {
+    "file": "native-validator.mjs",
+    "sha256": "42738c623cb9bf30dcb79c24b4dd0cf1c97a3f00848fcd15571d5b39814db9a2"
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "executableVersion": "Google Chrome for Testing 153.0.8010.12",
+    "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "playwrightVersion": "1.63.0"
+  },
+  "nodeVersion": "v22.22.0",
+  "schedule": [
+    {
+      "id": "comparison-01-A",
+      "kind": "comparison",
+      "pair": 1,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-01-B",
+      "kind": "comparison",
+      "pair": 1,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-02-B",
+      "kind": "comparison",
+      "pair": 2,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-02-A",
+      "kind": "comparison",
+      "pair": 2,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-A1",
+      "kind": "control",
+      "pair": 1,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-A2",
+      "kind": "control",
+      "pair": 1,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-03-A",
+      "kind": "comparison",
+      "pair": 3,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-03-B",
+      "kind": "comparison",
+      "pair": 3,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-04-B",
+      "kind": "comparison",
+      "pair": 4,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-04-A",
+      "kind": "comparison",
+      "pair": 4,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-02-A1",
+      "kind": "control",
+      "pair": 2,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-02-A2",
+      "kind": "control",
+      "pair": 2,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-05-A",
+      "kind": "comparison",
+      "pair": 5,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-05-B",
+      "kind": "comparison",
+      "pair": 5,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-06-B",
+      "kind": "comparison",
+      "pair": 6,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-06-A",
+      "kind": "comparison",
+      "pair": 6,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-03-A1",
+      "kind": "control",
+      "pair": 3,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-03-A2",
+      "kind": "control",
+      "pair": 3,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-07-A",
+      "kind": "comparison",
+      "pair": 7,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-07-B",
+      "kind": "comparison",
+      "pair": 7,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-08-B",
+      "kind": "comparison",
+      "pair": 8,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-08-A",
+      "kind": "comparison",
+      "pair": 8,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-04-A1",
+      "kind": "control",
+      "pair": 4,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-04-A2",
+      "kind": "control",
+      "pair": 4,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-09-A",
+      "kind": "comparison",
+      "pair": 9,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-09-B",
+      "kind": "comparison",
+      "pair": 9,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-10-B",
+      "kind": "comparison",
+      "pair": 10,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-10-A",
+      "kind": "comparison",
+      "pair": 10,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-05-A1",
+      "kind": "control",
+      "pair": 5,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-05-A2",
+      "kind": "control",
+      "pair": 5,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-11-A",
+      "kind": "comparison",
+      "pair": 11,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "comparison-11-B",
+      "kind": "comparison",
+      "pair": 11,
+      "position": 1,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-12-B",
+      "kind": "comparison",
+      "pair": 12,
+      "position": 0,
+      "arm": "B"
+    },
+    {
+      "id": "comparison-12-A",
+      "kind": "comparison",
+      "pair": 12,
+      "position": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-06-A1",
+      "kind": "control",
+      "pair": 6,
+      "position": 0,
+      "arm": "A"
+    },
+    {
+      "id": "control-06-A2",
+      "kind": "control",
+      "pair": 6,
+      "position": 1,
+      "arm": "A"
+    }
+  ],
+  "passes": 2,
+  "callsPerPass": 12,
+  "callsPerObservation": 24,
+  "observations": 36,
+  "observationTimeoutMs": 120000,
+  "fixedInterObservationDelayMs": 500,
+  "worker": {
+    "crossOriginIsolated": true,
+    "timer": "performance.now",
+    "crossOriginOpenerPolicy": "same-origin",
+    "crossOriginEmbedderPolicy": "require-corp",
+    "crossOriginResourcePolicy": "same-origin"
+  },
+  "inputInventoryFile": "input-inventory.json",
+  "inputInventorySha256": "0e239198f8bdbab64a48bf9f3d2188bd73339ba222384996468f7062bf0d6532",
+  "measurement": {
+    "primary": "firstPassSumMs plus nativeInitializationElapsedMs (baseline initialization is zero)",
+    "secondPass": "secondPassSumMs, using the same declared module/memory; no additional initialization",
+    "perCall": "Outer performance.now interval around baselineScan or native validate: includes adapter guard, linear-memory growth, every typed-column copy, native call, error/result translation, and adapter diagnostic clock/counter overhead.",
+    "initialization": "Fresh browser process/worker. First WebAssembly.Module, Memory and Instance construction measured once before first call; separate compile, memory+instantiate and total outer elapsed recorded. Native bytes are fetched and SHA-verified before this interval in both arms.",
+    "excluded": "Browser launch, script parsing/import, asset fetch/hash, column restoration, common factory-origin admission, result/input verification, persistence, record encoding, and observer transport. No warmup loop.",
+    "cadence": "Every group result is verified and checkpointed before next group. Record gaps; verification/transport gaps can change compiler background progress and cache/GC behavior from a live import.",
+    "jitCaveat": "The baseline loop is extracted unchanged from a large async writer into a small synchronous function; lexical environment, call shape and V8 optimization behavior differ. A component gain cannot predict production method gain.",
+    "captureCaveat": "Input capture is after run selection; reconstructed private columns prove fixed-corpus component eligibility, not original pre-loop factory admission. Original buffer capacities/aliases were not retained."
+  },
+  "checks": {
+    "exactGroupsAndRows": true,
+    "exactSourceAndModuleHashes": true,
+    "unchangedInputColumnsAfterEveryCall": true,
+    "exactResultAfterEveryCall": true,
+    "nativeCallsPerPass": 12,
+    "nativeFallbacksPerPass": 0,
+    "nativeCopiedInputBytesPerPass": 6505556,
+    "expectedNativePeakHeapBytes": 655360,
+    "firstRunOnlyAndUniqueCountAtMostRows": true,
+    "disjointResultAndInputs": "Adapter result [8,32), inputs begin at32; raw export overlap is outside this input-immutability contract"
+  },
+  "analysis": {
+    "pairs": 12,
+    "balancedOrder": "6 AB and 6 BA, interleaved with 6 unchanged JS A/A controls",
+    "metrics": [
+      "coldFirstPassIncludingInitializationMs",
+      "firstPassSumMs",
+      "firstCallMs",
+      "remainingFirstPassMs",
+      "secondPassSumMs",
+      "secondPassFirstCallMs"
+    ],
+    "bootstrapReplicates": 20000,
+    "bootstrapSeed": 1691003128,
+    "intervalPercentiles": [
+      2.5,
+      97.5
+    ],
+    "policy": "Report all pairs/controls/metrics and phase overheads separately. No outlier trimming, pooling engines, adaptive rerun or winning-metric selection. Missing/failed observations remain failures; no whole-import speed claim."
+  },
+  "lifecycle": "Fresh Chrome process/context/dedicated worker for each observation; module exists only for the two declared passes. No engine flags, arbitrary warmup, profiler, or shared browser process.",
+  "workflow": "One fixed hosted cell, publication and explicit freeze remain parent-owned.",
+  "inputArchive": {
+    "file": "inputs.bin.gz",
+    "format": "Deterministic gzip (mtime=0, no filename) of exact group payloads concatenated in inventory order",
+    "bytes": 1774944,
+    "sha256": "b5a2325f717beb3ae2ce1ea4d7b61e2935448870024402f81746eb23286bf693",
+    "uncompressedBytes": 6505560
+  },
+  "hostedWorkflow": {
+    "path": ".github/workflows/record-run-validator-component-20261128-0f1f.yml",
+    "sha256": "b2961538ac2cc4946faf0b17ae1d8ddd4db9743fde28f56748a1b73f51fbd8b3",
+    "runsOn": "ubuntu-26.04",
+    "requiredRunAttempt": 1
+  },
+  "additionalSourceFiles": [
+    "build.mjs",
+    "build-binding.json",
+    "record-run-validator.c",
+    "inputs.bin.gz",
+    "correctness.json",
+    "independent-review.json",
+    "provenance-supplement.json"
+  ]
+}

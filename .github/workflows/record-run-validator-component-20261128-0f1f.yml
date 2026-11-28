@@ -1,0 +1,123 @@
+name: Frozen record-run validator component 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/record-run-validator-component-20261128-0f1f']
+    paths:
+      - '.github/workflows/record-run-validator-component-20261128-0f1f.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  component:
+    name: Record-run validator / JMdict component
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_TOOLING: dev/perf/record-run-validator-component-20261128-0f1f
+      PERF_EVIDENCE: builds/perf/record-run-validator-component-20261128-0f1f
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Record source and prepare exact baseline product checkout
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/tooling-source.txt"
+          cp -R "$PERF_TOOLING" "$PERF_EVIDENCE/tooling"
+          cp .github/workflows/record-run-validator-component-20261128-0f1f.yml "$PERF_EVIDENCE/workflow.yml"
+          {
+            uname -a
+            lscpu
+            free -b
+            df -B1 .
+          } > "$PERF_EVIDENCE/host.txt"
+          git fetch --no-tags --depth 1 origin "$PERF_BASELINE"
+          git worktree add --detach "$RUNNER_TEMP/record-run-product" "$PERF_BASELINE"
+          printf 'PERF_PRODUCT=%s\n' "$RUNNER_TEMP/record-run-product" >> "$GITHUB_ENV"
+          test "$(git -C "$RUNNER_TEMP/record-run-product" rev-parse HEAD)" = "$PERF_BASELINE"
+          git -C "$RUNNER_TEMP/record-run-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source.txt"
+          git -C "$RUNNER_TEMP/record-run-product" status --porcelain=v1 > "$PERF_EVIDENCE/product-status-before.txt"
+          test ! -s "$PERF_EVIDENCE/product-status-before.txt"
+          cmp package-lock.json "$RUNNER_TEMP/record-run-product/package-lock.json"
+          cmp .github/actions/setup/action.yml "$RUNNER_TEMP/record-run-product/.github/actions/setup/action.yml"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check protocol freeze and runtime identity before acquisition preparation
+        run: |
+          test "$(node --version)" = 'v22.22.0'
+          node --input-type=module <<'JS' > "$PERF_EVIDENCE/preparation-identity.json"
+          import assert from 'node:assert/strict'
+          import {readFile} from 'node:fs/promises'
+          const protocol = JSON.parse(await readFile(process.env.PERF_TOOLING + '/protocol.json', 'utf8'))
+          assert.equal(protocol.status, 'frozen', 'Protocol has not been reviewed and frozen')
+          console.log(JSON.stringify({node: process.version, protocolStatus: protocol.status, inputArchive: protocol.inputArchive}, null, 2))
+          JS
+          npm --version > "$PERF_EVIDENCE/npm-version.txt"
+      - name: Install the pinned compiler and browser
+        run: |
+          sudo apt-get update > "$PERF_EVIDENCE/apt-update.log" 2>&1
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 > "$PERF_EVIDENCE/apt-install.log" 2>&1
+          npx playwright install --with-deps chromium > "$PERF_EVIDENCE/browser-install.log" 2>&1
+      - name: Reproduce the tiny native module and unpack the exact captured columns
+        run: |
+          node "$PERF_TOOLING/build.mjs" --project-root "$PERF_PRODUCT" \
+            --clang "$(command -v clang-21)" --linker "$(command -v wasm-ld-21)" \
+            --output "$PERF_EVIDENCE/modules" --inputs-output "$PERF_EVIDENCE/inputs" \
+            > "$PERF_EVIDENCE/build.log" 2>&1
+          node "$PERF_TOOLING/check-harness.mjs" > "$PERF_EVIDENCE/synthetic-worker-check.json"
+          python3 "$PERF_TOOLING/check-analysis.py" > "$PERF_EVIDENCE/synthetic-analysis-check.json"
+      - name: Acquire the complete fixed component cohort once
+        run: |
+          node "$PERF_TOOLING/run.mjs" --inputs "$PERF_EVIDENCE/inputs" \
+            --output "$PERF_EVIDENCE/cohort" > "$PERF_EVIDENCE/acquisition.log" 2>&1
+      - name: Analyze all prescribed observations or emit an explicit invalid summary
+        if: always()
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          python3 "$PERF_TOOLING/analyze.py" "$PERF_EVIDENCE/cohort" > "$PERF_EVIDENCE/analysis.log" 2>&1
+      - name: Verify final product and tooling identities
+        if: always()
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          node --input-type=module <<'JS' > "$PERF_EVIDENCE/final-tooling-identity.json"
+          import {pathToFileURL} from 'node:url'
+          import path from 'node:path'
+          const {verifySourceInventory} = await import(pathToFileURL(path.resolve(process.env.PERF_TOOLING, 'common.mjs')))
+          console.log(JSON.stringify({sourceInventorySha256: await verifySourceInventory()}, null, 2))
+          JS
+          if test -d "$RUNNER_TEMP/record-run-product"; then
+            git -C "$RUNNER_TEMP/record-run-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source-after.txt"
+            git -C "$RUNNER_TEMP/record-run-product" status --porcelain=v1 --untracked-files=no > "$PERF_EVIDENCE/product-status-after.txt"
+            cmp "$PERF_EVIDENCE/product-source.txt" "$PERF_EVIDENCE/product-source-after.txt"
+            test ! -s "$PERF_EVIDENCE/product-status-after.txt"
+          fi
+      - name: Inventory all retained evidence including partial failures
+        if: always()
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['PERF_EVIDENCE'])
+          files = []
+          for file in sorted(root.rglob('*')):
+              if not file.is_file() or file.name == 'artifact-manifest.json':
+                  continue
+              files.append({'path': str(file.relative_to(root)), 'bytes': file.stat().st_size, 'sha256': hashlib.sha256(file.read_bytes()).hexdigest()})
+          (root / 'artifact-manifest.json').write_text(json.dumps({'schemaVersion': 1, 'baseline': os.environ['PERF_BASELINE'], 'files': files}, indent=2) + '\n')
+          PY
+      - name: Upload all inputs, observations, failures, and analysis
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: record-run-validator-component-20261128-0f1f
+          path: builds/perf/record-run-validator-component-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14

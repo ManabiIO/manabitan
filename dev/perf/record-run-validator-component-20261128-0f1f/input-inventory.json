@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 1,
+  "scope": "Copied current-source sink columns, no rerun of the importer and no performance acquisition",
+  "baselineHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineStoreSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+  "captureSha256": "c4d1a3cbc390f6fd40c11020dad58b33fe958869e71922220a2bfcce31c5e4e8",
+  "provenance": {
+    "reportSha256": "fbc3c6c75e943d8faffcdc072af532ab35c7d3672a019e55a28c95e5cc948d38",
+    "captureSha256": "c4d1a3cbc390f6fd40c11020dad58b33fe958869e71922220a2bfcce31c5e4e8",
+    "captureWriter": "/workspace/scratch/1c4137568bc6/record-field-capture.mjs",
+    "captureWriterSha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8",
+    "source": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": {
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "test/fixtures/fused-score/node-opfs-adapter.mjs": "b8f79d909a7f6f7a7d35bc2b327cc5e642c3df6c05d19cd67c317cda40615bff"
+      },
+      "harnessSha256": "e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef",
+      "workerBridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+      "tailProbeSha256": "6c69890860c9b4834599184003bcaa8365510f4eaf05bf0075ec9f29c04802d4",
+      "recordCaptureSha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8"
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "substitutions": {
+      "sqlite": ":memory:",
+      "opfs": "test/fixtures/fused-score/node-opfs-adapter.mjs; atomic real files, in-memory copy per asynchronous write and file snapshot; Node fd sync handles for production index writes/reads",
+      "worker": "node:worker_threads with true transferable buffers; file fetch and sync access handle bridge",
+      "zipUseWebWorkers": false,
+      "skipImageMetadata": true
+    },
+    "gap": "Capture report binds a clean source commit and parser/WASM hashes; current checked-in record-store bytes are independently bound here. The exact enclosing capture harness and worker bridge were not found in place by their recorded hashes. Capture writer and its hash are available. These are component inputs from a Node OPFS substitution, not a browser timing or independent fixture re-acquisition."
+  },
+  "provenanceSupplement": {
+    "priorCorrectnessReceiptSha256": "72421d9788ec4633a685e5b1cbd0e99022f23c6b988bfe7af6f44ad7b20a6e96",
+    "bridgePath": "/workspace/scratch/1c4137568bc6/experiments/native-record-fields/node-import-worker-bridge.mjs",
+    "bridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+    "remainingGap": "Exact enclosing historical harness hash e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef remains unlocated. Worker bridge, field-capture writer and tail probe have been located by exact recorded hashes. Original receipt is retained, with this later evidence supplement.",
+    "rawKernelContract": "No source input is modified under the adapter layout: result bytes [8,32), input bytes beginning at32. The raw ABI validates bounds/alignment but permits overlapping output; all stores occur after relevant reads. Public callers use the disjoint adapter layout."
+  },
+  "producerSha256": "194f0c6b500ff8ddfb6a75805e9ebf41753dab5c43d4e3a3f8eae27dfc37c6f1",
+  "rows": 528299,
+  "uniqueReferences": 366030,
+  "inputCopyBytesPerPass": 6505556,
+  "layoutCaveat": "Capture stores column values in independent snapshots and does not retain original ArrayBuffer capacity/aliasing. Browser restoration creates one private fixed ArrayBuffer per column outside the timed interval.",
+  "entryScopeCaveat": "The historical field capture occurs after production run selection. The reconstructed factory identity and component admission prove these fixed inputs, not the original pre-loop ownership guard or its live production activation. Full qualification must count actual admissions/fallbacks at that earlier boundary.",
+  "groups": [
+    {
+      "group": 1,
+      "rowCount": 50000,
+      "uniqueCount": 34951,
+      "file": "group-01.bin",
+      "bytes": 619412,
+      "sha256": "dd6bfe1fa25a6c113c69cf23ed28af64794e63feaa1a996dcfab9055d5a42b24",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 200000,
+          "length": 50000,
+          "sha256": "dcfef87693e35ceb7c1e3ff38d85daf3d4423e2e6a826b0b861a760fb18e6f7c"
+        },
+        "offsets": {
+          "offset": 200000,
+          "bytes": 279608,
+          "length": 34951,
+          "sha256": "78ccd2bd3bd99601fc5f4948ad3f81d4dfe4da3402ba44ac7b470128aa1c1441"
+        },
+        "lengths": {
+          "offset": 479608,
+          "bytes": 139804,
+          "length": 34951,
+          "sha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455"
+        }
+      },
+      "expected": {
+        "runEnd": 50000,
+        "minimum": 0,
+        "maximum": 699000
+      },
+      "inputCopyBytes": 619412,
+      "sourceRecordFieldsSha256": "6d65bcc025e23a9f81a53e98652fdefb578b486a44d3c8c0797c19c3f45d1a3e"
+    },
+    {
+      "group": 2,
+      "rowCount": 40000,
+      "uniqueCount": 32856,
+      "file": "group-02.bin",
+      "bytes": 554272,
+      "sha256": "9df5e0ff7ec0f72d4178be092b958abfae75fa8d3cbd7a779cd14e45b6456887",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "138ccf61f41e0a4edf190f673211580ddecfdf4426c31b2be02f1009216c9c5b"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 262848,
+          "length": 32856,
+          "sha256": "a60af5f1a8ddcc3e1791d7256149270df8fdca73d44008cd83f2bca2f141dae4"
+        },
+        "lengths": {
+          "offset": 422848,
+          "bytes": 131424,
+          "length": 32856,
+          "sha256": "db64aea2af0a265afe562eb002a8ea5225aafad03a49a9be248de51542e4b19f"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 7480,
+        "maximum": 2247246
+      },
+      "inputCopyBytes": 554272,
+      "sourceRecordFieldsSha256": "d2cdcc2645131d62f42592374f543d601993ecb6dbb9225c46bfea68fc29ac0b"
+    },
+    {
+      "group": 3,
+      "rowCount": 40000,
+      "uniqueCount": 32421,
+      "file": "group-03.bin",
+      "bytes": 549052,
+      "sha256": "a75f07c388bb375fbc4863dd6f16c7f290c86e55da925493692122f856dc86b7",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "60321a26a39bdacda4fac361f49bed8ce85ef646f2e4f833232ae9b8f7fd4a26"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 259368,
+          "length": 32421,
+          "sha256": "953671ac8938f578c5c521eb5229c03522ba05b1c2f80a5dfa752850c80a6a6d"
+        },
+        "lengths": {
+          "offset": 419368,
+          "bytes": 129684,
+          "length": 32421,
+          "sha256": "fd1bc5eca38d6b8ced13f169b33784c74d46becc901aefd2cbc620a46ace7803"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 87640,
+        "maximum": 3919211
+      },
+      "inputCopyBytes": 549052,
+      "sourceRecordFieldsSha256": "b17f1fa45004ec9beb5853667a16dfbeff4894088d1847b3d55f1b4fb55b7c32"
+    },
+    {
+      "group": 4,
+      "rowCount": 40000,
+      "uniqueCount": 28895,
+      "file": "group-04.bin",
+      "bytes": 506740,
+      "sha256": "02bd93828bb30f8ae9530744b6087399f0d22040bede2796e108d3f8c542e547",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "88bfb3301c41abe4bbae37cd25f9789ee60bc8b99946547abd126404c762bbf9"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 231160,
+          "length": 28895,
+          "sha256": "3d0392874f0071ffc3d54932089cab6ddb1023458950b5c4672bbde3083cadd8"
+        },
+        "lengths": {
+          "offset": 391160,
+          "bytes": 115580,
+          "length": 28895,
+          "sha256": "0296b2d2eaf101da39e08af3bd04949fe4e943a1847e77f4e4e20d666639a24e"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 9760,
+        "maximum": 5523882
+      },
+      "inputCopyBytes": 506740,
+      "sourceRecordFieldsSha256": "dcbfcaa9c4aa1873c2527c13a48e0323b5fcb6274c52d6380d47716f01752961"
+    },
+    {
+      "group": 5,
+      "rowCount": 50000,
+      "uniqueCount": 34677,
+      "file": "group-05.bin",
+      "bytes": 616124,
+      "sha256": "539599e5678985389c318e3530dd8ab4c825f3adbd3197de8a1454c76f7e750c",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 200000,
+          "length": 50000,
+          "sha256": "9e1271617786a28f14dca718a799dc540dbae757e6025098e1ef3877d4644699"
+        },
+        "offsets": {
+          "offset": 200000,
+          "bytes": 277416,
+          "length": 34677,
+          "sha256": "6925c829414ed0ebf11efb7a7af129b06868179069353ab0a3e49280134aa2d3"
+        },
+        "lengths": {
+          "offset": 477416,
+          "bytes": 138708,
+          "length": 34677,
+          "sha256": "4d90d76aca2c9562684bb243434bdfaadede214af245a8639df315cdd599646b"
+        }
+      },
+      "expected": {
+        "runEnd": 50000,
+        "minimum": 16440,
+        "maximum": 7078252
+      },
+      "inputCopyBytes": 616124,
+      "sourceRecordFieldsSha256": "7e213207925cd52ad15bac661b29e8c08221e58cbc63ded0e9b1f8e33099c5a5"
+    },
+    {
+      "group": 6,
+      "rowCount": 50000,
+      "uniqueCount": 34006,
+      "file": "group-06.bin",
+      "bytes": 608072,
+      "sha256": "e1f8ca1ba22c362a94f458b775e15bffcf2362a12eba7f177a97d2d218b36a49",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 200000,
+          "length": 50000,
+          "sha256": "f8b3b971c659d440c4b7e9a102ca0c19e4cfdec706418d471357038085b3d1e2"
+        },
+        "offsets": {
+          "offset": 200000,
+          "bytes": 272048,
+          "length": 34006,
+          "sha256": "e285e3f269c9450e04b0b78816dd4d5f33f29fbf9548fd1b9838fea2d7366173"
+        },
+        "lengths": {
+          "offset": 472048,
+          "bytes": 136024,
+          "length": 34006,
+          "sha256": "45459c7b0eba4f408c3cc67865a6fef7be867437378d4e44fc9000ba18720f62"
+        }
+      },
+      "expected": {
+        "runEnd": 50000,
+        "minimum": 80980,
+        "maximum": 8820948
+      },
+      "inputCopyBytes": 608072,
+      "sourceRecordFieldsSha256": "9bfbefbd4e23132cfd015585b8ab8a8d21049cc219c5cc835150d90ffba4085b"
+    },
+    {
+      "group": 7,
+      "rowCount": 40000,
+      "uniqueCount": 24271,
+      "file": "group-07.bin",
+      "bytes": 451252,
+      "sha256": "f9a7ce556a7af9c21b3ca7e043bfa8eb4088ed13920baf2c6ea797a3abc05fe9",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "0bf1a7def8db9bf48beff26be6217a7f02e3a23d563bfa9494c37d9b28a9610c"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 194168,
+          "length": 24271,
+          "sha256": "42692f993623474a9c3e3a903e02393fa5c5070cc46407ca8e75edb80952a629"
+        },
+        "lengths": {
+          "offset": 354168,
+          "bytes": 97084,
+          "length": 24271,
+          "sha256": "21accd964eba5118879ba2e891c5b97149ca7c698dfa0398ef6dbe102d1dfda5"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 2020,
+        "maximum": 10499123
+      },
+      "inputCopyBytes": 451252,
+      "sourceRecordFieldsSha256": "fb885f10fe1c3e02966964cfda80516f6cac1374345f406134a14eb62f38c5c7"
+    },
+    {
+      "group": 8,
+      "rowCount": 50000,
+      "uniqueCount": 31906,
+      "file": "group-08.bin",
+      "bytes": 582872,
+      "sha256": "f2e303e5ceae3843e5cdc74771e18c00cd0f9b5d1ba0dba072a4bf96399d74a6",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 200000,
+          "length": 50000,
+          "sha256": "751e436db0715b762ba609470ea4d862746a4a604ed46a6a2027536c3400e442"
+        },
+        "offsets": {
+          "offset": 200000,
+          "bytes": 255248,
+          "length": 31906,
+          "sha256": "0fbae61a85f59b03556937a13aa364824ec5ce60811f481713274c33e03806bf"
+        },
+        "lengths": {
+          "offset": 455248,
+          "bytes": 127624,
+          "length": 31906,
+          "sha256": "f74d3705e4879e8e0988001fb8d8ccafb1a74b8066164bf58a05412f0fbcf7c7"
+        }
+      },
+      "expected": {
+        "runEnd": 50000,
+        "minimum": 66520,
+        "maximum": 12025669
+      },
+      "inputCopyBytes": 582872,
+      "sourceRecordFieldsSha256": "0093a079a8629962ba1f5038d0b3527f97666b862f70ca6024865d7fe0ec5d4f"
+    },
+    {
+      "group": 9,
+      "rowCount": 40000,
+      "uniqueCount": 25774,
+      "file": "group-09.bin",
+      "bytes": 469288,
+      "sha256": "fe4de4a6988113e7f8e37a408977ee8b1a72974ef3c24056a07257ca065d2da1",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "aa24f09b7f1b827465d7dc99e0059a87e280ba15b87d1af213429419464f910c"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 206192,
+          "length": 25774,
+          "sha256": "ee3810b77facafa759dc64a8b155a9e4f7be852239927864b14e35c6be331078"
+        },
+        "lengths": {
+          "offset": 366192,
+          "bytes": 103096,
+          "length": 25774,
+          "sha256": "7fce7a7928444b3f56e21c74fac143bd319fe1fb3c50b855693832f76df10e90"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 89760,
+        "maximum": 13411141
+      },
+      "inputCopyBytes": 469288,
+      "sourceRecordFieldsSha256": "ab844be7e07f6d308f1cc108d75797674909b5ee1ac43d38b5b7666493bc8b8e"
+    },
+    {
+      "group": 10,
+      "rowCount": 40000,
+      "uniqueCount": 25109,
+      "file": "group-10.bin",
+      "bytes": 461308,
+      "sha256": "c6fada897b7a8378335182e1f73fa76a53aac67539581e8991c0faffd232f27f",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "d5518fbd9eeebdca56d0d233994fcccb4134423c8003ad09a59dc377a832a6d0"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 200872,
+          "length": 25109,
+          "sha256": "8d449126b84381f6701933dfbaadf7c5c6813c41a193755756dc954c8684e08b"
+        },
+        "lengths": {
+          "offset": 360872,
+          "bytes": 100436,
+          "length": 25109,
+          "sha256": "40c3020dbe79cc71d5e49d39fbe673dace0c6ea2fbba7f88de39c1338ee7f177"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 57160,
+        "maximum": 14952406
+      },
+      "inputCopyBytes": 461308,
+      "sourceRecordFieldsSha256": "ffffdb0dafb611a1a953d09f3c37b8912cf53fe3f754b2737be95c56881cb0a2"
+    },
+    {
+      "group": 11,
+      "rowCount": 40000,
+      "uniqueCount": 26102,
+      "file": "group-11.bin",
+      "bytes": 473224,
+      "sha256": "d6660c419045cfee17ad01a1710ff383545cec2a5a46d9ed888d44e0e26cb3c4",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 160000,
+          "length": 40000,
+          "sha256": "f33e59b75d0ea4d6ed62a06af7b2b7b6742d712a77b7fc417e589ecde9e9595e"
+        },
+        "offsets": {
+          "offset": 160000,
+          "bytes": 208816,
+          "length": 26102,
+          "sha256": "7211a3c6e05dd293bb799c94832988047a83df0318b1bc7108573742bd332d6e"
+        },
+        "lengths": {
+          "offset": 368816,
+          "bytes": 104408,
+          "length": 26102,
+          "sha256": "9e940358c518fb7cdceeea3e1b8524b75288436a5401bba55e68a0360fcbaf30"
+        }
+      },
+      "expected": {
+        "runEnd": 40000,
+        "minimum": 16480,
+        "maximum": 16526663
+      },
+      "inputCopyBytes": 473224,
+      "sourceRecordFieldsSha256": "1ddc358e5fd8af6caaeaaee2256ccdbffcb9b1c2b9e5baf05e233babeca12c34"
+    },
+    {
+      "group": 12,
+      "rowCount": 48299,
+      "uniqueCount": 35062,
+      "file": "group-12.bin",
+      "bytes": 613944,
+      "sha256": "98e92f74851ed631b7cbfe77b7ce15404378e4ee740f29e243c222e595cc1b7d",
+      "columns": {
+        "uniqueIndexList": {
+          "offset": 0,
+          "bytes": 193196,
+          "length": 48299,
+          "sha256": "b83518ee70b6927c4a986ac7c595c2b5559ac080be8b3ec48b2c7b95cb418155"
+        },
+        "offsets": {
+          "offset": 193200,
+          "bytes": 280496,
+          "length": 35062,
+          "sha256": "b62c96a8367f34fdd706dcdf71d6517f970497831c1a5a46683d6b12c887f1a7"
+        },
+        "lengths": {
+          "offset": 473696,
+          "bytes": 140248,
+          "length": 35062,
+          "sha256": "5910768e64ecec8579d7e649fa6126997302c646cf334b9e5c43ff7a9fd97e42"
+        }
+      },
+      "expected": {
+        "runEnd": 48299,
+        "minimum": 41780,
+        "maximum": 18305893
+      },
+      "inputCopyBytes": 613940,
+      "sourceRecordFieldsSha256": "d2f2b04835164b65d84b6bb3badd49d664f6849bd5b18aae88fc57df6a40a1c8"
+    }
+  ]
+}

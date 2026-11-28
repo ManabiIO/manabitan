@@ -1,0 +1,7 @@
+{
+  "priorCorrectnessReceiptSha256": "72421d9788ec4633a685e5b1cbd0e99022f23c6b988bfe7af6f44ad7b20a6e96",
+  "bridgePath": "/workspace/scratch/1c4137568bc6/experiments/native-record-fields/node-import-worker-bridge.mjs",
+  "bridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+  "remainingGap": "Exact enclosing historical harness hash e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef remains unlocated. Worker bridge, field-capture writer and tail probe have been located by exact recorded hashes. Original receipt is retained, with this later evidence supplement.",
+  "rawKernelContract": "No source input is modified under the adapter layout: result bytes [8,32), input bytes beginning at32. The raw ABI validates bounds/alignment but permits overlapping output; all stores occur after relevant reads. Public callers use the disjoint adapter layout."
+}

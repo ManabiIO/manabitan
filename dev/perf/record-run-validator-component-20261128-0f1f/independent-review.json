@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "history_audit",
+  "scope": "Independent source, lowered LLVM/WASM assembly, input-capture shape, and receipt-binding review; no candidate edits, native execution, or timing acquisition by reviewer",
+  "status": "no_remaining_component_correctness_blocker_after_detached_staging_fix",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineStoreSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+  "bindings": {
+    "record-run-validator.c": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/record-run-validator.c",
+      "sha256": "2972cdbb3d4d0250bc7e14041caec3ccc31d2f9dab3bcc38681cb911d6231181"
+    },
+    "record-run-validator.wasm": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/record-run-validator.wasm",
+      "sha256": "48abbcb5c6b44b9d19808df31ac351bd72ff99428327cfe73a6a425b32b6588c"
+    },
+    "native-validator.mjs": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/native-validator.mjs",
+      "sha256": "42738c623cb9bf30dcb79c24b4dd0cf1c97a3f00848fcd15571d5b39814db9a2"
+    },
+    "candidate-store.mjs": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/candidate-store.mjs",
+      "sha256": "334c0e94ee6c73ef561f7cd0a6d96dc23cb4b795d029897f9805a1f55a6b1ed2"
+    },
+    "build-receipt.json": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/build-receipt.json",
+      "sha256": "5d31e308e9ceccd60b6384dbfe669e569697a7dc64cce8c3e0b18456966dc915"
+    },
+    "check-component.mjs": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/check-component.mjs",
+      "sha256": "4b3eb2490c698dc580fd0fc73c8250f98d741312a651c8985d2f88d3c02efcb9"
+    },
+    "correctness.json": {
+      "path": "/workspace/scratch/0f1f4f8ea254/experiments/native-record-run-validator/correctness.json",
+      "sha256": "72421d9788ec4633a685e5b1cbd0e99022f23c6b988bfe7af6f44ad7b20a6e96"
+    }
+  },
+  "resolvedBlocker": {
+    "issue": "Factory-proven live IDs plus jointly detached offset/length metadata can pass the existing witness with equal zero lengths. Unguarded staging threw TypeError before the original unique-index RangeError.",
+    "fix": "Adapter catches intrinsic source-view construction and staging-copy errors, leaves source buffers unchanged, and returns null to the unchanged JS loop.",
+    "regressions": [
+      "jointly-detached-metadata",
+      "separately-detached-metadata"
+    ],
+    "observedReceiptResult": "Both decline before the kernel and preserve RangeError: Invalid resolved term content reference index: 0"
+  },
+  "findings": [
+    {
+      "area": "structural copy bound",
+      "result": "First runStart must be zero and U <= current run-window R. At most one native staging attempt occurs per writer invocation; copied payload 4R + 12U <= 16R. Subsequent offset-driven or row-cap splits use the original JS loop. The alternating 64-row split fixture makes one 280-byte copy and 63 fallbacks; U=1000/R=1 copies zero bytes."
+    },
+    {
+      "area": "raw ABI bounds",
+      "result": "All pointer/count span arithmetic widens to uint64 before addition/multiplication; 4-byte IDs/lengths, 8-byte offsets/result alignment and the entire 24-byte result are checked before reads/writes. Invalid ABI returns -1 without stores. Counts admitted by adapter address arithmetic fit uint32."
+    },
+    {
+      "area": "validation order",
+      "result": "ID bounds precede offset/length lookup, offset safe-integer-or-minus-one precedes invalid uint32 length sentinel, and both validations precede the prospective range-split test. Adjacent equal IDs skip exactly the same repeated validations as baseline."
+    },
+    {
+      "area": "numeric semantics",
+      "result": "The C offset predicate matches safe finite integer semantics for Float64 inputs, including sentinel -1 and signed zero. Minimum/maximum explicitly preserve Math.min/Math.max signed-zero selection. The exact 4294967294 range threshold and subtraction match baseline."
+    },
+    {
+      "area": "aliasing and writes",
+      "result": "Frozen lowered code has no stack-pointer references or helper imports and performs all four output stores in the common exit block after relevant reads. Raw ABI intentionally permits output/input overlap; its blanket input-immutability source comment is only true under adapter disjointness. Adapter result occupies [8,32), staged inputs start at32, and source buffers cannot equal owned native heap. Input-input aliases remain readonly."
+    },
+    {
+      "area": "JS witness",
+      "result": "Candidate invokes the adapter only after the existing per-run factory-origin and concrete/private typed-array witness, with fixed-span override behavior unchanged. No await is introduced in validation and witness/value checks are reacquired after awaited appends. Adapter additionally rejects resizable buffers and noninitial/unbounded windows; no cache of value validity spans an await."
+    },
+    {
+      "area": "failure fallback",
+      "result": "Memory-growth, staging-copy and kernel exceptions return to the original loop. Staging affects only the private heap, so the newly added copy catch preserves original first errors even after partial staging."
+    },
+    {
+      "area": "integration scope",
+      "result": "This remains a component-only injection. Production module loading, lifetime, initialization failure, memory accounting, and whole-import activation/latency have not been implemented or qualified."
+    }
+  ],
+  "verifiedAuthorCorrectnessReceipts": {
+    "rawCases": 4882,
+    "rawNativeCases": 4877,
+    "rawDeclinedCases": 5,
+    "rawAbiCases": 16,
+    "publicCases": 23,
+    "capturedGroups": 12,
+    "capturedRows": 528299,
+    "copyInputBytes": 6505556,
+    "peakHeapBytes": 655360,
+    "capturedFieldsSha256": "914b2b4b608bc72955c1e6dbfe3689444cb5f507b936ff3aaf40bbe9eeb2fc7b",
+    "note": "Reviewer verified seven build-file digests plus correctness runner/build bindings and inspected test coverage; reviewer did not repeat these native calls or interpret diagnostic clocks."
+  },
+  "captureProvenance": {
+    "capturePath": "/workspace/scratch/1c4137568bc6/profiles/current-sink-capture-jmdict/record-fields.v8",
+    "captureSha256": "c4d1a3cbc390f6fd40c11020dad58b33fe958869e71922220a2bfcce31c5e4e8",
+    "reportPath": "/workspace/scratch/1c4137568bc6/profiles/current-sink-capture-jmdict/report.json",
+    "reportSha256": "fbc3c6c75e943d8faffcdc072af532ab35c7d3672a019e55a28c95e5cc948d38",
+    "reportedSourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "reportedTrackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "captureRuntime": {
+      "node": "v24.22.3",
+      "v8": "13.6.233.17-node.63",
+      "platform": "linux",
+      "cpus": 9,
+      "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+      "hardwareConcurrency": 4,
+      "deviceMemory": 8
+    },
+    "matchedFiles": [
+      {
+        "role": "capture writer",
+        "path": "/workspace/scratch/1c4137568bc6/record-field-capture.mjs",
+        "sha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8"
+      },
+      {
+        "role": "worker bridge",
+        "path": "/workspace/scratch/1c4137568bc6/experiments/native-record-fields/node-import-worker-bridge.mjs",
+        "sha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb"
+      },
+      {
+        "role": "tail probe",
+        "path": "/workspace/scratch/1c4137568bc6/tail-probe.mjs",
+        "sha256": "6c69890860c9b4834599184003bcaa8365510f4eaf05bf0075ec9f29c04802d4"
+      }
+    ],
+    "unlocatedEnclosingHarnessSha256": "e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef",
+    "inputShapeAudit": "All12 captured reference arrays are private concrete Uint32/Float64/Uint32 columns, no fixed-span override fields are present, all factoryOrigin flags are true, and row/unique counts match the independently captured current canonical groups.",
+    "limitations": [
+      "The capture was from Node24.22.3 with in-memory SQLite and test OPFS, not Chromium; its timing is not part of the new component experiment.",
+      "The exact enclosing harness was not located in the focused source/evidence scan; capture writer, worker bridge and tail-probe identities are now located and verified.",
+      "Hook snapshots are at _encodeArtifactRecordFields, after run selection. Reconstructing factory objects verifies these fixed data groups, but does not itself establish original WeakMap/descriptor/prepared-range admission at the earlier validation call.",
+      "The component can prospectively benchmark this fixed hash-bound corpus with these caveats. Claims of current browser production activation and whole-import benefit require a fresh bound import qualification."
+    ]
+  }
+}

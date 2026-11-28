@@ -1,0 +1,33 @@
+{
+  "scope": "Portable source-bound compiler reproduction and fixed input unpacking; no product manifest change",
+  "nodeVersion": "v22.22.0",
+  "baselineHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineStorePath": "ext/js/dictionary/term-record-opfs-store.js",
+  "baselineStoreSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+  "baselineLoopSha256": "f6737163f7c737b3c1d8bb5dd899872b4d502cc3bd7f6d6f5488d9d9b2ff9a04",
+  "portableBaselineSha256": "10cfe61efbae4e9483c741da43ca3fcfe2009ff698b0e8027d9c66baab21345b",
+  "kernelSourceSha256": "2972cdbb3d4d0250bc7e14041caec3ccc31d2f9dab3bcc38681cb911d6231181",
+  "kernelSha256": "48abbcb5c6b44b9d19808df31ac351bd72ff99428327cfe73a6a425b32b6588c",
+  "adapterSha256": "42738c623cb9bf30dcb79c24b4dd0cf1c97a3f00848fcd15571d5b39814db9a2",
+  "arguments": [
+    "--target=wasm32",
+    "-O3",
+    "-nostdlib",
+    "-Wl,--no-entry",
+    "-Wl,--import-memory",
+    "-Wl,-z,stack-size=0",
+    "-Wl,--strip-all"
+  ],
+  "compilerVersion": "21.1.8",
+  "linkerVersion": "21.1.8",
+  "inputInventorySha256": "0e239198f8bdbab64a48bf9f3d2188bd73339ba222384996468f7062bf0d6532",
+  "inputArchive": {
+    "file": "inputs.bin.gz",
+    "format": "Deterministic gzip (mtime=0, no filename) of exact group payloads concatenated in inventory order",
+    "bytes": 1774944,
+    "sha256": "b5a2325f717beb3ae2ce1ea4d7b61e2935448870024402f81746eb23286bf693",
+    "uncompressedBytes": 6505560
+  },
+  "correctnessReceiptSha256": "72421d9788ec4633a685e5b1cbd0e99022f23c6b988bfe7af6f44ad7b20a6e96",
+  "independentReviewSha256": "aeade248d97f6ed5d1b0e998dff9a8badf0d1cee0d8c6e527c52458faab0e2fe"
+}

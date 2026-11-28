@@ -1,0 +1,366 @@
+{
+  "scope": "Untimed differential correctness and exact current-source captured fields. Metric clocks below are diagnostic phase accounting only; no candidate speed comparison.",
+  "node": "v22.22.0",
+  "v8": "12.4.254.21-node.33",
+  "buildReceiptSha256": "5d31e308e9ceccd60b6384dbfe669e569697a7dc64cce8c3e0b18456966dc915",
+  "runnerSha256": "4b3eb2490c698dc580fd0fc73c8250f98d741312a651c8985d2f88d3c02efcb9",
+  "rawCases": 4882,
+  "rawNativeCases": 4877,
+  "rawDeclinedCases": 5,
+  "rawAbiCases": 16,
+  "publicCases": [
+    {
+      "name": "factory",
+      "nativeCalls": 1,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "external",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "factory-proxy",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "replaced-reference",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      }
+    },
+    {
+      "name": "offset-accessor",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      }
+    },
+    {
+      "name": "shared",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "resizable",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": null
+    },
+    {
+      "name": "subclass",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "detached",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid resolved term content reference index: 0"
+      }
+    },
+    {
+      "name": "jointly-detached-metadata",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid resolved term content reference index: 0"
+      }
+    },
+    {
+      "name": "separately-detached-metadata",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid resolved term content reference index: 0"
+      }
+    },
+    {
+      "name": "fixed-length-override",
+      "nativeCalls": 0,
+      "fallbackCalls": 0,
+      "error": null
+    },
+    {
+      "name": "first-error-offset-before-length",
+      "nativeCalls": 1,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      }
+    },
+    {
+      "name": "split-row-length-error",
+      "nativeCalls": 1,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content length: 4294967295"
+      }
+    },
+    {
+      "name": "offset-range-split",
+      "nativeCalls": 1,
+      "fallbackCalls": 1,
+      "error": null
+    },
+    {
+      "name": "alternating-extreme-splits",
+      "nativeCalls": 1,
+      "fallbackCalls": 63,
+      "error": null
+    },
+    {
+      "name": "oversized-unused-metadata",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": null
+    },
+    {
+      "name": "after-await-offset",
+      "nativeCalls": 1,
+      "fallbackCalls": 1,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      }
+    },
+    {
+      "name": "after-await-length",
+      "nativeCalls": 1,
+      "fallbackCalls": 1,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content length: 4294967295"
+      }
+    },
+    {
+      "name": "after-await-id",
+      "nativeCalls": 1,
+      "fallbackCalls": 1,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid resolved term content reference index: 1"
+      }
+    },
+    {
+      "name": "after-await-replace",
+      "nativeCalls": 1,
+      "fallbackCalls": 0,
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      }
+    },
+    {
+      "name": "kernel-trap",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": null
+    },
+    {
+      "name": "memory-growth",
+      "nativeCalls": 0,
+      "fallbackCalls": 1,
+      "error": null
+    }
+  ],
+  "capturedGroups": [
+    {
+      "index": 0,
+      "rows": 50000,
+      "unique": 34951,
+      "runEnd": 50000,
+      "base": 0,
+      "outputBytes": 401376,
+      "outputSha256": "6d65bcc025e23a9f81a53e98652fdefb578b486a44d3c8c0797c19c3f45d1a3e"
+    },
+    {
+      "index": 1,
+      "rows": 40000,
+      "unique": 32856,
+      "runEnd": 40000,
+      "base": 7480,
+      "outputBytes": 321564,
+      "outputSha256": "d2cdcc2645131d62f42592374f543d601993ecb6dbb9225c46bfea68fc29ac0b"
+    },
+    {
+      "index": 2,
+      "rows": 40000,
+      "unique": 32421,
+      "runEnd": 40000,
+      "base": 87640,
+      "outputBytes": 321736,
+      "outputSha256": "b17f1fa45004ec9beb5853667a16dfbeff4894088d1847b3d55f1b4fb55b7c32"
+    },
+    {
+      "index": 3,
+      "rows": 40000,
+      "unique": 28895,
+      "runEnd": 40000,
+      "base": 9760,
+      "outputBytes": 321916,
+      "outputSha256": "dcbfcaa9c4aa1873c2527c13a48e0323b5fcb6274c52d6380d47716f01752961"
+    },
+    {
+      "index": 4,
+      "rows": 50000,
+      "unique": 34677,
+      "runEnd": 50000,
+      "base": 16440,
+      "outputBytes": 400988,
+      "outputSha256": "7e213207925cd52ad15bac661b29e8c08221e58cbc63ded0e9b1f8e33099c5a5"
+    },
+    {
+      "index": 5,
+      "rows": 50000,
+      "unique": 34006,
+      "runEnd": 50000,
+      "base": 80980,
+      "outputBytes": 401096,
+      "outputSha256": "9bfbefbd4e23132cfd015585b8ab8a8d21049cc219c5cc835150d90ffba4085b"
+    },
+    {
+      "index": 6,
+      "rows": 40000,
+      "unique": 24271,
+      "runEnd": 40000,
+      "base": 2020,
+      "outputBytes": 321008,
+      "outputSha256": "fb885f10fe1c3e02966964cfda80516f6cac1374345f406134a14eb62f38c5c7"
+    },
+    {
+      "index": 7,
+      "rows": 50000,
+      "unique": 31906,
+      "runEnd": 50000,
+      "base": 66520,
+      "outputBytes": 400684,
+      "outputSha256": "0093a079a8629962ba1f5038d0b3527f97666b862f70ca6024865d7fe0ec5d4f"
+    },
+    {
+      "index": 8,
+      "rows": 40000,
+      "unique": 25774,
+      "runEnd": 40000,
+      "base": 89760,
+      "outputBytes": 320808,
+      "outputSha256": "ab844be7e07f6d308f1cc108d75797674909b5ee1ac43d38b5b7666493bc8b8e"
+    },
+    {
+      "index": 9,
+      "rows": 40000,
+      "unique": 25109,
+      "runEnd": 40000,
+      "base": 57160,
+      "outputBytes": 320812,
+      "outputSha256": "ffffdb0dafb611a1a953d09f3c37b8912cf53fe3f754b2737be95c56881cb0a2"
+    },
+    {
+      "index": 10,
+      "rows": 40000,
+      "unique": 26102,
+      "runEnd": 40000,
+      "base": 16480,
+      "outputBytes": 320784,
+      "outputSha256": "1ddc358e5fd8af6caaeaaee2256ccdbffcb9b1c2b9e5baf05e233babeca12c34"
+    },
+    {
+      "index": 11,
+      "rows": 48299,
+      "unique": 35062,
+      "runEnd": 48299,
+      "base": 41780,
+      "outputBytes": 387188,
+      "outputSha256": "d2f2b04835164b65d84b6bb3badd49d664f6849bd5b18aae88fc57df6a40a1c8"
+    }
+  ],
+  "captureProvenance": {
+    "reportSha256": "fbc3c6c75e943d8faffcdc072af532ab35c7d3672a019e55a28c95e5cc948d38",
+    "captureSha256": "c4d1a3cbc390f6fd40c11020dad58b33fe958869e71922220a2bfcce31c5e4e8",
+    "captureWriter": "/workspace/scratch/1c4137568bc6/record-field-capture.mjs",
+    "captureWriterSha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8",
+    "source": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": {
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "test/fixtures/fused-score/node-opfs-adapter.mjs": "b8f79d909a7f6f7a7d35bc2b327cc5e642c3df6c05d19cd67c317cda40615bff"
+      },
+      "harnessSha256": "e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef",
+      "workerBridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+      "tailProbeSha256": "6c69890860c9b4834599184003bcaa8365510f4eaf05bf0075ec9f29c04802d4",
+      "recordCaptureSha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8"
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "substitutions": {
+      "sqlite": ":memory:",
+      "opfs": "test/fixtures/fused-score/node-opfs-adapter.mjs; atomic real files, in-memory copy per asynchronous write and file snapshot; Node fd sync handles for production index writes/reads",
+      "worker": "node:worker_threads with true transferable buffers; file fetch and sync access handle bridge",
+      "zipUseWebWorkers": false,
+      "skipImageMetadata": true
+    },
+    "gap": "Capture report binds a clean source commit and parser/WASM hashes; current checked-in record-store bytes are independently bound here. The exact enclosing capture harness and worker bridge were not found in place by their recorded hashes. Capture writer and its hash are available. These are component inputs from a Node OPFS substitution, not a browser timing or independent fixture re-acquisition."
+  },
+  "capturedFieldsSha256": "914b2b4b608bc72955c1e6dbfe3689444cb5f507b936ff3aaf40bbe9eeb2fc7b",
+  "capturePhaseDiagnostics": {
+    "moduleCompileMs": 0.04012000000000171,
+    "memoryAndInstantiateMs": 0.08704999999997654,
+    "initializationMs": 0.12740999999999758,
+    "calls": 12,
+    "fallbackCalls": 0,
+    "copyInputBytes": 6505556,
+    "growMs": 0.02161200000006147,
+    "copyMs": 0.8045199999999113,
+    "kernelMs": 3.25632000000013,
+    "guardAndResultMs": 0.14806799999996656,
+    "peakHeapBytes": 655360,
+    "peakRequiredBytes": 619444,
+    "failureCounts": {}
+  },
+  "abi": {
+    "imports": [
+      {
+        "module": "env",
+        "name": "memory",
+        "kind": "memory"
+      }
+    ],
+    "exports": [
+      {
+        "name": "validate_record_run",
+        "kind": "function"
+      }
+    ]
+  },
+  "status": "pass"
+}
