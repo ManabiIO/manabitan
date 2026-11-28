@@ -1,0 +1,14 @@
+{
+  "label": "build-candidate-libraries",
+  "command": [
+    "npm",
+    "run",
+    "build:libs"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855931.3272452,
+  "finishedEpoch": 1795855931.6734974,
+  "exitCode": 0,
+  "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

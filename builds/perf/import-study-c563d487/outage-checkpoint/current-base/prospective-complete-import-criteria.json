@@ -1,0 +1,34 @@
+{
+  "recordedAtUtc": "2026-11-28T08:29:57.209583+00:00",
+  "phase": "Before any execution of the separately composed current-base source; original VNDB full-host results still pending. Existing old-base JMdict/Jitendex full cells are inconclusive.",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateSourceSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "fullProductCommit": "Freeze exact six-file product after independent compiled-artifact/correctness audit; before any new full-browser acquisition",
+  "target": "VNDB; JMdict is the priority non-regression corpus, with Jitendex also required",
+  "performanceReviewThreshold": {
+    "minimumReplicatedMedianReductionPercent": 2,
+    "minimumFasterPairsPerIndependentHost": 9,
+    "totalPairsPerHost": 12,
+    "interval": "Descriptive paired 95% interval below zero on each independent host",
+    "controls": "Candidate effect must be meaningfully larger than identical-code control variation; never subtract controls",
+    "nonTargetPolicy": "Hold if either non-target corpus shows a replicated material regression. A slowdown of at least 1% on both hosts, at least 9/12 slower pairs on each, intervals above zero and controls materially smaller is a predeclared rejection condition. Inconclusive or discordant evidence must be reported and does not prove non-regression.",
+    "scope": "File input through completion of required post-UI work; fresh profiles, production defaults, uninstrumented timing",
+    "noPooling": true,
+    "noSelectedRetriesOrOutlierRemoval": true
+  },
+  "requiredGates": {
+    "correctness": "Exact source reproduction, focused regression suite, full unit/options suites, strict main/test types, lint, dry builds, full browser inventory/restart/canonical lookup/media validation",
+    "storage": "Unchanged complete validation receipts and exact corpus storage totals under the existing observer",
+    "memory": "Unchanged a7f7 prospective coverage and process-tree memory screens on both independent hosts; no new parser heap reservation",
+    "package": "Only js/dictionary/wasm/term-bank-parser.c and lib/term-bank-parser.wasm may differ in the release package; record exact compressed/uncompressed size changes and source-bound binary hashes for review"
+  },
+  "failurePolicy": "Preserve all observations and failed gates. Component or profiler gains cannot substitute for full-import qualification. No performance PR if the completed evidence does not justify review.",
+  "composition": {
+    "scope": "Original numeric suffix design composed with merged #972. Only successful suffix reuse adds bounded current score/non-null sequence span recovery for existing token-end outputs. No admission, cache, threshold, flags or persisted format changes.",
+    "patchSha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+    "previousCriteriaSha256": "08de789b815cf8fd18efd740e20a3068c06572afb15d0871d4b662f766f13f5c",
+    "thresholdsAndGatesCopiedUnchanged": true,
+    "noPoolingOrGainTransferFrom9e10": true,
+    "currentPreparationScope": "One separately source-bound build and correctness run only; not performance qualification."
+  }
+}

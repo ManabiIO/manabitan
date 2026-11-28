@@ -1,0 +1,15 @@
+{
+  "label": "dependencies-baseline",
+  "command": [
+    "cp",
+    "-a",
+    "/home/runner/work/manabitan/manabitan/node_modules",
+    "/home/runner/work/manabitan/numeric-suffix-972-baseline/node_modules"
+  ],
+  "cwd": "/home/runner/work/manabitan/manabitan",
+  "startedEpoch": 1795855924.4463785,
+  "finishedEpoch": 1795855925.632376,
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

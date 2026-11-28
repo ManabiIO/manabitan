@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "scope": "Root independent source-only composition review; no compilation/native execution/test run/timing",
+  "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineCSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+  "candidateCSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "oldCandidateCSha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+  "patchSha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+  "checks": {
+    "entireSuffixProofHelperByteIdenticalToFrozenOldCandidate": {
+      "sha256": "3db6efee084ab37be832a74bffbceceff6aa515da3957cf0eb86427140b3ac33",
+      "bytes": 1724
+    },
+    "admissionExpressionByteIdenticalToOldCandidate": true,
+    "mergedCompactListFunctionByteIdentical": {
+      "sha256": "1d51cda7460e1eb2a016601e4c21881af3b25efe0768f05c1eb6c4fde12fdf81",
+      "bytes": 1615
+    },
+    "entireBaselineTailAfterParsedRowBindingByteIdentical": {
+      "sha256": "4908347f0b79e2264faf4de30d0cde4ca153335735ee6f615d62b49bde68d0c9",
+      "bytes": 18729
+    },
+    "normalMergedScoreAndSequenceTokenEndWritesRetained": true
+  },
+  "reasoning": [
+    "Complete suffix proof already establishes current numeric grammar; the added bounded scalar spans recover existing caller outputs from the current rebased offsets.",
+    "Non-null score output always receives its end on successful reuse. Non-null sequence output receives its end only for a non-null current sequence; the null sentinel remains authoritative.",
+    "Caller initializes both ends; ordinary/failed-proof route preserves all merged assignments and compact-list parsing.",
+    "Full-byte proof remains necessary and includes closing bracket; current expression/reading validation, bank bounds and current-key identity are unchanged.",
+    "Existing late integer conversion and negative-zero fallback are byte-identical to merged baseline.",
+    "No extra allocation, cache, ABI, persisted format, threshold or admission change."
+  ],
+  "testReview": "Read the nine proposed cases at initial85c9/60c7 hashes; four short-three-row positives require exactly one suffix reuse with zero native fallback, numeric mismatches/old fallbacks preserve output, malformed later row publishes nothing. Final formatting/type preparation is pending.",
+  "decision": "No source compatibility blocker found. Exact compiled source and all correctness gates still required; old-base performance does not transfer to this composition."
+}

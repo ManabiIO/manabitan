@@ -1,0 +1,16 @@
+{
+  "label": "fetch-baseline",
+  "command": [
+    "git",
+    "fetch",
+    "--no-tags",
+    "origin",
+    "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  ],
+  "cwd": "/home/runner/work/manabitan/manabitan",
+  "startedEpoch": 1795855918.0527244,
+  "finishedEpoch": 1795855923.1565986,
+  "exitCode": 0,
+  "logSha256": "5f42a04f4676f5b1eb3aed638699f727ecc9ddbbcac3670ff4653c858a50404e",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

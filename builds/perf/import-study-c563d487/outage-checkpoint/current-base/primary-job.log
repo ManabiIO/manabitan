@@ -1,0 +1,550 @@
+﻿2026-11-28T08:51:38.3158898Z Current runner version: '2.338.2'
+2026-11-28T08:51:38.3174516Z ##[group]Runner Image Provisioner
+2026-11-28T08:51:38.3175121Z Hosted Compute Agent
+2026-11-28T08:51:38.3175483Z Version: 20261111.635
+2026-11-28T08:51:38.3175896Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T08:51:38.3176361Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T08:51:38.3176774Z Worker ID: {faedc360-4f9b-45e9-844b-8f7ac744b3df}
+2026-11-28T08:51:38.3177189Z Region: southcentralus
+2026-11-28T08:51:38.3177577Z Cloud: Azure
+2026-11-28T08:51:38.3177937Z ##[endgroup]
+2026-11-28T08:51:38.3179105Z ##[group]Operating System
+2026-11-28T08:51:38.3179596Z Ubuntu
+2026-11-28T08:51:38.3179935Z 26.04.1
+2026-11-28T08:51:38.3180354Z LTS
+2026-11-28T08:51:38.3180812Z ##[endgroup]
+2026-11-28T08:51:38.3181161Z ##[group]Runner Image
+2026-11-28T08:51:38.3181524Z Image: ubuntu-26.04
+2026-11-28T08:51:38.3181863Z Version: 20261122.9.1
+2026-11-28T08:51:38.3182669Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T08:51:38.3183547Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T08:51:38.3184107Z ##[endgroup]
+2026-11-28T08:51:38.3184789Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T08:51:38.3186196Z Contents: read
+2026-11-28T08:51:38.3186544Z Metadata: read
+2026-11-28T08:51:38.3186924Z ##[endgroup]
+2026-11-28T08:51:38.3188240Z Secret source: Actions
+2026-11-28T08:51:38.3188853Z Cache mode: write
+2026-11-28T08:51:38.3189375Z Prepare workflow directory
+2026-11-28T08:51:38.3567802Z Prepare all required actions
+2026-11-28T08:51:38.3600699Z Getting action download info
+2026-11-28T08:51:38.5926203Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T08:51:38.6738381Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-28T08:51:38.8304394Z Complete job name: Separate merged-source build and correctness gates
+2026-11-28T08:51:38.8761936Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:51:38.8762423Z with:
+2026-11-28T08:51:38.8762654Z   fetch-depth: 1
+2026-11-28T08:51:38.8762909Z   persist-credentials: false
+2026-11-28T08:51:38.8763189Z   repository: ManabiIO/manabitan
+2026-11-28T08:51:38.8765168Z   token: ***
+2026-11-28T08:51:38.8765395Z   ssh-strict: true
+2026-11-28T08:51:38.8765629Z   ssh-user: git
+2026-11-28T08:51:38.8765850Z   clean: true
+2026-11-28T08:51:38.8766091Z   sparse-checkout-cone-mode: true
+2026-11-28T08:51:38.8766371Z   fetch-tags: false
+2026-11-28T08:51:38.8766611Z   show-progress: true
+2026-11-28T08:51:38.8766850Z   lfs: false
+2026-11-28T08:51:38.8767075Z   submodules: false
+2026-11-28T08:51:38.8767316Z   set-safe-directory: true
+2026-11-28T08:51:38.8767592Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:51:38.8767922Z env:
+2026-11-28T08:51:38.8768188Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:38.8768690Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:38.8769233Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:38.8769777Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:38.8770218Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:38.8770636Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:38.8770923Z ##[endgroup]
+2026-11-28T08:51:39.0535736Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:51:39.0536741Z ##[group]Getting Git version info
+2026-11-28T08:51:39.0537114Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:51:39.0537933Z [command]/usr/bin/git version
+2026-11-28T08:51:39.0538433Z git version 2.56.1
+2026-11-28T08:51:39.0551149Z ##[endgroup]
+2026-11-28T08:51:39.0559999Z Temporarily overriding HOME='/home/runner/work/_temp/a708a4e4-bdd5-42a2-8479-498c99312a7d' before making global git config changes
+2026-11-28T08:51:39.0561573Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:51:39.0563747Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:51:39.0612877Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:51:39.0614977Z ##[group]Determining repository object format
+2026-11-28T08:51:39.0616308Z ##[endgroup]
+2026-11-28T08:51:39.0616902Z ##[group]Initializing the repository
+2026-11-28T08:51:39.0618597Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-28T08:51:39.0692033Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:51:39.0692931Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:51:39.0694341Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:51:39.0695073Z hint: call:
+2026-11-28T08:51:39.0695548Z hint:
+2026-11-28T08:51:39.0696101Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:51:39.0696727Z hint:
+2026-11-28T08:51:39.0697361Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:51:39.0698244Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:51:39.0698966Z hint:
+2026-11-28T08:51:39.0699429Z hint: 	git branch -m <name>
+2026-11-28T08:51:39.0699927Z hint:
+2026-11-28T08:51:39.0700649Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:51:39.0702027Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-28T08:51:39.0709311Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:51:39.0750356Z ##[endgroup]
+2026-11-28T08:51:39.0751164Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:51:39.0753215Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:51:39.0783410Z ##[endgroup]
+2026-11-28T08:51:39.0784614Z ##[group]Setting up auth
+2026-11-28T08:51:39.0785132Z Removing SSH command configuration
+2026-11-28T08:51:39.0788858Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:51:39.0825144Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:51:39.1192554Z Removing HTTP extra header
+2026-11-28T08:51:39.1199206Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:51:39.1235328Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:51:39.1440075Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:51:39.1444386Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:51:39.1470877Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:51:39.1673085Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:51:39.1701071Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:39.1725965Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:39.1753899Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:39.1783882Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:39.1806671Z ##[endgroup]
+2026-11-28T08:51:39.1807084Z ##[group]Fetching the repository
+2026-11-28T08:51:39.1812197Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d28d74f9c1047491670942ec6e0414cc9c823101:refs/remotes/origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.4758293Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:51:41.4759654Z  * [new ref]         d28d74f9c1047491670942ec6e0414cc9c823101 -> origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.4767759Z [command]/usr/bin/git branch --list --remote origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.4788565Z   origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.4794729Z [command]/usr/bin/git rev-parse refs/remotes/origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.4812788Z d28d74f9c1047491670942ec6e0414cc9c823101
+2026-11-28T08:51:41.4816418Z ##[endgroup]
+2026-11-28T08:51:41.4817139Z ##[group]Determining the checkout info
+2026-11-28T08:51:41.4817738Z ##[endgroup]
+2026-11-28T08:51:41.4820833Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T08:51:41.4861114Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T08:51:41.4884510Z ##[group]Checking out the ref
+2026-11-28T08:51:41.4887493Z [command]/usr/bin/git checkout --progress --force -B perf/numeric-suffix-972-build-20261128-c563d487 refs/remotes/origin/perf/numeric-suffix-972-build-20261128-c563d487
+2026-11-28T08:51:41.9412530Z Switched to a new branch 'perf/numeric-suffix-972-build-20261128-c563d487'
+2026-11-28T08:51:41.9415335Z branch 'perf/numeric-suffix-972-build-20261128-c563d487' set up to track 'origin/perf/numeric-suffix-972-build-20261128-c563d487'.
+2026-11-28T08:51:41.9444217Z ##[endgroup]
+2026-11-28T08:51:41.9484107Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:51:41.9504499Z d28d74f9c1047491670942ec6e0414cc9c823101
+2026-11-28T08:51:41.9514251Z ##[group]Removing auth
+2026-11-28T08:51:41.9514583Z Removing SSH command configuration
+2026-11-28T08:51:41.9515008Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:51:41.9540263Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:51:41.9751174Z Removing HTTP extra header
+2026-11-28T08:51:41.9754045Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:51:41.9779237Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:51:41.9979103Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:51:41.9982339Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:51:42.0003676Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:51:42.0004255Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:51:42.0004588Z includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:51:42.0004862Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:51:42.0010078Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:51:42.0028412Z /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0036277Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0079405Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:51:42.0099004Z /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0105953Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0133538Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:51:42.0151910Z /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0156887Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0182962Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:51:42.0199629Z /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0204995Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config
+2026-11-28T08:51:42.0230917Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:51:42.0431386Z Removing credentials config '/home/runner/work/_temp/git-credentials-01d76aac-38a3-4a13-8a75-97dd335c0cf8.config'
+2026-11-28T08:51:42.0438302Z ##[endgroup]
+2026-11-28T08:51:42.0638883Z Prepare all required actions
+2026-11-28T08:51:42.0639276Z Getting action download info
+2026-11-28T08:51:42.1727513Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-28T08:51:42.2680101Z ##[group]Run ./.github/actions/setup
+2026-11-28T08:51:42.2680539Z with:
+2026-11-28T08:51:42.2680764Z   node-version: 22.22.0
+2026-11-28T08:51:42.2680989Z env:
+2026-11-28T08:51:42.2681234Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:42.2681690Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:42.2682228Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:42.2682745Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:42.2683152Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:42.2683474Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:42.2683733Z ##[endgroup]
+2026-11-28T08:51:42.2719238Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-28T08:51:42.2771735Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-28T08:51:42.2771993Z with:
+2026-11-28T08:51:42.2772136Z   node-version: 22.22.0
+2026-11-28T08:51:42.2772283Z   cache: npm
+2026-11-28T08:51:42.2772417Z   always-auth: false
+2026-11-28T08:51:42.2772563Z   check-latest: false
+2026-11-28T08:51:42.2773991Z   token: ***
+2026-11-28T08:51:42.2774132Z env:
+2026-11-28T08:51:42.2774297Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:42.2774573Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:42.2774887Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:42.2775198Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:42.2775462Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:42.2775640Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:42.2775810Z ##[endgroup]
+2026-11-28T08:51:42.3640471Z Attempting to download 22.22.0...
+2026-11-28T08:51:42.3733983Z (node:2460) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:51:42.3734471Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:51:43.1452358Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-28T08:51:43.6331157Z Extracting ...
+2026-11-28T08:51:43.6419790Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/172a6382-c143-4d82-b89d-ff32d3f96827 -f /home/runner/work/_temp/264875ee-0924-44f4-8134-f4f1b1b5acd1
+2026-11-28T08:51:44.2152715Z Adding to the cache ...
+2026-11-28T08:51:45.8462706Z ##[group]Environment details
+2026-11-28T08:51:45.9953061Z node: v22.22.0
+2026-11-28T08:51:45.9953518Z npm: 10.9.4
+2026-11-28T08:51:45.9953635Z yarn: 1.22.22
+2026-11-28T08:51:45.9954010Z ##[endgroup]
+2026-11-28T08:51:45.9970985Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-28T08:51:46.0576517Z /home/runner/.npm
+2026-11-28T08:51:46.2209823Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T08:51:46.2277610Z (node:2460) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T08:51:47.0883944Z Received 63143556 of 63143556 (100.0%), 87.3 MBs/sec
+2026-11-28T08:51:47.0884420Z Cache Size: ~60 MB (63143556 B)
+2026-11-28T08:51:47.0975197Z [command]/usr/bin/tar -xf /home/runner/work/_temp/36b0f8de-3e47-4dde-9c25-9ad55be9268b/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-28T08:51:47.2920221Z Cache restored successfully
+2026-11-28T08:51:47.2951168Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T08:51:47.3104252Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=5038]
+2026-11-28T08:51:47.3106739Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-28T08:51:47.3111824Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-28T08:51:47.3113065Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-28T08:51:47.3136999Z ##[group]Run npm ci
+2026-11-28T08:51:47.3137176Z [36;1mnpm ci[0m
+2026-11-28T08:51:47.3169623Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:51:47.3169825Z env:
+2026-11-28T08:51:47.3169981Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:47.3170260Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:47.3170686Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:47.3171000Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:47.3171275Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:47.3171431Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:47.3171582Z ##[endgroup]
+2026-11-28T08:51:47.6762976Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-28T08:51:50.5647865Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-28T08:51:51.2246647Z 
+2026-11-28T08:51:51.2247320Z > yomitan@0.0.0 prepare
+2026-11-28T08:51:51.2247633Z > husky
+2026-11-28T08:51:51.2247733Z 
+2026-11-28T08:51:51.2672241Z 
+2026-11-28T08:51:51.2673069Z added 670 packages, and audited 671 packages in 4s
+2026-11-28T08:51:51.2673291Z 
+2026-11-28T08:51:51.2673579Z 232 packages are looking for funding
+2026-11-28T08:51:51.2673944Z   run `npm fund` for details
+2026-11-28T08:51:51.2681227Z 
+2026-11-28T08:51:51.2681739Z found 0 vulnerabilities
+2026-11-28T08:51:51.3255779Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=4014]
+2026-11-28T08:51:51.3257924Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-28T08:51:51.3272394Z ##[group]Run npm run build:libs
+2026-11-28T08:51:51.3272590Z [36;1mnpm run build:libs[0m
+2026-11-28T08:51:51.3272743Z [36;1mnpm run license-report:html[0m
+2026-11-28T08:51:51.3300093Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:51:51.3300275Z env:
+2026-11-28T08:51:51.3300568Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:51.3300822Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:51.3301121Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:51.3301415Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:51.3301651Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:51.3301815Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:51.3301961Z ##[endgroup]
+2026-11-28T08:51:51.3904608Z 
+2026-11-28T08:51:51.3905358Z > yomitan@0.0.0 build:libs
+2026-11-28T08:51:51.3905781Z > node ./dev/bin/build-libs.js
+2026-11-28T08:51:51.3905982Z 
+2026-11-28T08:51:51.7335444Z 
+2026-11-28T08:51:51.7336246Z > yomitan@0.0.0 license-report:html
+2026-11-28T08:51:51.7337192Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-28T08:51:51.7337754Z 
+2026-11-28T08:51:52.0736721Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=747]
+2026-11-28T08:51:52.0765170Z ##[group]Run mkdir -p "$OUTPUT_ROOT"
+2026-11-28T08:51:52.0765377Z [36;1mmkdir -p "$OUTPUT_ROOT"[0m
+2026-11-28T08:51:52.0765535Z [36;1msudo apt-get update[0m
+2026-11-28T08:51:52.0765740Z [36;1msudo apt-get install -y --no-install-recommends clang-21 lld-21[0m
+2026-11-28T08:51:52.0792690Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:51:52.0792874Z env:
+2026-11-28T08:51:52.0793027Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:52.0793279Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:52.0793571Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:52.0793863Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:52.0794098Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:52.0794256Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:52.0794409Z ##[endgroup]
+2026-11-28T08:51:52.1370798Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-28T08:51:52.1728646Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-28T08:51:52.1729449Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-28T08:51:52.1811569Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-28T08:51:52.1835426Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-28T08:51:52.1847508Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-28T08:51:52.1991290Z Get:7 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [192 kB]
+2026-11-28T08:51:52.2121156Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [928 kB]
+2026-11-28T08:51:52.2151279Z Get:14 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [178 kB]
+2026-11-28T08:51:52.2166640Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [205 kB]
+2026-11-28T08:51:52.2202780Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [402 kB]
+2026-11-28T08:51:52.2203862Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [127 kB]
+2026-11-28T08:51:52.2208072Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-28T08:51:52.2247662Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-28T08:51:52.2329968Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [765 kB]
+2026-11-28T08:51:52.2345355Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [165 kB]
+2026-11-28T08:51:52.2372966Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [229 kB]
+2026-11-28T08:51:52.2373848Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [74.4 kB]
+2026-11-28T08:51:52.2788830Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-28T08:51:52.2814294Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-28T08:51:54.3958067Z Fetched 5199 kB in 0s (17.2 MB/s)
+2026-11-28T08:51:54.7921582Z Reading package lists...
+2026-11-28T08:51:54.8195884Z Reading package lists...
+2026-11-28T08:51:54.9207018Z Building dependency tree...
+2026-11-28T08:51:54.9212495Z Reading state information...
+2026-11-28T08:51:54.9434860Z clang-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T08:51:54.9435322Z lld-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T08:51:54.9782943Z Solving dependencies...
+2026-11-28T08:51:55.0599478Z 0 upgraded, 0 newly installed, 0 to remove and 38 not upgraded.
+2026-11-28T08:51:55.0644876Z ##[group]Run python3 "$TOOL_ROOT/prepare-and-validate.py"
+2026-11-28T08:51:55.0645147Z [36;1mpython3 "$TOOL_ROOT/prepare-and-validate.py"[0m
+2026-11-28T08:51:55.0672859Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:51:55.0673053Z env:
+2026-11-28T08:51:55.0673208Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:51:55.0673491Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:51:55.0673809Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:51:55.0674122Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:51:55.0674369Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:51:55.0674533Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:51:55.0674695Z ##[endgroup]
+2026-11-28T08:52:03.1571579Z NUMERIC_972_BUILD_STEP {"label":"fetch-baseline","command":["git","fetch","--no-tags","origin","dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"],"cwd":"/home/runner/work/manabitan/manabitan","startedEpoch":1795855918.0527244,"finishedEpoch":1795855923.1565986,"exitCode":0,"logSha256":"5f42a04f4676f5b1eb3aed638699f727ecc9ddbbcac3670ff4653c858a50404e","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:03.1572501Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:52:03.1572771Z  * branch                dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16 -> FETCH_HEAD
+2026-11-28T08:52:03.1572929Z 
+2026-11-28T08:52:03.6212453Z NUMERIC_972_BUILD_STEP {"label":"create-baseline","command":["git","worktree","add","--detach","/home/runner/work/manabitan/numeric-suffix-972-baseline","dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"],"cwd":"/home/runner/work/manabitan/manabitan","startedEpoch":1795855923.1569018,"finishedEpoch":1795855923.6207721,"exitCode":0,"logSha256":"9b6b0d9f739d4a183e0bb26e956e0283cc0b4305462cd0e6706559339be2fadd","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:03.6213481Z Preparing worktree (detached HEAD dcfc02a0a)
+2026-11-28T08:52:03.6213859Z HEAD is now at dcfc02a0a Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127
+2026-11-28T08:52:03.6214086Z 
+2026-11-28T08:52:04.1558221Z NUMERIC_972_BUILD_STEP {"label":"create-candidate","command":["git","worktree","add","--detach","/home/runner/work/manabitan/numeric-suffix-972-candidate","dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"],"cwd":"/home/runner/work/manabitan/manabitan","startedEpoch":1795855923.6210737,"finishedEpoch":1795855924.1553307,"exitCode":0,"logSha256":"9b6b0d9f739d4a183e0bb26e956e0283cc0b4305462cd0e6706559339be2fadd","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:04.1559871Z Preparing worktree (detached HEAD dcfc02a0a)
+2026-11-28T08:52:04.1560260Z HEAD is now at dcfc02a0a Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127
+2026-11-28T08:52:04.1560714Z 
+2026-11-28T08:52:05.6328951Z NUMERIC_972_BUILD_STEP {"label":"dependencies-baseline","command":["cp","-a","/home/runner/work/manabitan/manabitan/node_modules","/home/runner/work/manabitan/numeric-suffix-972-baseline/node_modules"],"cwd":"/home/runner/work/manabitan/manabitan","startedEpoch":1795855924.4463785,"finishedEpoch":1795855925.632376,"exitCode":0,"logSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:05.6329870Z 
+2026-11-28T08:52:06.8949347Z NUMERIC_972_BUILD_STEP {"label":"dependencies-candidate","command":["cp","-a","/home/runner/work/manabitan/manabitan/node_modules","/home/runner/work/manabitan/numeric-suffix-972-candidate/node_modules"],"cwd":"/home/runner/work/manabitan/manabitan","startedEpoch":1795855925.7586899,"finishedEpoch":1795855926.8944726,"exitCode":0,"logSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:06.8950594Z 
+2026-11-28T08:52:10.1511895Z NUMERIC_972_BUILD_STEP {"label":"reproduce-baseline","command":["npm","run","build:dictionary-wasm","--","--check"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-baseline","startedEpoch":1795855926.8947556,"finishedEpoch":1795855930.150634,"exitCode":0,"logSha256":"b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:10.1513086Z 
+2026-11-28T08:52:10.1513230Z > yomitan@0.0.0 build:dictionary-wasm
+2026-11-28T08:52:10.1513548Z > node ./dev/bin/build-dictionary-wasm.js --check
+2026-11-28T08:52:10.1513722Z 
+2026-11-28T08:52:10.1513819Z {
+2026-11-28T08:52:10.1513990Z   "mode": "check",
+2026-11-28T08:52:10.1514195Z   "toolchain": {
+2026-11-28T08:52:10.1514413Z     "compilerVersion": "21.1.8",
+2026-11-28T08:52:10.1514644Z     "linkerVersion": "21.1.8"
+2026-11-28T08:52:10.1514845Z   },
+2026-11-28T08:52:10.1515210Z   "targets": [
+2026-11-28T08:52:10.1515473Z     {
+2026-11-28T08:52:10.1515792Z       "name": "term-content-canonical-scan-v1.wasm",
+2026-11-28T08:52:10.1516216Z       "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+2026-11-28T08:52:10.1516550Z     },
+2026-11-28T08:52:10.1516712Z     {
+2026-11-28T08:52:10.1516923Z       "name": "term-bank-parser.wasm",
+2026-11-28T08:52:10.1517304Z       "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+2026-11-28T08:52:10.1517625Z     }
+2026-11-28T08:52:10.1517786Z   ]
+2026-11-28T08:52:10.1517943Z }
+2026-11-28T08:52:10.1518032Z 
+2026-11-28T08:52:10.1537196Z NUMERIC_972_BUILD_STEP {"label":"apply-check","command":["git","apply","--check","/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-972-build-c563d487/candidate.patch"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855930.1509223,"finishedEpoch":1795855930.153435,"exitCode":0,"logSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:10.1538561Z 
+2026-11-28T08:52:10.1558584Z NUMERIC_972_BUILD_STEP {"label":"apply-patch","command":["git","apply","/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-972-build-c563d487/candidate.patch"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855930.153599,"finishedEpoch":1795855930.1556344,"exitCode":0,"logSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:10.1559700Z 
+2026-11-28T08:52:11.3274193Z NUMERIC_972_BUILD_STEP {"label":"build-native-candidate","command":["npm","run","build:dictionary-wasm","--","--write"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855930.1558533,"finishedEpoch":1795855931.3269389,"exitCode":0,"logSha256":"51a978ac06d848c3818ff93748ba0fe25752eacf04f1d566f244fff4b5797e6e","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:11.3274985Z 
+2026-11-28T08:52:11.3275086Z > yomitan@0.0.0 build:dictionary-wasm
+2026-11-28T08:52:11.3275307Z > node ./dev/bin/build-dictionary-wasm.js --write
+2026-11-28T08:52:11.3275438Z 
+2026-11-28T08:52:11.3275490Z {
+2026-11-28T08:52:11.3275603Z   "mode": "write",
+2026-11-28T08:52:11.3275725Z   "toolchain": {
+2026-11-28T08:52:11.3275884Z     "compilerVersion": "21.1.8",
+2026-11-28T08:52:11.3276031Z     "linkerVersion": "21.1.8"
+2026-11-28T08:52:11.3276159Z   },
+2026-11-28T08:52:11.3276268Z   "targets": [
+2026-11-28T08:52:11.3276379Z     {
+2026-11-28T08:52:11.3276538Z       "name": "term-content-canonical-scan-v1.wasm",
+2026-11-28T08:52:11.3276805Z       "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+2026-11-28T08:52:11.3277024Z     },
+2026-11-28T08:52:11.3277150Z     {
+2026-11-28T08:52:11.3277284Z       "name": "term-bank-parser.wasm",
+2026-11-28T08:52:11.3277529Z       "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+2026-11-28T08:52:11.3277946Z     }
+2026-11-28T08:52:11.3278048Z   ]
+2026-11-28T08:52:11.3278156Z }
+2026-11-28T08:52:11.3278211Z 
+2026-11-28T08:52:11.6740080Z NUMERIC_972_BUILD_STEP {"label":"build-candidate-libraries","command":["npm","run","build:libs"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855931.3272452,"finishedEpoch":1795855931.6734974,"exitCode":0,"logSha256":"eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:11.6742215Z 
+2026-11-28T08:52:11.6742345Z > yomitan@0.0.0 build:libs
+2026-11-28T08:52:11.6742579Z > node ./dev/bin/build-libs.js
+2026-11-28T08:52:11.6742675Z 
+2026-11-28T08:52:11.6742678Z 
+2026-11-28T08:52:12.8313834Z NUMERIC_972_BUILD_STEP {"label":"reproduce-candidate","command":["npm","run","build:dictionary-wasm","--","--check"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855931.6737993,"finishedEpoch":1795855932.8308268,"exitCode":0,"logSha256":"17b79907e5174222df6a0582804dd7fb04a0e93fe1545bd401f3fee658fd1d72","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:12.8315065Z 
+2026-11-28T08:52:12.8315197Z > yomitan@0.0.0 build:dictionary-wasm
+2026-11-28T08:52:12.8315419Z > node ./dev/bin/build-dictionary-wasm.js --check
+2026-11-28T08:52:12.8315553Z 
+2026-11-28T08:52:12.8315606Z {
+2026-11-28T08:52:12.8315730Z   "mode": "check",
+2026-11-28T08:52:12.8315853Z   "toolchain": {
+2026-11-28T08:52:12.8315994Z     "compilerVersion": "21.1.8",
+2026-11-28T08:52:12.8316146Z     "linkerVersion": "21.1.8"
+2026-11-28T08:52:12.8316278Z   },
+2026-11-28T08:52:12.8316382Z   "targets": [
+2026-11-28T08:52:12.8316497Z     {
+2026-11-28T08:52:12.8316660Z       "name": "term-content-canonical-scan-v1.wasm",
+2026-11-28T08:52:12.8316922Z       "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+2026-11-28T08:52:12.8317131Z     },
+2026-11-28T08:52:12.8317242Z     {
+2026-11-28T08:52:12.8317373Z       "name": "term-bank-parser.wasm",
+2026-11-28T08:52:12.8317611Z       "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+2026-11-28T08:52:12.8317827Z     }
+2026-11-28T08:52:12.8317927Z   ]
+2026-11-28T08:52:12.8318026Z }
+2026-11-28T08:52:12.8318084Z 
+2026-11-28T08:52:15.5668958Z NUMERIC_972_BUILD_STEP {"label":"scoped-lint","command":["npx","eslint","test/term-bank-row-suffix-reuse.test.js","test/term-bank-row-suffix-token-end-fixtures.js","test/term-bank-row-suffix-token-ends.test.js"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855932.95889,"finishedEpoch":1795855935.5663247,"exitCode":0,"logSha256":"4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:15.5671941Z ▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+2026-11-28T08:52:15.5672448Z 
+2026-11-28T08:52:15.5672652Z     ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+2026-11-28T08:52:15.5673196Z       2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+2026-11-28T08:52:15.5673632Z         ╵                                 ~~~~~~
+2026-11-28T08:52:15.5673803Z 
+2026-11-28T08:52:15.5674225Z   This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+2026-11-28T08:52:15.5674664Z 
+2026-11-28T08:52:15.5674757Z     package.json:11:12:
+2026-11-28T08:52:15.5675033Z       11 │     "type": "module",
+2026-11-28T08:52:15.5675304Z          ╵             ~~~~~~~~
+2026-11-28T08:52:15.5675443Z 
+2026-11-28T08:52:15.5675778Z   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+2026-11-28T08:52:15.5676144Z 
+2026-11-28T08:52:15.5676149Z 
+2026-11-28T08:52:22.4687240Z NUMERIC_972_BUILD_STEP {"label":"strict-main-types","command":["npm","run","test:ts:main"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855935.5666366,"finishedEpoch":1795855942.4682055,"exitCode":0,"logSha256":"ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:22.4688007Z 
+2026-11-28T08:52:22.4688085Z > yomitan@0.0.0 test:ts:main
+2026-11-28T08:52:22.4688290Z > npx tsc --noEmit --project jsconfig.json
+2026-11-28T08:52:22.4688409Z 
+2026-11-28T08:52:22.4688413Z 
+2026-11-28T08:52:38.2698888Z NUMERIC_972_BUILD_STEP {"label":"strict-test-types","command":["npm","run","test:ts:test"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855942.4685485,"finishedEpoch":1795855958.2693107,"exitCode":0,"logSha256":"483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:52:38.2700078Z 
+2026-11-28T08:52:38.2700188Z > yomitan@0.0.0 test:ts:test
+2026-11-28T08:52:38.2700762Z > npx tsc --noEmit --project test/jsconfig.typecheck.json
+2026-11-28T08:52:38.2700970Z 
+2026-11-28T08:52:38.2700975Z 
+2026-11-28T08:55:31.9705440Z NUMERIC_972_BUILD_STEP {"label":"complete-unit-suite","command":["npm","run","test:unit","--","--maxWorkers=2"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795855958.2696373,"finishedEpoch":1795856131.969368,"exitCode":0,"logSha256":"e375ec48d509c04d1c088d4937e9cc12767fc2c1d4dd511a9d7b9e36479d034a","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:55:31.9712535Z PASS reset can remove gapped interrupted segments without publishing them
+2026-11-28T08:55:31.9713101Z START successful finalization remains idempotent and snapshots permit next import
+2026-11-28T08:55:31.9713675Z PASS successful finalization remains idempotent and snapshots permit next import
+2026-11-28T08:55:31.9714199Z START failed rollback cannot re-enable admission over unverified content
+2026-11-28T08:55:31.9714691Z PASS failed rollback cannot re-enable admission over unverified content
+2026-11-28T08:55:31.9715961Z  [32m✓[39m test/term-content-cursor-recovery.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 142[2mms[22m[39m
+2026-11-28T08:55:31.9716471Z  [32m✓[39m test/term-bank-glossary-semantics.test.js [2m([22m[2m2 tests[22m[2m)[22m[32m 137[2mms[22m[39m
+2026-11-28T08:55:31.9717363Z  [32m✓[39m test/weighted-lru-map-state.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 109[2mms[22m[39m
+2026-11-28T08:55:31.9717825Z  [32m✓[39m test/term-bank-native-field-parity.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 101[2mms[22m[39m
+2026-11-28T08:55:31.9718300Z  [32m✓[39m test/term-record-builder-boundaries.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 118[2mms[22m[39m
+2026-11-28T08:55:31.9718801Z  [32m✓[39m test/raw-term-content-reference-validation.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 105[2mms[22m[39m
+2026-11-28T08:55:31.9719301Z  [32m✓[39m test/raw-term-content-shared-glossary.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 107[2mms[22m[39m
+2026-11-28T08:55:31.9719813Z  [32m✓[39m test/dictionary-importer-row-materialization.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 111[2mms[22m[39m
+2026-11-28T08:55:31.9720322Z  [32m✓[39m test/anki-controller-promise-settlement.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 28[2mms[22m[39m
+2026-11-28T08:55:31.9721031Z  [32m✓[39m test/web-client-deadline.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 259[2mms[22m[39m
+2026-11-28T08:55:31.9721542Z  [32m✓[39m test/term-record-compaction-alias.test.js [2m([22m[2m46 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-11-28T08:55:31.9721771Z 
+2026-11-28T08:55:31.9721948Z [2m Test Files [22m [1m[32m671 passed[39m[22m[90m (671)[39m
+2026-11-28T08:55:31.9722323Z [2m      Tests [22m [1m[32m15180 passed[39m[22m[2m | [22m[33m47 skipped[39m[90m (15227)[39m
+2026-11-28T08:55:31.9722611Z [2m   Start at [22m 08:52:38
+2026-11-28T08:55:31.9723120Z [2m   Duration [22m 173.28s[2m (transform 7.66s, setup 3.13s, import 67.16s, tests 218.71s, environment 233ms)[22m
+2026-11-28T08:55:31.9723336Z 
+2026-11-28T08:55:31.9723344Z 
+2026-11-28T08:55:32.5184979Z NUMERIC_972_BUILD_STEP {"label":"options-unit-suite","command":["npm","run","test:unit:options","--","--maxWorkers=2"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795856131.9712358,"finishedEpoch":1795856132.5179555,"exitCode":0,"logSha256":"af3d2335e35c97870b0600de9bce4f0187cabc02993eef859721bdf5082f3e48","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:55:32.5185833Z 
+2026-11-28T08:55:32.5185954Z > yomitan@0.0.0 test:unit:options
+2026-11-28T08:55:32.5186229Z > vitest run --config test/data/vitest.options.config.json --maxWorkers=2
+2026-11-28T08:55:32.5186403Z 
+2026-11-28T08:55:32.5186407Z 
+2026-11-28T08:55:32.5186902Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/runner/work/manabitan/numeric-suffix-972-candidate[39m
+2026-11-28T08:55:32.5187135Z 
+2026-11-28T08:55:32.5187417Z  [32m✓[39m test/options-util.test.js [2m([22m[2m32 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+2026-11-28T08:55:32.5187616Z 
+2026-11-28T08:55:32.5187777Z [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+2026-11-28T08:55:32.5188060Z [2m      Tests [22m [1m[32m32 passed[39m[22m[90m (32)[39m
+2026-11-28T08:55:32.5188295Z [2m   Start at [22m 08:55:32
+2026-11-28T08:55:32.5188642Z [2m   Duration [22m 285ms[2m (transform 88ms, setup 0ms, import 116ms, tests 88ms, environment 0ms)[22m
+2026-11-28T08:55:32.5188847Z 
+2026-11-28T08:55:32.5188851Z 
+2026-11-28T08:55:32.8741093Z NUMERIC_972_BUILD_STEP {"label":"all-dry-build-targets","command":["npm","run","test:build"],"cwd":"/home/runner/work/manabitan/numeric-suffix-972-candidate","startedEpoch":1795856132.5183299,"finishedEpoch":1795856132.8734956,"exitCode":0,"logSha256":"f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda","scope":"Build/correctness command, not a benchmark observation"}
+2026-11-28T08:55:32.8742397Z 
+2026-11-28T08:55:32.8742529Z > yomitan@0.0.0 test:build
+2026-11-28T08:55:32.8742847Z > node ./dev/bin/build.js --dryRun --all
+2026-11-28T08:55:32.8743031Z 
+2026-11-28T08:55:32.8743126Z Version: 0.0.0.0...
+2026-11-28T08:55:32.8743346Z Building chrome...
+2026-11-28T08:55:32.8743459Z 
+2026-11-28T08:55:32.8743561Z Building chrome-dev...
+2026-11-28T08:55:32.8743968Z 
+2026-11-28T08:55:32.8744044Z Building chrome-playwright...
+2026-11-28T08:55:32.8744148Z 
+2026-11-28T08:55:32.8744211Z Building firefox...
+2026-11-28T08:55:32.8744284Z 
+2026-11-28T08:55:32.8744349Z Building firefox-dev...
+2026-11-28T08:55:32.8744434Z 
+2026-11-28T08:55:32.8744499Z Building firefox-android...
+2026-11-28T08:55:32.8744592Z 
+2026-11-28T08:55:32.8744648Z Building edge...
+2026-11-28T08:55:32.8744720Z 
+2026-11-28T08:55:32.8744783Z Restoring manifest...
+2026-11-28T08:55:32.8744867Z 
+2026-11-28T08:55:32.8842912Z NUMERIC_972_BUILD_RESULT {"status":"Build and all declared correctness gates passed; no performance observations acquired","baseline":{"commit":"dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16","cSha256":"7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a","wasmSha256":"5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"},"productFilesSha256":{"ext/js/dictionary/wasm/term-bank-parser.c":"f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f","dev/data/dictionary-wasm/term-bank-parser.wasm":"a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968","dev/data/dictionary-wasm/manifest.json":"c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e","test/term-bank-row-suffix-reuse.test.js":"f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f","test/term-bank-row-suffix-token-end-fixtures.js":"85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc","test/term-bank-row-suffix-token-ends.test.js":"cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd"},"fixedSource":true,"oldBaselineGainTransferred":false,"productPrOpened":false,"performanceQualificationPending":true}
+2026-11-28T08:55:32.8952390Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-28T08:55:32.8952620Z with:
+2026-11-28T08:55:32.8952749Z   name: numeric-suffix-972-build-1
+2026-11-28T08:55:32.8952910Z   path: builds/numeric-suffix-972-build
+2026-11-28T08:55:32.8953076Z   if-no-files-found: warn
+2026-11-28T08:55:32.8953226Z   retention-days: 14
+2026-11-28T08:55:32.8953357Z   compression-level: 6
+2026-11-28T08:55:32.8953483Z   overwrite: false
+2026-11-28T08:55:32.8953621Z   include-hidden-files: false
+2026-11-28T08:55:32.8953759Z env:
+2026-11-28T08:55:32.8953902Z   TOOL_ROOT: dev/perf/numeric-suffix-972-build-c563d487
+2026-11-28T08:55:32.8954168Z   OUTPUT_ROOT: /home/runner/work/manabitan/manabitan/builds/numeric-suffix-972-build
+2026-11-28T08:55:32.8954473Z   BASE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-baseline
+2026-11-28T08:55:32.8954777Z   CANDIDATE_ROOT: /home/runner/work/manabitan/manabitan/../numeric-suffix-972-candidate
+2026-11-28T08:55:32.8955052Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:55:32.8955211Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:55:32.8955362Z ##[endgroup]
+2026-11-28T08:55:33.0023362Z (node:14864) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:55:33.0023911Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:55:33.0117460Z With the provided path, there will be 44 files uploaded
+2026-11-28T08:55:33.0120745Z Artifact name is valid!
+2026-11-28T08:55:33.0121059Z Root directory input is valid!
+2026-11-28T08:55:33.3046500Z Beginning upload of artifact content to blob storage
+2026-11-28T08:55:33.3515270Z (node:14864) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T08:55:33.6170281Z Uploaded bytes 136615
+2026-11-28T08:55:33.6628038Z Finished uploading artifact content to blob storage!
+2026-11-28T08:55:33.6628717Z SHA256 digest of uploaded artifact zip is 8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db
+2026-11-28T08:55:33.6629830Z Finalizing artifact upload
+2026-11-28T08:55:34.0139562Z Artifact numeric-suffix-972-build-1.zip successfully finalized. Artifact ID 15256173851
+2026-11-28T08:55:34.0140902Z Artifact numeric-suffix-972-build-1 has been successfully uploaded! Final size is 136615 bytes. Artifact ID is 15256173851
+2026-11-28T08:55:34.0144646Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/46126462448/artifacts/15256173851
+2026-11-28T08:55:34.0336301Z Post job cleanup.
+2026-11-28T08:55:34.0338960Z ##[start-action display=Setup node;id=__78794ee5-2e1c-4b13-9a45-66afafb66d91.__actions_setup-node]
+2026-11-28T08:55:34.0383807Z Post job cleanup.
+2026-11-28T08:55:34.1176679Z (node:14877) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:55:34.1177172Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:55:34.1178690Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-28T08:55:34.1242003Z ##[end-action id=__78794ee5-2e1c-4b13-9a45-66afafb66d91.__actions_setup-node;outcome=success;conclusion=success;duration_ms=90]
+2026-11-28T08:55:34.1292468Z Post job cleanup.
+2026-11-28T08:55:34.1825947Z [command]/usr/bin/git version
+2026-11-28T08:55:34.1861616Z git version 2.56.1
+2026-11-28T08:55:34.1889580Z Temporarily overriding HOME='/home/runner/work/_temp/2bd3702c-0271-4801-8a72-af95eeeed124' before making global git config changes
+2026-11-28T08:55:34.1890182Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:55:34.1894057Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:55:34.1923089Z Removing SSH command configuration
+2026-11-28T08:55:34.1927642Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:55:34.1957199Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:55:34.2232404Z Removing HTTP extra header
+2026-11-28T08:55:34.2233232Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:55:34.2261905Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:55:34.2569881Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:55:34.2570728Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:55:34.2600586Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:55:34.2994234Z Cleaning up orphan processes
+2026-11-28T08:55:34.3265305Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,15 @@
+{
+  "label": "dependencies-candidate",
+  "command": [
+    "cp",
+    "-a",
+    "/home/runner/work/manabitan/manabitan/node_modules",
+    "/home/runner/work/manabitan/numeric-suffix-972-candidate/node_modules"
+  ],
+  "cwd": "/home/runner/work/manabitan/manabitan",
+  "startedEpoch": 1795855925.7586899,
+  "finishedEpoch": 1795855926.8944726,
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

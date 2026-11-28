@@ -1,0 +1,2980 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "scope": "Separate evidence-only remote outage checkpoint; does not replace the larger unpublished local stage.",
+  "currentBaseStatusCutoffUtc": "2026-11-28 09:10:19 UTC",
+  "previousCheckpoint": {
+    "commit": "9ecd38c1ac0af11d3cecbc7425b6a28409b3f4e8",
+    "tree": "ce3c6523d81fd79c6ed9224ad8f7dad6a2ec7e56",
+    "canonicalPath": "dev/perf/import-experiments-20260914.md",
+    "canonicalSha256": "65298eff9b2d1f7afa215c7951ee97630e5d1eb14276e68f620e72303691aa16",
+    "canonicalGitBlob": "6af42f4e52709d93987d321f2a17c1e0decedbeb",
+    "canonicalBytes": 131748,
+    "evidenceIndexPath": "builds/perf/import-study-c563d487/prior-streak-followup/index.json",
+    "evidenceIndexSha256": "410b90173e5cec3f99846a91144386833e2f0c11b4d064c89702a57cb79987d7"
+  },
+  "canonicalUpdate": {
+    "path": "dev/perf/import-experiments-20260914.md",
+    "bytes": 141846,
+    "sha256": "2579e29641e7ca406d1d6fa756d4e91176d347570ae0b640e636bc76996f3881",
+    "gitBlobSha": "feb460d211185c818be66f0b37e6431a24f95218",
+    "insertionBytes": 10098,
+    "insertionSha256": "a45abfb1a9f6958fc3b069a50acc4b34c6aa09af29f6fd7db509ee19972df82a",
+    "priorBytesReconstructExactly": true,
+    "precisionEdit": {
+      "removedClause": ", with 85,314 key-predicate/helper opportunities",
+      "otherBytesUnchanged": true,
+      "previousInsertionSha256": "628734c51d6b9c2fdb7f2f1847fa3c8a0c3df3cabc49faa00a71ebf1023c0222",
+      "finalInsertionSha256": "a45abfb1a9f6958fc3b069a50acc4b34c6aa09af29f6fd7db509ee19972df82a",
+      "reason": "Avoid conflating selector-helper opportunities with bounded pure-key comparison calls; precise 44,102 proof/8,059,365-byte counters retained."
+    }
+  },
+  "localStageNotReplaced": {
+    "absolutePath": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128",
+    "preparationStateSha256": "a2a69b6c5f2e43e5d46a3b12c8af9b244c9cd8add7171842735c96a389172079",
+    "evidenceFileCount": 54,
+    "evidenceBytes": 15245415,
+    "finalCanonicalWritten": false,
+    "finalEvidenceIndexWritten": false,
+    "availability": "Executor unavailable; last recorded state only. No file deleted or overwritten by this remote checkpoint.",
+    "publicationStatus": "Not published; later recovery must preserve the exact bytes and histories.",
+    "generatedInputStorageRepresentation": {
+      "sha256": "a65983c78af9b20f878f51082b45925e9d72a1de19316ed8bc659d165ce9c7a0",
+      "sourceRelativeToExperiments": "jmdict-prior-streak-selector-negative/input-storage-representation.json",
+      "redundantGeneratedRawBytesRemoved": 106230012,
+      "exactRetainedDeflateBytes": 588127,
+      "byteIdentityVerifiedBeforeRemoval": true,
+      "rawObservationBytesRemoved": false,
+      "exactReceiptIncludedHere": false
+    }
+  },
+  "frozenBaselines": {
+    "old": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "oldTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "current": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "currentTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "currentContainsPr972": true,
+    "noGainOrCompatibilityTransfer": true
+  },
+  "fixtures": {
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dictionaries": [
+      {
+        "dictionary": "jmdict",
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-11-22]",
+        "label": "JMdict",
+        "mediaBytes": 0,
+        "mediaFiles": 0,
+        "release": "2026-11-22",
+        "revision": "JMdict.2026-11-22",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "termRows": 528299,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+      },
+      {
+        "dictionary": "jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "label": "Jitendex",
+        "mediaBytes": 4992155,
+        "mediaFiles": 236,
+        "release": "2026.10.03.0",
+        "revision": "2026.10.03.0",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ],
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+      },
+      {
+        "dictionary": "vndb",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB",
+        "mediaBytes": 188131284,
+        "mediaFiles": 146570,
+        "mediaRows": 146570,
+        "optional": true,
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      }
+    ]
+  },
+  "numericOldBaseline": {
+    "runId": 46113243549,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549",
+    "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "tooling": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "counts": {
+      "taggedRecords": 330,
+      "reports": 252,
+      "candidatePairs": 72,
+      "identicalCodePairs": 24,
+      "separateMemoryObservations": 24,
+      "qualifiedMemoryObservations": 21,
+      "rawScansReported": 2300
+    },
+    "remoteReconciliation": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-primary-reconciliation.json",
+      "sha256": "84eb7e657512458939d4f63dd60c966be3b28390760af86345d6bc745f1aae47",
+      "bytes": 85563,
+      "gitBlobSha": "29554213b34186ff73f092fe37e96594f453b371"
+    },
+    "remoteReconciliationSource": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/reconcile-primary-records.mjs",
+      "sha256": "32afa26a2d996d19463b3294776b4b5b24eb0c1b3c90ff600ed05e61054950fc",
+      "bytes": 9003,
+      "gitBlobSha": "e700b72bca214fd3cdae86b4aba062946fa8d1f2"
+    },
+    "cells": [
+      {
+        "cell": "jmdict-AB",
+        "jobId": 140903281788,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-AB/primary-records.jsonl",
+          "sha256": "07b60acf90675fc8895aa7a25a20690c69db9de2398a2e334daa6e8f263dfa3e",
+          "bytes": 362962,
+          "gitBlobSha": "70bf97043158f4c2c1dc1aee079d532917c14c58"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.5291434063464782,
+            1.9683295555438018
+          ],
+          "equalWorkChangePercent": 1.0569126751822866,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.16572357123693093,
+          "ratios": [
+            0.9895040131714374,
+            0.9888548057259773,
+            0.9854112778065124,
+            0.9698942229455073,
+            1.007181515403824,
+            1.071420888458604,
+            1.0236146095717262,
+            1.0977590460526687,
+            1.0157519815391498,
+            0.9810911345319399,
+            0.984005854066558,
+            1.0150391866130803
+          ],
+          "worstPairChangePercent": 9.775904605266872,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 971.8000000000029,
+              "comparisonMs": 961.6000000000058,
+              "ratio": 0.9895040131714374
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 978,
+              "comparisonMs": 967.1000000000058,
+              "ratio": 0.9888548057259773
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 966.5,
+              "comparisonMs": 952.3999999999942,
+              "ratio": 0.9854112778065124
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 983.1999999999825,
+              "comparisonMs": 953.6000000000058,
+              "ratio": 0.9698942229455073
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 960.8000000000175,
+              "comparisonMs": 967.7000000000116,
+              "ratio": 1.007181515403824
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 929.7000000000116,
+              "comparisonMs": 996.0999999999767,
+              "ratio": 1.071420888458604
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 952.8000000000466,
+              "comparisonMs": 975.2999999999884,
+              "ratio": 1.0236146095717262
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 972.7999999999884,
+              "comparisonMs": 1067.9000000000233,
+              "ratio": 1.0977590460526687
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 996.6999999999534,
+              "comparisonMs": 1012.4000000000233,
+              "ratio": 1.0157519815391498
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 967.7999999999884,
+              "comparisonMs": 949.5,
+              "ratio": 0.9810911345319399
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 956.5999999999767,
+              "comparisonMs": 941.3000000000466,
+              "ratio": 0.984005854066558
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 944.1999999999534,
+              "comparisonMs": 958.4000000000233,
+              "ratio": 1.0150391866130803
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 9.775904605266872
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.0386373078460687,
+            5.136047247423781
+          ],
+          "equalWorkChangePercent": 1.459528863039039,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.8949552864506938,
+          "ratios": [
+            1.0204124579124518,
+            1.0513604724742378,
+            0.9896136269215393,
+            0.9974866478165618
+          ],
+          "worstPairChangePercent": 5.136047247423781,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 950.3999999999942,
+              "comparisonMs": 969.7999999999884,
+              "ratio": 1.0204124579124518
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 948.1999999999534,
+              "comparisonMs": 996.9000000000233,
+              "ratio": 1.0513604724742378
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 962.7999999999884,
+              "comparisonMs": 952.8000000000466,
+              "ratio": 0.9896136269215393
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 954.8999999999651,
+              "comparisonMs": 952.5,
+              "ratio": 0.9974866478165618
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.136047247423781
+        },
+        "memory": {
+          "emittedGatePassed": true,
+          "rawScanCount": 271,
+          "coverage": [
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 207.093144,
+              "failures": [],
+              "allObservedSampleCount": 67
+            },
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 205.971604,
+              "failures": [],
+              "allObservedSampleCount": 67
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 196.578553,
+              "failures": [],
+              "allObservedSampleCount": 69
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 231.355743,
+              "failures": [],
+              "allObservedSampleCount": 68
+            }
+          ],
+          "qualifiedObservations": 4
+        },
+        "storageBytes": 43520477,
+        "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+        "originalArtifact": {
+          "id": 15255570810,
+          "name": "numeric-suffix-c563d487-jmdict-AB",
+          "size_in_bytes": 35566204,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255570810",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255570810/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:12:24Z",
+          "expires_at": "2026-12-12T08:12:21Z",
+          "updated_at": "2026-11-28T08:12:24Z",
+          "digest": "sha256:404a1ab001d880b783ac55c5e8a658cc51f40c5f82638dbf5bb42873a219c79c",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "70f43f9a75b066319db95e51a55c6fb55832b33034e3503b3ecf98f1b6ed107e",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      },
+      {
+        "cell": "jmdict-BA",
+        "jobId": 140903281805,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-BA/primary-records.jsonl",
+          "sha256": "f961ea4cc6507e1d56ada826059ff9bfa5f3592c1fe167ffe0051a174fd858e8",
+          "bytes": 362865,
+          "gitBlobSha": "fcbb07de936ce1f3ec4fd3328b04e6f3c0c25aab"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -2.0294996615738636,
+            1.901317454077267
+          ],
+          "equalWorkChangePercent": 0.2529040081686862,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.21205695051211837,
+          "ratios": [
+            1.0098284833301043,
+            0.9835590845399291,
+            0.9746645397391389,
+            0.9919856684895343,
+            1.015565317035894,
+            1.022461032045651,
+            1.0774449936996842,
+            1.026827565572976,
+            1.0003854307187947,
+            0.9953734302709629,
+            0.9758509222285935,
+            0.9596758633995859
+          ],
+          "worstPairChangePercent": 7.744499369968416,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1037.8000000000175,
+              "comparisonMs": 1048,
+              "ratio": 1.0098284833301043
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1070.5,
+              "comparisonMs": 1052.8999999999942,
+              "ratio": 0.9835590845399291
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1065.7000000000116,
+              "comparisonMs": 1038.7000000000116,
+              "ratio": 0.9746645397391389
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1060.6000000000058,
+              "comparisonMs": 1052.1000000000058,
+              "ratio": 0.9919856684895343
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1047.2000000000116,
+              "comparisonMs": 1063.5,
+              "ratio": 1.015565317035894
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1032.9000000000233,
+              "comparisonMs": 1056.0999999999767,
+              "ratio": 1.022461032045651
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1031.7000000000116,
+              "comparisonMs": 1111.5999999999767,
+              "ratio": 1.0774449936996842
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1002.7000000000116,
+              "comparisonMs": 1029.600000000035,
+              "ratio": 1.026827565572976
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1037.8000000000466,
+              "comparisonMs": 1038.2000000000116,
+              "ratio": 1.0003854307187947
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1059.100000000035,
+              "comparisonMs": 1054.2000000000116,
+              "ratio": 0.9953734302709629
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1051.7999999999884,
+              "comparisonMs": 1026.4000000000233,
+              "ratio": 0.9758509222285935
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1036.5999999999767,
+              "comparisonMs": 994.7999999999884,
+              "ratio": 0.9596758633995859
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 7.744499369968416
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -2.045542261676103,
+            1.4880952380952328
+          ],
+          "equalWorkChangePercent": -0.282724790373845,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.2504095414946894,
+          "ratios": [
+            1.0069672924327293,
+            0.988024516737377,
+            1.0148809523809523,
+            0.979544577383239
+          ],
+          "worstPairChangePercent": 1.4880952380952328,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1033.4000000000233,
+              "comparisonMs": 1040.6000000000058,
+              "ratio": 1.0069672924327293
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1060.5,
+              "comparisonMs": 1047.7999999999884,
+              "ratio": 0.988024516737377
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1008,
+              "comparisonMs": 1023,
+              "ratio": 1.0148809523809523
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1036.4000000000233,
+              "comparisonMs": 1015.2000000000116,
+              "ratio": 0.979544577383239
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 2.045542261676103
+        },
+        "memory": {
+          "emittedGatePassed": true,
+          "rawScanCount": 393,
+          "coverage": [
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 120.99272,
+              "failures": [],
+              "allObservedSampleCount": 97
+            },
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 118.408273,
+              "failures": [],
+              "allObservedSampleCount": 99
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 137.64584,
+              "failures": [],
+              "allObservedSampleCount": 97
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 127.664578,
+              "failures": [],
+              "allObservedSampleCount": 100
+            }
+          ],
+          "qualifiedObservations": 4
+        },
+        "storageBytes": 43520477,
+        "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+        "originalArtifact": {
+          "id": 15255527579,
+          "name": "numeric-suffix-c563d487-jmdict-BA",
+          "size_in_bytes": 35680155,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255527579",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255527579/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:19:40Z",
+          "expires_at": "2026-12-12T08:19:38Z",
+          "updated_at": "2026-11-28T08:19:40Z",
+          "digest": "sha256:86b7e9e8905eaf4269b5559f56e9ee3a2172b9995bbe41b685ec557c6a01e80e",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "21036998a0a361af6d2664c174dc2218a65a731d86f19a19c49b88bc7cead611",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      },
+      {
+        "cell": "jitendex-AB",
+        "jobId": 140903281821,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-AB/primary-records.jsonl",
+          "sha256": "15325a4df4808ce97f6274976581f6ff68f388286da6e873bc6ac9e67f9557cf",
+          "bytes": 361895,
+          "gitBlobSha": "73159afaf9257056e9d23b565e317314d630cd7c"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.9675644488865496,
+            1.3976195856380436
+          ],
+          "equalWorkChangePercent": -0.3046068839587024,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.19095474233700171,
+          "ratios": [
+            1.0267016215166378,
+            1.0135274776890641,
+            1.0019029495718363,
+            0.9717847769028821,
+            0.9540136789057078,
+            0.9936466411286393,
+            1.014424914023697,
+            0.9888639341193869,
+            0.9942779555814236,
+            1.011256319755756,
+            1.0342818296591707,
+            0.9641115303211026
+          ],
+          "worstPairChangePercent": 3.4281829659170704,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1029.9000000000087,
+              "comparisonMs": 1057.3999999999942,
+              "ratio": 1.0267016215166378
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1064.5,
+              "comparisonMs": 1078.9000000000087,
+              "ratio": 1.0135274776890641
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1051,
+              "comparisonMs": 1053,
+              "ratio": 1.0019029495718363
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1066.8000000000175,
+              "comparisonMs": 1036.7000000000116,
+              "ratio": 0.9717847769028821
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1111.1999999999825,
+              "comparisonMs": 1060.1000000000058,
+              "ratio": 0.9540136789057078
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1070.3000000000175,
+              "comparisonMs": 1063.5,
+              "ratio": 0.9936466411286393
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1046.7999999999884,
+              "comparisonMs": 1061.8999999999942,
+              "ratio": 1.014424914023697
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1068.6000000000058,
+              "comparisonMs": 1056.6999999999825,
+              "ratio": 0.9888639341193869
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1031.1000000000058,
+              "comparisonMs": 1025.2000000000116,
+              "ratio": 0.9942779555814236
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1048.3000000000175,
+              "comparisonMs": 1060.0999999999767,
+              "ratio": 1.011256319755756
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1029.6999999999534,
+              "comparisonMs": 1065,
+              "ratio": 1.0342818296591707
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1086.7000000000116,
+              "comparisonMs": 1047.6999999999534,
+              "ratio": 0.9641115303211026
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 4.598632109429223
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.60402872330343,
+            2.677622039633798
+          ],
+          "equalWorkChangePercent": -0.10420120305011382,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.7062924307864815,
+          "ratios": [
+            0.9957770270270271,
+            0.9839597127669657,
+            0.9900971243572432,
+            1.026776220396338
+          ],
+          "worstPairChangePercent": 2.677622039633798,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1065.6000000000058,
+              "comparisonMs": 1061.1000000000058,
+              "ratio": 0.9957770270270271
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1072.2999999999884,
+              "comparisonMs": 1055.1000000000058,
+              "ratio": 0.9839597127669657
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1050.2000000000116,
+              "comparisonMs": 1039.7999999999884,
+              "ratio": 0.9900971243572432
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1034.5,
+              "comparisonMs": 1062.2000000000116,
+              "ratio": 1.026776220396338
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 2.677622039633798
+        },
+        "memory": {
+          "emittedGatePassed": true,
+          "rawScanCount": 270,
+          "coverage": [
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 138.272523,
+              "failures": [],
+              "allObservedSampleCount": 67
+            },
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 129.073579,
+              "failures": [],
+              "allObservedSampleCount": 66
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 121.995791,
+              "failures": [],
+              "allObservedSampleCount": 69
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 141.821274,
+              "failures": [],
+              "allObservedSampleCount": 68
+            }
+          ],
+          "qualifiedObservations": 4
+        },
+        "storageBytes": 67466332,
+        "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+        "originalArtifact": {
+          "id": 15255097791,
+          "name": "numeric-suffix-c563d487-jitendex-AB",
+          "size_in_bytes": 35578772,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255097791",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255097791/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:18:18Z",
+          "expires_at": "2026-12-12T08:18:16Z",
+          "updated_at": "2026-11-28T08:18:18Z",
+          "digest": "sha256:ad933c09311ee43a24d94bde837910000b6e86cc06c0081b629e33053acdd628",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "285bd502fbd92b7bdfaa79cc480f1f24a5b58ab6780f3c0593df792fb124eb08",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      },
+      {
+        "cell": "jitendex-BA",
+        "jobId": 140903281858,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-BA/primary-records.jsonl",
+          "sha256": "7c87a2b4fe183bf12d719ff98ea52f59409289e6694b47e8a9a602362d53d0bf",
+          "bytes": 362502,
+          "gitBlobSha": "664fff3a5c63e879082b04a5b117e0fceaa33cbf"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.560149532950561,
+            1.1585166131202085
+          ],
+          "equalWorkChangePercent": 0.09941181343768868,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": 0.34029899896741433,
+          "ratios": [
+            1.0103298296484446,
+            1.0100234784179476,
+            1.0128405026139595,
+            0.9701479237212621,
+            1.0590255220417417,
+            0.9995536909756315,
+            0.9942399423994032,
+            1.007252289003717,
+            0.9909382151030068,
+            0.9778587942379818,
+            1.0228701594532819,
+            0.9602836879432727
+          ],
+          "worstPairChangePercent": 5.902552204174172,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1103.5999999999767,
+              "comparisonMs": 1115,
+              "ratio": 1.0103298296484446
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1107.399999999965,
+              "comparisonMs": 1118.5,
+              "ratio": 1.0100234784179476
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1090.2999999999884,
+              "comparisonMs": 1104.2999999999884,
+              "ratio": 1.0128405026139595
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1122.2000000000116,
+              "comparisonMs": 1088.7000000000116,
+              "ratio": 0.9701479237212621
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1077.5,
+              "comparisonMs": 1141.0999999999767,
+              "ratio": 1.0590255220417417
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1120.2999999999884,
+              "comparisonMs": 1119.7999999999884,
+              "ratio": 0.9995536909756315
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1111.100000000035,
+              "comparisonMs": 1104.7000000000116,
+              "ratio": 0.9942399423994032
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1103.0999999999767,
+              "comparisonMs": 1111.0999999999767,
+              "ratio": 1.007252289003717
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1092.5,
+              "comparisonMs": 1082.600000000035,
+              "ratio": 0.9909382151030068
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1124.5999999999767,
+              "comparisonMs": 1099.7000000000116,
+              "ratio": 0.9778587942379818
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1097.5,
+              "comparisonMs": 1122.5999999999767,
+              "ratio": 1.0228701594532819
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1128,
+              "comparisonMs": 1083.2000000000116,
+              "ratio": 0.9602836879432727
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.902552204174172
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.5980928836285657,
+            1.7404635224085085
+          ],
+          "equalWorkChangePercent": 0.23913820847252243,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.42896151460201093,
+          "ratios": [
+            0.9840190711637143,
+            1.0100036049025938,
+            0.9985756253894464,
+            1.017404635224085
+          ],
+          "worstPairChangePercent": 1.7404635224085085,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1132.5999999999767,
+              "comparisonMs": 1114.5,
+              "ratio": 0.9840190711637143
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1109.600000000035,
+              "comparisonMs": 1120.6999999999534,
+              "ratio": 1.0100036049025938
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1123.3000000000466,
+              "comparisonMs": 1121.7000000000116,
+              "ratio": 0.9985756253894464
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1108.9000000000233,
+              "comparisonMs": 1128.2000000000116,
+              "ratio": 1.017404635224085
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.7404635224085085
+        },
+        "memory": {
+          "emittedGatePassed": true,
+          "rawScanCount": 348,
+          "coverage": [
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 85.250307,
+              "failures": [],
+              "allObservedSampleCount": 88
+            },
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 106.260753,
+              "failures": [],
+              "allObservedSampleCount": 86
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 96.322725,
+              "failures": [],
+              "allObservedSampleCount": 87
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 95.472259,
+              "failures": [],
+              "allObservedSampleCount": 87
+            }
+          ],
+          "qualifiedObservations": 4
+        },
+        "storageBytes": 67466332,
+        "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+        "originalArtifact": {
+          "id": 15255119565,
+          "name": "numeric-suffix-c563d487-jitendex-BA",
+          "size_in_bytes": 35666782,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255119565",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255119565/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:19:46Z",
+          "expires_at": "2026-12-12T08:19:43Z",
+          "updated_at": "2026-11-28T08:19:46Z",
+          "digest": "sha256:c51e6257ecb7793089f0c8e830270ac62dc8438cb529610fc1ff56f2eca057c9",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "fa6ef6b73831385d22ad35f0b52f56a710a0a11937b96ab5822dea01bbe158eb",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      },
+      {
+        "cell": "vndb-AB",
+        "jobId": 140903281809,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-AB/primary-records.jsonl",
+          "sha256": "ea04f794d55add66e9c15bf082f9b2209bf81cfee01432dec0a550fb10d43fe0",
+          "bytes": 377434,
+          "gitBlobSha": "aaa6fe748fab06b3d6441751d1e84f39ef01e6a9"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -6.164366084966932,
+            -2.786535510611099
+          ],
+          "equalWorkChangePercent": -4.6041956420952435,
+          "fasterPairs": 12,
+          "medianPairedChangePercent": -3.963495532166561,
+          "ratios": [
+            0.9662020844684275,
+            0.9768825697735732,
+            0.9715368331168946,
+            0.9394881233504648,
+            0.9467923595664258,
+            0.9751752957008167,
+            0.9186831738885691,
+            0.9587109592861287,
+            0.9727324566708834,
+            0.9254948602497663,
+            0.9620191300705401,
+            0.9372245549501964
+          ],
+          "worstPairChangePercent": -2.311743022642676,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 5689.700000000012,
+              "comparisonMs": 5497.400000000023,
+              "ratio": 0.9662020844684275
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 5697,
+              "comparisonMs": 5565.300000000047,
+              "ratio": 0.9768825697735732
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 5621.299999999988,
+              "comparisonMs": 5461.299999999988,
+              "ratio": 0.9715368331168946
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 5759.199999999953,
+              "comparisonMs": 5410.699999999953,
+              "ratio": 0.9394881233504648
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 5664.599999999977,
+              "comparisonMs": 5363.199999999953,
+              "ratio": 0.9467923595664258
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 5647.600000000093,
+              "comparisonMs": 5507.400000000023,
+              "ratio": 0.9751752957008167
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 6041.800000000047,
+              "comparisonMs": 5550.5,
+              "ratio": 0.9186831738885691
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 5737.599999999977,
+              "comparisonMs": 5500.70000000007,
+              "ratio": 0.9587109592861287
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 5787.099999999977,
+              "comparisonMs": 5629.300000000047,
+              "ratio": 0.9727324566708834
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 5885.5,
+              "comparisonMs": 5447,
+              "ratio": 0.9254948602497663
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 5729.199999999953,
+              "comparisonMs": 5511.600000000093,
+              "ratio": 0.9620191300705401
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 5763.40000000014,
+              "comparisonMs": 5401.600000000093,
+              "ratio": 0.9372245549501964
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 8.131682611143088
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.5426910415369588,
+            1.5125164690398485
+          ],
+          "equalWorkChangePercent": -0.21830813383741932,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.41957214372395635,
+          "ratios": [
+            1.0151251646903985,
+            0.9932756289832803,
+            0.9845730895846304,
+            0.9983329281422406
+          ],
+          "worstPairChangePercent": 1.5125164690398485,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 5692.5,
+              "comparisonMs": 5778.600000000093,
+              "ratio": 1.0151251646903985
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 5695.699999999953,
+              "comparisonMs": 5657.400000000023,
+              "ratio": 0.9932756289832803
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 5710.800000000047,
+              "comparisonMs": 5622.699999999953,
+              "ratio": 0.9845730895846304
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 5758.600000000093,
+              "comparisonMs": 5749,
+              "ratio": 0.9983329281422406
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.5426910415369588
+        },
+        "memory": {
+          "emittedGatePassed": false,
+          "rawScanCount": 413,
+          "coverage": [
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": false,
+              "maximumCoveredSampleGapMs": 255.363403,
+              "failures": [
+                "covered-import-scan-gap-over-250ms"
+              ],
+              "allObservedSampleCount": 102
+            },
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": false,
+              "maximumCoveredSampleGapMs": 260.966631,
+              "failures": [
+                "covered-import-scan-gap-over-250ms"
+              ],
+              "allObservedSampleCount": 103
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 229.133288,
+              "failures": [],
+              "allObservedSampleCount": 103
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": false,
+              "maximumCoveredSampleGapMs": 284.148828,
+              "failures": [
+                "covered-import-scan-gap-over-250ms"
+              ],
+              "allObservedSampleCount": 105
+            }
+          ],
+          "qualifiedObservations": 1
+        },
+        "storageBytes": 609176779,
+        "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+        "originalArtifact": {
+          "id": 15255922406,
+          "name": "numeric-suffix-c563d487-vndb-AB",
+          "size_in_bytes": 35741094,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255922406",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255922406/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:36:33Z",
+          "expires_at": "2026-12-12T08:36:30Z",
+          "updated_at": "2026-11-28T08:36:33Z",
+          "digest": "sha256:23c293793610c1a7af920014024a7d1032f7e7f5c7c710b4a3d9c0f8bfd16068",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "7d61cbebf92e135ce1d9e4ff126fc35ff4f9a7c0f928004a4d08f20cd5a721fa",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      },
+      {
+        "cell": "vndb-BA",
+        "jobId": 140903281848,
+        "primaryRecords": {
+          "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-BA/primary-records.jsonl",
+          "sha256": "716907665e13176b57392d9a863b149170d6b0fe7280cdbf52bb9660c8562efd",
+          "bytes": 375818,
+          "gitBlobSha": "332c506840cc8d164fcca490ebd8e6902007eecb"
+        },
+        "primaryRecordCount": 55,
+        "reportCount": 42,
+        "roleCounts": {
+          "control": 8,
+          "exhaustive-media": 2,
+          "memory": 4,
+          "candidate": 24,
+          "warmup": 4
+        },
+        "candidateLatency": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -4.0366325241512735,
+            -1.9751376872885529
+          ],
+          "equalWorkChangePercent": -2.9539570394931713,
+          "fasterPairs": 12,
+          "medianPairedChangePercent": -3.1824394599714534,
+          "ratios": [
+            0.9771400195208774,
+            0.9658732936646832,
+            0.9816079043891843,
+            0.9964270324619217,
+            0.9592616614370567,
+            0.9684026056786799,
+            0.9847163503210792,
+            0.9555880487633049,
+            0.9498856605981183,
+            0.9600056880799178,
+            0.9788893418650446,
+            0.967948605121891
+          ],
+          "worstPairChangePercent": -0.3572967538078342,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 5839.900000000023,
+              "comparisonMs": 5706.399999999994,
+              "ratio": 0.9771400195208774
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 5714,
+              "comparisonMs": 5519,
+              "ratio": 0.9658732936646832
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 5698.099999999977,
+              "comparisonMs": 5593.299999999988,
+              "ratio": 0.9816079043891843
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 5569.600000000035,
+              "comparisonMs": 5549.699999999953,
+              "ratio": 0.9964270324619217
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 5704.700000000012,
+              "comparisonMs": 5472.299999999988,
+              "ratio": 0.9592616614370567
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 5649.199999999953,
+              "comparisonMs": 5470.699999999953,
+              "ratio": 0.9684026056786799
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 5653.099999999977,
+              "comparisonMs": 5566.70000000007,
+              "ratio": 0.9847163503210792
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 5676.400000000023,
+              "comparisonMs": 5424.300000000047,
+              "ratio": 0.9555880487633049
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 5641.099999999977,
+              "comparisonMs": 5358.400000000023,
+              "ratio": 0.9498856605981183
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 5625.800000000047,
+              "comparisonMs": 5400.800000000047,
+              "ratio": 0.9600056880799178
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 5641.699999999953,
+              "comparisonMs": 5522.599999999977,
+              "ratio": 0.9788893418650446
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 5681.5,
+              "comparisonMs": 5499.400000000023,
+              "ratio": 0.967948605121891
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.01143394018817
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.3742275440725704,
+            0.8572189191595747
+          ],
+          "equalWorkChangePercent": -0.6074698572759107,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.9481352742078952,
+          "ratios": [
+            0.9862577245592743,
+            0.9921742919389938,
+            0.9888630025768483,
+            1.0085721891915957
+          ],
+          "worstPairChangePercent": 0.8572189191595747,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 5712.300000000047,
+              "comparisonMs": 5633.799999999988,
+              "ratio": 0.9862577245592743
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 5737.5,
+              "comparisonMs": 5692.599999999977,
+              "ratio": 0.9921742919389938
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 5665.800000000047,
+              "comparisonMs": 5602.699999999953,
+              "ratio": 0.9888630025768483
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 5634.5,
+              "comparisonMs": 5682.800000000047,
+              "ratio": 1.0085721891915957
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.3742275440725704
+        },
+        "memory": {
+          "emittedGatePassed": true,
+          "rawScanCount": 605,
+          "coverage": [
+            {
+              "name": "B1",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 150.788407,
+              "failures": [],
+              "allObservedSampleCount": 151
+            },
+            {
+              "name": "A1",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 177.540981,
+              "failures": [],
+              "allObservedSampleCount": 153
+            },
+            {
+              "name": "A2",
+              "arm": "A",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 160.049453,
+              "failures": [],
+              "allObservedSampleCount": 150
+            },
+            {
+              "name": "B2",
+              "arm": "B",
+              "qualified": true,
+              "maximumCoveredSampleGapMs": 170.421551,
+              "failures": [],
+              "allObservedSampleCount": 151
+            }
+          ],
+          "qualifiedObservations": 4
+        },
+        "storageBytes": 609176779,
+        "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+        "originalArtifact": {
+          "id": 15256340581,
+          "name": "numeric-suffix-c563d487-vndb-BA",
+          "size_in_bytes": 35934413,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256340581",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256340581/zip",
+          "expired": false,
+          "created_at": "2026-11-28T08:37:36Z",
+          "expires_at": "2026-12-12T08:37:34Z",
+          "updated_at": "2026-11-28T08:37:36Z",
+          "digest": "sha256:d4111ebba7aec361c9f705213928e2d2ce37b211b60fe8435d4e867c69bcb89a",
+          "workflow_run": {
+            "id": 46113243549,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "perf/import-numeric-suffix-qualification-20261128-c563d487",
+            "head_sha": "ee9450923d14e95b7958feeffffde4998cf8c5d9"
+          }
+        },
+        "knownPreOutageOriginalAudit": {
+          "sha256": "088724cd1838a616bebcd0a65004eb3d58fd2c5cf5af5c43f395734868ec85d9",
+          "completed": true,
+          "exactFileIncludedInThisCheckpoint": false
+        }
+      }
+    ],
+    "decision": {
+      "status": "Held; no performance PR from this source cohort",
+      "replicatedVndbLatencyConditionPassed": true,
+      "vndbBAAllGatesPassed": true,
+      "vndbABMemoryCoveragePassed": false,
+      "failedCoverageObservations": [
+        "A1",
+        "B1",
+        "A2"
+      ],
+      "failedMaximumGapsMs": [
+        255.363403,
+        260.966631,
+        284.148828
+      ],
+      "unchangedMaximumGapGateMs": 250,
+      "qualifiedMemoryObservations": 21,
+      "notEvidenceOfMemoryRegression": true,
+      "nonTargetReplicatedSlowdownRuleTriggered": false,
+      "nonTargetEquivalenceProven": false,
+      "noRetryNoReplacementNoGateRelaxation": true
+    },
+    "knownPreOutageArtifactPreservation": {
+      "allSixOriginalArtifactIndexSha256": "9f4e52c88badda2c7ca75223a9445387d65b00862d63bc23e3894923c117722c",
+      "combinedPrimaryIndexSha256": "9e77188166cd10cba625860ea054b09428a731a1a3304e3a6ac3b097a12f0a68",
+      "allSixOriginalArtifactsAudited": true,
+      "reports": 252,
+      "rawScans": 2300,
+      "selectedMembers": 1884,
+      "selectedRawBytes": 159075058,
+      "selectedArchiveBytes": 13060454,
+      "exactLocalIndexAndSelectedArchivesIncludedHere": false,
+      "scope": "Known completed pre-outage work, pending durable publication. Do not reconstruct these files under their old hashes.",
+      "retention": "First three original ZIPs retained; last three new temporary downloads retired only after complete API/package/member verification and exact selected representation. Selected archives omit only two extension package ZIPs per cell; complete package hashes and 554-entry maps retained."
+    }
+  },
+  "priorStreakSuccessor": {
+    "runId": 46124542684,
+    "jobId": 140916123863,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46124542684",
+    "tooling": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+    "source": {
+      "baseline": {
+        "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+        "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "trackedChanges": "",
+        "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+        "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+      },
+      "candidate": {
+        "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+        "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+        "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+        "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+        "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+        "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+        "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+      },
+      "tooling": {
+        "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+        "hashes": {
+          "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+          "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+          "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+          "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+          "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+          "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+          "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+          "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+          "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+          "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+          "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+          "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+          "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+          "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+          "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+          "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+          "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+          "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+          "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+          "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+          "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+          "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+          "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+          "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+          "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+          "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+          "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "runtime": {
+        "node": "v22.22.0",
+        "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+        "browser": null,
+        "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+        "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+        "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+        "linker": "Ubuntu LLD 21.1.8\n"
+      }
+    },
+    "primaryRecords": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-records.jsonl",
+      "sha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+      "bytes": 3450202,
+      "gitBlobSha": "0fea9b09a55d4af04a15e99ef2798ce5c01752a4"
+    },
+    "primaryAudit": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-log-audit.json",
+      "sha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193",
+      "bytes": 192712,
+      "gitBlobSha": "9d98aa34dbbdb738eb644cd24eeff31fcb7928f1"
+    },
+    "measuredChildren": 144,
+    "excludedChildren": 15,
+    "rawChildren": 159,
+    "taggedRecords": 495,
+    "allPrimaryChecksPassed": true,
+    "artifactBindingPass": null,
+    "cells": [
+      {
+        "id": "jmdict",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 17,
+        "candidateElapsed": {
+          "firstValues": [
+            509.55828499999984,
+            506.2993840000004,
+            513.2553949999997,
+            494.9436730000002
+          ],
+          "secondValues": [
+            499.9630669999997,
+            488.64352400000007,
+            501.1332490000002,
+            500.64236200000005
+          ],
+          "pairedChangesPercent": [
+            -1.8830462152136684,
+            -3.4872371087064757,
+            -2.361815602542172,
+            1.151381320920497
+          ],
+          "medianPairedChangePercent": -2.12243090887792,
+          "equalWorkChangePercent": -1.6637149732231071,
+          "fasterPairs": 3,
+          "slowerPairs": 1,
+          "minimumChangePercent": -3.4872371087064757,
+          "maximumChangePercent": 1.151381320920497,
+          "largestAbsoluteChangePercent": 3.4872371087064757
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            495.9846010000001,
+            504.4788160000003,
+            502.7189150000004,
+            493.7202219999999
+          ],
+          "secondValues": [
+            533.0932560000003,
+            504.31264599999986,
+            498.5470959999998,
+            504.9583209999996
+          ],
+          "pairedChangesPercent": [
+            7.481815952588455,
+            -0.03293894505184136,
+            -0.8298512101937883,
+            2.2762079613582564
+          ],
+          "medianPairedChangePercent": 1.1216345081532075,
+          "equalWorkChangePercent": 2.2038514053600133,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -0.8298512101937883,
+          "maximumChangePercent": 7.481815952588455,
+          "largestAbsoluteChangePercent": 7.481815952588455
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-1",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            168.190887,
+            168.68261500000008,
+            169.25507300000012,
+            168.4036910000001
+          ],
+          "secondValues": [
+            173.74983900000004,
+            169.03898199999983,
+            170.19478399999994,
+            169.89673599999995
+          ],
+          "pairedChangesPercent": [
+            3.30514458848179,
+            0.21126480639379608,
+            0.555204038108692,
+            0.8865868622795592
+          ],
+          "medianPairedChangePercent": 0.7208954501941256,
+          "equalWorkChangePercent": 1.2376094400203819,
+          "fasterPairs": 0,
+          "slowerPairs": 4,
+          "minimumChangePercent": 0.21126480639379608,
+          "maximumChangePercent": 3.30514458848179,
+          "largestAbsoluteChangePercent": 3.30514458848179
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            169.78098600000004,
+            168.05102500000007,
+            168.62497800000014,
+            169.40212700000012
+          ],
+          "secondValues": [
+            171.44197400000004,
+            169.27316200000007,
+            169.37228600000012,
+            170.1682770000001
+          ],
+          "pairedChangesPercent": [
+            0.9783121415021023,
+            0.7272416220014177,
+            0.443177522608762,
+            0.45226704857135314
+          ],
+          "medianPairedChangePercent": 0.5897543352863854,
+          "equalWorkChangePercent": 0.6505176738638596,
+          "fasterPairs": 0,
+          "slowerPairs": 4,
+          "minimumChangePercent": 0.443177522608762,
+          "maximumChangePercent": 0.9783121415021023,
+          "largestAbsoluteChangePercent": 0.9783121415021023
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-2",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            157.40648500000012,
+            162.39288199999996,
+            158.00570800000003,
+            155.599955
+          ],
+          "secondValues": [
+            155.03865599999995,
+            159.981503,
+            155.95856799999999,
+            156.68879300000015
+          ],
+          "pairedChangesPercent": [
+            -1.5042766503553961,
+            -1.4849043691459007,
+            -1.2956114218354964,
+            0.6997675545601156
+          ],
+          "medianPairedChangePercent": -1.3902578954906986,
+          "equalWorkChangePercent": -0.9058200879775158,
+          "fasterPairs": 3,
+          "slowerPairs": 1,
+          "minimumChangePercent": -1.5042766503553961,
+          "maximumChangePercent": 0.6997675545601156,
+          "largestAbsoluteChangePercent": 1.5042766503553961
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            155.58327500000001,
+            155.98923600000006,
+            156.1451120000001,
+            157.10366699999997
+          ],
+          "secondValues": [
+            155.948934,
+            156.40396899999993,
+            163.312217,
+            154.692702
+          ],
+          "pairedChangesPercent": [
+            0.23502461945217323,
+            0.2658728324048454,
+            4.590028408958391,
+            -1.5346331795043189
+          ],
+          "medianPairedChangePercent": 0.2504487259285093,
+          "equalWorkChangePercent": 0.8860984874570876,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -1.5346331795043189,
+          "maximumChangePercent": 4.590028408958391,
+          "largestAbsoluteChangePercent": 4.590028408958391
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-3",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            972.9012359999998,
+            976.4449050000001,
+            978.3859219999995,
+            988.4532650000001
+          ],
+          "secondValues": [
+            981.9086630000002,
+            986.4259439999998,
+            970.0667359999997,
+            974.0218049999999
+          ],
+          "pairedChangesPercent": [
+            0.9258315918102555,
+            1.0221814819136865,
+            -0.850296985364829,
+            -1.4600042825494874
+          ],
+          "medianPairedChangePercent": 0.03776730322271327,
+          "equalWorkChangePercent": -0.09606746578363357,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -1.4600042825494874,
+          "maximumChangePercent": 1.0221814819136865,
+          "largestAbsoluteChangePercent": 1.4600042825494874
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            970.4466040000001,
+            969.9917729999996,
+            972.4023179999999,
+            965.6730190000004
+          ],
+          "secondValues": [
+            977.1754410000004,
+            974.0481810000003,
+            975.0584520000002,
+            969.6381590000001
+          ],
+          "pairedChangesPercent": [
+            0.6933752946597371,
+            0.41818993860689435,
+            0.2731517552799989,
+            0.41060896618048126
+          ],
+          "medianPairedChangePercent": 0.4143994523936878,
+          "equalWorkChangePercent": 0.44879354009166317,
+          "fasterPairs": 0,
+          "slowerPairs": 4,
+          "minimumChangePercent": 0.2731517552799989,
+          "maximumChangePercent": 0.6933752946597371,
+          "largestAbsoluteChangePercent": 0.6933752946597371
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-4",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            136.31384499999996,
+            133.77050600000004,
+            132.82135599999995,
+            139.81628100000006
+          ],
+          "secondValues": [
+            137.38108100000005,
+            150.31952400000014,
+            137.2247339999999,
+            136.58596500000004
+          ],
+          "pairedChangesPercent": [
+            0.7829256081802294,
+            12.371200868448607,
+            3.3152635484311244,
+            -2.3104004604442396
+          ],
+          "medianPairedChangePercent": 2.049094578305677,
+          "equalWorkChangePercent": 3.462051734671956,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -2.3104004604442396,
+          "maximumChangePercent": 12.371200868448607,
+          "largestAbsoluteChangePercent": 12.371200868448607
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            134.73810599999996,
+            137.1628030000001,
+            135.74363899999997,
+            139.1677060000001
+          ],
+          "secondValues": [
+            137.72052999999997,
+            133.72033599999997,
+            137.18786999999992,
+            134.06630800000016
+          ],
+          "pairedChangesPercent": [
+            2.2134970488601136,
+            -2.5097671706228786,
+            1.0639400937232368,
+            -3.665647833556962
+          ],
+          "medianPairedChangePercent": -0.7229135384498209,
+          "equalWorkChangePercent": -0.7529476469999019,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -3.665647833556962,
+          "maximumChangePercent": 2.2134970488601136,
+          "largestAbsoluteChangePercent": 3.665647833556962
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-5",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            830.9203680000004,
+            833.0304839999999,
+            849.0036049999999,
+            834.3142679999999
+          ],
+          "secondValues": [
+            842.1197860000002,
+            841.571449,
+            840.7482889999999,
+            839.5097209999999
+          ],
+          "pairedChangesPercent": [
+            1.347832888843059,
+            1.0252884094935633,
+            -0.9723534683931057,
+            0.6227213412584254
+          ],
+          "medianPairedChangePercent": 0.8240048753759943,
+          "equalWorkChangePercent": 0.4983322634187548,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -0.9723534683931057,
+          "maximumChangePercent": 1.347832888843059,
+          "largestAbsoluteChangePercent": 1.347832888843059
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            823.0164560000002,
+            836.4687110000001,
+            826.7225839999996,
+            832.578164
+          ],
+          "secondValues": [
+            828.2289300000001,
+            841.4752669999998,
+            827.4771690000005,
+            826.097896
+          ],
+          "pairedChangesPercent": [
+            0.6333377615963309,
+            0.5985347609732239,
+            0.09127426958022156,
+            -0.7783374919258623
+          ],
+          "medianPairedChangePercent": 0.3449045152767227,
+          "equalWorkChangePercent": 0.13539128811208556,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -0.7783374919258623,
+          "maximumChangePercent": 0.6333377615963309,
+          "largestAbsoluteChangePercent": 0.7783374919258623
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "negative-6",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 18,
+        "candidateElapsed": {
+          "firstValues": [
+            111.76175900000013,
+            106.61534399999995,
+            105.46068,
+            106.74113200000006
+          ],
+          "secondValues": [
+            109.55952500000011,
+            110.11538299999994,
+            109.044577,
+            110.43152800000001
+          ],
+          "pairedChangesPercent": [
+            -1.9704718498569918,
+            3.282866113530525,
+            3.398325328454166,
+            3.4573326428653184
+          ],
+          "medianPairedChangePercent": 3.3405957209923454,
+          "equalWorkChangePercent": 1.9908308793987306,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -1.9704718498569918,
+          "maximumChangePercent": 3.4573326428653184,
+          "largestAbsoluteChangePercent": 3.4573326428653184
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            105.82505300000005,
+            110.66428499999999,
+            105.616051,
+            106.98236299999989
+          ],
+          "secondValues": [
+            105.05455400000005,
+            107.19593699999997,
+            105.39732299999993,
+            107.553125
+          ],
+          "pairedChangesPercent": [
+            -0.7280875162897438,
+            -3.134116847183366,
+            -0.20709730948004212,
+            0.5335103693681731
+          ],
+          "medianPairedChangePercent": -0.46759241288489295,
+          "equalWorkChangePercent": -0.9058317283314188,
+          "fasterPairs": 3,
+          "slowerPairs": 1,
+          "minimumChangePercent": -3.134116847183366,
+          "maximumChangePercent": 0.5335103693681731,
+          "largestAbsoluteChangePercent": 3.134116847183366
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "jitendex",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 17,
+        "candidateElapsed": {
+          "firstValues": [
+            997.1548700000008,
+            978.6172620000007,
+            967.6442680000009,
+            977.1317030000005
+          ],
+          "secondValues": [
+            1003.0910520000002,
+            969.7620120000001,
+            981.4558109999989,
+            979.0628400000019
+          ],
+          "pairedChangesPercent": [
+            0.5953119398593998,
+            -0.9048736767531596,
+            1.4273368278763021,
+            0.19763323552723921
+          ],
+          "medianPairedChangePercent": 0.3964725876933195,
+          "equalWorkChangePercent": 0.32708722513021815,
+          "fasterPairs": 1,
+          "slowerPairs": 3,
+          "minimumChangePercent": -0.9048736767531596,
+          "maximumChangePercent": 1.4273368278763021,
+          "largestAbsoluteChangePercent": 1.4273368278763021
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            990.5810390000006,
+            975.4890650000007,
+            979.7795609999998,
+            971.8680239999994
+          ],
+          "secondValues": [
+            997.3470569999986,
+            962.7785589999999,
+            978.4486239999992,
+            975.2644679999999
+          ],
+          "pairedChangesPercent": [
+            0.6830352826890707,
+            -1.3029880555350815,
+            -0.13584045360592878,
+            0.3494758461155545
+          ],
+          "medianPairedChangePercent": 0.10681769625481286,
+          "equalWorkChangePercent": -0.09901124348224988,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -1.3029880555350815,
+          "maximumChangePercent": 0.6830352826890707,
+          "largestAbsoluteChangePercent": 1.3029880555350815
+        },
+        "allPrimaryChecksPassed": true
+      },
+      {
+        "id": "vndb",
+        "measuredObservationCount": 16,
+        "rawChildReceiptCount": 17,
+        "candidateElapsed": {
+          "firstValues": [
+            3442.0878479999983,
+            3380.9835000000094,
+            3385.941258999991,
+            3460.9674380000015
+          ],
+          "secondValues": [
+            3394.862269999998,
+            3401.4977470000113,
+            3448.8506399999924,
+            3393.946296000003
+          ],
+          "pairedChangesPercent": [
+            -1.3720038559573822,
+            0.6067538336108846,
+            1.857958428333184,
+            -1.9364857716988038
+          ],
+          "medianPairedChangePercent": -0.38262501117324876,
+          "equalWorkChangePercent": -0.22548015358127005,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -1.9364857716988038,
+          "maximumChangePercent": 1.857958428333184,
+          "largestAbsoluteChangePercent": 1.9364857716988038
+        },
+        "identicalCodeControlElapsed": {
+          "firstValues": [
+            3408.9954930000113,
+            3412.5374569999985,
+            3449.5604139999978,
+            3413.771660999986
+          ],
+          "secondValues": [
+            3445.3634830000055,
+            3407.2335170000006,
+            3420.242765000002,
+            3438.2171050000125
+          ],
+          "pairedChangesPercent": [
+            1.0668242323778943,
+            -0.15542510717700964,
+            -0.8498952179822883,
+            0.7160831604321682
+          ],
+          "medianPairedChangePercent": 0.2803290266275793,
+          "equalWorkChangePercent": 0.19139279015305544,
+          "fasterPairs": 2,
+          "slowerPairs": 2,
+          "minimumChangePercent": -0.8498952179822883,
+          "maximumChangePercent": 1.0668242323778943,
+          "largestAbsoluteChangePercent": 1.0668242323778943
+        },
+        "allPrimaryChecksPassed": true
+      }
+    ],
+    "mechanicalChecks": {
+      "jmdictTotalAndGroupFields": 387,
+      "negativeFields": 288,
+      "additionalJmdictProofs": 44102,
+      "additionalJmdictProofBytes": 8059365
+    },
+    "decision": {
+      "status": "Do not promote this exact successor to full import qualification or a performance PR",
+      "jmdictProspectiveComponentGatePassed": false,
+      "reason": "JMdict has3/4 faster pairs and median−2.1224309%, while largest absolute same-code paired change is7.48181595%; the frozen gate required all4 faster and an effect larger than that control.",
+      "negativeRiskRuleTriggered": false,
+      "negativeAmbiguity": "Case6 median+3.3405957% has only3/4 slower pairs, so it does not trigger the declared all4 rule; cases4/5/6 adverse directions and all outliers remain retained as uncertainty, not proof of nonregression.",
+      "nonTargetInterpretation": "Jitendex+0.3964726% and VNDB−0.3826250% are small relative to controls; no complete-import or equivalence claim.",
+      "currentDevelopLimitation": "Frozen9e10 source only; develop advanced to dcfc02a0. No current-source gain transfer.",
+      "noRetryNoReplacementNoThresholdTuning": true
+    },
+    "originalArtifact": {
+      "id": 15255629754,
+      "name": "jmdict-prior-streak-selector-screen-1",
+      "size_in_bytes": 2878668,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255629754",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255629754/zip",
+      "expired": false,
+      "created_at": "2026-11-28T08:47:09Z",
+      "expires_at": "2026-12-12T08:47:07Z",
+      "updated_at": "2026-11-28T08:47:09Z",
+      "digest": "sha256:e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+      "workflow_run": {
+        "id": 46124542684,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-prior-streak-selector-screen-20261128-c563d487",
+        "head_sha": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82"
+      },
+      "independentAuditComplete": false,
+      "reason": "Executor became unavailable during final read-only artifact reconciliation attempt 4 before a completion receipt; source/tag primary evidence is complete, artifact binding remains pending.",
+      "noArtifactBytesIncludedHere": true
+    },
+    "offlineAuditHistory": {
+      "originalAcceptedCorruptionWitnessSha256": "985b514fec89bfb6fb0027bfe215294b483d8269cd73689b0f016c3ee9654be1",
+      "correctedV2Sha256": "01e3244f0e67fa08d05aed50cd818f8de4ac10bdd5e51b9787a5041b85c58dc5",
+      "firstActualAuditSha256": "eb17df4808894c3ef4cc306c2ae8c5c338366e202e0509f18aa831a512df7fce",
+      "v3Sha256": "f7affda07e6033fee59cc3466de3e86211a1ecc857a6b46c0c17a5f967d849a1",
+      "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+      "sourceInventoryAmendmentSha256": "83bb740aeb876b76bff3fa07229d718cc61158a1cf706aa52471492decec33de",
+      "rootReviewSha256": "ed1e955bc19545bafc64dff11d8671daaf9b5c9f7e80ab1268e418619e06355e",
+      "pipelineReviewSha256": "a89a26ebabf68e13098daf281283f3c2fd6d5f6d2058a9915249b1565e05a798",
+      "finalInventoryReplaySha256": "b284860936829af05ec48d59d9af97d54d6a6aac7ccdec9de44cd2e42af76dac",
+      "correction": "Only expected source-map key filter changed to the pinned main 11 / negative 10 declared files; exact keysets/per-file hashes retained. Statistics unchanged.",
+      "exactLocalHistoryFilesIncludedHere": false,
+      "sourceTimersObservationsThresholdsChanged": false
+    }
+  },
+  "currentBaseNumeric": {
+    "buildRunId": 46126462448,
+    "buildJobId": 140922033124,
+    "buildTooling": "d28d74f9c1047491670942ec6e0414cc9c823101",
+    "buildTree": "169ea236aa1ba9a17583878be0b11d5f5cd795f9",
+    "buildStatus": "All 17 declared correctness steps passed; no performance measurements.",
+    "primaryLog": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-job.log",
+      "sha256": "2ec90e3e0d6c8091ebaecf8a97aeec14791fedb295787b8c1a7abe91d1739123",
+      "bytes": 52564,
+      "gitBlobSha": "6bb56c86106fb4f2624e2db11144ed1e0c0b25e8"
+    },
+    "primaryRecords": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-records.json",
+      "sha256": "344a5422d8c7795485d8a71e228236c83a8e34785764be0853b6237826150038",
+      "bytes": 10951,
+      "gitBlobSha": "73ad52d70186d0d55eb61f0b234c6a051faf0d53"
+    },
+    "remotePrimaryReview": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/remote-primary-review.json",
+      "sha256": "2892dde1ef41cc27ce4bcbf53018de0e519d86dfcbf97f6cedea128e6473489c",
+      "bytes": 2516,
+      "gitBlobSha": "1f5acc3387751ad00de6a544418e13913b894e21"
+    },
+    "originalBuildArtifact": {
+      "id": 15256173851,
+      "name": "numeric-suffix-972-build-1",
+      "size_in_bytes": 136615,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256173851",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15256173851/zip",
+      "expired": false,
+      "created_at": "2026-11-28T08:55:33Z",
+      "expires_at": "2026-12-12T08:55:33Z",
+      "updated_at": "2026-11-28T08:55:33Z",
+      "digest": "sha256:8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+      "workflow_run": {
+        "id": 46126462448,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/numeric-suffix-972-build-20261128-c563d487",
+        "head_sha": "d28d74f9c1047491670942ec6e0414cc9c823101"
+      }
+    },
+    "correctness": {
+      "stepCount": 17,
+      "unitFiles": 671,
+      "unitPassed": 15180,
+      "unitSkipped": 47,
+      "optionsPassed": 32,
+      "originalSuffixCases": 32,
+      "newTokenEndCases": 9,
+      "nativeReproductionPassed": true,
+      "scopedLintPassed": true,
+      "strictMainTypesPassed": true,
+      "strictTestTypesPassed": true,
+      "allSevenDryBuildTargetsPassed": true
+    },
+    "sourceCompositionReview": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/composition-source-review.json",
+      "sha256": "9affdad61d5d2a1e8ec8939b1b1ad8fbeb098dcad7dcea08614fb905d518eef6",
+      "bytes": 2552,
+      "gitBlobSha": "fbec82f0e67d9b818558e1452339b49e8d0c9002"
+    },
+    "recovery": {
+      "runId": 46128887478,
+      "jobId": 140929481433,
+      "tooling": "ccb45276dea13417d11f7ef2b9d170cd7d328699",
+      "review": {
+        "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/recovery-and-product-review.json",
+        "sha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+        "bytes": 17452,
+        "gitBlobSha": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6"
+      },
+      "originalMemberHashes": 44,
+      "originalProofFilesIncluded": 20,
+      "all20ProofBytesIndependentlyFetchedAndHashVerified": true,
+      "productFiles": 6,
+      "noCompilationTestsOrBenchmarksRepeated": true,
+      "wholeOriginalZipBytesIncludedHere": false
+    },
+    "product": {
+      "branch": "perf/numeric-row-suffix-972-20261128-c563d487",
+      "head": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+      "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+      "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "publishedAtUtc": "2026-11-28 09:09:39 UTC",
+      "files": [
+        {
+          "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 164449,
+          "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+          "gitBlobSha": "5a9033fda78144bfa1edf038b52f6804eeba23f5"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 69998,
+          "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+          "gitBlobSha": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "bytes": 2588,
+          "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+          "gitBlobSha": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd"
+        },
+        {
+          "path": "test/term-bank-row-suffix-reuse.test.js",
+          "bytes": 15101,
+          "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+          "gitBlobSha": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+        },
+        {
+          "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+          "bytes": 3037,
+          "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+          "gitBlobSha": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+        },
+        {
+          "path": "test/term-bank-row-suffix-token-ends.test.js",
+          "bytes": 7560,
+          "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+          "gitBlobSha": "8ba263fc060391555a5070d65d6313fdd96607b4"
+        }
+      ],
+      "buildRun": 46126462448,
+      "recoveryRun": 46128887478,
+      "performanceQualified": false,
+      "productPrOpened": false
+    },
+    "prospectiveCriteria": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/prospective-complete-import-criteria.json",
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "bytes": 3193,
+      "gitBlobSha": "cce478f3af29580e8d864db426550a601e350747"
+    },
+    "criteriaFrozenBeforeOldVndbResults": true,
+    "preOutageCompletedReviews": {
+      "rootPrimaryReviewSha256": "3350ad5d66261778b770e60e2d5b8e154d885998b68d982d771a969c4d2df07e",
+      "independentArtifactAuditSha256": "eec68624e1d5a0e8bab9334a2a4b077b146aefa5a397b0fa887985b89f29ab47",
+      "exactFilesIncludedHere": false
+    },
+    "currentBasePerformanceObservationsAtCutoff": 0,
+    "currentBasePerformanceQualified": false,
+    "productPrOpened": false,
+    "selectorCurrentBaseExecutionClaimed": false
+  },
+  "preservation": {
+    "rawMeasurementsAltered": false,
+    "sourceProductEditsByThisCheckpoint": false,
+    "oldLocalStageModified": false,
+    "priorPublishedCanonicalBytesUnchanged": true,
+    "unavailableOriginalFileHashesReusedForReconstructedBytes": false,
+    "exactOriginalPrimaryRecordFilesRecovered": true,
+    "rawReportsAndProcessScansClaimedIncludedHere": false,
+    "originalArchiveMetadata": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/artifact-api-metadata.json",
+      "sha256": "401f9ad436bdc4f7cc19801f81c9157b42af60512bc93327c1e9a8c6f0e6e4a6",
+      "bytes": 8469,
+      "gitBlobSha": "cedf1afcd9c3145141c23c4c0d15bcd1be5401fb"
+    },
+    "newReadOnlyPreparationHistory": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-preparation-history.json",
+      "sha256": "1ad2ca19dfa2d5bcc54ee6f05dc7bf98978ab45220d7e1127e81cca390145d44",
+      "bytes": 12031,
+      "gitBlobSha": "80bd9d94cfb029b236172c672910123b8d82ad51"
+    }
+  },
+  "review": {
+    "ownedTextReviews": {
+      "insertionBeforePrecisionSha256": "628734c51d6b9c2fdb7f2f1847fa3c8a0c3df3cabc49faa00a71ebf1023c0222",
+      "benchmarkSetup": "Passed factual review of numeric/successor statistics, coverage hold and exact primary versus pending artifact scope.",
+      "rowSuffixExperiment": "Passed owned-facts review of coverage, pending original successor audit and completed current build/recovery scope."
+    },
+    "precisionCorrection": {
+      "removedClause": ", with 85,314 key-predicate/helper opportunities",
+      "otherBytesUnchanged": true,
+      "previousInsertionSha256": "628734c51d6b9c2fdb7f2f1847fa3c8a0c3df3cabc49faa00a71ebf1023c0222",
+      "finalInsertionSha256": "a45abfb1a9f6958fc3b069a50acc4b34c6aa09af29f6fd7db509ee19972df82a",
+      "reason": "Avoid conflating selector-helper opportunities with bounded pure-key comparison calls; precise 44,102 proof/8,059,365-byte counters retained."
+    },
+    "publicationReview": "Prepared for root review; a separate publication receipt must bind the final chosen tree and any external final reviews."
+  },
+  "replay": {
+    "readOnlyPrimaryAuditExample": "node --input-type=module -e 'import fs from \"node:fs\"; import {reconcileNumericCell,parseTaggedNumericRecords} from \"./builds/perf/import-study-c563d487/outage-checkpoint/reconcile-primary-records.mjs\"; console.log(JSON.stringify(reconcileNumericCell(parseTaggedNumericRecords(fs.readFileSync(process.argv[1],\"utf8\"))),null,2));' builds/perf/import-study-c563d487/outage-checkpoint/jmdict-AB/primary-records.jsonl",
+    "originalLogs": "gh run view 46113243549 --repo ManabiIO/manabitan --job 140903281788 --log",
+    "originalArtifacts": "Use the exact run/artifact IDs and API digests in artifact-api-metadata.json; verify ZIP digests before reading. No acquisition rerun is implied.",
+    "benchmarkReproduction": "Published tooling commits ee9450923d14e95b7958feeffffde4998cf8c5d9 and 24ae6bb44f5f055eb06fe2fdf478017a7b01ed82 retain the original workflows and fixed protocols. Any new acquisition requires separate identity and never replaces these observations."
+  },
+  "evidenceFiles": [
+    {
+      "key": "artifact_metadata",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/artifact-api-metadata.json",
+      "bytes": 8469,
+      "sha256": "401f9ad436bdc4f7cc19801f81c9157b42af60512bc93327c1e9a8c6f0e6e4a6",
+      "gitBlobSha": "cedf1afcd9c3145141c23c4c0d15bcd1be5401fb",
+      "encoding": "utf-8",
+      "kind": "new-read-only-outage-reconciliation",
+      "provenance": "Explicitly new remote preparation bytes; never assigned an unavailable original-file hash."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/all-dry-build-targets.receipt.json",
+      "bytes": 413,
+      "sha256": "1c2e66c45263973290eb25b487548574d8f102b001df697aa31bd0417102fa51",
+      "gitBlobSha": "50819abec5b5aa104f9fb7de4605aefd8b0a6066",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/apply-check.receipt.json",
+      "bytes": 505,
+      "sha256": "7b0e860eb63bc63847a0cb3eae850babe59d9bf8a0de6e6f5ad3804ec6acfb63",
+      "gitBlobSha": "6bf555f513d2c64edfb179546831a56b4a1dcf1b",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/apply-patch.receipt.json",
+      "bytes": 490,
+      "sha256": "912e7ec463a4497c82fa58d680d2cbbedb50a30f1ffe47b9f7b2c87081539e58",
+      "gitBlobSha": "cbd8f05fe71a9ea3b1b76d5963d5e285874da24c",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/build-candidate-libraries.receipt.json",
+      "bytes": 417,
+      "sha256": "d36ed6e9883b24f7654ba022559a1cd3da3ce3505cabfc87fcdd1e43550d0c61",
+      "gitBlobSha": "9c2543947adf9d87eac0e19763cbeff04e5b85ba",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/build-native-candidate.receipt.json",
+      "bytes": 450,
+      "sha256": "87cc84a2144ff15be52f8691a48999a35282a71c10c7de5da998bcebaba65b46",
+      "gitBlobSha": "2fa8e135669be53701dc2b9d0a19ac7fc6ba4c8b",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/compiled-source-binding.json",
+      "bytes": 1537,
+      "sha256": "1d02d52e901f2e1a5620dee11bf373dc32f8a4e2ba1660379848f886f3dea22c",
+      "gitBlobSha": "dd092b0784c12cdfaa9b1bb7b767071f4044b5c0",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/complete-unit-suite.receipt.json",
+      "bytes": 441,
+      "sha256": "8e09a91cbf00a56286efb71c97128e08ccd3a4e2d8990c4d7e8e75fefe095b90",
+      "gitBlobSha": "9554cf2a61bf2c29a9c1b6f15c4870581fe24f40",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/create-baseline.receipt.json",
+      "bytes": 513,
+      "sha256": "f7499c64fb761d310460da5afb1bf8c755c70283f7d495953c9455baff6c2aa1",
+      "gitBlobSha": "3c2d77cbc7bfb879471484c52aacf823d714678e",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/create-candidate.receipt.json",
+      "bytes": 515,
+      "sha256": "b181b24ba6a13c46b3e4ff4c7b7a76faf360933c000eeaf5835c73f0fd6a5ea8",
+      "gitBlobSha": "6860fe084dca04f9b5e2b2c5cb2d31c3cfbd9792",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/dependencies-baseline.receipt.json",
+      "bytes": 507,
+      "sha256": "c2cc5c153d1720065a0e59821226e97511142665ce99f4cd03d616a6123e784b",
+      "gitBlobSha": "fb63ba62203ab6ecbd8cc95bc4b261a0620a2f94",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/dependencies-candidate.receipt.json",
+      "bytes": 510,
+      "sha256": "dd8f822dde125cd2f1e87c7ab30b9a6c06ce0d6e5b99ed3fd222d3df70cf2f0d",
+      "gitBlobSha": "e223f8d8392ac84321e1507db15a5d019029eafd",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/fetch-baseline.receipt.json",
+      "bytes": 450,
+      "sha256": "0d009f3c61e7c62e41fc9aa2b3f253288b285fcaa487bad0575805f09b143597",
+      "gitBlobSha": "5f44a2bdce309f4c3b514de57b62bc1b23cfbaaa",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/options-unit-suite.receipt.json",
+      "bytes": 449,
+      "sha256": "76fd9bb43b89d14227e9322181e4c5ec4de70aa7687a0a215628c36dbd0a6e47",
+      "gitBlobSha": "973eafa7ebd3c48f0db3e10de4ec26b3bd50ddb1",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/preparation-start.json",
+      "bytes": 3729,
+      "sha256": "b9415d0cc1eaeb72894a41418a038a72dfe31d979ae0162096bae812cdbd93b2",
+      "gitBlobSha": "65d320f6ee9947cdbf38faea580234f6228ddc2a",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/reproduce-baseline.receipt.json",
+      "bytes": 444,
+      "sha256": "3c6a6b1164262fccc79eb8a3a1179ca8deda46b951b57a746824a580dcc601ef",
+      "gitBlobSha": "31740a162cee5605fade8e45e5a2f3cfcb0f55d6",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/reproduce-candidate.receipt.json",
+      "bytes": 447,
+      "sha256": "65d06016738dbfa837f63a036e0e8dc0e6df08c62e05333e55dcd13cf5a265d6",
+      "gitBlobSha": "e95cc4c132b662c2e80d3455163eb9e26cb78ac4",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/result.json",
+      "bytes": 1225,
+      "sha256": "ca180fdc14e0f212437fccd27218a90069f3087dd18fb30a386a2284b68bf1d1",
+      "gitBlobSha": "c2ded85301aa967b4f83e5b55b2e28a2b5994070",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/scoped-lint.receipt.json",
+      "bytes": 540,
+      "sha256": "cf6e28db332ab1e453527e5154e90c4bd2523688e75d4e71580567a83d708a86",
+      "gitBlobSha": "c20cd3f58bc41f8bce3a7df045516d5c393cdc43",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/strict-main-types.receipt.json",
+      "bytes": 411,
+      "sha256": "b3bbf1f66d7154e48449acd5b3b74bfed58f4472ce269fad915339bc1bdc5ced",
+      "gitBlobSha": "a78c0e20f4bd9d46862351dce728d40fe82c2b61",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/build-original-proofs/strict-test-types.receipt.json",
+      "bytes": 411,
+      "sha256": "7a5d56a042a4f3b4e9abf42d20d0c980caab194b4c687dffc735d1982e668015",
+      "gitBlobSha": "a29501407182620ea7aa2d3df6e64df88cbb628b",
+      "encoding": "utf-8",
+      "provenance": "Exact original build artifact member bytes recovered read-only; root recovery review binds the original ZIP and 44-member manifest.",
+      "kind": "exact-original-build-proof"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/composition-source-review.json",
+      "bytes": 2552,
+      "sha256": "9affdad61d5d2a1e8ec8939b1b1ad8fbeb098dcad7dcea08614fb905d518eef6",
+      "gitBlobSha": "fbec82f0e67d9b818558e1452339b49e8d0c9002",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact published root source-composition review; no unavailable local file reconstructed."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-job.log",
+      "bytes": 52564,
+      "sha256": "2ec90e3e0d6c8091ebaecf8a97aeec14791fedb295787b8c1a7abe91d1739123",
+      "gitBlobSha": "6bb56c86106fb4f2624e2db11144ed1e0c0b25e8",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact original build primary log, including its UTF-8 BOM; no test or build repeated."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/primary-records.json",
+      "bytes": 10951,
+      "sha256": "344a5422d8c7795485d8a71e228236c83a8e34785764be0853b6237826150038",
+      "gitBlobSha": "73ad52d70186d0d55eb61f0b234c6a051faf0d53",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Retained structured 17 STEP and one RESULT primary record values."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/prospective-complete-import-criteria.json",
+      "bytes": 3193,
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "gitBlobSha": "cce478f3af29580e8d864db426550a601e350747",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact file fetched from published build-only tooling d28d74f9…; thresholds frozen before old VNDB results completed."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/recovery-and-product-review.json",
+      "bytes": 17452,
+      "sha256": "1a41b0ccb3b8cfdcbcfd4cfba97ab25f8ac1c616e8ce86fcd8b859675386e720",
+      "gitBlobSha": "ab4ab1b0190a27f45bdeaf6be6adf45901904ac6",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact root review of read-only artifact recovery, 44 member hashes, 20 original proof files and six original product files."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/remote-primary-review.json",
+      "bytes": 2516,
+      "sha256": "2892dde1ef41cc27ce4bcbf53018de0e519d86dfcbf97f6cedea128e6473489c",
+      "gitBlobSha": "1f5acc3387751ad00de6a544418e13913b894e21",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "New explicit root remote-only review; unavailable original reviews are referenced, not reconstructed."
+    },
+    {
+      "key": "jitendex_AB",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-AB/primary-records.jsonl",
+      "bytes": 361895,
+      "sha256": "15325a4df4808ce97f6274976581f6ff68f388286da6e873bc6ac9e67f9557cf",
+      "gitBlobSha": "73159afaf9257056e9d23b565e317314d630cd7c",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    },
+    {
+      "key": "jitendex_BA",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jitendex-BA/primary-records.jsonl",
+      "bytes": 362502,
+      "sha256": "7c87a2b4fe183bf12d719ff98ea52f59409289e6694b47e8a9a602362d53d0bf",
+      "gitBlobSha": "664fff3a5c63e879082b04a5b117e0fceaa33cbf",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    },
+    {
+      "key": "jmdict_AB",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-AB/primary-records.jsonl",
+      "bytes": 362962,
+      "sha256": "07b60acf90675fc8895aa7a25a20690c69db9de2398a2e334daa6e8f263dfa3e",
+      "gitBlobSha": "70bf97043158f4c2c1dc1aee079d532917c14c58",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    },
+    {
+      "key": "jmdict_BA",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/jmdict-BA/primary-records.jsonl",
+      "bytes": 362865,
+      "sha256": "f961ea4cc6507e1d56ada826059ff9bfa5f3592c1fe167ffe0051a174fd858e8",
+      "gitBlobSha": "fcbb07de936ce1f3ec4fd3328b04e6f3c0c25aab",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    },
+    {
+      "key": "numeric_helper",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/reconcile-primary-records.mjs",
+      "bytes": 9003,
+      "sha256": "32afa26a2d996d19463b3294776b4b5b24eb0c1b3c90ff600ed05e61054950fc",
+      "gitBlobSha": "e700b72bca214fd3cdae86b4aba062946fa8d1f2",
+      "encoding": "utf-8",
+      "kind": "new-read-only-outage-reconciliation",
+      "provenance": "Explicitly new remote preparation bytes; never assigned an unavailable original-file hash."
+    },
+    {
+      "key": "preparation_history",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-preparation-history.json",
+      "bytes": 12031,
+      "sha256": "1ad2ca19dfa2d5bcc54ee6f05dc7bf98978ab45220d7e1127e81cca390145d44",
+      "gitBlobSha": "80bd9d94cfb029b236172c672910123b8d82ad51",
+      "encoding": "utf-8",
+      "kind": "new-read-only-outage-reconciliation",
+      "provenance": "Explicitly new remote preparation bytes; never assigned an unavailable original-file hash."
+    },
+    {
+      "key": "numeric_reconciliation",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/remote-primary-reconciliation.json",
+      "bytes": 85563,
+      "sha256": "84eb7e657512458939d4f63dd60c966be3b28390760af86345d6bc745f1aae47",
+      "gitBlobSha": "29554213b34186ff73f092fe37e96594f453b371",
+      "encoding": "utf-8",
+      "kind": "new-read-only-outage-reconciliation",
+      "provenance": "Explicitly new remote preparation bytes; never assigned an unavailable original-file hash."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-log-audit.json",
+      "bytes": 192712,
+      "sha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193",
+      "gitBlobSha": "9d98aa34dbbdb738eb644cd24eeff31fcb7928f1",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact retained final primary audit; original artifactBindingPass remains null."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/successor/primary-records.jsonl",
+      "bytes": 3450202,
+      "sha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+      "gitBlobSha": "0fea9b09a55d4af04a15e99ef2798ce5c01752a4",
+      "encoding": "utf-8",
+      "kind": "exact-retained-evidence",
+      "provenance": "Exact original 495 tagged records; independently re-extracted from original job log and matched SHA98b1ec1f…."
+    },
+    {
+      "key": "vndb_AB",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-AB/primary-records.jsonl",
+      "bytes": 377434,
+      "sha256": "ea04f794d55add66e9c15bf082f9b2209bf81cfee01432dec0a550fb10d43fe0",
+      "gitBlobSha": "aaa6fe748fab06b3d6441751d1e84f39ef01e6a9",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    },
+    {
+      "key": "vndb_BA",
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/vndb-BA/primary-records.jsonl",
+      "bytes": 375818,
+      "sha256": "716907665e13176b57392d9a863b149170d6b0fe7280cdbf52bb9660c8562efd",
+      "gitBlobSha": "332c506840cc8d164fcca490ebd8e6902007eecb",
+      "encoding": "utf-8",
+      "kind": "exact-original-primary-records",
+      "provenance": "Fresh job-log extraction preserves original tag and JSON payload plus original terminal newlines; matches the saved pre-outage SHA-256."
+    }
+  ]
+}

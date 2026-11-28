@@ -1,0 +1,16 @@
+{
+  "label": "reproduce-baseline",
+  "command": [
+    "npm",
+    "run",
+    "build:dictionary-wasm",
+    "--",
+    "--check"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-baseline",
+  "startedEpoch": 1795855926.8947556,
+  "finishedEpoch": 1795855930.150634,
+  "exitCode": 0,
+  "logSha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

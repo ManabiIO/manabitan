@@ -1,0 +1,3930 @@
+{
+  "schemaVersion": 1,
+  "runId": 46124542684,
+  "jobId": 140916123863,
+  "toolingHead": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+  "scope": "Read-only independent reconstruction of one nine-cell native component screen; no new execution or measurements",
+  "complete": true,
+  "allLogChecksPass": true,
+  "errors": [],
+  "cellOrder": [
+    "jmdict",
+    "negative-1",
+    "negative-2",
+    "negative-3",
+    "negative-4",
+    "negative-5",
+    "negative-6",
+    "jitendex",
+    "vndb"
+  ],
+  "measuredObservationCount": 144,
+  "plannedMeasuredObservations": 144,
+  "cells": [
+    {
+      "id": "jmdict",
+      "schemaVersion": 1,
+      "scope": "One locked dictionary native component cell",
+      "dictionary": "jmdict",
+      "caseId": null,
+      "negative": false,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 17,
+      "mechanics": {
+        "jmdict": {
+          "keyPredicateRows": 85314,
+          "admissions": 44466,
+          "candidateRecordsInspected": 100878,
+          "noPrefixCandidate": 285,
+          "selected": 44181,
+          "selectedDistance1": 3,
+          "selectedDistance2": 35212,
+          "selectedDistance3": 6553,
+          "selectedDistance4": 2413,
+          "selectedBytes": 8070191,
+          "selectedAtLeast512": 6837,
+          "selectedAtLeast512Bytes": 4991626,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 75,
+          "middleRejected": 3,
+          "fullRejected": 1,
+          "hits": 44102,
+          "hitBytes": 8059365,
+          "fullBytesOffered": 8059396,
+          "failedFullBytesOffered": 31,
+          "maxSelectedBytes": 4522,
+          "maxFailedFullBytes": 31,
+          "originalLookbackZeroRows": 353880,
+          "originalLookbackPositiveRows": 174411,
+          "originalGlossaryReuses": 54629,
+          "totalGlossaryReuses": 98731,
+          "priorStreakRows": 154409,
+          "recentContentHits": 154413,
+          "rows": 528299,
+          "budgetPositiveRows": 116643,
+          "budgetRefreshByRecentStreak": 26837,
+          "definitionLengthRejected": 49931,
+          "rulesLengthRejected": 8,
+          "definitionSignatureRejected": 6757,
+          "rulesSignatureRejected": 1,
+          "hitDistance1": 0,
+          "hitDistance2": 35159,
+          "hitDistance3": 6539,
+          "hitDistance4": 2404,
+          "priorStreakLookbackZeroRows": 85314,
+          "expressionMatches": 40983,
+          "readingMatches": 3483,
+          "readingIneligibleRows": 34880,
+          "readingAliasRejected": 2435,
+          "keyComparisonCalls": 60932,
+          "keyComparisonBytesOffered": 872780,
+          "maxKeyComparisonBytes": 30
+        }
+      },
+      "statistics": {
+        "jmdict": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              509.55828499999984,
+              506.2993840000004,
+              513.2553949999997,
+              494.9436730000002
+            ],
+            "secondValues": [
+              499.9630669999997,
+              488.64352400000007,
+              501.1332490000002,
+              500.64236200000005
+            ],
+            "pairedChangesPercent": [
+              -1.8830462152136684,
+              -3.4872371087064757,
+              -2.361815602542172,
+              1.151381320920497
+            ],
+            "medianPairedChangePercent": -2.12243090887792,
+            "equalWorkChangePercent": -1.6637149732231071,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -3.4872371087064757,
+            "maximumChangePercent": 1.151381320920497,
+            "largestAbsoluteChangePercent": 3.4872371087064757
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              495.9846010000001,
+              504.4788160000003,
+              502.7189150000004,
+              493.7202219999999
+            ],
+            "secondValues": [
+              533.0932560000003,
+              504.31264599999986,
+              498.5470959999998,
+              504.9583209999996
+            ],
+            "pairedChangesPercent": [
+              7.481815952588455,
+              -0.03293894505184136,
+              -0.8298512101937883,
+              2.2762079613582564
+            ],
+            "medianPairedChangePercent": 1.1216345081532075,
+            "equalWorkChangePercent": 2.2038514053600133,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.8298512101937883,
+            "maximumChangePercent": 7.481815952588455,
+            "largestAbsoluteChangePercent": 7.481815952588455
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              556.2610000000001,
+              555.8249999999999,
+              567.19,
+              545.9549999999999
+            ],
+            "secondValues": [
+              551.2649999999999,
+              538.153,
+              553.8460000000001,
+              550.046
+            ],
+            "pairedChangesPercent": [
+              -0.8981395424090821,
+              -3.179417982278576,
+              -2.35265078721415,
+              0.7493291571649907
+            ],
+            "medianPairedChangePercent": -1.625395164811616,
+            "equalWorkChangePercent": -1.4345027549948486,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -3.179417982278576,
+            "maximumChangePercent": 0.7493291571649907,
+            "largestAbsoluteChangePercent": 3.179417982278576
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              552.565,
+              553.8820000000001,
+              550.7370000000001,
+              554.951
+            ],
+            "secondValues": [
+              587.022,
+              556.289,
+              561.441,
+              558.2289999999999
+            ],
+            "pairedChangesPercent": [
+              6.235827459212939,
+              0.4345690959446147,
+              1.943577424433074,
+              0.5906827810022719
+            ],
+            "medianPairedChangePercent": 1.267130102717673,
+            "equalWorkChangePercent": 2.2985034819303474,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.4345690959446147,
+            "maximumChangePercent": 6.235827459212939,
+            "largestAbsoluteChangePercent": 6.235827459212939
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              360.84864500000026,
+              354.77920900000026,
+              362.89472300000034,
+              353.42718000000013
+            ],
+            "secondValues": [
+              348.3359409999998,
+              347.52539,
+              352.3268339999995,
+              352.52759699999933
+            ],
+            "pairedChangesPercent": [
+              -3.4675768285067132,
+              -2.044600928122664,
+              -2.9121087550233793,
+              -0.25453135777525615
+            ],
+            "medianPairedChangePercent": -2.4783548415730214,
+            "equalWorkChangePercent": -2.1812214323384427,
+            "fasterPairs": 4,
+            "slowerPairs": 0,
+            "minimumChangePercent": -3.4675768285067132,
+            "maximumChangePercent": -0.25453135777525615,
+            "largestAbsoluteChangePercent": 3.4675768285067132
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              345.6556760000001,
+              352.40701899999976,
+              351.6494230000003,
+              351.28889000000026
+            ],
+            "secondValues": [
+              391.7350640000002,
+              362.34699599999976,
+              348.5872189999998,
+              354.73848499999986
+            ],
+            "pairedChangesPercent": [
+              13.331008630681396,
+              2.820595636320178,
+              -0.870811609436517,
+              0.9819823792319715
+            ],
+            "medianPairedChangePercent": 1.9012890077760747,
+            "equalWorkChangePercent": 4.02617526168112,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.870811609436517,
+            "maximumChangePercent": 13.331008630681396,
+            "largestAbsoluteChangePercent": 13.331008630681396
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              333,
+              320,
+              326,
+              318
+            ],
+            "secondValues": [
+              321,
+              314,
+              316,
+              318
+            ],
+            "pairedChangesPercent": [
+              -3.6036036036036,
+              -1.8750000000000044,
+              -3.0674846625766916,
+              0
+            ],
+            "medianPairedChangePercent": -2.471242331288348,
+            "equalWorkChangePercent": -2.1588280647648395,
+            "fasterPairs": 3,
+            "slowerPairs": 0,
+            "minimumChangePercent": -3.6036036036036,
+            "maximumChangePercent": 0,
+            "largestAbsoluteChangePercent": 3.6036036036036
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              316,
+              319,
+              318,
+              313
+            ],
+            "secondValues": [
+              356,
+              327,
+              314,
+              322
+            ],
+            "pairedChangesPercent": [
+              12.658227848101266,
+              2.507836990595602,
+              -1.2578616352201255,
+              2.8753993610223683
+            ],
+            "medianPairedChangePercent": 2.691618175808985,
+            "equalWorkChangePercent": 4.1864139020537205,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -1.2578616352201255,
+            "maximumChangePercent": 12.658227848101266,
+            "largestAbsoluteChangePercent": 12.658227848101266
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              19.144587999999658,
+              24.464205999999876,
+              25.43319099999985,
+              24.122164999999768
+            ],
+            "secondValues": [
+              20.635238999999956,
+              25.8948740000003,
+              24.473351000000093,
+              23.37581500000033
+            ],
+            "pairedChangesPercent": [
+              7.786278816761816,
+              5.848005040508686,
+              -3.773966074488111,
+              -3.0940423465283695
+            ],
+            "medianPairedChangePercent": 1.3769813469901582,
+            "equalWorkChangePercent": 1.3042881838148501,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.773966074488111,
+            "maximumChangePercent": 7.786278816761816,
+            "largestAbsoluteChangePercent": 7.786278816761816
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              20.47824400000013,
+              24.78566899999987,
+              24.615923000000294,
+              25.49059000000011
+            ],
+            "secondValues": [
+              25.018055999999888,
+              25.540561000000253,
+              21.50698099999977,
+              23.79717400000004
+            ],
+            "pairedChangesPercent": [
+              22.168951595653063,
+              3.0456793399459503,
+              -12.629800637581157,
+              -6.643298566255485
+            ],
+            "medianPairedChangePercent": -1.7988096131547673,
+            "equalWorkChangePercent": 0.516245990134867,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -12.629800637581157,
+            "maximumChangePercent": 22.168951595653063,
+            "largestAbsoluteChangePercent": 22.168951595653063
+          },
+          "prospectiveComponentAssessment": {
+            "target": true,
+            "mechanicalGatePass": false,
+            "interpretation": "Component gate only; every negative/non-target and original-artifact correctness gate remains required. No browser/current-develop gain claim."
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-1",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 1,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "1": {
+          "keyPredicateRows": 0,
+          "admissions": 0,
+          "candidateRecordsInspected": 0,
+          "noPrefixCandidate": 0,
+          "selected": 0,
+          "selectedDistance1": 0,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 0,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 0,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 0,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 19999,
+          "originalLookbackPositiveRows": 0,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 0,
+          "recentContentHits": 0,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 0,
+          "expressionMatches": 0,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 0,
+          "keyComparisonBytesOffered": 0,
+          "maxKeyComparisonBytes": 0
+        }
+      },
+      "statistics": {
+        "1": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              168.190887,
+              168.68261500000008,
+              169.25507300000012,
+              168.4036910000001
+            ],
+            "secondValues": [
+              173.74983900000004,
+              169.03898199999983,
+              170.19478399999994,
+              169.89673599999995
+            ],
+            "pairedChangesPercent": [
+              3.30514458848179,
+              0.21126480639379608,
+              0.555204038108692,
+              0.8865868622795592
+            ],
+            "medianPairedChangePercent": 0.7208954501941256,
+            "equalWorkChangePercent": 1.2376094400203819,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.21126480639379608,
+            "maximumChangePercent": 3.30514458848179,
+            "largestAbsoluteChangePercent": 3.30514458848179
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              169.78098600000004,
+              168.05102500000007,
+              168.62497800000014,
+              169.40212700000012
+            ],
+            "secondValues": [
+              171.44197400000004,
+              169.27316200000007,
+              169.37228600000012,
+              170.1682770000001
+            ],
+            "pairedChangesPercent": [
+              0.9783121415021023,
+              0.7272416220014177,
+              0.443177522608762,
+              0.45226704857135314
+            ],
+            "medianPairedChangePercent": 0.5897543352863854,
+            "equalWorkChangePercent": 0.6505176738638596,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.443177522608762,
+            "maximumChangePercent": 0.9783121415021023,
+            "largestAbsoluteChangePercent": 0.9783121415021023
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              172.97,
+              172.589,
+              176.41,
+              173.12300000000002
+            ],
+            "secondValues": [
+              177.72199999999998,
+              173.41100000000003,
+              175.86900000000003,
+              174.784
+            ],
+            "pairedChangesPercent": [
+              2.747297219170952,
+              0.4762760083203643,
+              -0.3066719573720178,
+              0.9594334663793891
+            ],
+            "medianPairedChangePercent": 0.7178547373498767,
+            "equalWorkChangePercent": 0.9630379863384997,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.3066719573720178,
+            "maximumChangePercent": 2.747297219170952,
+            "largestAbsoluteChangePercent": 2.747297219170952
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              174.45899999999997,
+              173.581,
+              173.38999999999996,
+              173.36
+            ],
+            "secondValues": [
+              174.69100000000003,
+              173.84700000000004,
+              174.22299999999998,
+              175.64400000000003
+            ],
+            "pairedChangesPercent": [
+              0.13298253457836307,
+              0.1532425783928204,
+              0.4804198627371914,
+              1.317489616982015
+            ],
+            "medianPairedChangePercent": 0.3168312205650059,
+            "equalWorkChangePercent": 0.520301098173559,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.13298253457836307,
+            "maximumChangePercent": 1.317489616982015,
+            "largestAbsoluteChangePercent": 1.317489616982015
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              158.2893990000001,
+              158.877928,
+              159.396228,
+              158.59833599999996
+            ],
+            "secondValues": [
+              163.51098100000004,
+              158.98726299999998,
+              160.10899999999998,
+              159.7027539999999
+            ],
+            "pairedChangesPercent": [
+              3.2987566021398296,
+              0.06881698507548162,
+              0.44716992926581156,
+              0.6963616566569408
+            ],
+            "medianPairedChangePercent": 0.5717657929613762,
+            "equalWorkChangePercent": 1.12539922518744,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.06881698507548162,
+            "maximumChangePercent": 3.2987566021398296,
+            "largestAbsoluteChangePercent": 3.2987566021398296
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              159.5612139999998,
+              158.237246,
+              158.49212599999984,
+              159.0150829999999
+            ],
+            "secondValues": [
+              161.36040799999992,
+              159.48329699999994,
+              159.335493,
+              159.86478800000006
+            ],
+            "pairedChangesPercent": [
+              1.1275885629700166,
+              0.7874574611845375,
+              0.5321191792204027,
+              0.5343549705911776
+            ],
+            "medianPairedChangePercent": 0.6609062158878576,
+            "equalWorkChangePercent": 0.7458326332045573,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.5321191792204027,
+            "maximumChangePercent": 1.1275885629700166,
+            "largestAbsoluteChangePercent": 1.1275885629700166
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              144,
+              146,
+              144,
+              144
+            ],
+            "secondValues": [
+              148,
+              147,
+              150,
+              145
+            ],
+            "pairedChangesPercent": [
+              2.777777777777768,
+              0.6849315068493178,
+              4.166666666666674,
+              0.694444444444442
+            ],
+            "medianPairedChangePercent": 1.736111111111105,
+            "equalWorkChangePercent": 2.076124567474058,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.6849315068493178,
+            "maximumChangePercent": 4.166666666666674,
+            "largestAbsoluteChangePercent": 4.166666666666674
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              145,
+              146,
+              145,
+              145
+            ],
+            "secondValues": [
+              148,
+              145,
+              146,
+              143
+            ],
+            "pairedChangesPercent": [
+              2.0689655172413834,
+              -0.6849315068493178,
+              0.6896551724137945,
+              -1.379310344827589
+            ],
+            "medianPairedChangePercent": 0.002361832782238338,
+            "equalWorkChangePercent": 0.1721170395869276,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.379310344827589,
+            "maximumChangePercent": 2.0689655172413834,
+            "largestAbsoluteChangePercent": 2.0689655172413834
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              7.094844000000052,
+              7.216456000000022,
+              7.171719999999993,
+              7.058339000000046
+            ],
+            "secondValues": [
+              7.334322000000128,
+              7.086823000000038,
+              7.18100400000003,
+              7.362043999999884
+            ],
+            "pairedChangesPercent": [
+              3.3753807694725246,
+              -1.796352669509571,
+              0.12945290669512666,
+              4.302782850183817
+            ],
+            "medianPairedChangePercent": 1.7524168380838256,
+            "equalWorkChangePercent": 1.4814781594666426,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -1.796352669509571,
+            "maximumChangePercent": 4.302782850183817,
+            "largestAbsoluteChangePercent": 4.302782850183817
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              7.492632000000015,
+              6.8216009999999585,
+              7.057626000000198,
+              7.228492999999986
+            ],
+            "secondValues": [
+              7.053058000000107,
+              7.223836999999975,
+              7.549144999999953,
+              7.278436000000056
+            ],
+            "pairedChangesPercent": [
+              -5.866750162024603,
+              5.896504354330001,
+              6.9643673382486115,
+              0.690918563524523
+            ],
+            "medianPairedChangePercent": 3.293711458927262,
+            "equalWorkChangePercent": 1.762649634521729,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -5.866750162024603,
+            "maximumChangePercent": 6.9643673382486115,
+            "largestAbsoluteChangePercent": 6.9643673382486115
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-2",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 2,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "2": {
+          "keyPredicateRows": 0,
+          "admissions": 0,
+          "candidateRecordsInspected": 0,
+          "noPrefixCandidate": 0,
+          "selected": 0,
+          "selectedDistance1": 0,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 0,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 0,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 0,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 19999,
+          "originalLookbackPositiveRows": 0,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 0,
+          "recentContentHits": 0,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 0,
+          "expressionMatches": 0,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 0,
+          "keyComparisonBytesOffered": 0,
+          "maxKeyComparisonBytes": 0
+        }
+      },
+      "statistics": {
+        "2": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              157.40648500000012,
+              162.39288199999996,
+              158.00570800000003,
+              155.599955
+            ],
+            "secondValues": [
+              155.03865599999995,
+              159.981503,
+              155.95856799999999,
+              156.68879300000015
+            ],
+            "pairedChangesPercent": [
+              -1.5042766503553961,
+              -1.4849043691459007,
+              -1.2956114218354964,
+              0.6997675545601156
+            ],
+            "medianPairedChangePercent": -1.3902578954906986,
+            "equalWorkChangePercent": -0.9058200879775158,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -1.5042766503553961,
+            "maximumChangePercent": 0.6997675545601156,
+            "largestAbsoluteChangePercent": 1.5042766503553961
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              155.58327500000001,
+              155.98923600000006,
+              156.1451120000001,
+              157.10366699999997
+            ],
+            "secondValues": [
+              155.948934,
+              156.40396899999993,
+              163.312217,
+              154.692702
+            ],
+            "pairedChangesPercent": [
+              0.23502461945217323,
+              0.2658728324048454,
+              4.590028408958391,
+              -1.5346331795043189
+            ],
+            "medianPairedChangePercent": 0.2504487259285093,
+            "equalWorkChangePercent": 0.8860984874570876,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -1.5346331795043189,
+            "maximumChangePercent": 4.590028408958391,
+            "largestAbsoluteChangePercent": 4.590028408958391
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              162.972,
+              166.75900000000001,
+              164.40599999999998,
+              161.48899999999998
+            ],
+            "secondValues": [
+              159.30499999999998,
+              164.105,
+              162.841,
+              162.407
+            ],
+            "pairedChangesPercent": [
+              -2.250079768303781,
+              -1.5915182988624488,
+              -0.9519117307154046,
+              0.5684597712537931
+            ],
+            "medianPairedChangePercent": -1.2717150147889267,
+            "equalWorkChangePercent": -1.062801048158546,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -2.250079768303781,
+            "maximumChangePercent": 0.5684597712537931,
+            "largestAbsoluteChangePercent": 2.250079768303781
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              161.27299999999997,
+              162.29999999999998,
+              159.85000000000002,
+              162.07499999999996
+            ],
+            "secondValues": [
+              161.36400000000003,
+              161.90800000000002,
+              171.391,
+              160.34
+            ],
+            "pairedChangesPercent": [
+              0.056426060158898395,
+              -0.24152803450397942,
+              7.219893650297138,
+              -1.0704920561468212
+            ],
+            "medianPairedChangePercent": -0.09255098717254051,
+            "equalWorkChangePercent": 1.4725064988582615,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.0704920561468212,
+            "maximumChangePercent": 7.219893650297138,
+            "largestAbsoluteChangePercent": 7.219893650297138
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              146.749391,
+              151.66836100000006,
+              147.73356899999996,
+              145.10400399999997
+            ],
+            "secondValues": [
+              145.04686399999994,
+              149.20989500000013,
+              145.89103699999995,
+              145.95171900000003
+            ],
+            "pairedChangesPercent": [
+              -1.1601594994013031,
+              -1.6209484850963296,
+              -1.2471992739849114,
+              0.5842119973478166
+            ],
+            "medianPairedChangePercent": -1.2036793866931073,
+            "equalWorkChangePercent": -0.8720107510236774,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -1.6209484850963296,
+            "maximumChangePercent": 0.5842119973478166,
+            "largestAbsoluteChangePercent": 1.6209484850963296
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              145.65104999999997,
+              145.69221999999996,
+              145.80845099999982,
+              146.62491799999998
+            ],
+            "secondValues": [
+              145.57364200000004,
+              146.332581,
+              151.5854320000001,
+              144.6601460000001
+            ],
+            "pairedChangesPercent": [
+              -0.05314620114302837,
+              0.4395299900022298,
+              3.9620344091031434,
+              -1.3399987033580918
+            ],
+            "medianPairedChangePercent": 0.19319189442960072,
+            "equalWorkChangePercent": 0.7494582187281607,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.3399987033580918,
+            "maximumChangePercent": 3.9620344091031434,
+            "largestAbsoluteChangePercent": 3.9620344091031434
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              138,
+              141,
+              142,
+              134
+            ],
+            "secondValues": [
+              136,
+              138,
+              137,
+              133
+            ],
+            "pairedChangesPercent": [
+              -1.449275362318836,
+              -2.127659574468088,
+              -3.5211267605633756,
+              -0.7462686567164201
+            ],
+            "medianPairedChangePercent": -1.788467468393462,
+            "equalWorkChangePercent": -1.981981981981984,
+            "fasterPairs": 4,
+            "slowerPairs": 0,
+            "minimumChangePercent": -3.5211267605633756,
+            "maximumChangePercent": -0.7462686567164201,
+            "largestAbsoluteChangePercent": 3.5211267605633756
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              139,
+              131,
+              135,
+              132
+            ],
+            "secondValues": [
+              139,
+              139,
+              140,
+              135
+            ],
+            "pairedChangesPercent": [
+              0,
+              6.106870229007644,
+              3.703703703703698,
+              2.2727272727272707
+            ],
+            "medianPairedChangePercent": 2.9882154882154843,
+            "equalWorkChangePercent": 2.9795158286778367,
+            "fasterPairs": 0,
+            "slowerPairs": 3,
+            "minimumChangePercent": 0,
+            "maximumChangePercent": 6.106870229007644,
+            "largestAbsoluteChangePercent": 6.106870229007644
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              3.795542000000097,
+              3.8776889999999185,
+              3.734251999999998,
+              3.706983000000008
+            ],
+            "secondValues": [
+              3.9082329999999956,
+              3.906991999999917,
+              3.7855629999999962,
+              3.8723820000000444
+            ],
+            "pairedChangesPercent": [
+              2.96903577934049,
+              0.7556820570189915,
+              1.3740636679045348,
+              4.461822457778619
+            ],
+            "medianPairedChangePercent": 2.1715497236225123,
+            "equalWorkChangePercent": 2.373249574281555,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.7556820570189915,
+            "maximumChangePercent": 4.461822457778619,
+            "largestAbsoluteChangePercent": 4.461822457778619
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              3.7838549999999884,
+              3.829395999999946,
+              3.7788480000001243,
+              3.7441780000000904
+            ],
+            "secondValues": [
+              3.7982789999999795,
+              3.8063230000000488,
+              4.127674999999954,
+              3.773370000000085
+            ],
+            "pairedChangesPercent": [
+              0.3811985395844042,
+              -0.6025232177580331,
+              9.231040782794597,
+              0.7796637873518364
+            ],
+            "medianPairedChangePercent": 0.5804311634681203,
+            "equalWorkChangePercent": 2.4402962498632608,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.6025232177580331,
+            "maximumChangePercent": 9.231040782794597,
+            "largestAbsoluteChangePercent": 9.231040782794597
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-3",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 3,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "3": {
+          "keyPredicateRows": 0,
+          "admissions": 0,
+          "candidateRecordsInspected": 0,
+          "noPrefixCandidate": 0,
+          "selected": 0,
+          "selectedDistance1": 0,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 0,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 0,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 0,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 10000,
+          "originalLookbackPositiveRows": 9999,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 0,
+          "recentContentHits": 0,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 0,
+          "expressionMatches": 0,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 0,
+          "keyComparisonBytesOffered": 0,
+          "maxKeyComparisonBytes": 0
+        }
+      },
+      "statistics": {
+        "3": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              972.9012359999998,
+              976.4449050000001,
+              978.3859219999995,
+              988.4532650000001
+            ],
+            "secondValues": [
+              981.9086630000002,
+              986.4259439999998,
+              970.0667359999997,
+              974.0218049999999
+            ],
+            "pairedChangesPercent": [
+              0.9258315918102555,
+              1.0221814819136865,
+              -0.850296985364829,
+              -1.4600042825494874
+            ],
+            "medianPairedChangePercent": 0.03776730322271327,
+            "equalWorkChangePercent": -0.09606746578363357,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.4600042825494874,
+            "maximumChangePercent": 1.0221814819136865,
+            "largestAbsoluteChangePercent": 1.4600042825494874
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              970.4466040000001,
+              969.9917729999996,
+              972.4023179999999,
+              965.6730190000004
+            ],
+            "secondValues": [
+              977.1754410000004,
+              974.0481810000003,
+              975.0584520000002,
+              969.6381590000001
+            ],
+            "pairedChangesPercent": [
+              0.6933752946597371,
+              0.41818993860689435,
+              0.2731517552799989,
+              0.41060896618048126
+            ],
+            "medianPairedChangePercent": 0.4143994523936878,
+            "equalWorkChangePercent": 0.44879354009166317,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.2731517552799989,
+            "maximumChangePercent": 0.6933752946597371,
+            "largestAbsoluteChangePercent": 0.6933752946597371
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              977.481,
+              980.8249999999998,
+              982.821,
+              992.835
+            ],
+            "secondValues": [
+              986.083,
+              990.6160000000001,
+              974.377,
+              978.733
+            ],
+            "pairedChangesPercent": [
+              0.8800171051918104,
+              0.9982412764764748,
+              -0.8591595010688735,
+              -1.4203770012137018
+            ],
+            "medianPairedChangePercent": 0.010428802061468456,
+            "equalWorkChangePercent": -0.10556787279591973,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.4203770012137018,
+            "maximumChangePercent": 0.9982412764764748,
+            "largestAbsoluteChangePercent": 1.4203770012137018
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              974.97,
+              974.291,
+              976.6480000000001,
+              970.7289999999999
+            ],
+            "secondValues": [
+              981.455,
+              978.821,
+              979.6370000000001,
+              973.823
+            ],
+            "pairedChangesPercent": [
+              0.6651486712411669,
+              0.4649534892552598,
+              0.30604680499011216,
+              0.31872953213514243
+            ],
+            "medianPairedChangePercent": 0.3918415106952011,
+            "equalWorkChangePercent": 0.438788514611832,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.30604680499011216,
+            "maximumChangePercent": 0.6651486712411669,
+            "largestAbsoluteChangePercent": 0.6651486712411669
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              931.1254899999999,
+              934.4256119999999,
+              936.1935859999995,
+              940.4662150000001
+            ],
+            "secondValues": [
+              939.765737,
+              944.2905649999998,
+              927.8667710000004,
+              931.9803400000003
+            ],
+            "pairedChangesPercent": [
+              0.9279358252774372,
+              1.0557237380175666,
+              -0.8894330322830379,
+              -0.9023051402223814
+            ],
+            "medianPairedChangePercent": 0.019251396497199647,
+            "equalWorkChangePercent": 0.04522754178937216,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.9023051402223814,
+            "maximumChangePercent": 1.0557237380175666,
+            "largestAbsoluteChangePercent": 1.0557237380175666
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              927.2091219999995,
+              927.93067,
+              929.9573109999998,
+              923.6297209999996
+            ],
+            "secondValues": [
+              935.0672549999997,
+              932.1165020000001,
+              931.8222020000002,
+              927.1460440000003
+            ],
+            "pairedChangesPercent": [
+              0.8475038492988585,
+              0.4510931835026044,
+              0.20053511897175635,
+              0.38070699979140254
+            ],
+            "medianPairedChangePercent": 0.4159000916470035,
+            "equalWorkChangePercent": 0.46984261249007897,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.20053511897175635,
+            "maximumChangePercent": 0.8475038492988585,
+            "largestAbsoluteChangePercent": 0.8475038492988585
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              918,
+              922,
+              925,
+              926
+            ],
+            "secondValues": [
+              928,
+              933,
+              916,
+              919
+            ],
+            "pairedChangesPercent": [
+              1.089324618736387,
+              1.193058568329719,
+              -0.9729729729729741,
+              -0.7559395248380119
+            ],
+            "medianPairedChangePercent": 0.16669254694918756,
+            "equalWorkChangePercent": 0.13546464372797828,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.9729729729729741,
+            "maximumChangePercent": 1.193058568329719,
+            "largestAbsoluteChangePercent": 1.193058568329719
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              915,
+              914,
+              920,
+              913
+            ],
+            "secondValues": [
+              922,
+              917,
+              922,
+              914
+            ],
+            "pairedChangesPercent": [
+              0.7650273224043769,
+              0.3282275711159688,
+              0.21739130434783593,
+              0.10952902519167917
+            ],
+            "medianPairedChangePercent": 0.27280943773190236,
+            "equalWorkChangePercent": 0.35499726925176667,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 0.10952902519167917,
+            "maximumChangePercent": 0.7650273224043769,
+            "largestAbsoluteChangePercent": 0.7650273224043769
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              4.1122609999999895,
+              4.068744000000436,
+              4.104797999999846,
+              3.822011999999688
+            ],
+            "secondValues": [
+              4.090126000000055,
+              4.162965000000099,
+              3.7773979999998915,
+              4.080101000000127
+            ],
+            "pairedChangesPercent": [
+              -0.5382683638011976,
+              2.315726917192462,
+              -7.97603195090153,
+              6.7526998868779
+            ],
+            "medianPairedChangePercent": 0.8887292766956323,
+            "equalWorkChangePercent": 0.017227662474472716,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -7.97603195090153,
+            "maximumChangePercent": 6.7526998868779,
+            "largestAbsoluteChangePercent": 7.97603195090153
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              3.8902689999998756,
+              4.000442999999905,
+              3.996228999999971,
+              4.085638999999958
+            ],
+            "secondValues": [
+              3.95883799999973,
+              3.8719470000002048,
+              4.023134999999854,
+              3.9752159999998753
+            ],
+            "pairedChangesPercent": [
+              1.762577343619598,
+              -3.2120442660901083,
+              0.6732847391849539,
+              -2.702710640858963
+            ],
+            "medianPairedChangePercent": -1.0147129508370045,
+            "equalWorkChangePercent": -0.8980640572784582,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.2120442660901083,
+            "maximumChangePercent": 1.762577343619598,
+            "largestAbsoluteChangePercent": 3.2120442660901083
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-4",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 4,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "4": {
+          "keyPredicateRows": 6666,
+          "admissions": 6666,
+          "candidateRecordsInspected": 6666,
+          "noPrefixCandidate": 0,
+          "selected": 6666,
+          "selectedDistance1": 6666,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 1613172,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 6666,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 1613172,
+          "failedFullBytesOffered": 1613172,
+          "maxSelectedBytes": 242,
+          "maxFailedFullBytes": 242,
+          "originalLookbackZeroRows": 19999,
+          "originalLookbackPositiveRows": 0,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 6666,
+          "recentContentHits": 6667,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 6666,
+          "expressionMatches": 6666,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 6666,
+          "keyComparisonBytesOffered": 26664,
+          "maxKeyComparisonBytes": 4
+        }
+      },
+      "statistics": {
+        "4": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              136.31384499999996,
+              133.77050600000004,
+              132.82135599999995,
+              139.81628100000006
+            ],
+            "secondValues": [
+              137.38108100000005,
+              150.31952400000014,
+              137.2247339999999,
+              136.58596500000004
+            ],
+            "pairedChangesPercent": [
+              0.7829256081802294,
+              12.371200868448607,
+              3.3152635484311244,
+              -2.3104004604442396
+            ],
+            "medianPairedChangePercent": 2.049094578305677,
+            "equalWorkChangePercent": 3.462051734671956,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -2.3104004604442396,
+            "maximumChangePercent": 12.371200868448607,
+            "largestAbsoluteChangePercent": 12.371200868448607
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              134.73810599999996,
+              137.1628030000001,
+              135.74363899999997,
+              139.1677060000001
+            ],
+            "secondValues": [
+              137.72052999999997,
+              133.72033599999997,
+              137.18786999999992,
+              134.06630800000016
+            ],
+            "pairedChangesPercent": [
+              2.2134970488601136,
+              -2.5097671706228786,
+              1.0639400937232368,
+              -3.665647833556962
+            ],
+            "medianPairedChangePercent": -0.7229135384498209,
+            "equalWorkChangePercent": -0.7529476469999019,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.665647833556962,
+            "maximumChangePercent": 2.2134970488601136,
+            "largestAbsoluteChangePercent": 3.665647833556962
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              142.19,
+              140.12800000000001,
+              137.1,
+              144.37900000000002
+            ],
+            "secondValues": [
+              141.678,
+              157.014,
+              144.28400000000002,
+              143.401
+            ],
+            "pairedChangesPercent": [
+              -0.36008158098319587,
+              12.050411052751775,
+              5.239970824215923,
+              -0.6773838300583979
+            ],
+            "medianPairedChangePercent": 2.4399446216163634,
+            "equalWorkChangePercent": 4.004987610788979,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.6773838300583979,
+            "maximumChangePercent": 12.050411052751775,
+            "largestAbsoluteChangePercent": 12.050411052751775
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              140.509,
+              142.533,
+              141.414,
+              144.29999999999998
+            ],
+            "secondValues": [
+              144.738,
+              139.34199999999998,
+              144.98000000000002,
+              139.74300000000002
+            ],
+            "pairedChangesPercent": [
+              3.0097716160530696,
+              -2.238779791346568,
+              2.5216739502454066,
+              -3.158004158004135
+            ],
+            "medianPairedChangePercent": 0.14144707944941937,
+            "equalWorkChangePercent": 0.008263649086792668,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.158004158004135,
+            "maximumChangePercent": 3.0097716160530696,
+            "largestAbsoluteChangePercent": 3.158004158004135
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              128.06635299999996,
+              125.71492699999997,
+              124.81814200000011,
+              131.638521
+            ],
+            "secondValues": [
+              129.204073,
+              140.81597900000008,
+              129.2014369999999,
+              128.60754700000012
+            ],
+            "pairedChangesPercent": [
+              0.8883832274040326,
+              12.012139178985581,
+              3.511745111539799,
+              -2.3024977620341613
+            ],
+            "medianPairedChangePercent": 2.200064169471916,
+            "equalWorkChangePercent": 3.4476254150311414,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -2.3024977620341613,
+            "maximumChangePercent": 12.012139178985581,
+            "largestAbsoluteChangePercent": 12.012139178985581
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              126.36966999999999,
+              128.8536329999999,
+              127.45024099999999,
+              131.03819600000003
+            ],
+            "secondValues": [
+              129.2831910000001,
+              125.51050399999991,
+              128.627012,
+              125.89386600000012
+            ],
+            "pairedChangesPercent": [
+              2.3055540146619924,
+              -2.594516679246428,
+              0.9233179872920161,
+              -3.9258248030214826
+            ],
+            "medianPairedChangePercent": -0.835599345977206,
+            "equalWorkChangePercent": -0.8559599981109778,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.9258248030214826,
+            "maximumChangePercent": 2.3055540146619924,
+            "largestAbsoluteChangePercent": 3.9258248030214826
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              120,
+              117,
+              117,
+              124
+            ],
+            "secondValues": [
+              120,
+              130,
+              121,
+              119
+            ],
+            "pairedChangesPercent": [
+              0,
+              11.111111111111116,
+              3.418803418803429,
+              -4.0322580645161255
+            ],
+            "medianPairedChangePercent": 1.7094017094017144,
+            "equalWorkChangePercent": 2.5104602510460206,
+            "fasterPairs": 1,
+            "slowerPairs": 2,
+            "minimumChangePercent": -4.0322580645161255,
+            "maximumChangePercent": 11.111111111111116,
+            "largestAbsoluteChangePercent": 11.111111111111116
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              117,
+              120,
+              119,
+              121
+            ],
+            "secondValues": [
+              120,
+              115,
+              116,
+              114
+            ],
+            "pairedChangesPercent": [
+              2.564102564102555,
+              -4.1666666666666625,
+              -2.5210084033613467,
+              -5.785123966942152
+            ],
+            "medianPairedChangePercent": -3.3438375350140044,
+            "equalWorkChangePercent": -2.515723270440251,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -5.785123966942152,
+            "maximumChangePercent": 2.564102564102555,
+            "largestAbsoluteChangePercent": 5.785123966942152
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              3.8580890000000068,
+              3.757169000000033,
+              3.7716770000000395,
+              3.861652000000106
+            ],
+            "secondValues": [
+              3.705861999999968,
+              4.093387000000007,
+              3.840776000000062,
+              3.724038999999948
+            ],
+            "pairedChangesPercent": [
+              -3.945658070615754,
+              8.948705794175638,
+              1.8320497752066789,
+              -3.563578489210173
+            ],
+            "medianPairedChangePercent": -0.865764357001747,
+            "equalWorkChangePercent": 0.7572963973632385,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -3.945658070615754,
+            "maximumChangePercent": 8.948705794175638,
+            "largestAbsoluteChangePercent": 8.948705794175638
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              3.743597000000051,
+              4.147422999999975,
+              3.8871730000000753,
+              3.775163000000191
+            ],
+            "secondValues": [
+              3.707831000000027,
+              3.8881119999999214,
+              3.96540200000004,
+              3.96573099999992
+            ],
+            "pairedChangesPercent": [
+              -0.9553912987969371,
+              -6.252340308670112,
+              2.0124908255938934,
+              5.047940976315979
+            ],
+            "medianPairedChangePercent": 0.5285497633984781,
+            "equalWorkChangePercent": -0.16896674904363085,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -6.252340308670112,
+            "maximumChangePercent": 5.047940976315979,
+            "largestAbsoluteChangePercent": 6.252340308670112
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-5",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 5,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "5": {
+          "keyPredicateRows": 5000,
+          "admissions": 5000,
+          "candidateRecordsInspected": 15000,
+          "noPrefixCandidate": 0,
+          "selected": 5000,
+          "selectedDistance1": 0,
+          "selectedDistance2": 0,
+          "selectedDistance3": 5000,
+          "selectedDistance4": 0,
+          "selectedBytes": 20480000,
+          "selectedAtLeast512": 5000,
+          "selectedAtLeast512Bytes": 20480000,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 5000,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 20480000,
+          "failedFullBytesOffered": 20480000,
+          "maxSelectedBytes": 4096,
+          "maxFailedFullBytes": 4096,
+          "originalLookbackZeroRows": 10000,
+          "originalLookbackPositiveRows": 9999,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 5000,
+          "recentContentHits": 5000,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 10000,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 5000,
+          "expressionMatches": 5000,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 5000,
+          "keyComparisonBytesOffered": 20000,
+          "maxKeyComparisonBytes": 4
+        }
+      },
+      "statistics": {
+        "5": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              830.9203680000004,
+              833.0304839999999,
+              849.0036049999999,
+              834.3142679999999
+            ],
+            "secondValues": [
+              842.1197860000002,
+              841.571449,
+              840.7482889999999,
+              839.5097209999999
+            ],
+            "pairedChangesPercent": [
+              1.347832888843059,
+              1.0252884094935633,
+              -0.9723534683931057,
+              0.6227213412584254
+            ],
+            "medianPairedChangePercent": 0.8240048753759943,
+            "equalWorkChangePercent": 0.4983322634187548,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.9723534683931057,
+            "maximumChangePercent": 1.347832888843059,
+            "largestAbsoluteChangePercent": 1.347832888843059
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              823.0164560000002,
+              836.4687110000001,
+              826.7225839999996,
+              832.578164
+            ],
+            "secondValues": [
+              828.2289300000001,
+              841.4752669999998,
+              827.4771690000005,
+              826.097896
+            ],
+            "pairedChangesPercent": [
+              0.6333377615963309,
+              0.5985347609732239,
+              0.09127426958022156,
+              -0.7783374919258623
+            ],
+            "medianPairedChangePercent": 0.3449045152767227,
+            "equalWorkChangePercent": 0.13539128811208556,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.7783374919258623,
+            "maximumChangePercent": 0.6333377615963309,
+            "largestAbsoluteChangePercent": 0.7783374919258623
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              834.9699999999999,
+              837.451,
+              853.271,
+              839.204
+            ],
+            "secondValues": [
+              846.1120000000001,
+              847.0960000000001,
+              845.116,
+              844.1440000000001
+            ],
+            "pairedChangesPercent": [
+              1.3344192006898625,
+              1.1517091746263475,
+              -0.9557338758729661,
+              0.5886530569444659
+            ],
+            "medianPairedChangePercent": 0.8701811157854067,
+            "equalWorkChangePercent": 0.5222152482573073,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.9557338758729661,
+            "maximumChangePercent": 1.3344192006898625,
+            "largestAbsoluteChangePercent": 1.3344192006898625
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              827.768,
+              841.5609999999999,
+              830.8810000000001,
+              837.16
+            ],
+            "secondValues": [
+              832.6220000000001,
+              845.6880000000002,
+              831.8449999999999,
+              830.2150000000001
+            ],
+            "pairedChangesPercent": [
+              0.5863961883039837,
+              0.49039820048699667,
+              0.11602142785787084,
+              -0.8295905203306253
+            ],
+            "medianPairedChangePercent": 0.30320981417243376,
+            "equalWorkChangePercent": 0.08989114182726965,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.8295905203306253,
+            "maximumChangePercent": 0.5863961883039837,
+            "largestAbsoluteChangePercent": 0.8295905203306253
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              791.932372,
+              793.9207729999998,
+              802.0570210000001,
+              795.0272090000003
+            ],
+            "secondValues": [
+              802.8795549999998,
+              801.5453409999996,
+              801.716532,
+              800.1141560000001
+            ],
+            "pairedChangesPercent": [
+              1.3823381120730005,
+              0.9603688754973305,
+              -0.04245196925968253,
+              0.6398456483518666
+            ],
+            "medianPairedChangePercent": 0.8001072619245986,
+            "equalWorkChangePercent": 0.7326003076010723,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.04245196925968253,
+            "maximumChangePercent": 1.3823381120730005,
+            "largestAbsoluteChangePercent": 1.3823381120730005
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              783.9953170000001,
+              795.0583350000002,
+              787.5013079999994,
+              793.2347260000001
+            ],
+            "secondValues": [
+              789.3807949999997,
+              801.918825,
+              788.144174,
+              787.0345850000001
+            ],
+            "pairedChangesPercent": [
+              0.6869273174497259,
+              0.8628914002894783,
+              0.0816336421882502,
+              -0.7816275305123299
+            ],
+            "medianPairedChangePercent": 0.38428047981898805,
+            "equalWorkChangePercent": 0.21168158848152707,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.7816275305123299,
+            "maximumChangePercent": 0.8628914002894783,
+            "largestAbsoluteChangePercent": 0.8628914002894783
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              784,
+              781,
+              794,
+              784
+            ],
+            "secondValues": [
+              791,
+              789,
+              788,
+              786
+            ],
+            "pairedChangesPercent": [
+              0.8928571428571397,
+              1.0243277848911658,
+              -0.7556675062972307,
+              0.25510204081633514
+            ],
+            "medianPairedChangePercent": 0.5739795918367374,
+            "equalWorkChangePercent": 0.349984091632205,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.7556675062972307,
+            "maximumChangePercent": 1.0243277848911658,
+            "largestAbsoluteChangePercent": 1.0243277848911658
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              773,
+              784,
+              775,
+              782
+            ],
+            "secondValues": [
+              779,
+              790,
+              776,
+              778
+            ],
+            "pairedChangesPercent": [
+              0.7761966364812523,
+              0.7653061224489832,
+              0.1290322580645098,
+              -0.5115089514066473
+            ],
+            "medianPairedChangePercent": 0.4471691902567465,
+            "equalWorkChangePercent": 0.28901734104045396,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.5115089514066473,
+            "maximumChangePercent": 0.7761966364812523,
+            "largestAbsoluteChangePercent": 0.7761966364812523
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              3.943389000000195,
+              3.885279000000253,
+              3.9501530000000002,
+              4.000968000000455
+            ],
+            "secondValues": [
+              3.922565999999563,
+              4.101985000000013,
+              3.9830560000002038,
+              4.084128999999791
+            ],
+            "pairedChangesPercent": [
+              -0.5280483361045918,
+              5.577617463243856,
+              0.8329550779476946,
+              2.0785219976597435
+            ],
+            "medianPairedChangePercent": 1.455738537803719,
+            "equalWorkChangePercent": 1.9768768771157186,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.5280483361045918,
+            "maximumChangePercent": 5.577617463243856,
+            "largestAbsoluteChangePercent": 5.577617463243856
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              3.9169970000000944,
+              3.8966779999999517,
+              3.8743150000002515,
+              3.9908109999997237
+            ],
+            "secondValues": [
+              4.034154000000115,
+              3.922578000000044,
+              4.015576000000067,
+              3.8366170000001603
+            ],
+            "pairedChangesPercent": [
+              2.990990291797968,
+              0.6646687255167816,
+              3.646089695850918,
+              -3.863725944415164
+            ],
+            "medianPairedChangePercent": 1.8278295086573748,
+            "equalWorkChangePercent": 0.829935911555757,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -3.863725944415164,
+            "maximumChangePercent": 3.646089695850918,
+            "largestAbsoluteChangePercent": 3.863725944415164
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "negative-6",
+      "schemaVersion": 1,
+      "scope": "One fixed synthetic child-sum component cell",
+      "dictionary": null,
+      "caseId": 6,
+      "negative": true,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 18,
+      "mechanics": {
+        "6": {
+          "keyPredicateRows": 7999,
+          "admissions": 7999,
+          "candidateRecordsInspected": 15999,
+          "noPrefixCandidate": 0,
+          "selected": 7999,
+          "selectedDistance1": 3999,
+          "selectedDistance2": 0,
+          "selectedDistance3": 4000,
+          "selectedDistance4": 0,
+          "selectedBytes": 1935758,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 7999,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 1935758,
+          "failedFullBytesOffered": 1935758,
+          "maxSelectedBytes": 242,
+          "maxFailedFullBytes": 242,
+          "originalLookbackZeroRows": 19999,
+          "originalLookbackPositiveRows": 0,
+          "originalGlossaryReuses": 0,
+          "totalGlossaryReuses": 0,
+          "priorStreakRows": 7999,
+          "recentContentHits": 8000,
+          "rows": 20000,
+          "budgetPositiveRows": 0,
+          "budgetRefreshByRecentStreak": 0,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 8000,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 7999,
+          "expressionMatches": 7999,
+          "readingMatches": 0,
+          "readingIneligibleRows": 0,
+          "readingAliasRejected": 0,
+          "keyComparisonCalls": 7999,
+          "keyComparisonBytesOffered": 31996,
+          "maxKeyComparisonBytes": 4
+        }
+      },
+      "statistics": {
+        "6": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              111.76175900000013,
+              106.61534399999995,
+              105.46068,
+              106.74113200000006
+            ],
+            "secondValues": [
+              109.55952500000011,
+              110.11538299999994,
+              109.044577,
+              110.43152800000001
+            ],
+            "pairedChangesPercent": [
+              -1.9704718498569918,
+              3.282866113530525,
+              3.398325328454166,
+              3.4573326428653184
+            ],
+            "medianPairedChangePercent": 3.3405957209923454,
+            "equalWorkChangePercent": 1.9908308793987306,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -1.9704718498569918,
+            "maximumChangePercent": 3.4573326428653184,
+            "largestAbsoluteChangePercent": 3.4573326428653184
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              105.82505300000005,
+              110.66428499999999,
+              105.616051,
+              106.98236299999989
+            ],
+            "secondValues": [
+              105.05455400000005,
+              107.19593699999997,
+              105.39732299999993,
+              107.553125
+            ],
+            "pairedChangesPercent": [
+              -0.7280875162897438,
+              -3.134116847183366,
+              -0.20709730948004212,
+              0.5335103693681731
+            ],
+            "medianPairedChangePercent": -0.46759241288489295,
+            "equalWorkChangePercent": -0.9058317283314188,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -3.134116847183366,
+            "maximumChangePercent": 0.5335103693681731,
+            "largestAbsoluteChangePercent": 3.134116847183366
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              124.46399999999998,
+              115.519,
+              114.091,
+              114.37799999999999
+            ],
+            "secondValues": [
+              115.61199999999998,
+              118.29899999999999,
+              115.38699999999999,
+              117.578
+            ],
+            "pairedChangesPercent": [
+              -7.112096670523204,
+              2.4065305274456827,
+              1.1359353498523017,
+              2.7977408242844115
+            ],
+            "medianPairedChangePercent": 1.7712329386489922,
+            "equalWorkChangePercent": -0.3364272113258182,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -7.112096670523204,
+            "maximumChangePercent": 2.7977408242844115,
+            "largestAbsoluteChangePercent": 7.112096670523204
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              113.44899999999997,
+              120.381,
+              114.128,
+              115.32500000000002
+            ],
+            "secondValues": [
+              111.905,
+              116.75299999999997,
+              113.13399999999999,
+              115.31000000000002
+            ],
+            "pairedChangesPercent": [
+              -1.360963957372885,
+              -3.0137646306310995,
+              -0.8709519136408383,
+              -0.013006720138741823
+            ],
+            "medianPairedChangePercent": -1.1159579355068616,
+            "equalWorkChangePercent": -1.334173712396114,
+            "fasterPairs": 4,
+            "slowerPairs": 0,
+            "minimumChangePercent": -3.0137646306310995,
+            "maximumChangePercent": -0.013006720138741823,
+            "largestAbsoluteChangePercent": 3.0137646306310995
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              78.39248200000006,
+              74.43087100000001,
+              74.351881,
+              74.597304
+            ],
+            "secondValues": [
+              78.11850200000006,
+              78.26836600000007,
+              77.96315099999998,
+              78.2245050000001
+            ],
+            "pairedChangesPercent": [
+              -0.349497800056886,
+              5.155784083193193,
+              4.856998843109261,
+              4.862375455284673
+            ],
+            "medianPairedChangePercent": 4.859687149196967,
+            "equalWorkChangePercent": 3.5795125930246696,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.349497800056886,
+            "maximumChangePercent": 5.155784083193193,
+            "largestAbsoluteChangePercent": 5.155784083193193
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              74.29013100000002,
+              79.20732999999998,
+              74.75777799999993,
+              75.81758699999995
+            ],
+            "secondValues": [
+              73.96516199999996,
+              74.58571599999999,
+              74.49587,
+              75.43197600000012
+            ],
+            "pairedChangesPercent": [
+              -0.4374322613592496,
+              -5.834831195547174,
+              -0.35034214098756955,
+              -0.5086036304476793
+            ],
+            "medianPairedChangePercent": -0.47301794590346447,
+            "equalWorkChangePercent": -1.8397244086519549,
+            "fasterPairs": 4,
+            "slowerPairs": 0,
+            "minimumChangePercent": -5.834831195547174,
+            "maximumChangePercent": -0.35034214098756955,
+            "largestAbsoluteChangePercent": 5.834831195547174
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              68,
+              64,
+              65,
+              66
+            ],
+            "secondValues": [
+              69,
+              70,
+              68,
+              67
+            ],
+            "pairedChangesPercent": [
+              1.4705882352941124,
+              9.375,
+              4.615384615384621,
+              1.5151515151515138
+            ],
+            "medianPairedChangePercent": 3.0652680652680675,
+            "equalWorkChangePercent": 4.1825095057034245,
+            "fasterPairs": 0,
+            "slowerPairs": 4,
+            "minimumChangePercent": 1.4705882352941124,
+            "maximumChangePercent": 9.375,
+            "largestAbsoluteChangePercent": 9.375
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              65,
+              71,
+              65,
+              65
+            ],
+            "secondValues": [
+              64,
+              65,
+              65,
+              66
+            ],
+            "pairedChangesPercent": [
+              -1.538461538461533,
+              -8.450704225352112,
+              0,
+              1.538461538461533
+            ],
+            "medianPairedChangePercent": -0.7692307692307665,
+            "equalWorkChangePercent": -2.2556390977443663,
+            "fasterPairs": 2,
+            "slowerPairs": 1,
+            "minimumChangePercent": -8.450704225352112,
+            "maximumChangePercent": 1.538461538461533,
+            "largestAbsoluteChangePercent": 8.450704225352112
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              4.059098999999975,
+              3.8950290000000223,
+              3.913319000000044,
+              3.8612229999999954
+            ],
+            "secondValues": [
+              3.8027210000000053,
+              3.839575999999994,
+              3.8154990000001305,
+              3.804139000000049
+            ],
+            "pairedChangesPercent": [
+              -6.316130747241477,
+              -1.4236864475213995,
+              -2.499668440009928,
+              -1.47839169092141
+            ],
+            "medianPairedChangePercent": -1.989030065465669,
+            "equalWorkChangePercent": -2.967415553888897,
+            "fasterPairs": 4,
+            "slowerPairs": 0,
+            "minimumChangePercent": -6.316130747241477,
+            "maximumChangePercent": -1.4236864475213995,
+            "largestAbsoluteChangePercent": 6.316130747241477
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              3.85273600000005,
+              3.769069999999971,
+              4.049587999999957,
+              4.009275000000002
+            ],
+            "secondValues": [
+              3.75957600000001,
+              3.8574299999999795,
+              3.961296000000033,
+              3.7983160000000566
+            ],
+            "pairedChangesPercent": [
+              -2.4180218940524023,
+              2.3443448914456155,
+              -2.1802711782019646,
+              -5.261774260931107
+            ],
+            "medianPairedChangePercent": -2.2991465361271834,
+            "equalWorkChangePercent": -1.9390180355181363,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -5.261774260931107,
+            "maximumChangePercent": 2.3443448914456155,
+            "largestAbsoluteChangePercent": 5.261774260931107
+          },
+          "prospectiveNegativeAssessment": {
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: ambiguous negatives remain a hold/qualification limitation; not an equivalence proof"
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "jitendex",
+      "schemaVersion": 1,
+      "scope": "One locked dictionary native component cell",
+      "dictionary": "jitendex",
+      "caseId": null,
+      "negative": false,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 17,
+      "mechanics": {
+        "jitendex": {
+          "keyPredicateRows": 23,
+          "admissions": 0,
+          "candidateRecordsInspected": 0,
+          "noPrefixCandidate": 0,
+          "selected": 0,
+          "selectedDistance1": 0,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 0,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "fullBytesOffered": 0,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 0,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 24302,
+          "originalLookbackPositiveRows": 412231,
+          "originalGlossaryReuses": 85998,
+          "totalGlossaryReuses": 85998,
+          "priorStreakRows": 73243,
+          "recentContentHits": 73244,
+          "rows": 436555,
+          "budgetPositiveRows": 221635,
+          "budgetRefreshByRecentStreak": 2389,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 0,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 23,
+          "expressionMatches": 0,
+          "readingMatches": 0,
+          "readingIneligibleRows": 14,
+          "readingAliasRejected": 7,
+          "keyComparisonCalls": 19,
+          "keyComparisonBytesOffered": 201,
+          "maxKeyComparisonBytes": 18
+        }
+      },
+      "statistics": {
+        "jitendex": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              997.1548700000008,
+              978.6172620000007,
+              967.6442680000009,
+              977.1317030000005
+            ],
+            "secondValues": [
+              1003.0910520000002,
+              969.7620120000001,
+              981.4558109999989,
+              979.0628400000019
+            ],
+            "pairedChangesPercent": [
+              0.5953119398593998,
+              -0.9048736767531596,
+              1.4273368278763021,
+              0.19763323552723921
+            ],
+            "medianPairedChangePercent": 0.3964725876933195,
+            "equalWorkChangePercent": 0.32708722513021815,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.9048736767531596,
+            "maximumChangePercent": 1.4273368278763021,
+            "largestAbsoluteChangePercent": 1.4273368278763021
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              990.5810390000006,
+              975.4890650000007,
+              979.7795609999998,
+              971.8680239999994
+            ],
+            "secondValues": [
+              997.3470569999986,
+              962.7785589999999,
+              978.4486239999992,
+              975.2644679999999
+            ],
+            "pairedChangesPercent": [
+              0.6830352826890707,
+              -1.3029880555350815,
+              -0.13584045360592878,
+              0.3494758461155545
+            ],
+            "medianPairedChangePercent": 0.10681769625481286,
+            "equalWorkChangePercent": -0.09901124348224988,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.3029880555350815,
+            "maximumChangePercent": 0.6830352826890707,
+            "largestAbsoluteChangePercent": 1.3029880555350815
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              1031.8650000000002,
+              1012.0190000000002,
+              999.452,
+              1012.0850000000003
+            ],
+            "secondValues": [
+              1035.7700000000002,
+              1003.74,
+              1016.0059999999997,
+              1017.36
+            ],
+            "pairedChangesPercent": [
+              0.37844097822874456,
+              -0.8180676449750623,
+              1.6563076565957902,
+              0.5212012825009493
+            ],
+            "medianPairedChangePercent": 0.44982113036484694,
+            "equalWorkChangePercent": 0.4304115405034281,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.8180676449750623,
+            "maximumChangePercent": 1.6563076565957902,
+            "largestAbsoluteChangePercent": 1.6563076565957902
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              1024.706,
+              1009.317,
+              1017.0320000000002,
+              1009.9070000000002
+            ],
+            "secondValues": [
+              1036.7009999999998,
+              997.6950000000002,
+              1013.7310000000001,
+              1012.08
+            ],
+            "pairedChangesPercent": [
+              1.1705796589460693,
+              -1.1514717378187322,
+              -0.32457189154323496,
+              0.21516832738062153
+            ],
+            "medianPairedChangePercent": -0.054701782081306716,
+            "equalWorkChangePercent": -0.0185916538987696,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.1514717378187322,
+            "maximumChangePercent": 1.1705796589460693,
+            "largestAbsoluteChangePercent": 1.1705796589460693
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              622.7135160000003,
+              603.3830349999998,
+              595.6596610000006,
+              603.4699770000002
+            ],
+            "secondValues": [
+              627.9442869999998,
+              596.5949899999991,
+              605.670474999999,
+              601.2116939999996
+            ],
+            "pairedChangesPercent": [
+              0.839996381257202,
+              -1.124997655925264,
+              1.6806264811003224,
+              -0.37421629676210877
+            ],
+            "medianPairedChangePercent": 0.2328900422475466,
+            "equalWorkChangePercent": 0.2554506886036645,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.124997655925264,
+            "maximumChangePercent": 1.6806264811003224,
+            "largestAbsoluteChangePercent": 1.6806264811003224
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              615.9289389999994,
+              602.8695420000004,
+              602.7244780000005,
+              594.095679
+            ],
+            "secondValues": [
+              617.3058149999988,
+              588.4626909999979,
+              604.6941179999994,
+              601.0692140000006
+            ],
+            "pairedChangesPercent": [
+              0.2235446190001822,
+              -2.3897128642804244,
+              0.32678944889290573,
+              1.1738067194392965
+            ],
+            "medianPairedChangePercent": 0.27516703394654396,
+            "equalWorkChangePercent": -0.16918233431860719,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -2.3897128642804244,
+            "maximumChangePercent": 1.1738067194392965,
+            "largestAbsoluteChangePercent": 2.3897128642804244
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              601,
+              583,
+              572,
+              588
+            ],
+            "secondValues": [
+              608,
+              576,
+              588,
+              580
+            ],
+            "pairedChangesPercent": [
+              1.1647254575707144,
+              -1.2006861063464824,
+              2.7972027972027913,
+              -1.3605442176870763
+            ],
+            "medianPairedChangePercent": -0.017980324387883995,
+            "equalWorkChangePercent": 0.34129692832765013,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.3605442176870763,
+            "maximumChangePercent": 2.7972027972027913,
+            "largestAbsoluteChangePercent": 2.7972027972027913
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              598,
+              583,
+              584,
+              574
+            ],
+            "secondValues": [
+              596,
+              571,
+              586,
+              582
+            ],
+            "pairedChangesPercent": [
+              -0.33444816053511683,
+              -2.0583190394511175,
+              0.3424657534246478,
+              1.3937282229965264
+            ],
+            "medianPairedChangePercent": 0.004008796444765483,
+            "equalWorkChangePercent": -0.17101325352715246,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -2.0583190394511175,
+            "maximumChangePercent": 1.3937282229965264,
+            "largestAbsoluteChangePercent": 2.0583190394511175
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              11.819020000000364,
+              11.546409000000494,
+              11.565954999999121,
+              11.627726999999595
+            ],
+            "secondValues": [
+              11.788979999997537,
+              11.609830999998849,
+              11.799344000000929,
+              12.130163000000266
+            ],
+            "pairedChangesPercent": [
+              -0.25416658913197665,
+              0.5492790009287818,
+              2.0178964901888863,
+              4.321016480699003
+            ],
+            "medianPairedChangePercent": 1.283587745558834,
+            "equalWorkChangePercent": 1.6521084347981052,
+            "fasterPairs": 1,
+            "slowerPairs": 3,
+            "minimumChangePercent": -0.25416658913197665,
+            "maximumChangePercent": 4.321016480699003,
+            "largestAbsoluteChangePercent": 4.321016480699003
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              11.770701000000372,
+              11.754048000002513,
+              11.595137000000705,
+              11.556783999999425
+            ],
+            "secondValues": [
+              11.840388000001894,
+              11.539385000000038,
+              11.758304999999837,
+              11.539135999999871
+            ],
+            "pairedChangesPercent": [
+              0.5920378064273368,
+              -1.8262899726326443,
+              1.4072106263093076,
+              -0.15270684300714432
+            ],
+            "medianPairedChangePercent": 0.21966548171009626,
+            "equalWorkChangePercent": 0.0011654644571423844,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.8262899726326443,
+            "maximumChangePercent": 1.4072106263093076,
+            "largestAbsoluteChangePercent": 1.8262899726326443
+          },
+          "prospectiveComponentAssessment": {
+            "target": false,
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: inconclusive non-target observations remain uncertainty."
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    },
+    {
+      "id": "vndb",
+      "schemaVersion": 1,
+      "scope": "One locked dictionary native component cell",
+      "dictionary": "vndb",
+      "caseId": null,
+      "negative": false,
+      "complete": true,
+      "allLogChecksPass": true,
+      "errors": [],
+      "source": {
+        "baseline": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-baseline",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "",
+          "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+          "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "candidate": {
+          "root": "/home/runner/work/manabitan/prior-streak-selector-candidate",
+          "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+          "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+          "cSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+          "wasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "trackedWasmSha256": "e59fc0246710b64d81cef5b5b8b82c1d76784af88f2b9c9948ba89dfb754a837",
+          "manifestSha256": "68c7a2fe25c627475f32c7cb86965ecda15b6f7e363b54794134f3650e71f275",
+          "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+        },
+        "tooling": {
+          "head": "24ae6bb44f5f055eb06fe2fdf478017a7b01ed82",
+          "hashes": {
+            "candidate.patch": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+            "diagnostic-fields.json": "8bd2afc3f0c7fde9860221cad69a6de043206cbc9b24fa70e38468670ebb849b",
+            "expected-mechanics.json": "62d380f30a7930860d6432eb101af57d180730e250afc9f2fc5dc449e6039952",
+            "prepare.py": "31e8b4d2a4c7bf226c9bab14190dd6ead4ed6284bdf277b6486c84ebe7fa890b",
+            "cohort_tools.py": "430881849ebff2070e48d31d100121dfa0542f0754b3c0e8da0c82ef6edc16e0",
+            "run.py": "2388c40af68001bff321803b342d0574cc2a2ee1c35fcf98d465a2f0ad82d8cf",
+            "screen.mjs": "03ac862e0e7af7397cda5bcd3fdbecd315ec17c371eacbbe9767c6d1c50b358a",
+            "smoke.mjs": "a52f6017b275da9096d96ceaf4a79c88797dad2775da3c497567daf5d162123a",
+            "native-oracle.mjs": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+            "preflight.py": "d67b1101b45432adc70a81b9a5f8d05d4f871f533f40a4b49681868439d69ce9",
+            "setup.sh": "d4bf037d48fd965ca42a8eff52d33eb41c7e5fe637fb82c30b81ca5367b33963",
+            "negative-fixtures.mjs": "40294321765948003d60d97e979896c10c533e80af99f9b2503cc88e3585ab4d",
+            "negative-screen.mjs": "aa7bc717fc5859edd2273abd49181c6efb9ae8657d75fa02807a75cf08f7345c",
+            "negative-run.py": "aefd2e08a2b875226046a346b4057e403a68a5752fa5fd6c38c85e2c437a4dd2",
+            "verify-negative-fixtures.py": "3f664c299ca16ab01e3c43e0be8df5cc83466f009ba3dcc9a7998b891595ad9e",
+            "output-digest.mjs": "b50c52d0ecf3274ce7758bbf02cc095ee321d243543d7751b9ad94322a24bc61",
+            "workflow.yml": "6fc6845decd8c2b403481bbfa977c47227d92f99ab06c47624d7aea858a09fed",
+            "negative-protocol.json": "c2c71c3d145abafee9a8613370d1ca4604fcef8d43ca8bc69a316081af1db652",
+            "fixture-model.mjs": "3ae92ffb47722cb5dbb5357e4abe72b5fd2e463d837d87fb70fcec4e5824d6ac",
+            "state-model.mjs": "bb55885f0ff44761f8869cdb6d2fc611ac0ef140d2c281040a0137b49dd9ce08",
+            "expected-counts.json": "fb7c8134a8637f3934adbb623244de8554b7c22d5f26eefe3e9f9f7756a3df64",
+            "legacy-fixture-manifest.json": "c41ac6611de35dc5ccf74f6705ac59dc3fabb4a5a14450ffb2996740c7679af1",
+            "prospective-complete-import-criteria.json": "bfce2e023c572c9107fea86fceeecce37292f2948c05c7f1518417ac7cfa710a",
+            "prospective-component-review.json": "a4f968a92da9b6b6b59cce6b77887c6bca8473fef8ed8cf516913acc49aabf36",
+            "preparation-record.json": "86f6a533a2591baa009247572720e7273521bc3c494338e0ab07d10e47b4b7a6",
+            "../qualification/term-bank-prior-streak-selector-fixtures.js": "c96212182b5218d5ebb66259fa26cd31ecc8ba6d20c02f3835dc7680eb38cf1d",
+            "../qualification/term-bank-prior-streak-selector.test.js": "39a328e2bbddf868ee18660a3bc4fd5711fb009a363a21544c771f76e479fdd5"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "runtime": {
+          "node": "v22.22.0",
+          "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "browser": null,
+          "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+          "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.30\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                2 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+          "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+          "linker": "Ubuntu LLD 21.1.8\n"
+        }
+      },
+      "artifactBindingPass": null,
+      "measuredObservationCount": 16,
+      "rawChildReceiptCount": 17,
+      "mechanics": {
+        "vndb": {
+          "keyPredicateRows": 114,
+          "admissions": 5,
+          "candidateRecordsInspected": 5,
+          "noPrefixCandidate": 0,
+          "selected": 5,
+          "selectedDistance1": 5,
+          "selectedDistance2": 0,
+          "selectedDistance3": 0,
+          "selectedDistance4": 0,
+          "selectedBytes": 2232,
+          "selectedAtLeast512": 0,
+          "selectedAtLeast512Bytes": 0,
+          "boundsRejected": 0,
+          "openerRejected": 0,
+          "tailRejected": 0,
+          "middleRejected": 0,
+          "fullRejected": 0,
+          "hits": 5,
+          "hitBytes": 2232,
+          "fullBytesOffered": 2232,
+          "failedFullBytesOffered": 0,
+          "maxSelectedBytes": 450,
+          "maxFailedFullBytes": 0,
+          "originalLookbackZeroRows": 152,
+          "originalLookbackPositiveRows": 6639682,
+          "originalGlossaryReuses": 6482137,
+          "totalGlossaryReuses": 6482142,
+          "priorStreakRows": 6482124,
+          "recentContentHits": 6482289,
+          "rows": 6640000,
+          "budgetPositiveRows": 6639551,
+          "budgetRefreshByRecentStreak": 6009176,
+          "definitionLengthRejected": 0,
+          "rulesLengthRejected": 0,
+          "definitionSignatureRejected": 0,
+          "rulesSignatureRejected": 0,
+          "hitDistance1": 5,
+          "hitDistance2": 0,
+          "hitDistance3": 0,
+          "hitDistance4": 0,
+          "priorStreakLookbackZeroRows": 114,
+          "expressionMatches": 0,
+          "readingMatches": 5,
+          "readingIneligibleRows": 63,
+          "readingAliasRejected": 7,
+          "keyComparisonCalls": 84,
+          "keyComparisonBytesOffered": 1211,
+          "maxKeyComparisonBytes": 30
+        }
+      },
+      "statistics": {
+        "vndb": {
+          "candidate.elapsedMs": {
+            "firstValues": [
+              3442.0878479999983,
+              3380.9835000000094,
+              3385.941258999991,
+              3460.9674380000015
+            ],
+            "secondValues": [
+              3394.862269999998,
+              3401.4977470000113,
+              3448.8506399999924,
+              3393.946296000003
+            ],
+            "pairedChangesPercent": [
+              -1.3720038559573822,
+              0.6067538336108846,
+              1.857958428333184,
+              -1.9364857716988038
+            ],
+            "medianPairedChangePercent": -0.38262501117324876,
+            "equalWorkChangePercent": -0.22548015358127005,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.9364857716988038,
+            "maximumChangePercent": 1.857958428333184,
+            "largestAbsoluteChangePercent": 1.9364857716988038
+          },
+          "identicalControl.elapsedMs": {
+            "firstValues": [
+              3408.9954930000113,
+              3412.5374569999985,
+              3449.5604139999978,
+              3413.771660999986
+            ],
+            "secondValues": [
+              3445.3634830000055,
+              3407.2335170000006,
+              3420.242765000002,
+              3438.2171050000125
+            ],
+            "pairedChangesPercent": [
+              1.0668242323778943,
+              -0.15542510717700964,
+              -0.8498952179822883,
+              0.7160831604321682
+            ],
+            "medianPairedChangePercent": 0.2803290266275793,
+            "equalWorkChangePercent": 0.19139279015305544,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.8498952179822883,
+            "maximumChangePercent": 1.0668242323778943,
+            "largestAbsoluteChangePercent": 1.0668242323778943
+          },
+          "candidate.cpuMs": {
+            "firstValues": [
+              3545.8360000000007,
+              3479.0429999999988,
+              3480.877000000001,
+              3597.1919999999986
+            ],
+            "secondValues": [
+              3468.849999999999,
+              3508.6840000000007,
+              3555.881000000002,
+              3507.539999999999
+            ],
+            "pairedChangesPercent": [
+              -2.1711664047632695,
+              0.851987170035029,
+              2.1547443359820395,
+              -2.4922773096348383
+            ],
+            "medianPairedChangePercent": -0.6595896173641203,
+            "equalWorkChangePercent": -0.4395747612484846,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -2.4922773096348383,
+            "maximumChangePercent": 2.1547443359820395,
+            "largestAbsoluteChangePercent": 2.4922773096348383
+          },
+          "identicalControl.cpuMs": {
+            "firstValues": [
+              3516.611,
+              3526.141999999998,
+              3582.733000000003,
+              3547.9139999999993
+            ],
+            "secondValues": [
+              3562.033,
+              3501.1949999999983,
+              3536.4590000000007,
+              3536.805999999999
+            ],
+            "pairedChangesPercent": [
+              1.2916412989665282,
+              -0.7074871063048382,
+              -1.2915838272068325,
+              -0.3130853791833754
+            ],
+            "medianPairedChangePercent": -0.5102862427441068,
+            "equalWorkChangePercent": -0.26039623520117683,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -1.2915838272068325,
+            "maximumChangePercent": 1.2916412989665282,
+            "largestAbsoluteChangePercent": 1.2916412989665282
+          },
+          "candidate.parseMs": {
+            "firstValues": [
+              2963.256890000014,
+              2908.3681949999973,
+              2913.0719879999997,
+              2983.8816500000066
+            ],
+            "secondValues": [
+              2925.974756999988,
+              2925.925406999986,
+              2973.208817999983,
+              2920.3579360000085
+            ],
+            "pairedChangesPercent": [
+              -1.2581471800788058,
+              0.6036791362996174,
+              2.064378437872749,
+              -2.1288952261225846
+            ],
+            "medianPairedChangePercent": -0.32723402188959416,
+            "equalWorkChangePercent": -0.19638569400808326,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -2.1288952261225846,
+            "maximumChangePercent": 2.064378437872749,
+            "largestAbsoluteChangePercent": 2.1288952261225846
+          },
+          "identicalControl.parseMs": {
+            "firstValues": [
+              2934.0045130000044,
+              2931.8290289999986,
+              2961.595872999993,
+              2941.2898989999667
+            ],
+            "secondValues": [
+              2969.4272570000094,
+              2931.2115429999985,
+              2940.320005000014,
+              2968.944150000004
+            ],
+            "pairedChangesPercent": [
+              1.2073172976746926,
+              -0.021061460061011505,
+              -0.7183920059433024,
+              0.9402082742486328
+            ],
+            "medianPairedChangePercent": 0.45957340709381067,
+            "equalWorkChangePercent": 0.34994156884236016,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.7183920059433024,
+            "maximumChangePercent": 1.2073172976746926,
+            "largestAbsoluteChangePercent": 1.2073172976746926
+          },
+          "candidate.nativeParseMs": {
+            "firstValues": [
+              2682,
+              2636,
+              2636,
+              2709
+            ],
+            "secondValues": [
+              2650,
+              2637,
+              2689,
+              2643
+            ],
+            "pairedChangesPercent": [
+              -1.1931394481730084,
+              0.03793626707131459,
+              2.010622154779962,
+              -2.436323366555926
+            ],
+            "medianPairedChangePercent": -0.5776015905508469,
+            "equalWorkChangePercent": -0.4126418456344316,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -2.436323366555926,
+            "maximumChangePercent": 2.010622154779962,
+            "largestAbsoluteChangePercent": 2.436323366555926
+          },
+          "identicalControl.nativeParseMs": {
+            "firstValues": [
+              2658,
+              2650,
+              2679,
+              2663
+            ],
+            "secondValues": [
+              2701,
+              2650,
+              2668,
+              2691
+            ],
+            "pairedChangesPercent": [
+              1.6177577125658482,
+              0,
+              -0.4106009705113878,
+              1.0514457378896003
+            ],
+            "medianPairedChangePercent": 0.5257228689448001,
+            "equalWorkChangePercent": 0.5633802816901401,
+            "fasterPairs": 1,
+            "slowerPairs": 2,
+            "minimumChangePercent": -0.4106009705113878,
+            "maximumChangePercent": 1.6177577125658482,
+            "largestAbsoluteChangePercent": 1.6177577125658482
+          },
+          "candidate.lookupMs": {
+            "firstValues": [
+              125.64357200000723,
+              124.51017100000263,
+              124.23640599999726,
+              125.11922699999286
+            ],
+            "secondValues": [
+              124.66484400000718,
+              125.64851900001122,
+              125.0831130000015,
+              123.82198499999413
+            ],
+            "pairedChangesPercent": [
+              -0.778971804462858,
+              0.9142610526240214,
+              0.6815288909792327,
+              -1.0368046791072394
+            ],
+            "medianPairedChangePercent": -0.04872145674181261,
+            "equalWorkChangePercent": -0.05824014802595645,
+            "fasterPairs": 2,
+            "slowerPairs": 2,
+            "minimumChangePercent": -1.0368046791072394,
+            "maximumChangePercent": 0.9142610526240214,
+            "largestAbsoluteChangePercent": 1.0368046791072394
+          },
+          "identicalControl.lookupMs": {
+            "firstValues": [
+              123.8643509999938,
+              124.62947799999438,
+              125.55323999999655,
+              126.14548100001684
+            ],
+            "secondValues": [
+              124.26069300002746,
+              124.18277899998611,
+              124.28537099999903,
+              123.26860000000124
+            ],
+            "pairedChangesPercent": [
+              0.31998068599550233,
+              -0.3584216247846994,
+              -1.0098257918294662,
+              -2.280605676247105
+            ],
+            "medianPairedChangePercent": -0.6841237083070828,
+            "equalWorkChangePercent": -0.8386984172370604,
+            "fasterPairs": 3,
+            "slowerPairs": 1,
+            "minimumChangePercent": -2.280605676247105,
+            "maximumChangePercent": 0.31998068599550233,
+            "largestAbsoluteChangePercent": 2.280605676247105
+          },
+          "prospectiveComponentAssessment": {
+            "target": false,
+            "clearSlowdownRuleTriggered": false,
+            "interpretation": "No automatic pass: inconclusive non-target observations remain uncertainty."
+          }
+        }
+      },
+      "failures": [],
+      "limits": [
+        "Original artifact/source compilation, native17-word oracle and smoke/correctness audits remain separately mandatory.",
+        "No complete browser import or process-memory qualification.",
+        "Frozen9e10 source only; develop advanced to dcfc02a0, so no current-source gain transfer.",
+        "No pooling corpora/hosts, subtraction, trimming, replacement or retries."
+      ],
+      "rawObservationsPreservedIn": "primary-records.jsonl"
+    }
+  ],
+  "artifactBindingPass": null,
+  "recordCount": 495,
+  "parseErrors": [],
+  "prePlanRecords": [
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-baseline",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-baseline",
+          "--baseline"
+        ],
+        "startedEpoch": 1795855110.473286,
+        "finishedEpoch": 1795855110.6059148,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 449
+    },
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-candidate",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-candidate"
+        ],
+        "startedEpoch": 1795855110.6257458,
+        "finishedEpoch": 1795855110.773566,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 450
+    },
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-diagnostic",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-candidate",
+          "/home/runner/work/manabitan/manabitan/builds/jmdict-prior-streak-selector/diagnostic.wasm"
+        ],
+        "startedEpoch": 1795855110.805575,
+        "finishedEpoch": 1795855110.9482007,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 451
+    },
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-disabled-baseline",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-baseline",
+          "--baseline",
+          "--disabled-reuse"
+        ],
+        "startedEpoch": 1795855111.0086083,
+        "finishedEpoch": 1795855111.1390584,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 452
+    },
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-disabled-candidate",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-candidate",
+          "--disabled-reuse"
+        ],
+        "startedEpoch": 1795855111.1767917,
+        "finishedEpoch": 1795855111.31239,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 453
+    },
+    {
+      "kind": "PREFIX_CHILD_STATUS",
+      "value": {
+        "label": "smoke-disabled-diagnostic",
+        "command": [
+          "node",
+          "--max-old-space-size=512",
+          "/home/runner/work/manabitan/manabitan/dev/perf/jmdict-prior-streak-selector-c563d487/hosted/smoke.mjs",
+          "/home/runner/work/manabitan/manabitan/../prior-streak-selector-candidate",
+          "/home/runner/work/manabitan/manabitan/builds/jmdict-prior-streak-selector/diagnostic.wasm",
+          "--disabled-reuse"
+        ],
+        "startedEpoch": 1795855111.3509123,
+        "finishedEpoch": 1795855111.4952197,
+        "exitCode": 0,
+        "status": "completed"
+      },
+      "line": 454
+    }
+  ],
+  "interpretation": "A component target signal is insufficient without every prospective control/correctness gate and separate source-bound artifact audit. Current-develop and complete-import qualification remain separate.",
+  "recordedAtUtc": "2026-11-28 08:55:02 UTC",
+  "auditorSha256": "f7affda07e6033fee59cc3466de3e86211a1ecc857a6b46c0c17a5f967d849a1",
+  "expectedSha256": "76bc4c32dfa149f81a7f086fed6f17d5c37a189a39bb08d042e00855282b926a",
+  "rootInventoryReviewSha256": "ed1e955bc19545bafc64dff11d8671daaf9b5c9f7e80ab1268e418619e06355e",
+  "primaryJobLogUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46124542684/job/140916123863",
+  "rawTaggedRecordsFile": "primary-records.jsonl",
+  "rawTaggedRecordsSha256": "98b1ec1fc4cba772d4f82da3a6700b6926e3888390fec5348962b9544e3b5763",
+  "rawLogCharacters": 3556280,
+  "statisticsExactlyUnchangedFromInitialFailedAudit": true,
+  "measuredChildCount": 144,
+  "excludedDiagnosticVerificationChildren": 15,
+  "negativePassReceipts": 1740,
+  "allPredictedJmdictTotalAndGroupChecks": 387,
+  "allSixNegativeMechanicalFields": 288,
+  "decision": {
+    "status": "Do not promote this exact successor to full import qualification or a performance PR",
+    "jmdictProspectiveComponentGatePassed": false,
+    "reason": "JMdict has3/4 faster pairs and median−2.1224309%, while largest absolute same-code paired change is7.48181595%; the frozen gate required all4 faster and an effect larger than that control.",
+    "negativeRiskRuleTriggered": false,
+    "negativeAmbiguity": "Case6 median+3.3405957% has only3/4 slower pairs, so it does not trigger the declared all4 rule; cases4/5/6 adverse directions and all outliers remain retained as uncertainty, not proof of nonregression.",
+    "nonTargetInterpretation": "Jitendex+0.3964726% and VNDB−0.3826250% are small relative to controls; no complete-import or equivalence claim.",
+    "currentDevelopLimitation": "Frozen9e10 source only; develop advanced to dcfc02a0. No current-source gain transfer.",
+    "noRetryNoReplacementNoThresholdTuning": true
+  }
+}
+

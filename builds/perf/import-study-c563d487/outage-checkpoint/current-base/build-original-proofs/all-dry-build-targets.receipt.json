@@ -1,0 +1,14 @@
+{
+  "label": "all-dry-build-targets",
+  "command": [
+    "npm",
+    "run",
+    "test:build"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795856132.5183299,
+  "finishedEpoch": 1795856132.8734956,
+  "exitCode": 0,
+  "logSha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

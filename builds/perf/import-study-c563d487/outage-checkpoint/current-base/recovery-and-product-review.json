@@ -1,0 +1,515 @@
+{
+  "schema": 1,
+  "reviewedAtUtc": "2026-11-28 09:10:19 UTC",
+  "reviewer": "root",
+  "recoveryHead": "ccb45276dea13417d11f7ef2b9d170cd7d328699",
+  "recoveryRun": 46128887478,
+  "recoveryJob": 140929481433,
+  "originalBuildRun": 46126462448,
+  "originalBuildJob": 140922033124,
+  "artifactId": 15256173851,
+  "artifactSha256": "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+  "primaryRecordInventory": {
+    "START": 1,
+    "FILE": 26,
+    "CHUNK": 66,
+    "COMPLETE": 1
+  },
+  "allChunkSequencesAndLengthsVerified": true,
+  "allSixGitBlobIdsMatchPreOutageRecords": true,
+  "allTwentyOriginalProofGitBlobIdsVerified": true,
+  "originalProofFiles": [
+    {
+      "path": "all-dry-build-targets.receipt.json",
+      "bytes": 413,
+      "sha256": "1c2e66c45263973290eb25b487548574d8f102b001df697aa31bd0417102fa51",
+      "gitBlobSha": "50819abec5b5aa104f9fb7de4605aefd8b0a6066"
+    },
+    {
+      "path": "apply-check.receipt.json",
+      "bytes": 505,
+      "sha256": "7b0e860eb63bc63847a0cb3eae850babe59d9bf8a0de6e6f5ad3804ec6acfb63",
+      "gitBlobSha": "6bf555f513d2c64edfb179546831a56b4a1dcf1b"
+    },
+    {
+      "path": "apply-patch.receipt.json",
+      "bytes": 490,
+      "sha256": "912e7ec463a4497c82fa58d680d2cbbedb50a30f1ffe47b9f7b2c87081539e58",
+      "gitBlobSha": "cbd8f05fe71a9ea3b1b76d5963d5e285874da24c"
+    },
+    {
+      "path": "build-candidate-libraries.receipt.json",
+      "bytes": 417,
+      "sha256": "d36ed6e9883b24f7654ba022559a1cd3da3ce3505cabfc87fcdd1e43550d0c61",
+      "gitBlobSha": "9c2543947adf9d87eac0e19763cbeff04e5b85ba"
+    },
+    {
+      "path": "build-native-candidate.receipt.json",
+      "bytes": 450,
+      "sha256": "87cc84a2144ff15be52f8691a48999a35282a71c10c7de5da998bcebaba65b46",
+      "gitBlobSha": "2fa8e135669be53701dc2b9d0a19ac7fc6ba4c8b"
+    },
+    {
+      "path": "complete-unit-suite.receipt.json",
+      "bytes": 441,
+      "sha256": "8e09a91cbf00a56286efb71c97128e08ccd3a4e2d8990c4d7e8e75fefe095b90",
+      "gitBlobSha": "9554cf2a61bf2c29a9c1b6f15c4870581fe24f40"
+    },
+    {
+      "path": "create-baseline.receipt.json",
+      "bytes": 513,
+      "sha256": "f7499c64fb761d310460da5afb1bf8c755c70283f7d495953c9455baff6c2aa1",
+      "gitBlobSha": "3c2d77cbc7bfb879471484c52aacf823d714678e"
+    },
+    {
+      "path": "create-candidate.receipt.json",
+      "bytes": 515,
+      "sha256": "b181b24ba6a13c46b3e4ff4c7b7a76faf360933c000eeaf5835c73f0fd6a5ea8",
+      "gitBlobSha": "6860fe084dca04f9b5e2b2c5cb2d31c3cfbd9792"
+    },
+    {
+      "path": "dependencies-baseline.receipt.json",
+      "bytes": 507,
+      "sha256": "c2cc5c153d1720065a0e59821226e97511142665ce99f4cd03d616a6123e784b",
+      "gitBlobSha": "fb63ba62203ab6ecbd8cc95bc4b261a0620a2f94"
+    },
+    {
+      "path": "dependencies-candidate.receipt.json",
+      "bytes": 510,
+      "sha256": "dd8f822dde125cd2f1e87c7ab30b9a6c06ce0d6e5b99ed3fd222d3df70cf2f0d",
+      "gitBlobSha": "e223f8d8392ac84321e1507db15a5d019029eafd"
+    },
+    {
+      "path": "fetch-baseline.receipt.json",
+      "bytes": 450,
+      "sha256": "0d009f3c61e7c62e41fc9aa2b3f253288b285fcaa487bad0575805f09b143597",
+      "gitBlobSha": "5f44a2bdce309f4c3b514de57b62bc1b23cfbaaa"
+    },
+    {
+      "path": "options-unit-suite.receipt.json",
+      "bytes": 449,
+      "sha256": "76fd9bb43b89d14227e9322181e4c5ec4de70aa7687a0a215628c36dbd0a6e47",
+      "gitBlobSha": "973eafa7ebd3c48f0db3e10de4ec26b3bd50ddb1"
+    },
+    {
+      "path": "reproduce-baseline.receipt.json",
+      "bytes": 444,
+      "sha256": "3c6a6b1164262fccc79eb8a3a1179ca8deda46b951b57a746824a580dcc601ef",
+      "gitBlobSha": "31740a162cee5605fade8e45e5a2f3cfcb0f55d6"
+    },
+    {
+      "path": "reproduce-candidate.receipt.json",
+      "bytes": 447,
+      "sha256": "65d06016738dbfa837f63a036e0e8dc0e6df08c62e05333e55dcd13cf5a265d6",
+      "gitBlobSha": "e95cc4c132b662c2e80d3455163eb9e26cb78ac4"
+    },
+    {
+      "path": "scoped-lint.receipt.json",
+      "bytes": 540,
+      "sha256": "cf6e28db332ab1e453527e5154e90c4bd2523688e75d4e71580567a83d708a86",
+      "gitBlobSha": "c20cd3f58bc41f8bce3a7df045516d5c393cdc43"
+    },
+    {
+      "path": "strict-main-types.receipt.json",
+      "bytes": 411,
+      "sha256": "b3bbf1f66d7154e48449acd5b3b74bfed58f4472ce269fad915339bc1bdc5ced",
+      "gitBlobSha": "a78c0e20f4bd9d46862351dce728d40fe82c2b61"
+    },
+    {
+      "path": "strict-test-types.receipt.json",
+      "bytes": 411,
+      "sha256": "7a5d56a042a4f3b4e9abf42d20d0c980caab194b4c687dffc735d1982e668015",
+      "gitBlobSha": "a29501407182620ea7aa2d3df6e64df88cbb628b"
+    },
+    {
+      "path": "preparation-start.json",
+      "bytes": 3729,
+      "sha256": "b9415d0cc1eaeb72894a41418a038a72dfe31d979ae0162096bae812cdbd93b2",
+      "gitBlobSha": "65d320f6ee9947cdbf38faea580234f6228ddc2a"
+    },
+    {
+      "path": "compiled-source-binding.json",
+      "bytes": 1537,
+      "sha256": "1d02d52e901f2e1a5620dee11bf373dc32f8a4e2ba1660379848f886f3dea22c",
+      "gitBlobSha": "dd092b0784c12cdfaa9b1bb7b767071f4044b5c0"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1225,
+      "sha256": "ca180fdc14e0f212437fccd27218a90069f3087dd18fb30a386a2284b68bf1d1",
+      "gitBlobSha": "c2ded85301aa967b4f83e5b55b2e28a2b5994070"
+    }
+  ],
+  "originalArchiveMembers": [
+    {
+      "bytes": 280,
+      "crc32": 2052854322,
+      "path": "all-dry-build-targets.log",
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "bytes": 413,
+      "crc32": 879391799,
+      "path": "all-dry-build-targets.receipt.json",
+      "sha256": "1c2e66c45263973290eb25b487548574d8f102b001df697aa31bd0417102fa51"
+    },
+    {
+      "bytes": 505,
+      "crc32": 2315156600,
+      "path": "apply-check.receipt.json",
+      "sha256": "7b0e860eb63bc63847a0cb3eae850babe59d9bf8a0de6e6f5ad3804ec6acfb63"
+    },
+    {
+      "bytes": 0,
+      "crc32": 0,
+      "path": "apply-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "crc32": 0,
+      "path": "apply-patch.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 490,
+      "crc32": 4051224379,
+      "path": "apply-patch.receipt.json",
+      "sha256": "912e7ec463a4497c82fa58d680d2cbbedb50a30f1ffe47b9f7b2c87081539e58"
+    },
+    {
+      "bytes": 60,
+      "crc32": 321773622,
+      "path": "build-candidate-libraries.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 417,
+      "crc32": 1839342344,
+      "path": "build-candidate-libraries.receipt.json",
+      "sha256": "d36ed6e9883b24f7654ba022559a1cd3da3ce3505cabfc87fcdd1e43550d0c61"
+    },
+    {
+      "bytes": 500,
+      "crc32": 899108293,
+      "path": "build-native-candidate.log",
+      "sha256": "51a978ac06d848c3818ff93748ba0fe25752eacf04f1d566f244fff4b5797e6e"
+    },
+    {
+      "bytes": 450,
+      "crc32": 2072844413,
+      "path": "build-native-candidate.receipt.json",
+      "sha256": "87cc84a2144ff15be52f8691a48999a35282a71c10c7de5da998bcebaba65b46"
+    },
+    {
+      "bytes": 1537,
+      "crc32": 3650299697,
+      "path": "compiled-source-binding.json",
+      "sha256": "1d02d52e901f2e1a5620dee11bf373dc32f8a4e2ba1660379848f886f3dea22c"
+    },
+    {
+      "bytes": 611687,
+      "crc32": 2718458560,
+      "path": "complete-unit-suite.log",
+      "sha256": "e375ec48d509c04d1c088d4937e9cc12767fc2c1d4dd511a9d7b9e36479d034a"
+    },
+    {
+      "bytes": 441,
+      "crc32": 4170952969,
+      "path": "complete-unit-suite.receipt.json",
+      "sha256": "8e09a91cbf00a56286efb71c97128e08ccd3a4e2d8990c4d7e8e75fefe095b90"
+    },
+    {
+      "bytes": 155,
+      "crc32": 548090009,
+      "path": "create-baseline.log",
+      "sha256": "9b6b0d9f739d4a183e0bb26e956e0283cc0b4305462cd0e6706559339be2fadd"
+    },
+    {
+      "bytes": 513,
+      "crc32": 4167885596,
+      "path": "create-baseline.receipt.json",
+      "sha256": "f7499c64fb761d310460da5afb1bf8c755c70283f7d495953c9455baff6c2aa1"
+    },
+    {
+      "bytes": 155,
+      "crc32": 548090009,
+      "path": "create-candidate.log",
+      "sha256": "9b6b0d9f739d4a183e0bb26e956e0283cc0b4305462cd0e6706559339be2fadd"
+    },
+    {
+      "bytes": 515,
+      "crc32": 653562106,
+      "path": "create-candidate.receipt.json",
+      "sha256": "b181b24ba6a13c46b3e4ff4c7b7a76faf360933c000eeaf5835c73f0fd6a5ea8"
+    },
+    {
+      "bytes": 0,
+      "crc32": 0,
+      "path": "dependencies-baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 507,
+      "crc32": 2694794239,
+      "path": "dependencies-baseline.receipt.json",
+      "sha256": "c2cc5c153d1720065a0e59821226e97511142665ce99f4cd03d616a6123e784b"
+    },
+    {
+      "bytes": 0,
+      "crc32": 0,
+      "path": "dependencies-candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 510,
+      "crc32": 1959886671,
+      "path": "dependencies-candidate.receipt.json",
+      "sha256": "dd8f822dde125cd2f1e87c7ab30b9a6c06ce0d6e5b99ed3fd222d3df70cf2f0d"
+    },
+    {
+      "bytes": 123,
+      "crc32": 438909481,
+      "path": "fetch-baseline.log",
+      "sha256": "5f42a04f4676f5b1eb3aed638699f727ecc9ddbbcac3670ff4653c858a50404e"
+    },
+    {
+      "bytes": 450,
+      "crc32": 3267619716,
+      "path": "fetch-baseline.receipt.json",
+      "sha256": "0d009f3c61e7c62e41fc9aa2b3f253288b285fcaa487bad0575805f09b143597"
+    },
+    {
+      "bytes": 606,
+      "crc32": 828739914,
+      "path": "options-unit-suite.log",
+      "sha256": "af3d2335e35c97870b0600de9bce4f0187cabc02993eef859721bdf5082f3e48"
+    },
+    {
+      "bytes": 449,
+      "crc32": 1227221618,
+      "path": "options-unit-suite.receipt.json",
+      "sha256": "76fd9bb43b89d14227e9322181e4c5ec4de70aa7687a0a215628c36dbd0a6e47"
+    },
+    {
+      "bytes": 3729,
+      "crc32": 2450026462,
+      "path": "preparation-start.json",
+      "sha256": "b9415d0cc1eaeb72894a41418a038a72dfe31d979ae0162096bae812cdbd93b2"
+    },
+    {
+      "bytes": 2588,
+      "crc32": 406669679,
+      "path": "product/dev/data/dictionary-wasm/manifest.json",
+      "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e"
+    },
+    {
+      "bytes": 69998,
+      "crc32": 2602561014,
+      "path": "product/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+    },
+    {
+      "bytes": 164449,
+      "crc32": 3348494121,
+      "path": "product/ext/js/dictionary/wasm/term-bank-parser.c",
+      "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f"
+    },
+    {
+      "bytes": 15101,
+      "crc32": 3105920180,
+      "path": "product/test/term-bank-row-suffix-reuse.test.js",
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f"
+    },
+    {
+      "bytes": 3037,
+      "crc32": 2468008079,
+      "path": "product/test/term-bank-row-suffix-token-end-fixtures.js",
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc"
+    },
+    {
+      "bytes": 7560,
+      "crc32": 449146510,
+      "path": "product/test/term-bank-row-suffix-token-ends.test.js",
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd"
+    },
+    {
+      "bytes": 17580,
+      "crc32": 2993650264,
+      "path": "rebuilt-candidate.diff",
+      "sha256": "113139f4799adbc3a030d5691a33e1666ee7bdd99cfd7017885fc6111e17b4f4"
+    },
+    {
+      "bytes": 500,
+      "crc32": 4141964139,
+      "path": "reproduce-baseline.log",
+      "sha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089"
+    },
+    {
+      "bytes": 444,
+      "crc32": 4231739045,
+      "path": "reproduce-baseline.receipt.json",
+      "sha256": "3c6a6b1164262fccc79eb8a3a1179ca8deda46b951b57a746824a580dcc601ef"
+    },
+    {
+      "bytes": 500,
+      "crc32": 489575914,
+      "path": "reproduce-candidate.log",
+      "sha256": "17b79907e5174222df6a0582804dd7fb04a0e93fe1545bd401f3fee658fd1d72"
+    },
+    {
+      "bytes": 447,
+      "crc32": 3952789609,
+      "path": "reproduce-candidate.receipt.json",
+      "sha256": "65d06016738dbfa837f63a036e0e8dc0e6df08c62e05333e55dcd13cf5a265d6"
+    },
+    {
+      "bytes": 1225,
+      "crc32": 4242669379,
+      "path": "result.json",
+      "sha256": "ca180fdc14e0f212437fccd27218a90069f3087dd18fb30a386a2284b68bf1d1"
+    },
+    {
+      "bytes": 694,
+      "crc32": 390850769,
+      "path": "scoped-lint.log",
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "bytes": 540,
+      "crc32": 2251993557,
+      "path": "scoped-lint.receipt.json",
+      "sha256": "cf6e28db332ab1e453527e5154e90c4bd2523688e75d4e71580567a83d708a86"
+    },
+    {
+      "bytes": 74,
+      "crc32": 189494261,
+      "path": "strict-main-types.log",
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    {
+      "bytes": 411,
+      "crc32": 779784470,
+      "path": "strict-main-types.receipt.json",
+      "sha256": "b3bbf1f66d7154e48449acd5b3b74bfed58f4472ce269fad915339bc1bdc5ced"
+    },
+    {
+      "bytes": 89,
+      "crc32": 1705139753,
+      "path": "strict-test-types.log",
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    {
+      "bytes": 411,
+      "crc32": 1470517104,
+      "path": "strict-test-types.receipt.json",
+      "sha256": "7a5d56a042a4f3b4e9abf42d20d0c980caab194b4c687dffc735d1982e668015"
+    }
+  ],
+  "product": {
+    "branch": "perf/numeric-row-suffix-972-20261128-c563d487",
+    "head": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+    "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "publishedAtUtc": "2026-11-28 09:09:39 UTC",
+    "files": [
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "bytes": 164449,
+        "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "gitBlobSha": "5a9033fda78144bfa1edf038b52f6804eeba23f5"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "bytes": 69998,
+        "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+        "gitBlobSha": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "bytes": 2588,
+        "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+        "gitBlobSha": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd"
+      },
+      {
+        "path": "test/term-bank-row-suffix-reuse.test.js",
+        "bytes": 15101,
+        "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+        "gitBlobSha": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+        "bytes": 3037,
+        "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+        "gitBlobSha": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-ends.test.js",
+        "bytes": 7560,
+        "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+        "gitBlobSha": "8ba263fc060391555a5070d65d6313fdd96607b4"
+      }
+    ],
+    "buildRun": 46126462448,
+    "recoveryRun": 46128887478,
+    "performanceQualified": false,
+    "productPrOpened": false
+  },
+  "productDiff": {
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "head": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7",
+    "exactDirectParent": true,
+    "exactSixFiles": true,
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "sha": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "sha": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124",
+        "status": "modified",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "sha": "5a9033fda78144bfa1edf038b52f6804eeba23f5",
+        "status": "modified",
+        "additions": 64,
+        "deletions": 10
+      },
+      {
+        "path": "test/term-bank-row-suffix-reuse.test.js",
+        "sha": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+        "status": "added",
+        "additions": 285,
+        "deletions": 0
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+        "sha": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+        "status": "added",
+        "additions": 58,
+        "deletions": 0
+      },
+      {
+        "path": "test/term-bank-row-suffix-token-ends.test.js",
+        "sha": "8ba263fc060391555a5070d65d6313fdd96607b4",
+        "status": "added",
+        "additions": 170,
+        "deletions": 0
+      }
+    ],
+    "originalBuildRun": 46126462448,
+    "recoveryRun": 46128887478,
+    "noSourceRecomputation": true
+  },
+  "noCompilationTestsOrBenchmarksRepeated": true,
+  "scope": "Read-only artifact recovery followed by publication of byte-identical original products. No performance qualification."
+}

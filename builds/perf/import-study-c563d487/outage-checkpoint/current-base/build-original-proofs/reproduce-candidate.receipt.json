@@ -1,0 +1,16 @@
+{
+  "label": "reproduce-candidate",
+  "command": [
+    "npm",
+    "run",
+    "build:dictionary-wasm",
+    "--",
+    "--check"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855931.6737993,
+  "finishedEpoch": 1795855932.8308268,
+  "exitCode": 0,
+  "logSha256": "17b79907e5174222df6a0582804dd7fb04a0e93fe1545bd401f3fee658fd1d72",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

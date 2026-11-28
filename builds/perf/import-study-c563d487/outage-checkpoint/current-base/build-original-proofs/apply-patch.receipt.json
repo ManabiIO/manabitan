@@ -1,0 +1,14 @@
+{
+  "label": "apply-patch",
+  "command": [
+    "git",
+    "apply",
+    "/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-972-build-c563d487/candidate.patch"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855930.153599,
+  "finishedEpoch": 1795855930.1556344,
+  "exitCode": 0,
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

@@ -1,0 +1,14 @@
+{
+  "label": "strict-main-types",
+  "command": [
+    "npm",
+    "run",
+    "test:ts:main"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855935.5666366,
+  "finishedEpoch": 1795855942.4682055,
+  "exitCode": 0,
+  "logSha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

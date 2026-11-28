@@ -1,0 +1,17 @@
+{
+  "label": "create-baseline",
+  "command": [
+    "git",
+    "worktree",
+    "add",
+    "--detach",
+    "/home/runner/work/manabitan/numeric-suffix-972-baseline",
+    "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+  ],
+  "cwd": "/home/runner/work/manabitan/manabitan",
+  "startedEpoch": 1795855923.1569018,
+  "finishedEpoch": 1795855923.6207721,
+  "exitCode": 0,
+  "logSha256": "9b6b0d9f739d4a183e0bb26e956e0283cc0b4305462cd0e6706559339be2fadd",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

@@ -1,0 +1,16 @@
+{
+  "label": "build-native-candidate",
+  "command": [
+    "npm",
+    "run",
+    "build:dictionary-wasm",
+    "--",
+    "--write"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855930.1558533,
+  "finishedEpoch": 1795855931.3269389,
+  "exitCode": 0,
+  "logSha256": "51a978ac06d848c3818ff93748ba0fe25752eacf04f1d566f244fff4b5797e6e",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

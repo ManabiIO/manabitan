@@ -1,0 +1,16 @@
+{
+  "label": "complete-unit-suite",
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855958.2696373,
+  "finishedEpoch": 1795856131.969368,
+  "exitCode": 0,
+  "logSha256": "e375ec48d509c04d1c088d4937e9cc12767fc2c1d4dd511a9d7b9e36479d034a",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

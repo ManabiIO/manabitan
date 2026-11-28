@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "scope": "Remote-only reconciliation of retained primary records after execution workspace became unavailable. No experiment rerun and no product source change.",
+  "reviewer": "root",
+  "reviewedAtUtc": "2026-11-28 09:04:24 UTC",
+  "runId": 46126462448,
+  "jobId": 140922033124,
+  "toolingHead": "d28d74f9c1047491670942ec6e0414cc9c823101",
+  "primaryLogSha256": "2ec90e3e0d6c8091ebaecf8a97aeec14791fedb295787b8c1a7abe91d1739123",
+  "primaryEvidence": [
+    {
+      "name": "primary-job.log",
+      "gitBlobSha": "6bb56c86106fb4f2624e2db11144ed1e0c0b25e8",
+      "chars": 52528
+    },
+    {
+      "name": "primary-records.json",
+      "gitBlobSha": "73ad52d70186d0d55eb61f0b234c6a051faf0d53",
+      "chars": 10951
+    }
+  ],
+  "stepCount": 17,
+  "allStepsSucceeded": true,
+  "terminalResult": {
+    "status": "Build and all declared correctness gates passed; no performance observations acquired",
+    "baseline": {
+      "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+      "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    "productFilesSha256": {
+      "ext/js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+      "dev/data/dictionary-wasm/manifest.json": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+      "test/term-bank-row-suffix-reuse.test.js": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "test/term-bank-row-suffix-token-end-fixtures.js": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "test/term-bank-row-suffix-token-ends.test.js": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd"
+    },
+    "fixedSource": true,
+    "oldBaselineGainTransferred": false,
+    "productPrOpened": false,
+    "performanceQualificationPending": true
+  },
+  "preOutageVerification": {
+    "rootPrimaryReviewSha256": "3350ad5d66261778b770e60e2d5b8e154d885998b68d982d771a969c4d2df07e",
+    "independentArtifactAuditSha256": "eec68624e1d5a0e8bab9334a2a4b077b146aefa5a397b0fa887985b89f29ab47",
+    "recordedCompleted": true,
+    "exactReviewFilesCurrentlyUnavailable": true,
+    "all17ReceiptsAndLogsAndSixProductFilesMatched": true
+  },
+  "performanceQualified": false,
+  "productPrOpened": false
+}

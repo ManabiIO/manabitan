@@ -1,0 +1,2020 @@
+{
+  "schemaVersion": 1,
+  "scope": "New read-only reconciliation during executor outage; original measurements and primary record bytes unchanged.",
+  "source": "Fresh GitHub job logs, exact original tag+JSON record serialization; independently matches all six previously recorded raw-record hashes.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+  "runId": 46113243549,
+  "sourceFunctionSha256": "4d64f8e894b49e595de29b6db3638c3967b7faef2599f75c4ccfe965df8fe4fe",
+  "counts": {
+    "taggedRecords": 330,
+    "reports": 252,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "separateMemoryObservations": 24,
+    "qualifiedMemoryObservations": 21,
+    "rawScansReported": 2300
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "jmdict",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "JMdict.zip",
+          "expectedTitle": "JMdict [2026-11-22]",
+          "label": "JMdict",
+          "mediaBytes": 0,
+          "mediaFiles": 0,
+          "release": "2026-11-22",
+          "revision": "JMdict.2026-11-22",
+          "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "sizeBytes": 15645766,
+          "termRows": 528299,
+          "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "AB",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "0baabf556b90da4528f85fc47d6ea33446c1d1088bf9ac8c6c3c3a35106a2540",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "0baabf556b90da4528f85fc47d6ea33446c1d1088bf9ac8c6c3c3a35106a2540",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "b20c8318a67a9501ab51f0a74e334fa6c603d13eb2d7eb3e349b5418bd475117",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "b20c8318a67a9501ab51f0a74e334fa6c603d13eb2d7eb3e349b5418bd475117",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.5291434063464782,
+            1.9683295555438018
+          ],
+          "equalWorkChangePercent": 1.0569126751822866,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.16572357123693093,
+          "ratios": [
+            0.9895040131714374,
+            0.9888548057259773,
+            0.9854112778065124,
+            0.9698942229455073,
+            1.007181515403824,
+            1.071420888458604,
+            1.0236146095717262,
+            1.0977590460526687,
+            1.0157519815391498,
+            0.9810911345319399,
+            0.984005854066558,
+            1.0150391866130803
+          ],
+          "worstPairChangePercent": 9.775904605266872,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 971.8000000000029,
+              "comparisonMs": 961.6000000000058,
+              "ratio": 0.9895040131714374
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 978,
+              "comparisonMs": 967.1000000000058,
+              "ratio": 0.9888548057259773
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 966.5,
+              "comparisonMs": 952.3999999999942,
+              "ratio": 0.9854112778065124
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 983.1999999999825,
+              "comparisonMs": 953.6000000000058,
+              "ratio": 0.9698942229455073
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 960.8000000000175,
+              "comparisonMs": 967.7000000000116,
+              "ratio": 1.007181515403824
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 929.7000000000116,
+              "comparisonMs": 996.0999999999767,
+              "ratio": 1.071420888458604
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 952.8000000000466,
+              "comparisonMs": 975.2999999999884,
+              "ratio": 1.0236146095717262
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 972.7999999999884,
+              "comparisonMs": 1067.9000000000233,
+              "ratio": 1.0977590460526687
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 996.6999999999534,
+              "comparisonMs": 1012.4000000000233,
+              "ratio": 1.0157519815391498
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 967.7999999999884,
+              "comparisonMs": 949.5,
+              "ratio": 0.9810911345319399
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 956.5999999999767,
+              "comparisonMs": 941.3000000000466,
+              "ratio": 0.984005854066558
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 944.1999999999534,
+              "comparisonMs": 958.4000000000233,
+              "ratio": 1.0150391866130803
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 9.775904605266872
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.0386373078460687,
+            5.136047247423781
+          ],
+          "equalWorkChangePercent": 1.459528863039039,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.8949552864506938,
+          "ratios": [
+            1.0204124579124518,
+            1.0513604724742378,
+            0.9896136269215393,
+            0.9974866478165618
+          ],
+          "worstPairChangePercent": 5.136047247423781,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 950.3999999999942,
+              "comparisonMs": 969.7999999999884,
+              "ratio": 1.0204124579124518
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 948.1999999999534,
+              "comparisonMs": 996.9000000000233,
+              "ratio": 1.0513604724742378
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 962.7999999999884,
+              "comparisonMs": 952.8000000000466,
+              "ratio": 0.9896136269215393
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 954.8999999999651,
+              "comparisonMs": 952.5,
+              "ratio": 0.9974866478165618
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.136047247423781
+        }
+      },
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memory": {
+        "emittedGatePassed": true,
+        "rawScanCount": 271,
+        "coverage": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 207.093144,
+            "failures": [],
+            "allObservedSampleCount": 67
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 205.971604,
+            "failures": [],
+            "allObservedSampleCount": 67
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 196.578553,
+            "failures": [],
+            "allObservedSampleCount": 69
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 231.355743,
+            "failures": [],
+            "allObservedSampleCount": 68
+          }
+        ],
+        "qualifiedObservations": 4
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "jmdict",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "JMdict.zip",
+          "expectedTitle": "JMdict [2026-11-22]",
+          "label": "JMdict",
+          "mediaBytes": 0,
+          "mediaFiles": 0,
+          "release": "2026-11-22",
+          "revision": "JMdict.2026-11-22",
+          "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "sizeBytes": 15645766,
+          "termRows": 528299,
+          "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "BA",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "a4e349ab9e9047ba77e910efda5fb4b9c555a9f64304da7c9ce8fb1f05132fc5",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "a4e349ab9e9047ba77e910efda5fb4b9c555a9f64304da7c9ce8fb1f05132fc5",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "a92f8506f804778488b417ecff6156d9b1febf5fa232b38493d7cb1523c730bb",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "a92f8506f804778488b417ecff6156d9b1febf5fa232b38493d7cb1523c730bb",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -2.0294996615738636,
+            1.901317454077267
+          ],
+          "equalWorkChangePercent": 0.2529040081686862,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.21205695051211837,
+          "ratios": [
+            1.0098284833301043,
+            0.9835590845399291,
+            0.9746645397391389,
+            0.9919856684895343,
+            1.015565317035894,
+            1.022461032045651,
+            1.0774449936996842,
+            1.026827565572976,
+            1.0003854307187947,
+            0.9953734302709629,
+            0.9758509222285935,
+            0.9596758633995859
+          ],
+          "worstPairChangePercent": 7.744499369968416,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1037.8000000000175,
+              "comparisonMs": 1048,
+              "ratio": 1.0098284833301043
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1070.5,
+              "comparisonMs": 1052.8999999999942,
+              "ratio": 0.9835590845399291
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1065.7000000000116,
+              "comparisonMs": 1038.7000000000116,
+              "ratio": 0.9746645397391389
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1060.6000000000058,
+              "comparisonMs": 1052.1000000000058,
+              "ratio": 0.9919856684895343
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1047.2000000000116,
+              "comparisonMs": 1063.5,
+              "ratio": 1.015565317035894
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1032.9000000000233,
+              "comparisonMs": 1056.0999999999767,
+              "ratio": 1.022461032045651
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1031.7000000000116,
+              "comparisonMs": 1111.5999999999767,
+              "ratio": 1.0774449936996842
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1002.7000000000116,
+              "comparisonMs": 1029.600000000035,
+              "ratio": 1.026827565572976
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1037.8000000000466,
+              "comparisonMs": 1038.2000000000116,
+              "ratio": 1.0003854307187947
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1059.100000000035,
+              "comparisonMs": 1054.2000000000116,
+              "ratio": 0.9953734302709629
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1051.7999999999884,
+              "comparisonMs": 1026.4000000000233,
+              "ratio": 0.9758509222285935
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1036.5999999999767,
+              "comparisonMs": 994.7999999999884,
+              "ratio": 0.9596758633995859
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 7.744499369968416
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -2.045542261676103,
+            1.4880952380952328
+          ],
+          "equalWorkChangePercent": -0.282724790373845,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": -0.2504095414946894,
+          "ratios": [
+            1.0069672924327293,
+            0.988024516737377,
+            1.0148809523809523,
+            0.979544577383239
+          ],
+          "worstPairChangePercent": 1.4880952380952328,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1033.4000000000233,
+              "comparisonMs": 1040.6000000000058,
+              "ratio": 1.0069672924327293
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1060.5,
+              "comparisonMs": 1047.7999999999884,
+              "ratio": 0.988024516737377
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1008,
+              "comparisonMs": 1023,
+              "ratio": 1.0148809523809523
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1036.4000000000233,
+              "comparisonMs": 1015.2000000000116,
+              "ratio": 0.979544577383239
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 2.045542261676103
+        }
+      },
+      "storageBytes": 43520477,
+      "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "memory": {
+        "emittedGatePassed": true,
+        "rawScanCount": 393,
+        "coverage": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 120.99272,
+            "failures": [],
+            "allObservedSampleCount": 97
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 118.408273,
+            "failures": [],
+            "allObservedSampleCount": 99
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 137.64584,
+            "failures": [],
+            "allObservedSampleCount": 97
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 127.664578,
+            "failures": [],
+            "allObservedSampleCount": 100
+          }
+        ],
+        "qualifiedObservations": 4
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "jitendex",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "jitendex-yomitan.zip",
+          "expectedTitle": "Jitendex.org [2026-10-03]",
+          "label": "Jitendex",
+          "mediaBytes": 4992155,
+          "mediaFiles": 236,
+          "release": "2026.10.03.0",
+          "revision": "2026.10.03.0",
+          "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "sizeBytes": 38831822,
+          "termRows": 436555,
+          "unreferencedMediaPaths": [
+            "jitendex/HanaMinA/05167.svg",
+            "jitendex/HanaMinA/05641.svg",
+            "jitendex/HanaMinA/0576b.svg",
+            "jitendex/HanaMinA/05bda.svg",
+            "jitendex/HanaMinA/06207.svg",
+            "jitendex/HanaMinA/07055.svg",
+            "jitendex/HanaMinA/07575.svg",
+            "jitendex/HanaMinA/076a5.svg",
+            "jitendex/HanaMinA/0793d.svg",
+            "jitendex/HanaMinA/080ed.svg",
+            "jitendex/HanaMinA/09093.svg",
+            "jitendex/HanaMinA/09c81.svg",
+            "jitendex/HanaMinA/20bb7.svg"
+          ],
+          "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "AB",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "acb7394d4c077a011f3da0367e9dbda1b59599aef9111d4ab3751ff983d9b3ed",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "acb7394d4c077a011f3da0367e9dbda1b59599aef9111d4ab3751ff983d9b3ed",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "395905c8854aa96d9688933513017f5dabc604d7b41a2e0af2c70521c3e4de09",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "395905c8854aa96d9688933513017f5dabc604d7b41a2e0af2c70521c3e4de09",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.9675644488865496,
+            1.3976195856380436
+          ],
+          "equalWorkChangePercent": -0.3046068839587024,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": -0.19095474233700171,
+          "ratios": [
+            1.0267016215166378,
+            1.0135274776890641,
+            1.0019029495718363,
+            0.9717847769028821,
+            0.9540136789057078,
+            0.9936466411286393,
+            1.014424914023697,
+            0.9888639341193869,
+            0.9942779555814236,
+            1.011256319755756,
+            1.0342818296591707,
+            0.9641115303211026
+          ],
+          "worstPairChangePercent": 3.4281829659170704,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1029.9000000000087,
+              "comparisonMs": 1057.3999999999942,
+              "ratio": 1.0267016215166378
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1064.5,
+              "comparisonMs": 1078.9000000000087,
+              "ratio": 1.0135274776890641
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1051,
+              "comparisonMs": 1053,
+              "ratio": 1.0019029495718363
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1066.8000000000175,
+              "comparisonMs": 1036.7000000000116,
+              "ratio": 0.9717847769028821
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1111.1999999999825,
+              "comparisonMs": 1060.1000000000058,
+              "ratio": 0.9540136789057078
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1070.3000000000175,
+              "comparisonMs": 1063.5,
+              "ratio": 0.9936466411286393
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1046.7999999999884,
+              "comparisonMs": 1061.8999999999942,
+              "ratio": 1.014424914023697
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1068.6000000000058,
+              "comparisonMs": 1056.6999999999825,
+              "ratio": 0.9888639341193869
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1031.1000000000058,
+              "comparisonMs": 1025.2000000000116,
+              "ratio": 0.9942779555814236
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1048.3000000000175,
+              "comparisonMs": 1060.0999999999767,
+              "ratio": 1.011256319755756
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1029.6999999999534,
+              "comparisonMs": 1065,
+              "ratio": 1.0342818296591707
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1086.7000000000116,
+              "comparisonMs": 1047.6999999999534,
+              "ratio": 0.9641115303211026
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 4.598632109429223
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.60402872330343,
+            2.677622039633798
+          ],
+          "equalWorkChangePercent": -0.10420120305011382,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.7062924307864815,
+          "ratios": [
+            0.9957770270270271,
+            0.9839597127669657,
+            0.9900971243572432,
+            1.026776220396338
+          ],
+          "worstPairChangePercent": 2.677622039633798,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1065.6000000000058,
+              "comparisonMs": 1061.1000000000058,
+              "ratio": 0.9957770270270271
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1072.2999999999884,
+              "comparisonMs": 1055.1000000000058,
+              "ratio": 0.9839597127669657
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1050.2000000000116,
+              "comparisonMs": 1039.7999999999884,
+              "ratio": 0.9900971243572432
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1034.5,
+              "comparisonMs": 1062.2000000000116,
+              "ratio": 1.026776220396338
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 2.677622039633798
+        }
+      },
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memory": {
+        "emittedGatePassed": true,
+        "rawScanCount": 270,
+        "coverage": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 138.272523,
+            "failures": [],
+            "allObservedSampleCount": 67
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 129.073579,
+            "failures": [],
+            "allObservedSampleCount": 66
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 121.995791,
+            "failures": [],
+            "allObservedSampleCount": 69
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 141.821274,
+            "failures": [],
+            "allObservedSampleCount": 68
+          }
+        ],
+        "qualifiedObservations": 4
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "jitendex",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "jitendex-yomitan.zip",
+          "expectedTitle": "Jitendex.org [2026-10-03]",
+          "label": "Jitendex",
+          "mediaBytes": 4992155,
+          "mediaFiles": 236,
+          "release": "2026.10.03.0",
+          "revision": "2026.10.03.0",
+          "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "sizeBytes": 38831822,
+          "termRows": 436555,
+          "unreferencedMediaPaths": [
+            "jitendex/HanaMinA/05167.svg",
+            "jitendex/HanaMinA/05641.svg",
+            "jitendex/HanaMinA/0576b.svg",
+            "jitendex/HanaMinA/05bda.svg",
+            "jitendex/HanaMinA/06207.svg",
+            "jitendex/HanaMinA/07055.svg",
+            "jitendex/HanaMinA/07575.svg",
+            "jitendex/HanaMinA/076a5.svg",
+            "jitendex/HanaMinA/0793d.svg",
+            "jitendex/HanaMinA/080ed.svg",
+            "jitendex/HanaMinA/09093.svg",
+            "jitendex/HanaMinA/09c81.svg",
+            "jitendex/HanaMinA/20bb7.svg"
+          ],
+          "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "BA",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "d618327214509db1edfcb1b1cc29f09ef8f53e836550358ff9e11d819f35feac",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "d618327214509db1edfcb1b1cc29f09ef8f53e836550358ff9e11d819f35feac",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "b45fe89dcf9cbdefa0e0054702c1c0717a49a66fe1ff19a7d86c397845557695",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "b45fe89dcf9cbdefa0e0054702c1c0717a49a66fe1ff19a7d86c397845557695",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -1.560149532950561,
+            1.1585166131202085
+          ],
+          "equalWorkChangePercent": 0.09941181343768868,
+          "fasterPairs": 6,
+          "medianPairedChangePercent": 0.34029899896741433,
+          "ratios": [
+            1.0103298296484446,
+            1.0100234784179476,
+            1.0128405026139595,
+            0.9701479237212621,
+            1.0590255220417417,
+            0.9995536909756315,
+            0.9942399423994032,
+            1.007252289003717,
+            0.9909382151030068,
+            0.9778587942379818,
+            1.0228701594532819,
+            0.9602836879432727
+          ],
+          "worstPairChangePercent": 5.902552204174172,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 1103.5999999999767,
+              "comparisonMs": 1115,
+              "ratio": 1.0103298296484446
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 1107.399999999965,
+              "comparisonMs": 1118.5,
+              "ratio": 1.0100234784179476
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 1090.2999999999884,
+              "comparisonMs": 1104.2999999999884,
+              "ratio": 1.0128405026139595
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 1122.2000000000116,
+              "comparisonMs": 1088.7000000000116,
+              "ratio": 0.9701479237212621
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 1077.5,
+              "comparisonMs": 1141.0999999999767,
+              "ratio": 1.0590255220417417
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 1120.2999999999884,
+              "comparisonMs": 1119.7999999999884,
+              "ratio": 0.9995536909756315
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 1111.100000000035,
+              "comparisonMs": 1104.7000000000116,
+              "ratio": 0.9942399423994032
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 1103.0999999999767,
+              "comparisonMs": 1111.0999999999767,
+              "ratio": 1.007252289003717
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 1092.5,
+              "comparisonMs": 1082.600000000035,
+              "ratio": 0.9909382151030068
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 1124.5999999999767,
+              "comparisonMs": 1099.7000000000116,
+              "ratio": 0.9778587942379818
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 1097.5,
+              "comparisonMs": 1122.5999999999767,
+              "ratio": 1.0228701594532819
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 1128,
+              "comparisonMs": 1083.2000000000116,
+              "ratio": 0.9602836879432727
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.902552204174172
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.5980928836285657,
+            1.7404635224085085
+          ],
+          "equalWorkChangePercent": 0.23913820847252243,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.42896151460201093,
+          "ratios": [
+            0.9840190711637143,
+            1.0100036049025938,
+            0.9985756253894464,
+            1.017404635224085
+          ],
+          "worstPairChangePercent": 1.7404635224085085,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 1132.5999999999767,
+              "comparisonMs": 1114.5,
+              "ratio": 0.9840190711637143
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 1109.600000000035,
+              "comparisonMs": 1120.6999999999534,
+              "ratio": 1.0100036049025938
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 1123.3000000000466,
+              "comparisonMs": 1121.7000000000116,
+              "ratio": 0.9985756253894464
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 1108.9000000000233,
+              "comparisonMs": 1128.2000000000116,
+              "ratio": 1.017404635224085
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.7404635224085085
+        }
+      },
+      "storageBytes": 67466332,
+      "lookupSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "memory": {
+        "emittedGatePassed": true,
+        "rawScanCount": 348,
+        "coverage": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 85.250307,
+            "failures": [],
+            "allObservedSampleCount": 88
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 106.260753,
+            "failures": [],
+            "allObservedSampleCount": 86
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 96.322725,
+            "failures": [],
+            "allObservedSampleCount": 87
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 95.472259,
+            "failures": [],
+            "allObservedSampleCount": 87
+          }
+        ],
+        "qualifiedObservations": 4
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "vndb",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "vndb_characters_by_bee.zip",
+          "expectedTitle": "VNDB Characters by Bee",
+          "label": "VNDB",
+          "mediaBytes": 188131284,
+          "mediaFiles": 146570,
+          "mediaRows": 146570,
+          "optional": true,
+          "release": "1.0.0",
+          "revision": "395525135651",
+          "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "sizeBytes": 291705969,
+          "termRows": 6648310,
+          "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "AB",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "83b6d9578bd0b66012bec5bc7fe876074bda73c1b2c61caabaca4423eb0ac849",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "83b6d9578bd0b66012bec5bc7fe876074bda73c1b2c61caabaca4423eb0ac849",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "d7270aab0eb6860d4839a38f35f370476d584170c0ec57facdbed254881c7167",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "d7270aab0eb6860d4839a38f35f370476d584170c0ec57facdbed254881c7167",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -6.164366084966932,
+            -2.786535510611099
+          ],
+          "equalWorkChangePercent": -4.6041956420952435,
+          "fasterPairs": 12,
+          "medianPairedChangePercent": -3.963495532166561,
+          "ratios": [
+            0.9662020844684275,
+            0.9768825697735732,
+            0.9715368331168946,
+            0.9394881233504648,
+            0.9467923595664258,
+            0.9751752957008167,
+            0.9186831738885691,
+            0.9587109592861287,
+            0.9727324566708834,
+            0.9254948602497663,
+            0.9620191300705401,
+            0.9372245549501964
+          ],
+          "worstPairChangePercent": -2.311743022642676,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 5689.700000000012,
+              "comparisonMs": 5497.400000000023,
+              "ratio": 0.9662020844684275
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 5697,
+              "comparisonMs": 5565.300000000047,
+              "ratio": 0.9768825697735732
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 5621.299999999988,
+              "comparisonMs": 5461.299999999988,
+              "ratio": 0.9715368331168946
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 5759.199999999953,
+              "comparisonMs": 5410.699999999953,
+              "ratio": 0.9394881233504648
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 5664.599999999977,
+              "comparisonMs": 5363.199999999953,
+              "ratio": 0.9467923595664258
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 5647.600000000093,
+              "comparisonMs": 5507.400000000023,
+              "ratio": 0.9751752957008167
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 6041.800000000047,
+              "comparisonMs": 5550.5,
+              "ratio": 0.9186831738885691
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 5737.599999999977,
+              "comparisonMs": 5500.70000000007,
+              "ratio": 0.9587109592861287
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 5787.099999999977,
+              "comparisonMs": 5629.300000000047,
+              "ratio": 0.9727324566708834
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 5885.5,
+              "comparisonMs": 5447,
+              "ratio": 0.9254948602497663
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 5729.199999999953,
+              "comparisonMs": 5511.600000000093,
+              "ratio": 0.9620191300705401
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 5763.40000000014,
+              "comparisonMs": 5401.600000000093,
+              "ratio": 0.9372245549501964
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 8.131682611143088
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.5426910415369588,
+            1.5125164690398485
+          ],
+          "equalWorkChangePercent": -0.21830813383741932,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.41957214372395635,
+          "ratios": [
+            1.0151251646903985,
+            0.9932756289832803,
+            0.9845730895846304,
+            0.9983329281422406
+          ],
+          "worstPairChangePercent": 1.5125164690398485,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 5692.5,
+              "comparisonMs": 5778.600000000093,
+              "ratio": 1.0151251646903985
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 5695.699999999953,
+              "comparisonMs": 5657.400000000023,
+              "ratio": 0.9932756289832803
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 5710.800000000047,
+              "comparisonMs": 5622.699999999953,
+              "ratio": 0.9845730895846304
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 5758.600000000093,
+              "comparisonMs": 5749,
+              "ratio": 0.9983329281422406
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.5426910415369588
+        }
+      },
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memory": {
+        "emittedGatePassed": false,
+        "rawScanCount": 413,
+        "coverage": [
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": false,
+            "maximumCoveredSampleGapMs": 255.363403,
+            "failures": [
+              "covered-import-scan-gap-over-250ms"
+            ],
+            "allObservedSampleCount": 102
+          },
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": false,
+            "maximumCoveredSampleGapMs": 260.966631,
+            "failures": [
+              "covered-import-scan-gap-over-250ms"
+            ],
+            "allObservedSampleCount": 103
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 229.133288,
+            "failures": [],
+            "allObservedSampleCount": 103
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": false,
+            "maximumCoveredSampleGapMs": 284.148828,
+            "failures": [
+              "covered-import-scan-gap-over-250ms"
+            ],
+            "allObservedSampleCount": 105
+          }
+        ],
+        "qualifiedObservations": 1
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "runId": 46113243549,
+      "cohort": {
+        "attempt": "1",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+        "dictionary": "vndb",
+        "expectedObservationCount": 42,
+        "fixture": {
+          "cacheFile": "vndb_characters_by_bee.zip",
+          "expectedTitle": "VNDB Characters by Bee",
+          "label": "VNDB",
+          "mediaBytes": 188131284,
+          "mediaFiles": 146570,
+          "mediaRows": 146570,
+          "optional": true,
+          "release": "1.0.0",
+          "revision": "395525135651",
+          "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "sizeBytes": 291705969,
+          "termRows": 6648310,
+          "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+        "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "order": "BA",
+        "runId": "46113243549",
+        "workflowCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+        "workflowSha256": "a292baa3402740b4d70947dad03f7136907e7b053a778f9da252cc8436a00167"
+      },
+      "taggedRecordCount": 55,
+      "rawReportCount": 42,
+      "roleCounts": {
+        "control": 8,
+        "exhaustive-media": 2,
+        "memory": 4,
+        "candidate": 24,
+        "warmup": 4
+      },
+      "allPrimaryReconciliationChecksPass": true,
+      "sourceRecords": [
+        {
+          "arm": "A",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+            "lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+          "packageEntryCount": 554,
+          "packageSha256": "a8ac4489b488b12876c2c49978c225934d3524c636274ca52c0e08c2fa2b228d",
+          "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "a8ac4489b488b12876c2c49978c225934d3524c636274ca52c0e08c2fa2b228d",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+        },
+        {
+          "arm": "B",
+          "changedPackageEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+            "lib/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a"
+          },
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageEntriesSha256": "e2914ffeb0ca6744a29a8351a9ce74a9b4b8c1a6374632c33fdd4abedd97e4d9",
+          "packageEntryCount": 554,
+          "packageSha256": "df33b1b91d1cec3b950e4359c1b506ae78b378fe8b067e4f312bda654dec118a",
+          "sha": "399feae29fea358560af27af68f03dfb6d8b6f58",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "df33b1b91d1cec3b950e4359c1b506ae78b378fe8b067e4f312bda654dec118a",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07"
+        }
+      ],
+      "packageDiff": {
+        "changedPackageEntries": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "controlC": "Same A source, package, runtime, and flags under a distinct observation label"
+      },
+      "comparisons": {
+        "candidate": {
+          "count": 12,
+          "descriptiveBootstrap95Percent": [
+            -4.0366325241512735,
+            -1.9751376872885529
+          ],
+          "equalWorkChangePercent": -2.9539570394931713,
+          "fasterPairs": 12,
+          "medianPairedChangePercent": -3.1824394599714534,
+          "ratios": [
+            0.9771400195208774,
+            0.9658732936646832,
+            0.9816079043891843,
+            0.9964270324619217,
+            0.9592616614370567,
+            0.9684026056786799,
+            0.9847163503210792,
+            0.9555880487633049,
+            0.9498856605981183,
+            0.9600056880799178,
+            0.9788893418650446,
+            0.967948605121891
+          ],
+          "worstPairChangePercent": -0.3572967538078342,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "pair-01-A",
+              "comparisonId": "pair-01-B",
+              "baselineMs": 5839.900000000023,
+              "comparisonMs": 5706.399999999994,
+              "ratio": 0.9771400195208774
+            },
+            {
+              "pair": 2,
+              "baselineId": "pair-02-A",
+              "comparisonId": "pair-02-B",
+              "baselineMs": 5714,
+              "comparisonMs": 5519,
+              "ratio": 0.9658732936646832
+            },
+            {
+              "pair": 3,
+              "baselineId": "pair-03-A",
+              "comparisonId": "pair-03-B",
+              "baselineMs": 5698.099999999977,
+              "comparisonMs": 5593.299999999988,
+              "ratio": 0.9816079043891843
+            },
+            {
+              "pair": 4,
+              "baselineId": "pair-04-A",
+              "comparisonId": "pair-04-B",
+              "baselineMs": 5569.600000000035,
+              "comparisonMs": 5549.699999999953,
+              "ratio": 0.9964270324619217
+            },
+            {
+              "pair": 5,
+              "baselineId": "pair-05-A",
+              "comparisonId": "pair-05-B",
+              "baselineMs": 5704.700000000012,
+              "comparisonMs": 5472.299999999988,
+              "ratio": 0.9592616614370567
+            },
+            {
+              "pair": 6,
+              "baselineId": "pair-06-A",
+              "comparisonId": "pair-06-B",
+              "baselineMs": 5649.199999999953,
+              "comparisonMs": 5470.699999999953,
+              "ratio": 0.9684026056786799
+            },
+            {
+              "pair": 7,
+              "baselineId": "pair-07-A",
+              "comparisonId": "pair-07-B",
+              "baselineMs": 5653.099999999977,
+              "comparisonMs": 5566.70000000007,
+              "ratio": 0.9847163503210792
+            },
+            {
+              "pair": 8,
+              "baselineId": "pair-08-A",
+              "comparisonId": "pair-08-B",
+              "baselineMs": 5676.400000000023,
+              "comparisonMs": 5424.300000000047,
+              "ratio": 0.9555880487633049
+            },
+            {
+              "pair": 9,
+              "baselineId": "pair-09-A",
+              "comparisonId": "pair-09-B",
+              "baselineMs": 5641.099999999977,
+              "comparisonMs": 5358.400000000023,
+              "ratio": 0.9498856605981183
+            },
+            {
+              "pair": 10,
+              "baselineId": "pair-10-A",
+              "comparisonId": "pair-10-B",
+              "baselineMs": 5625.800000000047,
+              "comparisonMs": 5400.800000000047,
+              "ratio": 0.9600056880799178
+            },
+            {
+              "pair": 11,
+              "baselineId": "pair-11-A",
+              "comparisonId": "pair-11-B",
+              "baselineMs": 5641.699999999953,
+              "comparisonMs": 5522.599999999977,
+              "ratio": 0.9788893418650446
+            },
+            {
+              "pair": 12,
+              "baselineId": "pair-12-A",
+              "comparisonId": "pair-12-B",
+              "baselineMs": 5681.5,
+              "comparisonMs": 5499.400000000023,
+              "ratio": 0.967948605121891
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 5.01143394018817
+        },
+        "control": {
+          "count": 4,
+          "descriptiveBootstrap95Percent": [
+            -1.3742275440725704,
+            0.8572189191595747
+          ],
+          "equalWorkChangePercent": -0.6074698572759107,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.9481352742078952,
+          "ratios": [
+            0.9862577245592743,
+            0.9921742919389938,
+            0.9888630025768483,
+            1.0085721891915957
+          ],
+          "worstPairChangePercent": 0.8572189191595747,
+          "pairs": [
+            {
+              "pair": 1,
+              "baselineId": "control-01-A",
+              "comparisonId": "control-01-C",
+              "baselineMs": 5712.300000000047,
+              "comparisonMs": 5633.799999999988,
+              "ratio": 0.9862577245592743
+            },
+            {
+              "pair": 2,
+              "baselineId": "control-02-A",
+              "comparisonId": "control-02-C",
+              "baselineMs": 5737.5,
+              "comparisonMs": 5692.599999999977,
+              "ratio": 0.9921742919389938
+            },
+            {
+              "pair": 3,
+              "baselineId": "control-03-A",
+              "comparisonId": "control-03-C",
+              "baselineMs": 5665.800000000047,
+              "comparisonMs": 5602.699999999953,
+              "ratio": 0.9888630025768483
+            },
+            {
+              "pair": 4,
+              "baselineId": "control-04-A",
+              "comparisonId": "control-04-C",
+              "baselineMs": 5634.5,
+              "comparisonMs": 5682.800000000047,
+              "ratio": 1.0085721891915957
+            }
+          ],
+          "largestAbsolutePairedChangePercent": 1.3742275440725704
+        }
+      },
+      "storageBytes": 609176779,
+      "lookupSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "memory": {
+        "emittedGatePassed": true,
+        "rawScanCount": 605,
+        "coverage": [
+          {
+            "name": "B1",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 150.788407,
+            "failures": [],
+            "allObservedSampleCount": 151
+          },
+          {
+            "name": "A1",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 177.540981,
+            "failures": [],
+            "allObservedSampleCount": 153
+          },
+          {
+            "name": "A2",
+            "arm": "A",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 160.049453,
+            "failures": [],
+            "allObservedSampleCount": 150
+          },
+          {
+            "name": "B2",
+            "arm": "B",
+            "qualified": true,
+            "maximumCoveredSampleGapMs": 170.421551,
+            "failures": [],
+            "allObservedSampleCount": 151
+          }
+        ],
+        "qualifiedObservations": 4
+      },
+      "limits": "Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified."
+    }
+  ],
+  "limitations": [
+    "This new receipt is not the unavailable combined-primary-index.json and does not use its old SHA.",
+    "All paired clocks and ratios are reconstructed from the exact primary records; emitted confidence intervals are retained rather than recomputed here.",
+    "Original per-process scan replay and complete original artifact integrity were completed before outage and identified separately; their exact local audit/archive files are not included by this receipt.",
+    "The VNDB AB coverage hold remains unchanged; no failed observation, timing, control or threshold is replaced.",
+    "Old-baseline performance cannot transfer to the dcfc02a0 composition."
+  ],
+  "allReadOnlyReconciliationChecksPass": true,
+  "fullPerformanceQualificationPassed": false,
+  "qualificationDecision": "Held by VNDB AB memory coverage; all original failures and raw values retained."
+}

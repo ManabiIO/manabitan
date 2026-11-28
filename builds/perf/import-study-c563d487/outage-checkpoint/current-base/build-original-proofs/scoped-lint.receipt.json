@@ -1,0 +1,16 @@
+{
+  "label": "scoped-lint",
+  "command": [
+    "npx",
+    "eslint",
+    "test/term-bank-row-suffix-reuse.test.js",
+    "test/term-bank-row-suffix-token-end-fixtures.js",
+    "test/term-bank-row-suffix-token-ends.test.js"
+  ],
+  "cwd": "/home/runner/work/manabitan/numeric-suffix-972-candidate",
+  "startedEpoch": 1795855932.95889,
+  "finishedEpoch": 1795855935.5663247,
+  "exitCode": 0,
+  "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+  "scope": "Build/correctness command, not a benchmark observation"
+}

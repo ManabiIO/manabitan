@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only remote checkpoint preparation only; no product change, original-byte mutation, measurement or acquisition.",
+  "firstPayloadExtraction": {
+    "status": "failed before any file or blob mutation",
+    "reason": "A broad substring match included the echoed workflow command instead of only timestamped emitted JSON records; JSON.parse rejected a control character.",
+    "correction": "Use the exact timestamp-plus-tag record grammar; original logs remain unchanged."
+  },
+  "firstClockReconciliation": {
+    "source": "function reconcileNumericCell(records) {\n    const assert = (value, message) => { if (!value) throw new Error(message); };\n    const near = (a, b) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= 1e-9;\n    const median = (values) => { const x = [...values].sort((a, b) => a - b); return (x[Math.floor((x.length - 1) / 2)] + x[Math.floor(x.length / 2)]) / 2; };\n    const one = (kind) => { const x = records.filter((record) => record.kind === kind); assert(x.length === 1, kind + \" must be unique\"); return x[0].value; };\n    const result = (path) => { const x = records.filter((record) => record.kind === \"result-file\" && record.value.path === path); assert(x.length === 1, path + \" must be unique\"); return x[0].value.value; };\n    assert(records.length === 55, \"55 tagged records required\");\n    const cohort = one(\"cohort\");\n    assert(cohort.runId === \"46113243549\", \"run identity\");\n    assert(cohort.baseline === \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\", \"baseline identity\");\n    assert(cohort.candidate === \"399feae29fea358560af27af68f03dfb6d8b6f58\", \"candidate identity\");\n    assert(cohort.workflowCommit === \"ee9450923d14e95b7958feeffffde4998cf8c5d9\", \"tooling identity\");\n    assert(cohort.observerSha256 === \"cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef\", \"observer identity\");\n    const extraction = one(\"extraction-complete\");\n    assert(extraction.rawReportCount === 42 && extraction.attemptedObservationCount === 42 && extraction.plannedObservationCount === 42 && extraction.unattemptedPlannedIds.length === 0, \"complete acquisition\");\n    const observations = records.filter((record) => record.kind === \"observation\").map((record) => record.value);\n    assert(observations.length === 42 && new Set(observations.map((x) => x.id)).size === 42, \"42 unique observations\");\n    const sourceRecords = records.filter((record) => record.kind === \"source-identity\").map((record) => record.value);\n    assert(sourceRecords.length === 2, \"two product source records\");\n    const sources = Object.fromEntries(sourceRecords.map((record) => [record.arm, record]));\n    assert(sources.A.sha === cohort.baseline && sources.B.sha === cohort.candidate, \"product source heads\");\n    assert(sources.A.packageEntryCount === 554 && sources.B.packageEntryCount === 554, \"package entry counts\");\n    const packageDiff = one(\"package-diff\");\n    assert(JSON.stringify(packageDiff.changedPackageEntries) === JSON.stringify([\"js/dictionary/wasm/term-bank-parser.c\", \"lib/term-bank-parser.wasm\"]), \"declared package delta\");\n    const roleCounts = {};\n    const common = new Set();\n    const storageBytes = new Set();\n    const lookupDigests = new Set();\n    for (const observation of observations) {\n        roleCounts[observation.role.kind] = (roleCounts[observation.role.kind] || 0) + 1;\n        assert(observation.runCount === 1 && observation.run.index === 1, \"one run per observation\");\n        assert(observation.report.status === \"success\" && !observation.report.skippedVerification && observation.report.failureReason === \"\", \"successful report\");\n        const source = observation.role.arm === \"B\" ? sources.B : sources.A;\n        assert(observation.report.packageSha256 === source.packageSha256 && observation.run.packageSha256 === source.packageSha256, \"source-bound package\");\n        assert(observation.benchmark.productionImportDefaults === true && observation.benchmark.traceEnabled === false, \"production defaults and no trace\");\n        const phases = observation.rawPhases.filter((phase) => phase.browserTiming !== null);\n        assert(phases.length === 1, \"one browser timing phase\");\n        const timing = phases[0].browserTiming;\n        assert(timing.trigger === \"file-input-change\" && timing.errorCount === 0, \"browser timing boundary\");\n        assert(near(observation.run.totalImportMs, timing.nextFrameAtMs - timing.startedAtMs), \"raw browser clock agreement\");\n        assert(near(observation.summary.timing.medianMs, observation.run.totalImportMs), \"summary clock agreement\");\n        assert(observation.validation.contentReadable === true && observation.validation.lookup.allExactHeadwordMatches === true, \"content/lookup checks\");\n        assert(observation.validation.termRows === cohort.fixture.termRows && observation.validation.restart.termRows === cohort.fixture.termRows, \"row and restart counts\");\n        common.add(observation.canonicalCommonSha256);\n        storageBytes.add(observation.validation.storage.bytes);\n        lookupDigests.add(observation.validation.lookup.semanticSha256);\n    }\n    for (const [kind, count] of Object.entries({candidate:24,control:8,warmup:4,\"exhaustive-media\":2,memory:4})) assert(roleCounts[kind] === count, \"role count \" + kind);\n    assert(common.size === 1 && storageBytes.size === 1 && lookupDigests.size === 1, \"common semantics/storage\");\n    const indexed = new Map(observations.map((x) => [x.id, x]));\n    const timings = result(\"observations.json\");\n    assert(timings.length === 36, \"36 latency/warmup entries\");\n    for (const timing of timings) {\n        const observation = indexed.get(timing.id);\n        assert(observation && observation.role.kind === timing.kind && observation.role.arm === timing.arm && observation.role.pair === timing.pair && near(observation.run.totalImportMs, timing.totalImportMs), \"retained paired timing\");\n    }\n    const analysis = result(\"analysis.json\");\n    const comparisons = {};\n    for (const [kind, count, secondArm, emittedKey] of [[\"candidate\",12,\"B\",\"candidateVsBaseline\"],[\"control\",4,\"C\",\"identicalCodeControl\"]]) {\n        const pairs = [];\n        for (let pair = 1; pair <= count; pair++) {\n            const members = timings.filter((x) => x.kind === kind && x.pair === pair);\n            assert(members.length === 2, \"two members per pair\");\n            const a = members.find((x) => x.arm === \"A\"), b = members.find((x) => x.arm === secondArm);\n            assert(a && b, \"pair arms\");\n            pairs.push({pair,baselineId:a.id,comparisonId:b.id,baselineMs:a.totalImportMs,comparisonMs:b.totalImportMs,ratio:b.totalImportMs/a.totalImportMs});\n        }\n        const ratios = pairs.map((x) => x.ratio);\n        const emitted = analysis[emittedKey];\n        assert(emitted.count === count && emitted.ratios.length === count && ratios.every((ratio, index) => near(ratio, emitted.ratios[index])), \"ratio reconstruction\");\n        const change = (median(ratios) - 1) * 100;\n        assert(near(change, emitted.medianPairedChangePercent) && ratios.filter((ratio) => ratio < 1).length === emitted.fasterPairs, \"median and wins reconstruction\");\n        comparisons[kind] = {...emitted, pairs, largestAbsolutePairedChangePercent: Math.max(...ratios.map((ratio) => Math.abs((ratio - 1) * 100)))};\n    }\n    const memory = result(\"memory/observations.json\");\n    const memoryAudit = result(\"memory/memory-audit.json\");\n    assert(memory.length === 4 && memoryAudit.observations === 4, \"four separate memory observations\");\n    assert(memory.reduce((sum, x) => sum + x.allObservedSampleCount, 0) === memoryAudit.rawScanCount, \"reported scan count\");\n    for (const observation of memory) {\n        assert(observation.authoritativeTiming === false, \"memory excluded from authoritative latency\");\n        if (!observation.qualifiedForWholeTreePss) assert(observation.maxSampledPssKiB === null && observation.maxSampledPrivateKiB === null, \"unqualified memory maxima remain null\");\n    }\n    return {\n        dictionary:cohort.dictionary, order:cohort.order, runId:46113243549,\n        cohort, taggedRecordCount:55, rawReportCount:42, roleCounts,\n        allPrimaryReconciliationChecksPass:true,\n        sourceRecords, packageDiff, comparisons,\n        storageBytes:[...storageBytes][0], lookupSemanticSha256:[...lookupDigests][0],\n        memory:{emittedGatePassed:analysis.memoryPassed,rawScanCount:memoryAudit.rawScanCount,\n            coverage:memory.map((x) => ({name:x.name,arm:x.arm,qualified:x.qualifiedForWholeTreePss,maximumCoveredSampleGapMs:x.maximumCoveredSampleGapMs,failures:x.qualificationFailures,allObservedSampleCount:x.allObservedSampleCount})),\n            qualifiedObservations:memory.filter((x) => x.qualifiedForWholeTreePss).length},\n        limits:\"Read-only reconciliation of emitted primary records. Confidence intervals are preserved from the already audited emitted analysis; bootstrap and raw process-scan replay are not repeated here. The unavailable local artifact audits/selected archives are separately identified.\"\n    };\n}",
+    "checks": [
+      {
+        "key": "jmdict_AB",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      },
+      {
+        "key": "jmdict_BA",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      },
+      {
+        "key": "jitendex_AB",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      },
+      {
+        "key": "jitendex_BA",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      },
+      {
+        "key": "vndb_AB",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      },
+      {
+        "key": "vndb_BA",
+        "pass": false,
+        "error": "Error: raw browser clock agreement"
+      }
+    ],
+    "reason": "The scratch reconstruction initially used nextFrameAtMs; the unchanged authoritative boundary is the post-UI import-complete event at completedAtMs."
+  },
+  "correctedClockReconciliation": {
+    "exactReplacement": {
+      "from": "timing.nextFrameAtMs - timing.startedAtMs",
+      "to": "timing.completedAtMs - timing.startedAtMs"
+    },
+    "authoritativeBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+    "checks": [
+      {
+        "key": "jmdict_AB",
+        "pass": true,
+        "median": -0.16572357123693093,
+        "memory": true
+      },
+      {
+        "key": "jmdict_BA",
+        "pass": true,
+        "median": -0.21205695051211837,
+        "memory": true
+      },
+      {
+        "key": "jitendex_AB",
+        "pass": true,
+        "median": -0.19095474233700171,
+        "memory": true
+      },
+      {
+        "key": "jitendex_BA",
+        "pass": true,
+        "median": 0.34029899896741433,
+        "memory": true
+      },
+      {
+        "key": "vndb_AB",
+        "pass": true,
+        "median": -3.963495532166561,
+        "memory": false
+      },
+      {
+        "key": "vndb_BA",
+        "pass": true,
+        "median": -3.1824394599714534,
+        "memory": true
+      }
+    ]
+  },
+  "exactOriginalSerialization": {
+    "numeric": "Preserve full MANABITAN_QUALIFICATION_JSON tag + one space + original JSON payload, join with newline, append two newlines; all six original SHA-256 values match.",
+    "successor": "Preserve the exact 495 selected tags and original JSON payloads, join with newline, append two newlines; original SHA98b1ec1f… matches."
+  },
+  "hashValidation": {
+    "sha256KnownVectors": [
+      "empty",
+      "abc"
+    ],
+    "publishedCanonicalSha256": "65298eff9b2d1f7afa215c7951ee97630e5d1eb14276e68f620e72303691aa16",
+    "sha1KnownVector": "abc",
+    "publishedCanonicalGitBlob": "6af42f4e52709d93987d321f2a17c1e0decedbeb",
+    "passed": true
+  }
+}
