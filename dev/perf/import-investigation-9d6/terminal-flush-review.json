@@ -1,0 +1,62 @@
+{
+  "recordedAtUtc": "2026-11-28T07:13:41.095436+00:00",
+  "scope": "Bounded read-only source review of terminal record/content/index flush overlap; closed without implementation, profiling, benchmark, resource tuning or durability-contract change.",
+  "status": "No remaining straightforward overlap opportunity; existing store-level and per-shard terminal finalization already run concurrently.",
+  "facts": [
+    {
+      "file": "ext/js/dictionary/dictionary-database.js",
+      "method": "finishBulkImport",
+      "finding": "Starts content and record endImportSession promises before awaiting both with Promise.allSettled. Only after both succeed does it synchronize the virtual table, finish index work and commit publication."
+    },
+    {
+      "file": "ext/js/dictionary/term-record-opfs-store.js",
+      "method": "_closeAllWritables",
+      "finding": "For each shard, _finalizeShardWritable and _flushLookupIndexFile are started together and awaited with Promise.allSettled. The import-index worker is retired afterward."
+    },
+    {
+      "file": "ext/js/dictionary/term-record-import-index-writer.js",
+      "method": "_finish(false)",
+      "finding": "Awaits the writer queue before the final synchronous-access-handle flush and close. This completes the same writer in order."
+    }
+  ],
+  "priorImplementations": [
+    {
+      "commit": "92dd8ea0f5fa96c0daecd32b58911a07d18d91a7",
+      "title": "Settle term-record finalization concurrently",
+      "scope": "Implementation identified in earlier read-only source history; no timing claim"
+    },
+    {
+      "commit": "c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1",
+      "title": "perf: overlap import index persistence in a dedicated worker",
+      "scope": "Implementation identified in earlier read-only source history; no timing claim"
+    }
+  ],
+  "diagnosticContext": {
+    "recordCloseMs": 111.7,
+    "finalizationMs": 127.9,
+    "residualCeilingMsApprox": 16,
+    "source": "Parent supplied ordinary JMdict diagnostic; overlapping phase measurements are context only, not a prospective performance cohort."
+  },
+  "disposition": "Closed. Do not implement or time another terminal-flush overlap study on this evidence.",
+  "sourceIdentities": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytes": 613153,
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-import-index-writer.js",
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytes": 12987,
+      "sha256": "ec650fdf525642cf5340ca1da7a928d65b9a68e770847c3b08b17a2d3a5c1585"
+    }
+  ],
+  "recoveryNote": "Recorded from the completed review after executor restoration. /home/agent had been cleared. This note does not reconstruct or rerun any performance observation."
+}

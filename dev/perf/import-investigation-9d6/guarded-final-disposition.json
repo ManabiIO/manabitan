@@ -1,0 +1,515 @@
+{
+  "finalizedAtUtc": "2026-11-28T07:20:48.533727+00:00",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+  "runId": 46109596112,
+  "attempt": 1,
+  "status": "Closed: no worthwhile replicated qualified complete-import gain; no product PR.",
+  "decision": "Do not promote the guarded SIMD candidate. JMdict AB control drift exceeds the candidate point estimate; JMdict BA is nearly neutral and fails sampling coverage. Both Jitendex intervals include zero. VNDB paired medians are slower on both hosts, with coverage failures. Correctness and lower overlapping compression counters do not establish a full-import gain. All original observations and failures remain included; no replacement cohort.",
+  "counts": {
+    "semanticReceipts": 252,
+    "timedImports": 192,
+    "warmups": 24,
+    "mediaImports": 12,
+    "memoryImports": 24,
+    "rawMemoryScans": 1968,
+    "memoryScreensPassing": 3,
+    "memoryScreensTotal": 6
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "artifactId": 15251554467,
+      "auditSha256": "bdc5be446d9ed694f982506bd1ee84dfb0ac7d31f572527d4b1ec27cf83e044a",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9613244296048737,
+          0.9849806894578745,
+          0.9987271955875785,
+          0.9738065061259297,
+          0.980904522613082,
+          0.9966447644344704,
+          0.9978762565482914,
+          1.0046205544665197,
+          0.9998591945930232,
+          1.0097425191370912,
+          0.9786265857694433,
+          0.9580429137624558
+        ],
+        "medianPairedChangePercent": -0.9187273053827605,
+        "equalWorkChangePercent": -1.2977902490357573,
+        "worstPairChangePercent": 0.9742519137091232,
+        "descriptiveBootstrap95Percent": [
+          -2.3783454052313524,
+          -0.07068049096992102
+        ],
+        "fasterPairs": 10
+      },
+      "medianPairedSavedMs": 6.4500000000116415,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9813422445001071,
+          0.9912255873195424,
+          0.9853085210577868,
+          1.0518465909090908
+        ],
+        "medianPairedChangePercent": -1.1732945811335438,
+        "equalWorkChangePercent": 0.22507473184332216,
+        "worstPairChangePercent": 5.184659090909083,
+        "descriptiveBootstrap95Percent": [
+          -1.8657755499892903,
+          5.184659090909083
+        ],
+        "fasterPairs": 3
+      },
+      "controlMedianPairedSavedMs": 8.35000000000582,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 288,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.7259006896133791,
+            "maximumPairedChangePercent": -0.5836974297520059
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.6976536115839704,
+            "maximumPairedChangePercent": -0.032211954661676145
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [],
+      "semanticFailures": []
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifactId": 15251679069,
+      "auditSha256": "27582d491b8bdee0a760e8c87b5adfbe3a77ac76b99624491b0209340a59ce26",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9610601427115218,
+          0.9708727871551901,
+          1.0013758069636876,
+          0.9948295874221861,
+          1.0428586621290945,
+          1.0422219852862844,
+          0.9911022715377368,
+          1.0036861506055819,
+          0.9646761133603592,
+          1.0087964400289766,
+          1.0065461346633293,
+          0.9929798826487726
+        ],
+        "medianPairedChangePercent": -0.18973028070632392,
+        "equalWorkChangePercent": -0.1913159931475339,
+        "worstPairChangePercent": 4.2858662129094505,
+        "descriptiveBootstrap95Percent": [
+          -1.9012470653536617,
+          0.7671287346152855
+        ],
+        "fasterPairs": 6
+      },
+      "medianPairedSavedMs": 1.8000000000029104,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          1.0077657676566207,
+          0.9898760330578633,
+          1.0258213498478372,
+          1.023196963306684
+        ],
+        "medianPairedChangePercent": 1.5481365481652354,
+        "equalWorkChangePercent": 1.1564625850366106,
+        "worstPairChangePercent": 2.582134984783724,
+        "descriptiveBootstrap95Percent": [
+          -1.0123966942136686,
+          2.582134984783724
+        ],
+        "fasterPairs": 1
+      },
+      "controlMedianPairedSavedMs": -14.700000000026193,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 238,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [
+        {
+          "name": "B1",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 407.646012,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        },
+        {
+          "name": "B2",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 283.053538,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        }
+      ],
+      "semanticFailures": []
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "artifactId": 15252526724,
+      "auditSha256": "6c21370a434f6add57eed1c9bc2467037484d0b6d9b4be833a633b3916b05f5f",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9620787363598212,
+          0.9995648119365796,
+          1.0310625000000073,
+          1.01652547428705,
+          0.9624073631364912,
+          1.0155367231638701,
+          0.9890037255137328,
+          0.9722635557407432,
+          0.9594498878527002,
+          1.0004331147134968,
+          0.9766881028938484,
+          0.9266764506661161
+        ],
+        "medianPairedChangePercent": -1.7154085796209362,
+        "equalWorkChangePercent": -1.6305905422731137,
+        "worstPairChangePercent": 3.106250000000732,
+        "descriptiveBootstrap95Percent": [
+          -3.775695025184378,
+          0.7984918938683361
+        ],
+        "fasterPairs": 8
+      },
+      "medianPairedSavedMs": 28.000000000058208,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9938014066038722,
+          1.0317411591356043,
+          1.0091170531725548,
+          0.9964607078584842
+        ],
+        "medianPairedChangePercent": 0.27888805155193985,
+        "equalWorkChangePercent": 0.7612100667390154,
+        "worstPairChangePercent": 3.174115913560427,
+        "descriptiveBootstrap95Percent": [
+          -0.6198593396127827,
+          3.174115913560427
+        ],
+        "fasterPairs": 2
+      },
+      "controlMedianPairedSavedMs": -4.5,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 262,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.9736613298259256,
+            "maximumPairedChangePercent": 2.012522145000295
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.331263086730361,
+            "maximumPairedChangePercent": 2.5695720013430456
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [],
+      "semanticFailures": []
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "artifactId": 15252207958,
+      "auditSha256": "0714e6aa7f324e506e8b421af0cc167fb8082c93b1671de427bcffb812f68d87",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          1.0192518787469786,
+          0.9641130058538677,
+          1.0069683485853316,
+          1.0048060708263167,
+          0.9767558528428191,
+          1.0056779661017048,
+          0.9882510909701728,
+          0.992158868149703,
+          0.9952979396426435,
+          1.004609868533399,
+          0.9907139205998402,
+          0.9868197278911565
+        ],
+        "medianPairedChangePercent": -0.6271596103826771,
+        "equalWorkChangePercent": -0.5383893479332769,
+        "worstPairChangePercent": 1.9251878746978646,
+        "descriptiveBootstrap95Percent": [
+          -1.2464590569335354,
+          0.5242018464010734
+        ],
+        "fasterPairs": 7
+      },
+      "medianPairedSavedMs": 7.349999999976717,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9877558010103706,
+          1.0064912880082295,
+          0.9995812746001173,
+          1.0172621092407903
+        ],
+        "medianPairedChangePercent": 0.3036281304173327,
+        "equalWorkChangePercent": 0.2746316954786554,
+        "worstPairChangePercent": 1.7262109240790302,
+        "descriptiveBootstrap95Percent": [
+          -1.2244198989629362,
+          1.7262109240790302
+        ],
+        "fasterPairs": 2
+      },
+      "controlMedianPairedSavedMs": -3.5500000000174623,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 313,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.6280725075883509,
+            "maximumPairedChangePercent": 1.012236748387707
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.8621471556818305,
+            "maximumPairedChangePercent": 1.8161722973982108
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [],
+      "semanticFailures": []
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifactId": 15252367104,
+      "auditSha256": "479dd6f6e53f670568a74bbd6d448ebaf722ad4ae776fc52fbd5a5bc4742d96a",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.9958640488528747,
+          1.0096736968744542,
+          1.0135868903552672,
+          0.9802324495892429,
+          1.0101528877475834,
+          1.0294054773045744,
+          0.9862949427104056,
+          0.9930598434142665,
+          1.018454554426144,
+          1.0190922712552282,
+          1.0277962266007425,
+          0.9909894757076266
+        ],
+        "medianPairedChangePercent": 0.9913292311018784,
+        "equalWorkChangePercent": 0.6174846941763734,
+        "worstPairChangePercent": 2.9405477304574434,
+        "descriptiveBootstrap95Percent": [
+          -0.7975340439053458,
+          1.877341284068601
+        ],
+        "fasterPairs": 5
+      },
+      "medianPairedSavedMs": -41.04999999998836,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9623707820189823,
+          0.982749026154705,
+          1.005145923693303,
+          0.9901261261261317
+        ],
+        "medianPairedChangePercent": -1.3562423859581618,
+        "equalWorkChangePercent": -1.5111410558734328,
+        "worstPairChangePercent": 0.5145923693302912,
+        "descriptiveBootstrap95Percent": [
+          -3.7629217981017704,
+          0.5145923693302912
+        ],
+        "fasterPairs": 3
+      },
+      "controlMedianPairedSavedMs": 56.19999999998254,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 475,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [
+        {
+          "name": "B1",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 277.90287,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        }
+      ],
+      "semanticFailures": []
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "artifactId": 15252558708,
+      "auditSha256": "a65af7f19ba0c91017306755e33662703f0aecb0a7bdc796e14daf49436e20d4",
+      "observationsValidated": 42,
+      "candidateVsBaseline": {
+        "count": 12,
+        "ratios": [
+          0.979520521479098,
+          1.0011847748093474,
+          1.0314167261358556,
+          1.0098409389896013,
+          0.9829756226814974,
+          0.976036866359447,
+          0.986272719727786,
+          1.005287310454916,
+          1.0195059842118508,
+          1.008997299122203,
+          1.0036103542234254,
+          0.9862419996976418
+        ],
+        "medianPairedChangePercent": 0.23975645163862858,
+        "equalWorkChangePercent": -0.08617343700310087,
+        "worstPairChangePercent": 3.1416726135855555,
+        "descriptiveBootstrap95Percent": [
+          -1.5391188810430334,
+          0.9419119055902092
+        ],
+        "fasterPairs": 5
+      },
+      "medianPairedSavedMs": -14.149999999965075,
+      "identicalCodeControl": {
+        "count": 4,
+        "ratios": [
+          0.9938761168557315,
+          0.9844666031968732,
+          0.98607275176828,
+          1.0215957428488023
+        ],
+        "medianPairedChangePercent": -1.0025565687994176,
+        "equalWorkChangePercent": -0.3665367549048004,
+        "worstPairChangePercent": 2.159574284880228,
+        "descriptiveBootstrap95Percent": [
+          -1.553339680312682,
+          2.159574284880228
+        ],
+        "fasterPairs": 3
+      },
+      "controlMedianPairedSavedMs": 59.64999999999418,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 392,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "unqualifiedMemoryObservations": [
+        {
+          "name": "B1",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 260.657945,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        },
+        {
+          "name": "A1",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 271.681417,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        },
+        {
+          "name": "A2",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 265.135504,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        },
+        {
+          "name": "B2",
+          "benchmarkExitCode": 0,
+          "maximumCoveredSampleGapMs": 252.967237,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ]
+        }
+      ],
+      "semanticFailures": []
+    }
+  ],
+  "recovery": "Exact original immutable ZIPs and failed-job logs reacquired. Only offline audits and diagnostic arithmetic rerun; no imports, builds, native proofs or timing repeated."
+}

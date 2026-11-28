@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "receipt": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/guarded-final-archive-review.json",
+  "sha256": "6649a351d8c9664c2fda135f6ae2328e2a178dce8ab7f10bf2d3673f95bcad33",
+  "totals": {
+    "members": 2004,
+    "rawBytes": 154032081,
+    "archiveBytes": 2707812,
+    "canonicalReceipts": 252,
+    "timedImports": 192,
+    "warmups": 24,
+    "mediaImports": 12,
+    "memoryImports": 24,
+    "rawMemoryScans": 1968,
+    "coverageFailures": 7,
+    "failedJobRecords": 3
+  },
+  "publicationFilesVerified": 13,
+  "archivesModified": false
+}

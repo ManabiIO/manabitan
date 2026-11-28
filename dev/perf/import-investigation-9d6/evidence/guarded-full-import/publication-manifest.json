@@ -1,0 +1,109 @@
+{
+  "status": "Frozen evidence-only record for parent publication; no product promotion implied.",
+  "files": [
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/README.md",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/README.md",
+      "encoding": "utf-8",
+      "bytes": 5473,
+      "sha256": "5b61b925333ad3bdacbba25e04804f4b2c171667950fe33d7faddf0bc284d4ff",
+      "gitBlobSha1": "e4a5a9194be35dbddb7a3476ee92bb5dd906ea6a"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/jitendex-AB.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jitendex-AB.tar.xz",
+      "encoding": "base64",
+      "bytes": 401312,
+      "sha256": "84d7bd76152103c4bbb98cfcae38993058daeac16388d8d081dea8c1293c9100",
+      "gitBlobSha1": "b469b56477f0ded7ea21732bcef29b45370ddbd6"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/jitendex-BA.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jitendex-BA.tar.xz",
+      "encoding": "base64",
+      "bytes": 398488,
+      "sha256": "c701da5a85fbc8cee992867bd33c627477278b31a2f4171b100e5f3629f8bd86",
+      "gitBlobSha1": "12945e5dd97a0cae53dce074eb7d5382f7ddb961"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/jmdict-AB.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jmdict-AB.tar.xz",
+      "encoding": "base64",
+      "bytes": 392112,
+      "sha256": "c27d3c595310c78332e348621c4d4a73e286c7ca221e1f2501844d7a87e08b1a",
+      "gitBlobSha1": "42cbe219fbc29782d111db217b8c8e8c39953725"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/jmdict-BA.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jmdict-BA.tar.xz",
+      "encoding": "base64",
+      "bytes": 404048,
+      "sha256": "f74d434304d625926f7ae3e5592a6a613a8f9d175bf88faefc8ef500cdf9bcc0",
+      "gitBlobSha1": "12f193f7f418c1fa818c585bf3c7d535ac554784"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/native-checks-and-tools.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/native-checks-and-tools.tar.xz",
+      "encoding": "base64",
+      "bytes": 249292,
+      "sha256": "27f43f37c7fb6b4a81642dc5099e982bd3f730f8abb508a94b026c5cdae93bf8",
+      "gitBlobSha1": "0d93dacd3bc2668023887c7e7c7dde0473ca15f4"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/vndb-AB.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/vndb-AB.tar.xz",
+      "encoding": "base64",
+      "bytes": 432100,
+      "sha256": "bad9a0e1a6de2fb8c90ae2219f7498ad840e097e6142d95e2e1db2fa8e8e1bad",
+      "gitBlobSha1": "bec9d0051cdf9657bf0176aace5b3372dc7d2908"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/archives/vndb-BA.tar.xz",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/vndb-BA.tar.xz",
+      "encoding": "base64",
+      "bytes": 430460,
+      "sha256": "e85669d3d91746c559691cfaf991714cda66d0b381bd2bcb9b7c0450f0d75d5e",
+      "gitBlobSha1": "57d0922724e29c3cdf1163b86cd6e2af82ea39d1"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/inventory.json",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/inventory.json",
+      "encoding": "utf-8",
+      "bytes": 1311813,
+      "sha256": "effb56be7448ed315b8b6c4db8ae5551032666afee2086780edc7e74cc0d9bc4",
+      "gitBlobSha1": "349e84b1d7c69e9d0316aff52ee7a6177555d61f"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/layout.json",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/layout.json",
+      "encoding": "utf-8",
+      "bytes": 19466,
+      "sha256": "efb74076b76ef7c0f57de2a13795215dd5b7fdf8d4afe4132a1661fa40ad57a8",
+      "gitBlobSha1": "d8ff9f80299d181d7782e33f786b1c74a06f5430"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/materialize.py",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/materialize.py",
+      "encoding": "utf-8",
+      "bytes": 38570,
+      "sha256": "840aef67289b10d77cbafedd6112666504c7bb3ae7e86a12e1d7490f73380aaf",
+      "gitBlobSha1": "8aaa8fdbc037a80cb5da30e62992e2289209b8e8"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/publication-receipt.json",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/publication-receipt.json",
+      "encoding": "utf-8",
+      "bytes": 13512,
+      "sha256": "c1f4005b56e984a9308acff4e0d2d3c3152898be3cef88da1f3c8f8850370e55",
+      "gitBlobSha1": "4325d67a73e972e6aace2c32e19b37e9d8404763"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-full-import/release.json",
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/release.json",
+      "encoding": "utf-8",
+      "bytes": 4545,
+      "sha256": "01bc7a775e958608491326cbb967531c319ea66bf8b047f70e6872dc3c6b6785",
+      "gitBlobSha1": "666d864782167f11f51d0065ee2633adb7aabfa8"
+    }
+  ]
+}

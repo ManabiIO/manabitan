@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-11-28T04:51:10.380811+00:00",
+  "scope": [
+    "source-cache helper",
+    "guarded Zstd SIMD16",
+    "libdeflate SIMD copy"
+  ],
+  "userPriority": "JMdict is especially important; Jitendex and VNDB must also remain qualified.",
+  "performanceEvidence": "Evaluate complete imports separately on each independent host and order, including all prescribed observations and failures. Preserve paired median, equal-work ratio, faster-pair count, bootstrap interval, absolute milliseconds, and identical-code controls. Never transfer timings between binary identities.",
+  "promoteWhen": "A replicated practical improvement is distinguishable from identical-code drift, with an understandable mechanism and all correctness, reproducibility, package, and memory checks passing. A small component improvement alone does not establish a worthwhile full-import PR.",
+  "inconclusiveWhen": "Opposite host directions, intervals spanning material gains and regressions, or control drift comparable to the effect do not justify claiming a full-import gain. Retain results and close the unchanged candidate rather than repeating the cohort until it passes.",
+  "resourcePolicy": "No threshold, worker-count, batch-size, compression-level, or dictionary-policy tuning. No spending package/storage/memory freely for a minor latency result.",
+  "duplicatePolicy": "Check current develop, product branches, open PRs, and active full-import cohorts before publication. Keep equivalent ongoing work in one review path."
+}

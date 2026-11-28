@@ -1,0 +1,104 @@
+{
+  "packagingReleased": true,
+  "finalizedAt": "2026-11-28T07:22:24.411509+00:00",
+  "runId": 46109596112,
+  "attempt": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+  "tooling": "8936a15e8a8a2cf53cb10849181a6268c656a7bf",
+  "approvedMaterializerSha256": "840aef67289b10d77cbafedd6112666504c7bb3ae7e86a12e1d7490f73380aaf",
+  "approvedLayoutSha256": "efb74076b76ef7c0f57de2a13795215dd5b7fdf8d4afe4132a1661fa40ad57a8",
+  "approvedPlanSha256": "9e92c0f2e855ddb5319aa43ad86291b72da536ace25fc60e797e16c498969540",
+  "independentInputReviewSha256": "f2a83722fd59ebf8300f820076e369b501f34a34c63b3f5f2f930de41947fe40",
+  "disposition": {
+    "status": "Closed: no worthwhile replicated qualified complete-import gain; no product PR.",
+    "decision": "Do not promote the guarded SIMD candidate. JMdict AB control drift exceeds the candidate point estimate; JMdict BA is nearly neutral and fails sampling coverage. Both Jitendex intervals include zero. VNDB paired medians are slower on both hosts, with coverage failures. Correctness and lower overlapping compression counters do not establish a full-import gain. All original observations and failures remain included; no replacement cohort.",
+    "counts": {
+      "semanticReceipts": 252,
+      "timedImports": 192,
+      "warmups": 24,
+      "mediaImports": 12,
+      "memoryImports": 24,
+      "rawMemoryScans": 1968,
+      "memoryScreensPassing": 3,
+      "memoryScreensTotal": 6
+    }
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "artifactId": 15251554467,
+      "audit": "root-audit.json",
+      "auditSha256": "bdc5be446d9ed694f982506bd1ee84dfb0ac7d31f572527d4b1ec27cf83e044a"
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifactId": 15251679069,
+      "audit": "root-audit.json",
+      "auditSha256": "27582d491b8bdee0a760e8c87b5adfbe3a77ac76b99624491b0209340a59ce26"
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "artifactId": 15252526724,
+      "audit": "root-audit.json",
+      "auditSha256": "6c21370a434f6add57eed1c9bc2467037484d0b6d9b4be833a633b3916b05f5f"
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "artifactId": 15252207958,
+      "audit": "root-audit.json",
+      "auditSha256": "0714e6aa7f324e506e8b421af0cc167fb8082c93b1671de427bcffb812f68d87"
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifactId": 15252367104,
+      "audit": "root-audit.json",
+      "auditSha256": "479dd6f6e53f670568a74bbd6d448ebaf722ad4ae776fc52fbd5a5bc4742d96a"
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "artifactId": 15252558708,
+      "audit": "root-audit.json",
+      "auditSha256": "a65af7f19ba0c91017306755e33662703f0aecb0a7bdc796e14daf49436e20d4"
+    }
+  ],
+  "additionalSupportFiles": [
+    {
+      "sourcePath": "/home/agent/manabitan-guarded-hosted-9d6/jmdict-review.json",
+      "archivePath": "analysis/jmdict-independent-review.json",
+      "bytes": 14690,
+      "sha256": "56b0d018a7cb28c423b025bbdcd037c0856a47d47c0e68678be41fc6f3cb23c3"
+    },
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/benchmark-setup/guarded-final-disposition.json",
+      "archivePath": "analysis/root-final-disposition.json",
+      "bytes": 16586,
+      "sha256": "487885702336fe8a0fe5dc99bb8022826c3b2e8657422158c8831126d9ef97f7"
+    },
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/guarded-recovery-layout-review.json",
+      "archivePath": "review/recovered-layout-review.json",
+      "bytes": 19645,
+      "sha256": "f2a83722fd59ebf8300f820076e369b501f34a34c63b3f5f2f930de41947fe40"
+    },
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/guarded-recovery-layout-review.py",
+      "archivePath": "review/recovered-layout-review.py",
+      "bytes": 13341,
+      "sha256": "74eddc34b1816eda20a035bcb463fac4d3b23e838cf7340b12e0a5b3a9d43b79"
+    },
+    {
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/guarded-recovery-layout-review.log",
+      "archivePath": "review/recovered-layout-review.log",
+      "bytes": 306,
+      "sha256": "6af97bf6982a37139f38fb9322fe6215c0f7ee8b9463bf59bdf4cd5930a0de5f"
+    }
+  ],
+  "scope": "Evidence-only deterministic archival release. Original frozen hosted artifacts only. No benchmark, native rebuild, threshold change, product promotion, merge or external publication authorized by this file."
+}

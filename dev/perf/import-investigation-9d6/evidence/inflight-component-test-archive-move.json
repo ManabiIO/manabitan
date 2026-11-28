@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "preparedAtUtc": "2026-11-28T07:25:54.592423+00:00",
+  "status": "Prepared for root publication; no remote mutation or repository file move performed by this preparation.",
+  "repository": "ManabiIO/manabitan",
+  "sourceEvidenceCommit": "45f4f6112e30941f15ae9c95c4acd5f186ab7689",
+  "sourceEvidenceTree": "32699b6e3b13bc34abcd89905cffe4aba825ed00",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "oldPath": "test/dictionary-content-inflight-range.test.js",
+  "oldGitBlobSha1": "b2e5756d154b6db38ff3403d1ed4840fae97185b",
+  "oldMode": "100644",
+  "newPath": "dev/perf/import-investigation-9d6/evidence/inflight-component-test-source.txt",
+  "newGitBlobSha1": "b2e5756d154b6db38ff3403d1ed4840fae97185b",
+  "localSnapshot": "/workspace/scratch/9d6dcf05cf8f/benchmark-setup/inflight-component-test-source.txt",
+  "bytes": 16859,
+  "sha256": "d78d8c0dff4e6fa0ab9c7cf80a81b4c38c7bdb1031574f5ee2c0f5b73acffcf8",
+  "exactOriginalBytesPreserved": true,
+  "wasPresentInBaseline": false,
+  "testAdditionsBeforeMove": [
+    "test/dictionary-content-inflight-range.test.js"
+  ],
+  "remainingTestAdditionsAfterProposedMove": [],
+  "staticCaveat": {
+    "test": {
+      "path": "test/dictionary-content-inflight-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b2e5756d154b6db38ff3403d1ed4840fae97185b",
+      "sha256": "d78d8c0dff4e6fa0ab9c7cf80a81b4c38c7bdb1031574f5ee2c0f5b73acffcf8"
+    },
+    "runtime": {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    },
+    "calledMethod": "_createTermContentSourceSpans",
+    "methodNamePresentInBaselineRuntime": false
+  },
+  "reason": "This experiment-specific unit test calls _createTermContentSourceSpans, which is absent from the unchanged baseline DictionaryDatabase. Retain the exact source as a .txt evidence snapshot outside test discovery instead of leaving candidate-only test coverage active on the evidence branch.",
+  "proposedTreeEntries": [
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflight-component-test-source.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2e5756d154b6db38ff3403d1ed4840fae97185b"
+    },
+    {
+      "path": "test/dictionary-content-inflight-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": null
+    }
+  ],
+  "scopeReceipt": {
+    "path": "/workspace/scratch/9d6dcf05cf8f/benchmark-setup/evidence-runtime-scope-45f4f611.json",
+    "sha256": "8eb2c7cbd1a3a3160cb11e9bd0cf869abf841168e00a78b36160161e059158be"
+  },
+  "validation": "Verified the exact Git source blob and UTF-8 round trip, baseline absence, byte-preserving snapshot, and no other added test path. No test, build, import or timing was run."
+}

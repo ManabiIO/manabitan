@@ -1,0 +1,141 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceBranch": "perf/import-components-9d6-20261128",
+  "profileRun": 46102565844,
+  "currentFullImportCandidate": {
+    "commit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+    "run": 46109596112,
+    "status": "Closed without PR",
+    "reason": "Do not promote the guarded SIMD candidate. JMdict AB control drift exceeds the candidate point estimate; JMdict BA is nearly neutral and fails sampling coverage. Both Jitendex intervals include zero. VNDB paired medians are slower on both hosts, with coverage failures. Correctness and lower overlapping compression counters do not establish a full-import gain. All original observations and failures remain included; no replacement cohort.",
+    "evidence": "evidence/guarded-full-import/README.md",
+    "decisionRecord": "guarded-final-disposition.json"
+  },
+  "experiments": [
+    {
+      "name": "Private in-flight span admission",
+      "status": "Closed after independent audit of overlapping external complete-import cohort; no own PR",
+      "evidence": "benchmark-setup",
+      "run": 46103338197,
+      "note": "Own component showed approximately 3\u20134 ms cold savings, but the equivalent external b4d candidate is now fully audited across six cells without replicated complete-import gain. All 282 report semantics and 2,098 memory scans reproduced. Both VNDB hosts fail the unchanged memory sampler coverage gate, not a measured-growth comparison. No replacement cohort.",
+      "externalCandidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+      "externalFullImportRun": 46104891607,
+      "publishedAuditCommit": "8e0859da46242f24937935e9cffac3aa6ac3f9cf"
+    },
+    {
+      "name": "Source-cache range helper",
+      "status": "Closed: no replicated practical complete-import gain on any dictionary; no PR",
+      "run": 46104605338,
+      "note": "Six complete cells: JMdict AB -0.5017% / BA +0.3154%; Jitendex AB -0.0214% / BA -0.0359%; VNDB AB -0.8447% / BA +0.9324%. All candidate intervals include zero. All 252 report semantics pass, and 1,924 raw memory scans reproduce. Five memory screens pass. VNDB BA fails coverage in all four observations (259.371315, 266.956994, 272.787439, 267.570606 ms versus fixed 250 ms); maxima and pair deltas remain null. No exclusions, control subtraction, threshold change, or replacement cohort.",
+      "fullImportRun": 46107460816,
+      "fullImportCandidate": "dfd2523b514f291dc57f39a9f256bbc0759efd5b",
+      "publishedEvidenceCommit": "3a0c150a45038f6cb0797e3be84e9f940882bff4"
+    },
+    {
+      "name": "Zstd count8ctz/count8unroll",
+      "status": "Closed: inconsistent cold performance and subsequently identified bounds defect; no rerun or PR",
+      "run": 46103338197,
+      "note": "Warm component improved approximately 2\u20134 ms, but cold gain was inconsistent across hosts and both binaries grew. These old unsigned-length specializations also lack the reversed-limit guard. Their timings cannot qualify a production candidate."
+    },
+    {
+      "name": "Zstd SIMD16/CStream64",
+      "status": "Closed: old SIMD16 invalid; corrected guarded variant has no worthwhile replicated qualified complete-import gain. CStream64 closed.",
+      "run": 46104781415,
+      "note": "Old SIMD16 had 768 traps and one wrong result on reversed input limits; old timings and the old size reduction were rejected. Guarded 13890c7e\u2026 is 433,757 bytes (+126), reproduces exactly and passes all native correctness checks. Corrected six-host full imports show JMdict -0.9187%/-0.1897%, Jitendex -1.7154%/-0.6272%, VNDB +0.9913%/+0.2398%. Five intervals include zero; JMdict AB identical-code control improves more than the candidate. All 252 report semantics pass. Three memory screens fail coverage; qualified maxima remain unavailable. No product PR. CStream64 retained 72 tight-capacity status regressions.",
+      "evidence": "compression-probe/hosted-results/v2/analysis-{AB,BA}.json",
+      "guardedWasmSha256": "13890c7e75e7a2ff5fa00bd65f1e518e15f545da85154719be6a2eaa2a773a22",
+      "guardedEvidence": "evidence/guarded-full-import/README.md",
+      "externalBoundaryFinding": "ede7e7a6b92e2c752ac631a503231a5a8aa62d3e",
+      "guardedProductCommit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+      "guardedQualificationRun": 46109596112,
+      "guardedLocalDiagnostic": {
+        "planSha256": "4dab9c657ec2ca96ea92f239d50f1bbc30995842dd3e4b3e8fc46f09f05985fc",
+        "status": "Closed inconclusive. Exact 19 children and 65 archived members independently verified, with every control and cold tail retained; no follow-up.",
+        "evidence": "evidence/guarded-local/README.md",
+        "publishedCommit": "45f4f6112e30941f15ae9c95c4acd5f186ab7689"
+      },
+      "guardedDecision": "guarded-final-disposition.json"
+    },
+    {
+      "name": "Libdeflate 40-byte SIMD copy",
+      "status": "Closed after isolated replication; no full-import cohort or PR",
+      "run": 46106878218,
+      "note": "Both isolated hosts pass all 36 children, 270 corpus passes, exact native/source/input identity, and focused correctness checks. AB cold saves about 1.4\u20131.6 ms, but BA loses 4.75 ms versus A and is tied with C. Warm savings remain about 1 ms. Cold gains do not replicate, and the retained local cold cohort also loses. This does not justify promotion.",
+      "hostedEvidence": "metadata-experiments/builds/perf/inflater-hosted-9d6"
+    },
+    {
+      "name": "Direct record reference lengths",
+      "status": "Closed negative; runtime reverted",
+      "evidence": "metadata-experiments/builds/perf/record-length/screen-v1/report.json",
+      "note": "108 fresh children across all three actual parsed dictionaries. No stable JMdict or VNDB gain against both controls; Jitendex warm gain is only about 0.24 ms."
+    },
+    {
+      "name": "Compact score validation indexed loop",
+      "status": "Duplicate; own qualification stopped",
+      "evidence": "score-validation/disposition.json",
+      "note": "Exact accepted #944 optimization is already being restored/qualified by f21bda709a5b3374f4d5175f8234c94439936040. No duplicate PR."
+    },
+    {
+      "name": "Short consecutive publication runs",
+      "status": "Closed by actual reach before implementation",
+      "evidence": "compression-probe/publication-census/reach-01/report.json",
+      "note": "Only 2,317 pending rows (0.64%) occur in length 2\u20138 runs, creating 938 subarray allocations. Insufficient absolute ceiling."
+    },
+    {
+      "name": "Native reference-slab emission",
+      "status": "Held without implementation",
+      "evidence": "metadata-experiments/builds/perf/inflater-simd/reference-slab-disposition.json",
+      "note": "JMdict current ordinary reference creation is 5.8 ms. A native ABI/export, DB-store callback, and additional input/output copies would be required. Complexity is not justified."
+    },
+    {
+      "name": "Raw ZIP owned copy substitution",
+      "status": "Duplicate prior experiment; not rerun",
+      "evidence": "benchmark-setup/rawzip-prior/chromium/disposition.json",
+      "run": 44600487162,
+      "note": "The exact mechanism was already studied November 19 on Chromium 153 with a different older fixture. No current performance claim."
+    },
+    {
+      "name": "Inline large XXH32 rounds",
+      "status": "Duplicate screened mechanism; own cohort stopped",
+      "evidence": "inflight-experiments/builds/perf/hash-inline",
+      "note": "Own 151 vectors pass. Exact external study 99c6e321c6690443cd928311f83f93bb9414670e already shows less than 1 ms cold component gain and unreliable warm results. No new timing."
+    },
+    {
+      "name": "UI/offscreen sampled startup hotspots",
+      "status": "Rejected trace artifacts",
+      "evidence": "benchmark-setup/profiles-current/jmdict/startup-attribution.json",
+      "note": "The 72 ms message handler and 126 ms selector observer are largely V8 API interrupt work creating profiles. The selector observer occurs before the file-input change."
+    },
+    {
+      "name": "Compression message batching",
+      "status": "Rejected as insufficient CPU opportunity",
+      "evidence": "compression-probe/postmessage-dispatch-gaps.json",
+      "note": "103 dispatches in 12 batches: 91 adjacent gaps total 29.77 ms wall time but only 3.51 ms thread CPU. This does not justify a 40\u201350 ms serialization claim."
+    },
+    {
+      "name": "Synchronous record-run validation extraction",
+      "status": "Held without implementation; overlapping active experiment",
+      "evidence": "benchmark-setup/profiles-current/jmdict/run-validation-extraction-disposition.json",
+      "note": "JMdict ordinary record validation is 27.6 ms. Existing profile suggests an early synchronous loop inside an async function; no direct cold-JIT cause is established. Seven relevant branches checked. aa2473f4 fused-record-fields bypasses this work on its whole-chunk route, so a competing cohort was not started."
+    },
+    {
+      "name": "Final remaining-critical-path source review",
+      "status": "Closed without implementation or new timing",
+      "evidence": "metadata-experiments/builds/perf/jmdict-bounded-review-9d6.json",
+      "evidenceSha256": "0644136ea720ed443cb21c72438fce8a83f4c41ce1f380da7e66633457329720",
+      "note": "Apparent volatile progress/config reload redundancies match a0ab82c90e and19b13a550d; new external #975 also covers canonical slot tags. Parser owned copies permit heap reuse and sink overlap; final record-store flush persists queued index header/tail and propagates durability failures. No distinct material redundant operation found. Diagnostic counters overlap and are not predicted savings."
+    },
+    {
+      "name": "Terminal flush overlap",
+      "status": "Closed source review; no implementation or new timing",
+      "evidence": "terminal-flush-review.json",
+      "evidenceSha256": "cd8db6a00f03b4681dc314d6bb6c427462d4a40b5ccf249ca738ed59c348f7d6",
+      "note": "Content and record endImportSession already start together. Per-shard close and lookup-index persistence already overlap. Index-writer finish awaits admitted writes, then flushes and closes in order. No straightforward unexploited terminal overlap was found.",
+      "priorImplementations": [
+        "92dd8ea0f5fa96c0daecd32b58911a07d18d91a7",
+        "c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1"
+      ]
+    }
+  ],
+  "finalizedAtUtc": "2026-11-28T07:20:48.533727+00:00",
+  "status": "Completed after several hours of experiments. No worthwhile replicated qualified import gain; no product PR and no merge."
+}

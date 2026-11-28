@@ -1,0 +1,303 @@
+{
+  "complete": true,
+  "finalizedAt": "2026-11-28T07:22:24.411509+00:00",
+  "runId": 46109596112,
+  "attempt": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+  "tooling": "8936a15e8a8a2cf53cb10849181a6268c656a7bf",
+  "disposition": {
+    "status": "Closed: no worthwhile replicated qualified complete-import gain; no product PR.",
+    "decision": "Do not promote the guarded SIMD candidate. JMdict AB control drift exceeds the candidate point estimate; JMdict BA is nearly neutral and fails sampling coverage. Both Jitendex intervals include zero. VNDB paired medians are slower on both hosts, with coverage failures. Correctness and lower overlapping compression counters do not establish a full-import gain. All original observations and failures remain included; no replacement cohort.",
+    "counts": {
+      "semanticReceipts": 252,
+      "timedImports": 192,
+      "warmups": 24,
+      "mediaImports": 12,
+      "memoryImports": 24,
+      "rawMemoryScans": 1968,
+      "memoryScreensPassing": 3,
+      "memoryScreensTotal": 6
+    }
+  },
+  "inventorySha256": "effb56be7448ed315b8b6c4db8ae5551032666afee2086780edc7e74cc0d9bc4",
+  "materializerSha256": "840aef67289b10d77cbafedd6112666504c7bb3ae7e86a12e1d7490f73380aaf",
+  "sourceEntriesVerified": 2004,
+  "totalArchiveBytes": 2707812,
+  "canonicalReceiptsValidated": 252,
+  "authoritativeTimedImports": 192,
+  "ordinaryWarmups": 24,
+  "exhaustiveMediaImports": 12,
+  "separateMemoryImports": 24,
+  "rawMemoryScansValidated": 1968,
+  "archives": [
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jmdict-AB.tar.xz",
+      "name": "jmdict-AB.tar.xz",
+      "bytes": 392112,
+      "sha256": "c27d3c595310c78332e348621c4d4a73e286c7ca221e1f2501844d7a87e08b1a",
+      "files": 319,
+      "uncompressedBytes": 23650696
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jmdict-BA.tar.xz",
+      "name": "jmdict-BA.tar.xz",
+      "bytes": 404048,
+      "sha256": "f74d434304d625926f7ae3e5592a6a613a8f9d175bf88faefc8ef500cdf9bcc0",
+      "files": 321,
+      "uncompressedBytes": 22039426
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jitendex-AB.tar.xz",
+      "name": "jitendex-AB.tar.xz",
+      "bytes": 401312,
+      "sha256": "84d7bd76152103c4bbb98cfcae38993058daeac16388d8d081dea8c1293c9100",
+      "files": 319,
+      "uncompressedBytes": 22932482
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/jitendex-BA.tar.xz",
+      "name": "jitendex-BA.tar.xz",
+      "bytes": 398488,
+      "sha256": "c701da5a85fbc8cee992867bd33c627477278b31a2f4171b100e5f3629f8bd86",
+      "files": 319,
+      "uncompressedBytes": 24815534
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/vndb-AB.tar.xz",
+      "name": "vndb-AB.tar.xz",
+      "bytes": 432100,
+      "sha256": "bad9a0e1a6de2fb8c90ae2219f7498ad840e097e6142d95e2e1db2fa8e8e1bad",
+      "files": 321,
+      "uncompressedBytes": 30749712
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/vndb-BA.tar.xz",
+      "name": "vndb-BA.tar.xz",
+      "bytes": 430460,
+      "sha256": "e85669d3d91746c559691cfaf991714cda66d0b381bd2bcb9b7c0450f0d75d5e",
+      "files": 321,
+      "uncompressedBytes": 27445811
+    },
+    {
+      "localPath": "/home/agent/manabitan-guarded-hosted-9d6/recovery-packaging/completed/archives/native-checks-and-tools.tar.xz",
+      "name": "native-checks-and-tools.tar.xz",
+      "bytes": 249292,
+      "sha256": "27f43f37c7fb6b4a81642dc5099e982bd3f730f8abb508a94b026c5cdae93bf8",
+      "files": 84,
+      "uncompressedBytes": 2398420
+    }
+  ],
+  "originalArtifacts": [
+    {
+      "artifact": {
+        "id": 15251383941,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MTM4Mzk0MQ==",
+        "name": "count16-native-9d6-46109596112-1",
+        "size_in_bytes": 261265,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251383941",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251383941/zip",
+        "expired": false,
+        "digest": "sha256:59b66eb6490e48cf4c1f10c53fb94a9e153cb6d2da1ace5d1548c34ff7d3a1a1",
+        "created_at": "2026-11-28T06:26:05Z",
+        "updated_at": "2026-11-28T06:26:05Z",
+        "expires_at": "2026-12-12T06:26:04Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 261265,
+      "zipSha256": "59b66eb6490e48cf4c1f10c53fb94a9e153cb6d2da1ace5d1548c34ff7d3a1a1"
+    },
+    {
+      "artifact": {
+        "id": 15251866511,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MTg2NjUxMQ==",
+        "name": "count16-checks-9d6-46109596112-1",
+        "size_in_bytes": 43206,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251866511",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251866511/zip",
+        "expired": false,
+        "digest": "sha256:05d979aea4cf810540112c8cc25db78da2f53693ae79d5ff65f79f50acf45bc3",
+        "created_at": "2026-11-28T06:26:19Z",
+        "updated_at": "2026-11-28T06:26:19Z",
+        "expires_at": "2026-12-12T06:26:19Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 43206,
+      "zipSha256": "05d979aea4cf810540112c8cc25db78da2f53693ae79d5ff65f79f50acf45bc3"
+    },
+    {
+      "artifact": {
+        "id": 15251554467,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MTU1NDQ2Nw==",
+        "name": "import-count16-9d6-jmdict-AB-46109596112-1",
+        "size_in_bytes": 35567966,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251554467",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251554467/zip",
+        "expired": false,
+        "digest": "sha256:4c8294fd0a9214156b9ec1a0f382cd146379c7768ce78d3419fdd192c8e045b5",
+        "created_at": "2026-11-28T06:32:58Z",
+        "updated_at": "2026-11-28T06:32:58Z",
+        "expires_at": "2026-12-12T06:32:55Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35567966,
+      "zipSha256": "4c8294fd0a9214156b9ec1a0f382cd146379c7768ce78d3419fdd192c8e045b5"
+    },
+    {
+      "artifact": {
+        "id": 15251679069,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MTY3OTA2OQ==",
+        "name": "import-count16-9d6-jmdict-BA-46109596112-1",
+        "size_in_bytes": 35533808,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251679069",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251679069/zip",
+        "expired": false,
+        "digest": "sha256:7c7d07c22a45aee879af6ba19400d160b6b482bc5901a6c1eb9229d170127f60",
+        "created_at": "2026-11-28T06:30:12Z",
+        "updated_at": "2026-11-28T06:30:12Z",
+        "expires_at": "2026-12-12T06:30:10Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35533808,
+      "zipSha256": "7c7d07c22a45aee879af6ba19400d160b6b482bc5901a6c1eb9229d170127f60"
+    },
+    {
+      "artifact": {
+        "id": 15252526724,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MjUyNjcyNA==",
+        "name": "import-count16-9d6-jitendex-AB-46109596112-1",
+        "size_in_bytes": 35575358,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252526724",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252526724/zip",
+        "expired": false,
+        "digest": "sha256:f959e82cd9ed30fe40c2adda019f5918887ef701dbd730812b8d211770398485",
+        "created_at": "2026-11-28T06:42:26Z",
+        "updated_at": "2026-11-28T06:42:26Z",
+        "expires_at": "2026-12-12T06:42:23Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35575358,
+      "zipSha256": "f959e82cd9ed30fe40c2adda019f5918887ef701dbd730812b8d211770398485"
+    },
+    {
+      "artifact": {
+        "id": 15252207958,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MjIwNzk1OA==",
+        "name": "import-count16-9d6-jitendex-BA-46109596112-1",
+        "size_in_bytes": 35621918,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252207958",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252207958/zip",
+        "expired": false,
+        "digest": "sha256:aab6fb2bc40fbef38beeb72b436a9bfcd35849a5b1e4450046a49c23b7372dcf",
+        "created_at": "2026-11-28T06:35:25Z",
+        "updated_at": "2026-11-28T06:35:25Z",
+        "expires_at": "2026-12-12T06:35:22Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35621918,
+      "zipSha256": "aab6fb2bc40fbef38beeb72b436a9bfcd35849a5b1e4450046a49c23b7372dcf"
+    },
+    {
+      "artifact": {
+        "id": 15252367104,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MjM2NzEwNA==",
+        "name": "import-count16-9d6-vndb-AB-46109596112-1",
+        "size_in_bytes": 35808364,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252367104",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252367104/zip",
+        "expired": false,
+        "digest": "sha256:221bb647f8b75a3057b33ce09baf2b419bc7df7e223aa1e44ad4e87d07d0bd7d",
+        "created_at": "2026-11-28T06:42:23Z",
+        "updated_at": "2026-11-28T06:42:23Z",
+        "expires_at": "2026-12-12T06:42:20Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35808364,
+      "zipSha256": "221bb647f8b75a3057b33ce09baf2b419bc7df7e223aa1e44ad4e87d07d0bd7d"
+    },
+    {
+      "artifact": {
+        "id": 15252558708,
+        "node_id": "MDg6QXJ0aWZhY3QxNTI1MjU1ODcwOA==",
+        "name": "import-count16-9d6-vndb-BA-46109596112-1",
+        "size_in_bytes": 35725469,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252558708",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252558708/zip",
+        "expired": false,
+        "digest": "sha256:56e2a8536b3fa729b0dc3f0c3ea17493bf9f32b25aadbe88f291c0b7cbc6f3f2",
+        "created_at": "2026-11-28T06:57:24Z",
+        "updated_at": "2026-11-28T06:57:24Z",
+        "expires_at": "2026-12-12T06:57:22Z",
+        "workflow_run": {
+          "id": 46109596112,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-components-9d6-20261128",
+          "head_sha": "8936a15e8a8a2cf53cb10849181a6268c656a7bf"
+        }
+      },
+      "runAttempt": 1,
+      "zipBytes": 35725469,
+      "zipSha256": "56e2a8536b3fa729b0dc3f0c3ea17493bf9f32b25aadbe88f291c0b7cbc6f3f2"
+    }
+  ],
+  "verification": [
+    "All eight original ZIP sizes/digests and every extracted member verified",
+    "All twelve release ZIPs and every entry verified before payload omission",
+    "All primary audits bind the exact reviewed auditor and four baseline Git helpers",
+    "All native/checks files and the separate independent correctness audit retained, including superseded native traps and wrong result",
+    "Every saved tar member re-read and checked against its frozen source hash",
+    "Credential pattern scan passed across retained evidence and generated text",
+    "No source receipt, endpoint observation, control, tail, memory scan or phase diagnostic rewritten",
+    "No benchmark executed, no earlier archive changed, no external publication performed"
+  ]
+}

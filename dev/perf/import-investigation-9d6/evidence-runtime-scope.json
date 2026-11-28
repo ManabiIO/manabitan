@@ -1,0 +1,1188 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "reviewedAtUtc": "2026-11-28T07:25:27.562734+00:00",
+  "scope": "Read-only exact Git tree scope check. No build, test, import, benchmark, new Git fetch or branch mutation was performed.",
+  "repository": "ManabiIO/manabitan",
+  "sources": {
+    "baseline": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+    },
+    "evidence": {
+      "commit": "45f4f6112e30941f15ae9c95c4acd5f186ab7689",
+      "tree": "32699b6e3b13bc34abcd89905cffe4aba825ed00"
+    }
+  },
+  "method": {
+    "objectSource": "Existing local Git objects only",
+    "networkLazyFetch": "disabled with GIT_NO_LAZY_FETCH=1",
+    "commitAndRootTreeObjects": "Raw object bytes independently rehashed with the Git SHA-1 object header and checked against requested identities",
+    "treeComparison": "Recursive leaf path, mode, type and Git object identity comparison; all existing baseline leaves are exactly preserved",
+    "commands": [
+      "git cat-file commit <commit>",
+      "git cat-file tree <tree>",
+      "git ls-tree -r -z <tree>",
+      "git ls-tree -z <tree>"
+    ]
+  },
+  "summary": {
+    "baselineLeafEntries": 2851,
+    "evidenceLeafEntries": 2954,
+    "unchangedBaselineLeafEntries": 2851,
+    "addedEntries": 103,
+    "modifiedEntries": 0,
+    "removedEntries": 0,
+    "addedByGroup": {
+      "workflow": 7,
+      "dev/perf": 95,
+      "experiment-test": 1
+    }
+  },
+  "productionRuntimeUnchanged": true,
+  "extSubtree": {
+    "baseline": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "6c6791461a10ca5384f73e3445a35b3b0a904919"
+    },
+    "evidence": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "6c6791461a10ca5384f73e3445a35b3b0a904919"
+    },
+    "leafEntries": 518
+  },
+  "protectedDevelopmentEntries": {
+    "dev/anki-note-type-compatibility.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6b4ffe1deacb0b798bd189bd59b3d0ee8e933146"
+    },
+    "dev/anki-note-type-upstream.py": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b82fdbb5da7f5bfba8beeca7393b187d9dc93c67"
+    },
+    "dev/bin": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "713bf8c9740cbf51fc3c17cd61cdbcb80db93d38"
+    },
+    "dev/build-libs.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "af96e234fc58b3c4fc6a652cc3bf14b4fe1b5781"
+    },
+    "dev/data-error.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "ffa28a8a6f1d3529ef9cd24dd6aa9fd0047e24e1"
+    },
+    "dev/data": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "94ac9e4e411ff1b02074669317a250a0ce1cc364"
+    },
+    "dev/dictionary-archive-util.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "637c7842f88a0c06af78c9613ffde2003162ca7f"
+    },
+    "dev/dictionary-validate.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "245cc0641e6637b54f4eb212cadc681cee846a48"
+    },
+    "dev/dictionary-wasm.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "840fa7aaa110e2509c77545caef219940d0d30e1"
+    },
+    "dev/generate-css-json.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "8164ee8d16060a855e9ad44581be1cd79a511ace"
+    },
+    "dev/jsconfig.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "ddda4a57885247a222438d73cd0a590b195a60b0"
+    },
+    "dev/json.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "338ddfee8acc134f38682c9c95120e7a25622aff"
+    },
+    "dev/lib": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "4d4b281ddf0baf15e9bb10cce12e98724bd2a64a"
+    },
+    "dev/manifest-util.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "66ad06da0aee8a2a4d1f30a88498e1e24785d781"
+    },
+    "dev/native": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "c396de4c54cebcf84551e1d2abbb131a1379c5a7"
+    },
+    "dev/requirements-anki-note-type-compatibility.txt": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e1fd98c44671a95f86d4c0c7053c176cf0f989f7"
+    },
+    "dev/schema-validate.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "0960490ea29fc37f612b0712701fcbe7e048bd4d"
+    },
+    "dev/tests": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "16d8eaeb9e1799737af83e28c4527de2b8f1d91c"
+    },
+    "dev/to-error.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "076d77fae71eaef8043ce89a2ad85fd14327e5b6"
+    },
+    "dev/util.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6ac287e124f9169fc00b90c9ab8d1a2e854ace2f"
+    }
+  },
+  "rootFilesUnchanged": {
+    ".gitattributes": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "2b72565d40abccc37c13c41638312073128a1e08"
+    },
+    ".gitignore": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "29086626c008d7c7aa0e0c6a1133d94eff3aea57"
+    },
+    ".htmlvalidate.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "c9b9f8ab1fc8faa22f01f246e61ed67b8160a2cf"
+    },
+    ".htmlvalidateignore": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "5f8a1cc9b302fc292b4f8dbbad1ea7db5e83f93e"
+    },
+    ".lycheeignore": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6d8cf608a7c1b01566644f4a2246cead830c9e98"
+    },
+    ".prettierignore": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a501e2ca068bed5c8fc7036cbbe2bd5122c27737"
+    },
+    ".stylelintignore": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "572c354a4e81ce6edd9057988f7a978b3c82bf4a"
+    },
+    ".stylelintrc.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "d83b25bdf8fb64fe1d60b3a70ae6cfbcc9683220"
+    },
+    "AGENTS.md": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "938666275257cbc3303dc38c17dc0a9728ab9b45"
+    },
+    "CODEOWNERS": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "5f9c82463e20f56f20390a264446a93ebcde7032"
+    },
+    "CONTRIBUTING.md": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "44c0bc8e33a06644d33ce278bb4a9854f8512cab"
+    },
+    "LICENSE": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "94a9ed024d3859793618152ea559a168bbcbb5e2"
+    },
+    "PRIVACY-POLICY.md": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "72cc6bf78305e8639bf2fcd2da1f11d060ea6db8"
+    },
+    "README.md": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b6b4056cc76eda0eacf0a8d39c1f5014878ed41b"
+    },
+    "SECURITY.md": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6c8c71723395ead7617c6c9902250e1da705c086"
+    },
+    "build.bat": {
+      "mode": "100755",
+      "type": "blob",
+      "gitObject": "96100858ed858e6ccf12307c9c246e7be68333bc"
+    },
+    "build.sh": {
+      "mode": "100755",
+      "type": "blob",
+      "gitObject": "d61c37f4773264cb981aee1c38380d07b66e3913"
+    },
+    "eslint.config.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "0df55128f76aec524ffc8ce78ec45b4ebc419e2a"
+    },
+    "jsconfig.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "081275406575753a0fcb1a8b2f2ce75d6e060a4d"
+    },
+    "mise.toml": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "698d340e21f43641a7822abcbceda0956e8972ca"
+    },
+    "package-lock.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "46d4c84c09debdc6e307a3cfa948bb924a4d903b"
+    },
+    "package.json": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "55e166cdeec6ac759a25296c33025e6e52ea9c82"
+    },
+    "playwright.config.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6c1d0a86594a77e830df432d5dc9d45b7aea8e48"
+    },
+    "shell.nix": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6e4952e53e130e3a79334205f8b1831745cf0d66"
+    },
+    "tag.sh": {
+      "mode": "100755",
+      "type": "blob",
+      "gitObject": "6d7ea8e58f664359ed6b1072ebd7f4f31197af09"
+    },
+    "vitest.config.js": {
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "732be5b45b9765c46af795d61d85c364e0414e00"
+    }
+  },
+  "otherUnchangedRootTrees": {
+    ".husky": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "5dacad67043a9f65315e81ae1bd1a44a2270e572"
+    },
+    ".vscode": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "a5cf3198c887d1e9893d78f8857bd3b0930e86c8"
+    },
+    "benches": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "c3807d8cd0cd1e5cedd210df5a82f05f594578ac"
+    },
+    "builds": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "619c8dd7ef4844811239e888440d62c785a9557d"
+    },
+    "dl": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "0bb798bb6045e56f4257a6b2c00fe643f6381b6c"
+    },
+    "docs": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "5c2391d7566ac08b07fc09d0b8b8d6111fef56dd"
+    },
+    "resources": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "cba9a0bb232da2ea59a656ed627d8cb7452b5f0e"
+    },
+    "types": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "ceb3bc46619ef7ebe4287746268808c2999bc51e"
+    },
+    "web": {
+      "mode": "040000",
+      "type": "tree",
+      "gitObject": "f5b98a6b28ad82bbc1a10c81b930bb53c9caf816"
+    }
+  },
+  "existingWorkflowAndTestFilesUnchanged": true,
+  "changes": [
+    {
+      "path": ".github/workflows/import-cache-range-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "bfc79c5e330336c72c08cecfe31a755b528a96c8"
+    },
+    {
+      "path": ".github/workflows/import-codec-width-v2-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a123f57eec3dd46eab485b44531fed82b6066b60"
+    },
+    {
+      "path": ".github/workflows/import-components-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e7b752624c6e4fcacc9baa110c5c2ffb8c5d70c6"
+    },
+    {
+      "path": ".github/workflows/import-count16-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "03343e3c5f27c82af9372bf1879cd3541cc8df19"
+    },
+    {
+      "path": ".github/workflows/import-inflater-copy-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "c1b949c3bc505bbe6b79ba00f1f039246fa33dae"
+    },
+    {
+      "path": ".github/workflows/import-metadata-cold-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "00bdb420182ceca9a9faeb0268507889e006e9ae"
+    },
+    {
+      "path": ".github/workflows/import-profile-9d6.yml",
+      "status": "A",
+      "group": "workflow",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "2e1c289b732ea380f0d2f9904b1c6f38a8bad553"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "ddbc84562810f27d946a50f890934f49530d0bd1"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/capture.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "bed8af0f4b6ef5d0e294ebf25a4cf26c1feb0a22"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/inflight.patch",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "eed06d0d9ac0adc459d756c516bcb0e81b386b52"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e5589006a9f31e6e80016b87fa1be07f087cf228"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/register-screen.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "62f96b964e1db9a27ce0278fe66f106223f3c280"
+    },
+    {
+      "path": "dev/perf/experimental-9d6/run.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "f5a262e8ce772e79de7cb8d472cfa1f5158d0288"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/audit-complete-import.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "3906702915cc0125ddc93605c282574cdd748a3e"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "33d8d5cc624f0cfd6c455b253e1fa87c25858eda"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "1027d12d333aadad089a2c1d467cf881b07f1f8f"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/checks-and-tools.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "17d76bc2a21ae44c37c42f59653102dbcee4b789"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/jitendex-AB.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b35d2bb6cf8711ef7bb179e4b2382f2fc8645d28"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/jitendex-BA.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "9592abebae3a5d52f79e530d2dbcefd76065995c"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/jmdict-AB.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "8541f5d23b1799dc20b6cc60868373ce25e34ccb"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/jmdict-BA.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "2b42b35d225f06caca32948ad28124b3bae8be0f"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/vndb-AB.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "ca22aceb0a3eeffebcbb898a436d22bb41fe7983"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/archives/vndb-BA.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "2a657e8b0dd6c0a07de1cb8dc2053f427d844f2e"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/inventory.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a22b08c4757f14aac727b28b22672a986f31af7c"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/layout.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e6bfe339e156dcb615294db1a9e272cf34d77a04"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/materialize.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "bd814f935c80cc3ff7cf52c5a71931979bdb753c"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/publication-receipt.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e635baee06724de53cfa1fbdc2a2b303896736fc"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/release.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "d6dc5e1af0d93cb3eee1bf2a2f44806ee1452748"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/review/independent-final-review-attempt1.log",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "ffb1141a4547e5483895486f5e09dc97127b9884"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/review/independent-final-review.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "4163f81e073d1c09976cc55f1b1d23ee43a809ff"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/review/independent-final-review.log",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a022e5c7819206437c9daec72da41527f2671fe4"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/review/independent-final-review.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "75d84f2f96639978e2bd046cb5a1b17b134732ae"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/cache-source-range/review/publication-manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6c02c9790c5ee0c7d3b9c1b3798d43243a5eb5bc"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/codec-v1.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a67bee1c0121685ac29da0011b7785fa1a7f6357"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/codec-v2-and-guarded-proof.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a13c370240e1fd4a4b505d19f0c4efc5856073fc"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/direct-record-lengths.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "240fba6598924a86297fb9f94531860bef6bbd6a"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/MANIFEST.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "28dee26b3bc894de28d094b60e15a3bbda00905f"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "19c144a900c3fb636b6e65abbc253feb7e89abde"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/build-appendix.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "57ac256e48c6a8a0d709695e593b1a7f1db78f86"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/external-inflight-qualification-46104891607.tar.xz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "eef1915a8bd4b1d0c4804282e6158fddc4c3dc73"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/publication-manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "56903347395f507686a18c0be12b241864d40de5"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/external-inflight/summary.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "8e00298540bb10a69e7abd5d1e0a401f55b8c65e"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "616ca6a1be3d15269c0baae46421556f6f53a7a1"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/analysis.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "3bd917adf61295063a19ce3a60db7913df73fb8d"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/audit-local-screen.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "7edba88b1443190e546bc338aa2e6a55558b422b"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/build-appendix.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "451f7b18360b55f3c830bd649855b1a493165572"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/guarded-local.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "2aead314b8f82a4bed2b8ead302a0ac8716e1a0c"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/independent-appendix-review-attempt1.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "4a8dbe709328a4bae2188beac65c06a8a027ebb7"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/independent-appendix-review.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "468e9f6a6539527b3d90fddc2cc33d8ff1a9f754"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/independent-appendix-review.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "491ee787f89c35f41b52e2be0dfad0bf25ce9120"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/inventory.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "774a022955b24eb133d53c99f3fd91f93fe2f797"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/publication-manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "54b2c4fb85fda2a99eee5994d4c813420f7bc3eb"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/reconstruction.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "cf3299d3532080bf3b9ef854cebbfe4df502ff72"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-hosted-inventory.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "705547411b57a05ea51e0f57dea95b8403f45276"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-hosted.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "39197c12c1bf7988e16074278beb9d504c4afe83"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-hosted.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "d03f8a9f2e4158a98779f5131a895000f877a443"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-hosted.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "700e9e2045fa58accbce0670c7272e54483d3089"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-local.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "958b2639f65c6fe764f993eaaa37c52dfd382f0b"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inventory.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "7036d3fe70f48fec960975752d95dd2b82c58fa5"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inventory.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "a9cdc24fa2382db8e0c41f0f9c8e939f18401115"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/materialize.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "9e7aced1aa19808475536a3bc84ed93af5307d7f"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/metadata.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "af99ef98fbb515837841d543123fab23a44fa2ac"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/publication-receipt.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "394f84abb5a467df40532e37542d446d815138d7"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/shared-identity-and-dispositions.tar.gz",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "16e416df4f1fb2333db26c310cee05281c0c96d1"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b5b2d0bc0d2d69b20acc29016826d85fe9c06e3b"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/candidate.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "484a1b0c33501099d76a25679f03b027515d75ab"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/candidate.patch",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "17f8c63bf19150acf5a11552fccd0400e2c89ac3"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/capture.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "acc04fa603708e11fc5c960bf1e67b8c0c02d636"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/prepare-inputs.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "1be12a7c8341a959061f1fe7f97e02bf9f152ad7"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/run.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "c29539c832d8b1026ab3427f7e6a6d981f8bdd23"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/screen-child.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "634b1cf6a1f8ced1fc4af8e6065c4e56a384e8d7"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/screen.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6617187ede02e3f09531e09d56bdfadd909ce4a0"
+    },
+    {
+      "path": "dev/perf/inflater-copy-9d6/source-groups.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "3dd780849163351f7ea75f44655ee69734310944"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "c6de5269e1efcc18fb6c822151a2963ab85c4a7a"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/candidate.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "0ba220515a69789857232f8e0d8d40c268987035"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/candidate.patch",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "0f023ccbdb8167c48ac980ae06f27abf612a196d"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/capture.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "acc04fa603708e11fc5c960bf1e67b8c0c02d636"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/child.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "238a61cf4ad931ee4e1bc9771fdaa12a2b5e475e"
+    },
+    {
+      "path": "dev/perf/metadata-cache-9d6/run.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6c374d0edb0d4c436a533ebaba8b398e91dfad82"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "082b87662e1431ea06f7300790161d85672e192e"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/build.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "036d15b5a3e048b743e5265ab18b41e2ba15feb4"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/capture-artifact.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "867299d9be675e0669035d0d7b1c7a46282d0bf0"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/fetch-capture.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "3e06a99af1be976a667e09ab7914a2beeb56331e"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "d5ecd8ffb419b4ba39df2ecb91d6f52d6a8de032"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/patch-cstream64.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "fc29c256e65ac279328d91515a0d117c41e17b7c"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/patch-zstd.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "d54884b53999f42f1a0783e390c886621d98d339"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/run.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "dbeab15d45c6fb78fc7f608d5cf7b10169b13dd3"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/screen.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "4e35a38981488277163d71e4b3a004e21fbf0295"
+    },
+    {
+      "path": "dev/perf/wasm-word-width-v2/verify.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "df117d3ffe44c255b7fed6b46e5d7309e5af1695"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "8cac606b8bcb57503bda454b2da958840e3757e6"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/build.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "4937f0db6fd1024290e4909de9da03483dff4dc0"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "9f1daf4ec44f3e40cf7bb5e2d8fcafe7a923de1c"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/patch-zstd.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "dd6bb598f382d223ea4c8cb24d8be1794ba78452"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/run.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e4da208ad865186bc3d29298cdbf87cb6b764145"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/screen.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "49805a22e7448cf9f59b9935e0b29c375fa951ca"
+    },
+    {
+      "path": "dev/perf/wasm-word-width/verify.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "3d2deb29315bda2e5090fc2cea1953e9cdf095c9"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/README.md",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "49c04f8af2f617587a3cc83168e3802d8284f1fb"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/boundaries.mjs",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b50417c4fd950894871439b0aa444fb584d34562"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/build-boundaries.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "1b709cca122544b004b07b34ec361455177adb14"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/count-boundaries.c",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "e46d429afc18edda45e4e93791948a7afc3dea4d"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/manifest.json",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "aba1cdb3abfb4c7740941b5d53829c05eaeab2ec"
+    },
+    {
+      "path": "dev/perf/zstd-count16-guarded/verify.py",
+      "status": "A",
+      "group": "dev/perf",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b26ef664d9679ddd016f4e34a1be4f30199ffc66"
+    },
+    {
+      "path": "test/dictionary-content-inflight-range.test.js",
+      "status": "A",
+      "group": "experiment-test",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b2e5756d154b6db38ff3403d1ed4840fae97185b"
+    }
+  ],
+  "scopeCaveats": [
+    "The exact addition set is 95 dev/perf files, seven experimental workflows, and one experiment-specific test. A claim that additions are only dev/perf and workflows would omit that test.",
+    "The added test calls _createTermContentSourceSpans, which is absent from the unchanged baseline DictionaryDatabase. It is candidate-specific test coverage; this review does not claim that the added test runs successfully on the evidence branch. No test was executed.",
+    "This receipt is pinned to evidence commit 45f4f6112e30941f15ae9c95c4acd5f186ab7689 and does not attest to later descendants or the two separate experimental product branches."
+  ],
+  "extraTestStaticCheck": {
+    "test": {
+      "path": "test/dictionary-content-inflight-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "b2e5756d154b6db38ff3403d1ed4840fae97185b",
+      "sha256": "d78d8c0dff4e6fa0ab9c7cf80a81b4c38c7bdb1031574f5ee2c0f5b73acffcf8"
+    },
+    "runtime": {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "gitObject": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    },
+    "calledMethod": "_createTermContentSourceSpans",
+    "methodNamePresentInBaselineRuntime": false
+  },
+  "conclusion": "The report statement that this evidence head preserves the production runtime at the frozen baseline is supported. All native release source/assets, build scripts, dependencies and root configuration also remain at baseline. The scope includes one explicitly retained candidate-specific unit-test addition as well as evidence/tooling and workflows."
+}
