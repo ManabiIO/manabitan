@@ -78,6 +78,58 @@ function encode(store, chunk) {
 }
 
 describe('resolved content reference origin', () => {
+    test.each([0, 65534, 65535, 0xfffffffe])('preserves exact encoding for a private uint32 length %i', async (length) => {
+        const columns = {
+            uniqueIndexList: Uint32Array.from({length: 64}, (_, i) => i % 2),
+            offsets: Float64Array.of(-1, 2 ** 40 + 123),
+            lengths: Uint32Array.of(0, length),
+        }
+        const generic = createStore()
+        const owned = createStore()
+        await encode(generic.store, createChunk(columns))
+        await encode(owned.store, createOwnedChunk(columns))
+        expect(owned.append.mock.calls).toStrictEqual(generic.append.mock.calls)
+    })
+
+    test.each([
+        [16, 0xffffffff, 'Invalid term content length: 4294967295'],
+        [Number.NaN, 0xffffffff, 'Invalid term content offset: NaN'],
+        [-2, 0xffffffff, 'Invalid term content offset: -2'],
+        [1.5, 0xffffffff, 'Invalid term content offset: 1.5'],
+    ])('preserves offset-first rejection for private typed spans (%#)', async (offset, length, message) => {
+        const columns = {
+            uniqueIndexList: Uint32Array.of(0, 0, 1),
+            offsets: Float64Array.of(0, Number(offset)),
+            lengths: Uint32Array.of(7, Number(length)),
+        }
+        for (const chunk of [createChunk(columns), createOwnedChunk(columns)]) {
+            const {store, append} = createStore()
+            await expect(encode(store, chunk)).rejects.toThrow(String(message))
+            expect(append).not.toHaveBeenCalled()
+        }
+    })
+
+    test('rejects a floating-point length column with both a uint32 prototype and tag', async () => {
+        const columns = references()
+        const invalid = Float64Array.of(Number.NaN)
+        Object.setPrototypeOf(invalid, Uint32Array.prototype)
+        Object.defineProperty(invalid, Symbol.toStringTag, {value: 'Uint32Array'})
+        columns.lengths = /** @type {Uint32Array} */ (/** @type {unknown} */ (invalid))
+        const {store, append} = createStore()
+        await expect(encode(store, createOwnedChunk(columns))).rejects.toThrow('Invalid term content length: NaN')
+        expect(append).not.toHaveBeenCalled()
+    })
+
+    test('does not consult a length column tag getter to prove uint32 storage', async () => {
+        const columns = references()
+        const tag = vi.fn(() => { throw new Error('Unexpected caller-controlled tag read') })
+        Object.defineProperty(columns.lengths, Symbol.toStringTag, {get: tag})
+        const {store, append} = createStore()
+        await encode(store, createOwnedChunk(columns))
+        expect(append).toHaveBeenCalledTimes(1)
+        expect(tag).not.toHaveBeenCalled()
+    })
+
     test.each(['external', 'factory-wrapper'])('rejects a %s Proxy whose descriptor and ordinary reference reads differ', async (kind) => {
         const valid = references()
         const invalid = {...valid, offsets: Float64Array.of(Number.NaN)}

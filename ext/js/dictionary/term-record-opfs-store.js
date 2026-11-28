@@ -115,6 +115,8 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
+// eslint-disable-next-line @stylistic/semi
+const TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint32Array.prototype), Symbol.toStringTag)
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
@@ -389,7 +391,10 @@ function getSynchronousResolvedContentReferences(chunk, count) {
         !(lengths instanceof Uint32Array) ||
         Object.getPrototypeOf(uniqueIndexList) !== Uint32Array.prototype ||
         Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
-        Object.getPrototypeOf(lengths) !== Uint32Array.prototype
+        Object.getPrototypeOf(lengths) !== Uint32Array.prototype ||
+        // The intrinsic getter checks storage kind independently of prototypes
+        // or caller-owned Symbol.toStringTag properties.
+        TYPED_ARRAY_TAG_DESCRIPTOR?.get?.call(lengths) !== 'Uint32Array'
     ) { return null; }
     for (const column of [uniqueIndexList, offsets, lengths]) {
         if (
@@ -2486,12 +2491,20 @@ export class TermRecordOpfsStore {
                     }
                     contentOffset = references.offsets[uniqueIndex];
                     contentLength = references.lengths[uniqueIndex];
+                    /* eslint-disable @stylistic/semi */
+                    validateContentOffset(contentOffset)
+                    // The current synchronous proof admits private Uint32
+                    // lengths. Their only unsupported value is the sentinel.
+                    if (contentLength === U32_NULL) {
+                        throw new RangeError(`Invalid term content length: ${contentLength}`)
+                    }
+                    /* eslint-enable @stylistic/semi */
                 } else {
                     contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
                     contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                    validateContentOffset(contentOffset);
+                    validateContentLength(contentLength);
                 }
-                validateContentOffset(contentOffset);
-                validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
                 const nextMaxContentOffset = contentOffset >= 0 ? Math.max(maxContentOffset, contentOffset) : maxContentOffset;
                 if (
@@ -5836,6 +5849,7 @@ view.chunks :
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
      * @returns {Uint8Array}
+     * @throws {RangeError} If a resolved content reference index is invalid.
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
@@ -5871,9 +5885,19 @@ view.chunks :
             null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            /* eslint-disable-next-line @stylistic/semi */
+            /* eslint-disable @stylistic/semi */
             const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            let contentLength
+            if (directReferences === null) {
+                contentLength = getArtifactContentLength(chunk, contentLengths, i)
+            } else {
+                const uniqueIndex = directReferences.uniqueIndexList[i]
+                if (uniqueIndex >= directReferences.lengths.length) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`)
+                }
+                contentLength = directReferences.lengths[uniqueIndex]
+            }
+            /* eslint-enable @stylistic/semi */
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;
