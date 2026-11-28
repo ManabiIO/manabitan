@@ -125,6 +125,18 @@ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
 const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
 
 /**
+ * @typedef {object} RecentTermContentSourceScan
+ * @property {Int32Array} indexes
+ * @property {Uint8Array} source
+ * @property {Uint32Array} offsets
+ * @property {Uint32Array} lengths
+ * @property {number} count
+ * @property {number} minimumOffset
+ * @property {number} maximumEnd
+ * @property {number} contentBytes
+ */
+
+/**
  * @typedef {object} InFlightTermContentSourceBatch
  * @property {number[]|Float64Array} offsets
  * @property {number[]|Uint32Array} lengths
@@ -6790,9 +6802,10 @@ void 0 :
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
+     * @param {RecentTermContentSourceScan|null} [scan] Same-call contiguous publication scan.
      * @returns {number} Number of owned source bytes retained.
      */
-    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null) {
+    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null, scan = null) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
         if (
             !(spans.buffer instanceof Uint8Array) ||
@@ -6809,10 +6822,14 @@ void 0 :
             this._recentTermContentSourceBatchBytes -= previousBoundary.buffer.byteLength
         }
         this._recentTermContentBoundaryBatchId = 0
-        const averageSampleCount = Math.min(
-            staged.indexes.length,
-            TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
-        );
+        const useScan = (
+            scan !== null && scan.indexes === staged.indexes &&
+            scan.source === spans.buffer && scan.offsets === spans.offsets && scan.lengths === spans.lengths &&
+            scan.count === staged.indexes.length
+        )
+        const averageSampleCount = useScan ?
+            0 :
+            Math.min(staged.indexes.length, TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT)
         let sampledPublishedCount = 0;
         let sampledContentBytes = 0;
         for (let i = 0; i < averageSampleCount; ++i) {
@@ -6843,12 +6860,12 @@ void 0 :
             if (sourceStart < 0) { return 0 }
             sourceEnd = sourceStart + 1
         }
-        let minimumOffset = Infinity;
-        let maximumEnd = 0;
-        let publishedCount = 0;
-        let publishedContentBytes = 0;
-        let lastPublishedSource = -1
-        for (let i = sourceStart; i < sourceEnd; ++i) {
+        let minimumOffset = useScan ? scan.minimumOffset : Infinity
+        let maximumEnd = useScan ? scan.maximumEnd : 0
+        let publishedCount = useScan ? scan.count : 0
+        let publishedContentBytes = useScan ? scan.contentBytes : 0
+        let lastPublishedSource = useScan ? sourceEnd - 1 : -1
+        for (let i = useScan ? sourceEnd : sourceStart; i < sourceEnd; ++i) {
             const index = staged.indexes[i];
             if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
             const offset = spans.offsets[i];
@@ -9787,9 +9804,11 @@ null :
      * @param {number[]|Uint32Array} lengths
      * @param {number} dictNameId
      * @param {boolean} metadataValidated
+     * @param {{spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, result: RecentTermContentSourceScan|null}|null} [recentSourceScan]
      * @returns {boolean} Whether the complete range was published.
      */
-    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated, recentSourceScan = null) {
+        if (recentSourceScan !== null) { recentSourceScan.result = null }
         if (
             staged === null ||
             !(staged.indexes instanceof Int32Array) ||
@@ -9828,6 +9847,26 @@ null :
         const hash1Table = this._termEntryContentMetaHash1Table
         const hash2Table = this._termEntryContentMetaHash2Table
         const lengthTable = this._termEntryContentMetaLengthTable
+        const spans = recentSourceScan?.spans ?? null
+        let scanSource = (
+            spans !== null &&
+            spans.buffer instanceof Uint8Array && spans.offsets instanceof Uint32Array &&
+            spans.offsets.buffer instanceof ArrayBuffer && spans.offsets.length >= count &&
+            spans.lengths === lengths && stateTable.buffer instanceof ArrayBuffer &&
+            Reflect.get(spans.buffer.buffer, 'resizable') !== true &&
+            Reflect.get(spans.buffer.buffer, 'growable') !== true
+        )
+        if (scanSource) {
+            // Preserve the cache's early boundary-only decision. Large-content
+            // groups must not acquire a new complete source-span scan.
+            const sampleCount = Math.min(count, TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT)
+            let sampledBytes = 0
+            for (let i = 0; i < sampleCount; ++i) {
+                const sourceIndex = sampleCount === 1 ? 0 : Math.floor(i * (count - 1) / (sampleCount - 1))
+                sampledBytes += lengths[sourceIndex]
+            }
+            scanSource = sampledBytes <= sampleCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
+        }
         // Caller-owned columns may be views into metadata storage. Scalar
         // publication interleaves its reads and writes; bulk operations require
         // every input to remain unchanged until all writes finish. Native arena
@@ -9852,6 +9891,11 @@ null :
             const target = writes[i]
             const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
             const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
+            if (scanSource && spans !== null && spans.offsets.buffer === target.buffer) {
+                const inputStart = spans.offsets.byteOffset
+                const inputEnd = inputStart + count * spans.offsets.BYTES_PER_ELEMENT
+                if (inputStart < targetEnd && targetStart < inputEnd) { scanSource = false }
+            }
             for (const {values, start} of reads) {
                 if (values.buffer !== target.buffer) { continue }
                 const inputStart = values.byteOffset + start * values.BYTES_PER_ELEMENT
@@ -9866,6 +9910,11 @@ null :
                 if (otherStart < targetEnd && targetStart < otherEnd) { return false }
             }
         }
+        let sourceOffsets = scanSource && spans !== null ? spans.offsets : null
+        const sourceByteLength = sourceOffsets !== null && spans !== null ? spans.buffer.byteLength : 0
+        let minimumOffset = Infinity
+        let maximumEnd = 0
+        let contentBytes = 0
         for (let i = 0; i < count; ++i) {
             const index = firstIndex + i
             const offset = offsets[i]
@@ -9881,6 +9930,17 @@ null :
             ) {
                 return false
             }
+            if (sourceOffsets !== null) {
+                const sourceOffset = sourceOffsets[i]
+                if (sourceOffset > sourceByteLength || length > sourceByteLength - sourceOffset) {
+                    // Cache rejection does not change metadata publication.
+                    sourceOffsets = null
+                } else {
+                    minimumOffset = Math.min(minimumOffset, sourceOffset)
+                    maximumEnd = Math.max(maximumEnd, sourceOffset + length)
+                    contentBytes += length
+                }
+            }
         }
         this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
         this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
@@ -9888,6 +9948,20 @@ null :
         stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
         this._termEntryContentMetaHashPairPendingCount -= count
         this._termEntryContentMetaHashPairCount += count
+        if (sourceOffsets !== null && spans !== null && recentSourceScan !== null) {
+            // No await or caller callback separates this proof from cache use.
+            // The original mapping pass still handles aliases and ID wrapping.
+            recentSourceScan.result = {
+                indexes,
+                source: spans.buffer,
+                offsets: sourceOffsets,
+                lengths,
+                count,
+                minimumOffset,
+                maximumEnd,
+                contentBytes,
+            }
+        }
         return true
     }
 
@@ -9983,6 +10057,8 @@ null :
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
         /* eslint-disable @stylistic/semi */
+        /** @type {{spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, result: RecentTermContentSourceScan|null}} */
+        const recentSourceScan = {spans: pendingContentSpans, result: null}
         const publishedContiguous = typeof uniformPendingDictName === 'string' && this._tryPublishContiguousArtifactTermContentMetadata(
             stagedContentMetadata,
             pendingContentHash1s,
@@ -9991,6 +10067,7 @@ null :
             pendingLengths,
             uniformPendingDictNameId,
             metadataValidated,
+            recentSourceScan,
         )
         /* eslint-enable @stylistic/semi */
         for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
@@ -10066,6 +10143,7 @@ null :
             stagedContentMetadata,
             pendingContentSpans,
             importMetrics,
+            recentSourceScan.result,
         );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
