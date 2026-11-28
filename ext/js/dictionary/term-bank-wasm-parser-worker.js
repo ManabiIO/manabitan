@@ -27,7 +27,7 @@ import {
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
-import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes} from './term-content-ownership.js';
+import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes, TERM_CONTENT_OWNED_RESULT_MAX_BYTES} from './term-content-ownership.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
@@ -133,7 +133,7 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Compact cacheable slabs and small projected slabs transfer
+                // Compact cacheable slabs and eligible projected slabs transfer
                 // ownership so the next parse can overlap the ordered sink.
                 const ownCacheableContent = options.ownContentBytes !== true && typeof SharedArrayBuffer === 'function' && shouldOwnTermContentBytes(
                     chunk.contentBytesLength,
@@ -142,36 +142,38 @@ async function parse(data) {
                     chunk.rowCount,
                 );
                 /* eslint-disable @stylistic/semi */
-                // Reuse the existing borrowed-result lease for byte-heavy
-                // projected groups. Never create a shared buffer for this path;
-                // nonshared sources retain the original private transfer.
-                const borrowProjectedContent = (
-                    options.ownContentBytes === true &&
-                    options.projectImagePaths === true &&
+                // The direct media import can own a compact slab independently
+                // of the parser's image projection and its archive-size gate.
+                const usesProjectedBorrowing = options.ownContentBytes === true && options.projectImagePaths === true
+                const {contentBytesLength} = chunk
+                const byteHeavyShared = (
+                    (usesProjectedBorrowing || options.allowOwnedByteHeavyContent === true) &&
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
                     shouldBorrowProjectedTermContent(
-                        chunk.contentBytesLength,
+                        contentBytesLength,
                         chunk.contentDedupPlan?.uniqueCount,
                         chunk.contentDedupPlan?.sourceRowCount,
                         chunk.rowCount,
                     )
                 )
-                const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
+                const borrowProjectedContent = usesProjectedBorrowing && byteHeavyShared
+                const ownByteHeavyContent = byteHeavyShared && typeof contentBytesLength === 'number' &&
+                contentBytesLength <= TERM_CONTENT_OWNED_RESULT_MAX_BYTES
+                const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent || ownByteHeavyContent
                 /* eslint-enable @stylistic/semi */
                 resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource, true);
                 if (
-                    ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
+                    (ownCacheableContent || ownByteHeavyContent) && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
                 ) {
-                    // Compression workers retain the shared-span path. This slab
-                    // is independent of the reusable parser heap and is never
-                    // written again after the result is posted.
+                    // This compact slab is independent of reusable parser
+                    // memory and is immutable after the result is posted.
                     const owned = new Uint8Array(new SharedArrayBuffer(resultChunk.contentBytesBuffer.byteLength));
                     owned.set(resultChunk.contentBytesBuffer);
                     resultChunk.contentBytesBuffer = owned;
                 }
-                ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
+                ownsContentBytes = ownCacheableContent || ownByteHeavyContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&

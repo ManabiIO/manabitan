@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number, previousBuffersDetached: boolean}}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, ownsContentBytes?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number, previousBuffersDetached: boolean}}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -599,7 +599,11 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
-    test.each([false, true])('projects a compressed media source with lookup routing=%s without reconstructing its glossary', async (prepareLookupRoute) => {
+    test.each([
+        {projectImagePaths: true, prepareLookupRoute: false},
+        {projectImagePaths: true, prepareLookupRoute: true},
+        {projectImagePaths: false, prepareLookupRoute: true},
+    ])('owns eligible content with image projection=$projectImagePaths and lookup routing=$prepareLookupRoute', async ({projectImagePaths, prepareLookupRoute}) => {
         const glossary = JSON.stringify([{type: 'structured-content', content: {tag: 'div', content: ['text'.repeat(1024), {tag: 'img', path: 'img/猫.webp'}]}}])
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
@@ -619,6 +623,8 @@ describe('actual parser worker flag propagation', () => {
             expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
             let prior
             let snapshot
+            let priorContentBytes
+            let priorContentBytesSnapshot
             for (const current of [glossary, '[{"type":"image","path":"later.png"}]']) {
                 const payload = compressed(`[["画像","がぞう","","",0,${current},1,""]]`, 8)
                 const reply = await requestWorker(worker, {type: 'parse',
@@ -630,17 +636,24 @@ describe('actual parser worker flag propagation', () => {
                         emitContentSlab: true,
                         emitTokenBinaryContent: true,
                         mediaHintFastScan: true,
-                        projectImagePaths: true,
+                        projectImagePaths,
                         validateGlossaryTypes: true,
-                        ownContentBytes: true,
+                        ownContentBytes: projectImagePaths,
+                        allowOwnedByteHeavyContent: !projectImagePaths,
                         prepareLookupIndexes: true,
                         prepareLookupRoute}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
-                expect(reply.chunk?.mediaRows).toHaveLength(0)
-                expect(reply.chunk?.projectedMedia?.paths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
-                expect(reply.chunk?.projectedMedia?.rowIndexes).toEqual(new Uint32Array([0]))
-                expect(reply.borrowsWorkerMemory).toBe(current === glossary)
+                const paths = current === glossary ? ['img/猫.webp'] : ['later.png']
+                if (projectImagePaths) {
+                    expect(reply.chunk?.mediaRows).toHaveLength(0)
+                    expect(reply.chunk?.projectedMedia?.paths).toEqual(paths)
+                } else {
+                    expect(reply.chunk?.projectedMedia).toBeUndefined()
+                    expect(reply.chunk?.mediaRows).toHaveLength(1)
+                    expect(reply.chunk?.mediaRows[0].imagePaths).toBeUndefined()
+                }
                 if (!reply.chunk) { throw new Error('Missing projected worker result') }
+                expect(reply.profile?.borrowedContentResultCount).toBe(0)
                 expect(reply.chunk.preparedLookupIndexes?.size).toBeGreaterThan(0)
                 for (const index of reply.chunk.preparedLookupIndexes?.values() ?? []) {
                     if (prepareLookupRoute) {
@@ -650,12 +663,17 @@ describe('actual parser worker flag propagation', () => {
                     }
                 }
                 if (prior) { expect(prior).toEqual(snapshot) }
-                // The large source follows the current borrowed-content lease.
-                // Only its owned metadata may survive a later parser request.
                 const {contentBytesBuffer, ...metadata} = reply.chunk
-                expect(contentBytesBuffer?.buffer instanceof SharedArrayBuffer).toBe(current === glossary)
+                expect(contentBytesBuffer?.buffer instanceof SharedArrayBuffer).toBe(!projectImagePaths || current === glossary)
+                if (contentBytesBuffer === void 0) { throw new Error('Missing projected content slab') }
+                expect(contentBytesBuffer.byteOffset).toBe(0)
+                expect(contentBytesBuffer.byteLength).toBe(contentBytesBuffer.buffer.byteLength)
+                expect(contentBytesBuffer.byteLength > 512).toBe(current === glossary)
+                if (priorContentBytes !== void 0) { expect([...priorContentBytes]).toEqual(priorContentBytesSnapshot) }
                 prior = metadata
                 snapshot = structuredClone(metadata)
+                priorContentBytes = contentBytesBuffer
+                priorContentBytesSnapshot = [...contentBytesBuffer]
             }
         } finally { await worker.terminate() }
     })

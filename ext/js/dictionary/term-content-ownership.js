@@ -17,6 +17,8 @@
 
 /* eslint @stylistic/semi: ["error", "never"] */
 
+export const TERM_CONTENT_OWNED_RESULT_MAX_BYTES = 24 * 1024 * 1024
+
 export const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024
 
 export const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES = 512
