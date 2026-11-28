@@ -33,10 +33,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p builds/perf/record-field-lengths-validation
-          python -m py_compile dev/perf/import-record-field-screen-20261127-5a86.py
-          npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-direct-field-columns.test.js
-          npm run test:ts:main
-          npm run test:ts:test
+          python -m py_compile dev/perf/import-record-field-screen-20261127-5a86.py 2>&1 | tee builds/perf/record-field-lengths-validation/python.log
+          npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-direct-field-columns.test.js 2>&1 | tee builds/perf/record-field-lengths-validation/lint.log
+          npm run test:ts:main 2>&1 | tee builds/perf/record-field-lengths-validation/types-main.log
+          npm run test:ts:test 2>&1 | tee builds/perf/record-field-lengths-validation/types-test.log
           npm run test:unit 2>&1 | tee builds/perf/record-field-lengths-validation/unit.log
           npm run test:build 2>&1 | tee builds/perf/record-field-lengths-validation/build.log
           python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' 2>&1 | tee builds/perf/record-field-lengths-validation/observers.log

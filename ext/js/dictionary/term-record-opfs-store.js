@@ -5836,6 +5836,7 @@ view.chunks :
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
      * @returns {Uint8Array}
+     * @throws {RangeError} If a resolved content reference index is out of bounds.
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;

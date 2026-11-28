@@ -771,3 +771,10 @@ packages, memory scans, audits, and failures are retained in hosted artifacts.
 Jitendex and VNDB controls are deferred until JMdict shows a review-worthy
 benefit. A code branch and CI acquisition do not establish a speedup; no pull
 request should be opened from this experiment without useful measured evidence.
+
+The initial hosted attempt
+[46102040540](https://github.com/ManabiIO/manabitan/actions/runs/46102040540)
+stopped at scoped ESLint because the new direct throw needed an explicit
+`@throws` declaration. No browser observation started. The follow-up adds that
+declaration without changing runtime logic and preserves early validation logs
+as artifacts. That failed attempt remains separate from the corrected cohort.
