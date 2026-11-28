@@ -1,0 +1,17 @@
+{
+  "artifactId": 15036875013,
+  "runId": 45641794563,
+  "artifactName": "manabitan-perf-runtime-linux-x64",
+  "artifactSha256": "730bf0ff41672e27d0c87ef4675cf96e49ba5a4524045a9cd77cf6b7a3ced471",
+  "artifactShaVerified": true,
+  "nodeVersion": "v24.20.0",
+  "chromiumVersion": "153.0.8010.12",
+  "runtimePath": "/workspace/scratch/4990c2c9ba7c/browser-runtime",
+  "baselineSource": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselinePackageSha256": "03fae85d4b97911d9be8a0a233d75cf211b5d0d4f7c70b04274274640f366b8d",
+  "attempt": "/tmp/manabitan-4990-evidence/baseline-jmdict",
+  "outcome": "Browser startup failed before extension loading; no timing observation",
+  "failure": "process_singleton_posix.cc:297 socket() failed: Operation not permitted (1)",
+  "sourceChanged": false,
+  "escalationAttempted": false
+}

@@ -1,0 +1,27 @@
+{
+    "schemaVersion": 1,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "23781611da3b3c86f8524ac774487692490c4040",
+    "candidateTree": "e8ce94546ab01d6bd69918f3306ce711294dd94d",
+    "localCandidateEquivalent": "337b1f0508c18bed3c5e3a7c5e872b9c915296bc",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "browserVersion": "153.0.8010.12",
+    "nodeVersion": "v22.22.0",
+    "parserWasmSha256": {
+        "A": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "B": "1b83a1a90a794d03a740de437facf3a487e5df5f8c2f5be380b1b54215843379"
+    },
+    "expectedPackageChanges": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+    ],
+    "vndbSahAllocationUnits": [37, 37],
+    "vndbSahAllocationPolicy": "Current baseline-bound 4096-byte allocation units; exact complete file-size equality remains required across every observation.",
+    "control": "A and C use the same immutable baseline package in independent fresh browser profiles.",
+    "timingPlan": "Three warmups followed by six balanced ABC permutations. The second independent hosted job reverses each block. No retries or appended observations.",
+    "timingBoundary": "Unchanged file-input change through post-UI import completion. No product or timing-harness overlay. First-use work is not deferred by this native parser change.",
+    "diagnostics": "Complete per-corpus native output parity precedes timing. Exhaustive media and four separately instrumented process-memory observations follow timing. Separate baseline and candidate browser traces follow all timing and memory observations.",
+    "memoryPolicy": "Existing complete-process-tree observer and fixed coverage rules, median PSS/private growth at most 5%, each individual pair at most 10%. Both independent host results remain separate.",
+    "statistics": "Six within-block B/A, B/C and unchanged C/A comparisons per host. Descriptive paired percentile bootstrap, 10000 resamples, seed 20261127. No control subtraction or pooling across hosts/corpora.",
+    "promotion": "No automatic promotion. Runtime PR requires a repeatable complete-import benefit worth review plus correctness and memory assessment. All raw observations and failures remain available."
+}

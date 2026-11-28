@@ -1,0 +1,97 @@
+[perf-import] JMdict run 1/1
+[chromium-e2e] Wrote report: /tmp/manabitan-4990-evidence/baseline-jmdict/run-1.html
+[chromium-e2e] Wrote report json: /tmp/manabitan-4990-evidence/baseline-jmdict/run-1.json
+[chromium-e2e] Wrote combined report: /workspace/scratch/4990c2c9ba7c/profile-experiments/builds/extension-e2e-report.html
+file:///workspace/scratch/4990c2c9ba7c/profile-experiments/test/chromium/extension-two-dictionary-import.e2e.js:5979
+            runError = new Error(withE2ETag(failureReason));
+                       ^
+
+Error: [chromium-e2e] browserType.launchPersistentContext: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --disable-features=MacAppCodeSignClone --disable-extensions-except=/tmp/manabitan-chromium-ext-SzF8KX --load-extension=/tmp/manabitan-chromium-ext-SzF8KX --user-data-dir=/tmp/manabitan-chromium-profile-sLGpe7 --remote-debugging-pipe about:blank
+<launched> pid=36
+[pid=36][err] [36:36:1127/215214.749455:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+[pid=36][err] [1127/215214.754382:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+[pid=36][err] Received signal 6
+[pid=36][err] #0 0x559b1bedbbc3 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6a9abc2)
+[pid=36][err] #1 0x559b20ba1494 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb760493)
+[pid=36][err] #2 0x7f455765fd70 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x3fd6f)
+[pid=36][err] #3 0x559b20b5814d (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb71714c)
+[pid=36][err] #4 0x559b20b580de (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7170dd)
+[pid=36][err] #5 0x559b1bca2603 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6861602)
+[pid=36][err] #6 0x559b19105eb9 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3cc4eb8)
+[pid=36][err] #7 0x559b20b582c0 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7172bf)
+[pid=36][err] #8 0x559b191f2829 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3db1828)
+[pid=36][err] #9 0x559b1b176488 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d35487)
+[pid=36][err] #10 0x559b1b175737 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34736)
+[pid=36][err] #11 0x559b1b17559f (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d3459e)
+[pid=36][err] #12 0x559b1b175564 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34563)
+[pid=36][err] #13 0x559b1a25573b (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e1473a)
+[pid=36][err] #14 0x559b1a254953 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e13952)
+[pid=36][err] #15 0x559b1b410106 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcf105)
+[pid=36][err] #16 0x559b1b40f7a9 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fce7a8)
+[pid=36][err] #17 0x559b1b40eb00 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcdaff)
+[pid=36][err] #18 0x7f4557649ca8 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x29ca7)
+[pid=36][err]   r8: 00002de8000706bb  r9: 0000000000000001 r10: 00002de8000706bb r11: 0000000000000246
+[pid=36][err]  r12: 00007ffcc8ef2838 r13: 0000000000000006 r14: 000000000000008b r15: 00002de8000f0500
+[pid=36][err]   di: 0000000000000024  si: 0000000000000024  bp: 00007ffcc8ef27d0  bx: 0000000000000024
+[pid=36][err]   dx: 0000000000000006  ax: 0000000000000000  cx: 00007f45576b469c  sp: 00007ffcc8ef26c0
+[pid=36][err]   ip: 00007f45576b469c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000
+[pid=36][err]  trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000
+[pid=36][err] [end of stack trace]
+Call log:
+[2m  - <launching> /workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --disable-features=MacAppCodeSignClone --disable-extensions-except=/tmp/manabitan-chromium-ext-SzF8KX --load-extension=/tmp/manabitan-chromium-ext-SzF8KX --user-data-dir=/tmp/manabitan-chromium-profile-sLGpe7 --remote-debugging-pipe about:blank[22m
+[2m  - <launched> pid=36[22m
+[2m  - [pid=36][err] [36:36:1127/215214.749455:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)[22m
+[2m  - [pid=36][err] [1127/215214.754382:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)[22m
+[2m  - [pid=36][err] Received signal 6[22m
+[2m  - [pid=36][err] #0 0x559b1bedbbc3 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6a9abc2)[22m
+[2m  - [pid=36][err] #1 0x559b20ba1494 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb760493)[22m
+[2m  - [pid=36][err] #2 0x7f455765fd70 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x3fd6f)[22m
+[2m  - [pid=36][err] #3 0x559b20b5814d (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb71714c)[22m
+[2m  - [pid=36][err] #4 0x559b20b580de (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7170dd)[22m
+[2m  - [pid=36][err] #5 0x559b1bca2603 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6861602)[22m
+[2m  - [pid=36][err] #6 0x559b19105eb9 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3cc4eb8)[22m
+[2m  - [pid=36][err] #7 0x559b20b582c0 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7172bf)[22m
+[2m  - [pid=36][err] #8 0x559b191f2829 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3db1828)[22m
+[2m  - [pid=36][err] #9 0x559b1b176488 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d35487)[22m
+[2m  - [pid=36][err] #10 0x559b1b175737 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34736)[22m
+[2m  - [pid=36][err] #11 0x559b1b17559f (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d3459e)[22m
+[2m  - [pid=36][err] #12 0x559b1b175564 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34563)[22m
+[2m  - [pid=36][err] #13 0x559b1a25573b (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e1473a)[22m
+[2m  - [pid=36][err] #14 0x559b1a254953 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e13952)[22m
+[2m  - [pid=36][err] #15 0x559b1b410106 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcf105)[22m
+[2m  - [pid=36][err] #16 0x559b1b40f7a9 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fce7a8)[22m
+[2m  - [pid=36][err] #17 0x559b1b40eb00 (/workspace/scratch/4990c2c9ba7c/browser-runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcdaff)[22m
+[2m  - [pid=36][err] #18 0x7f4557649ca8 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x29ca7)[22m
+[2m  - [pid=36][err]   r8: 00002de8000706bb  r9: 0000000000000001 r10: 00002de8000706bb r11: 0000000000000246[22m
+[2m  - [pid=36][err]  r12: 00007ffcc8ef2838 r13: 0000000000000006 r14: 000000000000008b r15: 00002de8000f0500[22m
+[2m  - [pid=36][err]   di: 0000000000000024  si: 0000000000000024  bp: 00007ffcc8ef27d0  bx: 0000000000000024[22m
+[2m  - [pid=36][err]   dx: 0000000000000006  ax: 0000000000000000  cx: 00007f45576b469c  sp: 00007ffcc8ef26c0[22m
+[2m  - [pid=36][err]   ip: 00007f45576b469c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000[22m
+[2m  - [pid=36][err]  trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000[22m
+[2m  - [pid=36][err] [end of stack trace][22m
+[2m  - [pid=36] <gracefully close start>[22m
+[2m  - [pid=36] <kill>[22m
+[2m  - [pid=36] <will force kill>[22m
+[2m  - [pid=36] <process did exit: exitCode=null, signal=SIGABRT>[22m
+[2m  - [pid=36] starting temporary directories cleanup[22m
+[2m  - [pid=36] finished temporary directories cleanup[22m
+[2m  - [pid=36] <gracefully close end>[22m
+
+    at main (file:///workspace/scratch/4990c2c9ba7c/profile-experiments/test/chromium/extension-two-dictionary-import.e2e.js:5979:24)
+    at async file:///workspace/scratch/4990c2c9ba7c/profile-experiments/test/chromium/extension-two-dictionary-import.e2e.js:6028:1
+
+Node.js v24.20.0
+file:///workspace/scratch/4990c2c9ba7c/profile-experiments/dev/perf/import-benchmark.js:119
+                reject(new Error(`Command failed code=${String(code)} signal=${String(signal)}: ${command} ${args.join(' ')}`));
+                       ^
+
+Error: Command failed code=1 signal=null: /workspace/scratch/4990c2c9ba7c/browser-runtime/node/bin/node /workspace/scratch/4990c2c9ba7c/profile-experiments/test/chromium/extension-two-dictionary-import.e2e.js
+    at ChildProcess.<anonymous> (file:///workspace/scratch/4990c2c9ba7c/profile-experiments/dev/perf/import-benchmark.js:119:24)
+    at ChildProcess.emit (node:events:514:28)
+    at maybeClose (node:internal/child_process:1141:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:306:5)
+
+Node.js v24.20.0
