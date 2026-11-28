@@ -33,11 +33,13 @@ const instances = new WeakMap();
 /* eslint-disable @typescript-eslint/unbound-method -- Captured intrinsics are applied explicitly or compared by identity. */
 const ChecksumUint8 = Uint8Array
 const checksumUint8Prototype = ChecksumUint8.prototype
+/** @type {unknown} */
 const checksumTypedPrototype = /** @type {object} */ (Object.getPrototypeOf(checksumUint8Prototype))
 const checksumGetPrototypeOf = Object.getPrototypeOf
 const checksumHasOwn = Object.hasOwn
 const checksumDescriptor = Object.getOwnPropertyDescriptor
 const checksumApply = Reflect.apply
+/** @type {(this: WeakMap<WebAssembly.Memory, CanonicalInstance>, key: WebAssembly.Memory) => CanonicalInstance|undefined} */
 const checksumWeakMapGet = WeakMap.prototype.get
 const checksumIsView = ArrayBuffer.isView
 const checksumGetBuffer = /** @type {() => ArrayBufferLike} */ (checksumDescriptor(checksumTypedPrototype, 'buffer')?.get)
