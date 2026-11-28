@@ -51,6 +51,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/dense-zip-file-map.js',
     'ext/js/dictionary/dense-zip-filenames.js',
     'ext/js/dictionary/dictionary-image-references.js',
+    'ext/js/dictionary/dictionary-media-diagnostics.js',
     'ext/js/dictionary/dictionary-generation-media-store.js',
     'ext/js/dictionary/source-zip-media-pack.js',
     'ext/js/dictionary/source-zip-media-preparation.js',

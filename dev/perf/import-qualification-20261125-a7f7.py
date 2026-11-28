@@ -17,7 +17,6 @@ import statistics
 import subprocess
 import sys
 import time
-import zipfile
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--baseline", required=True)
@@ -29,6 +28,8 @@ parser.add_argument("--evidence", type=pathlib.Path, required=True)
 parser.add_argument("--flags", default="{}")
 parser.add_argument("--expected-workers", type=int)
 parser.add_argument("--expected-package-entry", action="append", required=True)
+parser.add_argument("--expected-added-package-entry", action="append", default=[],
+                    help="Exact permitted added package member; repeat as needed, default: no additions")
 parser.add_argument("--vndb-sah-allocation-units", type=int, nargs=2, metavar=("MIN", "MAX"),
                     help="Prospective VNDB active SAH allocation range in 4096-byte units; default: historical 129–131")
 args = parser.parse_args()
@@ -50,6 +51,7 @@ from qualification_receipts import (
     SAH_ALLOCATION_UNIT_BYTES, validate_import_summary, require_matching_receipts,
     validate_vndb_sah_allocation_units,
 )
+from qualification_packages import read_package_manifest, write_package_identity_receipt
 
 if args.vndb_sah_allocation_units is not None and args.dictionary != "vndb":
     parser.error("An explicit VNDB SAH allocation range requires --dictionary vndb")
@@ -88,16 +90,6 @@ def digest(path):
         for block in iter(lambda: data.read(1024 * 1024), b""):
             result.update(block)
     return result.hexdigest()
-
-def package_entries(path):
-    with zipfile.ZipFile(path) as package:
-        names = [item.filename for item in package.infolist()]
-        if len(names) != len(set(names)):
-            raise RuntimeError(f"Duplicate package member names: {path}")
-        return {
-            item.filename: hashlib.sha256(package.read(item)).hexdigest()
-            for item in package.infolist() if not item.is_dir()
-        }
 
 sources = {}
 identities = {}
@@ -148,7 +140,7 @@ for label, sha in (("A", args.baseline), ("B", args.candidate)):
         "sha": git("rev-parse", "HEAD", cwd=target),
         "tree": git("rev-parse", "HEAD^{tree}", cwd=target),
         "packageSha256": digest(archive),
-        "entries": package_entries(archive),
+        **read_package_manifest(archive),
         "lockSha256": digest(target / "package-lock.json"),
         "fixtureLockSha256": digest(target / "test/perf/dictionaries.lock.json"),
         "sourceHashes": {path: digest(target / path) if (target / path).is_file() else None for path in provenance_paths},
@@ -157,20 +149,10 @@ for label, sha in (("A", args.baseline), ("B", args.candidate)):
         raise RuntimeError(f"Unexpected source changes after building arm {label}")
     sources[label] = target
     shutil.copyfile(archive, evidence / f"package-{label}.zip")
-if identities["A"]["entries"].keys() != identities["B"]["entries"].keys():
-    raise RuntimeError("Candidate changes the set of packaged files")
-changed_entries = [
-    name for name in identities["A"]["entries"]
-    if identities["A"]["entries"][name] != identities["B"]["entries"][name]
-]
-write_json(evidence / "source-identities.json", {
-    "arms": identities, "changedPackageEntries": changed_entries,
-    "controlC": "Same A source, package, runtime, and flags under a distinct observation label",
-})
-if not changed_entries:
-    raise RuntimeError("Candidate has no changed runtime package bytes")
-if set(changed_entries) != set(args.expected_package_entry):
-    raise RuntimeError(f"Unexpected packaged changes: {changed_entries}")
+write_package_identity_receipt(
+    evidence / "source-identities.json", identities,
+    args.expected_package_entry, args.expected_added_package_entry,
+)
 
 schedule = []
 first = args.initial_order
@@ -195,6 +177,7 @@ write_json(evidence / "registered-plan.json", {
     "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
     "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
     "expectedPackageEntries": args.expected_package_entry,
+    "expectedAddedPackageEntries": args.expected_added_package_entry,
     "expectedWorkers": args.expected_workers,
     "vndbSahAllocationPolicy": {
         "unitBytes": SAH_ALLOCATION_UNIT_BYTES,
