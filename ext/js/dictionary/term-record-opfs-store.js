@@ -2231,6 +2231,18 @@ export class TermRecordOpfsStore {
             this._loadedDictionaryNames.delete(chunk.dictionary);
             this._allShardContentsLoaded = false;
         } else {
+            /* eslint-disable @stylistic/semi */
+            let materializedStringsBuffer = stableStringsBuffer ?? EMPTY_BYTES
+            if (hasStableStringSlices && chunk.preparedLookupIndexes instanceof Map) {
+                for (const {bytes} of chunk.preparedLookupIndexes.values()) {
+                    if (bytes.buffer !== materializedStringsBuffer.buffer) { continue }
+                    // Cached records must retain only their key arena, even
+                    // when a worker plan borrows the owned lookup container.
+                    materializedStringsBuffer = new Uint8Array(materializedStringsBuffer)
+                    break
+                }
+            }
+            /* eslint-enable @stylistic/semi */
             this._recordsById.ensureCapacity(firstId + count - 1);
             const existingIndex = this._deferIndexBuild ? void 0 : this._indexByDictionary.get(chunk.dictionary);
             for (let i = 0; i < count; ++i) {
@@ -2244,10 +2256,10 @@ export class TermRecordOpfsStore {
                 const expressionOffset = hasStableExpression ? stableStringOffsets[expressionIndex] : 0;
                 const readingOffset = hasStableReading ? stableStringOffsets[readingIndex] : 0;
                 const expressionBytes = hasStableExpression ?
-                    stableStringsBuffer.subarray(expressionOffset, expressionOffset + stableStringLengths[expressionIndex]) :
+                    materializedStringsBuffer.subarray(expressionOffset, expressionOffset + stableStringLengths[expressionIndex]) :
                     chunk.expressionBytesList[i];
                 const readingBytes = hasStableReading ?
-                    stableStringsBuffer.subarray(readingOffset, readingOffset + stableStringLengths[readingIndex]) :
+                    materializedStringsBuffer.subarray(readingOffset, readingOffset + stableStringLengths[readingIndex]) :
                     chunk.readingBytesList[i];
                 /** @type {TermRecord} */
                 const record = {

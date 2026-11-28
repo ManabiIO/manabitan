@@ -100,10 +100,11 @@ function digestIndexes(indexes) {
  * @param {Uint8Array[]} banks
  * @param {Flags} [flags={}]
  * @param {boolean} [preload=false]
+ * @param {boolean} [reuseOwnedLookupPlan=false]
  * @returns {Promise<{chunk: Chunk, indexes: Map<string, import('../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>, profile: ReturnType<typeof consumeLastTermBankWasmParseProfile>}>}
  * @throws {Error} If the parser omits results.
  */
-async function parse(banks, flags = {}, preload = false) {
+async function parse(banks, flags = {}, preload = false, reuseOwnedLookupPlan = false) {
     // Keep the portable oracle explicit after production native promotion.
     flags = {experimentalNativeSegmentedLookup: false, experimentalLookupScratchReuse: false, ...flags}
     const preloadedSource = preload ?
@@ -115,7 +116,7 @@ async function parse(banks, flags = {}, preload = false) {
         undefined
     /** @type {Chunk|null} */
     let result = null
-    await parseTermBankWithWasmColumnChunks(preload ? new Uint8Array(0) : banks, 3, (chunk) => { result = copyWasmBackedColumnChunk(chunk) }, 2048, {
+    await parseTermBankWithWasmColumnChunks(preload ? new Uint8Array(0) : banks, 3, (chunk) => { result = copyWasmBackedColumnChunk(chunk, false, false, false, void 0, reuseOwnedLookupPlan) }, 2048, {
         ...flags,
         preloadedSource,
         singleChunk: true,
@@ -419,10 +420,11 @@ describe('lookup construction experiments', () => {
         const banks = makeBanks(90001)
         const baseline = await parse(banks)
         const expected = digestIndexes(baseline.indexes)
-        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, false, true)
         expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(4)
         expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 90001)).toBe(true)
         expect(digestIndexes(candidate.indexes)).toBe(expected)
+        expect(candidate.chunk.termRecordPreinternedPlan.expressionIndexes).toBeInstanceOf(Uint32Array)
         for (const [key, value] of candidate.indexes) {
             const start = Number(key.split(':')[0])
             const count = Number(key.split(':')[1])
@@ -433,6 +435,7 @@ describe('lookup construction experiments', () => {
             expect(value.preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
             expect(value.preinternedPlan.stringOffsets).toBeUndefined()
             expect(value.bytes.buffer).toBeInstanceOf(ArrayBuffer)
+            expect(candidate.chunk.termRecordPreinternedPlan.stringsBuffer.buffer).not.toBe(value.bytes.buffer)
             // A sink can re-encode any subset if content-offset or dictionary
             // boundaries split a prepared segment. Check every row in two runs,
             // including the final one-row segment, against explicit offsets.

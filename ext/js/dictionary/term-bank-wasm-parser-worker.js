@@ -159,7 +159,8 @@ async function parse(data) {
                 )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
                 /* eslint-enable @stylistic/semi */
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
+                // eslint-disable-next-line @stylistic/semi
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource, true)
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer

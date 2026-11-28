@@ -80,6 +80,7 @@ const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {chunk: TermBankColumnChunk, plan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, indexes: NonNullable<TermBankColumnChunk['preparedLookupIndexes']>, prepared: import('./term-lookup-index-preparation.js').PreparedTermLookupIndex, bytes: Uint8Array, rowCount: number}} OwnedWholeLookupPlanReceipt */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -113,6 +114,9 @@ const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
 let suppliedWasmModule = null;
+/** @type {ReturnType<typeof createOwnedWholeLookupPlanReceipt>} */
+// eslint-disable-next-line @stylistic/semi
+let activeOwnedWholeLookupPlanReceipt = null
 
 // Tokens are fields within JSON, not standalone documents with a BOM.
 /** @type {TextDecoder} */
@@ -2553,6 +2557,9 @@ null :
                 termRecordPreinternedPlan,
                 mediaRows,
             };
+            /** @type {ReturnType<typeof createOwnedWholeLookupPlanReceipt>} */
+            // eslint-disable-next-line @stylistic/semi
+            let ownedWholeLookupPlanReceipt = null
             if (
                 options.compactContentMetadata === true && emitContentSlab &&
                 start === 0 && end === rowCount && contentDedupPlan !== null &&
@@ -2614,6 +2621,11 @@ null :
                         [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
                     ]);
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
+                    /* eslint-disable @stylistic/semi */
+                    if (start === 0 && end === rowCount) {
+                        ownedWholeLookupPlanReceipt = createOwnedWholeLookupPlanReceipt(chunk, bytes)
+                    }
+                    /* eslint-enable @stylistic/semi */
                 } else if (nativeCompactionScratch !== null) {
                     ++nativeSegmentedLookupFallbacks;
                 }
@@ -2628,7 +2640,18 @@ null :
             const invokeColumnChunk = async () => {
                 if (dispatchStopped) { return; }
                 const tDispatchStart = Date.now();
-                const result = onChunk(chunk, progress);
+                /* eslint-disable @stylistic/semi */
+                // Only the worker's immediate copy may consume this receipt.
+                // Never retain it across a callback's asynchronous continuation.
+                activeOwnedWholeLookupPlanReceipt = ownedWholeLookupPlanReceipt
+                let result
+                try {
+                    result = onChunk(chunk, progress)
+                } finally {
+                    activeOwnedWholeLookupPlanReceipt = null
+                    ownedWholeLookupPlanReceipt = null
+                }
+                /* eslint-enable @stylistic/semi */
                 await result;
                 chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
             };
@@ -4099,16 +4122,98 @@ function tryProjectNativeGlossaryImagePath(row, source) {
     return getImageMediaTypeFromFileName(path) === null ? null : [path];
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Called only after the native encoder validates and copies a complete group's
+ * lookup index. Bind its original views without publishing a reusable claim.
+ * @param {TermBankColumnChunk} chunk
+ * @param {Uint8Array} bytes
+ * @returns {OwnedWholeLookupPlanReceipt|null}
+ */
+function createOwnedWholeLookupPlanReceipt(chunk, bytes) {
+    const plan = chunk.termRecordPreinternedPlan
+    const indexes = chunk.preparedLookupIndexes
+    if (!(indexes instanceof Map)) { return null }
+    const prepared = indexes.get(`0:${chunk.rowCount}`)
+    if (typeof prepared === 'undefined' || prepared.preinternedPlan !== plan || prepared.bytes !== bytes) { return null }
+    return {
+        chunk,
+        plan,
+        indexes,
+        prepared,
+        bytes,
+        rowCount: chunk.rowCount,
+        stringLengths: plan.stringLengths,
+        stringOffsets: plan.stringOffsets,
+        stringHashes: plan.stringHashes,
+        stringsBuffer: plan.stringsBuffer,
+        expressionIndexes: plan.expressionIndexes,
+        readingIndexes: plan.readingIndexes,
+    }
+}
+
+/**
+ * A one-use capability for the worker's synchronous, unmodified native result.
+ * General copies and delayed, replaced, or partial results retain independent
+ * columns. The persisted reading column uses sentinels and is never adopted.
+ * @param {TermBankColumnChunk} chunk
+ * @param {boolean} reuseOwnedLookupPlan
+ * @returns {{stringsBuffer: Uint8Array, stringLengths: Uint16Array, expressionIndexes: Uint16Array}|null}
+ */
+function takeOwnedWholeLookupPlan(chunk, reuseOwnedLookupPlan) {
+    const receipt = activeOwnedWholeLookupPlanReceipt
+    activeOwnedWholeLookupPlanReceipt = null
+    if (!reuseOwnedLookupPlan || receipt === null || receipt.chunk !== chunk) { return null }
+    const plan = chunk.termRecordPreinternedPlan
+    const {bytes, prepared} = receipt
+    const rowCount = receipt.rowCount
+    const keyCount = receipt.stringLengths.length
+    const keyBytes = receipt.stringsBuffer.byteLength
+    const lengthsOffset = 48 + Math.ceil(keyBytes / 4) * 4
+    const expressionsOffset = lengthsOffset + keyCount * 2
+    if (
+        plan !== receipt.plan || chunk.rowCount !== rowCount ||
+        chunk.preparedLookupIndexes !== receipt.indexes || receipt.indexes?.size !== 1 ||
+        receipt.indexes.get(`0:${rowCount}`) !== prepared ||
+        prepared.bytes !== bytes || prepared.preinternedPlan !== plan ||
+        plan.stringLengths !== receipt.stringLengths || plan.stringOffsets !== receipt.stringOffsets ||
+        plan.stringHashes !== receipt.stringHashes || plan.stringsBuffer !== receipt.stringsBuffer ||
+        plan.expressionIndexes !== receipt.expressionIndexes || plan.readingIndexes !== receipt.readingIndexes ||
+        rowCount <= 0 || rowCount >= 0xffff || keyCount <= 0 || keyCount >= 0xffff ||
+        !(plan.expressionIndexes instanceof Uint32Array) || plan.expressionIndexes.length !== rowCount ||
+        plan.readingIndexes.length !== rowCount ||
+        !(bytes.buffer instanceof ArrayBuffer) || bytes.buffer === plan.stringsBuffer.buffer ||
+        bytes.byteOffset !== 0 || bytes.byteLength !== bytes.buffer.byteLength ||
+        expressionsOffset + rowCount * 2 > bytes.byteLength
+    ) { return null }
+    const header = new DataView(bytes.buffer, 0, 48)
+    if (
+        header.getUint32(0, true) !== 0x37494c4d || header.getUint32(4, true) !== 7 ||
+        16 + header.getUint32(8, true) + header.getUint32(12, true) !== bytes.byteLength ||
+        header.getUint32(16, true) !== rowCount || header.getUint32(20, true) !== keyCount ||
+        header.getUint32(24, true) !== keyBytes || header.getUint32(28, true) !== 7
+    ) { return null }
+    return {
+        stringsBuffer: bytes.subarray(48, 48 + keyBytes),
+        stringLengths: new Uint16Array(bytes.buffer, lengthsOffset, keyCount),
+        expressionIndexes: new Uint16Array(bytes.buffer, expressionsOffset, rowCount),
+    }
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
  * @param {boolean} [prepareLookupRoute=false]
  * @param {PreloadedTermBankSource} [preloadedSource]
+ * @param {boolean} [reuseOwnedLookupPlan=false] Worker-only adoption of its immediate, unmodified native result.
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0, reuseOwnedLookupPlan = false) {
+    // eslint-disable-next-line @stylistic/semi
+    const ownedLookupPlan = takeOwnedWholeLookupPlan(chunk, reuseOwnedLookupPlan)
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4143,7 +4248,8 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
-    const ownedStrings = new Uint8Array(plan.stringsBuffer);
+    // eslint-disable-next-line @stylistic/semi
+    const ownedStrings = ownedLookupPlan?.stringsBuffer ?? new Uint8Array(plan.stringsBuffer)
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             (tryProjectNativeGlossaryImagePath(row, preloadedSource) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
@@ -4170,7 +4276,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         };
     });
     const stablePlan = {
-        stringLengths: new Uint16Array(plan.stringLengths),
+        stringLengths: ownedLookupPlan?.stringLengths ?? new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             new Uint32Array(stringOffsets),
@@ -4182,7 +4288,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     void 0
             ),
         stringsBuffer: ownedStrings,
-        expressionIndexes: new Uint32Array(plan.expressionIndexes),
+        expressionIndexes: ownedLookupPlan?.expressionIndexes ?? new Uint32Array(plan.expressionIndexes),
         readingIndexes: new Uint32Array(plan.readingIndexes),
     };
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */

@@ -17,7 +17,7 @@
 
 /* eslint @stylistic/semi: ["error", "never"] */
 
-import {describe, expect, test} from 'vitest'
+import {describe, expect, test, vi} from 'vitest'
 import {
     compactTermRecordPreinternedPlan,
     compactTermRecordPreinternedPlanRuns,
@@ -191,5 +191,85 @@ describe('compact expression columns in prepared term plans', () => {
         expect(actual.recordFields).toEqual(expected.recordFields)
         expect(actual.recordFieldsFormat).toBe(expected.recordFieldsFormat)
         expect(actual.contentOffsetBase).toBe(expected.contentOffsetBase)
+    })
+
+    test.each([false, true])('materialized records retain only the key arena with an aliased lookup=%s', async (alias) => {
+        const store = new TermRecordOpfsStore()
+        const plan = makePlan()
+        const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(plan, equals, sequences, 4)
+        if (alias) {
+            const persisted = parsePersistedTermLookupIndex(bytes)
+            plan.stringsBuffer = persisted.keyBytes
+            plan.expressionIndexes = persisted.expressionKeys
+        }
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: 'Owned key arena',
+            rowCount: 4,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList: equals,
+            scoreList: new Int32Array([3, 4, 3, 0]),
+            sequenceList: sequences,
+            termRecordPreinternedPlan: plan,
+            preparedLookupIndexes: new Map([['0:4', {bytes, preinternedPlan: plan}]]),
+        }, [0, 16, 32, 0], [16, 16, 16, 16], 'raw')
+        const records = [...Reflect.get(store, '_recordsById').values()]
+        expect(records).toHaveLength(4)
+        for (const record of records) {
+            const {expressionBytes} = record
+            if (!(expressionBytes instanceof Uint8Array)) { throw new Error('Missing materialized expression bytes') }
+            expect(expressionBytes.buffer.byteLength).toBe(plan.stringsBuffer.byteLength)
+            expect(expressionBytes.buffer).not.toBe(bytes.buffer)
+            expect(expressionBytes.buffer === plan.stringsBuffer.buffer).toBe(!alias)
+        }
+        expect([...store.getByIds([1, 2, 3, 4]).values()].map((record) => [record.expression, record.reading]))
+            .toEqual([['a', 'b'], ['c', 'd'], ['e', 'e'], ['a', 'a']])
+    })
+
+    test('recompacts an owned whole plan when content offsets split its prepared lookup range', async () => {
+        const original = makePlan()
+        const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(original, equals, sequences, 4)
+        const persisted = parsePersistedTermLookupIndex(bytes)
+        const plan = {...original, stringsBuffer: persisted.keyBytes, expressionIndexes: persisted.expressionKeys}
+        const wide = {...original, expressionIndexes: Uint32Array.from(original.expressionIndexes)}
+        const chunk = {
+            dictionary: 'Split owned lookup',
+            rowCount: 4,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList: equals,
+            scoreList: new Int32Array([3, 4, 3, 0]),
+            sequenceList: sequences,
+        }
+        /**
+         * @param {typeof plan|typeof wide} sourcePlan
+         * @returns {Promise<unknown[][]>}
+         */
+        const encode = async (sourcePlan) => {
+            const store = new TermRecordOpfsStore()
+            const append = vi.spyOn(store, '_appendEncodedChunk').mockResolvedValue()
+            await store._encodeAndAppendArtifactChunkForState(
+                /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
+                chunk,
+                7,
+                new Float64Array([0, 16, 0x100000020, 8]),
+                new Uint32Array([16, 16, 16, 16]),
+                sourcePlan,
+                'raw',
+                new Map([['0:4', {bytes, preinternedPlan: sourcePlan}]]),
+            )
+            const calls = append.mock.calls.map((args) => args.slice(1))
+            append.mockRestore()
+            return calls
+        }
+        const actual = await encode(plan)
+        expect(actual).toEqual(await encode(wide))
+        expect(actual.map((args) => args.slice(0, 4))).toEqual([
+            [7, 2, 'raw', 0],
+            [9, 1, 'raw', 0x100000020],
+            [10, 1, 'raw', 8],
+        ])
+        expect(plan.expressionIndexes).toEqual(new Uint16Array([0, 2, 4, 0]))
+        expect(plan.readingIndexes).toEqual(new Uint32Array([1, 3, 4, 0]))
     })
 })
