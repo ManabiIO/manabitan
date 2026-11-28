@@ -97,6 +97,27 @@ describe('direct resolved record-field columns', () => {
         expect([...new Int32Array(second.buffer, 16, 2)]).toEqual([-9688, -10200])
     })
 
+    test('preserves scores outside the inline range after the bounded eligibility prefix', () => {
+        const chunk = fixture(256)
+        chunk.scoreList.fill(-200)
+        chunk.scoreList[chunk.rowCount - 1] = -10200
+        const actual = encodeDirect(chunk)
+        expect(actual).toEqual(encodeGeneric(chunk))
+        expect([...new Int32Array(actual.buffer, 16, 2)]).toEqual([-200, -10200])
+    })
+
+    test('rechecks cache eligibility when the score prefix changes between calls', () => {
+        const chunk = fixture()
+        chunk.scoreList.fill(-200)
+        const original = encodeDirect(chunk)
+        chunk.scoreList[0] = -10200
+        const changed = encodeDirect(chunk)
+        expect(changed).toEqual(encodeGeneric(chunk))
+        expect([...new Int32Array(changed.buffer, 16, 2)]).toEqual([-10200, -200])
+        chunk.scoreList[0] = -200
+        expect(encodeDirect(chunk)).toEqual(original)
+    })
+
     test('writes field columns into the final allocation without copying staged offsets or lengths', () => {
         const chunk = fixture()
         const expected = encodeGeneric(chunk)

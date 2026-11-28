@@ -103,6 +103,7 @@ const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
 const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const COMPACT_SCORE_CACHE_SLOTS = 512;
+const COMPACT_SCORE_CACHE_PROBE_ROWS = 32;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
 const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
@@ -437,6 +438,23 @@ function getSynchronousRecordFieldReferences(chunk, count) {
     return references
 }
 /* eslint-enable @stylistic/semi */
+
+/**
+ * Keeps small scores on the established direct table. The prefix is only an
+ * eligibility heuristic: a later score outside the table still uses the
+ * general encoder correctly when this probe does not select the cache.
+ * @param {Int32Array} scoreList Private, ordinary columns proved by the caller.
+ * @param {number} count
+ * @returns {boolean}
+ */
+function shouldCacheCompactRecordScores(scoreList, count) {
+    const end = Math.min(count, COMPACT_SCORE_CACHE_PROBE_ROWS);
+    for (let i = 0; i < end; ++i) {
+        const score = scoreList[i];
+        if (score < -COMPACT_SCORE_TABLE_RADIUS || score >= COMPACT_SCORE_TABLE_RADIUS) { return true; }
+    }
+    return false;
+}
 
 /**
  * Encodes first-use score keys for private, stable Int32 columns. A bounded
@@ -5909,7 +5927,10 @@ view.chunks :
         /** @type {number[]} */
         let scores = [];
         let compact = true;
-        if (directReferences !== null && count >= COMPACT_SCORE_TABLE_MIN_ROWS) {
+        if (
+            directReferences !== null && count >= COMPACT_SCORE_TABLE_MIN_ROWS &&
+            shouldCacheCompactRecordScores(/** @type {Int32Array} */ (chunk.scoreList), count)
+        ) {
             // The origin proof also establishes private, ordinary Int32 scores.
             // No caller-controlled reads or await separate this scan and output.
             const cachedScores = encodeCachedCompactRecordScores(
