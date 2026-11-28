@@ -1,0 +1,4 @@
+5fa32ade84367d0b890791d5bd82d392002d1e380da214741f8707046542a981  builds/perf/native-components-20261128-92c09/native-delimiter-screen.mjs
+5c8153bc0c6d197385f4feb496939e752a5311d891cf7bdeb1b4bee96e03b34c  builds/perf/native-components-20261128-92c09/crc-powers-verifier-screen.mjs
+8995a2b2aece95126778a2ca6082a9fb7e68edd9046df116b29d4347f79ebd76  builds/perf/native-components-20261128-92c09/crc-powers-host-snapshot.mjs
+12b90ef435e1c569b63bc2f3884b3c381307450d86d01eb624cd8b11a8500ec1  builds/perf/native-components-20261128-92c09/protocol.json

@@ -1,0 +1,156 @@
+name: Frozen native import components 92c09
+
+on:
+  push:
+    branches: ['perf/native-import-components-20261128-92c09']
+    paths:
+      - '.github/workflows/native-import-components-92c09.yml'
+      - 'builds/perf/native-components-20261128-92c09/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-import-components-92c09-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  component:
+    name: Frozen native component (${{ matrix.experiment }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - experiment: strict-field-delimiter
+            dictionary: jmdict
+            candidate: 8cebcd7922230e557a7cd655f51cfb4a3326f836
+            test: test/term-bank-format3-row.test.js
+            wasm: 7b65e1c6984a7cd224bdc5aec85e70609f349850d834c7a55703dc94c6fa12a3
+          - experiment: crc-powers
+            dictionary: vndb
+            candidate: 4a39054eb24285aea5303fe7bfc7eeaeee66ac40
+            test: test/term-bank-crc.test.js
+            wasm: 742efd71c5a0635a71e444ffc385f9c99c6c31b4a28d939277ce3b99eb11105c
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ matrix.candidate }}
+      PERF_EXPERIMENT: ${{ matrix.experiment }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_CHANGED_TEST: ${{ matrix.test }}
+      PERF_EXPECTED_WASM: ${{ matrix.wasm }}
+      PERF_BASELINE_ROOT: ${{ github.workspace }}/builds/perf/native-component-trees-92c09/baseline
+      PERF_CANDIDATE_ROOT: ${{ github.workspace }}/builds/perf/native-component-trees-92c09/candidate
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/native-component-results-92c09
+      PERF_RUNNERS: ${{ github.workspace }}/builds/perf/native-components-20261128-92c09
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned dictionary WASM toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Prepare and audit the exact independent source trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          mkdir -p "$(dirname "$PERF_BASELINE_ROOT")"
+          git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+          git worktree add --detach "$PERF_BASELINE_ROOT" "$PERF_BASELINE"
+          git worktree add --detach "$PERF_CANDIDATE_ROOT" "$PERF_CANDIDATE"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$PERF_BASELINE_ROOT/node_modules"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$PERF_CANDIDATE_ROOT/node_modules"
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          expected = sorted([
+              'dev/data/dictionary-wasm/manifest.json',
+              'dev/data/dictionary-wasm/term-bank-parser.wasm',
+              'ext/js/dictionary/wasm/term-bank-parser.c',
+              os.environ['PERF_CHANGED_TEST'],
+          ])
+          changed = subprocess.check_output([
+              'git', 'diff', '--name-only', os.environ['PERF_BASELINE'], os.environ['PERF_CANDIDATE'],
+          ], text=True).splitlines()
+          assert sorted(changed) == expected, changed
+          records = {}
+          for name in ['BASELINE', 'CANDIDATE']:
+              root = pathlib.Path(os.environ['PERF_' + name + '_ROOT'])
+              head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+              assert head == os.environ['PERF_' + name]
+              records[name] = {
+                  'head': head,
+                  'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=root, text=True).strip(),
+                  'files': {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in expected},
+                  'status': subprocess.check_output(['git', 'status', '--porcelain=v1'], cwd=root, text=True),
+                  'dependencyLink': str((root / 'node_modules').resolve()),
+              }
+              subprocess.check_call(['git', 'diff', '--exit-code'], cwd=root)
+          evidence = pathlib.Path(os.environ['PERF_EVIDENCE'])
+          (evidence / 'source-identities.json').write_text(json.dumps(records, indent=2) + '\n')
+          PY
+      - name: Verify native source, all units, types, lint, and build
+        shell: bash
+        working-directory: ${{ env.PERF_CANDIDATE_ROOT }}
+        run: |
+          set -euo pipefail
+          npm run build:dictionary-wasm -- --check 2>&1 | tee "$PERF_EVIDENCE/native-rebuild.log"
+          npm run build:libs 2>&1 | tee "$PERF_EVIDENCE/candidate-libraries.log"
+          npm run test:unit 2>&1 | tee "$PERF_EVIDENCE/unit.log"
+          npm run test:ts:main 2>&1 | tee "$PERF_EVIDENCE/types-main.log"
+          npm run test:ts:test 2>&1 | tee "$PERF_EVIDENCE/types-test.log"
+          npx eslint "$PERF_CHANGED_TEST" 2>&1 | tee "$PERF_EVIDENCE/lint.log"
+          npm run test:build 2>&1 | tee "$PERF_EVIDENCE/build.log"
+          git diff --exit-code
+      - name: Prepare baseline libraries outside measurement
+        shell: bash
+        working-directory: ${{ env.PERF_BASELINE_ROOT }}
+        run: |
+          set -euo pipefail
+          npm run build:libs 2>&1 | tee "$PERF_EVIDENCE/baseline-libraries.log"
+          git diff --exit-code
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare and verify only the locked fixture
+        run: node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
+      - name: Execute the one predeclared independent component cohort
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check "$PERF_RUNNERS/runner-checksums.txt"
+          test "$(sha256sum "$PERF_BASELINE_ROOT/ext/lib/term-bank-parser.wasm" | cut -d ' ' -f1)" = 8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee
+          test "$(sha256sum "$PERF_CANDIDATE_ROOT/ext/lib/term-bank-parser.wasm" | cut -d ' ' -f1)" = "$PERF_EXPECTED_WASM"
+          node --version > "$PERF_EVIDENCE/node-version.txt"
+          if [[ "$PERF_EXPERIMENT" == strict-field-delimiter ]]; then
+            MANABITAN_SCREEN_RUNTIME_ROOT="$PERF_BASELINE_ROOT" node "$PERF_RUNNERS/native-delimiter-screen.mjs" jmdict \
+              --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+              --source-root "$PERF_BASELINE_ROOT" \
+              --baseline-root "$PERF_BASELINE_ROOT" \
+              --baseline-wasm "$PERF_BASELINE_ROOT/ext/lib/term-bank-parser.wasm" \
+              --candidate-wasm "$PERF_CANDIDATE_ROOT/ext/lib/term-bank-parser.wasm" \
+              --candidate-c "$PERF_CANDIDATE_ROOT/ext/js/dictionary/wasm/term-bank-parser.c" \
+              --out "$PERF_EVIDENCE/delimiter-screen.json" \
+              2>&1 | tee "$PERF_EVIDENCE/cohort.log"
+          else
+            MANABITAN_CRC_BASELINE_ROOT="$PERF_BASELINE_ROOT" \
+            MANABITAN_CRC_CANDIDATE_ROOT="$PERF_CANDIDATE_ROOT" \
+            MANABITAN_CRC_FIXTURE_ROOT="$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            CRC_POWERS_VERIFIER_OUTPUT="$PERF_EVIDENCE/crc" \
+              node "$PERF_RUNNERS/crc-powers-verifier-screen.mjs" 2>&1 | tee "$PERF_EVIDENCE/cohort.log"
+          fi
+          sha256sum --check "$PERF_RUNNERS/runner-checksums.txt"
+          git -C "$PERF_BASELINE_ROOT" diff --exit-code
+          git -C "$PERF_CANDIDATE_ROOT" diff --exit-code
+      - name: Preserve every observation, failed attempt, and source receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-component-92c09-${{ matrix.experiment }}
+          path: builds/perf/native-component-results-92c09
+          if-no-files-found: error
+          retention-days: 14

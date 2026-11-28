@@ -1,0 +1,30 @@
+{
+  "purpose": "One prospective independent hosted owning-stage replication per native candidate after local identical-code control variation exceeded the possible effect. Local results remain retained and inconclusive, not replaced or pooled.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtime": "Pinned repository Node 22.22.0 on Ubuntu 26.04; a separate environment from local Node 24.22.3. No browser or complete-import inference from these component runs.",
+  "fixed_source_candidates": {
+    "strict-field-delimiter": {
+      "commit": "8cebcd7922230e557a7cd655f51cfb4a3326f836",
+      "local_equivalent": "3aafd3e40ced5b15e894c7a41dc08fe04935ad07",
+      "wasm_sha256": "7b65e1c6984a7cd224bdc5aec85e70609f349850d834c7a55703dc94c6fa12a3",
+      "cohort": "Six balanced ABC permutations;18 fresh processes; each has one cold 12-group JMdict pass,8 excluded warmups and one warm 12-group pass. A/C are identical baseline. Resident decoded source through native parser and completed lookup; archive inflation/compilation/oracles/GC are outside timing."
+    },
+    "crc-powers": {
+      "commit": "4a39054eb24285aea5303fe7bfc7eeaeee66ac40",
+      "local_equivalent": "43d4d9e0e2e971689180a99e040a5c1b21d10f43",
+      "wasm_sha256": "742efd71c5a0635a71e444ffc385f9c99c6c31b4a28d939277ce3b99eb11105c",
+      "cohort": "Six fresh processes replay all 170 production VNDB verifier inputs in group/pass-balanced ABC orders. A/C share identical baseline module bytes. Native verifier call only; source parser/inflate/copies/oracles/checkpoint I/O/compilation are outside timing."
+    }
+  },
+  "runners": {
+    "native-delimiter-screen.mjs": "5fa32ade84367d0b890791d5bd82d392002d1e380da214741f8707046542a981",
+    "crc-powers-verifier-screen.mjs": "5c8153bc0c6d197385f4feb496939e752a5311d891cf7bdeb1b4bee96e03b34c",
+    "crc-powers-host-snapshot.mjs": "8995a2b2aece95126778a2ca6082a9fb7e68edd9046df116b29d4347f79ebd76"
+  },
+  "fixture_sha256": {
+    "jmdict": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "vndb": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "retention": "Retain every planned observation, cold/compile/init/heap control, checkpoint, raw failure and tail. No outlier removal, control subtraction, source retuning or additional repeats chosen after these results.",
+  "decision": "Assess each candidate against both baselines and its own control spread. This does not grant browser speed or memory qualification. PR decision remains separate and requires a gain worth reviewing."
+}
