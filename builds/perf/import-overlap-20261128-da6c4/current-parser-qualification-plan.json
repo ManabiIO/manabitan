@@ -1,19 +1,21 @@
 {
-  "schema": "manabitan-owned-overlap-current-baseline-qualification-v2",
+  "schema": "manabitan-owned-overlap-current-baseline-qualification-v3",
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
-  "productCommit": "88add36ce87811bf0e7ce4f61d833b49911d7b11",
-  "productTree": "331e46081ec8938b3ffcdee3b8dbebf905c3dbd2",
+  "productCommit": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
+  "productTree": "2497bc64bbef07ad9d352b043fffa52e9a314024",
   "productSubtrees": {
+    "eslint": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8",
     "ext": "7c2db3acb0121fca3e639350c629d8afb561a9f7",
-    "test": "28f95fb32a077e9c384573b3abeadb90c7542405",
-    "eslint": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8"
+    "test": "0263e3c7b6c37045faab54d6e3e596ea3e44cef6"
   },
   "supersedes": {
-    "qualificationCommit": "10e8ee6b3daf7020521e3cfec2b2479e907c2fa8",
-    "run": 46125980377,
-    "statusAtSupersession": "Full unit suite failed with two native parser settlement checks and one stale worker assignment assertion; no browser observations acquired.",
-    "logBlob": "32ba0897c3e554c490dfd91729fbedd475ada890",
-    "reason": "Repair the actual callback return-value compatibility regression and make the replacement-pool test select its logical batch independently of the intended rotating worker cursor."
+    "qualificationCommit": "55c7d6e3d570c585185e932afaf20c778ca5a1a6",
+    "run": 46129519577,
+    "reason": "Paired clean product head88add36 failed the new public-callback test's TypeScript annotations. Correct the test-only assignability fixture before interpreting qualification.",
+    "browserObservationCount": 0,
+    "staticWebRun": 46129517279,
+    "staticWebJob": 140931398123,
+    "logBlob": "e0080200c7d825b471a37d07938e22058340ce6e"
   },
   "productPatch": [
     {
@@ -70,7 +72,7 @@
     },
     {
       "path": "test/term-bank-pipeline-completion.test.js",
-      "blob": "806241f0e59ee0875c9bdbe79d58eb7da08a6081"
+      "blob": "c5744034f1235b8fa8996ee6f86472358b32b4b7"
     },
     {
       "path": "test/zstd-term-content-initialization.test.js",
@@ -108,5 +110,12 @@
     "localLimits": "Current Vitest and lint attempts were killed with exit137 before useful diagnostics. No current repaired full lint/type/unit pass is claimed. Existing native fixtures and test timeouts are unchanged."
   },
   "disposition": "Draft #977 remains on hold until complete current-source verification, semantic and memory checks, and the original replicated timing gates pass. Historical component results are not a complete-import gain.",
-  "createdAtUtc": "2026-11-28T09:16:00Z"
+  "createdAtUtc": "2026-11-28T09:30:24Z",
+  "testTypeAmendment": {
+    "evidenceBlob": "a673c55d0cf6b9ef4ea5a7ca18ccc3c0dbbd9486",
+    "runtimeChanged": false,
+    "changedTest": "test/term-bank-pipeline-completion.test.js",
+    "scope": "Correct three Parameters indexes from2 to3 for deferred/lazy/compressed callbacks and infer a numeric-returning function before assigning the legacy void callback type. Every byte after this first new test remains unchanged.",
+    "verification": "Exact source/signature review and V8 execution of this first test passed; current hosted TypeScript/full gates remain required. No local compiler run is claimed during the outage."
+  }
 }
