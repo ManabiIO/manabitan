@@ -102,6 +102,7 @@ const COMPACT_RECORD_FIELDS_HEADER_BYTES = 16;
 const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
 const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
+const COMPACT_SCORE_CACHE_SLOTS = 512;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
 const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
@@ -436,6 +437,51 @@ function getSynchronousRecordFieldReferences(chunk, count) {
     return references
 }
 /* eslint-enable @stylistic/semi */
+
+/**
+ * Encodes first-use score keys for private, stable Int32 columns. A bounded
+ * cache avoids map lookups for repeated scores across the full Int32 range.
+ * Collisions consult the complete map, preserving score-table order.
+ * @param {ResolvedContentReferences} references
+ * @param {Int32Array} scoreList
+ * @param {Uint16Array} scoreKeys
+ * @returns {number[]|null} Null keeps the established legacy-field fallback.
+ * @throws {RangeError} If a content reference is out of bounds.
+ */
+function encodeCachedCompactRecordScores(references, scoreList, scoreKeys) {
+    const {uniqueIndexList, lengths} = references;
+    const cachedScores = new Int32Array(COMPACT_SCORE_CACHE_SLOTS);
+    const cachedIndexes = new Uint16Array(COMPACT_SCORE_CACHE_SLOTS);
+    /** @type {Map<number, number>} */
+    const indexes = new Map();
+    /** @type {number[]} */
+    const scores = [];
+    for (let i = 0; i < scoreKeys.length; ++i) {
+        const uniqueIndex = uniqueIndexList[i];
+        if (uniqueIndex >= lengths.length) {
+            throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+        }
+        if (lengths[uniqueIndex] >= U16_NULL) { return null; }
+        const score = scoreList[i];
+        const slot = score & (COMPACT_SCORE_CACHE_SLOTS - 1);
+        const cachedIndex = cachedIndexes[slot] - 1;
+        if (cachedIndex >= 0 && cachedScores[slot] === score) {
+            scoreKeys[i] = cachedIndex;
+            continue;
+        }
+        let index = indexes.get(score);
+        if (typeof index === 'undefined') {
+            index = scores.length;
+            if (index >= U16_NULL) { return null; }
+            indexes.set(score, index);
+            scores.push(score);
+        }
+        cachedScores[slot] = score;
+        cachedIndexes[slot] = index + 1;
+        scoreKeys[i] = index;
+    }
+    return scores;
+}
 
 /**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
@@ -5861,47 +5907,59 @@ view.chunks :
         /* eslint-enable @stylistic/semi */
         const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
-        const scores = [];
-        /** @type {Map<number, number>} */
-        const scoreIndexes = new Map();
-        // Common integer scores use a bounded table. Store the key plus one
-        // so zero can mark an unseen score without initializing the table.
-        const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
-            new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
-            null;
+        let scores = [];
         let compact = true;
-        for (let i = 0; i < count; ++i) {
-            /* eslint-disable-next-line @stylistic/semi */
-            const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            if (contentLength >= U16_NULL) {
-                compact = false;
-                break;
-            }
-            /* eslint-disable @stylistic/semi */
-            if (offsets !== null && lengths !== null) {
-                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
-                lengths[i] = contentLength < 0 ? U16_NULL : contentLength
-            }
-            /* eslint-enable @stylistic/semi */
-            const score = chunk.scoreList[i] ?? 0;
-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
-            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
-            if (scoreIndex < 0) {
-                scoreIndex = scores.length;
-                if (scoreIndex >= U16_NULL) {
+        if (directReferences !== null && count >= COMPACT_SCORE_TABLE_MIN_ROWS) {
+            // The origin proof also establishes private, ordinary Int32 scores.
+            // No caller-controlled reads or await separate this scan and output.
+            const cachedScores = encodeCachedCompactRecordScores(
+                directReferences,
+                /** @type {Int32Array} */ (chunk.scoreList),
+                scoreKeys,
+            );
+            compact = cachedScores !== null;
+            scores = cachedScores ?? [];
+        } else {
+            /** @type {Map<number, number>} */
+            const scoreIndexes = new Map();
+            // Common integer scores use a bounded table. Store the key plus one
+            // so zero can mark an unseen score without initializing the table.
+            const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+                new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
+                null;
+            for (let i = 0; i < count; ++i) {
+                /* eslint-disable-next-line @stylistic/semi */
+                const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                if (contentLength >= U16_NULL) {
                     compact = false;
                     break;
                 }
-                if (useInlineScore) {
-                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
-                } else {
-                    scoreIndexes.set(score, scoreIndex);
+                /* eslint-disable @stylistic/semi */
+                if (offsets !== null && lengths !== null) {
+                    offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
+                    lengths[i] = contentLength < 0 ? U16_NULL : contentLength
                 }
-                scores.push(score);
+                /* eslint-enable @stylistic/semi */
+                const score = chunk.scoreList[i] ?? 0;
+                const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+                const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+                let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+                if (scoreIndex < 0) {
+                    scoreIndex = scores.length;
+                    if (scoreIndex >= U16_NULL) {
+                        compact = false;
+                        break;
+                    }
+                    if (useInlineScore) {
+                        inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+                    } else {
+                        scoreIndexes.set(score, scoreIndex);
+                    }
+                    scores.push(score);
+                }
+                scoreKeys[i] = scoreIndex;
             }
-            scoreKeys[i] = scoreIndex;
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
         (scores.length * 4) +

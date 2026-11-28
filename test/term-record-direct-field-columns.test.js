@@ -70,6 +70,33 @@ describe('direct resolved record-field columns', () => {
         expect(new TermRecordOpfsStore()._encodeArtifactRecordFields(chunk, [], [], 2 ** 40)).toEqual(expected)
     })
 
+    test('preserves first-use score IDs after repeated signed-score cache collisions', () => {
+        const values = [0, 0, 512, 512, -512, -512, 2147483136, -2147483648, 0, -512, 1024, 512]
+        const chunk = fixture(values.length * 16)
+        chunk.scoreList = Int32Array.from({length: chunk.rowCount}, (_, i) => values[i % values.length])
+        const actual = encodeDirect(chunk)
+        expect(actual).toEqual(encodeGeneric(chunk))
+        const expectedScores = [...new Set(values)]
+        const scores = new Int32Array(actual.buffer, 16, expectedScores.length)
+        const keys = new Uint16Array(actual.buffer, 16 + scores.byteLength + chunk.rowCount * 6, chunk.rowCount)
+        expect([...scores]).toEqual(expectedScores)
+        expect(Array.from(keys, (key) => scores[key])).toEqual([...chunk.scoreList])
+    })
+
+    test('uses current scores after colliding slots and columns change between calls', () => {
+        const chunk = fixture()
+        chunk.scoreList.fill(-10200)
+        const first = encodeDirect(chunk)
+        chunk.scoreList.fill(-10200 + 512)
+        chunk.scoreList[1] = -10200
+        const second = encodeDirect(chunk)
+        expect(second).toEqual(encodeGeneric(chunk))
+        expect(second).not.toEqual(first)
+        const header = new Uint32Array(second.buffer, 0, 4)
+        expect(header[2]).toBe(2)
+        expect([...new Int32Array(second.buffer, 16, 2)]).toEqual([-9688, -10200])
+    })
+
     test('writes field columns into the final allocation without copying staged offsets or lengths', () => {
         const chunk = fixture()
         const expected = encodeGeneric(chunk)
