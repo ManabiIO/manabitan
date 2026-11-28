@@ -1,0 +1,77 @@
+name: CRC gap experiment 20261127 4a779
+
+on:
+  push:
+    branches: ['perf/crc-gap-lab-20261127-4a779']
+    paths:
+      - '.github/workflows/crc-gap-lab-4a779.yml'
+      - 'test/perf/crc-gap-screen.mjs'
+      - 'test/term-bank-crc.test.js'
+      - 'ext/js/dictionary/wasm/term-bank-parser.c'
+      - 'dev/data/dictionary-wasm/manifest.json'
+      - 'dev/data/dictionary-wasm/term-bank-parser.wasm'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: VNDB production parser 12 balanced A/B/C blocks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CRC_BASELINE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Initialize experiment receipt
+        run: |
+          mkdir -p builds/perf/crc-gap-lab
+          git rev-parse HEAD > builds/perf/crc-gap-lab/candidate-head.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Validate focused CRC coverage and experiment harness
+        run: |
+          set -o pipefail
+          node --check test/perf/crc-gap-screen.mjs
+          node node_modules/eslint/bin/eslint.js test/perf/crc-gap-screen.mjs test/term-bank-crc.test.js 2>&1 | tee builds/perf/crc-gap-lab/lint.log
+          node node_modules/vitest/vitest.mjs run test/term-bank-crc.test.js --maxWorkers 1 --no-file-parallelism 2>&1 | tee builds/perf/crc-gap-lab/crc-unit.log
+      - name: Prepare isolated unchanged baseline
+        run: |
+          git fetch --no-tags --depth=1 origin "$CRC_BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/manabitan-crc-baseline" "$CRC_BASELINE_SHA"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/manabitan-crc-baseline/node_modules"
+          (
+            cd "$RUNNER_TEMP/manabitan-crc-baseline"
+            node dev/bin/build-libs.js
+          )
+          cmp test/perf/dictionaries.lock.json "$RUNNER_TEMP/manabitan-crc-baseline/test/perf/dictionaries.lock.json"
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify the pinned VNDB fixture
+        run: |
+          node --input-type=module - <<'NODE'
+          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'
+          await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', ['vndb'])
+          NODE
+      - name: Run the fixed 36-observation component cohort
+        run: |
+          set -o pipefail
+          node --expose-gc test/perf/crc-gap-screen.mjs \
+            --baseline "$RUNNER_TEMP/manabitan-crc-baseline" \
+            --candidate "$GITHUB_WORKSPACE" \
+            --archive builds/e2e-dictionary-cache/vndb_characters_by_bee.zip \
+            --output builds/perf/crc-gap-lab/cohort \
+            2>&1 | tee builds/perf/crc-gap-lab/cohort.log
+      - name: Retain every observation, identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-gap-lab-4a779
+          path: builds/perf/crc-gap-lab
+          if-no-files-found: error
+          retention-days: 14
