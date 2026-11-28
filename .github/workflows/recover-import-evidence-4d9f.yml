@@ -1,0 +1,45 @@
+name: Recover indexed import evidence 4d9f
+
+on:
+  push:
+    branches: [experiment/recover-import-evidence-20261128-4d9f]
+    paths:
+      - .github/workflows/recover-import-evidence-4d9f.yml
+      - dev/perf/recover-import-evidence-4d9f.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recover-import-evidence-4d9f
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a72385b08a1004bec627172b0ca07f49b50c2f19
+          path: evidence-source
+          persist-credentials: false
+          sparse-checkout: builds/perf/20261128-4d9f-reference-fields
+      - name: Verify every archive member and publish selected exact bytes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python3 dev/perf/recover-import-evidence-4d9f.py
+          --source-directory evidence-source
+          --output-directory recovered-output
+      - name: Preserve recovery receipts and selected source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: recovered-import-evidence-4d9f
+          path: recovered-output
+          if-no-files-found: error
+          retention-days: 14
