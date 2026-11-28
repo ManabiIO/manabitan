@@ -1088,9 +1088,9 @@ IDs are 15249815569 (JMdict), 15249047935 (Jitendex), and 15249408881 (VNDB).
 
 #### Prospective scheduling and alias screens
 
-The shared-span first-free-worker FIFO component is now
-[run 46111938461](https://github.com/ManabiIO/manabitan/actions/runs/46111938461),
-tooling `587d684fa2cd356bb150fe48d167f7e36f309aa5`. It regenerates
+The active shared-span first-free-worker FIFO component is
+[run 46113052837](https://github.com/ManabiIO/manabitan/actions/runs/46113052837),
+tooling `81d35bc83af349b611f9ad51cc223de788a2d0d6`. It regenerates
 checksum-bound inputs from `9e10d3b3` and executes the frozen `5048ba3e`
 codec runtime with the actual 1 MiB / 103-block JMdict plan. A and C are
 identical current two-group rotating dispatch; B changes only the physical
@@ -1102,6 +1102,17 @@ source-poisoning ownership checks. Every output must match the original block
 hashes and exhaustively decode after compressor workers terminate. The two
 incomplete local exit-137 attempts remain separately described; they support
 no performance conclusion. No unchanged local retry or pooling is permitted.
+
+The first hosted source, `587d684f` /
+[run 46111938461](https://github.com/ManabiIO/manabitan/actions/runs/46111938461),
+was superseded while still queued, before accepting any acquisition. Review
+found that an idle-worker exit after the final output was saved could be
+latched but omitted from the terminal success path. The active source joins
+all worker terminations and checks the failure latch before decode or
+acceptance. A focused deterministic case fails against the original terminal
+block and passes against the repaired block. The successful timed region and
+dispatcher class remain byte-identical; the complete script has a new hash.
+Every eventual outcome of the superseded cohort remains separate.
 
 Before hosted acquisition, the plan froze a mechanical advance rule: B must
 save at least 5 ms and 5% by paired median against both controls, be faster
@@ -1127,5 +1138,57 @@ post-await mutation and production provenance remain separate design gates.
 The candidate intentionally changes physical layout and therefore requires
 semantic/layout-aware verification rather than claiming byte-identical A/B
 storage. No alias observation or product modification is claimed here.
+
+#### Registered alias cohort and remaining production boundaries
+
+The immutable VNDB alias screen is
+[run 46113754947](https://github.com/ManabiIO/manabitan/actions/runs/46113754947),
+source `d0a79f888b36684f26ca76ef880c019ad06c88f1`, tree
+`7853cbb3eac7967b90386f9f9f9b1ced06e7f764`, on
+`perf/vndb-raw-alias-component-20261128-da6c4`. The
+[source-bound reproduction bundle](https://github.com/ManabiIO/manabitan/tree/d0a79f888b36684f26ca76ef880c019ad06c88f1/dev/perf/raw-alias-da6c4)
+and its independent review are retained. The workflow, protocol blob, research
+HEAD/tree, baseline source, generated codec assets, fixtures, and every helper
+are bound before acquisition.
+
+The workflow first requires actual Node 22 syntax, eighteen real-file adapter
+cases, and arithmetic gates. It then regenerates all 170 native groups to
+verify the original route witness and exact content seed, retaining only the
+ten selected groups under an inclusive 64 MiB capture/proof bound. Each of
+36 observations uses a fresh child with empty read caches. Every source row,
+definition reference, record field, native candidate lookup payload, and
+reopened query witness is checked outside the common timing endpoint.
+Finalization stays inside that endpoint. Success also requires clean worker
+termination and no surviving file locks or staging files before reopening.
+
+The fixed advance gate requires at least 10 ms and 10% paired-median saving
+against both A and identical C, at least 9/12 faster blocks against each,
+lower equal-work sums, strictly negative upper bootstrap bounds, and the
+prospectively specified control-drift bound. All observations and failures
+are retained. A component pass would permit production design and a separate
+full browser study; it would not establish an import-speed or peak-memory
+claim.
+
+The
+[ownership audit](https://github.com/ManabiIO/manabitan/blob/d0a79f888b36684f26ca76ef880c019ad06c88f1/builds/perf/import-overlap-20261128-da6c4/raw-alias-ownership-audit.json)
+found no existing capability covering whole native lookup/record/reference
+columns across the proposed read/compression awaits. The content-slab adoption
+witness covers a different allocation. Exported record-factory identity and
+dimensional prepared-map validation are insufficient. #820's worker-local
+copy-elision proof does not cross transfer, and the concurrent one-use
+receive-side receipt expires before an awaited callback continues. A new
+private ownership/lease protocol or explicitly isolated snapshot would be
+required. Ordinary mutable/factory/caller-supplied inputs must retain the
+existing split, revalidation, and rebuild path.
+
+Likewise, a future FIFO product implementation would have to preserve private
+buffer transfer timing. This component qualifies only already snapshotted
+shared-span messages; it rejects transfer lists. Delaying legacy private-buffer
+detachment or ignoring their occupancy in a shared worker queue is outside
+its proof.
+
+At this source checkpoint the active overlap verification, repaired FIFO
+screen, and new alias screen remain queued. No complete-import gain, alias
+observation, production alias/FIFO implementation, or PR is claimed.
 
 <!-- da6c4 evidence checkpoint end -->
