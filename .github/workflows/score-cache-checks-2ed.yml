@@ -1,0 +1,19 @@
+name: Exact score cache checks 2ed
+
+on:
+  push:
+    branches: ['perf/score-cache-checks-20261127-2ed']
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Scoped score-cache lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - name: Lint changed JavaScript
+        run: npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-direct-field-columns.test.js
