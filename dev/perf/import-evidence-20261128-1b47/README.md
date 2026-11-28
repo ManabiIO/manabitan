@@ -83,3 +83,10 @@ that does not activate the proposed overlap.
 The immutable addendum archive, member manifest and checksum are stored here as
 `browser-results-addendum-20261128-1b47.*`. Archive SHA-256:
 `76b1ae9451052684192902916b5cdeb1e812ff806b064d0773e6d2bdf242ec98`.
+
+## Why JMdict gains stayed small
+
+The [technical assessment](jmdict-technical-assessment.md) explains the measured
+headroom, work shifted between phases, the narrow unmeasured overlap window,
+and the failed score-cache/common-path tradeoff. It cites the frozen evidence
+and distinguishes the separate scheduling proposal in PR #977.
