@@ -1,0 +1,1243 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28T08:44:43.318409+00:00",
+  "auditStatus": "passed",
+  "dictionary": "jmdict",
+  "initialOrder": "BA",
+  "scope": "Independent saved-data audit only. No benchmark, browser, test or native execution.",
+  "auditorScriptSha256": "eec86ccadfaf79cc2db559b47c95df130009196f40946167ef62b61cf5decb26",
+  "artifactRoot": "/tmp/manabitan-path-qualification-7c02/jmdict-BA-15256246047",
+  "publicationBoundary": "Workflow success is not publication eligibility. All six independent hosts are required; no pooling or control adjustment.",
+  "frozenAuditSources": [
+    {
+      "path": "import-experiments-7c02/path-publication-review/remote-policy.md",
+      "sha256": "074a139c1807d19c4ed78b5be83ebc8bc56c6feb7fa4325d8e6175f3e668be2b"
+    },
+    {
+      "path": "import-experiments-7c02/path-hosted/validation-workflow-d36ee85.yml",
+      "sha256": "48213d39871a1e3377fc21f47812e1b431988507afa5f3012f8e6486188d0fcf"
+    },
+    {
+      "path": "import-experiments-7c02/path-hosted/summarize.py",
+      "sha256": "5397e658c840250fed03d32437d033153e8c90c43633c38ffac5198005bdf084"
+    },
+    {
+      "path": "manabitan/dev/perf/import-qualification-20261125-a7f7.py",
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "manabitan/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    }
+  ],
+  "checklistSha256": "1f638d3a19ce3a234a9cfd491c37cf612b169ca912929d70b5d8f8b3d53311ed",
+  "artifact": {
+    "id": 15256246047,
+    "runId": 46113567719,
+    "jobId": 140904689347,
+    "researchCommit": "d36ee85feb1513af31f769175affa33b3696a307",
+    "zipBytes": 35781708,
+    "zipSha256": "3a39c24c411fadf7f1791aa119816c14c85e8a6d518b70bed74f9244b613c75b",
+    "metadataSha256": "7ca133cf75ec5310d17068b96cd41ba0dc4879d4415d044eaff98930012f4c88",
+    "preservationSha256": "930dbaf02076d023a6694e5c589839bbd3a8e435852dff99995eb70ebc3d7180",
+    "members": 317,
+    "expandedBytes": 64054076,
+    "allOriginalZipCrcAndMemberHashesMatched": true,
+    "memberManifestSha256": "df6328faee7dd8d620fa3c53c57c6fca8825359a548f2aef10afe9499bbe48e7"
+  },
+  "identities": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "e90c4c04172b691985858609094887f9541541dd",
+    "packages": {
+      "A": {
+        "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "packageSha256": "7efaa5a77312571d971dd25f3eadaa433d117e38dc6622ae038dbdb9f3620966",
+        "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "entryCount": 554
+      },
+      "B": {
+        "sha": "e90c4c04172b691985858609094887f9541541dd",
+        "tree": "586061b2dfb33d9ebd3fc12a340f4def5a09abea",
+        "packageSha256": "153af25288006eae85e24fb465a1778b54393d9fac11a3eb2d9e006c09dc2710",
+        "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "entryCount": 554
+      }
+    },
+    "changedPackageEntries": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js"
+    ],
+    "browser": {
+      "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+      "version": "153.0.8010.12",
+      "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "fullPackageHashesAndMapsRecomputed": true,
+    "frozenGitSourceHashesIndependentlyMatched": true,
+    "browserBinaryDigestIsOriginalCapturedIdentityNotARehashOfAnIncludedBinary": true
+  },
+  "memory": {
+    "recomputedAudit": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 463,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -0.5549959357400047,
+          "maximumPairedChangePercent": 0.5542400437455131
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -0.6931736182040127,
+          "maximumPairedChangePercent": 1.093863310191634
+        }
+      }
+    },
+    "coverage": [
+      {
+        "index": 1,
+        "arm": "B",
+        "name": "B1",
+        "pair": 1,
+        "allObservedSampleCount": 240,
+        "fullyContainedImportSampleCount": 9,
+        "stableFullyReadImportSampleCount": 9,
+        "preImportBracketGapMs": 95.652729,
+        "postImportBracketGapMs": 87.080714,
+        "maximumCoveredSampleGapMs": 151.68395,
+        "maxSampledPssKiB": 1002306,
+        "maxSampledPrivateKiB": 769240,
+        "qualifiedForWholeTreePss": true
+      },
+      {
+        "index": 2,
+        "arm": "A",
+        "name": "A1",
+        "pair": 1,
+        "allObservedSampleCount": 74,
+        "fullyContainedImportSampleCount": 10,
+        "stableFullyReadImportSampleCount": 10,
+        "preImportBracketGapMs": 91.521044,
+        "postImportBracketGapMs": 74.761849,
+        "maximumCoveredSampleGapMs": 147.157226,
+        "maxSampledPssKiB": 1019269,
+        "maxSampledPrivateKiB": 788804,
+        "qualifiedForWholeTreePss": true
+      },
+      {
+        "index": 3,
+        "arm": "A",
+        "name": "A2",
+        "pair": 2,
+        "allObservedSampleCount": 77,
+        "fullyContainedImportSampleCount": 8,
+        "stableFullyReadImportSampleCount": 8,
+        "preImportBracketGapMs": 43.902647,
+        "postImportBracketGapMs": 98.897388,
+        "maximumCoveredSampleGapMs": 171.187295,
+        "maxSampledPssKiB": 1024105,
+        "maxSampledPrivateKiB": 788764,
+        "qualifiedForWholeTreePss": true
+      },
+      {
+        "index": 4,
+        "arm": "B",
+        "name": "B2",
+        "pair": 2,
+        "allObservedSampleCount": 72,
+        "fullyContainedImportSampleCount": 7,
+        "stableFullyReadImportSampleCount": 7,
+        "preImportBracketGapMs": 36.503587,
+        "postImportBracketGapMs": 51.995501,
+        "maximumCoveredSampleGapMs": 176.184969,
+        "maxSampledPssKiB": 1029781,
+        "maxSampledPrivateKiB": 797392,
+        "qualifiedForWholeTreePss": true
+      }
+    ],
+    "pairedMetrics": {
+      "maxSampledPssKiB": {
+        "medianPairedChangePercent": -0.5549959357400047,
+        "maximumPairedChangePercent": 0.5542400437455131
+      },
+      "maxSampledPrivateKiB": {
+        "medianPairedChangePercent": -0.6931736182040127,
+        "maximumPairedChangePercent": 1.093863310191634
+      }
+    },
+    "pairs": [
+      {
+        "pair": 1,
+        "qualified": true,
+        "maxSampledPssKiB": {
+          "baseline": 1019269,
+          "candidate": 1002306,
+          "changePercent": -1.6642319152255225
+        },
+        "maxSampledPrivateKiB": {
+          "baseline": 788804,
+          "candidate": 769240,
+          "changePercent": -2.4802105465996593
+        }
+      },
+      {
+        "pair": 2,
+        "qualified": true,
+        "maxSampledPssKiB": {
+          "baseline": 1024105,
+          "candidate": 1029781,
+          "changePercent": 0.5542400437455131
+        },
+        "maxSampledPrivateKiB": {
+          "baseline": 788764,
+          "candidate": 797392,
+          "changePercent": 1.093863310191634
+        }
+      }
+    ],
+    "overlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+    "exactOverlayAndOriginalHarnessMatched": true,
+    "instrumentedDurationsExcludedFromOrdinaryStatistics": true
+  },
+  "correctness": {
+    "ordinaryImports": 36,
+    "excludedWarmups": 4,
+    "candidatePairs": 12,
+    "controlPairs": 4,
+    "exhaustiveMediaImports": 2,
+    "separateMemoryImports": 4,
+    "totalImports": 42,
+    "allExactOrderedScheduleFieldsMatched": true,
+    "allSummaryRawCanonicalBindingsPassed": true,
+    "allSourcePackageBrowserAndNodeBindingsPassed": true,
+    "allWorkersEqualThree": true,
+    "allSemanticRestartLookupAndStorageReceiptsMatched": true,
+    "freshProfilePolicyBoundToUnchangedMkdtempHarness": true,
+    "lookupObservationsPerImport": 72,
+    "termRowsPerImport": 528299,
+    "uniqueMediaFiles": 0,
+    "mediaBytes": 0,
+    "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+    "storageBytes": 43520477,
+    "imports": [
+      {
+        "path": "warmup-1-B",
+        "kind": "warmup",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:32:19.559Z",
+        "totalImportMs": 978.6999999999971,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "warmup-1-A",
+        "kind": "warmup",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:32:32.112Z",
+        "totalImportMs": 893.6000000000058,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "warmup-2-A",
+        "kind": "warmup",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:32:40.069Z",
+        "totalImportMs": 1055.9000000000087,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "warmup-2-B",
+        "kind": "warmup",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:32:48.945Z",
+        "totalImportMs": 885,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-01-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:32:57.640Z",
+        "totalImportMs": 947.1999999999971,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-01-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:33:06.773Z",
+        "totalImportMs": 882.7999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-02-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:33:14.708Z",
+        "totalImportMs": 865.8000000000175,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-02-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:33:22.645Z",
+        "totalImportMs": 880.9000000000233,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-03-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:33:31.453Z",
+        "totalImportMs": 839.8999999999942,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-03-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:33:39.340Z",
+        "totalImportMs": 933,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-01-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:33:47.441Z",
+        "totalImportMs": 870.7999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-01-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:33:55.784Z",
+        "totalImportMs": 896.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-04-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:34:03.791Z",
+        "totalImportMs": 847.7000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-04-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:34:11.767Z",
+        "totalImportMs": 949.3999999999942,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-05-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:34:20.630Z",
+        "totalImportMs": 863.1000000000058,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-05-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:34:28.943Z",
+        "totalImportMs": 912.2999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-06-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:34:37.112Z",
+        "totalImportMs": 880.7000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-06-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:34:45.632Z",
+        "totalImportMs": 883.5999999999767,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-02-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:34:53.889Z",
+        "totalImportMs": 880.7000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-02-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:35:02.264Z",
+        "totalImportMs": 886.8999999999942,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-07-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:35:10.924Z",
+        "totalImportMs": 883.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-07-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:35:19.352Z",
+        "totalImportMs": 888.8999999999942,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-08-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:35:27.415Z",
+        "totalImportMs": 902.2999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-08-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:35:35.540Z",
+        "totalImportMs": 880.7999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-09-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:35:44.229Z",
+        "totalImportMs": 864.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-09-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:35:52.299Z",
+        "totalImportMs": 904.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-03-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:36:00.793Z",
+        "totalImportMs": 881.6000000000349,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-03-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:36:08.883Z",
+        "totalImportMs": 918.7000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-10-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:36:16.987Z",
+        "totalImportMs": 904.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-10-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:36:26.365Z",
+        "totalImportMs": 1120,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-11-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:36:35.524Z",
+        "totalImportMs": 910.5,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-11-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:36:44.047Z",
+        "totalImportMs": 905.2999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-12-A",
+        "kind": "candidate",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:36:52.747Z",
+        "totalImportMs": 887.7000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "pair-12-B",
+        "kind": "candidate",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:37:01.468Z",
+        "totalImportMs": 885.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-04-A",
+        "kind": "control",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:37:09.936Z",
+        "totalImportMs": 885,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "control-04-C",
+        "kind": "control",
+        "arm": "C",
+        "startedAtIso": "2026-11-28T08:37:18.114Z",
+        "totalImportMs": 896.2000000000116,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "exhaustive-media-B",
+        "kind": "exhaustive-media",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:37:26.596Z",
+        "totalImportMs": 871.9000000000233,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "5b2d1cbf9a2496510577094ea355ff9027e54b46727c380784a2e3f775cd11a9",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "all",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "exhaustive-media-A",
+        "kind": "exhaustive-media",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:37:34.512Z",
+        "totalImportMs": 1245.7999999999884,
+        "sourceDirty": false,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "5b2d1cbf9a2496510577094ea355ff9027e54b46727c380784a2e3f775cd11a9",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "all",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "memory/B1",
+        "kind": "memory",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:37:43.928Z",
+        "totalImportMs": 1092.7999999999884,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "memory/A1",
+        "kind": "memory",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:38:06.910Z",
+        "totalImportMs": 1203.2999999999884,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "memory/A2",
+        "kind": "memory",
+        "arm": "A",
+        "startedAtIso": "2026-11-28T08:38:16.485Z",
+        "totalImportMs": 1096.5,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "path": "memory/B2",
+        "kind": "memory",
+        "arm": "B",
+        "startedAtIso": "2026-11-28T08:38:28.570Z",
+        "totalImportMs": 1057.2999999999884,
+        "sourceDirty": true,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+        "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+        "lookupObservations": 72,
+        "storageBytes": 43520477,
+        "media": {
+          "mode": "sample",
+          "totalFiles": 0,
+          "totalBytes": 0,
+          "files": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ]
+  },
+  "statistics": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "ratios": [
+        1.0729497054825663,
+        1.0174405174405239,
+        0.9002143622722338,
+        1.119971688097182,
+        0.9460703715883118,
+        1.003292835244652,
+        0.9939250759365573,
+        0.9761720048764266,
+        0.9557619995576205,
+        1.2386640123866242,
+        1.0057439522810248,
+        0.9971837332432129
+      ],
+      "medianPairedChangePercent": 0.02382842439323518,
+      "equalWorkChangePercent": 1.804963182110697,
+      "worstPairChangePercent": 23.866401238662416,
+      "descriptiveBootstrap95Percent": [
+        -3.4032997782976415,
+        4.519511146154498
+      ],
+      "fasterPairs": 6
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "ratios": [
+        0.9716581120285395,
+        1.007039854661045,
+        0.9596168498966189,
+        1.0126553672316516
+      ],
+      "medianPairedChangePercent": -1.0651016655207735,
+      "equalWorkChangePercent": -1.2595654359606079,
+      "worstPairChangePercent": 1.2655367231651615,
+      "descriptiveBootstrap95Percent": [
+        -4.038315010338112,
+        1.2655367231651615
+      ],
+      "fasterPairs": 2
+    },
+    "candidateMedianVsControlCPercent": -0.0791631326012121,
+    "allSavedValuesRecomputedExactly": true,
+    "descriptiveBootstrap": {
+      "seedPerComparison": 897,
+      "completePairResamples": 10000,
+      "indexes": [
+        249,
+        9749
+      ]
+    }
+  },
+  "gates": {
+    "correctnessAndMemory": true,
+    "completeSchedule": true,
+    "unchangedControls": true,
+    "nonRegression": true,
+    "wholeImportGain": false
+  },
+  "mandatoryHostEligibility": true,
+  "decision": "JMdict BA passes this host mandatory correctness, memory, control and nonregression screens; no whole-import gain established. This is not campaign or PR qualification.",
+  "originalsUnmodifiedAfterAudit": true
+}
