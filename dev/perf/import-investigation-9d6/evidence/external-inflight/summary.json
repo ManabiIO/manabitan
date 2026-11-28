@@ -1,0 +1,2427 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent audit of an external candidate and its original six-cell hosted qualification. No new profiling, implementation, timing, rerun, threshold change or outlier exclusion.",
+  "attribution": "The runtime candidate b4d0f54e23f8d4065df33bd40f5ea299bad57c6b and run 46104891607 belong to a concurrent external in-flight study. This appendix is our independent review of that existing evidence, not a new optimization or measurement cohort.",
+  "source": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+    "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+    "changedPackageEntries": [
+      "js/dictionary/dictionary-database.js"
+    ],
+    "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710"
+  },
+  "runId": 46104891607,
+  "lastWorkflowObservationUtc": "2026-11-28T05:57:03Z",
+  "conclusion": "No replicated complete-import gain against both identical-code controls on both hosts for any dictionary. JMdict host 1 is slightly faster against both controls but has large control variation; host 2 is slightly slower against both. Jitendex host 1 is slower than A and slightly faster than C; host 2 is faster against both. VNDB host 1 is slower against both; host 2 is slower than A and faster than C. Both VNDB hosts also fail memory coverage, so complete qualification is not established. These are sampler coverage failures, not evidence of increased memory use.",
+  "recommendation": "Do not promote this study as a qualified endpoint gain or open a duplicate in-flight PR. Preserve the external candidate attribution and all complete negative/inconclusive results.",
+  "counts": {
+    "measurementCells": 6,
+    "rawImportReports": 282,
+    "authoritativeTimingImports": 216,
+    "freshProfileWarmups": 18,
+    "exhaustiveMediaImports": 12,
+    "separateMemoryImports": 24,
+    "diagnosticTraceImports": 12,
+    "rawMemoryScans": 2098,
+    "recordedCommands": 780,
+    "commandFailures": 0,
+    "samplerCoverageFailedObservations": 6,
+    "memoryQualifiedObservations": 18
+  },
+  "cells": {
+    "jmdict-host-1": {
+      "complete": true,
+      "qualificationPassed": true,
+      "auditor": {
+        "path": "audit-inflight-peer-whole-v2.py",
+        "sha256": "7993b36bfdcbe0fa784022bddf797fa418e50f550aaaba99ab8f5153ca41a52f"
+      },
+      "artifactId": 15250096690,
+      "dictionary": "jmdict",
+      "replication": 1,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -6.680694371383478,
+            0.6953790937620496,
+            -19.114077669900777,
+            -8.845999195818099,
+            -0.7407407407420297,
+            -2.765726681127978,
+            4.237121510025199,
+            2.61004202610442,
+            1.1951742022815903,
+            -3.7896283854689905,
+            3.264430136679497,
+            -0.5509332134048917
+          ],
+          "medianPairedChangePercent": -0.6458369770734551,
+          "equalWorkChangePercent": -2.9314870602323073,
+          "descriptiveBootstrap95Percent": [
+            -5.235161378426234,
+            1.9026081141930051
+          ],
+          "fasterPairs": 7
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -3.827388051610414,
+            -0.9597352454508101,
+            0.6254717998477544,
+            2.18616182105289,
+            -0.17789637536199665,
+            -1.785714285713036,
+            19.632178720523786,
+            -22.97218762972284,
+            -1.406129847301829,
+            2.9543922713983317,
+            3.217793835384408,
+            -0.7295173961840651
+          ],
+          "medianPairedChangePercent": -0.45370688577303087,
+          "equalWorkChangePercent": -0.9340417307191706,
+          "descriptiveBootstrap95Percent": [
+            -1.595922066507427,
+            2.570277046225611
+          ],
+          "fasterPairs": 7
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -2.9668595476062154,
+            1.6711529833999705,
+            -19.616851595003805,
+            -10.796139927625791,
+            -0.5638474295197149,
+            -0.9978308026043048,
+            -12.868659064099663,
+            33.21167883212366,
+            2.6384034276721424,
+            -6.550493386517598,
+            0.04518242403968031,
+            0.1798965594756785
+          ],
+          "medianPairedChangePercent": -0.7808391160620154,
+          "equalWorkChangePercent": -2.016278209396294,
+          "descriptiveBootstrap95Percent": [
+            -8.673316657071695,
+            0.9255247714378356
+          ],
+          "fasterPairs": 7
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 303,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.17660829642523468,
+            "maximumPairedChangePercent": 1.202162262226114
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.40572064561765764,
+            "maximumPairedChangePercent": 1.2427722979513778
+          }
+        }
+      },
+      "memoryObservationCoverage": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 166.792323,
+          "maxSampledPssKiB": 1045083,
+          "maxSampledPrivateKiB": 815884,
+          "allObservedSampleCount": 74
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 175.374561,
+          "maxSampledPssKiB": 1028828,
+          "maxSampledPrivateKiB": 799124,
+          "allObservedSampleCount": 70
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 169.868462,
+          "maxSampledPssKiB": 1005908,
+          "maxSampledPrivateKiB": 773920,
+          "allObservedSampleCount": 81
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 156.778957,
+          "maxSampledPssKiB": 993959,
+          "maxSampledPrivateKiB": 764420,
+          "allObservedSampleCount": 78
+        }
+      ],
+      "semanticDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "storageBytes": 43520477,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              18.493661446706653,
+              46.564885496192176,
+              81.47321428561756,
+              122.23719676554312,
+              73.01790281323142,
+              -22.802547770678917,
+              112.98701298693739,
+              94.57547169861296,
+              -2.0681265208352895,
+              -57.34853029387344,
+              117.92828685302048,
+              -56.005221932086314
+            ],
+            "medianPairedChangePercent": 59.791394154711796,
+            "equalWorkChangePercent": 24.045461298498672,
+            "descriptiveBootstrap95Percent": [
+              -12.435337145757108,
+              103.78124234277517
+            ],
+            "fasterPairs": 4
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              107.98429319380323,
+              -29.337539432112024,
+              135.99419448474666,
+              200.36429872497573,
+              108.7962962965483,
+              69.74789915962482,
+              6.91003911333421,
+              2.103960396162363,
+              85.48387096750831,
+              -56.38036809807122,
+              1.9254658384955547,
+              -15.960099750484623
+            ],
+            "medianPairedChangePercent": 38.328969136479515,
+            "equalWorkChangePercent": 25.311421281743062,
+            "descriptiveBootstrap95Percent": [
+              -7.017316955994534,
+              108.39029474517577
+            ],
+            "fasterPairs": 3
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -43.02759134975048,
+              107.41548527790368,
+              -23.10267857146504,
+              -26.010781671149463,
+              -17.13554987225526,
+              -54.522292993607316,
+              99.22077922088506,
+              90.56603773610938,
+              -47.201946472036006,
+              -2.21955608882477,
+              113.8114209831873,
+              -47.65013054835535
+            ],
+            "medianPairedChangePercent": -20.119114221860144,
+            "equalWorkChangePercent": -1.010251077112978,
+            "descriptiveBootstrap95Percent": [
+              -45.11476891089325,
+              94.89340847849724
+            ],
+            "fasterPairs": 8
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -3.0598052852315205,
+              7.898658718139329,
+              13.043478260879038,
+              14.263074484982763,
+              11.424100156477346,
+              -14.792176039093452,
+              4.964539007352209,
+              -12.35795454564258,
+              -9.636871508179489,
+              -1.057401812969072,
+              0.0,
+              -12.73458445097071
+            ],
+            "medianPairedChangePercent": -0.528700906484536,
+            "equalWorkChangePercent": -0.7528680689066869,
+            "descriptiveBootstrap95Percent": [
+              -10.99741302691104,
+              9.661379437308337
+            ],
+            "fasterPairs": 6
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -9.831824062151961,
+              9.03614457828208,
+              11.045655375686536,
+              8.258258258439554,
+              8.702290076502429,
+              1.4556040757341515,
+              8.187134502887151,
+              -8.592592592991688,
+              2.535657685887971,
+              1.7080745334843161,
+              -1.1461318048918812,
+              3.9936102228775194
+            ],
+            "medianPairedChangePercent": 3.264633954382745,
+            "equalWorkChangePercent": 2.759218015221787,
+            "descriptiveBootstrap95Percent": [
+              0.15473613542114073,
+              8.480274167470991
+            ],
+            "fasterPairs": 3
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              7.510431154322483,
+              -1.0432190761533344,
+              1.7991004496605623,
+              5.546751188448096,
+              2.503912362894445,
+              -16.014669926659764,
+              -2.9787234039819643,
+              -4.119318181605259,
+              -11.871508379414008,
+              -2.7190332322562294,
+              1.1594202895831573,
+              -16.085790884648212
+            ],
+            "medianPairedChangePercent": -1.881126154204782,
+            "equalWorkChangePercent": -3.417782026726035,
+            "descriptiveBootstrap95Percent": [
+              -7.995413280509633,
+              2.1515064062775036
+            ],
+            "fasterPairs": 7
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "A": 950.5,
+          "B": 887,
+          "C": 922.3000000000029
+        },
+        {
+          "B": 897.7999999999884,
+          "C": 906.5,
+          "A": 891.6000000000058
+        },
+        {
+          "C": 927.3000000000175,
+          "A": 1153.5999999999767,
+          "B": 933.1000000000058
+        },
+        {
+          "A": 994.8000000000175,
+          "C": 887.3999999999942,
+          "B": 906.8000000000175
+        },
+        {
+          "B": 897.7999999999884,
+          "A": 904.5,
+          "C": 899.3999999999942
+        },
+        {
+          "C": 912.7999999999884,
+          "B": 896.5,
+          "A": 922
+        },
+        {
+          "C": 886.2999999999884,
+          "B": 1060.2999999999884,
+          "A": 1017.2000000000116
+        },
+        {
+          "B": 927.7999999999884,
+          "A": 904.1999999999534,
+          "C": 1204.5
+        },
+        {
+          "A": 886.8999999999651,
+          "C": 910.2999999999884,
+          "B": 897.5
+        },
+        {
+          "C": 890.2000000000116,
+          "A": 952.5999999999767,
+          "B": 916.5
+        },
+        {
+          "B": 914.2000000000116,
+          "C": 885.7000000000116,
+          "A": 885.2999999999884
+        },
+        {
+          "A": 889.4000000000233,
+          "B": 884.5,
+          "C": 891
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T05:23:25.282Z",
+        "loadAverage": [
+          3.76,
+          1.1,
+          0.38
+        ],
+        "freeMemoryBytes": 15263449088,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": []
+    },
+    "jmdict-host-2": {
+      "complete": true,
+      "artifactId": 15249710714,
+      "dictionary": "jmdict",
+      "replication": 2,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -0.3209536909694388,
+            -0.7894125841639621,
+            3.249181860674266,
+            1.1151160171236185,
+            -1.8022128436102403,
+            2.8160646387845434,
+            -0.7467040018762416,
+            -6.8611782921834674e-12,
+            -0.1633224451662585,
+            1.2087123025342539,
+            0.8548009367667975,
+            1.6480282519128808
+          ],
+          "medianPairedChangePercent": 0.42740046837996815,
+          "equalWorkChangePercent": 0.578820604458552,
+          "descriptiveBootstrap95Percent": [
+            -0.5338288464228347,
+            1.4283702772235785
+          ],
+          "fasterPairs": 6
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -14.147497285022137,
+            -3.347658900701811,
+            0.7067943456399162,
+            3.6485394296311924,
+            -3.160854893135734,
+            2.3297067171322627,
+            0.5793331756875242,
+            1.3264818355612995,
+            -2.0487581549757383,
+            -1.4794967381120627,
+            0.5252100840336116,
+            -0.3692165685948545
+          ],
+          "medianPairedChangePercent": 0.07799675771937853,
+          "equalWorkChangePercent": -1.491458357112585,
+          "descriptiveBootstrap95Percent": [
+            -2.604806524055736,
+            1.016638090600619
+          ],
+          "fasterPairs": 6
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            16.10499770746987,
+            2.646853958673967,
+            2.524544179520327,
+            -2.4442441991452957,
+            1.4029884795308867,
+            0.47528517109571844,
+            -1.3183992533013722,
+            -1.3091166411174249,
+            1.9248716752285455,
+            2.728578267104975,
+            0.32786885245765784,
+            2.0247204237800576
+          ],
+          "medianPairedChangePercent": 1.663930077379705,
+          "equalWorkChangePercent": 2.101623805452646,
+          "descriptiveBootstrap95Percent": [
+            -0.49062389432987796,
+            2.585699069097158
+          ],
+          "fasterPairs": 3
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 276,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.2555181803782669,
+            "maximumPairedChangePercent": 0.49130287509309145
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.10620784704115094,
+            "maximumPairedChangePercent": 1.034139237113707
+          }
+        }
+      },
+      "semanticDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "storageBytes": 43520477,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              16.284779050781694,
+              -17.33067729076384,
+              44.76744186049659,
+              34.45692883905256,
+              0.684261974595235,
+              -12.95871559619034,
+              38.05714285722139,
+              25.187265917477355,
+              78.174037089964,
+              -4.869358669601375,
+              -13.079667063213362,
+              -16.192170818564122
+            ],
+            "medianPairedChangePercent": 8.484520512688466,
+            "equalWorkChangePercent": 12.92415607192321,
+            "descriptiveBootstrap95Percent": [
+              -13.019191329701851,
+              36.25703584813698
+            ],
+            "fasterPairs": 5
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              52.63157894753954,
+              -47.79874213830112,
+              9.37042459735764,
+              -15.925058548046934,
+              -34.14322250632923,
+              11.127379209413979,
+              -21.913380736835407,
+              15.958369471017653,
+              52.87637698899079,
+              -21.547502448413702,
+              -32.688766114205,
+              -15.591397849310384
+            ],
+            "medianPairedChangePercent": -15.758228198678658,
+            "equalWorkChangePercent": -9.014482514953126,
+            "descriptiveBootstrap95Percent": [
+              -27.301073425520205,
+              13.542874340215816
+            ],
+            "fasterPairs": 7
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -23.813420621987056,
+              58.366533864488176,
+              32.36434108530848,
+              59.92509363315068,
+              52.883675464186794,
+              -21.67431192651028,
+              76.79999999993134,
+              7.958801497951695,
+              16.54778887309383,
+              21.258907363459834,
+              29.131985731032394,
+              -0.7117437724904141
+            ],
+            "medianPairedChangePercent": 25.195446547246103,
+            "equalWorkChangePercent": 24.112231477368784,
+            "descriptiveBootstrap95Percent": [
+              3.6235288627306517,
+              55.6251046643375
+            ],
+            "fasterPairs": 3
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              1.641791044739227,
+              3.0110935023257346,
+              -2.7993779163606347,
+              -0.31645569585365685,
+              -7.9341317363435415,
+              0.9787928217618314,
+              -25.508982035914197,
+              7.223796034653107,
+              7.443365695959003,
+              2.8315946350824905,
+              1.1235955055455271,
+              -10.787172012332446
+            ],
+            "medianPairedChangePercent": 1.0511941636536903,
+            "equalWorkChangePercent": -2.513756878444129,
+            "descriptiveBootstrap95Percent": [
+              -5.366754826352094,
+              2.9213440687041015
+            ],
+            "fasterPairs": 5
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -9.561752987843942,
+              -14.921465968732283,
+              -12.587412587301017,
+              -3.076923076489102,
+              -4.354587869167936,
+              1.4754098360040935,
+              -11.77304964551924,
+              1.8842530286915737,
+              1.5290519876780317,
+              9.350237718536402,
+              -3.669724771029248,
+              -8.52017937271896
+            ],
+            "medianPairedChangePercent": -4.012156320098592,
+            "equalWorkChangePercent": -4.8345745329718355,
+            "descriptiveBootstrap95Percent": [
+              -10.667401316681591,
+              1.5022309118410515
+            ],
+            "fasterPairs": 8
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              12.388059701198406,
+              21.077654516787405,
+              11.197511663541505,
+              2.848101265722236,
+              -3.7425149700637927,
+              -0.48939641145065993,
+              -15.56886227530968,
+              5.240793201337857,
+              5.825242718703549,
+              -5.961251863240269,
+              4.975922953797607,
+              -2.4781341109641697
+            ],
+            "medianPairedChangePercent": 3.9120121097599103,
+            "equalWorkChangePercent": 2.4387193596184797,
+            "descriptiveBootstrap95Percent": [
+              -3.1103245405139868,
+              8.511377191122538
+            ],
+            "fasterPairs": 5
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "C": 1012.8999999999942,
+          "B": 869.6000000000058,
+          "A": 872.4000000000233
+        },
+        {
+          "A": 861.3999999999942,
+          "C": 884.2000000000116,
+          "B": 854.6000000000058
+        },
+        {
+          "B": 883.3999999999651,
+          "A": 855.6000000000349,
+          "C": 877.2000000000116
+        },
+        {
+          "B": 897.7000000000116,
+          "C": 866.0999999999767,
+          "A": 887.7999999999884
+        },
+        {
+          "C": 889,
+          "A": 876.6999999999534,
+          "B": 860.9000000000233
+        },
+        {
+          "A": 841.6000000000349,
+          "B": 865.3000000000466,
+          "C": 845.5999999999767
+        },
+        {
+          "A": 857.1000000000349,
+          "B": 850.6999999999534,
+          "C": 845.7999999999884
+        },
+        {
+          "C": 836.7999999999884,
+          "A": 847.9000000000233,
+          "B": 847.8999999999651
+        },
+        {
+          "B": 855.7999999999884,
+          "C": 873.7000000000116,
+          "A": 857.1999999999534
+        },
+        {
+          "B": 845.7000000000116,
+          "A": 835.6000000000349,
+          "C": 858.3999999999651
+        },
+        {
+          "A": 854,
+          "C": 856.7999999999884,
+          "B": 861.2999999999884
+        },
+        {
+          "C": 866.7000000000116,
+          "B": 863.5,
+          "A": 849.5
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T04:52:55.011Z",
+        "loadAverage": [
+          4.45,
+          1.39,
+          0.49
+        ],
+        "freeMemoryBytes": 15180296192,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": []
+    },
+    "jitendex-host-1": {
+      "complete": true,
+      "artifactId": 15248961251,
+      "dictionary": "jitendex",
+      "replication": 1,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            15.423329298592625,
+            1.8019177553253218,
+            5.663472896704769,
+            -0.08164290648674521,
+            -0.4337131020204388,
+            -4.028776978418724,
+            1.0378199414228906,
+            0.01924433895621469,
+            2.099483204134356,
+            3.151166506870462,
+            -1.7839132627325394,
+            -2.595024624323472
+          ],
+          "medianPairedChangePercent": 0.5285321401895526,
+          "equalWorkChangePercent": 1.6653188048007639,
+          "descriptiveBootstrap95Percent": [
+            -1.108813182376489,
+            2.62532485550242
+          ],
+          "fasterPairs": 5
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            17.26860841423874,
+            -3.063913229977333,
+            3.6834310000651627,
+            -0.16941707975225428,
+            -1.9131432944327842,
+            -4.130733658294861,
+            -9.855714610312727,
+            0.9517643250250396,
+            -1.0641627543035992,
+            2.561169367650984,
+            -0.09617850730956334,
+            -14.574450412534857
+          ],
+          "medianPairedChangePercent": -0.6167899170279267,
+          "equalWorkChangePercent": -1.1638011296626671,
+          "descriptiveBootstrap95Percent": [
+            -3.5973234441361024,
+            1.7564668463380118
+          ],
+          "fasterPairs": 8
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -1.5735490858114765,
+            5.0196280326919585,
+            1.909699435619916,
+            0.08792313006489305,
+            1.5082858622468054,
+            0.10634970284715273,
+            12.084553673750541,
+            -0.9237282699354088,
+            3.197674418604657,
+            0.5752636625119933,
+            -1.6893595562272434,
+            14.023235256971844
+          ],
+          "medianPairedChangePercent": 1.0417747623793883,
+          "equalWorkChangePercent": 2.8624329616064426,
+          "descriptiveBootstrap95Percent": [
+            -0.4179025699352579,
+            4.1086512256482965
+          ],
+          "fasterPairs": 3
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 282,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.14517997470517852,
+            "maximumPairedChangePercent": 0.9762105412011168
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.07788567578743133,
+            "maximumPairedChangePercent": 2.007434944237918
+          }
+        }
+      },
+      "semanticDigestSha256": "754fc8c99cea76757778abe6b30f16a293c91bba3d45a68dcb9e3e9bac3ca215",
+      "storageBytes": 67466332,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -57.00773860704993,
+              8.98203592814788,
+              -59.999999999934104,
+              15.107212475645525,
+              113.9059304712001,
+              0.16528925630416857,
+              75.67954220271658,
+              -17.622950819672134,
+              36.36363636371036,
+              21.880492091411096,
+              11.469194312952325,
+              -1.7094017092044056
+            ],
+            "medianPairedChangePercent": 10.225615120550113,
+            "equalWorkChangePercent": 3.193832599184998,
+            "descriptiveBootstrap95Percent": [
+              -9.666176264438263,
+              29.12206422756074
+            ],
+            "fasterPairs": 4
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -57.48299319730577,
+              30.935251798514464,
+              -67.40968485772594,
+              -3.276003276097683,
+              -6.440071556208871,
+              -0.08244023086132479,
+              153.19587628936358,
+              113.37579617844943,
+              78.89908256903637,
+              28.425925925867478,
+              9.701492537393674,
+              -4.564315352784886
+            ],
+            "medianPairedChangePercent": 4.809526153266175,
+            "equalWorkChangePercent": 4.900103341392392,
+            "descriptiveBootstrap95Percent": [
+              -5.502193454496873,
+              54.91716718377542
+            ],
+            "fasterPairs": 6
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              1.117798796282421,
+              -16.76646706583539,
+              22.735849056520664,
+              19.005847953344947,
+              128.62985685128046,
+              0.24793388443220543,
+              -30.61516452110691,
+              -61.39344262296991,
+              -23.77622377627999,
+              -5.096660808374997,
+              1.611374407650934,
+              2.991452991754473
+            ],
+            "medianPairedChangePercent": 0.6828663403573021,
+            "equalWorkChangePercent": -1.6265672652908791,
+            "descriptiveBootstrap95Percent": [
+              -20.271345421057685,
+              10.99865047254971
+            ],
+            "fasterPairs": 5
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -24.27947598257959,
+              -0.17559262524758923,
+              -11.921891058619028,
+              15.198237885791688,
+              22.88732394368025,
+              -4.616724738415112,
+              29.696287964166167,
+              0.4233700253525763,
+              -1.7142857141526635,
+              16.776859504170716,
+              -3.934987168256321,
+              1.3333333334663688
+            ],
+            "medianPairedChangePercent": 0.12388870005248798,
+            "equalWorkChangePercent": 2.4643113486759516,
+            "descriptiveBootstrap95Percent": [
+              -4.275855953335716,
+              15.987548694981202
+            ],
+            "fasterPairs": 6
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -27.68974145132159,
+              16.138917262442387,
+              -13.695871097619383,
+              -10.368466152541234,
+              -10.128755364641929,
+              11.620795107165005,
+              32.224770641949064,
+              34.314835787943586,
+              -0.23201856122859743,
+              10.736677116094672,
+              15.892672858896727,
+              -9.369676320441156
+            ],
+            "medianPairedChangePercent": 5.252329277433043,
+            "equalWorkChangePercent": 2.619808306780591,
+            "descriptiveBootstrap95Percent": [
+              -10.248610758591582,
+              16.015795060669547
+            ],
+            "fasterPairs": 6
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              4.716157205337956,
+              -14.047410008846228,
+              2.055498458256766,
+              28.524229075276274,
+              36.737089201647336,
+              -14.547038327393015,
+              -1.9122609670692903,
+              -25.232853514483622,
+              -1.4857142858340278,
+              5.454545454478121,
+              -17.10863986310325,
+              11.809523809878586
+            ],
+            "medianPairedChangePercent": 0.2848920862113635,
+            "equalWorkChangePercent": -0.15152723501468124,
+            "descriptiveBootstrap95Percent": [
+              -14.297224168119627,
+              8.632034632178343
+            ],
+            "fasterPairs": 6
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "A": 1569.6999999999825,
+          "B": 1811.7999999999884,
+          "C": 1545
+        },
+        {
+          "B": 1581.8999999999942,
+          "C": 1631.8999999999942,
+          "A": 1553.8999999999942
+        },
+        {
+          "C": 1552.8999999999942,
+          "A": 1523.8000000000175,
+          "B": 1610.1000000000058
+        },
+        {
+          "A": 1592.2999999999884,
+          "C": 1593.7000000000116,
+          "B": 1591
+        },
+        {
+          "B": 1538.0999999999767,
+          "A": 1544.7999999999884,
+          "C": 1568.0999999999767
+        },
+        {
+          "C": 1600.2000000000116,
+          "B": 1534.0999999999767,
+          "A": 1598.5
+        },
+        {
+          "C": 1760.399999999965,
+          "B": 1586.9000000000233,
+          "A": 1570.600000000035
+        },
+        {
+          "B": 1559.2000000000116,
+          "A": 1558.9000000000233,
+          "C": 1544.5
+        },
+        {
+          "A": 1548,
+          "C": 1597.5,
+          "B": 1580.5
+        },
+        {
+          "C": 1573.5,
+          "A": 1564.5,
+          "B": 1613.7999999999884
+        },
+        {
+          "B": 1558.0999999999767,
+          "C": 1559.5999999999767,
+          "A": 1586.399999999965
+        },
+        {
+          "A": 1583.7999999999884,
+          "B": 1542.6999999999534,
+          "C": 1805.8999999999069
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T04:40:48.294Z",
+        "loadAverage": [
+          3.85,
+          1.49,
+          0.56
+        ],
+        "freeMemoryBytes": 15280136192,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759427072,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": []
+    },
+    "jitendex-host-2": {
+      "complete": true,
+      "artifactId": 15248728412,
+      "dictionary": "jitendex",
+      "replication": 2,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -13.91603135402184,
+            -0.2833574711919917,
+            -7.470078415185144,
+            -0.23507578100763205,
+            -1.9205988832328824,
+            0.46231792273516703,
+            1.6398713826366595,
+            -1.6800448011946578,
+            2.503277358139444,
+            -1.7277167277160221,
+            -1.8339529120183884,
+            -2.2676717745894415
+          ],
+          "medianPairedChangePercent": -1.7038807644553344,
+          "equalWorkChangePercent": -2.418598008812922,
+          "descriptiveBootstrap95Percent": [
+            -2.094135328911162,
+            0.11362107086376749
+          ],
+          "fasterPairs": 9
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -1.0491236731671183,
+            -0.42756539235339064,
+            -8.739896493570631,
+            0.1739238462008963,
+            -1.3089651765910926,
+            0.6407816266956301,
+            -2.624607233074616,
+            -0.2210154079276272,
+            0.5757687124809951,
+            -6.39102116771465,
+            -0.37726358148892913,
+            -2.484586929719268
+          ],
+          "medianPairedChangePercent": -0.7383445327602489,
+          "equalWorkChangePercent": -1.9238754325264784,
+          "descriptiveBootstrap95Percent": [
+            -2.5545970813969365,
+            -0.02354578086336545
+          ],
+          "fasterPairs": 9
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -13.003328680339898,
+            0.14482715194183982,
+            1.3914273922514653,
+            -0.408289514381488,
+            -0.6197459655136961,
+            -0.17732742241851618,
+            4.379421221867208,
+            -1.4622612158582404,
+            1.9164741869074575,
+            4.981684981687118,
+            -1.4622057001224764,
+            0.22244191794942303
+          ],
+          "medianPairedChangePercent": -0.01625013523833818,
+          "equalWorkChangePercent": -0.5044271258353938,
+          "descriptiveBootstrap95Percent": [
+            -1.0409758328180807,
+            1.6539507895794614
+          ],
+          "fasterPairs": 6
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 412,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.21609352255896885,
+            "maximumPairedChangePercent": 1.4156806204633554
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.23009544727291553,
+            "maximumPairedChangePercent": 2.295750105828964
+          }
+        }
+      },
+      "semanticDigestSha256": "754fc8c99cea76757778abe6b30f16a293c91bba3d45a68dcb9e3e9bac3ca215",
+      "storageBytes": 67466332,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -2.881844380347387,
+              -3.886554621741767,
+              -8.518518518529294,
+              2.8895768832520874,
+              -20.555138784750127,
+              4.589114194356725,
+              55.03267973884367,
+              11.06194690239446,
+              15.12702078498478,
+              -24.72250252257815,
+              -59.47467166975172,
+              -14.102564102514902
+            ],
+            "medianPairedChangePercent": -3.3841995010445824,
+            "equalWorkChangePercent": -6.1937312437449155,
+            "descriptiveBootstrap95Percent": [
+              -17.32885144363252,
+              7.825530548375603
+            ],
+            "fasterPairs": 7
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              1.7102615694868595,
+              -0.10917030565142927,
+              0.9193054135315348,
+              3.4232365144515997,
+              12.659574468117718,
+              8.768035516056738,
+              28.216216216496015,
+              -2.048780487953694,
+              -0.10020040101151872,
+              -26.211671612140886,
+              -52.52747252745973,
+              9.707602339187504
+            ],
+            "medianPairedChangePercent": 1.3147834915091972,
+            "equalWorkChangePercent": -1.4450867052179905,
+            "descriptiveBootstrap95Percent": [
+              -1.0789753968025617,
+              9.237818927622122
+            ],
+            "fasterPairs": 5
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -4.514889529309684,
+              -3.781512604959425,
+              -9.351851851722504,
+              -0.5159958720929669,
+              -29.482370592716467,
+              -3.8420490927071116,
+              20.9150326796943,
+              13.384955752118799,
+              15.242494226335236,
+              2.018163471240464,
+              -14.634146341398157,
+              -21.70329670325628
+            ],
+            "medianPairedChangePercent": -3.8117808488332683,
+            "equalWorkChangePercent": -4.8182727575676765,
+            "descriptiveBootstrap95Percent": [
+              -11.99299909656033,
+              7.70155961167962
+            ],
+            "fasterPairs": 8
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              36.86396677057373,
+              0.6211180124584326,
+              7.859358841563635,
+              -24.042379788227876,
+              13.532338308415802,
+              5.967450271565711,
+              2.8047464941024502,
+              19.153674832807944,
+              32.987312571989925,
+              3.8674033150337905,
+              -18.653321200948813,
+              1.9487179489759754
+            ],
+            "medianPairedChangePercent": 4.9174267932997395,
+            "equalWorkChangePercent": 5.593206499588632,
+            "descriptiveBootstrap95Percent": [
+              1.2849179807171929,
+              16.343006570611873
+            ],
+            "fasterPairs": 2
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              17.468805704129142,
+              -1.6478751082830034,
+              -6.373429084365045,
+              -16.262353998313948,
+              1.3321492005577307,
+              13.455953533437093,
+              -14.834673815831145,
+              0.7532956682095859,
+              4.818181818440914,
+              -1.3986013982281609,
+              -15.898400752547193,
+              -3.8684719531271283
+            ],
+            "medianPairedChangePercent": -1.5232382532555766,
+            "equalWorkChangePercent": -1.9039672304574706,
+            "descriptiveBootstrap95Percent": [
+              -10.604051450098096,
+              3.0751655094993335
+            ],
+            "fasterPairs": 7
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              16.510903426817446,
+              2.3070097603275386,
+              15.201654601612557,
+              -9.29095354526358,
+              12.039800995152405,
+              -6.60036166340483,
+              20.711974109966526,
+              18.26280623632661,
+              26.874279123007216,
+              5.340699815557515,
+              -3.2757051864088726,
+              6.051282051052698
+            ],
+            "medianPairedChangePercent": 9.045541523102552,
+            "equalWorkChangePercent": 7.642688005191056,
+            "descriptiveBootstrap95Percent": [
+              -0.48434771304066704,
+              17.38685483157203
+            ],
+            "fasterPairs": 3
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "C": 1620.3999999999942,
+          "B": 1603.3999999999942,
+          "A": 1862.6000000000058
+        },
+        {
+          "A": 1588.1000000000058,
+          "C": 1590.3999999999942,
+          "B": 1583.6000000000058
+        },
+        {
+          "B": 1569.4000000000233,
+          "A": 1696.0999999999767,
+          "C": 1719.6999999999534
+        },
+        {
+          "B": 1612.7000000000116,
+          "C": 1609.9000000000233,
+          "A": 1616.5
+        },
+        {
+          "C": 1619.600000000035,
+          "A": 1629.7000000000116,
+          "B": 1598.399999999965
+        },
+        {
+          "A": 1579,
+          "B": 1586.2999999999884,
+          "C": 1576.2000000000116
+        },
+        {
+          "A": 1555,
+          "B": 1580.5,
+          "C": 1623.100000000035
+        },
+        {
+          "C": 1583.5999999999767,
+          "A": 1607.100000000035,
+          "B": 1580.100000000035
+        },
+        {
+          "B": 1642,
+          "C": 1632.600000000035,
+          "A": 1601.899999999965
+        },
+        {
+          "B": 1609.7000000000116,
+          "A": 1638,
+          "C": 1719.600000000035
+        },
+        {
+          "A": 1614,
+          "C": 1590.4000000000233,
+          "B": 1584.4000000000233
+        },
+        {
+          "C": 1622,
+          "B": 1581.6999999999534,
+          "A": 1618.3999999999069
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T04:47:01.336Z",
+        "loadAverage": [
+          3.99,
+          1.45,
+          0.53
+        ],
+        "freeMemoryBytes": 15126687744,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16758390784,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": []
+    },
+    "vndb-host-1": {
+      "complete": true,
+      "qualificationPassed": false,
+      "auditor": {
+        "path": "audit-inflight-peer-whole-v2.py",
+        "sha256": "7993b36bfdcbe0fa784022bddf797fa418e50f550aaaba99ab8f5153ca41a52f"
+      },
+      "artifactId": 15249739199,
+      "dictionary": "vndb",
+      "replication": 1,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            0.8167766615540195,
+            -0.11207067044707308,
+            0.2315414787545933,
+            0.7363897841078382,
+            1.9296154789869346,
+            -2.0105783643172948,
+            -0.48866543177330524,
+            1.141773085773501,
+            -0.20916824861181293,
+            0.05623802745036155,
+            2.712236560300063,
+            7.076376554176544
+          ],
+          "medianPairedChangePercent": 0.48396563143122684,
+          "equalWorkChangePercent": 0.9694090177107428,
+          "descriptiveBootstrap95Percent": [
+            -0.160619459529443,
+            1.5356942823802289
+          ],
+          "fasterPairs": 4
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            1.521776852333545,
+            3.32435473422108,
+            2.8547617781098156,
+            1.7465567630956302,
+            -1.6371539229115162,
+            -0.2857693858596133,
+            -1.7247987734764436,
+            2.6363636363640586,
+            -5.218784954675238,
+            -1.216295936426004,
+            -0.5385245473086497,
+            7.015550663924408
+          ],
+          "medianPairedChangePercent": 0.6180037332369714,
+          "equalWorkChangePercent": 0.6672612032998293,
+          "descriptiveBootstrap95Percent": [
+            -1.4267249296687545,
+            2.745562707236937
+          ],
+          "fasterPairs": 6
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            -0.6944324780731148,
+            -3.3258619553033664,
+            -2.5504121092753462,
+            -0.9928266971626742,
+            3.626134810193582,
+            -1.7297520803546074,
+            1.2578283496503584,
+            -1.4561998278561528,
+            5.285453139282725,
+            1.2882023163025114,
+            3.268362039486261,
+            0.056838365896161314
+          ],
+          "medianPairedChangePercent": -0.3187970560884823,
+          "equalWorkChangePercent": 0.30014506285285236,
+          "descriptiveBootstrap95Percent": [
+            -1.59297595410538,
+            2.2782821778943863
+          ],
+          "fasterPairs": 6
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 410,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryObservationCoverage": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 238.246607,
+          "maxSampledPssKiB": 1236455,
+          "maxSampledPrivateKiB": 1014120,
+          "allObservedSampleCount": 101
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 259.348316,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 102
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 243.953287,
+          "maxSampledPssKiB": 1219720,
+          "maxSampledPrivateKiB": 990428,
+          "allObservedSampleCount": 104
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 255.797422,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 103
+        }
+      ],
+      "semanticDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "storageBytes": 609176779,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -9.418837675369641,
+              2.8865979379488316,
+              -8.015267175600084,
+              10.493827160463521,
+              6.185567010054394,
+              6.904231625538371,
+              -32.18707015141092,
+              26.530612245285855,
+              2.2680412368144776,
+              -1.6227180525989593,
+              -34.08134642317495,
+              2.597402597834564
+            ],
+            "medianPairedChangePercent": 2.432721917324532,
+            "equalWorkChangePercent": -5.177419354805668,
+            "descriptiveBootstrap95Percent": [
+              -8.717052425484862,
+              6.544899317796382
+            ],
+            "fasterPairs": 5
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -8.130081300865433,
+              1.217038539387305,
+              -6.042884990429476,
+              30.02421307502674,
+              31.713554987290713,
+              0.8403361335207249,
+              -4.722777724452953e-10,
+              5.531914893815171,
+              19.80676328484483,
+              -2.414486921437742,
+              -4.665314402163001,
+              1.4989293360976985
+            ],
+            "medianPairedChangePercent": 1.028687336454004,
+            "equalWorkChangePercent": 4.757662152326803,
+            "descriptiveBootstrap95Percent": [
+              -3.539900661800366,
+              12.66933908932999
+            ],
+            "fasterPairs": 5
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -1.402805611186797,
+              1.6494845360564891,
+              -2.099236641067259,
+              -15.020576131688479,
+              -19.381443299210588,
+              6.013363029639818,
+              -32.18707015109066,
+              19.897959183815892,
+              -14.63917525785371,
+              0.8113590264175352,
+              -30.855539971151224,
+              1.0822510827670495
+            ],
+            "medianPairedChangePercent": -1.751021126127028,
+            "equalWorkChangePercent": -9.48387096753457,
+            "descriptiveBootstrap95Percent": [
+              -17.201009715449533,
+              1.3658678094117693
+            ],
+            "fasterPairs": 7
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -1.2101210120452066,
+              0.11185682297962796,
+              2.7654867257327354,
+              -2.915766738738912,
+              -2.285092491556806,
+              -0.337457817825515,
+              -1.3001083419372894,
+              -0.7751937983986323,
+              -0.4479283307135429,
+              -0.8918617604468659,
+              -4.030501088805494,
+              1.698754246884726
+            ],
+            "medianPairedChangePercent": -0.8335277794227491,
+            "equalWorkChangePercent": -0.8196721309184474,
+            "descriptiveBootstrap95Percent": [
+              -1.7926004167470477,
+              -0.11280049742294906
+            ],
+            "fasterPairs": 9
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -2.603036876351572,
+              -1.5401540153036297,
+              2.5386313464360377,
+              0.22296544056523704,
+              3.8891112552619234e-10,
+              -2.2075055185158843,
+              2.359550562170165,
+              -0.9944751380199124,
+              -0.11235955014352594,
+              -0.4479283314916316,
+              -0.33936651641600646,
+              -0.6637168145171346
+            ],
+            "medianPairedChangePercent": -0.39364742395382457,
+            "equalWorkChangePercent": -0.32395409101565464,
+            "descriptiveBootstrap95Percent": [
+              -1.267314576661771,
+              0.11148272047707408
+            ],
+            "fasterPairs": 8
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              1.430143014354579,
+              1.6778523486010943,
+              0.2212389382595159,
+              -3.1317494603225415,
+              -2.2850924919368354,
+              1.9122609670667812,
+              -3.5752979414311548,
+              0.2214839423627879,
+              -0.3359462482632969,
+              -0.4459308797043038,
+              -3.703703702623451,
+              2.378255946007779
+            ],
+            "medianPairedChangePercent": -0.05735365500189049,
+            "equalWorkChangePercent": -0.49732915805613676,
+            "descriptiveBootstrap95Percent": [
+              -2.7084209761296885,
+              1.5539976814778367
+            ],
+            "fasterPairs": 6
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "A": 5803.3000000000175,
+          "B": 5850.6999999999825,
+          "C": 5763
+        },
+        {
+          "B": 6060.799999999988,
+          "C": 5865.800000000047,
+          "A": 6067.600000000035
+        },
+        {
+          "C": 5639.699999999953,
+          "A": 5787.300000000047,
+          "B": 5800.700000000012
+        },
+        {
+          "A": 5771.400000000023,
+          "C": 5714.099999999977,
+          "B": 5813.900000000023
+        },
+        {
+          "B": 5815.899999999965,
+          "A": 5705.79999999993,
+          "C": 5912.699999999953
+        },
+        {
+          "C": 5703.900000000023,
+          "B": 5687.599999999977,
+          "A": 5804.300000000047
+        },
+        {
+          "C": 5739.79999999993,
+          "B": 5640.79999999993,
+          "A": 5668.5
+        },
+        {
+          "B": 5757.900000000023,
+          "A": 5692.900000000023,
+          "C": 5610
+        },
+        {
+          "A": 5689.199999999953,
+          "C": 5989.900000000023,
+          "B": 5677.29999999993
+        },
+        {
+          "C": 5763.400000000023,
+          "A": 5690.100000000093,
+          "B": 5693.300000000047
+        },
+        {
+          "B": 5707,
+          "C": 5737.900000000023,
+          "A": 5556.300000000047
+        },
+        {
+          "A": 5630,
+          "B": 6028.40000000014,
+          "C": 5633.199999999953
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T04:50:49.693Z",
+        "loadAverage": [
+          2.52,
+          1.22,
+          0.48
+        ],
+        "freeMemoryBytes": 15008575488,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": [
+        {
+          "completedObservations": 39,
+          "message": "All timing retained; separate memory qualification did not pass",
+          "retried": false,
+          "stage": "profile",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/import-inflight-study-20261128-4990/run.py\", line 337, in main\n    raise RuntimeError('All timing retained; separate memory qualification did not pass')\nRuntimeError: All timing retained; separate memory qualification did not pass\n",
+          "type": "RuntimeError"
+        }
+      ]
+    },
+    "vndb-host-2": {
+      "complete": true,
+      "qualificationPassed": false,
+      "auditor": {
+        "path": "audit-inflight-peer-whole-v2.py",
+        "sha256": "7993b36bfdcbe0fa784022bddf797fa418e50f550aaaba99ab8f5153ca41a52f"
+      },
+      "artifactId": 15250228392,
+      "dictionary": "vndb",
+      "replication": 2,
+      "scope": "Independent artifact identity/complete package/source binding, fixed schedule and all semantic receipts; paired statistics reproduced from raw summaries; memory recomputed from original scans using the unchanged source-bound auditor. No new performance measurements.",
+      "source": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+        "tooling": "154c06d0784c2d9b6d06fb0c22921d59acc95710",
+        "candidateDatabaseSha256": "e3a2e73703e0ebcfb09f069badf842bdd41587ea5e7284b53068d655c17191a9",
+        "changedPackageEntries": [
+          "js/dictionary/dictionary-database.js"
+        ]
+      },
+      "commands": 130,
+      "commandFailures": 0,
+      "validatedReports": 47,
+      "authoritativeTimingReports": 36,
+      "warmups": 3,
+      "exhaustiveMediaReports": 2,
+      "memoryReports": 4,
+      "diagnosticTraces": 2,
+      "metrics": {
+        "B/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            2.935246881941689,
+            7.515507783797637,
+            0.31019378589731694,
+            0.1418141709098819,
+            -5.14292369638053,
+            2.00760635433177,
+            -5.293287451829521,
+            0.9345481902517161,
+            -3.470237199737003,
+            0.6734238103410561,
+            -3.0844730762080386,
+            1.885815835332716
+          ],
+          "medianPairedChangePercent": 0.49180879811918654,
+          "equalWorkChangePercent": -0.10105132788174043,
+          "descriptiveBootstrap95Percent": [
+            -3.277355137972515,
+            1.946711094832243
+          ],
+          "fasterPairs": 4
+        },
+        "B/C": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            1.3968830993974723,
+            6.194406467838087,
+            -1.2450291122028667,
+            -1.8767583887996264,
+            -2.361705771534628,
+            1.4901133490716312,
+            -0.5925531383655036,
+            1.2884608931994723,
+            -1.7724404225311519,
+            -2.0377459420627853,
+            -8.633024897452957,
+            -6.589895282990444
+          ],
+          "medianPairedChangePercent": -1.5087347673670148,
+          "equalWorkChangePercent": -1.2891436581641602,
+          "descriptiveBootstrap95Percent": [
+            -2.1997258567987066,
+            1.3426719962984723
+          ],
+          "fasterPairs": 8
+        },
+        "C/A": {
+          "pairs": 12,
+          "pairedChangePercent": [
+            1.5171706817024955,
+            1.244040397136792,
+            1.574829989942672,
+            2.057180874341502,
+            -2.848490898804612,
+            0.509894991919313,
+            -4.7287546978316275,
+            -0.3494106829413979,
+            -1.7284322083425674,
+            2.7675657103606532,
+            6.072819872845092,
+            9.073655515108058
+          ],
+          "medianPairedChangePercent": 1.3806055394196548,
+          "equalWorkChangePercent": 1.2036085738817315,
+          "descriptiveBootstrap95Percent": [
+            -1.0389214456419826,
+            2.4123732923510666
+          ],
+          "fasterPairs": 4
+        }
+      },
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 415,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryObservationCoverage": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 253.588202,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 104
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 262.712629,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 105
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 379.287351,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 103
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 316.988468,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "allObservedSampleCount": 103
+        }
+      ],
+      "semanticDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "storageBytes": 609176779,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "lookupDiagnostics": {
+        "firstPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -3.4482758623312404,
+              16.707021790959466,
+              -5.109489049966031,
+              -1.1650485420723,
+              -3.8888888882325556,
+              7.74907748934035,
+              24.208144795773467,
+              -2.0793950843656095,
+              -3.9292730840111645,
+              -2.840909092216959,
+              -2.99785867514194,
+              -2.5145067694679057
+            ],
+            "medianPairedChangePercent": -2.6777079308424323,
+            "equalWorkChangePercent": 1.1637436484459585,
+            "descriptiveBootstrap95Percent": [
+              -3.6685823752818925,
+              3.2920144736340307
+            ],
+            "fasterPairs": 9
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -12.92962356884323,
+              12.880562060358702,
+              -3.881700554694112,
+              19.764705882573374,
+              -4.066543438827797,
+              25.321888412319527,
+              2.8089887640620814,
+              14.096916298653529,
+              11.136363636034119,
+              6.4315352699711115,
+              -12.884615386316845,
+              -7.011070111162388
+            ],
+            "medianPairedChangePercent": 4.6202620170165964,
+            "equalWorkChangePercent": 3.158950358901458,
+            "descriptiveBootstrap95Percent": [
+              -5.5388067749950975,
+              13.488739179506126
+            ],
+            "fasterPairs": 5
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              10.889292196879996,
+              3.3898305082452618,
+              -1.2773722614293215,
+              -17.475728154141525,
+              0.18518518665275874,
+              -14.022140222754354,
+              20.814479637398865,
+              -14.177693760519306,
+              -13.55599214077623,
+              -8.712121213574397,
+              11.349036401570324,
+              4.8355899428779825
+            ],
+            "medianPairedChangePercent": -0.5460935373882814,
+            "equalWorkChangePercent": -1.9341091621366435,
+            "descriptiveBootstrap95Percent": [
+              -13.789066181765296,
+              7.862441069878989
+            ],
+            "fasterPairs": 6
+          }
+        },
+        "meanWarmPassSum": {
+          "B/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -14.258911819456744,
+              1.975850717159111,
+              2.280130291994431,
+              0.2183406113026587,
+              23.225806450537178,
+              -6.599999997857031,
+              -0.4296455428261292,
+              -3.2017075795966354,
+              -3.8002171539981533,
+              -2.1551724145555173,
+              9.518599563619933,
+              1.194353964203776
+            ],
+            "medianPairedChangePercent": -0.10565246576172971,
+            "equalWorkChangePercent": 0.42492917884640047,
+            "descriptiveBootstrap95Percent": [
+              -3.5009623667974,
+              2.127990504576771
+            ],
+            "fasterPairs": 6
+          },
+          "B/C": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              -18.538324420180963,
+              2.65193370360588,
+              1.072961373401804,
+              -19.1901408445988,
+              25.24590163791678,
+              0.7551240575558671,
+              0.21621621667038404,
+              -3.098290601142195,
+              -4.525862066939967,
+              -1.196953211877816,
+              11.3459399342551,
+              2.8697571742210437
+            ],
+            "medianPairedChangePercent": 0.48567013711311446,
+            "equalWorkChangePercent": -0.9257641919652282,
+            "descriptiveBootstrap95Percent": [
+              -3.8120763340410813,
+              2.760845438913462
+            ],
+            "fasterPairs": 5
+          },
+          "C/A": {
+            "pairs": 12,
+            "pairedChangePercent": [
+              5.253283301951117,
+              -0.6586169028231614,
+              1.1943539619195143,
+              24.017467248121328,
+              -1.6129032255439713,
+              -7.299999999217233,
+              -0.6444683144892771,
+              -0.10672358526594428,
+              0.7600434302434733,
+              -0.9698275851073301,
+              -1.6411378553309874,
+              -1.6286644938607098
+            ],
+            "medianPairedChangePercent": -0.6515426086562193,
+            "equalWorkChangePercent": 1.3633144477932069,
+            "descriptiveBootstrap95Percent": [
+              -1.620783859702346,
+              0.9771986960815049
+            ],
+            "fasterPairs": 8
+          }
+        }
+      },
+      "timingRows": [
+        {
+          "C": 5941.800000000047,
+          "B": 6024.800000000047,
+          "A": 5853
+        },
+        {
+          "A": 5851.899999999907,
+          "C": 5924.699999999953,
+          "B": 6291.699999999953
+        },
+        {
+          "B": 5885.5,
+          "A": 5867.300000000047,
+          "C": 5959.699999999953
+        },
+        {
+          "B": 5719.800000000047,
+          "C": 5829.199999999953,
+          "A": 5711.700000000186
+        },
+        {
+          "C": 5839,
+          "A": 6010.199999999953,
+          "B": 5701.100000000093
+        },
+        {
+          "A": 5942.40000000014,
+          "B": 6061.699999999953,
+          "C": 5972.699999999953
+        },
+        {
+          "A": 6306.09999999986,
+          "B": 5972.300000000047,
+          "C": 6007.899999999907
+        },
+        {
+          "C": 5960.59999999986,
+          "A": 5981.5,
+          "B": 6037.399999999907
+        },
+        {
+          "B": 5774.699999999953,
+          "C": 5878.90000000014,
+          "A": 5982.299999999814
+        },
+        {
+          "B": 5860.199999999953,
+          "A": 5821,
+          "C": 5982.100000000093
+        },
+        {
+          "A": 5929.699999999953,
+          "C": 6289.800000000047,
+          "B": 5746.800000000047
+        },
+        {
+          "C": 6321.800000000047,
+          "B": 5905.199999999953,
+          "A": 5795.899999999907
+        }
+      ],
+      "host": {
+        "capturedAtIso": "2026-11-28T05:24:20.175Z",
+        "loadAverage": [
+          3.52,
+          1.94,
+          0.83
+        ],
+        "freeMemoryBytes": 15015505920,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "correctnessJob": "Separate full unit/type/build/lint job is not inferred from this artifact; its completion must be checked independently.",
+      "failures": [
+        {
+          "completedObservations": 39,
+          "message": "All timing retained; separate memory qualification did not pass",
+          "retried": false,
+          "stage": "profile",
+          "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/import-inflight-study-20261128-4990/run.py\", line 337, in main\n    raise RuntimeError('All timing retained; separate memory qualification did not pass')\nRuntimeError: All timing retained; separate memory qualification did not pass\n",
+          "type": "RuntimeError"
+        }
+      ]
+    }
+  },
+  "correctness": {
+    "schemaVersion": 1,
+    "scope": "Independent read-only audit of the external in-flight candidate's completed correctness job and complete retained log. No new tests were run.",
+    "runId": 46104891607,
+    "jobId": 140855308314,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104891607/job/140855308314",
+    "apiStatusObservedAtUtc": "2026-11-28 05:03:39 UTC",
+    "apiConclusion": "success",
+    "runtimeCommit": "b4d0f54e23f8d4065df33bd40f5ea299bad57c6b",
+    "runtimeCheckoutVerifiedInLog": true,
+    "logFile": "correctness-job-140855308314.log",
+    "logSha256": "4a6036bcba82ee65c6a9a666fc469cacf9f5e81e12e88a5d772d61423533088a",
+    "scopedEslint": {
+      "conclusion": "success",
+      "paths": [
+        "ext/js/dictionary/dictionary-database.js",
+        "test/dictionary-database-inflight-source.test.js"
+      ]
+    },
+    "unitTests": {
+      "conclusion": "success",
+      "filesPassed": 670,
+      "testsPassed": 15159,
+      "testsSkipped": 47,
+      "testsFailed": 0
+    },
+    "typeChecks": {
+      "conclusion": "success",
+      "commands": [
+        "npm run test:ts:main",
+        "npm run test:ts:test"
+      ]
+    },
+    "dryBuild": {
+      "conclusion": "success",
+      "command": "node ./dev/bin/build.js --dryRun --all",
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ]
+    },
+    "warnings": [
+      "The complete log includes intentional negative-test stderr and dependency/runtime deprecation warnings. These are retained and are not counted as failed checks; all required job steps concluded success."
+    ]
+  }
+}

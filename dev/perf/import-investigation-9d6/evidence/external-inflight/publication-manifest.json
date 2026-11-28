@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "archive": "/home/agent/manabitan-inflight-peer-9d6/external-inflight-qualification-46104891607.tar.xz",
+  "bytes": 2453352,
+  "sha256": "d3e0567802ac1877e24b76a5cb176360f8db88cad6caa3732f8aaaee1ca452df",
+  "payloadCountIncludingManifest": 1904,
+  "uncompressedPayloadBytes": 139457763,
+  "allArchiveMembersReadBackAndSha256Verified": true,
+  "manifestPath": "/home/agent/manabitan-inflight-peer-9d6/MANIFEST.json",
+  "manifestSha256": "4566d8125ecb25ca06d5b601319624f0c49798524d5c711faf9a893148b938a4",
+  "readmePath": "/home/agent/manabitan-inflight-peer-9d6/README.md",
+  "readmeSha256": "50dfb5bbd6835f7ceb931a503173e88a6f66f738f67cce865ca7250333e5b3b4",
+  "summaryPath": "/home/agent/manabitan-inflight-peer-9d6/summary.json",
+  "summarySha256": "f0b6343bb2de21042e26b89f8438c0b2cc205ed55b57d7b6f1f4b75006ea0122",
+  "buildScriptSha256": "741479d024541d09b6cda55a18e7fe5eb244b81280e262e75af755912271119e",
+  "pythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "noNewMeasurements": true
+}
