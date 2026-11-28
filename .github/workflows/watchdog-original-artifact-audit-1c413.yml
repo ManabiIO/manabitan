@@ -1,0 +1,68 @@
+name: Audit original compression watchdog artifacts 20261128
+
+on:
+  push:
+    branches: [audit/watchdog-original-20261128-1c413]
+    paths:
+      - 'dev/perf/watchdog-artifact-audit-20261128/**'
+      - '.github/workflows/watchdog-original-artifact-audit-1c413.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit-records:
+    name: Read original watchdog records without import acquisition
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12.12'
+      - name: Verify Python and the immutable auditor source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code HEAD -- .
+          python3 -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11 or newer is required"'
+          python3 - <<'PY'
+          import json
+          import sys
+          sys.path.insert(0, "dev/perf/watchdog-artifact-audit-20261128")
+          from audit_watchdog import verify_auditor_source
+          print(json.dumps({"verifiedAuditorSources": verify_auditor_source()}, sort_keys=True))
+          PY
+      - name: Run pure archive, identity and statistical tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/watchdog-original-artifact-audit
+          python3 -m unittest discover \
+            -s dev/perf/watchdog-artifact-audit-20261128 \
+            -p 'test_*.py' -v \
+            2>&1 | tee builds/perf/watchdog-original-artifact-audit/pure-tests.log
+      - name: Audit only the three frozen original artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 dev/perf/watchdog-artifact-audit-20261128/audit_watchdog.py \
+            --manifest dev/perf/watchdog-artifact-audit-20261128/manifest.json \
+            --output builds/perf/watchdog-original-artifact-audit/evidence \
+            2>&1 | tee builds/perf/watchdog-original-artifact-audit/audit.log
+      - name: Preserve every original archive and audit outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: watchdog-original-artifact-audit-${{ github.sha }}
+          path: builds/perf/watchdog-original-artifact-audit
+          if-no-files-found: error
+          retention-days: 14
