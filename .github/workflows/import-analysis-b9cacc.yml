@@ -1,0 +1,28 @@
+name: Inspect frozen import qualification evidence
+
+on:
+  push:
+    branches: ['perf/import-analysis-20261127-b9cacc']
+    paths:
+      - '.github/workflows/import-analysis-b9cacc.yml'
+      - 'dev/perf/import-analysis-b9cacc.py'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate analysis script
+        run: python -m py_compile dev/perf/import-analysis-b9cacc.py
+      - name: Read frozen qualification artifacts without running imports
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python dev/perf/import-analysis-b9cacc.py
