@@ -1,0 +1,101 @@
+{
+  "recordedUtc": "2026-11-28 10:02:39 UTC",
+  "source": "GitHub API readbacks by root; independent read-only source review pending separate receipt",
+  "upstream": {
+    "pr": 981,
+    "merged": true,
+    "mergedAt": "2026-11-28T09:49:29Z",
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "previousDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "scoreCherryPick": "c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+    "scoreSource": "b15bad43acdfd54d541895cac1109c0e5ba51b2f",
+    "scoreBlob": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+    "changedFiles": [
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "sha": "b77dd9804f7b037f010d3e83996e63bb2f19bf18",
+        "status": "modified"
+      },
+      {
+        "path": "ext/js/dictionary/raw-term-content.js",
+        "sha": "c64bb389a58ccc0102562b81eb070a3bda3c4399",
+        "status": "modified"
+      },
+      {
+        "path": "ext/js/dictionary/term-content-block-store.js",
+        "sha": "561a7469d474fde1796824e3bba65e3c3aa53dee",
+        "status": "modified"
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "sha": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+        "status": "modified"
+      },
+      {
+        "path": "test/dictionary-content-lazy-ids.test.js",
+        "sha": "b9c68c8645ba844d31a10fe23460fabe06351124",
+        "status": "added"
+      },
+      {
+        "path": "test/dictionary-content-publication-range.test.js",
+        "sha": "a5cb1387c61f7b21d98976c903228336cd64411b",
+        "status": "modified"
+      },
+      {
+        "path": "test/dictionary-database-content-dedup.test.js",
+        "sha": "c6e56876a3047853de709b89a6f996e2e1f6955f",
+        "status": "modified"
+      },
+      {
+        "path": "test/dictionary-database-in-flight-content-source.test.js",
+        "sha": "611b5e9cc15b803903580b6052378a0cf51f4a4e",
+        "status": "added"
+      },
+      {
+        "path": "test/raw-term-content-block.test.js",
+        "sha": "365173cf01a584f2384dc44555d9ac57e5463a3e",
+        "status": "modified"
+      }
+    ],
+    "crcProductPathOverlap": [],
+    "mergedByThisTask": false
+  },
+  "score": {
+    "pr": 978,
+    "state": "closed",
+    "draft": true,
+    "merged": false,
+    "closedAt": "2026-11-28T10:02:27Z",
+    "head": "dbaa4d72a5f6b4fcffeb92cefadb521e101df7df",
+    "reason": "Exact source incorporated by merged #981; duplicate closed and evidence retained",
+    "bodyExactReadback": true,
+    "bodyFile": "current-develop-integrations/score-pr-body-superseded-981.md"
+  },
+  "crc": {
+    "pr": 979,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "head": "961614e36859c529580fc034d6535ca89d119051",
+    "bodyExactReadback": true,
+    "bodyFile": "current-develop-integrations/crc-pr-body-later-upstream-981.md",
+    "disposition": "Held component-only proposal; original adverse browser outcome and memory coverage failure unchanged"
+  },
+  "validationBoundary": {
+    "testedBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "runId": 46128395334,
+    "historicalPerformanceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "newRuntimeValidation": false,
+    "newRuntimePerformance": false,
+    "newExperiments": false
+  },
+  "evidence": {
+    "correctedResultsCommit": "afb92e49321d176e1306e63accfed1d648d200ce",
+    "correctedResultsArchiveSha256": "8faede5a03fb90c234000ebf8ab8007bd0dcb7125de369d3d64e34b50acf07b4",
+    "sealedSnapshotsUnchanged": true
+  },
+  "productRefsChanged": false,
+  "otherBranchesChanged": false,
+  "forcePush": false
+}

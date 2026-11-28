@@ -2,11 +2,15 @@
 
 This branch preserves historical performance evidence for two small product
 proposals measured against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
-Their current integrations and correctness gates are documented separately below.
+Their dcfc integrations and correctness gates are documented separately below.
 The bundles support component improvements; neither establishes a complete
 browser-import speedup. Product changes are on separate branches.
-Both product PRs remain held drafts. The completed browser results below retain
-the adverse timings and failed memory-coverage checks.
+The score change is now incorporated in develop through merged [#981](https://github.com/ManabiIO/manabitan/pull/981);
+[#978](https://github.com/ManabiIO/manabitan/pull/978) is closed as superseded.
+[#979](https://github.com/ManabiIO/manabitan/pull/979) remains a held CRC draft.
+The [final upstream-status appendix](late-upstream-status-README.md) records the
+exact source identities and validation boundary. The completed browser results
+below retain the adverse timings and failed memory-coverage checks.
 
 All performance acquisition in this session is complete. The shared compression
 candidate is closed without a product PR. No JMdict whole-import speedup was
@@ -144,7 +148,8 @@ slower, with +0.900% paired median and +3.387% equal-work timing. The complete
 interval spanning zero and a more favorable identical-code control. Those
 results do not cancel Jitendex's adverse evidence or JMdict's coverage failure.
 
-PR #978 remains a held component-only draft. Its small warm-validator saving is
+At this browser-results snapshot, PR #978 remained a held component-only draft.
+It was later superseded by merged #981 as recorded above. Its small warm-validator saving is
 not a browser non-regression or merge-readiness claim. The addendum also explains
 why the metric named `termRecordValidationMs` does not time the changed loop.
 
@@ -193,13 +198,13 @@ The archive, member manifest and checksum are stored here as
 `compression-original-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `bf0ea30f7c8faa7e3ff30b4207fc777ddc99b07c084830889add6bbeae56086a`.
 
-## Current product integrations and correctness gates
+## Product integrations and correctness gates on dcfc
 
 The [current-integration correctness packet](current-integration-correctness-README.md)
-records the two held drafts after integration with common baseline
+records the two then-held drafts after integration with common baseline
 `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`, which includes merged PR #972.
 
-| Draft                                                                            | Current validated head                     | Product delta from the common baseline                             |
+| Draft                                                                            | Validated head                             | Product delta from the common baseline                             |
 | -------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------ |
 | [#978: indexed score validation](https://github.com/ManabiIO/manabitan/pull/978) | `dbaa4d72a5f6b4fcffeb92cefadb521e101df7df` | One file, original two-line change                                 |
 | [#979: short-gap CRC tails](https://github.com/ManabiIO/manabitan/pull/979)      | `961614e36859c529580fc034d6535ca89d119051` | Four files; same helper/test change with regenerated native assets |
@@ -215,10 +220,11 @@ correction, the unchanged earlier preparation note and the later publication
 receipt. The draft refs and exact descriptions were verified at 09:18:55 UTC;
 the later byte snapshot and seal times are recorded separately.
 
-These are current-source correctness results only. No browser or performance
+These are dcfc integration correctness results only. No browser or performance
 cohort was acquired for either new combination. All historical component and
 browser timing remains tied to its original source, including unfavorable
-observations and failed coverage checks. Both drafts remain held and unmerged.
+observations and failed coverage checks. At that snapshot both drafts remained held and unmerged. The later upstream
+appendix records #978 supersession and keeps the validation boundary explicit.
 
 The archive, member manifest and checksum are stored here as
 `current-integration-correctness-20261128-1b47.*`. Archive SHA-256:
@@ -233,7 +239,7 @@ snapshot records only a queued validation job. This packet contains no corrected
 browser result, import observation, memory scan or hosted validation outcome.
 
 The fixed study is commit
-`3256036ff8534ba6de7bc9ecd74ec74d3c705603`, with current common baseline
+`3256036ff8534ba6de7bc9ecd74ec74d3c705603`, with common baseline
 `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`. The original compression product
 blobs are unchanged. Superseded preparation on `9e10`, fixture failures, design
 corrections, all source reviews and the final 45 synthetic fixture checks remain
@@ -259,7 +265,7 @@ bytes. Archive SHA-256:
 ## Corrected compression results and final decision
 
 The [complete corrected-compression readout](corrected-compression-results-README.md)
-preserves both fixed current-`dcfc02a0` cohorts from study
+preserves both fixed `dcfc02a0` cohorts from study
 `3256036ff8534ba6de7bc9ecd74ec74d3c705603`: 52 complete report/proof sets, all 624
 retained non-package artifact members, and all 547 raw memory scan rows. The unchanged
 frozen reader and separate original-ZIP reviews agree on each result.
