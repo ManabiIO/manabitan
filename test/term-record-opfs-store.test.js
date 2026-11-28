@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
-import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndex, encodePersistedTermLookupIndexFromPreinternedPlan, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -5996,6 +5996,47 @@ void 0,
         const id = store.findTermIds(dictionaryName, '暗記', 'expression')[0] ?? -1;
         const record = (await store.getByIdsAsync([id])).get(id);
         expect(record).toMatchObject({expression: '暗記', reading: 'あんき'});
+    });
+
+    test.each([false, true])('retains only the key arena when cached rows share a prepared sidecar (active import=%s)', async (activeImport) => {
+        const plan = {
+            stringLengths: Uint16Array.of(2, 4),
+            stringOffsets: Uint32Array.of(0, 2),
+            stringsBuffer: new TextEncoder().encode('aabbbb'),
+            expressionIndexes: Uint32Array.of(0, 1),
+            readingIndexes: Uint32Array.of(1, 1),
+        };
+        const equals = Uint8Array.of(0, 1);
+        const sequences = Int32Array.of(-1, 2);
+        const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(plan, equals, sequences, 2);
+        plan.stringsBuffer = bytes.subarray(48, 54);
+        plan.stringLengths = new Uint16Array(bytes.buffer, 56, 2);
+        const store = new TermRecordOpfsStore();
+        if (activeImport) { await store.beginImportSession(); }
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: 'Owned key cache',
+            rowCount: 2,
+            expressionBytesList: [],
+            readingBytesList: [],
+            readingEqualsExpressionList: equals,
+            scoreList: Int32Array.of(1, 2),
+            sequenceList: sequences,
+            fixedContentOffsetBase: 0,
+            fixedContentLength: 16,
+            termRecordPreinternedPlan: plan,
+            preparedLookupIndexes: new Map([['0:2', {bytes, preinternedPlan: plan}]]),
+        }, new Uint32Array(0), new Uint32Array(0), 'raw');
+        const first = store.getById(1);
+        const second = store.getById(2);
+        expect(first?.expressionBytes?.buffer.byteLength).toBe(6);
+        expect(first?.expressionBytes?.buffer).not.toBe(bytes.buffer);
+        expect(first?.readingBytes?.buffer).toBe(first?.expressionBytes?.buffer);
+        expect(second?.expressionBytes?.buffer).toBe(first?.expressionBytes?.buffer);
+        bytes.fill(0xff);
+        expect(first?.expressionBytes).toStrictEqual(new TextEncoder().encode('aa'));
+        expect(first?.readingBytes).toStrictEqual(new TextEncoder().encode('bbbb'));
+        expect(second?.expressionBytes).toStrictEqual(new TextEncoder().encode('bbbb'));
+        if (activeImport) { await store.endImportSession(); }
     });
 
     test('round-trips preinterned artifact chunk records through direct authoritative encoding', async () => {
