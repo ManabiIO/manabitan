@@ -265,6 +265,9 @@ describe('actual compression worker block equivalence', () => {
             await import(workerData.moduleUrl)
         `
         const nativeWorkers = Array.from({length: 3}, () => new NodeWorker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`), {workerData: {moduleUrl}}))
+        let holdResponses = false
+        /** @type {Array<{listener: (event: unknown) => void, data: Record<string, unknown>}>} */
+        const heldResponses = []
         try {
             await Promise.all(nativeWorkers.map((worker) => /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
                 worker.once('error', reject)
@@ -278,7 +281,13 @@ describe('actual compression worker block equivalence', () => {
             }))))
             const workers = nativeWorkers.map((worker) => ({
                 addEventListener(/** @type {string} */ type, /** @type {(event: unknown) => void} */ listener) {
-                    worker.on(type, (data) => listener(type === 'message' ? {data} : data))
+                    worker.on(type, (data) => {
+                        if (type === 'message' && holdResponses) {
+                            heldResponses.push({listener, data})
+                        } else {
+                            listener(type === 'message' ? {data} : data)
+                        }
+                    })
                 },
                 postMessage(/** @type {Record<string, unknown>} */ message, /** @type {ArrayBuffer[]} */ transfer) {
                     worker.postMessage(message, transfer)
@@ -300,6 +309,56 @@ describe('actual compression worker block equivalence', () => {
                 await pool.compressWrappedBlocks(Uint32Array.of(4, 4), () => Uint8Array.of(9, 8, 7, 6), dictName, options)
                 for (let index = 0; index < expected.length; ++index) {
                     expect(Buffer.compare(Buffer.from(result.chunks[index]), Buffer.from(expected[index]))).toBe(0)
+                }
+                // The workers must exhaust a shared batch without any result
+                // callbacks reaching the coordinator. This also exercises
+                // independent native contexts and real shared-message clones.
+                const shared = new Uint8Array(new SharedArrayBuffer(lengths.reduce((sum, length) => sum + length, 0)))
+                const offsets = new Uint32Array(lengths.length)
+                let offset = 0
+                for (let index = 0; index < source.length; ++index) {
+                    shared.set(source[index], offset)
+                    offsets[index] = offset
+                    offset += source[index].length
+                }
+                const spanLengths = Uint32Array.from(lengths)
+                const starts = Uint32Array.from({length: lengths.length + 1}, (_, index) => index)
+                const blockLengths = Uint32Array.from(lengths)
+                const otherSource = new Uint8Array(new SharedArrayBuffer(shared.byteLength))
+                const otherExpected = []
+                for (let index = 0; index < source.length; ++index) {
+                    const content = Uint8Array.from(source[index], (byte) => byte ^ 0x5a)
+                    otherSource.set(content, offsets[index])
+                    otherExpected.push(api.compressWrappedTermContentZstd(content, dictName, options).bytes)
+                }
+                holdResponses = true
+                const operation = pool.beginCompressWrappedSpans(shared, offsets, spanLengths, starts, blockLengths, dictName, options)
+                const concurrent = pool.beginCompressWrappedSpans(otherSource, offsets, spanLengths, starts, blockLengths, dictName, options)
+                for (const column of [offsets, spanLengths, starts, blockLengths]) { column.fill(0) }
+                await vi.waitFor(() => {
+                    expect(heldResponses.filter(({data}) => data.compressed instanceof ArrayBuffer)).toHaveLength(lengths.length * 2)
+                }, {timeout: 5000})
+                expect(heldResponses.filter(({data}) => data.type === 'source-consumed-batch')).toHaveLength(2)
+                expect(heldResponses.some(({data}) => data.type === 'source-consumed')).toBe(false)
+                for (const {listener, data} of heldResponses) {
+                    if (data.type === 'source-consumed-batch') { listener({data}) }
+                }
+                await Promise.all([operation.sourceConsumed, concurrent.sourceConsumed])
+                expect(Reflect.get(pool, '_sourceBatches').size).toBe(0)
+                shared.fill(0)
+                otherSource.fill(0)
+                for (const {listener, data} of heldResponses) {
+                    if (data.type !== 'source-consumed-batch') { listener({data}) }
+                }
+                heldResponses.length = 0
+                holdResponses = false
+                const claimed = await operation.completion
+                const otherClaimed = await concurrent.completion
+                expect(claimed.chunks).toHaveLength(expected.length)
+                expect(otherClaimed.chunks).toHaveLength(otherExpected.length)
+                for (let index = 0; index < expected.length; ++index) {
+                    expect(Buffer.compare(Buffer.from(claimed.chunks[index]), Buffer.from(expected[index]))).toBe(0)
+                    expect(Buffer.compare(Buffer.from(otherClaimed.chunks[index]), Buffer.from(otherExpected[index]))).toBe(0)
                 }
             }
             pool.close()

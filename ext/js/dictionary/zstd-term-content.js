@@ -98,14 +98,17 @@ export class TermContentCompressionPool {
         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
         /** @type {Worker[]} */
         this._workers = workers;
-        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>}>} */
+        /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number, workerIndex: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>, sourceBatchId?: number}>} */
         this._pending = new Map();
+        /** @type {Map<number, {jobIds: number[], remainingSources: Uint32Array, nextBlock: Uint32Array, pendingJobs: number}>} */
+        // eslint-disable-next-line @stylistic/semi
+        this._sourceBatches = new Map()
         /** @type {number} */
         this._nextId = 1;
         /** @type {boolean} */
         this._failed = false;
-        for (const worker of workers) {
-            worker.addEventListener('message', (event) => { this._onMessage(event); });
+        for (const [workerIndex, worker] of workers.entries()) {
+            worker.addEventListener('message', (event) => { this._onMessage(event, workerIndex); });
             worker.addEventListener('error', (event) => {
                 this._fail(new Error(event.message || 'Term content compression worker failed'));
             });
@@ -194,6 +197,7 @@ export class TermContentCompressionPool {
         return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: true};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @param {Uint8Array} source
      * @param {Uint32Array} sourceOffsets
@@ -228,68 +232,113 @@ export class TermContentCompressionPool {
      * @throws {Error} If the pool, shared source, or block plan is invalid.
      */
     beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName, options = {}) {
-        if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
+        if (this._failed) { throw new Error('Term content compression pool is unavailable') }
         if (typeof SharedArrayBuffer !== 'function' || !(source.buffer instanceof SharedArrayBuffer)) {
-            throw new TypeError('Parallel span compression requires shared source bytes');
+            throw new TypeError('Parallel span compression requires shared source bytes')
         }
-        validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths);
-        const compressionExperiments = snapshotTermBankExperiments(options);
-        const envelopeMsByWorker = new Float64Array(this._workers.length);
+        validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths)
+        const compressionExperiments = snapshotTermBankExperiments(options)
+        const workerCount = this._workers.length
+        const envelopeMsByWorker = new Float64Array(workerCount)
+        const shareQueue = workerCount > 1 && blockLengths.length > workerCount
         // Snapshot both columns before dispatch. The caller owns its scratch
         // arrays and each worker receives views of this batch's immutable copy.
-        const metadata = new SharedArrayBuffer(sourceOffsets.byteLength + sourceLengths.byteLength);
-        const offsets = new Uint32Array(metadata, 0, sourceOffsets.length);
-        const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
-        offsets.set(sourceOffsets);
-        lengths.set(sourceLengths);
-        const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
-            const workerIndex = blockIndex % this._workers.length;
-            const start = blockStartIndexes[blockIndex];
-            const end = blockStartIndexes[blockIndex + 1];
-            return this._dispatchWithSourceConsumed(
-                workerIndex,
-                {
-                    source,
-                    sourceOffsets: offsets.subarray(start, end),
-                    sourceLengths: lengths.subarray(start, end),
-                    contentBytes,
-                    dictName,
-                    wrap: true,
-                    compressionExperiments,
-                },
-            );
-        });
+        const columnBytes = sourceOffsets.byteLength + sourceLengths.byteLength
+        const metadata = new SharedArrayBuffer(columnBytes + (shareQueue ? blockStartIndexes.byteLength + blockLengths.byteLength + 8 : 0))
+        const offsets = new Uint32Array(metadata, 0, sourceOffsets.length)
+        const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length)
+        offsets.set(sourceOffsets)
+        lengths.set(sourceLengths)
+        /** @type {Array<{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>}>} */
+        let jobs
+        if (shareQueue) {
+            const starts = new Uint32Array(metadata, columnBytes, blockStartIndexes.length)
+            const sizes = new Uint32Array(metadata, columnBytes + blockStartIndexes.byteLength, blockLengths.length)
+            const nextBlock = new Uint32Array(metadata, metadata.byteLength - 8, 1)
+            const remainingSources = new Uint32Array(metadata, metadata.byteLength - 4, 1)
+            Atomics.store(remainingSources, 0, blockLengths.length)
+            starts.set(blockStartIndexes)
+            sizes.set(blockLengths)
+            // Register every block at admission, including those not claimed
+            // yet. The original deadline and both source/completion barriers
+            // therefore cover the whole batch before any worker can read it.
+            const batchId = this._nextId
+            const registered = Array.from(blockLengths, () => this._createPendingDispatch(true, batchId))
+            jobs = registered
+            const jobIds = registered.map(({id}) => id)
+            this._sourceBatches.set(batchId, {jobIds, remainingSources, nextBlock, pendingJobs: registered.length})
+            const message = {
+                type: 'compress-spans-batch',
+                source,
+                sourceOffsets: offsets,
+                sourceLengths: lengths,
+                blockStartIndexes: starts,
+                blockLengths: sizes,
+                nextBlock,
+                remainingSources,
+                batchId,
+                jobIds,
+                dictName,
+                wrap: true,
+                compressionExperiments,
+            }
+            try {
+                for (const worker of this._workers) { worker.postMessage(message) }
+            } catch (error) {
+                // A worker may already be reading when a later post fails.
+                // Terminate all readers before rejecting unclaimed jobs.
+                this._fail(error instanceof Error ? error : new Error(`${error}`))
+            }
+        } else {
+            jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
+                const start = blockStartIndexes[blockIndex]
+                const end = blockStartIndexes[blockIndex + 1]
+                return this._dispatchWithSourceConsumed(
+                    blockIndex % workerCount,
+                    {
+                        source,
+                        sourceOffsets: offsets.subarray(start, end),
+                        sourceLengths: lengths.subarray(start, end),
+                        contentBytes,
+                        dictName,
+                        wrap: true,
+                        compressionExperiments,
+                    },
+                )
+            })
+        }
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
-        const noFailure = Symbol();
+        const noFailure = Symbol()
         /** @type {unknown} */
-        let firstSourceFailure = noFailure;
-        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise.catch((error) => {
-            if (firstSourceFailure === noFailure) { firstSourceFailure = error; }
+        let firstSourceFailure = noFailure
+        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => /** @type {Promise<void>} */ (promise).catch((error) => {
+            if (firstSourceFailure === noFailure) { firstSourceFailure = error }
         }))).then(() => {
-            if (firstSourceFailure !== noFailure) { throw firstSourceFailure; }
-        });
+            if (firstSourceFailure !== noFailure) { throw firstSourceFailure }
+        })
         /** @type {unknown} */
-        let firstCompletionFailure = noFailure;
+        let firstCompletionFailure = noFailure
         const completion = Promise.all(jobs.map(({completion: promise}) => promise.catch((error) => {
-            if (firstCompletionFailure === noFailure) { firstCompletionFailure = error; }
-            return null;
+            if (firstCompletionFailure === noFailure) { firstCompletionFailure = error }
+            return null
         }))).then((results) => {
-            if (firstCompletionFailure !== noFailure) { throw firstCompletionFailure; }
-            const successfulResults = /** @type {Array<{bytes: Uint8Array, envelopeMs: number}>} */ (
+            if (firstCompletionFailure !== noFailure) { throw firstCompletionFailure }
+            const successfulResults = /** @type {Array<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>} */ (
                 /** @type {unknown} */ (results)
-            );
-            const chunks = successfulResults.map((result, blockIndex) => {
-                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
-                return result.bytes;
-            });
-            return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
-        });
-        void sourceConsumed.catch(() => {});
-        void completion.catch(() => {});
-        return {sourceConsumed, completion};
+            )
+            const chunks = successfulResults.map((result) => {
+                envelopeMsByWorker[result.workerIndex] += result.envelopeMs
+                return result.bytes
+            })
+            return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)}
+        })
+        void sourceConsumed.catch(() => {})
+        void completion.catch(() => {})
+        return {sourceConsumed, completion}
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {Uint8Array[]} contents
@@ -350,60 +399,116 @@ export class TermContentCompressionPool {
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
-     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
+     * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>}}
      */
     _dispatchWithSourceConsumed(workerIndex, message) {
         const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true);
         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
      * @param {Transferable[]} transfer
      * @param {boolean} trackSourceConsumed
-     * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
+     * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>}}
      */
     _startDispatch(workerIndex, message, transfer, trackSourceConsumed) {
-        const id = this._nextId++;
+        const operation = this._createPendingDispatch(trackSourceConsumed)
+        try {
+            this._workers[workerIndex].postMessage({id: operation.id, ...message}, transfer)
+        } catch (error) {
+            const pending = this._pending.get(operation.id)
+            if (typeof pending !== 'undefined') {
+                clearTimeout(pending.timeoutId)
+                this._pending.delete(operation.id)
+                pending.rejectSourceConsumed?.(error)
+                pending.reject(error)
+            }
+        }
+        return operation
+    }
+
+    /**
+     * @param {boolean} trackSourceConsumed
+     * @param {number} [sourceBatchId]
+     * @returns {{id: number, sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>}}
+     */
+    _createPendingDispatch(trackSourceConsumed, sourceBatchId) {
+        const id = this._nextId++
         /** @type {((value?: void|PromiseLike<void>) => void)|null} */
-        let resolveSourceConsumed = null;
+        let resolveSourceConsumed = null
         /** @type {((reason?: unknown) => void)|null} */
-        let rejectSourceConsumed = null;
+        let rejectSourceConsumed = null
         const sourceConsumed = trackSourceConsumed ?
             new Promise((resolve, reject) => {
-                resolveSourceConsumed = resolve;
-                rejectSourceConsumed = reject;
+                resolveSourceConsumed = resolve
+                rejectSourceConsumed = reject
             }) :
-            null;
-        /** @type {Promise<{bytes: Uint8Array, envelopeMs: number}>} */
+            null
+        /** @type {Promise<{bytes: Uint8Array, envelopeMs: number, workerIndex: number}>} */
         const completion = new Promise((resolve, reject) => {
             const timeoutId = setTimeout(() => {
-                this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`));
-            }, COMPRESSION_JOB_TIMEOUT_MS);
-            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
-            try {
-                this._workers[workerIndex].postMessage({id, ...message}, transfer);
-            } catch (error) {
-                clearTimeout(timeoutId);
-                this._pending.delete(id);
-                rejectSourceConsumed?.(error);
-                reject(error);
-            }
-        });
-        if (sourceConsumed !== null) { void sourceConsumed.catch(() => {}); }
-        return {sourceConsumed, completion};
+                this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`))
+            }, COMPRESSION_JOB_TIMEOUT_MS)
+            this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId, sourceBatchId})
+        })
+        if (sourceConsumed !== null) { void sourceConsumed.catch(() => {}) }
+        return {id, sourceConsumed, completion}
     }
+
+    /** @param {unknown} batchId */
+    _consumeBatchSources(batchId) {
+        if (typeof batchId !== 'number' || !Number.isSafeInteger(batchId) || batchId <= 0) {
+            this._fail(new Error('Term content compression worker returned an invalid source batch'))
+            return
+        }
+        const batch = this._sourceBatches.get(batchId)
+        if (typeof batch === 'undefined') { return }
+        if (Atomics.load(batch.remainingSources, 0) !== 0 || Atomics.load(batch.nextBlock, 0) !== batch.jobIds.length) {
+            this._fail(new Error('Term content compression worker acknowledged unread batch sources'))
+            return
+        }
+        this._sourceBatches.delete(batchId)
+        for (const id of batch.jobIds) {
+            const pending = this._pending.get(id)
+            if (typeof pending === 'undefined' || pending.sourceConsumedSettled) { continue }
+            pending.sourceConsumedSettled = true
+            pending.resolveSourceConsumed?.()
+        }
+    }
+
+    /** @param {number|undefined} batchId */
+    _retireBatchJob(batchId) {
+        if (typeof batchId === 'undefined') { return }
+        const batch = this._sourceBatches.get(batchId)
+        if (typeof batch !== 'undefined' && --batch.pendingJobs === 0) { this._sourceBatches.delete(batchId) }
+    }
+    /* eslint-enable @stylistic/semi */
 
     /** */
     close() {
         this._fail(new Error('Term content compression pool closed'));
     }
 
-    /** @param {MessageEvent} event */
-    _onMessage(event) {
+    /**
+     * @param {MessageEvent} event
+     * @param {number} workerIndex
+     */
+    _onMessage(event, workerIndex) {
         const rawData = /** @type {unknown} */ (event.data);
-        const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
+        const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown, batchId?: unknown, hasGathered?: unknown}} */ (rawData);
+        if (data?.type === 'batch-error') {
+            this._fail(new Error(typeof data.error === 'string' ? data.error : 'Term content compression worker batch failed'));
+            return;
+        }
+        /* eslint-disable @stylistic/semi */
+        if (data?.type === 'source-consumed-batch') {
+            this._consumeBatchSources(data.batchId)
+            return
+        }
+        /* eslint-enable @stylistic/semi */
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);
         if (typeof pending === 'undefined') { return; }
@@ -414,6 +519,15 @@ export class TermContentCompressionPool {
             }
             return;
         }
+        /* eslint-disable @stylistic/semi */
+        // A failed compression can follow a successful gather before this
+        // batch's final source acknowledgement. Its source is already safe.
+        if (data.hasGathered === true && !pending.sourceConsumedSettled) {
+            pending.sourceConsumedSettled = true
+            pending.resolveSourceConsumed?.()
+        }
+        this._retireBatchJob(pending.sourceBatchId)
+        /* eslint-enable @stylistic/semi */
         this._pending.delete(id);
         clearTimeout(pending.timeoutId);
         if (typeof data.error === 'string') {
@@ -435,6 +549,7 @@ export class TermContentCompressionPool {
         pending.resolve({
             bytes: new Uint8Array(data.compressed),
             envelopeMs: typeof data.envelopeMs === 'number' && Number.isFinite(data.envelopeMs) && data.envelopeMs >= 0 ? data.envelopeMs : 0,
+            workerIndex,
         });
     }
 
@@ -450,6 +565,8 @@ export class TermContentCompressionPool {
             reject(error);
         }
         this._pending.clear();
+        // eslint-disable-next-line @stylistic/semi
+        this._sourceBatches.clear()
     }
 }
 
