@@ -1,0 +1,10 @@
+{
+  "environment": "functions V8 isolate; version not exposed by tool",
+  "baselineSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateSha": "8b4f502cdc26541c542b7473fae4e51c0713ef98",
+  "cases": 3456,
+  "mismatchCount": 0,
+  "mismatches": [],
+  "sourceSha": "8b4f502cdc26541c542b7473fae4e51c0713ef98",
+  "scope": "Exact extracted register/find/key/factory methods and minimal Set-only constructor in functions V8; cross product numeric boundaries, ordered/overlap/duplicate reservations, source bounds, empty spans, typed/array/proxy/accessor/short inputs, prior live batch. Not full module/CI."
+}
