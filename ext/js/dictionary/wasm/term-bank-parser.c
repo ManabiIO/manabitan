@@ -999,14 +999,19 @@ static int parse_composite_span_impl(
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
                     i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
-                    // A literal content key and its colon already establish
-                    // the parent state. Enter an adjacent child here without
-                    // dispatching its opener through the general token loop.
-                    if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
-                        i < len && (src[i] == '[' || src[i] == '{')) {
+                    // The validated key and colon establish the parent state.
+                    // Enter an adjacent child without redispatching its opener,
+                    // retaining the required-field effects of this value type.
+                    if (i < len && (src[i] == '[' || src[i] == '{')) {
                         if (depth >= MAX_JSON_NESTING) { return 0; }
                         if (validate_top_level_objects && depth == 2u) {
-                            glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
+                            if (glossary_key == GLOSSARY_TYPE_FIELD) {
+                                glossary_object_type = 0u;
+                            } else if (glossary_key == GLOSSARY_CONTENT_FIELD) {
+                                glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
+                            } else {
+                                glossary_valid_fields &= ~glossary_key;
+                            }
                         }
                         parents[depth - 1u] = OBJECT_AFTER_VALUE;
                         ++depth;
@@ -1044,18 +1049,31 @@ static int parse_composite_span_impl(
             continue;
         }
         if (c == ']' || c == '}') {
-            if (c == ']') {
-                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
-            } else {
-                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
-                if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
+            uint8_t closer = c;
+            // A completed child restores an after-value parent. Consecutive
+            // closers and its comma can consume that known state directly;
+            // every frame still checks its delimiter and required fields.
+            for (;;) {
+                if (closer == ']') {
+                    if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
+                } else {
+                    if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
+                    if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
+                }
+                ++i;
+                if (--depth == 0u) {
+                    *out_end = i;
+                    return 1;
+                }
+                state = parents[depth - 1u];
+                if (i >= len) { return 0; }
+                closer = src[i];
+                if (closer != ']' && closer != '}') { break; }
             }
-            ++i;
-            if (--depth == 0u) {
-                *out_end = i;
-                return 1;
+            if (closer == ',') {
+                state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
+                i = advance_glossary_delimiter(src, len, i, normalization_hint);
             }
-            state = parents[depth - 1u];
             continue;
         }
         if (c == ',') {
