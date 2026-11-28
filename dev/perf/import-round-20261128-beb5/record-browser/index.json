@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original frozen native-record browser cohort. Retained archives preserve every member except reproducible release packages; all original member hashes and package hashes are listed. No observations removed.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "731c7374dc9e1e242142796f597be9939a3cda2c",
+  "workflowRun": 46102045293,
+  "corpora": {
+    "jmdict": {
+      "originalArchiveSha256": "a1593920283f4bedc473d958165e3bf95044f30764194344361f90e73ab49113",
+      "originalArchiveBytes": 35065101,
+      "retainedArchiveSha256": "8e0335996cf4d1f5bb81e588f29e62cc8c52e2c4553071e44be48da0c9898d3d",
+      "retainedArchiveBytes": 1576520,
+      "members": 201,
+      "omittedReleasePackages": 2,
+      "artifactId": 15247215895
+    },
+    "jitendex": {
+      "originalArchiveSha256": "a64d52f71de86b532fa04c643309f17fbb8b4a4113926111119ff5b8f48a1171",
+      "originalArchiveBytes": 35022571,
+      "retainedArchiveSha256": "ce86b106099739717bca39948d94da2777f09a618ee0c66c807fadda990ef6c4",
+      "retainedArchiveBytes": 1537509,
+      "members": 201,
+      "omittedReleasePackages": 2,
+      "artifactId": 15247261185
+    },
+    "vndb": {
+      "originalArchiveSha256": "cd2d0567eb11393700073c5e294b5d76cf77767df103ab703bcd1b6a9d593dc6",
+      "originalArchiveBytes": 35109431,
+      "retainedArchiveSha256": "3298a92fa4bb0fd70960aab6907bb37d1a0e10e4afdb2ecfe7e65d26f8613757",
+      "retainedArchiveBytes": 1620009,
+      "members": 201,
+      "omittedReleasePackages": 2,
+      "artifactId": 15245904227
+    }
+  },
+  "sourceValidation": {
+    "path": "source-validation.zip",
+    "bytes": 273819,
+    "sha256": "7df01482962e10e0f60e0a619773015c8c05d04309bcd762b2e7990086dd28cd",
+    "files": 21,
+    "frozenSourceGateCandidate": "731c7374dc9e1e242142796f597be9939a3cda2c",
+    "laterLintOnlySource": "0d9b11df78f05217b96e3c14ad06de6aeebc29b8"
+  }
+}
