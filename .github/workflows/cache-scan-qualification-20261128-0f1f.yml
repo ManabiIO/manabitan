@@ -1,0 +1,104 @@
+name: Frozen cache scan qualification 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/cache-scan-qualification-20261128-0f1f']
+    paths:
+      - '.github/workflows/cache-scan-qualification-20261128-0f1f.yml'
+
+permissions:
+  contents: read
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: ac1497941c6c8d5725c71b1274bef134dba4d36d
+
+jobs:
+  correctness:
+    name: Frozen candidate / ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [unit, lint-types, build]
+    env:
+      PERF_CHECK: ${{ matrix.check }}
+      PERF_EVIDENCE: builds/perf/cache-scan-checks-20261128-0f1f
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ac1497941c6c8d5725c71b1274bef134dba4d36d
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact source and run the required gate
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/source.txt"
+          case "$PERF_CHECK" in
+            unit) npm run test:unit > "$PERF_EVIDENCE/check.log" 2>&1 ;;
+            lint-types)
+              npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-content-cache-scan.test.js > "$PERF_EVIDENCE/check.log" 2>&1
+              npm run test:ts >> "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            build) npm run test:build > "$PERF_EVIDENCE/check.log" 2>&1 ;;
+            *) exit 1 ;;
+          esac
+          git status --porcelain=v1 > "$PERF_EVIDENCE/source-status.txt"
+          test ! -s "$PERF_EVIDENCE/source-status.txt"
+      - name: Preserve exact-commit checks and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cache-scan-checks-${{ matrix.check }}-20261128-0f1f
+          path: builds/perf/cache-scan-checks-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
+
+  qualify:
+    name: JMdict cache scan / ${{ matrix.order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify unchanged qualification observer and receipts
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install lockfile-pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch both frozen product revisions
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Run complete imports, controls, and separate memory checks
+        run: |
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary jmdict \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --evidence builds/perf/cache-scan-20261128-0f1f
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cache-scan-jmdict-${{ matrix.order }}-20261128-0f1f
+          path: builds/perf/cache-scan-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
