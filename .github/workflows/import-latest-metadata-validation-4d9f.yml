@@ -1,0 +1,86 @@
+name: Latest metadata integration validation 4d9f
+
+on:
+  push:
+    branches: [experiment/import-latest-metadata-validation-20261128-4d9f]
+    paths: [.github/workflows/import-latest-metadata-validation-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    name: ${{ matrix.candidate }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - candidate: implicit-metadata
+            sha: 86cd5c18d325488b0ecb04c552d1dc83567de9d2
+    env:
+      VALIDATION_CANDIDATE: ${{ matrix.candidate }}
+      VALIDATION_SOURCE: ${{ matrix.sha }}
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ matrix.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: ./.github/actions/setup
+      - name: Install pinned native test toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Run all required source gates and retain direct results
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, sys
+          root = pathlib.Path.cwd()
+          output = root / ('builds/perf/latest-metadata-validation-' + os.environ['VALIDATION_CANDIDATE'] + '-4d9f')
+          output.mkdir(parents=True, exist_ok=False)
+          def read(command):
+              return subprocess.check_output(command, text=True).strip()
+          source = read(['git', 'rev-parse', 'HEAD'])
+          assert source == os.environ['VALIDATION_SOURCE']
+          assert not read(['git', 'status', '--porcelain'])
+          identity = {'source': source, 'tree': read(['git', 'rev-parse', 'HEAD^{tree}']),
+                      'node': read(['node', '--version']), 'clang': read(['clang-21', '--version']),
+                      'linker': read(['wasm-ld-21', '--version']),
+                      'lockSha256': hashlib.sha256((root / 'package-lock.json').read_bytes()).hexdigest(),
+                      'scope': 'Required source validation on a hosted runner; no performance measurement'}
+          assert identity['node'] == 'v22.22.0'
+          assert '21.1.8' in identity['clang'] and '21.1.8' in identity['linker']
+          (output / 'identity.json').write_text(json.dumps(identity, indent=2) + '\n')
+          gates = [
+              ('units', ['npm', 'run', 'test:unit', '--', '--reporter=default', '--reporter=json', '--outputFile=' + str(output / 'unit-results.json')]),
+              ('types', ['npm', 'run', 'test:ts']),
+              ('dry-build', ['npm', 'run', 'test:build']),
+              ('native-assets', ['npm', 'run', 'build:dictionary-wasm', '--', '--check']),
+          ]
+          changed = read(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', source]).splitlines()
+          javascript = [path for path in changed if path.endswith('.js')]
+          assert javascript
+          gates.append(('changed-javascript', ['npx', 'eslint', *javascript]))
+          results = []
+          for name, command in gates:
+              with (output / (name + '.log')).open('wb') as log:
+                  completed = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+              result = {'gate': name, 'command': command, 'returncode': completed.returncode}
+              results.append(result)
+              (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+              print(json.dumps(result), flush=True)
+          assert not read(['git', 'status', '--porcelain'])
+          sys.exit(1 if any(result['returncode'] for result in results) else 0)
+          PY
+      - name: Retain complete validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: latest-metadata-validation-${{ matrix.candidate }}-4d9f
+          path: builds/perf/latest-metadata-validation-${{ matrix.candidate }}-4d9f
+          if-no-files-found: error
+          retention-days: 14
