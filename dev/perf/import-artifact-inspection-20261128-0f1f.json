@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "branch": "perf/import-artifact-inspection-20261128-0f1f",
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "zstd": {
+    "productCommit": "b150866ac6ce80e4b164f1b90ef2f03658791705",
+    "productTree": "30ae249f227279b2b5b6766767f7532cda401114",
+    "baselineWasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+    "count64Wasm": "41e2d04f83607716d02f25f614fe67b0711fc3eff70de23ce846256aec3033f4",
+    "count128Wasm": "304813b387ed3bd6b762826105279bec1196be79baeda3bc836ea8479efa7a5d",
+    "moduleJs": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+    "count64Patch": "bdca115498c52d22960c9feb9686a4c234b3a237e4577a9f2da5849a0c40a749",
+    "count128Patch": "b33a7f887b7142faf3e12caff0570bc1d15c656e00985ce5b2c019bc2ca38502",
+    "count128Binding": "10de57e31a31017d9d98a81c5d6d06b6c1c1b2366ede96487378ec75ceec7f4f",
+    "count128Oracle": "16f811b295b1bdb3d5106cb5df7876bb545f798fe823f422a3a87af63be4e9b8",
+    "compilerArtifact": 15248399857,
+    "compilerZip": "d46ab708126966c2484a535eae769f8f3d528073932172d74b1f92ad5f224c06",
+    "toolingTree": "063b0f148fd8dca5e4a740c1e8969467338dbe7a"
+  },
+  "canonical": {
+    "tree": "af5c1c0fd6acf6907bbbb3913c48f9208ec49b5c",
+    "analyzerSha256": "93fa12d03bdc610a6fa087072aa9f77ab15e5ed285e11788b3879b709ef1c8bb",
+    "protocolSha256": "497e9583892588cfd0754ccdba74a133cf22fc252a2b2d74b260eae043bb6650",
+    "sourceInventorySha256": "509a40b3b77e8c5318954fe7e6a6535f934a03037aea5ff9143112696b9dd3c3",
+    "snapshotInventorySha256": "f51d8d4ba64b4047794b54be2409d8f37f186e44e2cb719a6d8a026efaea6bdc",
+    "workflowSha256": "6d63f9fcb67350ceb456b4803521a38abb0ca069ca756c5e680647755009087f",
+    "modules": {
+      "baseline": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "row-helper": "2308bb4587bcb1e8a0e63655f815f594aed365bac2f771eaf8aec9e9869912bb",
+      "reservation-helper": "b2656b26b17ebe95015cd1b64de2f2b84941633d7690cd444ba8a4731c1ed94d"
+    }
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e"
+  },
+  "importDriverSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "artifacts": [
+    {
+      "label": "count128-jitendex",
+      "kind": "zstd",
+      "run": 46109865919,
+      "job": 140870781182,
+      "head": "2b31bff4057e0a96318743ee08e591c9796d269b",
+      "id": 15252674053,
+      "bytes": 963929,
+      "sha256": "6285e2cd83cb470daca6869f1a4d5508e93bb8934e086db824f9d8ecc76cc9aa"
+    },
+    {
+      "label": "canonical-reservation",
+      "kind": "canonical",
+      "variant": "reservation-helper",
+      "run": 46112238568,
+      "job": 140878132708,
+      "head": "d5b8ae03474c326db559837713955a2b3fe74c9b",
+      "id": 15252982436,
+      "bytes": 62438716,
+      "sha256": "ac0127cac6bf122b351c9b9a5deb62b96ceb262f0358f00611157d9f548abea9"
+    },
+    {
+      "label": "canonical-row",
+      "kind": "canonical",
+      "variant": "row-helper",
+      "run": 46112238568,
+      "job": 140878132878,
+      "head": "d5b8ae03474c326db559837713955a2b3fe74c9b",
+      "id": 15252922117,
+      "bytes": 62438957,
+      "sha256": "6c6e8e21a3ea74e56d3ab54a5f5f14fb3661b8cb79ef23392ca768d8faf72029"
+    },
+    {
+      "label": "count64-lint",
+      "kind": "lint",
+      "run": 46109925343,
+      "job": 140870966444,
+      "head": "142bd796ffa7b92a25db0d06c4d6d5749187c070",
+      "id": 15253105254,
+      "bytes": 2212,
+      "sha256": "da6f03f159ad0aef9d0f7e575a201c1356aea55ad28f284891ef96b63a561f11"
+    },
+    {
+      "label": "zero-sample-vndb-AB",
+      "kind": "zero",
+      "run": 46110938657,
+      "head": "fca50d67be8f1b85ccbc9c6dd7b7c96ee75480fd",
+      "id": 15252953791,
+      "bytes": 33515790,
+      "sha256": "a7db91ec2d601a9ee2ec20877390cf62c2d149f8de85cfbe13fcf7a632522f4b"
+    },
+    {
+      "label": "zero-sample-vndb-BA",
+      "kind": "zero",
+      "run": 46110938657,
+      "head": "fca50d67be8f1b85ccbc9c6dd7b7c96ee75480fd",
+      "id": 15252988482,
+      "bytes": 33515742,
+      "sha256": "dcfceb4e9f9c1ece3078115914fd93f6c92b1488fd1539c950434c6b28d5760d"
+    }
+  ]
+}
